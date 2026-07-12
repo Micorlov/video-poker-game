@@ -205,14 +205,20 @@
                 <div class="stats-grid">
                     <div class="stat-card"><div class="label">Total Users</div><div class="value" id="s-total-users">—</div></div>
                     <div class="stat-card"><div class="label">Active Today</div><div class="value" id="s-today">—</div></div>
-                    <div class="stat-card"><div class="label">Current Hour Players</div><div class="value" id="s-hour-players">—</div><div class="sub"><span class="live-dot"></span>Live</div></div>
-                    <div class="stat-card"><div class="label">Total Rebuys (this hour)</div><div class="value" id="s-hour-rebuys">—</div></div>
+                    <div class="stat-card"><div class="label" id="live-stat-label">Current Hour Players</div><div class="value" id="s-hour-players">—</div><div class="sub"><span class="live-dot"></span>Live</div></div>
+                    <div class="stat-card"><div class="label" id="rebuy-stat-label">Total Rebuys (this hour)</div><div class="value" id="s-hour-rebuys">—</div></div>
                 </div>
 
                 <div class="panel">
-                    <div class="panel-header">
-                        <h2><span class="live-dot"></span> Live — Current Hour</h2>
-                        <button onclick="loadCurrentHour()">↻ Refresh</button>
+                    <div class="panel-header" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <h2 style="display:flex; align-items:center; gap:8px; margin:0;"><span class="live-dot"></span> <span id="live-title">Live — Current Hour</span></h2>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <select id="admin-overview-select" onchange="setAdminOverviewTab(this.value)" style="padding:6px 12px; font-size:14px; border-radius:6px; background:#1b3224; border:1px solid #ffd700; color:#ffd700; cursor:pointer; font-weight:bold;">
+                                <option value="hourly">Hourly Scores</option>
+                                <option value="daily">Daily Scores</option>
+                            </select>
+                            <button onclick="loadCurrentHour()">↻ Refresh</button>
+                        </div>
                     </div>
                     <table>
                         <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Hands</th><th>Rebuys</th><th>Best Hand</th><th>Actions</th></tr></thead>
@@ -256,10 +262,14 @@
 
             <!-- COMPETITIONS -->
             <div class="tab-content" id="tab-competitions">
-                <div class="hour-nav" style="margin-bottom: 20px;">
+                <div class="hour-nav" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                     <button onclick="navHour(-1)">‹</button>
                     <span id="comp-hour-label">—</span>
                     <button onclick="navHour(1)">›</button>
+                    <select id="admin-comp-select" onchange="setAdminCompTab(this.value)" style="padding:6px 12px; font-size:14px; border-radius:6px; background:#1b3224; border:1px solid #ffd700; color:#ffd700; cursor:pointer; font-weight:bold; margin-left: auto;">
+                        <option value="hourly">Hourly History</option>
+                        <option value="daily">Daily History</option>
+                    </select>
                 </div>
                 <div class="panel">
                     <div class="panel-header">
@@ -293,6 +303,8 @@
     var usersSortField = 'lastLogin';
     var usersSortDir = -1;
     var compHourOffset = 0;
+    var adminOverviewTab = 'hourly';
+    var adminCompTab = 'hourly';
 
     function doSignIn() {
         auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
@@ -327,11 +339,42 @@
             String(now.getHours()).padStart(2, '0');
     }
 
+    function getDayKey(offset) {
+        var now = new Date();
+        now.setDate(now.getDate() + (offset || 0));
+        return now.getFullYear() + '-' +
+            String(now.getMonth() + 1).padStart(2, '0') + '-' +
+            String(now.getDate()).padStart(2, '0');
+    }
+
     function formatHourLabel(hk) {
         var parts = hk.split('T');
         var hour = parseInt(parts[1]);
         var nextHour = (hour + 1) % 24;
         return parts[0] + '  ' + String(hour).padStart(2, '0') + ':00 – ' + String(nextHour).padStart(2, '0') + ':00';
+    }
+
+    function setAdminOverviewTab(val) {
+        adminOverviewTab = val;
+        var liveTitle = document.getElementById('live-title');
+        var liveStatLabel = document.getElementById('live-stat-label');
+        var rebuyStatLabel = document.getElementById('rebuy-stat-label');
+        if (val === 'hourly') {
+            if (liveTitle) liveTitle.textContent = 'Live — Current Hour';
+            if (liveStatLabel) liveStatLabel.textContent = 'Current Hour Players';
+            if (rebuyStatLabel) rebuyStatLabel.textContent = 'Total Rebuys (this hour)';
+        } else {
+            if (liveTitle) liveTitle.textContent = 'Live — Current Day';
+            if (liveStatLabel) liveStatLabel.textContent = 'Current Day Players';
+            if (rebuyStatLabel) rebuyStatLabel.textContent = 'Total Rebuys (today)';
+        }
+        loadCurrentHour();
+    }
+
+    function setAdminCompTab(val) {
+        adminCompTab = val;
+        compHourOffset = 0;
+        loadCompetition(0);
     }
 
     function loadOverviewStats() {
@@ -348,13 +391,17 @@
     }
 
     function loadCurrentHour() {
-        var hourKey = getHourKey(0);
-        db.collection('hourly_scores').where('hourKey', '==', hourKey).orderBy('score', 'desc').get().then(function(snap) {
+        var isDaily = adminOverviewTab === 'daily';
+        var col = isDaily ? 'daily_scores' : 'hourly_scores';
+        var keyField = isDaily ? 'dayKey' : 'hourKey';
+        var keyValue = isDaily ? getDayKey(0) : getHourKey(0);
+
+        db.collection(col).where(keyField, '==', keyValue).orderBy('score', 'desc').get().then(function(snap) {
             document.getElementById('s-hour-players').textContent = snap.size;
             var totalRebuys = 0;
             var tbody = document.getElementById('live-body');
             if (snap.empty) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No players this hour yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No players this ' + (isDaily ? 'day' : 'hour') + ' yet</td></tr>';
                 document.getElementById('s-hour-rebuys').textContent = '0';
                 return;
             }
@@ -370,6 +417,7 @@
                 var scoreText = s > 0 ? '+' + s : '' + s;
                 var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
                 var tr = document.createElement('tr');
+                var rowKey = isDaily ? d.dayKey : d.hourKey;
                 tr.innerHTML =
                     '<td>' + medal + '</td>' +
                     '<td>' + photo + (d.displayName || '—') + '</td>' +
@@ -378,8 +426,8 @@
                     '<td>' + (d.rebuys || 0) + '</td>' +
                     '<td>' + (d.bestHand || '—') + '</td>' +
                     '<td>' +
-                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + d.hourKey + '\', \'' + d.uid + '\')">Reset</button>' +
-                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + d.hourKey + '\', \'' + d.uid + '\')">Delete</button>' +
+                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + rowKey + '\', \'' + d.uid + '\')">Reset</button>' +
+                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + rowKey + '\', \'' + d.uid + '\')">Delete</button>' +
                     '</td>';
                 tbody.appendChild(tr);
             });
@@ -467,13 +515,22 @@
     }
 
     function loadCompetition(offset) {
-        var hourKey = getHourKey(offset);
-        document.getElementById('comp-hour-label').textContent = formatHourLabel(hourKey);
-        db.collection('hourly_scores').where('hourKey', '==', hourKey).orderBy('score', 'desc').get().then(function(snap) {
+        var isDaily = adminCompTab === 'daily';
+        var col = isDaily ? 'daily_scores' : 'hourly_scores';
+        var keyField = isDaily ? 'dayKey' : 'hourKey';
+        var keyValue = isDaily ? getDayKey(offset) : getHourKey(offset);
+
+        if (isDaily) {
+            document.getElementById('comp-hour-label').textContent = keyValue;
+        } else {
+            document.getElementById('comp-hour-label').textContent = formatHourLabel(keyValue);
+        }
+
+        db.collection(col).where(keyField, '==', keyValue).orderBy('score', 'desc').get().then(function(snap) {
             document.getElementById('comp-count').textContent = snap.size + ' players';
             var tbody = document.getElementById('comp-body');
             if (snap.empty) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No data for this hour</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No data for this ' + (isDaily ? 'day' : 'hour') + '</td></tr>';
                 return;
             }
             tbody.innerHTML = '';
@@ -487,6 +544,7 @@
                 var scoreText = s > 0 ? '+' + s : '' + s;
                 var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
                 var tr = document.createElement('tr');
+                var rowKey = isDaily ? d.dayKey : d.hourKey;
                 tr.innerHTML =
                     '<td>' + medal + '</td>' +
                     '<td>' + photo + (d.displayName || '—') + '</td>' +
@@ -495,18 +553,20 @@
                     '<td>' + (d.rebuys || 0) + '</td>' +
                     '<td>' + (d.bestHand || '—') + '</td>' +
                     '<td>' +
-                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + d.hourKey + '\', \'' + d.uid + '\')">Reset</button>' +
-                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + d.hourKey + '\', \'' + d.uid + '\')">Delete</button>' +
+                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + rowKey + '\', \'' + d.uid + '\')">Reset</button>' +
+                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + rowKey + '\', \'' + d.uid + '\')">Delete</button>' +
                     '</td>';
                 tbody.appendChild(tr);
             });
         });
     }
 
-    function deleteScore(hourKey, uid) {
+    function deleteScore(key, uid) {
         if (!confirm('Are you sure you want to delete this score entry?')) return;
-        var docId = hourKey + '_' + uid;
-        db.collection('hourly_scores').doc(docId).delete().then(function() {
+        var isDaily = !key.includes('T');
+        var col = isDaily ? 'daily_scores' : 'hourly_scores';
+        var docId = key + '_' + uid;
+        db.collection(col).doc(docId).delete().then(function() {
             alert('Score deleted successfully!');
             loadOverviewStats();
             loadCurrentHour();
@@ -518,10 +578,12 @@
         });
     }
 
-    function resetScore(hourKey, uid) {
+    function resetScore(key, uid) {
         if (!confirm('Are you sure you want to reset this score to 0?')) return;
-        var docId = hourKey + '_' + uid;
-        db.collection('hourly_scores').doc(docId).update({
+        var isDaily = !key.includes('T');
+        var col = isDaily ? 'daily_scores' : 'hourly_scores';
+        var docId = key + '_' + uid;
+        db.collection(col).doc(docId).update({
             score: 0,
             hands: 0,
             rebuys: 0,

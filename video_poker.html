@@ -204,6 +204,43 @@
             animation: win-pulse 1s infinite alternate;
             background: linear-gradient(145deg, #fff5f5, #ffe0e0);
         }
+        .card.second-pair {
+            border-color: #8a2be2 !important; /* Purple/Blue-violet */
+            box-shadow: 0 0 25px #8a2be2, 0 10px 25px rgba(0,0,0,0.5) !important;
+            transform: translateY(-10px) scale(1.05);
+            animation: second-pulse 1s infinite alternate;
+            background: linear-gradient(145deg, #f6f0ff, #e6d4ff);
+        }
+        @keyframes second-pulse {
+            0% { box-shadow: 0 0 20px #8a2be2, 0 10px 25px rgba(0,0,0,0.5); }
+            100% { box-shadow: 0 0 35px #8a2be2, 0 0 50px rgba(138, 43, 226, 0.6); }
+        }
+        .card .win-badge {
+            display: none;
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff6b6b, #e63946);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        .card.winning .win-badge {
+            display: block;
+        }
+        .card.second-pair .win-badge {
+            display: block;
+            background: linear-gradient(135deg, #8a2be2, #6a1b9a);
+            box-shadow: 0 2px 8px rgba(138, 43, 226, 0.5);
+        }
         @keyframes win-pulse {
             0% { box-shadow: 0 0 20px #ff6b6b, 0 10px 25px rgba(0,0,0,0.5); }
             100% { box-shadow: 0 0 35px #ff6b6b, 0 0 50px rgba(255, 107, 107, 0.6); }
@@ -712,6 +749,24 @@
                 },
                 balanceLabel: 'Balance:',
                 heldBadge: 'HELD',
+                hourlyTitle: 'Hourly Competition',
+                dailyTitle: 'Daily Competition',
+                hourlyTab: 'Hourly',
+                dailyTab: 'Daily',
+                hourlyRankLabel: 'Hourly Rank',
+                dailyRankLabel: 'Daily Rank',
+                hourlyFormula: '(Your net profit/loss for this hour)',
+                dailyFormula: '(Your net profit/loss today)',
+                winLabels: {
+                    pair: 'Pair of',
+                    threeOfKind: '3 of a Kind',
+                    fourOfKind: '4 of a Kind',
+                    straight: 'Straight',
+                    flush: 'Flush',
+                    fullHouse: 'Full House',
+                    straightFlush: 'Str. Flush',
+                    royalFlush: 'Royal Flush'
+                },
                 betLabel: 'Bet:',
                 creditsLabel: 'credits',
                 chooseBetLabel: 'Choose Bet:',
@@ -769,6 +824,24 @@
                 },
                 balanceLabel: 'Saldo:',
                 heldBadge: 'MANTENER',
+                hourlyTitle: 'Competición Horaria',
+                dailyTitle: 'Competición Diaria',
+                hourlyTab: 'Por Hora',
+                dailyTab: 'Diario',
+                hourlyRankLabel: 'Rango Horario',
+                dailyRankLabel: 'Rango Diario',
+                hourlyFormula: '(Tu ganancia/pérdida neta de esta hora)',
+                dailyFormula: '(Tu ganancia/pérdida neta de hoy)',
+                winLabels: {
+                    pair: 'Pareja de',
+                    threeOfKind: 'Trío',
+                    fourOfKind: 'Póker',
+                    straight: 'Escalera',
+                    flush: 'Color',
+                    fullHouse: 'Full House',
+                    straightFlush: 'Escalera Color',
+                    royalFlush: 'Escalera Real'
+                },
                 betLabel: 'Apuesta:',
                 creditsLabel: 'créditos',
                 chooseBetLabel: 'Elige Apuesta:',
@@ -826,6 +899,24 @@
                 },
                 balanceLabel: 'Solde:',
                 heldBadge: 'CONSERVÉ',
+                hourlyTitle: 'Compétition Horaire',
+                dailyTitle: 'Compétition Journalière',
+                hourlyTab: 'Horaire',
+                dailyTab: 'Journalier',
+                hourlyRankLabel: 'Rang Horaire',
+                dailyRankLabel: 'Rang Journalier',
+                hourlyFormula: '(Votre gain/perte net de cette heure)',
+                dailyFormula: '(Votre gain/perte net d\'aujourd\'hui)',
+                winLabels: {
+                    pair: 'Paire de',
+                    threeOfKind: 'Brelan',
+                    fourOfKind: 'Carré',
+                    straight: 'Quinte',
+                    flush: 'Couleur',
+                    fullHouse: 'Full House',
+                    straightFlush: 'Quinte Flush',
+                    royalFlush: 'Quinte Royale'
+                },
                 betLabel: 'Mise:',
                 creditsLabel: 'crédits',
                 chooseBetLabel: 'Choisir la Mise:',
@@ -883,6 +974,24 @@
                 },
                 balanceLabel: 'Guthaben:',
                 heldBadge: 'GEHALTEN',
+                hourlyTitle: 'Stündlicher Wettbewerb',
+                dailyTitle: 'Täglicher Wettbewerb',
+                hourlyTab: 'Stündlich',
+                dailyTab: 'Täglich',
+                hourlyRankLabel: 'Stundenrang',
+                dailyRankLabel: 'Tagesrang',
+                hourlyFormula: '(Ihr Nettogewinn/-verlust für diese Stunde)',
+                dailyFormula: '(Ihr Nettogewinn/-verlust für heute)',
+                winLabels: {
+                    pair: 'Paar ',
+                    threeOfKind: 'Drilling',
+                    fourOfKind: 'Vierling',
+                    straight: 'Strasse',
+                    flush: 'Flush',
+                    fullHouse: 'Full House',
+                    straightFlush: 'Straight Flush',
+                    royalFlush: 'Royal Flush'
+                },
                 betLabel: 'Einsatz:',
                 creditsLabel: 'Credits',
                 chooseBetLabel: 'Einsatz Wählen:',
@@ -940,6 +1049,24 @@
                 },
                 balanceLabel: 'יתרה:',
                 heldBadge: 'להשאיר',
+                hourlyTitle: 'תחרות שעתית',
+                dailyTitle: 'תחרות יומית',
+                hourlyTab: 'שעתי',
+                dailyTab: 'יומי',
+                hourlyRankLabel: 'דירוג שעתי',
+                dailyRankLabel: 'דירוג יומי',
+                hourlyFormula: '(הרווח/הפסד הנקי שלך בשעה זו)',
+                dailyFormula: '(הרווח/הפסד הנקי שלך היום)',
+                winLabels: {
+                    pair: 'זוג',
+                    threeOfKind: 'שלישייה',
+                    fourOfKind: 'רביעייה',
+                    straight: 'סטרייט',
+                    flush: 'פלאש',
+                    fullHouse: 'פול האוס',
+                    straightFlush: 'סטרייט פלאש',
+                    royalFlush: 'רויאל פלאש'
+                },
                 betLabel: 'הימור:',
                 creditsLabel: 'קרדיטים',
                 chooseBetLabel: 'בחר הימור:',
@@ -996,6 +1123,24 @@
                 },
                 balanceLabel: 'الرصيد:',
                 heldBadge: 'إبقاء',
+                hourlyTitle: 'مسابقة ساعية',
+                dailyTitle: 'مسابقة يومية',
+                hourlyTab: 'ساعي',
+                dailyTab: 'يومي',
+                hourlyRankLabel: 'الترتيب الساعي',
+                dailyRankLabel: 'الترتيب اليومي',
+                hourlyFormula: '(صافي ربحك/خسارتك لهذه الساعة)',
+                dailyFormula: '(صافي ربحك/خسارتك لليوم)',
+                winLabels: {
+                    pair: 'زوج من',
+                    threeOfKind: 'ثلاثة من نوع',
+                    fourOfKind: 'أربعة من نوع',
+                    straight: 'ستريت',
+                    flush: 'فلاش',
+                    fullHouse: 'فول هاوس',
+                    straightFlush: 'ستريت فلاش',
+                    royalFlush: 'رويال فلاش'
+                },
                 betLabel: 'الرهان:',
                 creditsLabel: 'أرصدة',
                 chooseBetLabel: 'اختر الرهان:',
@@ -1086,7 +1231,9 @@
         let handsPlayed = 0;
         let lossStreak = 0;
         let hourlyRebuys = 0;
+        let dailyRebuys = 0;
         let currentHourKey = '';
+        let currentDayKey = '';
 
         function checkHourReset() {
             const hk = getHourKey();
@@ -1096,8 +1243,17 @@
             currentHourKey = hk;
         }
 
+        function checkDayReset() {
+            const dk = getDayKey();
+            if (currentDayKey && currentDayKey !== dk) {
+                dailyRebuys = 0;
+            }
+            currentDayKey = dk;
+        }
+
         function doRebuy() {
             hourlyRebuys++;
+            dailyRebuys++;
             balance = 100;
             document.getElementById('balance').textContent = balance;
             showRebuyNotification();
@@ -1163,6 +1319,32 @@
                 } else {
                     resultEl.innerHTML = `<span style="color:#aaa">${t.payouts['Nothing']}</span>`;
                 }
+            }
+
+            // Update leaderboard UI language dynamically
+            const titleEl = document.getElementById('lb-title');
+            if (titleEl) {
+                if (activeLbTab === 'hourly') {
+                    titleEl.textContent = '⏱ ' + (t.hourlyTitle || 'Hourly Competition');
+                } else {
+                    titleEl.textContent = '📅 ' + (t.dailyTitle || 'Daily Competition');
+                }
+            }
+            
+            const tabHourly = document.getElementById('tab-hourly');
+            const tabDaily = document.getElementById('tab-daily');
+            if (tabHourly) tabHourly.textContent = t.hourlyTab || 'Hourly';
+            if (tabDaily) tabDaily.textContent = t.dailyTab || 'Daily';
+            
+            const formulaNote = document.getElementById('lb-formula-note');
+            if (formulaNote) {
+                const noteText = activeLbTab === 'hourly' ? t.hourlyFormula : t.dailyFormula;
+                formulaNote.innerHTML = 'Score = Balance - (100 × Rebuys) - 100<br>' + noteText;
+            }
+
+            const rbRankLabel = document.getElementById('rb-rank-label');
+            if (rbRankLabel) {
+                rbRankLabel.textContent = activeLbTab === 'daily' ? (t.dailyRankLabel || 'Daily Rank') : (t.hourlyRankLabel || 'Hourly Rank');
             }
         }
 
@@ -1268,6 +1450,7 @@
 
         function deal() {
             checkHourReset();
+            checkDayReset();
             if (balance < bet) {
                 if (balance === 0) {
                     doRebuy();
@@ -1313,6 +1496,7 @@
             lastHandType = handType;
             const winIndices = result.winIndices || []; // Ensure it's an array
             const thirdMatchIndices = result.thirdMatchIndices || []; // Ensure it's an array
+            const secondPairIndices = result.secondPairIndices || []; // Ensure it's an array
             const win = bet * PAYOUTS[handType];
             balance += win;
             handsPlayed++;
@@ -1349,8 +1533,8 @@
                 }
             }
 
-            renderHand(winIndices, thirdMatchIndices, nearMissIndices);
-            updateHourlyScore(win, bet, handType);
+            renderHand(winIndices, thirdMatchIndices, nearMissIndices, secondPairIndices);
+            updateScores(win, bet, handType);
 
             gameState = 'bet';
             document.getElementById('deal-btn').disabled = false;
@@ -1363,7 +1547,52 @@
             renderHand();
         }
 
-        function renderHand(winningIndices = [], thirdMatchIndices = [], nearMissIndices = []) {
+        function getWinBadgeText(cardIndex, handType) {
+            const card = hand[cardIndex];
+            const ranks = hand.map(c => c.rank);
+            const rankCounts = {};
+            ranks.forEach(r => rankCounts[r] = (rankCounts[r] || 0) + 1);
+            
+            const t = TRANSLATIONS[currentLang];
+            const wl = t.winLabels || {};
+            const rankLabel = card.rank;
+
+            if (handType === 'Jacks or Better') {
+                return (wl.pair || 'Pair') + ' ' + rankLabel;
+            }
+            if (handType === 'Two Pair') {
+                return (wl.pair || 'Pair') + ' ' + rankLabel;
+            }
+            if (handType === 'Three of a Kind') {
+                return wl.threeOfKind || '3 of a Kind';
+            }
+            if (handType === 'Full House') {
+                const count = rankCounts[card.rank] || 0;
+                if (count === 3) {
+                    return wl.threeOfKind || '3 of a Kind';
+                } else if (count === 2) {
+                    return (wl.pair || 'Pair') + ' ' + rankLabel;
+                }
+            }
+            if (handType === 'Four of a Kind') {
+                return wl.fourOfKind || '4 of a Kind';
+            }
+            if (handType === 'Straight') {
+                return wl.straight || 'Straight';
+            }
+            if (handType === 'Flush') {
+                return wl.flush || 'Flush';
+            }
+            if (handType === 'Straight Flush') {
+                return wl.straightFlush || 'Str. Flush';
+            }
+            if (handType === 'Royal Flush') {
+                return wl.royalFlush || 'Royal Flush';
+            }
+            return '';
+        }
+
+        function renderHand(winningIndices = [], thirdMatchIndices = [], nearMissIndices = [], secondPairIndices = []) {
             const handEl = document.getElementById('hand');
             handEl.innerHTML = '';
             const t = TRANSLATIONS[currentLang];
@@ -1371,13 +1600,16 @@
 
             hand.forEach((card, i) => {
                 const cardEl = document.createElement('div');
-                const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || nearMissIndices.length > 0;
+                const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || nearMissIndices.length > 0 || secondPairIndices.length > 0;
                 const isHeld = !isResult && held[i];
                 const isUnheld = !isResult && anyHeld && !held[i];
                 let classes = `card ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
 
                 if (winningIndices.includes(i)) {
                     classes += ' winning';
+                }
+                if (secondPairIndices.includes(i)) {
+                    classes += ' second-pair';
                 }
                 if (thirdMatchIndices.includes(i)) {
                     classes += ' third-match';
@@ -1390,8 +1622,10 @@
                 cardEl.onclick = () => toggleHold(i);
                 
                 const badgeText = t.heldBadge || 'HELD';
+                const winBadgeText = isResult ? getWinBadgeText(i, lastHandType) : '';
                 cardEl.innerHTML = `
                     <div class="held-badge">${badgeText}</div>
+                    <div class="win-badge">${winBadgeText}</div>
                     <div class="suit">${card.suit}</div>
                     <div class="rank">${card.rank}</div>
                 `;
@@ -1441,7 +1675,7 @@
             };
             
             const allIndices = [0, 1, 2, 3, 4];
-            let result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [] }; // Initialize thirdMatchIndices // Initialize thirdMatchIndices
+            let result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] }; // Initialize thirdMatchIndices // Initialize thirdMatchIndices
 
             if (straight && flush) {
                 if (values.join(',') === '10,11,12,13,14') {
@@ -1455,12 +1689,10 @@
                 result.winIndices = findIndicesByCount(4);
             } else if (counts[0] === 3 && counts[1] === 2) { // Full House
                 result.type = 'Full House';
-                result.winIndices = allIndices; 
                 const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
-                const threeIndices = findIndices([threeRank]);
-                if (threeRank === 'J' && threeIndices.length > 0) {
-                    result.thirdMatchIndices.push(threeIndices[0]); 
-                }
+                const twoRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
+                result.winIndices = findIndices([threeRank]);
+                result.secondPairIndices = findIndices([twoRank]);
             } else if (flush) {
                 result.type = 'Flush';
                 result.winIndices = allIndices;
@@ -1478,7 +1710,8 @@
             } else if (counts[0] === 2 && counts[1] === 2) { // Two Pair
                 const pairRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === 2);
                 result.type = 'Two Pair';
-                result.winIndices = findIndices(pairRanks);
+                result.winIndices = findIndices([pairRanks[0]]);
+                result.secondPairIndices = findIndices([pairRanks[1]]);
             } else if (counts[0] === 2) { // One Pair
                 const pairRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
                 if (['J', 'Q', 'K', 'A'].includes(pairRank)) {
