@@ -443,6 +443,48 @@
             padding: 4px 10px; font-size: 12px; cursor: pointer; margin-left: 8px;
         }
         .admin-link:hover { border-color: rgba(255,215,0,0.5); color: #ffd700; }
+
+        .leaderboard {
+            margin: 25px auto; max-width: 600px;
+            background: rgba(0,0,0,0.35); border: 1px solid rgba(255,215,0,0.15);
+            border-radius: 14px; padding: 20px; position: relative;
+        }
+        .leaderboard h3 {
+            color: #ffd700; text-align: center; margin: 0 0 6px 0; font-size: 1.3em;
+        }
+        .leaderboard-timer {
+            text-align: center; color: rgba(255,255,255,0.4); font-size: 13px; margin-bottom: 14px;
+        }
+        .leaderboard-timer span { color: #ffd700; font-weight: 600; }
+        .lb-table { width: 100%; border-collapse: collapse; }
+        .lb-table th {
+            text-align: left; padding: 8px 10px; color: rgba(255,215,0,0.7);
+            border-bottom: 1px solid rgba(255,215,0,0.15); font-size: 12px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .lb-table td {
+            padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.85); font-size: 14px;
+        }
+        .lb-table tr:hover td { background: rgba(255,215,0,0.04); }
+        .lb-table img {
+            width: 24px; height: 24px; border-radius: 50%; vertical-align: middle;
+            margin-right: 6px;
+        }
+        .lb-rank { width: 30px; text-align: center; font-weight: 700; }
+        .lb-rank-1 { color: #ffd700; font-size: 1.2em; }
+        .lb-rank-2 { color: #c0c0c0; }
+        .lb-rank-3 { color: #cd7f32; }
+        .lb-positive { color: #4ade80; font-weight: 600; }
+        .lb-negative { color: #f87171; }
+        .lb-zero { color: rgba(255,255,255,0.4); }
+        .lb-you { background: rgba(255,215,0,0.06); }
+        .lb-empty { text-align: center; color: rgba(255,255,255,0.3); padding: 20px; font-size: 14px; }
+        .lb-badge {
+            display: inline-block; font-size: 10px; padding: 2px 6px;
+            border-radius: 4px; margin-left: 6px; vertical-align: middle;
+        }
+        .lb-badge-you { background: rgba(255,215,0,0.15); color: #ffd700; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -549,6 +591,19 @@
                 <div class="stat-label" id="stat-hands-label">Hands</div>
                 <div class="stat-value" id="stat-hands-value">0</div>
             </div>
+        </div>
+
+        <div class="leaderboard" id="leaderboard-section">
+            <h3 id="lb-title">⏱ Hourly Competition</h3>
+            <div class="leaderboard-timer">Resets in <span id="lb-countdown">--:--</span></div>
+            <table class="lb-table">
+                <thead><tr>
+                    <th>#</th><th>Player</th><th>Net</th><th>Hands</th><th>Best Hand</th>
+                </tr></thead>
+                <tbody id="lb-body">
+                    <tr><td colspan="5" class="lb-empty">Play a hand to join this hour's competition!</td></tr>
+                </tbody>
+            </table>
         </div>
 
         <div class="instructions">
@@ -1171,6 +1226,7 @@
             }
 
             renderHand(winIndices, thirdMatchIndices, nearMissIndices);
+            updateHourlyScore(win, bet, handType);
 
             gameState = 'bet';
             document.getElementById('deal-btn').disabled = false;
@@ -1360,6 +1416,7 @@
             document.getElementById('game-container').style.display = '';
             injectUserBar(user);
             logUserToFirestore(user);
+            refreshLeaderboard();
         } else {
             document.getElementById('login-overlay').classList.remove('hidden');
             document.getElementById('game-container').style.display = 'none';
@@ -1419,6 +1476,110 @@
     function closeAdmin() {
         document.getElementById('admin-panel').classList.add('hidden');
     }
+
+    // Hourly Competition
+    const HAND_RANK = {
+        'Nothing': 0, 'Jacks or Better': 1, 'Two Pair': 2, 'Three of a Kind': 3,
+        'Straight': 4, 'Flush': 5, 'Full House': 6, 'Four of a Kind': 7,
+        'Straight Flush': 8, 'Royal Flush': 9
+    };
+
+    function getHourKey() {
+        const now = new Date();
+        return now.getFullYear() + '-' +
+            String(now.getMonth() + 1).padStart(2, '0') + '-' +
+            String(now.getDate()).padStart(2, '0') + 'T' +
+            String(now.getHours()).padStart(2, '0');
+    }
+
+    function updateHourlyScore(win, betAmount, handType) {
+        const user = auth.currentUser;
+        if (!user) return;
+        const hourKey = getHourKey();
+        const docId = hourKey + '_' + user.uid;
+        const ref = db.collection('hourly_scores').doc(docId);
+        const net = win > 0 ? win - betAmount : -betAmount;
+        const handRank = HAND_RANK[handType] || 0;
+
+        ref.get().then(function(doc) {
+            if (doc.exists) {
+                const data = doc.data();
+                const prevBestRank = HAND_RANK[data.bestHand] || 0;
+                return ref.update({
+                    net: firebase.firestore.FieldValue.increment(net),
+                    hands: firebase.firestore.FieldValue.increment(1),
+                    bestHand: handRank > prevBestRank ? handType : data.bestHand,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } else {
+                return ref.set({
+                    hourKey: hourKey,
+                    uid: user.uid,
+                    displayName: user.displayName || '',
+                    photoURL: user.photoURL || '',
+                    net: net,
+                    hands: 1,
+                    bestHand: handType,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        }).then(function() {
+            refreshLeaderboard();
+        });
+    }
+
+    function refreshLeaderboard() {
+        const hourKey = getHourKey();
+        const user = auth.currentUser;
+        db.collection('hourly_scores')
+            .where('hourKey', '==', hourKey)
+            .orderBy('net', 'desc')
+            .limit(20)
+            .get()
+            .then(function(snap) {
+                const tbody = document.getElementById('lb-body');
+                if (snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="lb-empty">Play a hand to join this hour\'s competition!</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+                let rank = 0;
+                snap.forEach(function(doc) {
+                    rank++;
+                    const d = doc.data();
+                    const isYou = user && d.uid === user.uid;
+                    const photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+                    const name = d.displayName || 'Anonymous';
+                    const badge = isYou ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
+                    const rankClass = rank <= 3 ? ' lb-rank-' + rank : '';
+                    const netClass = d.net > 0 ? 'lb-positive' : d.net < 0 ? 'lb-negative' : 'lb-zero';
+                    const netText = d.net > 0 ? '+' + d.net : '' + d.net;
+                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+
+                    const row = document.createElement('tr');
+                    if (isYou) row.className = 'lb-you';
+                    row.innerHTML =
+                        '<td class="lb-rank' + rankClass + '">' + medal + '</td>' +
+                        '<td>' + photo + name + badge + '</td>' +
+                        '<td class="' + netClass + '">' + netText + '</td>' +
+                        '<td>' + d.hands + '</td>' +
+                        '<td>' + (d.bestHand || '—') + '</td>';
+                    tbody.appendChild(row);
+                });
+            });
+    }
+
+    function updateCountdown() {
+        const now = new Date();
+        const mins = 59 - now.getMinutes();
+        const secs = 59 - now.getSeconds();
+        document.getElementById('lb-countdown').textContent =
+            String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+    setInterval(refreshLeaderboard, 30000);
 
     function loadAdminData() {
         db.collection('users').orderBy('lastLogin', 'desc').get().then(function(snap) {
