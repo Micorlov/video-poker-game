@@ -1380,7 +1380,8 @@
             document.querySelectorAll('.bet-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
-            document.getElementById('bet-' + amount).classList.add('selected');
+            const btn = document.getElementById('bet-' + amount);
+            if (btn) btn.classList.add('selected');
         }
 
         function createDeck() {
