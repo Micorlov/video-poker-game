@@ -1891,49 +1891,148 @@
             String(now.getHours()).padStart(2, '0');
     }
 
-    function updateHourlyScore(win, betAmount, handType) {
+    let activeLbTab = 'hourly';
+
+    function setLeaderboardTab(tab) {
+        activeLbTab = tab;
+        document.querySelectorAll('.lb-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = 'rgba(0,0,0,0.3)';
+            btn.style.color = '#aaa';
+            btn.style.borderColor = 'rgba(255,255,255,0.1)';
+        });
+        const activeBtn = document.getElementById('tab-' + tab);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.style.background = '';
+            activeBtn.style.color = '';
+            activeBtn.style.borderColor = '';
+        }
+
+        const titleEl = document.getElementById('lb-title');
+        const t = TRANSLATIONS[currentLang];
+
+        if (tab === 'hourly') {
+            titleEl.textContent = '⏱ ' + (t.hourlyTitle || 'Hourly Competition');
+        } else {
+            titleEl.textContent = '📅 ' + (t.dailyTitle || 'Daily Competition');
+        }
+        
+        const timerIcon = document.getElementById('rb-timer-icon');
+        if (timerIcon) {
+            timerIcon.textContent = tab === 'hourly' ? '⏱' : '📅';
+        }
+        
+        const formulaNote = document.getElementById('lb-formula-note');
+        if (formulaNote) {
+            const noteText = tab === 'hourly' ? t.hourlyFormula : t.dailyFormula;
+            formulaNote.innerHTML = 'Score = Balance - (100 × Rebuys) - 100<br>' + noteText;
+        }
+
+        const rbRankLabel = document.getElementById('rb-rank-label');
+        if (rbRankLabel) {
+            rbRankLabel.textContent = tab === 'daily' ? (t.dailyRankLabel || 'Daily Rank') : (t.hourlyRankLabel || 'Hourly Rank');
+        }
+        
+        updateCountdown();
+        refreshLeaderboard();
+    }
+
+    function getDayKey() {
+        const now = new Date();
+        return now.getFullYear() + '-' +
+            String(now.getMonth() + 1).padStart(2, '0') + '-' +
+            String(now.getDate()).padStart(2, '0');
+    }
+
+    function updateScores(win, betAmount, handType) {
         const user = auth.currentUser;
         if (!user) return;
-        const hourKey = getHourKey();
-        const docId = hourKey + '_' + user.uid;
-        const ref = db.collection('hourly_scores').doc(docId);
-        const score = balance - 100 * (1 + hourlyRebuys);
+        
         const handRank = HAND_RANK[handType] || 0;
-
-        ref.get().then(function(doc) {
+        
+        // 1. Update Hourly Score
+        checkHourReset();
+        const hourKey = getHourKey();
+        const hourlyDocId = hourKey + '_' + user.uid;
+        const hourlyRef = db.collection('hourly_scores').doc(hourlyDocId);
+        const hourlyScoreVal = balance - 100 * (1 + hourlyRebuys);
+        
+        const hourlyPromise = hourlyRef.get().then(function(doc) {
             if (doc.exists) {
                 const data = doc.data();
                 const prevBestRank = HAND_RANK[data.bestHand] || 0;
-                return ref.update({
-                    score: score,
+                return hourlyRef.update({
+                    score: hourlyScoreVal,
                     rebuys: hourlyRebuys,
                     hands: firebase.firestore.FieldValue.increment(1),
                     bestHand: handRank > prevBestRank ? handType : data.bestHand,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             } else {
-                return ref.set({
+                return hourlyRef.set({
                     hourKey: hourKey,
                     uid: user.uid,
                     displayName: user.displayName || '',
                     photoURL: user.photoURL || '',
-                    score: score,
+                    score: hourlyScoreVal,
                     rebuys: hourlyRebuys,
                     hands: 1,
                     bestHand: handType,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }
-        }).then(function() {
+        });
+        
+        // 2. Update Daily Score
+        checkDayReset();
+        const dayKey = getDayKey();
+        const dailyDocId = dayKey + '_' + user.uid;
+        const dailyRef = db.collection('daily_scores').doc(dailyDocId);
+        const dailyScoreVal = balance - 100 * (1 + dailyRebuys);
+        
+        const dailyPromise = dailyRef.get().then(function(doc) {
+            if (doc.exists) {
+                const data = doc.data();
+                const prevBestRank = HAND_RANK[data.bestHand] || 0;
+                return dailyRef.update({
+                    score: dailyScoreVal,
+                    rebuys: dailyRebuys,
+                    hands: firebase.firestore.FieldValue.increment(1),
+                    bestHand: handRank > prevBestRank ? handType : data.bestHand,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } else {
+                return dailyRef.set({
+                    dayKey: dayKey,
+                    uid: user.uid,
+                    displayName: user.displayName || '',
+                    photoURL: user.photoURL || '',
+                    score: dailyScoreVal,
+                    rebuys: dailyRebuys,
+                    hands: 1,
+                    bestHand: handType,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        });
+        
+        Promise.all([hourlyPromise, dailyPromise]).then(function() {
             refreshLeaderboard();
         });
     }
 
     function refreshLeaderboard() {
-        const hourKey = getHourKey();
         const user = auth.currentUser;
-        db.collection('hourly_scores')
-            .where('hourKey', '==', hourKey)
+        if (!user) return;
+
+        const isDaily = activeLbTab === 'daily';
+        const col = isDaily ? 'daily_scores' : 'hourly_scores';
+        const keyField = isDaily ? 'dayKey' : 'hourKey';
+        const keyValue = isDaily ? getDayKey() : getHourKey();
+
+        db.collection(col)
+            .where(keyField, '==', keyValue)
             .orderBy('score', 'desc')
             .limit(20)
             .get()
@@ -1986,14 +2085,24 @@
         rbRank.textContent = rank ? '#' + rank : '#—';
         rbScore.textContent = score > 0 ? '+' + score : '' + score;
         rbScore.className = 'rank-bar-value' + (score > 0 ? ' positive' : score < 0 ? ' negative' : '');
-        rbRebuys.textContent = hourlyRebuys;
+        rbRebuys.textContent = activeLbTab === 'daily' ? dailyRebuys : hourlyRebuys;
     }
 
     function updateCountdown() {
         const now = new Date();
-        const mins = 59 - now.getMinutes();
-        const secs = 59 - now.getSeconds();
-        const timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        const isDaily = activeLbTab === 'daily';
+        
+        let timeStr = '';
+        if (isDaily) {
+            const hours = 23 - now.getHours();
+            const mins = 59 - now.getMinutes();
+            const secs = 59 - now.getSeconds();
+            timeStr = String(hours).padStart(2, '0') + ':' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        } else {
+            const mins = 59 - now.getMinutes();
+            const secs = 59 - now.getSeconds();
+            timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        }
         document.getElementById('lb-countdown').textContent = timeStr;
         const rbTimer = document.getElementById('rb-countdown');
         if (rbTimer) rbTimer.textContent = timeStr;
