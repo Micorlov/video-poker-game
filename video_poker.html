@@ -357,10 +357,128 @@
         body[dir="rtl"] .bet-btn {
             margin: 0 5px;
         }
+        .login-overlay {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #0c2317 0%, #051a0d 50%, #000 100%);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; flex-direction: column; gap: 30px;
+        }
+        .login-overlay.hidden { display: none; }
+        .login-title {
+            font-size: 3.2em;
+            background: linear-gradient(45deg, #ffd700, #ffaa00);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; text-align: center;
+        }
+        .login-subtitle { color: rgba(255,255,255,0.6); font-size: 1.1em; text-align: center; }
+        .google-btn {
+            display: flex; align-items: center; gap: 12px;
+            background: #fff; color: #333; border: none; border-radius: 40px;
+            padding: 14px 32px; font-size: 17px; font-weight: 600;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .google-btn:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(0,0,0,0.4); }
+        .google-btn svg { width: 24px; height: 24px; }
+        .user-bar {
+            display: flex; align-items: center; gap: 10px;
+            justify-content: center; margin-bottom: 10px;
+        }
+        .user-bar img {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 2px solid rgba(255,215,0,0.4);
+        }
+        .user-bar span { color: rgba(255,255,255,0.7); font-size: 14px; }
+        .user-bar button {
+            background: none; border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.5); border-radius: 6px;
+            padding: 4px 10px; font-size: 12px; cursor: pointer;
+        }
+        .user-bar button:hover { border-color: rgba(255,215,0,0.4); color: #ffd700; }
+        .admin-panel {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #0c2317 0%, #051a0d 50%, #000 100%);
+            z-index: 10000; overflow-y: auto; padding: 30px;
+        }
+        .admin-panel.hidden { display: none; }
+        .admin-panel h2 {
+            color: #ffd700; text-align: center; margin-bottom: 25px; font-size: 2em;
+        }
+        .admin-close {
+            position: absolute; top: 20px; right: 20px;
+            background: none; border: 2px solid rgba(255,215,0,0.3);
+            color: #ffd700; border-radius: 10px; padding: 8px 18px;
+            font-size: 16px; cursor: pointer;
+        }
+        .admin-close:hover { background: rgba(255,215,0,0.1); }
+        .admin-stats {
+            display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap;
+        }
+        .admin-stat-card {
+            background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 12px; padding: 20px 30px; text-align: center;
+        }
+        .admin-stat-card .num { font-size: 2.5em; color: #ffd700; }
+        .admin-stat-card .label { color: rgba(255,255,255,0.5); font-size: 14px; }
+        .users-table {
+            width: 100%; max-width: 900px; margin: 0 auto;
+            border-collapse: collapse;
+        }
+        .users-table th {
+            text-align: left; padding: 12px 16px; color: #ffd700;
+            border-bottom: 2px solid rgba(255,215,0,0.2); font-size: 14px;
+        }
+        .users-table td {
+            padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.8); font-size: 14px;
+        }
+        .users-table tr:hover td { background: rgba(255,215,0,0.04); }
+        .users-table img {
+            width: 28px; height: 28px; border-radius: 50%; vertical-align: middle;
+            margin-right: 8px;
+        }
+        .admin-link {
+            background: none; border: 1px solid rgba(255,215,0,0.2);
+            color: rgba(255,215,0,0.6); border-radius: 6px;
+            padding: 4px 10px; font-size: 12px; cursor: pointer; margin-left: 8px;
+        }
+        .admin-link:hover { border-color: rgba(255,215,0,0.5); color: #ffd700; }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
-    <div class="container">
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-title">♠ ♥ Video Poker ♦ ♣</div>
+        <div class="login-subtitle">Jacks or Better</div>
+        <button class="google-btn" onclick="signInWithGoogle()">
+            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
+            Sign in with Google
+        </button>
+        <div id="login-error" style="color: #ff6b6b; font-size: 14px; display: none;"></div>
+    </div>
+
+    <div id="admin-panel" class="admin-panel hidden">
+        <button class="admin-close" onclick="closeAdmin()">✕ Close</button>
+        <h2>Admin Panel — Connected Users</h2>
+        <div class="admin-stats">
+            <div class="admin-stat-card">
+                <div class="num" id="admin-total">0</div>
+                <div class="label">Total Users</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="num" id="admin-today">0</div>
+                <div class="label">Today</div>
+            </div>
+        </div>
+        <table class="users-table">
+            <thead><tr><th>User</th><th>Email</th><th>First Seen</th><th>Last Login</th></tr></thead>
+            <tbody id="admin-users-body"></tbody>
+        </table>
+    </div>
+
+    <div class="container" style="display:none;" id="game-container">
         <div class="language-selector">
             <label for="language-select" style="margin-right: 10px; color: #ffd700;">Language / שפה / Idioma / Langue / Sprache / اللغة:</label>
             <select id="language-select" onchange="changeLanguage(this.value)">
@@ -1212,6 +1330,127 @@
         const keyMap = { '1': 5, '2': 10, '3': 20, '4': 50 };
         if (keyMap[e.key]) setBet(keyMap[e.key]);
     });
+
+    // Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyB6m0Yis89jxvm06OFBqxs8P_vADjRXk0U",
+        authDomain: "video-poker-6d665.firebaseapp.com",
+        projectId: "video-poker-6d665",
+        storageBucket: "video-poker-6d665.firebasestorage.app",
+        messagingSenderId: "53702406091",
+        appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const ADMIN_EMAIL = 'micorlov@gmail.com';
+
+    function signInWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(function(err) {
+            const el = document.getElementById('login-error');
+            el.textContent = err.message;
+            el.style.display = 'block';
+        });
+    }
+
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            document.getElementById('login-overlay').classList.add('hidden');
+            document.getElementById('game-container').style.display = '';
+            injectUserBar(user);
+            logUserToFirestore(user);
+        } else {
+            document.getElementById('login-overlay').classList.remove('hidden');
+            document.getElementById('game-container').style.display = 'none';
+            const bar = document.getElementById('user-bar');
+            if (bar) bar.remove();
+        }
+    });
+
+    function injectUserBar(user) {
+        let bar = document.getElementById('user-bar');
+        if (bar) bar.remove();
+        bar = document.createElement('div');
+        bar.id = 'user-bar';
+        bar.className = 'user-bar';
+        const photo = user.photoURL
+            ? '<img src="' + user.photoURL + '" alt="">'
+            : '';
+        const adminBtn = user.email === ADMIN_EMAIL
+            ? '<button class="admin-link" onclick="openAdmin()">Admin</button>'
+            : '';
+        bar.innerHTML = photo +
+            '<span>' + (user.displayName || user.email) + '</span>' +
+            adminBtn +
+            '<button onclick="signOut()">Sign Out</button>';
+        const container = document.getElementById('game-container');
+        container.insertBefore(bar, container.firstChild);
+    }
+
+    function signOut() {
+        auth.signOut();
+    }
+
+    function logUserToFirestore(user) {
+        db.collection('users').doc(user.uid).set({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || '',
+            photoURL: user.photoURL || '',
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).then(function() {
+            return db.collection('users').doc(user.uid).get();
+        }).then(function(doc) {
+            if (doc.exists && !doc.data().firstSeen) {
+                return db.collection('users').doc(user.uid).update({
+                    firstSeen: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        });
+    }
+
+    function openAdmin() {
+        const panel = document.getElementById('admin-panel');
+        panel.classList.remove('hidden');
+        loadAdminData();
+    }
+
+    function closeAdmin() {
+        document.getElementById('admin-panel').classList.add('hidden');
+    }
+
+    function loadAdminData() {
+        db.collection('users').orderBy('lastLogin', 'desc').get().then(function(snap) {
+            const tbody = document.getElementById('admin-users-body');
+            tbody.innerHTML = '';
+            let todayCount = 0;
+            const now = new Date();
+            const todayStr = now.toISOString().slice(0, 10);
+
+            snap.forEach(function(doc) {
+                const d = doc.data();
+                const lastLogin = d.lastLogin ? d.lastLogin.toDate() : null;
+                const firstSeen = d.firstSeen ? d.firstSeen.toDate() : lastLogin;
+                if (lastLogin && lastLogin.toISOString().slice(0, 10) === todayStr) {
+                    todayCount++;
+                }
+                const photo = d.photoURL
+                    ? '<img src="' + d.photoURL + '">'
+                    : '';
+                const row = document.createElement('tr');
+                row.innerHTML =
+                    '<td>' + photo + (d.displayName || '—') + '</td>' +
+                    '<td>' + (d.email || '—') + '</td>' +
+                    '<td>' + (firstSeen ? firstSeen.toLocaleDateString() : '—') + '</td>' +
+                    '<td>' + (lastLogin ? lastLogin.toLocaleString() : '—') + '</td>';
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('admin-total').textContent = snap.size;
+            document.getElementById('admin-today').textContent = todayCount;
+        });
+    }
     </script>
 </body>
 </html>
