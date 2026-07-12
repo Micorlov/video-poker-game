@@ -1767,12 +1767,45 @@
 
     function signInWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(function(err) {
-            const el = document.getElementById('login-error');
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        const el = document.getElementById('login-error');
+        if (el) el.style.display = 'none';
+
+        if (isMobile) {
+            auth.signInWithRedirect(provider).catch(function(err) {
+                if (el) {
+                    el.textContent = err.message;
+                    el.style.display = 'block';
+                }
+            });
+        } else {
+            auth.signInWithPopup(provider).catch(function(err) {
+                if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+                    auth.signInWithRedirect(provider).catch(function(redirectErr) {
+                        if (el) {
+                            el.textContent = redirectErr.message;
+                            el.style.display = 'block';
+                        }
+                    });
+                } else {
+                    if (el) {
+                        el.textContent = err.message;
+                        el.style.display = 'block';
+                    }
+                }
+            });
+        }
+    }
+
+    // Handle redirect results on load
+    auth.getRedirectResult().catch(function(err) {
+        const el = document.getElementById('login-error');
+        if (el) {
             el.textContent = err.message;
             el.style.display = 'block';
-        });
-    }
+        }
+    });
 
     auth.onAuthStateChanged(function(user) {
         if (user) {
