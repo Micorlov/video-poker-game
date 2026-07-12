@@ -1208,7 +1208,7 @@
         const SUITS = ['♠', '♥', '♦', '♣'];
         const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
         
-        const PAYOUTS = {
+        const BASE_PAYOUTS = {
             'Royal Flush': 250,
             'Straight Flush': 50,
             'Four of a Kind': 20,
@@ -1220,6 +1220,7 @@
             'Jacks or Better': 1,
             'Nothing': 0
         };
+        let currentPayouts = { ...BASE_PAYOUTS };
 
         // --- Engagement tuning (play-money game) ---
         const BOOST_BASE = 0.18;          // baseline chance to improve a dead deal
@@ -1258,6 +1259,7 @@
         let dailyRebuys = 0;
         let currentHourKey = '';
         let currentDayKey = '';
+        let lastWinAmount = 0;
         let activeLbTab = 'hourly';
 
         function checkHourReset() {
@@ -1338,11 +1340,10 @@
             if (lastHandType) {
                 document.getElementById('explanation').textContent = t.explanations[lastHandType];
                 const resultEl = document.getElementById('result');
-                const win = bet * PAYOUTS[lastHandType];
-                if (win > 0) {
-                    resultEl.innerHTML = `<span class="win">🎉 ${t.payouts[lastHandType]}! +${win} ${t.creditsLabel}! 🎉</span>`;
+                if (lastWinAmount > 0) {
+                    resultEl.innerHTML = `<span class="win">🎉 ${t.payouts[lastHandType]}! +${lastWinAmount} ${t.creditsLabel}! 🎉</span>`;
                 } else {
-                    resultEl.innerHTML = `<span style="color:#aaa">${t.payouts['Nothing']}</span>`;
+                    resultEl.innerHTML = `<span style="color:#aaa">${t.payouts['Nothing']} - ${hand.map(c => c.rank + c.suit).join(' ')}</span>`;
                 }
             }
 
@@ -1366,7 +1367,9 @@
             handOrder.forEach(handType => {
                 const row = document.createElement('div');
                 row.className = 'payout-row';
-                row.innerHTML = `<div class="payout-hand">${t.payouts[handType]}</div><div class="payout-value">${PAYOUTS[handType]}</div>`;
+                const isBoosted = currentPayouts[handType] > BASE_PAYOUTS[handType];
+                const valStyle = isBoosted ? 'color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);' : '';
+                row.innerHTML = `<div class="payout-hand">${t.payouts[handType]}</div><div class="payout-value" style="${valStyle}">${currentPayouts[handType]}</div>`;
                 payoutsEl.appendChild(row);
             });
         }
@@ -1473,17 +1476,24 @@
             const winIndices = result.winIndices || []; // Ensure it's an array
             const thirdMatchIndices = result.thirdMatchIndices || []; // Ensure it's an array
             const secondPairIndices = result.secondPairIndices || []; // Ensure it's an array
-            const win = bet * PAYOUTS[handType];
+            const win = bet * currentPayouts[handType];
+            lastWinAmount = win;
             balance += win;
             handsPlayed++;
+            
             if (win > 0) {
                 totalWon += win;
                 lossStreak = 0;
+                currentPayouts = { ...BASE_PAYOUTS };
             } else {
                 totalLost += bet;
                 lossStreak++;
+                for (let key in currentPayouts) {
+                    if (key !== 'Nothing') currentPayouts[key]++;
+                }
             }
             updateStats();
+            renderPayouts(TRANSLATIONS[currentLang]);
 
             document.getElementById('balance').textContent = balance;
 
