@@ -1,0 +1,7 @@
+file '/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/Scene1_Hook.mp4'
+file '/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/Scene2_BetSelect.mp4'
+file '/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/Scene3_Deal.mp4'
+file '/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/Scene4_HoldDraw.mp4'
+file '/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/Scene5_WinReveal.mp4'
+file '/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/Scene6_PayoutTable.mp4'
+file '/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/Scene7_CTA.mp4'
