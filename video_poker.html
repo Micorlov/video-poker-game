@@ -2015,6 +2015,10 @@
         
         Promise.all([hourlyPromise, dailyPromise]).then(function() {
             refreshLeaderboard();
+        }).catch(function(err) {
+            console.error('Error in updateScores:', err);
+            // Even if writing to one of them fails, try to refresh the leaderboard so it's not stale
+            refreshLeaderboard();
         });
     }
 
