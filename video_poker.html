@@ -552,6 +552,15 @@
             text-align: center; color: rgba(255,255,255,0.4); font-size: 11px;
             margin-top: 12px; line-height: 1.5; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);
         }
+        .online-fire {
+            display: inline-block; margin-left: 6px; font-size: 13px;
+            filter: hue-rotate(120deg) saturate(1.5);
+            animation: flicker 1.5s infinite alternate;
+        }
+        @keyframes flicker {
+            0% { opacity: 0.8; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1.05); }
+        }
         .lb-score { font-weight: 700; font-size: 15px; }
         .rebuy-notification {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px);
@@ -1981,6 +1990,15 @@
             const name = (d.displayName || 'Anonymous').split(' ')[0];
             const badge = isYou ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
             const rebuyBadge = d.rebuys > 0 ? '<span class="lb-badge lb-badge-rebuys">♻' + d.rebuys + '</span>' : '';
+            
+            let isOnline = false;
+            if (d.updatedAt && typeof d.updatedAt.toDate === 'function') {
+                if (Date.now() - d.updatedAt.toDate().getTime() < 3 * 60 * 1000) isOnline = true;
+            } else if (d.updatedAt === null) {
+                isOnline = true; // Pending local write
+            }
+            const onlineIndicator = isOnline ? '<span class="online-fire" title="Online">🔥</span>' : '';
+
             const rankClass = rank <= 3 ? ' lb-rank-' + rank : '';
             const s = d.score || 0;
             const scoreClass = s > 0 ? 'lb-positive lb-score' : s < 0 ? 'lb-negative lb-score' : 'lb-zero lb-score';
@@ -1991,7 +2009,7 @@
             if (isYou) row.className = 'lb-you';
             row.innerHTML =
                 '<td class="lb-rank' + rankClass + '">' + medal + '</td>' +
-                '<td>' + photo + name + badge + rebuyBadge + '</td>' +
+                '<td>' + photo + name + badge + rebuyBadge + onlineIndicator + '</td>' +
                 '<td class="' + scoreClass + '">' + scoreText + '</td>' +
                 '<td>' + d.hands + '</td>';
             tbody.appendChild(row);
