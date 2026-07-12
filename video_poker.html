@@ -556,6 +556,24 @@
         }
         .lb-badge-you { background: rgba(255,215,0,0.15); color: #ffd700; }
         .lb-badge-rebuys { background: rgba(255,100,100,0.15); color: #f87171; font-size: 10px; }
+        .lb-tabs {
+            display: flex; gap: 0; margin-bottom: 12px; border-radius: 8px; overflow: hidden;
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+        .lb-tab-btn {
+            flex: 1; padding: 8px 0; text-align: center; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.25s ease; border: none; font-family: inherit;
+            background: rgba(0,0,0,0.3); color: #aaa;
+        }
+        .lb-tab-btn:first-child { border-right: 1px solid rgba(255,215,0,0.15); }
+        .lb-tab-btn.active {
+            background: rgba(255,215,0,0.12); color: #ffd700;
+        }
+        .lb-tab-btn:hover:not(.active) { background: rgba(255,215,0,0.06); color: #ddd; }
+        .lb-formula-note {
+            text-align: center; color: rgba(255,255,255,0.3); font-size: 11px;
+            margin-top: 10px; line-height: 1.5;
+        }
         .lb-score { font-weight: 700; font-size: 15px; }
         .rebuy-notification {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px);
@@ -625,7 +643,7 @@
 
     <div id="rank-bar" class="rank-bar hidden">
         <div class="rank-bar-item">
-            <span class="rank-bar-label">Rank</span>
+            <span class="rank-bar-label" id="rb-rank-label">Hourly Rank</span>
             <span class="rank-bar-value" id="rb-rank">#—</span>
         </div>
         <div class="rank-bar-item">
@@ -636,7 +654,7 @@
             <span class="rank-bar-label">Rebuys</span>
             <span class="rank-bar-value" id="rb-rebuys">0</span>
         </div>
-        <div class="rank-bar-timer">⏱ <span id="rb-countdown">--:--</span></div>
+        <div class="rank-bar-timer"><span id="rb-timer-icon">⏱</span> <span id="rb-countdown">--:--</span></div>
     </div>
 
     <div class="container" style="display:none; padding-top: 50px;" id="game-container">
@@ -713,6 +731,10 @@
 
             <div class="lb-col">
                 <div class="leaderboard" id="leaderboard-section">
+                    <div class="lb-tabs">
+                        <button class="lb-tab-btn active" id="tab-hourly" onclick="setLeaderboardTab('hourly')">⏱ Hourly</button>
+                        <button class="lb-tab-btn" id="tab-daily" onclick="setLeaderboardTab('daily')">📅 Daily</button>
+                    </div>
                     <h3 id="lb-title">⏱ Hourly Competition</h3>
                     <div class="leaderboard-timer">Resets in <span id="lb-countdown">--:--</span></div>
                     <table class="lb-table">
@@ -723,6 +745,7 @@
                             <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
                         </tbody>
                     </table>
+                    <div class="lb-formula-note" id="lb-formula-note">Score = Balance - (100 × Rebuys) - 100<br>(Your net profit/loss this hour)</div>
                 </div>
             </div>
         </div>
