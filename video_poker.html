@@ -556,24 +556,10 @@
         }
         .lb-badge-you { background: rgba(255,215,0,0.15); color: #ffd700; }
         .lb-badge-rebuys { background: rgba(255,100,100,0.15); color: #f87171; font-size: 10px; }
-        .lb-tabs {
-            display: flex; gap: 0; margin-bottom: 12px; border-radius: 8px; overflow: hidden;
-            border: 1px solid rgba(255,215,0,0.2);
+        .lb-divider {
+            height: 1px; background: rgba(255,215,0,0.12); margin: 18px 0;
         }
-        .lb-tab-btn {
-            flex: 1; padding: 8px 0; text-align: center; font-size: 13px; font-weight: 600;
-            cursor: pointer; transition: all 0.25s ease; border: none; font-family: inherit;
-            background: rgba(0,0,0,0.3); color: #aaa;
-        }
-        .lb-tab-btn:first-child { border-right: 1px solid rgba(255,215,0,0.15); }
-        .lb-tab-btn.active {
-            background: rgba(255,215,0,0.12); color: #ffd700;
-        }
-        .lb-tab-btn:hover:not(.active) { background: rgba(255,215,0,0.06); color: #ddd; }
-        .lb-formula-note {
-            text-align: center; color: rgba(255,255,255,0.3); font-size: 11px;
-            margin-top: 10px; line-height: 1.5;
-        }
+        .leaderboard + .leaderboard { margin-top: 16px; }
         .lb-score { font-weight: 700; font-size: 15px; }
         .rebuy-notification {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px);
@@ -592,19 +578,23 @@
             border-bottom: 1px solid rgba(255,215,0,0.2);
             backdrop-filter: blur(12px);
             display: flex; align-items: center; justify-content: center;
-            gap: 24px; padding: 10px 20px; font-size: 14px;
+            gap: 6px; padding: 10px 16px; font-size: 13px;
         }
         .rank-bar.hidden { display: none; }
-        .rank-bar-item { display: flex; align-items: center; gap: 6px; }
-        .rank-bar-label { color: rgba(255,255,255,0.5); }
-        .rank-bar-value { color: #ffd700; font-weight: 700; font-size: 18px; }
+        .rank-bar-group { display: flex; align-items: center; gap: 6px; }
+        .rank-bar-group-label { color: rgba(255,215,0,0.6); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .rank-bar-sep { color: rgba(255,255,255,0.15); font-size: 18px; margin: 0 6px; }
+        .rank-bar-item { display: flex; align-items: center; gap: 4px; }
+        .rank-bar-label { color: rgba(255,255,255,0.5); font-size: 12px; }
+        .rank-bar-value { color: #ffd700; font-weight: 700; font-size: 16px; }
         .rank-bar-value.positive { color: #4ade80; }
         .rank-bar-value.negative { color: #f87171; }
-        .rank-bar-timer { color: rgba(255,255,255,0.4); font-size: 13px; }
+        .rank-bar-timer { color: rgba(255,255,255,0.4); font-size: 12px; }
         .rank-bar-timer span { color: #ffd700; }
-        @media (max-width: 600px) {
-            .rank-bar { gap: 12px; font-size: 12px; padding: 8px 10px; }
-            .rank-bar-value { font-size: 15px; }
+        @media (max-width: 700px) {
+            .rank-bar { gap: 4px; font-size: 11px; padding: 6px 8px; flex-wrap: wrap; justify-content: center; }
+            .rank-bar-value { font-size: 14px; }
+            .rank-bar-sep { margin: 0 3px; }
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -642,19 +632,25 @@
     </div>
 
     <div id="rank-bar" class="rank-bar hidden">
+        <span class="rank-bar-group-label">⏱</span>
         <div class="rank-bar-item">
-            <span class="rank-bar-label" id="rb-rank-label">Hourly Rank</span>
-            <span class="rank-bar-value" id="rb-rank">#—</span>
+            <span class="rank-bar-label">#</span>
+            <span class="rank-bar-value" id="rb-hourly-rank">#—</span>
         </div>
         <div class="rank-bar-item">
-            <span class="rank-bar-label">Score</span>
-            <span class="rank-bar-value" id="rb-score">0</span>
+            <span class="rank-bar-value" id="rb-hourly-score">0</span>
+        </div>
+        <div class="rank-bar-timer"><span id="rb-hourly-countdown">--:--</span></div>
+        <span class="rank-bar-sep">│</span>
+        <span class="rank-bar-group-label">📅</span>
+        <div class="rank-bar-item">
+            <span class="rank-bar-label">#</span>
+            <span class="rank-bar-value" id="rb-daily-rank">#—</span>
         </div>
         <div class="rank-bar-item">
-            <span class="rank-bar-label">Rebuys</span>
-            <span class="rank-bar-value" id="rb-rebuys">0</span>
+            <span class="rank-bar-value" id="rb-daily-score">0</span>
         </div>
-        <div class="rank-bar-timer"><span id="rb-timer-icon">⏱</span> <span id="rb-countdown">--:--</span></div>
+        <div class="rank-bar-timer"><span id="rb-daily-countdown">--:--:--</span></div>
     </div>
 
     <div class="container" style="display:none; padding-top: 50px;" id="game-container">
@@ -730,22 +726,29 @@
             </div>
 
             <div class="lb-col">
-                <div class="leaderboard" id="leaderboard-section">
-                    <div class="lb-tabs">
-                        <button class="lb-tab-btn active" id="tab-hourly" onclick="setLeaderboardTab('hourly')">⏱ Hourly</button>
-                        <button class="lb-tab-btn" id="tab-daily" onclick="setLeaderboardTab('daily')">📅 Daily</button>
-                    </div>
-                    <h3 id="lb-title">⏱ Hourly Competition</h3>
-                    <div class="leaderboard-timer">Resets in <span id="lb-countdown">--:--</span></div>
+                <div class="leaderboard" id="leaderboard-hourly">
+                    <h3 id="lb-hourly-title">⏱ Hourly Competition</h3>
+                    <div class="leaderboard-timer">Resets in <span id="lb-hourly-countdown">--:--</span></div>
                     <table class="lb-table">
                         <thead><tr>
                             <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
                         </tr></thead>
-                        <tbody id="lb-body">
+                        <tbody id="lb-hourly-body">
                             <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
                         </tbody>
                     </table>
-                    <div class="lb-formula-note" id="lb-formula-note">Score = Balance - (100 × Rebuys) - 100<br>(Your net profit/loss this hour)</div>
+                </div>
+                <div class="leaderboard" id="leaderboard-daily">
+                    <h3 id="lb-daily-title">📅 Daily Competition</h3>
+                    <div class="leaderboard-timer">Resets in <span id="lb-daily-countdown">--:--:--</span></div>
+                    <table class="lb-table">
+                        <thead><tr>
+                            <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
+                        </tr></thead>
+                        <tbody id="lb-daily-body">
+                            <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -1380,30 +1383,10 @@
             }
 
             // Update leaderboard UI language dynamically
-            const titleEl = document.getElementById('lb-title');
-            if (titleEl) {
-                if (activeLbTab === 'hourly') {
-                    titleEl.textContent = '⏱ ' + (t.hourlyTitle || 'Hourly Competition');
-                } else {
-                    titleEl.textContent = '📅 ' + (t.dailyTitle || 'Daily Competition');
-                }
-            }
-            
-            const tabHourly = document.getElementById('tab-hourly');
-            const tabDaily = document.getElementById('tab-daily');
-            if (tabHourly) tabHourly.textContent = t.hourlyTab || 'Hourly';
-            if (tabDaily) tabDaily.textContent = t.dailyTab || 'Daily';
-            
-            const formulaNote = document.getElementById('lb-formula-note');
-            if (formulaNote) {
-                const noteText = activeLbTab === 'hourly' ? t.hourlyFormula : t.dailyFormula;
-                formulaNote.innerHTML = 'Score = Balance - (100 × Rebuys) - 100<br>' + noteText;
-            }
-
-            const rbRankLabel = document.getElementById('rb-rank-label');
-            if (rbRankLabel) {
-                rbRankLabel.textContent = activeLbTab === 'daily' ? (t.dailyRankLabel || 'Daily Rank') : (t.hourlyRankLabel || 'Hourly Rank');
-            }
+            const hourlyTitleEl = document.getElementById('lb-hourly-title');
+            if (hourlyTitleEl) hourlyTitleEl.textContent = '⏱ ' + (t.hourlyTitle || 'Hourly Competition');
+            const dailyTitleEl = document.getElementById('lb-daily-title');
+            if (dailyTitleEl) dailyTitleEl.textContent = '📅 ' + (t.dailyTitle || 'Daily Competition');
         }
 
         function renderPayouts(t) {
@@ -1949,50 +1932,7 @@
             String(now.getHours()).padStart(2, '0');
     }
 
-    function setLeaderboardTab(tab) {
-        activeLbTab = tab;
-        document.querySelectorAll('.lb-tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-            btn.style.background = 'rgba(0,0,0,0.3)';
-            btn.style.color = '#aaa';
-            btn.style.borderColor = 'rgba(255,255,255,0.1)';
-        });
-        const activeBtn = document.getElementById('tab-' + tab);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
-            activeBtn.style.background = '';
-            activeBtn.style.color = '';
-            activeBtn.style.borderColor = '';
-        }
-
-        const titleEl = document.getElementById('lb-title');
-        const t = TRANSLATIONS[currentLang];
-
-        if (tab === 'hourly') {
-            titleEl.textContent = '⏱ ' + (t.hourlyTitle || 'Hourly Competition');
-        } else {
-            titleEl.textContent = '📅 ' + (t.dailyTitle || 'Daily Competition');
-        }
-        
-        const timerIcon = document.getElementById('rb-timer-icon');
-        if (timerIcon) {
-            timerIcon.textContent = tab === 'hourly' ? '⏱' : '📅';
-        }
-        
-        const formulaNote = document.getElementById('lb-formula-note');
-        if (formulaNote) {
-            const noteText = tab === 'hourly' ? t.hourlyFormula : t.dailyFormula;
-            formulaNote.innerHTML = 'Score = Balance - (100 × Rebuys) - 100<br>' + noteText;
-        }
-
-        const rbRankLabel = document.getElementById('rb-rank-label');
-        if (rbRankLabel) {
-            rbRankLabel.textContent = tab === 'daily' ? (t.dailyRankLabel || 'Daily Rank') : (t.hourlyRankLabel || 'Hourly Rank');
-        }
-        
-        updateCountdown();
-        refreshLeaderboard();
-    }
+    // No more tab switching — both leaderboards always shown
 
     function getDayKey() {
         const now = new Date();
@@ -2078,90 +2018,108 @@
         });
     }
 
+    function fillLeaderboardTable(tbodyId, snap, user, rankBarPrefix) {
+        const tbody = document.getElementById(tbodyId);
+        let myRank = null;
+        let myScore = 0;
+        if (!snap || snap.empty) {
+            tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>';
+            return { rank: null, score: 0 };
+        }
+        tbody.innerHTML = '';
+        let rank = 0;
+        snap.forEach(function(doc) {
+            rank++;
+            const d = doc.data();
+            const isYou = user && d.uid === user.uid;
+            if (isYou) { myRank = rank; myScore = d.score || 0; }
+            const photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+            const name = (d.displayName || 'Anonymous').split(' ')[0];
+            const badge = isYou ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
+            const rebuyBadge = d.rebuys > 0 ? '<span class="lb-badge lb-badge-rebuys">♻' + d.rebuys + '</span>' : '';
+            const rankClass = rank <= 3 ? ' lb-rank-' + rank : '';
+            const s = d.score || 0;
+            const scoreClass = s > 0 ? 'lb-positive lb-score' : s < 0 ? 'lb-negative lb-score' : 'lb-zero lb-score';
+            const scoreText = s > 0 ? '+' + s : '' + s;
+            const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+
+            const row = document.createElement('tr');
+            if (isYou) row.className = 'lb-you';
+            row.innerHTML =
+                '<td class="lb-rank' + rankClass + '">' + medal + '</td>' +
+                '<td>' + photo + name + badge + rebuyBadge + '</td>' +
+                '<td class="' + scoreClass + '">' + scoreText + '</td>' +
+                '<td>' + d.hands + '</td>';
+            tbody.appendChild(row);
+        });
+        return { rank: myRank, score: myScore };
+    }
+
     function refreshLeaderboard() {
         const user = auth.currentUser;
         if (!user) return;
 
-        const isDaily = activeLbTab === 'daily';
-        const col = isDaily ? 'daily_scores' : 'hourly_scores';
-        const keyField = isDaily ? 'dayKey' : 'hourKey';
-        const keyValue = isDaily ? getDayKey() : getHourKey();
-
-        db.collection(col)
-            .where(keyField, '==', keyValue)
+        // Fetch hourly
+        const hourlyPromise = db.collection('hourly_scores')
+            .where('hourKey', '==', getHourKey())
             .orderBy('score', 'desc')
             .limit(20)
             .get()
-            .then(function(snap) {
-                const tbody = document.getElementById('lb-body');
-                if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>';
-                    updateRankBar(null, 0);
-                    return;
-                }
-                tbody.innerHTML = '';
-                let rank = 0;
-                let myRank = null;
-                let myScore = 0;
-                snap.forEach(function(doc) {
-                    rank++;
-                    const d = doc.data();
-                    const isYou = user && d.uid === user.uid;
-                    if (isYou) { myRank = rank; myScore = d.score || 0; }
-                    const photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
-                    const name = (d.displayName || 'Anonymous').split(' ')[0];
-                    const badge = isYou ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
-                    const rebuyBadge = d.rebuys > 0 ? '<span class="lb-badge lb-badge-rebuys">♻' + d.rebuys + '</span>' : '';
-                    const rankClass = rank <= 3 ? ' lb-rank-' + rank : '';
-                    const s = d.score || 0;
-                    const scoreClass = s > 0 ? 'lb-positive lb-score' : s < 0 ? 'lb-negative lb-score' : 'lb-zero lb-score';
-                    const scoreText = s > 0 ? '+' + s : '' + s;
-                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+            .catch(function(err) { console.error('Hourly LB error:', err); return null; });
 
-                    const row = document.createElement('tr');
-                    if (isYou) row.className = 'lb-you';
-                    row.innerHTML =
-                        '<td class="lb-rank' + rankClass + '">' + medal + '</td>' +
-                        '<td>' + photo + name + badge + rebuyBadge + '</td>' +
-                        '<td class="' + scoreClass + '">' + scoreText + '</td>' +
-                        '<td>' + d.hands + '</td>';
-                    tbody.appendChild(row);
-                });
-                updateRankBar(myRank, myScore);
-            });
+        // Fetch daily
+        const dailyPromise = db.collection('daily_scores')
+            .where('dayKey', '==', getDayKey())
+            .orderBy('score', 'desc')
+            .limit(20)
+            .get()
+            .catch(function(err) { console.error('Daily LB error:', err); return null; });
+
+        Promise.all([hourlyPromise, dailyPromise]).then(function(results) {
+            const hourlyResult = fillLeaderboardTable('lb-hourly-body', results[0], user);
+            const dailyResult = fillLeaderboardTable('lb-daily-body', results[1], user);
+            updateRankBar(hourlyResult, dailyResult);
+        });
     }
 
-    function updateRankBar(rank, score) {
+    function updateRankBar(hourlyResult, dailyResult) {
         const bar = document.getElementById('rank-bar');
         if (!auth.currentUser) { bar.classList.add('hidden'); return; }
         bar.classList.remove('hidden');
-        const rbRank = document.getElementById('rb-rank');
-        const rbScore = document.getElementById('rb-score');
-        const rbRebuys = document.getElementById('rb-rebuys');
-        rbRank.textContent = rank ? '#' + rank : '#—';
-        rbScore.textContent = score > 0 ? '+' + score : '' + score;
-        rbScore.className = 'rank-bar-value' + (score > 0 ? ' positive' : score < 0 ? ' negative' : '');
-        rbRebuys.textContent = activeLbTab === 'daily' ? dailyRebuys : hourlyRebuys;
+
+        const hRank = document.getElementById('rb-hourly-rank');
+        const hScore = document.getElementById('rb-hourly-score');
+        hRank.textContent = hourlyResult.rank ? '#' + hourlyResult.rank : '#—';
+        hScore.textContent = hourlyResult.score > 0 ? '+' + hourlyResult.score : '' + hourlyResult.score;
+        hScore.className = 'rank-bar-value' + (hourlyResult.score > 0 ? ' positive' : hourlyResult.score < 0 ? ' negative' : '');
+
+        const dRank = document.getElementById('rb-daily-rank');
+        const dScore = document.getElementById('rb-daily-score');
+        dRank.textContent = dailyResult.rank ? '#' + dailyResult.rank : '#—';
+        dScore.textContent = dailyResult.score > 0 ? '+' + dailyResult.score : '' + dailyResult.score;
+        dScore.className = 'rank-bar-value' + (dailyResult.score > 0 ? ' positive' : dailyResult.score < 0 ? ' negative' : '');
     }
 
     function updateCountdown() {
         const now = new Date();
-        const isDaily = activeLbTab === 'daily';
-        
-        let timeStr = '';
-        if (isDaily) {
-            const hours = 23 - now.getHours();
-            const mins = 59 - now.getMinutes();
-            const secs = 59 - now.getSeconds();
-            timeStr = String(hours).padStart(2, '0') + ':' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-        } else {
-            const mins = 59 - now.getMinutes();
-            const secs = 59 - now.getSeconds();
-            timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-        }
-        document.getElementById('lb-countdown').textContent = timeStr;
-        const rbTimer = document.getElementById('rb-countdown');
-        if (rbTimer) rbTimer.textContent = timeStr;
+        // Hourly countdown
+        const hMins = 59 - now.getMinutes();
+        const hSecs = 59 - now.getSeconds();
+        const hourlyStr = String(hMins).padStart(2, '0') + ':' + String(hSecs).padStart(2, '0');
+        const lbHourly = document.getElementById('lb-hourly-countdown');
+        const rbHourly = document.getElementById('rb-hourly-countdown');
+        if (lbHourly) lbHourly.textContent = hourlyStr;
+        if (rbHourly) rbHourly.textContent = hourlyStr;
+
+        // Daily countdown
+        const dHours = 23 - now.getHours();
+        const dMins = 59 - now.getMinutes();
+        const dSecs = 59 - now.getSeconds();
+        const dailyStr = String(dHours).padStart(2, '0') + ':' + String(dMins).padStart(2, '0') + ':' + String(dSecs).padStart(2, '0');
+        const lbDaily = document.getElementById('lb-daily-countdown');
+        const rbDaily = document.getElementById('rb-daily-countdown');
+        if (lbDaily) lbDaily.textContent = dailyStr;
+        if (rbDaily) rbDaily.textContent = dailyStr;
     }
 
     setInterval(updateCountdown, 1000);
