@@ -257,19 +257,7 @@
             0% { box-shadow: 0 0 20px #8a2be2, 0 10px 30px rgba(0,0,0,0.5); }
             100% { box-shadow: 0 0 40px #8a2be2, 0 0 60px rgba(138, 43, 226, 0.7); }
         }
-        .card.near-miss {
-            border-color: #ff9500 !important;
-            box-shadow: 0 0 25px #ff9500, 0 10px 25px rgba(0,0,0,0.5) !important;
-            transform: translateY(-10px) scale(1.04);
-            animation: near-pulse 0.9s infinite alternate;
-            background: linear-gradient(145deg, #fff6e6, #ffe4b8);
-        }
-        @keyframes near-pulse {
-            0% { box-shadow: 0 0 18px #ff9500, 0 10px 25px rgba(0,0,0,0.5); }
-            100% { box-shadow: 0 0 38px #ffb84d, 0 0 55px rgba(255, 149, 0, 0.6); }
-        }
-        .result.near { color: #ff9500; text-shadow: 0 0 15px rgba(255, 149, 0, 0.7); }
-        .suit { font-size: 42px; margin: 5px 0; }
+.suit { font-size: 42px; margin: 5px 0; }
         .rank { font-size: 22px; }
         
         button {
@@ -863,13 +851,6 @@
                     'Nothing': 'Better luck next hand!'
                 },
                 insufficientBalance: 'Insufficient balance!',
-                nearMiss: {
-                    royal: '👑 SO CLOSE! One card from a ROYAL FLUSH!',
-                    flush: '🔥 SO CLOSE! Just one card from a FLUSH!',
-                    straight: '⚡ SO CLOSE! One card from a STRAIGHT!',
-                    pair: '🎯 SO CLOSE! A high pair would have paid!',
-                    hint: 'You were one card away — try again!'
-                },
                 statWon: 'Won',
                 statLost: 'Lost',
                 statNet: 'Net',
@@ -938,13 +919,6 @@
                     'Nothing': '¡Mejor suerte la próxima mano!'
                 },
                 insufficientBalance: '¡Saldo insuficiente!',
-                nearMiss: {
-                    royal: '👑 ¡CASI! ¡A una carta de una ESCALERA REAL!',
-                    flush: '🔥 ¡CASI! ¡A solo una carta de un COLOR!',
-                    straight: '⚡ ¡CASI! ¡A una carta de una ESCALERA!',
-                    pair: '🎯 ¡CASI! ¡Una pareja alta habría pagado!',
-                    hint: 'Estuviste a una carta — ¡inténtalo de nuevo!'
-                },
                 statWon: 'Ganado',
                 statLost: 'Perdido',
                 statNet: 'Neto',
@@ -1013,13 +987,6 @@
                     'Nothing': 'Meilleure chance la prochaine main !'
                 },
                 insufficientBalance: 'Solde insuffisant !',
-                nearMiss: {
-                    royal: '👑 SI PROCHE ! À une carte d\'une QUINTE FLUSH ROYALE !',
-                    flush: '🔥 SI PROCHE ! À une seule carte d\'une COULEUR !',
-                    straight: '⚡ SI PROCHE ! À une carte d\'une QUINTE !',
-                    pair: '🎯 SI PROCHE ! Une paire haute aurait payé !',
-                    hint: 'Vous étiez à une carte — réessayez !'
-                },
                 statWon: 'Gagné',
                 statLost: 'Perdu',
                 statNet: 'Net',
@@ -1088,13 +1055,6 @@
                     'Nothing': 'Beim nächsten Mal mehr Glück!'
                 },
                 insufficientBalance: 'Nicht genügend Guthaben!',
-                nearMiss: {
-                    royal: '👑 SO KNAPP! Eine Karte von einem ROYAL FLUSH entfernt!',
-                    flush: '🔥 SO KNAPP! Nur eine Karte von einem FLUSH entfernt!',
-                    straight: '⚡ SO KNAPP! Eine Karte von einer STRASSE entfernt!',
-                    pair: '🎯 SO KNAPP! Ein hohes Paar hätte gezahlt!',
-                    hint: 'Nur eine Karte gefehlt — versuch es nochmal!'
-                },
                 statWon: 'Gewonnen',
                 statLost: 'Verloren',
                 statNet: 'Netto',
@@ -1162,13 +1122,6 @@
                     'Nothing': 'מזל טוב יותר ביד הבאה!'
                 },
                 insufficientBalance: 'יתרה לא מספקת!',
-                nearMiss: {
-                    royal: '👑 כמעט! קלף אחד מרויאל פלאש!',
-                    flush: '🔥 כמעט! רק קלף אחד מפלאש!',
-                    straight: '⚡ כמעט! קלף אחד מסטרייט!',
-                    pair: '🎯 כמעט! זוג גבוה היה מזכה!',
-                    hint: 'היית במרחק קלף אחד — נסה שוב!'
-                },
                 statWon: 'רווח',
                 statLost: 'הפסד',
                 statNet: 'סיכום',
@@ -1236,13 +1189,6 @@
                     'Nothing': 'حظ أفضل في اليد القادمة!'
                 },
                 insufficientBalance: 'رصيد غير كافٍ!',
-                nearMiss: {
-                    royal: '👑 قريب جداً! بطاقة واحدة من رويال فلاش!',
-                    flush: '🔥 قريب جداً! بطاقة واحدة فقط من فلاش!',
-                    straight: '⚡ قريب جداً! بطاقة واحدة من ستريت!',
-                    pair: '🎯 قريب جداً! زوج عالٍ كان سيفوز!',
-                    hint: 'كنت على بعد بطاقة واحدة — حاول مرة أخرى!'
-                },
                 statWon: 'ربح',
                 statLost: 'خسارة',
                 statNet: 'صافي',
@@ -1469,41 +1415,6 @@
             if (deckIdx !== -1) deck.splice(deckIdx, 1);
         }
 
-        // Detect "one card away" hands so losses still feel exciting.
-        function detectNearMiss(hand) {
-            const val = r => r === 'A' ? 14 : r === 'K' ? 13 : r === 'Q' ? 12 : r === 'J' ? 11 : parseInt(r);
-            const royalRanks = ['10', 'J', 'Q', 'K', 'A'];
-
-            // 4 to a flush (or 4 to a royal flush)
-            const suitCounts = {};
-            hand.forEach(c => suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1);
-            for (const s in suitCounts) {
-                if (suitCounts[s] === 4) {
-                    const indices = hand.map((c, i) => c.suit === s ? i : -1).filter(i => i >= 0);
-                    const isRoyal = indices.every(i => royalRanks.includes(hand[i].rank));
-                    return { type: isRoyal ? 'royal' : 'flush', indices };
-                }
-            }
-
-            // 4 to a straight: any 4 distinct values spanning <= 4 (one card completes it)
-            for (let skip = 0; skip < 5; skip++) {
-                const sub = [0, 1, 2, 3, 4].filter(i => i !== skip);
-                const vals = sub.map(i => val(hand[i].rank));
-                const set = new Set(vals);
-                if (set.size === 4) {
-                    const arr = [...set].sort((a, b) => a - b);
-                    if (arr[3] - arr[0] <= 4) return { type: 'straight', indices: sub };
-                    // ace-low view (A as 1)
-                    if (set.has(14)) {
-                        const low = vals.map(v => v === 14 ? 1 : v).sort((a, b) => a - b);
-                        if (low[3] - low[0] <= 4) return { type: 'straight', indices: sub };
-                    }
-                }
-            }
-
-            return null;
-        }
-
         function deal() {
             checkHourReset();
             checkDayReset();
@@ -1569,27 +1480,18 @@
 
             const t = TRANSLATIONS[currentLang];
             const resultEl = document.getElementById('result');
-            let nearMissIndices = [];
 
             if (win > 0) {
                 resultEl.className = 'result';
                 resultEl.innerHTML = `<span class="win">🎉 ${t.payouts[handType]}! +${win} ${t.creditsLabel}! 🎉</span>`;
                 document.getElementById('explanation').textContent = t.explanations[handType];
             } else {
-                const nearMiss = detectNearMiss(hand);
-                if (nearMiss) {
-                    nearMissIndices = nearMiss.indices;
-                    resultEl.className = 'result near';
-                    resultEl.innerHTML = `<span>${t.nearMiss[nearMiss.type]}</span>`;
-                    document.getElementById('explanation').textContent = t.nearMiss.hint;
-                } else {
-                    resultEl.className = 'result';
-                    resultEl.innerHTML = `<span style="color:#aaa">${t.payouts['Nothing']} - ${hand.map(c => c.rank + c.suit).join(' ')}</span>`;
-                    document.getElementById('explanation').textContent = t.explanations[handType];
-                }
+                resultEl.className = 'result';
+                resultEl.innerHTML = `<span style="color:#aaa">${t.payouts['Nothing']} - ${hand.map(c => c.rank + c.suit).join(' ')}</span>`;
+                document.getElementById('explanation').textContent = t.explanations[handType];
             }
 
-            renderHand(winIndices, thirdMatchIndices, nearMissIndices, secondPairIndices);
+            renderHand(winIndices, thirdMatchIndices, secondPairIndices);
             updateScores(win, bet, handType);
 
             gameState = 'bet';
@@ -1648,7 +1550,7 @@
             return '';
         }
 
-        function renderHand(winningIndices = [], thirdMatchIndices = [], nearMissIndices = [], secondPairIndices = []) {
+        function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = []) {
             const handEl = document.getElementById('hand');
             handEl.innerHTML = '';
             const t = TRANSLATIONS[currentLang];
@@ -1656,7 +1558,7 @@
 
             hand.forEach((card, i) => {
                 const cardEl = document.createElement('div');
-                const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || nearMissIndices.length > 0 || secondPairIndices.length > 0;
+                const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || secondPairIndices.length > 0;
                 const isHeld = !isResult && held[i];
                 const isUnheld = !isResult && anyHeld && !held[i];
                 let classes = `card ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
@@ -1669,9 +1571,6 @@
                 }
                 if (thirdMatchIndices.includes(i)) {
                     classes += ' third-match';
-                }
-                if (nearMissIndices.includes(i)) {
-                    classes += ' near-miss';
                 }
 
                 cardEl.className = classes.trim();
