@@ -21,7 +21,15 @@
         body[dir="rtl"] {
             font-family: 'Noto Sans Hebrew', 'Noto Sans Arabic', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
         }
-        .container { max-width: 850px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .game-layout {
+            display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start;
+        }
+        @media (max-width: 900px) {
+            .game-layout { grid-template-columns: 1fr; }
+        }
+        .game-col { min-width: 0; }
+        .lb-col { position: sticky; top: 70px; }
         h1 {
             text-align: center;
             margin-bottom: 10px;
@@ -445,9 +453,8 @@
         .admin-link:hover { border-color: rgba(255,215,0,0.5); color: #ffd700; }
 
         .leaderboard {
-            margin: 25px auto; max-width: 600px;
             background: rgba(0,0,0,0.35); border: 1px solid rgba(255,215,0,0.15);
-            border-radius: 14px; padding: 20px; position: relative;
+            border-radius: 14px; padding: 16px; position: relative;
         }
         .leaderboard h3 {
             color: #ffd700; text-align: center; margin: 0 0 6px 0; font-size: 1.3em;
@@ -498,6 +505,26 @@
         .rebuy-notification.show {
             transform: translateX(-50%) translateY(0); opacity: 1;
         }
+        .rank-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 9000;
+            background: linear-gradient(90deg, rgba(10,30,20,0.95), rgba(5,20,10,0.95));
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center;
+            gap: 24px; padding: 10px 20px; font-size: 14px;
+        }
+        .rank-bar.hidden { display: none; }
+        .rank-bar-item { display: flex; align-items: center; gap: 6px; }
+        .rank-bar-label { color: rgba(255,255,255,0.5); }
+        .rank-bar-value { color: #ffd700; font-weight: 700; font-size: 18px; }
+        .rank-bar-value.positive { color: #4ade80; }
+        .rank-bar-value.negative { color: #f87171; }
+        .rank-bar-timer { color: rgba(255,255,255,0.4); font-size: 13px; }
+        .rank-bar-timer span { color: #ffd700; }
+        @media (max-width: 600px) {
+            .rank-bar { gap: 12px; font-size: 12px; padding: 8px 10px; }
+            .rank-bar-value { font-size: 15px; }
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -533,7 +560,23 @@
         </table>
     </div>
 
-    <div class="container" style="display:none;" id="game-container">
+    <div id="rank-bar" class="rank-bar hidden">
+        <div class="rank-bar-item">
+            <span class="rank-bar-label">Rank</span>
+            <span class="rank-bar-value" id="rb-rank">#—</span>
+        </div>
+        <div class="rank-bar-item">
+            <span class="rank-bar-label">Score</span>
+            <span class="rank-bar-value" id="rb-score">0</span>
+        </div>
+        <div class="rank-bar-item">
+            <span class="rank-bar-label">Rebuys</span>
+            <span class="rank-bar-value" id="rb-rebuys">0</span>
+        </div>
+        <div class="rank-bar-timer">⏱ <span id="rb-countdown">--:--</span></div>
+    </div>
+
+    <div class="container" style="display:none; padding-top: 50px;" id="game-container">
         <div class="language-selector">
             <label for="language-select" style="margin-right: 10px; color: #ffd700;">Language / שפה / Idioma / Langue / Sprache / اللغة:</label>
             <select id="language-select" onchange="changeLanguage(this.value)">
@@ -545,85 +588,80 @@
                 <option value="ar">العربية</option>
             </select>
         </div>
-        
+
         <h1 id="game-title">Video Poker</h1>
-        
-        <div class="payouts" id="payouts">
-            <!-- Payout rows will be populated by JS -->
-        </div>
 
-        <div class="rules" id="rules-section">
-            <h3 id="rules-title">Winning Hands & Rules:</h3>
-            <div id="rules-list"><!-- Rules populated by JS --></div>
-        </div>
-        
-        <div class="game-area">
-            <div class="info">
-                <span id="balance-label">Balance:</span> <span class="balance" id="balance">100</span> | 
-                <span id="bet-label">Bet:</span> <span class="bet-display" id="bet-display">5</span> <span id="credits-label">credits</span>
-            </div>
-            
-            <div class="controls" style="margin-bottom: 20px;">
-                <strong id="choose-bet-label">Choose Bet:</strong>
-                <button class="bet-btn selected" onclick="setBet(5)" id="bet-5">5</button>
-                <button class="bet-btn" onclick="setBet(10)" id="bet-10">10</button>
-                <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
-                <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
-            </div>
-            
-            <div class="hand" id="hand">
-                <!-- Cards will be rendered here -->
-            </div>
-            
-            <div class="controls">
-                <button id="deal-btn" onclick="deal()">Deal</button>
-                <button id="hold-btn" onclick="draw()" disabled>Draw</button>
-            </div>
-            
-            <div class="result" id="result"></div>
-            <div class="explanation" id="explanation"></div>
-        </div>
-        
-        <div class="stats-bar" id="stats-bar">
-            <div class="stat-item stat-won">
-                <div class="stat-label" id="stat-won-label">Won</div>
-                <div class="stat-value" id="stat-won-value">+0</div>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item stat-net zero" id="stat-net">
-                <div class="stat-label" id="stat-net-label">Net</div>
-                <div class="stat-value" id="stat-net-value">0</div>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item stat-lost">
-                <div class="stat-label" id="stat-lost-label">Lost</div>
-                <div class="stat-value" id="stat-lost-value">-0</div>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item stat-hands">
-                <div class="stat-label" id="stat-hands-label">Hands</div>
-                <div class="stat-value" id="stat-hands-value">0</div>
-            </div>
-        </div>
+        <div class="game-layout">
+            <div class="game-col">
+                <div class="payouts" id="payouts"></div>
 
-        <div class="leaderboard" id="leaderboard-section">
-            <h3 id="lb-title">⏱ Hourly Competition</h3>
-            <div class="leaderboard-timer">Resets in <span id="lb-countdown">--:--</span></div>
-            <table class="lb-table">
-                <thead><tr>
-                    <th>#</th><th>Player</th><th>Score</th><th>Hands</th><th>Best Hand</th>
-                </tr></thead>
-                <tbody id="lb-body">
-                    <tr><td colspan="5" class="lb-empty">Play a hand to join this hour's competition!</td></tr>
-                </tbody>
-            </table>
-        </div>
+                <div class="game-area">
+                    <div class="info">
+                        <span id="balance-label">Balance:</span> <span class="balance" id="balance">100</span> |
+                        <span id="bet-label">Bet:</span> <span class="bet-display" id="bet-display">5</span> <span id="credits-label">credits</span>
+                    </div>
 
-        <div class="instructions">
-            <h3 id="how-to-play">How to Play:</h3>
-            <ul id="instructions-list">
-                <!-- Instructions will be populated by JS -->
-            </ul>
+                    <div class="controls" style="margin-bottom: 20px;">
+                        <strong id="choose-bet-label">Choose Bet:</strong>
+                        <button class="bet-btn selected" onclick="setBet(5)" id="bet-5">5</button>
+                        <button class="bet-btn" onclick="setBet(10)" id="bet-10">10</button>
+                        <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
+                        <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
+                    </div>
+
+                    <div class="hand" id="hand"></div>
+
+                    <div class="controls">
+                        <button id="deal-btn" onclick="deal()">Deal</button>
+                        <button id="hold-btn" onclick="draw()" disabled>Draw</button>
+                    </div>
+
+                    <div class="result" id="result"></div>
+                    <div class="explanation" id="explanation"></div>
+                </div>
+
+                <div class="stats-bar" id="stats-bar">
+                    <div class="stat-item stat-won">
+                        <div class="stat-label" id="stat-won-label">Won</div>
+                        <div class="stat-value" id="stat-won-value">+0</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item stat-net zero" id="stat-net">
+                        <div class="stat-label" id="stat-net-label">Net</div>
+                        <div class="stat-value" id="stat-net-value">0</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item stat-lost">
+                        <div class="stat-label" id="stat-lost-label">Lost</div>
+                        <div class="stat-value" id="stat-lost-value">-0</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item stat-hands">
+                        <div class="stat-label" id="stat-hands-label">Hands</div>
+                        <div class="stat-value" id="stat-hands-value">0</div>
+                    </div>
+                </div>
+
+                <div class="instructions">
+                    <h3 id="how-to-play">How to Play:</h3>
+                    <ul id="instructions-list"></ul>
+                </div>
+            </div>
+
+            <div class="lb-col">
+                <div class="leaderboard" id="leaderboard-section">
+                    <h3 id="lb-title">⏱ Hourly Competition</h3>
+                    <div class="leaderboard-timer">Resets in <span id="lb-countdown">--:--</span></div>
+                    <table class="lb-table">
+                        <thead><tr>
+                            <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
+                        </tr></thead>
+                        <tbody id="lb-body">
+                            <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1468,12 +1506,14 @@
         if (user) {
             document.getElementById('login-overlay').classList.add('hidden');
             document.getElementById('game-container').style.display = '';
+            document.getElementById('rank-bar').classList.remove('hidden');
             injectUserBar(user);
             logUserToFirestore(user);
             refreshLeaderboard();
         } else {
             document.getElementById('login-overlay').classList.remove('hidden');
             document.getElementById('game-container').style.display = 'none';
+            document.getElementById('rank-bar').classList.add('hidden');
             const bar = document.getElementById('user-bar');
             if (bar) bar.remove();
         }
@@ -1595,17 +1635,21 @@
             .then(function(snap) {
                 const tbody = document.getElementById('lb-body');
                 if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="lb-empty">Play a hand to join this hour\'s competition!</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>';
+                    updateRankBar(null, 0);
                     return;
                 }
                 tbody.innerHTML = '';
                 let rank = 0;
+                let myRank = null;
+                let myScore = 0;
                 snap.forEach(function(doc) {
                     rank++;
                     const d = doc.data();
                     const isYou = user && d.uid === user.uid;
+                    if (isYou) { myRank = rank; myScore = d.score || 0; }
                     const photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
-                    const name = d.displayName || 'Anonymous';
+                    const name = (d.displayName || 'Anonymous').split(' ')[0];
                     const badge = isYou ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
                     const rebuyBadge = d.rebuys > 0 ? '<span class="lb-badge lb-badge-rebuys">♻' + d.rebuys + '</span>' : '';
                     const rankClass = rank <= 3 ? ' lb-rank-' + rank : '';
@@ -1620,19 +1664,34 @@
                         '<td class="lb-rank' + rankClass + '">' + medal + '</td>' +
                         '<td>' + photo + name + badge + rebuyBadge + '</td>' +
                         '<td class="' + scoreClass + '">' + scoreText + '</td>' +
-                        '<td>' + d.hands + '</td>' +
-                        '<td>' + (d.bestHand || '—') + '</td>';
+                        '<td>' + d.hands + '</td>';
                     tbody.appendChild(row);
                 });
+                updateRankBar(myRank, myScore);
             });
+    }
+
+    function updateRankBar(rank, score) {
+        const bar = document.getElementById('rank-bar');
+        if (!auth.currentUser) { bar.classList.add('hidden'); return; }
+        bar.classList.remove('hidden');
+        const rbRank = document.getElementById('rb-rank');
+        const rbScore = document.getElementById('rb-score');
+        const rbRebuys = document.getElementById('rb-rebuys');
+        rbRank.textContent = rank ? '#' + rank : '#—';
+        rbScore.textContent = score > 0 ? '+' + score : '' + score;
+        rbScore.className = 'rank-bar-value' + (score > 0 ? ' positive' : score < 0 ? ' negative' : '');
+        rbRebuys.textContent = hourlyRebuys;
     }
 
     function updateCountdown() {
         const now = new Date();
         const mins = 59 - now.getMinutes();
         const secs = 59 - now.getSeconds();
-        document.getElementById('lb-countdown').textContent =
-            String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        const timeStr = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        document.getElementById('lb-countdown').textContent = timeStr;
+        const rbTimer = document.getElementById('rb-countdown');
+        if (rbTimer) rbTimer.textContent = timeStr;
     }
 
     setInterval(updateCountdown, 1000);
