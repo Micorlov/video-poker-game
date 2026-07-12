@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Poker — Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0f1a; color: #e2e8f0; min-height: 100vh;
+        }
+
+        .auth-gate {
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; flex-direction: column; gap: 20px;
+        }
+        .auth-gate h1 { color: #fbbf24; font-size: 1.8em; }
+        .auth-gate .denied { color: #f87171; font-size: 16px; display: none; }
+        .auth-gate button {
+            background: #fff; color: #333; border: none; border-radius: 40px;
+            padding: 14px 32px; font-size: 16px; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; gap: 10px;
+        }
+
+        .app { display: none; }
+        .app.visible { display: block; }
+
+        .topbar {
+            background: #111827; border-bottom: 1px solid #1e293b;
+            padding: 14px 30px; display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .topbar h1 { font-size: 18px; color: #fbbf24; font-weight: 700; }
+        .topbar-right { display: flex; align-items: center; gap: 14px; }
+        .topbar-right img { width: 28px; height: 28px; border-radius: 50%; }
+        .topbar-right span { font-size: 13px; color: #94a3b8; }
+        .topbar-right button {
+            background: none; border: 1px solid #334155; color: #94a3b8;
+            padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;
+        }
+        .topbar-right button:hover { border-color: #fbbf24; color: #fbbf24; }
+        .topbar-right a {
+            color: #94a3b8; text-decoration: none; font-size: 12px;
+            border: 1px solid #334155; padding: 5px 12px; border-radius: 6px;
+        }
+        .topbar-right a:hover { border-color: #fbbf24; color: #fbbf24; }
+
+        .content { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+        .tabs {
+            display: flex; gap: 4px; margin-bottom: 24px;
+            background: #111827; border-radius: 10px; padding: 4px;
+            border: 1px solid #1e293b;
+        }
+        .tab {
+            padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500;
+            cursor: pointer; color: #64748b; transition: all 0.2s; border: none; background: none;
+        }
+        .tab:hover { color: #cbd5e1; }
+        .tab.active { background: #1e293b; color: #fbbf24; }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px; margin-bottom: 28px;
+        }
+        .stat-card {
+            background: #111827; border: 1px solid #1e293b; border-radius: 12px;
+            padding: 20px;
+        }
+        .stat-card .label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .stat-card .value { font-size: 28px; font-weight: 700; color: #fbbf24; }
+        .stat-card .sub { font-size: 12px; color: #475569; margin-top: 4px; }
+
+        .panel {
+            background: #111827; border: 1px solid #1e293b; border-radius: 12px;
+            overflow: hidden; margin-bottom: 24px;
+        }
+        .panel-header {
+            padding: 16px 20px; border-bottom: 1px solid #1e293b;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-header h2 { font-size: 15px; font-weight: 600; color: #e2e8f0; }
+        .panel-header .badge {
+            background: #1e293b; color: #94a3b8; padding: 3px 10px;
+            border-radius: 20px; font-size: 12px;
+        }
+        .panel-header button {
+            background: #1e293b; border: none; color: #94a3b8; padding: 6px 14px;
+            border-radius: 6px; font-size: 12px; cursor: pointer;
+        }
+        .panel-header button:hover { color: #fbbf24; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left; padding: 10px 16px; font-size: 11px;
+            text-transform: uppercase; letter-spacing: 0.5px; color: #475569;
+            background: #0f172a; border-bottom: 1px solid #1e293b;
+            cursor: pointer; user-select: none;
+        }
+        th:hover { color: #94a3b8; }
+        td {
+            padding: 10px 16px; border-bottom: 1px solid rgba(30,41,59,0.5);
+            font-size: 13px; color: #cbd5e1;
+        }
+        tr:hover td { background: rgba(251,191,36,0.03); }
+        td img { width: 24px; height: 24px; border-radius: 50%; vertical-align: middle; margin-right: 8px; }
+
+        .positive { color: #4ade80; }
+        .negative { color: #f87171; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .search-bar {
+            background: #0f172a; border: 1px solid #1e293b; border-radius: 8px;
+            padding: 8px 14px; color: #e2e8f0; font-size: 13px; width: 250px;
+        }
+        .search-bar:focus { outline: none; border-color: #fbbf24; }
+
+        .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block; margin-right: 6px; animation: blink 1.5s infinite; }
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .hour-nav { display: flex; align-items: center; gap: 10px; }
+        .hour-nav button {
+            background: #1e293b; border: none; color: #94a3b8; width: 30px; height: 30px;
+            border-radius: 6px; cursor: pointer; font-size: 16px;
+        }
+        .hour-nav button:hover { color: #fbbf24; }
+        .hour-nav span { color: #e2e8f0; font-size: 13px; font-weight: 500; min-width: 130px; text-align: center; }
+
+        .empty-state { text-align: center; padding: 40px; color: #475569; font-size: 14px; }
+
+        @media (max-width: 700px) {
+            .content { padding: 14px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .topbar { padding: 12px 16px; }
+            th, td { padding: 8px 10px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-gate" id="auth-gate">
+        <h1>🎰 Admin Panel</h1>
+        <button onclick="doSignIn()">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
+            Sign in with Google
+        </button>
+        <div class="denied" id="denied-msg">Access denied — admin only.</div>
+    </div>
+
+    <div class="app" id="app">
+        <div class="topbar">
+            <h1>🎰 Video Poker — Admin</h1>
+            <div class="topbar-right">
+                <img id="topbar-photo" src="" alt="">
+                <span id="topbar-name"></span>
+                <a href="video_poker.html">← Game</a>
+                <button onclick="firebase.auth().signOut()">Sign Out</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('overview')">Overview</button>
+                <button class="tab" onclick="switchTab('users')">Users</button>
+                <button class="tab" onclick="switchTab('competitions')">Competitions</button>
+            </div>
+
+            <!-- OVERVIEW -->
+            <div class="tab-content active" id="tab-overview">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="label">Total Users</div><div class="value" id="s-total-users">—</div></div>
+                    <div class="stat-card"><div class="label">Active Today</div><div class="value" id="s-today">—</div></div>
+                    <div class="stat-card"><div class="label">Current Hour Players</div><div class="value" id="s-hour-players">—</div><div class="sub"><span class="live-dot"></span>Live</div></div>
+                    <div class="stat-card"><div class="label">Total Rebuys (this hour)</div><div class="value" id="s-hour-rebuys">—</div></div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><span class="live-dot"></span> Live — Current Hour</h2>
+                        <button onclick="loadCurrentHour()">↻ Refresh</button>
+                    </div>
+                    <table>
+                        <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Hands</th><th>Rebuys</th><th>Best Hand</th></tr></thead>
+                        <tbody id="live-body"><tr><td colspan="6" class="empty-state">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Recent Logins</h2>
+                        <span class="badge" id="recent-count">0</span>
+                    </div>
+                    <table>
+                        <thead><tr><th>User</th><th>Email</th><th>Last Login</th></tr></thead>
+                        <tbody id="recent-body"><tr><td colspan="3" class="empty-state">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- USERS -->
+            <div class="tab-content" id="tab-users">
+                <div style="margin-bottom: 16px;">
+                    <input class="search-bar" type="text" placeholder="Search by name or email..." id="user-search" oninput="filterUsers()">
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>All Users</h2>
+                        <span class="badge" id="users-count">0</span>
+                    </div>
+                    <table>
+                        <thead><tr>
+                            <th onclick="sortUsers('displayName')">Name ↕</th>
+                            <th onclick="sortUsers('email')">Email ↕</th>
+                            <th onclick="sortUsers('firstSeen')">First Seen ↕</th>
+                            <th onclick="sortUsers('lastLogin')">Last Login ↕</th>
+                        </tr></thead>
+                        <tbody id="all-users-body"><tr><td colspan="4" class="empty-state">Loading...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- COMPETITIONS -->
+            <div class="tab-content" id="tab-competitions">
+                <div class="hour-nav" style="margin-bottom: 20px;">
+                    <button onclick="navHour(-1)">‹</button>
+                    <span id="comp-hour-label">—</span>
+                    <button onclick="navHour(1)">›</button>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Competition Results</h2>
+                        <span class="badge" id="comp-count">0</span>
+                    </div>
+                    <table>
+                        <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Hands</th><th>Rebuys</th><th>Best Hand</th></tr></thead>
+                        <tbody id="comp-body"><tr><td colspan="6" class="empty-state">Select an hour</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var firebaseConfig = {
+        apiKey: "AIzaSyB6m0Yis89jxvm06OFBqxs8P_vADjRXk0U",
+        authDomain: "video-poker-6d665.firebaseapp.com",
+        projectId: "video-poker-6d665",
+        storageBucket: "video-poker-6d665.firebasestorage.app",
+        messagingSenderId: "53702406091",
+        appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.firestore();
+    var ADMIN_EMAIL = 'micorlov@gmail.com';
+
+    var allUsersData = [];
+    var usersSortField = 'lastLogin';
+    var usersSortDir = -1;
+    var compHourOffset = 0;
+
+    function doSignIn() {
+        auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    }
+
+    auth.onAuthStateChanged(function(user) {
+        if (user && user.email === ADMIN_EMAIL) {
+            document.getElementById('auth-gate').style.display = 'none';
+            document.getElementById('app').classList.add('visible');
+            document.getElementById('topbar-photo').src = user.photoURL || '';
+            document.getElementById('topbar-name').textContent = user.displayName || user.email;
+            loadAll();
+        } else if (user) {
+            document.getElementById('denied-msg').style.display = 'block';
+        }
+    });
+
+    function loadAll() {
+        loadOverviewStats();
+        loadCurrentHour();
+        loadRecentLogins();
+        loadAllUsers();
+        loadCompetition(0);
+    }
+
+    function getHourKey(offset) {
+        var now = new Date();
+        now.setHours(now.getHours() + (offset || 0));
+        return now.getFullYear() + '-' +
+            String(now.getMonth() + 1).padStart(2, '0') + '-' +
+            String(now.getDate()).padStart(2, '0') + 'T' +
+            String(now.getHours()).padStart(2, '0');
+    }
+
+    function formatHourLabel(hk) {
+        var parts = hk.split('T');
+        var hour = parseInt(parts[1]);
+        var nextHour = (hour + 1) % 24;
+        return parts[0] + '  ' + String(hour).padStart(2, '0') + ':00 – ' + String(nextHour).padStart(2, '0') + ':00';
+    }
+
+    function loadOverviewStats() {
+        db.collection('users').get().then(function(snap) {
+            document.getElementById('s-total-users').textContent = snap.size;
+            var todayStr = new Date().toISOString().slice(0, 10);
+            var todayCount = 0;
+            snap.forEach(function(doc) {
+                var d = doc.data();
+                if (d.lastLogin && d.lastLogin.toDate().toISOString().slice(0, 10) === todayStr) todayCount++;
+            });
+            document.getElementById('s-today').textContent = todayCount;
+        });
+    }
+
+    function loadCurrentHour() {
+        var hourKey = getHourKey(0);
+        db.collection('hourly_scores').where('hourKey', '==', hourKey).orderBy('score', 'desc').get().then(function(snap) {
+            document.getElementById('s-hour-players').textContent = snap.size;
+            var totalRebuys = 0;
+            var tbody = document.getElementById('live-body');
+            if (snap.empty) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No players this hour yet</td></tr>';
+                document.getElementById('s-hour-rebuys').textContent = '0';
+                return;
+            }
+            tbody.innerHTML = '';
+            var rank = 0;
+            snap.forEach(function(doc) {
+                rank++;
+                var d = doc.data();
+                totalRebuys += d.rebuys || 0;
+                var s = d.score || 0;
+                var medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+                var scoreClass = s > 0 ? 'positive' : s < 0 ? 'negative' : '';
+                var scoreText = s > 0 ? '+' + s : '' + s;
+                var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+                var tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td>' + medal + '</td>' +
+                    '<td>' + photo + (d.displayName || '—') + '</td>' +
+                    '<td class="' + scoreClass + '">' + scoreText + '</td>' +
+                    '<td>' + (d.hands || 0) + '</td>' +
+                    '<td>' + (d.rebuys || 0) + '</td>' +
+                    '<td>' + (d.bestHand || '—') + '</td>';
+                tbody.appendChild(tr);
+            });
+            document.getElementById('s-hour-rebuys').textContent = totalRebuys;
+        });
+    }
+
+    function loadRecentLogins() {
+        db.collection('users').orderBy('lastLogin', 'desc').limit(10).get().then(function(snap) {
+            var tbody = document.getElementById('recent-body');
+            tbody.innerHTML = '';
+            document.getElementById('recent-count').textContent = snap.size;
+            snap.forEach(function(doc) {
+                var d = doc.data();
+                var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+                var ll = d.lastLogin ? d.lastLogin.toDate().toLocaleString() : '—';
+                var tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td>' + photo + (d.displayName || '—') + '</td>' +
+                    '<td>' + (d.email || '—') + '</td>' +
+                    '<td>' + ll + '</td>';
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    function loadAllUsers() {
+        db.collection('users').get().then(function(snap) {
+            allUsersData = [];
+            snap.forEach(function(doc) { allUsersData.push(doc.data()); });
+            document.getElementById('users-count').textContent = allUsersData.length;
+            renderUsers();
+        });
+    }
+
+    function renderUsers() {
+        var query = (document.getElementById('user-search').value || '').toLowerCase();
+        var filtered = allUsersData.filter(function(u) {
+            if (!query) return true;
+            return (u.displayName || '').toLowerCase().includes(query) ||
+                   (u.email || '').toLowerCase().includes(query);
+        });
+        filtered.sort(function(a, b) {
+            var va = a[usersSortField], vb = b[usersSortField];
+            if (va && va.toDate) va = va.toDate().getTime();
+            if (vb && vb.toDate) vb = vb.toDate().getTime();
+            if (typeof va === 'string') va = va.toLowerCase();
+            if (typeof vb === 'string') vb = vb.toLowerCase();
+            if (va < vb) return -1 * usersSortDir;
+            if (va > vb) return 1 * usersSortDir;
+            return 0;
+        });
+        var tbody = document.getElementById('all-users-body');
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No users found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        filtered.forEach(function(d) {
+            var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+            var fs = d.firstSeen ? d.firstSeen.toDate().toLocaleDateString() : '—';
+            var ll = d.lastLogin ? d.lastLogin.toDate().toLocaleString() : '—';
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + photo + (d.displayName || '—') + '</td>' +
+                '<td>' + (d.email || '—') + '</td>' +
+                '<td>' + fs + '</td>' +
+                '<td>' + ll + '</td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    function sortUsers(field) {
+        if (usersSortField === field) { usersSortDir *= -1; }
+        else { usersSortField = field; usersSortDir = 1; }
+        renderUsers();
+    }
+
+    function filterUsers() { renderUsers(); }
+
+    function navHour(dir) {
+        compHourOffset += dir;
+        if (compHourOffset > 0) compHourOffset = 0;
+        loadCompetition(compHourOffset);
+    }
+
+    function loadCompetition(offset) {
+        var hourKey = getHourKey(offset);
+        document.getElementById('comp-hour-label').textContent = formatHourLabel(hourKey);
+        db.collection('hourly_scores').where('hourKey', '==', hourKey).orderBy('score', 'desc').get().then(function(snap) {
+            document.getElementById('comp-count').textContent = snap.size + ' players';
+            var tbody = document.getElementById('comp-body');
+            if (snap.empty) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No data for this hour</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            var rank = 0;
+            snap.forEach(function(doc) {
+                rank++;
+                var d = doc.data();
+                var s = d.score || 0;
+                var medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+                var scoreClass = s > 0 ? 'positive' : s < 0 ? 'negative' : '';
+                var scoreText = s > 0 ? '+' + s : '' + s;
+                var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+                var tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td>' + medal + '</td>' +
+                    '<td>' + photo + (d.displayName || '—') + '</td>' +
+                    '<td class="' + scoreClass + '">' + scoreText + '</td>' +
+                    '<td>' + (d.hands || 0) + '</td>' +
+                    '<td>' + (d.rebuys || 0) + '</td>' +
+                    '<td>' + (d.bestHand || '—') + '</td>';
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    function switchTab(name) {
+        document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+        document.getElementById('tab-' + name).classList.add('active');
+        event.target.classList.add('active');
+        if (name === 'users') loadAllUsers();
+        if (name === 'competitions') loadCompetition(compHourOffset);
+        if (name === 'overview') { loadCurrentHour(); loadRecentLogins(); }
+    }
+
+    setInterval(loadCurrentHour, 15000);
+    </script>
+</body>
+</html>

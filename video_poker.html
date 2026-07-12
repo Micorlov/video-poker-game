@@ -1529,7 +1529,7 @@
             ? '<img src="' + user.photoURL + '" alt="">'
             : '';
         const adminBtn = user.email === ADMIN_EMAIL
-            ? '<button class="admin-link" onclick="openAdmin()">Admin</button>'
+            ? '<a class="admin-link" href="admin.html" target="_blank">Admin</a>'
             : '';
         bar.innerHTML = photo +
             '<span>' + (user.displayName || user.email) + '</span>' +
