@@ -560,6 +560,10 @@
             height: 1px; background: rgba(255,215,0,0.12); margin: 18px 0;
         }
         .leaderboard + .leaderboard { margin-top: 16px; }
+        .lb-formula-note {
+            text-align: center; color: rgba(255,255,255,0.4); font-size: 11px;
+            margin-top: 12px; line-height: 1.5; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);
+        }
         .lb-score { font-weight: 700; font-size: 15px; }
         .rebuy-notification {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px);
@@ -750,6 +754,11 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="lb-formula-note" id="lb-formula-note">
+                    <strong>How is score calculated?</strong><br>
+                    Score = Balance - (100 × Rebuys) - 100<br>
+                    <span style="opacity:0.7">(This equals your exact Net Profit/Loss)</span>
+                </div>
             </div>
         </div>
     </div>
@@ -815,8 +824,8 @@
                 dailyTab: 'Daily',
                 hourlyRankLabel: 'Hourly Rank',
                 dailyRankLabel: 'Daily Rank',
-                hourlyFormula: '(Your net profit/loss for this hour)',
-                dailyFormula: '(Your net profit/loss today)',
+                formulaTitle: 'How is score calculated?',
+                hourlyFormula: 'Score = Balance - (100 × Rebuys) - 100<br><span style="opacity:0.7">(This equals your exact Net Profit/Loss)</span>',
                 winLabels: {
                     pair: 'Pair of',
                     threeOfKind: '3 of a Kind',
@@ -890,8 +899,8 @@
                 dailyTab: 'Diario',
                 hourlyRankLabel: 'Rango Horario',
                 dailyRankLabel: 'Rango Diario',
-                hourlyFormula: '(Tu ganancia/pérdida neta de esta hora)',
-                dailyFormula: '(Tu ganancia/pérdida neta de hoy)',
+                formulaTitle: '¿Cómo se calcula la puntuación?',
+                hourlyFormula: 'Puntuación = Saldo - (100 × Recompras) - 100<br><span style="opacity:0.7">(Esto equivale a tu beneficio/pérdida neta exacta)</span>',
                 winLabels: {
                     pair: 'Pareja de',
                     threeOfKind: 'Trío',
@@ -965,8 +974,8 @@
                 dailyTab: 'Journalier',
                 hourlyRankLabel: 'Rang Horaire',
                 dailyRankLabel: 'Rang Journalier',
-                hourlyFormula: '(Votre gain/perte net de cette heure)',
-                dailyFormula: '(Votre gain/perte net d\'aujourd\'hui)',
+                formulaTitle: 'Comment le score est-il calculé ?',
+                hourlyFormula: 'Score = Solde - (100 × Rebuys) - 100<br><span style="opacity:0.7">(Ceci équivaut à votre gain/perte net exact)</span>',
                 winLabels: {
                     pair: 'Paire de',
                     threeOfKind: 'Brelan',
@@ -1040,8 +1049,8 @@
                 dailyTab: 'Täglich',
                 hourlyRankLabel: 'Stundenrang',
                 dailyRankLabel: 'Tagesrang',
-                hourlyFormula: '(Ihr Nettogewinn/-verlust für diese Stunde)',
-                dailyFormula: '(Ihr Nettogewinn/-verlust für heute)',
+                formulaTitle: 'Wie wird der Score berechnet?',
+                hourlyFormula: 'Score = Guthaben - (100 × Rebuys) - 100<br><span style="opacity:0.7">(Dies entspricht Ihrem genauen Nettogewinn/-verlust)</span>',
                 winLabels: {
                     pair: 'Paar ',
                     threeOfKind: 'Drilling',
@@ -1115,8 +1124,8 @@
                 dailyTab: 'יומי',
                 hourlyRankLabel: 'דירוג שעתי',
                 dailyRankLabel: 'דירוג יומי',
-                hourlyFormula: '(הרווח/הפסד הנקי שלך בשעה זו)',
-                dailyFormula: '(הרווח/הפסד הנקי שלך היום)',
+                formulaTitle: 'איך הניקוד מחושב?',
+                hourlyFormula: 'ניקוד = יתרה - (100 × הפקדות מחדש) - 100<br><span style="opacity:0.7">(הניקוד שווה בדיוק לרווח/הפסד הנקי שלך)</span>',
                 winLabels: {
                     pair: 'זוג',
                     threeOfKind: 'שלישייה',
@@ -1387,6 +1396,12 @@
             if (hourlyTitleEl) hourlyTitleEl.textContent = '⏱ ' + (t.hourlyTitle || 'Hourly Competition');
             const dailyTitleEl = document.getElementById('lb-daily-title');
             if (dailyTitleEl) dailyTitleEl.textContent = '📅 ' + (t.dailyTitle || 'Daily Competition');
+
+            const formulaNote = document.getElementById('lb-formula-note');
+            if (formulaNote) {
+                formulaNote.innerHTML = '<strong>' + (t.formulaTitle || 'How is score calculated?') + '</strong><br>' +
+                                        (t.hourlyFormula || 'Score = Balance - (100 × Rebuys) - 100<br><span style="opacity:0.7">(This equals your exact Net Profit/Loss)</span>');
+            }
         }
 
         function renderPayouts(t) {
@@ -1855,6 +1870,7 @@
             document.getElementById('rank-bar').classList.remove('hidden');
             injectUserBar(user);
             logUserToFirestore(user);
+            loadUserState(user);
             refreshLeaderboard();
         } else {
             document.getElementById('login-overlay').classList.remove('hidden');
@@ -1887,6 +1903,31 @@
 
     function signOut() {
         auth.signOut();
+    }
+
+    function loadUserState(user) {
+        const hourKey = getHourKey();
+        const hourlyDocId = hourKey + '_' + user.uid;
+        db.collection('hourly_scores').doc(hourlyDocId).get().then(function(doc) {
+            if (doc.exists) {
+                const data = doc.data();
+                hourlyRebuys = data.rebuys || 0;
+                balance = (data.score || 0) + 100 * (1 + hourlyRebuys);
+                updateUI();
+            }
+        }).catch(function(err) {
+            console.error('Error loading hourly state:', err);
+        });
+
+        const dayKey = getDayKey();
+        const dailyDocId = dayKey + '_' + user.uid;
+        db.collection('daily_scores').doc(dailyDocId).get().then(function(doc) {
+            if (doc.exists) {
+                dailyRebuys = doc.data().rebuys || 0;
+            }
+        }).catch(function(err) {
+            console.error('Error loading daily state:', err);
+        });
     }
 
     function logUserToFirestore(user) {
