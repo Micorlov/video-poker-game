@@ -485,6 +485,19 @@
             border-radius: 4px; margin-left: 6px; vertical-align: middle;
         }
         .lb-badge-you { background: rgba(255,215,0,0.15); color: #ffd700; }
+        .lb-badge-rebuys { background: rgba(255,100,100,0.15); color: #f87171; font-size: 10px; }
+        .lb-score { font-weight: 700; font-size: 15px; }
+        .rebuy-notification {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px);
+            background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.1));
+            border: 1px solid rgba(255,215,0,0.3); color: #ffd700;
+            padding: 12px 28px; border-radius: 12px; font-size: 16px; font-weight: 600;
+            z-index: 9998; opacity: 0; transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+            pointer-events: none;
+        }
+        .rebuy-notification.show {
+            transform: translateX(-50%) translateY(0); opacity: 1;
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -598,7 +611,7 @@
             <div class="leaderboard-timer">Resets in <span id="lb-countdown">--:--</span></div>
             <table class="lb-table">
                 <thead><tr>
-                    <th>#</th><th>Player</th><th>Net</th><th>Hands</th><th>Best Hand</th>
+                    <th>#</th><th>Player</th><th>Score</th><th>Hands</th><th>Best Hand</th>
                 </tr></thead>
                 <tbody id="lb-body">
                     <tr><td colspan="5" class="lb-empty">Play a hand to join this hour's competition!</td></tr>
@@ -1002,6 +1015,38 @@
         let totalLost = 0;
         let handsPlayed = 0;
         let lossStreak = 0;
+        let hourlyRebuys = 0;
+        let currentHourKey = '';
+
+        function checkHourReset() {
+            const hk = getHourKey();
+            if (currentHourKey && currentHourKey !== hk) {
+                hourlyRebuys = 0;
+            }
+            currentHourKey = hk;
+        }
+
+        function doRebuy() {
+            hourlyRebuys++;
+            balance = 100;
+            document.getElementById('balance').textContent = balance;
+            showRebuyNotification();
+        }
+
+        function showRebuyNotification() {
+            let note = document.getElementById('rebuy-note');
+            if (!note) {
+                note = document.createElement('div');
+                note.id = 'rebuy-note';
+                note.className = 'rebuy-notification';
+                document.getElementById('game-container').appendChild(note);
+            }
+            note.textContent = '♻ +100 credits (rebuy #' + hourlyRebuys + ')';
+            note.classList.remove('show');
+            void note.offsetWidth;
+            note.classList.add('show');
+            setTimeout(function() { note.classList.remove('show'); }, 2000);
+        }
 
         function changeLanguage(lang) {
             currentLang = lang;
@@ -1152,9 +1197,18 @@
         }
 
         function deal() {
+            checkHourReset();
             if (balance < bet) {
-                alert(TRANSLATIONS[currentLang].insufficientBalance);
-                return;
+                if (balance === 0) {
+                    doRebuy();
+                } else {
+                    bet = Math.max(5, Math.floor(balance / 5) * 5);
+                    if (bet > balance) bet = 5;
+                    setBet(bet);
+                    if (balance < bet) {
+                        doRebuy();
+                    }
+                }
             }
 
             balance -= bet;
@@ -1498,7 +1552,7 @@
         const hourKey = getHourKey();
         const docId = hourKey + '_' + user.uid;
         const ref = db.collection('hourly_scores').doc(docId);
-        const net = win > 0 ? win - betAmount : -betAmount;
+        const score = balance - 100 * (1 + hourlyRebuys);
         const handRank = HAND_RANK[handType] || 0;
 
         ref.get().then(function(doc) {
@@ -1506,7 +1560,8 @@
                 const data = doc.data();
                 const prevBestRank = HAND_RANK[data.bestHand] || 0;
                 return ref.update({
-                    net: firebase.firestore.FieldValue.increment(net),
+                    score: score,
+                    rebuys: hourlyRebuys,
                     hands: firebase.firestore.FieldValue.increment(1),
                     bestHand: handRank > prevBestRank ? handType : data.bestHand,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1517,7 +1572,8 @@
                     uid: user.uid,
                     displayName: user.displayName || '',
                     photoURL: user.photoURL || '',
-                    net: net,
+                    score: score,
+                    rebuys: hourlyRebuys,
                     hands: 1,
                     bestHand: handType,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1533,7 +1589,7 @@
         const user = auth.currentUser;
         db.collection('hourly_scores')
             .where('hourKey', '==', hourKey)
-            .orderBy('net', 'desc')
+            .orderBy('score', 'desc')
             .limit(20)
             .get()
             .then(function(snap) {
@@ -1551,17 +1607,19 @@
                     const photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
                     const name = d.displayName || 'Anonymous';
                     const badge = isYou ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
+                    const rebuyBadge = d.rebuys > 0 ? '<span class="lb-badge lb-badge-rebuys">♻' + d.rebuys + '</span>' : '';
                     const rankClass = rank <= 3 ? ' lb-rank-' + rank : '';
-                    const netClass = d.net > 0 ? 'lb-positive' : d.net < 0 ? 'lb-negative' : 'lb-zero';
-                    const netText = d.net > 0 ? '+' + d.net : '' + d.net;
+                    const s = d.score || 0;
+                    const scoreClass = s > 0 ? 'lb-positive lb-score' : s < 0 ? 'lb-negative lb-score' : 'lb-zero lb-score';
+                    const scoreText = s > 0 ? '+' + s : '' + s;
                     const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
 
                     const row = document.createElement('tr');
                     if (isYou) row.className = 'lb-you';
                     row.innerHTML =
                         '<td class="lb-rank' + rankClass + '">' + medal + '</td>' +
-                        '<td>' + photo + name + badge + '</td>' +
-                        '<td class="' + netClass + '">' + netText + '</td>' +
+                        '<td>' + photo + name + badge + rebuyBadge + '</td>' +
+                        '<td class="' + scoreClass + '">' + scoreText + '</td>' +
                         '<td>' + d.hands + '</td>' +
                         '<td>' + (d.bestHand || '—') + '</td>';
                     tbody.appendChild(row);
