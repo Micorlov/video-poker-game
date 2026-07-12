@@ -167,6 +167,32 @@
             transform: translateY(-10px);
             animation: pulse 1.5s infinite;
         }
+        .card .held-badge {
+            display: none;
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #0c2317;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 10px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(255,215,0,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        .card.held .held-badge {
+            display: block;
+        }
+        .card.unheld {
+            opacity: 0.6;
+            filter: brightness(0.8) grayscale(15%);
+            transform: scale(0.95);
+        }
         @keyframes pulse {
             0%, 100% { box-shadow: 0 0 15px #ffd700, 0 10px 25px rgba(0,0,0,0.5); }
             50% { box-shadow: 0 0 30px #ffd700, 0 10px 25px rgba(0,0,0,0.5); }
@@ -685,6 +711,7 @@
                     'Nothing': 'Nothing'
                 },
                 balanceLabel: 'Balance:',
+                heldBadge: 'HELD',
                 betLabel: 'Bet:',
                 creditsLabel: 'credits',
                 chooseBetLabel: 'Choose Bet:',
@@ -741,6 +768,7 @@
                     'Nothing': 'Nada'
                 },
                 balanceLabel: 'Saldo:',
+                heldBadge: 'MANTENER',
                 betLabel: 'Apuesta:',
                 creditsLabel: 'créditos',
                 chooseBetLabel: 'Elige Apuesta:',
@@ -797,6 +825,7 @@
                     'Nothing': 'Rien'
                 },
                 balanceLabel: 'Solde:',
+                heldBadge: 'CONSERVÉ',
                 betLabel: 'Mise:',
                 creditsLabel: 'crédits',
                 chooseBetLabel: 'Choisir la Mise:',
@@ -853,6 +882,7 @@
                     'Nothing': 'Nichts'
                 },
                 balanceLabel: 'Guthaben:',
+                heldBadge: 'GEHALTEN',
                 betLabel: 'Einsatz:',
                 creditsLabel: 'Credits',
                 chooseBetLabel: 'Einsatz Wählen:',
@@ -909,6 +939,7 @@
                     'Nothing': 'כלום'
                 },
                 balanceLabel: 'יתרה:',
+                heldBadge: 'להשאיר',
                 betLabel: 'הימור:',
                 creditsLabel: 'קרדיטים',
                 chooseBetLabel: 'בחר הימור:',
@@ -964,6 +995,7 @@
                     'Nothing': 'لا شيء'
                 },
                 balanceLabel: 'الرصيد:',
+                heldBadge: 'إبقاء',
                 betLabel: 'الرهان:',
                 creditsLabel: 'أرصدة',
                 chooseBetLabel: 'اختر الرهان:',
@@ -1334,11 +1366,15 @@
         function renderHand(winningIndices = [], thirdMatchIndices = [], nearMissIndices = []) {
             const handEl = document.getElementById('hand');
             handEl.innerHTML = '';
+            const t = TRANSLATIONS[currentLang];
+            const anyHeld = held.some(h => h);
 
             hand.forEach((card, i) => {
                 const cardEl = document.createElement('div');
                 const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || nearMissIndices.length > 0;
-                let classes = `card ${!isResult && held[i] ? 'held' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
+                const isHeld = !isResult && held[i];
+                const isUnheld = !isResult && anyHeld && !held[i];
+                let classes = `card ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
 
                 if (winningIndices.includes(i)) {
                     classes += ' winning';
@@ -1352,7 +1388,10 @@
 
                 cardEl.className = classes.trim();
                 cardEl.onclick = () => toggleHold(i);
+                
+                const badgeText = t.heldBadge || 'HELD';
                 cardEl.innerHTML = `
+                    <div class="held-badge">${badgeText}</div>
                     <div class="suit">${card.suit}</div>
                     <div class="rank">${card.rank}</div>
                 `;
