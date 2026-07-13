@@ -938,6 +938,13 @@
             border-color: rgba(255,215,0,0.5); transform: translateY(-2px);
             background: rgba(255,215,0,0.08); box-shadow: none;
         }
+        .reaction-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            background: rgba(0,0,0,0.1) !important;
+            border-color: rgba(255,255,255,0.05) !important;
+        }
         .float-emoji {
             position: absolute; font-size: 26px; pointer-events: none;
             animation: float-up 2s ease-out forwards; z-index: 50;
@@ -1090,6 +1097,26 @@
         </div>
     </div>
 
+    <div id="feed-toasts"></div>
+
+    <div id="share-win-modal" class="room-modal rm-hidden">
+        <div class="room-modal-box" style="width: min(500px, 94vw);">
+            <button class="room-modal-close" onclick="closeShareWinModal()">✕</button>
+            <h3 id="share-win-title">Share Your Win!</h3>
+            <div class="room-modal-sub" id="share-win-sub">Show off your legendary hand to your friends</div>
+            <div id="share-win-wrap">
+                <canvas id="share-canvas" width="600" height="400"></canvas>
+            </div>
+            <div class="room-actions" style="margin-top: 20px;">
+                <button class="room-action-btn" id="share-win-download-btn" onclick="downloadWinCard()" style="flex: 1;">Download PNG</button>
+                <button class="room-action-btn secondary" id="share-win-copy-btn" onclick="copyWinCardLink()" style="flex: 1;">Copy Link</button>
+            </div>
+            <a class="whatsapp-btn" id="share-win-whatsapp" target="_blank" rel="noopener" style="margin-top: 10px;">
+                <span>💬</span><span id="share-win-wa-label">Share on WhatsApp</span>
+            </a>
+        </div>
+    </div>
+
     <div id="profile-backdrop" class="eg-hidden" onclick="egCloseProfile()"></div>
     <div id="profile-panel" class="eg-hidden">
         <button class="eg-close" onclick="egCloseProfile()">✕</button>
@@ -1108,6 +1135,19 @@
         <div id="pf-stats"></div>
         <h4 id="pf-ach-title">Achievements</h4>
         <div class="ach-grid" id="pf-ach-grid"></div>
+        <div id="pf-ref-section-wrap" style="display: none;">
+            <h4 id="pf-ref-title">Invite Friends</h4>
+            <div class="pf-ref-sub" id="pf-ref-sub">Invite friends to play! You both get 200 bonus credits when they play their first hand.</div>
+            <div id="pf-ref-code" style="text-align:center; font-weight:bold; color:#ffd700; font-size:24px; letter-spacing:6px; margin: 10px 0;"></div>
+            <div class="share-row" style="margin-top: 8px;">
+                <input class="room-input" id="pf-ref-link" readonly onclick="this.select()" style="font-size:12px; margin-bottom: 0;">
+                <button class="share-copy-btn" onclick="copyRefLink()" id="pf-ref-copy-btn">Copy Link</button>
+            </div>
+            <a class="whatsapp-btn" id="pf-ref-whatsapp" target="_blank" rel="noopener" style="margin-top: 8px;">
+                <span>💬</span><span id="pf-ref-wa-label">Share on WhatsApp</span>
+            </a>
+            <div class="pf-ref-count" id="pf-ref-count" style="color: #4ade80; font-size: 13px; font-weight: 600; margin-top: 10px; text-align: center;"></div>
+        </div>
         <div id="pf-styles-section">
             <h4 id="pf-styles-title">Card Styles</h4>
             <div class="style-row" id="pf-styles"></div>
@@ -1221,6 +1261,14 @@
                             <tbody id="room-lb-body"></tbody>
                         </table>
                         <div class="room-nudge rm-hidden" id="room-nudge"></div>
+                        <div class="reaction-bar" id="room-reaction-bar">
+                            <button class="reaction-btn" onclick="sendReaction('👏')">👏</button>
+                            <button class="reaction-btn" onclick="sendReaction('🔥')">🔥</button>
+                            <button class="reaction-btn" onclick="sendReaction('😱')">😱</button>
+                            <button class="reaction-btn" onclick="sendReaction('😂')">😂</button>
+                            <button class="reaction-btn" onclick="sendReaction('💀')">💀</button>
+                            <button class="reaction-btn" onclick="sendReaction('🎉')">🎉</button>
+                        </div>
                         <div class="room-footer">
                             <button class="room-mini-btn" onclick="openShareForActiveRoom()" id="room-share-btn">🔗 Invite</button>
                             <button class="room-mini-btn" onclick="leaveActiveRoom()" id="room-leave-btn">🚪 Leave</button>
@@ -1298,6 +1346,26 @@
             errDiv.textContent = 'Promise Rejection: ' + e.reason;
             document.body.appendChild(errDiv);
         });
+
+        // Parse and store URL parameters in sessionStorage so they survive redirects
+        (function() {
+            var params = new URLSearchParams(location.search);
+            var ref = params.get('ref');
+            if (ref) {
+                try {
+                    sessionStorage.setItem('vp_referred_by_code', ref.trim().toUpperCase());
+                } catch (e) {}
+            }
+            var room = params.get('room');
+            if (room) {
+                try {
+                    sessionStorage.setItem('vp_pending_room_code', room.trim().toUpperCase());
+                } catch (e) {}
+            }
+            if (ref || room) {
+                history.replaceState(null, '', location.pathname);
+            }
+        })();
 
         // Language translations
         const TRANSLATIONS = {
@@ -2114,12 +2182,20 @@
             document.getElementById('balance').textContent = balance;
             saveGameState();
 
+            if (win > 0 && HAND_RANK[handType] >= 3) {
+                logRoomEvent('hand', handType);
+            }
+
             const t = TRANSLATIONS[currentLang];
             const resultEl = document.getElementById('result');
 
             if (win > 0) {
                 resultEl.className = 'result';
-                resultEl.innerHTML = `<span class="win">🎉 ${t.payouts[handType]}! +${win} ${t.creditsLabel}! 🎉</span>`;
+                var shareWinBtn = '';
+                if (HAND_RANK[handType] >= 3) {
+                    shareWinBtn = '<br><button id="share-win-trigger-btn" onclick="openShareWinModal()" style="margin-top: 10px; padding: 8px 16px; font-size: 14px; border-radius: 8px;">Share Win</button>';
+                }
+                resultEl.innerHTML = `<span class="win">🎉 ${t.payouts[handType]}! +${win} ${t.creditsLabel}! 🎉</span>` + shareWinBtn;
                 document.getElementById('explanation').textContent = t.explanations[handType];
             } else {
                 resultEl.className = 'result';
@@ -2355,6 +2431,9 @@
                 void bar.offsetWidth;
                 bar.classList.add('bump');
             }
+            if (justWon && winStreak >= 5 && winStreak % 5 === 0) {
+                logRoomEvent('streak', winStreak);
+            }
             if (winStreak > bestStreak) {
                 bestStreak = winStreak;
                 document.getElementById('stat-best-streak-value').textContent = '🔥 ' + bestStreak;
@@ -2521,11 +2600,33 @@
         }, { merge: true }).then(function() {
             return db.collection('users').doc(user.uid).get();
         }).then(function(doc) {
-            if (doc.exists && !doc.data().firstSeen) {
-                return db.collection('users').doc(user.uid).update({
-                    firstSeen: firebase.firestore.FieldValue.serverTimestamp()
-                });
+            var updateData = {};
+            var data = doc.exists ? doc.data() : {};
+            
+            if (!data.referralCode) {
+                updateData.referralCode = generateRoomCode();
             }
+            
+            if (doc.exists && !data.firstSeen) {
+                updateData.firstSeen = firebase.firestore.FieldValue.serverTimestamp();
+                updateData.referralCount = 0;
+                
+                var refCode = '';
+                try {
+                    refCode = (sessionStorage.getItem('vp_referred_by_code') || '').trim().toUpperCase();
+                    sessionStorage.removeItem('vp_referred_by_code');
+                } catch (e) {}
+                
+                if (refCode && refCode !== updateData.referralCode) {
+                    updateData.referredBy = refCode;
+                }
+            }
+            
+            if (Object.keys(updateData).length > 0) {
+                return db.collection('users').doc(user.uid).update(updateData);
+            }
+        }).catch(function(err) {
+            console.error('logUserToFirestore error:', err);
         });
     }
 
@@ -2993,6 +3094,10 @@
         pendingInviteCode = null;
         renderRoomTabs();
         closeRoomModal();
+        if (roomEventsUnsubscribe) {
+            roomEventsUnsubscribe();
+            roomEventsUnsubscribe = null;
+        }
     };
 
     function loadMyRooms(user) {
@@ -3018,6 +3123,7 @@
                 renderRoomTabs();
                 syncWeeklyRebuysFromRooms(user);
                 refreshRoomLeaderboard();
+                listenToActiveRoomEvents(activeRoomId);
             });
         }).catch(function(err) { console.error('loadMyRooms:', err); });
     }
@@ -3137,6 +3243,7 @@
         roomPrevRanks = {};
         renderRoomTabs();
         refreshRoomLeaderboard();
+        listenToActiveRoomEvents(roomId);
     }
 
     // --- period keys ---
@@ -3262,6 +3369,7 @@
 
             var lvlBadge = d.level ? '<span class="lvl-badge">' + d.level + '</span>' : '';
             var row = document.createElement('tr');
+            row.dataset.uid = d.uid;
             if (isYou) row.className = 'lb-you';
             row.innerHTML =
                 '<td class="lb-rank' + rankClass + '">' + medal + '</td>' +
@@ -3440,10 +3548,12 @@
     }
 
     function handleInviteParam(user) {
-        var params = new URLSearchParams(location.search);
-        var code = (params.get('room') || '').trim().toUpperCase();
+        var code = '';
+        try {
+            code = (sessionStorage.getItem('vp_pending_room_code') || '').trim().toUpperCase();
+            sessionStorage.removeItem('vp_pending_room_code');
+        } catch (e) {}
         if (!code) return;
-        history.replaceState(null, '', location.pathname);
         if (myRooms.some(function(r) { return r.id === code; })) {
             switchRoom(code);
             return;
@@ -3495,13 +3605,18 @@
         set('rm-wa-label', rt('whatsapp'));
         set('rm-invite-title', rt('inviteTitle'));
         set('rm-invite-btn', rt('inviteJoin'));
+        
+        set('pf-ref-title', rt('refInviteTitle'));
+        set('pf-ref-sub', rt('refInviteSub'));
+        set('pf-ref-wa-label', rt('whatsapp'));
+        
         var nameInput = document.getElementById('room-name-input');
         if (nameInput) nameInput.placeholder = rt('roomNamePh');
     };
 
     // Invite hint on the login screen when arriving via a room link
     (function() {
-        if (new URLSearchParams(location.search).get('room')) {
+        if (new URLSearchParams(location.search).get('room') || sessionStorage.getItem('vp_pending_room_code')) {
             var sub = document.querySelector('.login-subtitle');
             if (sub) sub.textContent = rt('loginInvite');
         }
@@ -3748,6 +3863,23 @@
             };
             egApplyCardStyle(data.cardStyle || 'classic');
             egRenderXpBar();
+
+            if (data.bonusCredits && data.bonusCredits > 0) {
+                var bonus = data.bonusCredits;
+                egAddCredits(bonus);
+                egConfetti();
+                egToast('🎁 Referral bonus! You received ' + bonus + ' credits.');
+                saveGameState();
+                db.collection('users').doc(user.uid).update({
+                    bonusCredits: 0
+                });
+            }
+
+            var refCount = data.referralCount || 0;
+            if (refCount >= 3) {
+                egUnlock('invite3');
+            }
+
             db.collection('users').doc(user.uid).collection('achievements').get().then(function(snap) {
                 snap.forEach(function(d) { egAchievements[d.id] = true; });
                 egUpdateAchCount();
@@ -4091,10 +4223,15 @@
         if (newLevel > egLevel) {
             egLevel = newLevel;
             egShowLevelUp(newLevel);
+            logRoomEvent('levelUp', newLevel);
         }
         egRenderXpBar();
 
         if (!egStats) return;
+        var isFirstHand = (egStats.totalHands === 0);
+        if (isFirstHand) {
+            checkAndProcessReferral();
+        }
         egStats.totalHands++;
         if (ev.win > 0) egStats.totalWins++;
         var rank = HAND_RANK[ev.handType] || 0;
@@ -4312,7 +4449,33 @@
             grid.appendChild(cell);
         });
 
-        if (isMe) egRenderStylePicker();
+        const refSectionWrap = document.getElementById('pf-ref-section-wrap');
+        if (refSectionWrap) {
+            refSectionWrap.style.display = isMe ? '' : 'none';
+        }
+
+        if (isMe) {
+            egRenderStylePicker();
+            
+            const refCode = data.referralCode || '------';
+            const refCodeEl = document.getElementById('pf-ref-code');
+            if (refCodeEl) refCodeEl.textContent = refCode;
+            
+            const refLink = location.origin + location.pathname + '?ref=' + refCode;
+            const refLinkInput = document.getElementById('pf-ref-link');
+            if (refLinkInput) refLinkInput.value = refLink;
+            
+            const waText = rt('waRefText') || 'Join me in Video Poker! Use my referral code: {code}';
+            const waShareUrl = 'https://wa.me/?text=' + encodeURIComponent(waText.replace('{code}', refCode) + '\n' + refLink);
+            const waBtn = document.getElementById('pf-ref-whatsapp');
+            if (waBtn) waBtn.href = waShareUrl;
+            
+            const refCount = data.referralCount || 0;
+            const refCountEl = document.getElementById('pf-ref-count');
+            if (refCountEl) {
+                refCountEl.textContent = rt('referredFriends').replace('{n}', refCount);
+            }
+        }
     }
 
     window.egCloseProfile = function() {
@@ -4408,6 +4571,535 @@
         ach_challenge10: 'متحدٍ 10', ach_challenge50: 'سيد التحديات',
         ach_credits500: 'مقامر كبير', ach_credits1000: 'قطب', ach_ironhour: 'بنك حديدي'
     });
+
+    // Additional I18n strings for Phase 3
+    Object.assign(ROOM_I18N.en, {
+        refInviteTitle: "Invite Friends",
+        refInviteSub: "Invite friends to play! You both get 200 bonus credits when they play their first hand.",
+        referredFriends: "Referred: {n} friends",
+        waRefText: "🃏 Play Video Poker with me! Use my referral link to get 200 bonus credits:",
+        feedHitHand: "{name} just hit a {hand}!",
+        feedStreak: "{name} is on a {n}-win streak!",
+        feedLevelUp: "{name} just leveled up to {n}!"
+    });
+    Object.assign(ROOM_I18N.es, {
+        refInviteTitle: "Invitar Amigos",
+        refInviteSub: "¡Invita a tus amigos a jugar! Ambos obtendrán 200 créditos de bonificación cuando jueguen su primera mano.",
+        referredFriends: "Referidos: {n} amigos",
+        waRefText: "🃏 ¡Juega al Video Póker conmigo! Usa mi enlace de referencia para obtener 200 créditos de bonificación:",
+        feedHitHand: "¡{name} acaba de conseguir {hand}!",
+        feedStreak: "¡{name} lleva una racha de {n} victorias!",
+        feedLevelUp: "¡{name} acaba de subir al nivel {n}!"
+    });
+    Object.assign(ROOM_I18N.fr, {
+        refInviteTitle: "Inviter des Amis",
+        refInviteSub: "Invitez des amis à jouer ! Vous recevrez tous les deux 200 crédits bonus lorsqu'ils joueront leur première main.",
+        referredFriends: "Parrainé : {n} amis",
+        waRefText: "🃏 Jouez au Video Poker avec moi ! Utilisez mon lien de parrainage pour obtenir 200 crédits bonus :",
+        feedHitHand: "{name} vient d'obtenir {hand} !",
+        feedStreak: "{name} a une série de {n} victoires !",
+        feedLevelUp: "{name} vient de monter au niveau {n} !"
+    });
+    Object.assign(ROOM_I18N.de, {
+        refInviteTitle: "Freunde einladen",
+        refInviteSub: "Lade Freunde zum Spielen ein! Ihr beide erhaltet 200 Bonus-Credits, wenn sie ihre erste Hand spielen.",
+        referredFriends: "Geworben: {n} Freunde",
+        waRefText: "🃏 Spiele Video-Poker mit mir! Nutze meinen Empfehlungslink, um 200 Bonus-Credits zu erhalten:",
+        feedHitHand: "{name} hat gerade {hand} erzielt!",
+        feedStreak: "{name} hat eine Siegesserie von {n} Händen!",
+        feedLevelUp: "{name} ist gerade auf Level {n} aufgestiegen!"
+    });
+    Object.assign(ROOM_I18N.he, {
+        refInviteTitle: "הזמן חברים",
+        refInviteSub: "הזמן חברים לשחק! שניכם תקבלו 200 קרדיטים בונוס כשהם ישחקו את היד הראשונה שלהם.",
+        referredFriends: "חברים שהוזמנו: {n}",
+        waRefText: "🃏 בוא לשחק איתי וידאו פוקר! השתמש בלינק ההזמנה שלי כדי לקבל 200 קרדיטים בונוס:",
+        feedHitHand: "{name} הרגע השיג {hand}!",
+        feedStreak: "{name} ברצף של {n} ניצחונות!",
+        feedLevelUp: "{name} הרגע עלה לרמה {n}!"
+    });
+    Object.assign(ROOM_I18N.ar, {
+        refInviteTitle: "دعوة الأصدقاء",
+        refInviteSub: "ادعُ أصدقاءك للعب! ستحصلان كلاكما على 200 رصيد إضافي عند لعب اليد الأولى.",
+        referredFriends: "الأصدقاء المدعوون: {n}",
+        waRefText: "🃏 العب فيديو بوكر معي! استخدم رابط الدعوة الخاص بي للحصول على 200 رصيد إضافي:",
+        feedHitHand: "{name} حصل للتو على {hand}!",
+        feedStreak: "{name} في سلسلة انتصارات متتالية تبلغ {n}!",
+        feedLevelUp: "{name} ارتفع للتو إلى المستوى {n}!"
+    });
+
+    var roomEventsUnsubscribe = null;
+    var roomEventsSessionStartTime = 0;
+
+    function listenToActiveRoomEvents(roomId) {
+        if (roomEventsUnsubscribe) {
+            roomEventsUnsubscribe();
+            roomEventsUnsubscribe = null;
+        }
+        if (!roomId) return;
+        
+        roomEventsSessionStartTime = Date.now();
+        
+        roomEventsUnsubscribe = db.collection('room_events')
+            .where('roomId', '==', roomId)
+            .onSnapshot(function(snapshot) {
+                snapshot.docChanges().forEach(function(change) {
+                    if (change.type === 'added') {
+                        var data = change.doc.data();
+                        var timestamp = data.timestamp ? (data.timestamp.toDate ? data.timestamp.toDate().getTime() : data.timestamp) : Date.now();
+                        
+                        if (timestamp >= roomEventsSessionStartTime - 2000) {
+                            handleIncomingRoomEvent(data);
+                        }
+                    }
+                });
+            }, function(err) {
+                console.error('listenToActiveRoomEvents error:', err);
+            });
+    }
+
+    function logRoomEvent(eventType, detail) {
+        var user = auth.currentUser;
+        if (!user || myRooms.length === 0) return;
+        
+        myRooms.forEach(function(room) {
+            db.collection('room_events').add({
+                roomId: room.id,
+                uid: user.uid,
+                displayName: user.displayName || '',
+                photoURL: user.photoURL || '',
+                eventType: eventType,
+                detail: detail,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(function() {
+                db.collection('room_events')
+                    .where('roomId', '==', room.id)
+                    .get()
+                    .then(function(snap) {
+                        if (snap.size > 50) {
+                            var docs = [];
+                            snap.forEach(function(d) { docs.push({ id: d.id, data: d.data() }); });
+                            docs.sort(function(a, b) {
+                                var tA = a.data.timestamp ? (a.data.timestamp.toDate ? a.data.timestamp.toDate().getTime() : a.data.timestamp) : 0;
+                                var tB = b.data.timestamp ? (b.data.timestamp.toDate ? b.data.timestamp.toDate().getTime() : b.data.timestamp) : 0;
+                                return tA - tB;
+                            });
+                            var toDeleteCount = docs.length - 50;
+                            for (var i = 0; i < toDeleteCount; i++) {
+                                db.collection('room_events').doc(docs[i].id).delete();
+                            }
+                        }
+                    }).catch(function(err) { console.error('event cleanup:', err); });
+            }).catch(function(err) { console.error('add room event:', err); });
+        });
+    }
+
+    function handleIncomingRoomEvent(data) {
+        if (data.eventType === 'reaction') {
+            triggerFloatingEmoji(data.uid, data.detail);
+        } else {
+            var text = '';
+            var name = escapeHtml(firstName(data.displayName));
+            var t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+            
+            if (data.eventType === 'hand') {
+                var handName = t.payouts[data.detail] || data.detail;
+                var template = rt('feedHitHand') || '{name} just hit a {hand}!';
+                text = template.replace('{name}', name).replace('{hand}', handName);
+            } else if (data.eventType === 'streak') {
+                var template = rt('feedStreak') || '{name} is on a {n}-win streak!';
+                text = template.replace('{name}', name).replace('{n}', data.detail);
+            } else if (data.eventType === 'levelUp') {
+                var template = rt('feedLevelUp') || '{name} just leveled up to {n}!';
+                text = template.replace('{name}', name).replace('{n}', data.detail);
+            }
+            
+            if (text) {
+                showFeedToast(text);
+            }
+        }
+    }
+
+    var maxFeedToasts = 3;
+    function showFeedToast(text) {
+        var container = document.getElementById('feed-toasts');
+        if (!container) return;
+
+        var existing = container.getElementsByClassName('feed-toast');
+        if (existing.length >= maxFeedToasts) {
+            var oldest = existing[0];
+            oldest.remove();
+        }
+
+        var toast = document.createElement('div');
+        toast.className = 'feed-toast';
+        toast.textContent = text;
+        container.appendChild(toast);
+
+        setTimeout(function() {
+            toast.classList.add('out');
+            setTimeout(function() {
+                toast.remove();
+            }, 300);
+        }, 4000);
+    }
+
+    function triggerFloatingEmoji(uid, emoji) {
+        var lbContainer = document.getElementById('rooms-panel');
+        if (!lbContainer) return;
+
+        var rowEl = document.querySelector('#room-lb-body tr[data-uid="' + uid + '"]');
+        var topOffset, leftOffset;
+        var lbRect = lbContainer.getBoundingClientRect();
+        
+        if (rowEl) {
+            var rowRect = rowEl.getBoundingClientRect();
+            topOffset = rowRect.top - lbRect.top + (rowRect.height / 2) - 15;
+            leftOffset = rowRect.left - lbRect.left + (rowRect.width / 2) - 15;
+        } else {
+            topOffset = lbRect.height / 2 - 15;
+            leftOffset = lbRect.width / 2 - 15;
+        }
+
+        var emojiEl = document.createElement('div');
+        emojiEl.className = 'float-emoji';
+        emojiEl.textContent = emoji;
+        emojiEl.style.top = topOffset + 'px';
+        emojiEl.style.left = leftOffset + 'px';
+        
+        lbContainer.appendChild(emojiEl);
+
+        setTimeout(function() {
+            emojiEl.remove();
+        }, 2000);
+    }
+
+    var lastReactionTime = 0;
+    function sendReaction(emoji) {
+        var user = auth.currentUser;
+        var room = getActiveRoom();
+        if (!user || !room) return;
+
+        var now = Date.now();
+        if (now - lastReactionTime < 5000) return;
+        lastReactionTime = now;
+
+        var buttons = document.querySelectorAll('.reaction-btn');
+        buttons.forEach(function(btn) { btn.disabled = true; });
+        setTimeout(function() {
+            buttons.forEach(function(btn) { btn.disabled = false; });
+        }, 5000);
+
+        db.collection('room_events').add({
+            roomId: room.id,
+            uid: user.uid,
+            displayName: user.displayName || '',
+            photoURL: user.photoURL || '',
+            eventType: 'reaction',
+            detail: emoji,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(function(err) { console.error('send reaction error:', err); });
+    }
+
+    function checkAndProcessReferral() {
+        var user = auth.currentUser;
+        if (!user) return;
+
+        db.collection('users').doc(user.uid).get().then(function(doc) {
+            if (!doc.exists) return;
+            var data = doc.data();
+            var referredByCode = data.referredBy;
+            if (!referredByCode) return;
+
+            db.collection('users').where('referralCode', '==', referredByCode).limit(1).get().then(function(snap) {
+                if (snap.empty) return;
+                var referrerDoc = snap.docs[0];
+                var referrerUid = referrerDoc.id;
+                
+                if (referrerUid === user.uid) return;
+                var referralDocId = referrerUid + '_' + user.uid;
+
+                db.collection('referrals').doc(referralDocId).get().then(function(refDoc) {
+                    if (refDoc.exists) return;
+
+                    db.collection('referrals').doc(referralDocId).set({
+                        referrerUid: referrerUid,
+                        refereeUid: user.uid,
+                        creditedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(function() {
+                        db.collection('users').doc(referrerUid).update({
+                            bonusCredits: firebase.firestore.FieldValue.increment(200),
+                            referralCount: firebase.firestore.FieldValue.increment(1)
+                        });
+
+                        egAddCredits(200);
+                        egConfetti();
+                        egToast('🎉 Referral Reward! +200 credits! 🎉');
+                        saveGameState();
+                    });
+                });
+            });
+        });
+    }
+
+    function copyRefLink() {
+        var link = document.getElementById('pf-ref-link').value;
+        var btn = document.getElementById('pf-ref-copy-btn');
+        var done = function() {
+            btn.textContent = rt('copied') || 'Copied ✓';
+            setTimeout(function() { btn.textContent = rt('copyLink') || 'Copy Link'; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(done).catch(function() {
+                document.getElementById('pf-ref-link').select();
+                document.execCommand('copy');
+                done();
+            });
+        } else {
+            document.getElementById('pf-ref-link').select();
+            document.execCommand('copy');
+            done();
+        }
+    }
+
+    function openShareWinModal() {
+        var canvas = document.getElementById('share-canvas');
+        if (!canvas) return;
+
+        var room = getActiveRoom();
+        var user = auth.currentUser;
+        
+        var inviteCode = '';
+        var inviteLink = '';
+        
+        if (room) {
+            inviteCode = room.id;
+            inviteLink = roomLink(room.id);
+            drawAndShowShareModal(canvas, hand, lastHandType, lastWinAmount, inviteLink, inviteCode);
+        } else if (user && user.uid) {
+            db.collection('users').doc(user.uid).get().then(function(doc) {
+                var data = doc.exists ? doc.data() : {};
+                var refCode = data.referralCode || '';
+                var refLink = location.origin + location.pathname + '?ref=' + refCode;
+                drawAndShowShareModal(canvas, hand, lastHandType, lastWinAmount, refLink, refCode);
+            });
+        }
+    }
+
+    function drawAndShowShareModal(canvas, hand, handType, winAmount, inviteLink, inviteCode) {
+        var t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+        var translatedHandType = t.payouts[handType] || handType;
+        
+        drawWinCard(canvas, hand, translatedHandType, winAmount, inviteLink, inviteCode);
+        
+        var waText = 'Wow! I just hit a ' + translatedHandType + ' and won ' + winAmount + ' credits in Video Poker! Play with me: ' + inviteLink;
+        document.getElementById('share-win-whatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(waText);
+        
+        var copyBtn = document.getElementById('share-win-copy-btn');
+        copyBtn.dataset.link = inviteLink;
+        copyBtn.textContent = rt('copyLink') || 'Copy Link';
+
+        document.getElementById('share-win-modal').classList.remove('rm-hidden');
+    }
+
+    function closeShareWinModal() {
+        document.getElementById('share-win-modal').classList.add('rm-hidden');
+    }
+
+    function copyWinCardLink() {
+        var btn = document.getElementById('share-win-copy-btn');
+        var link = btn.dataset.link;
+        var done = function() {
+            btn.textContent = rt('copied') || 'Copied ✓';
+            setTimeout(function() { btn.textContent = rt('copyLink') || 'Copy Link'; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(done).catch(function() {
+                var temp = document.createElement('input');
+                temp.value = link;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand('copy');
+                temp.remove();
+                done();
+            });
+        } else {
+            var temp = document.createElement('input');
+            temp.value = link;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            temp.remove();
+            done();
+        }
+    }
+
+    function downloadWinCard() {
+        var canvas = document.getElementById('share-canvas');
+        if (!canvas) return;
+        var link = document.createElement('a');
+        link.download = 'video_poker_win_' + lastHandType.toLowerCase().replace(/ /g, '_') + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    function drawWinCard(canvas, hand, handType, winAmount, inviteLink, inviteCode) {
+        var ctx = canvas.getContext('2d');
+        
+        var grad = ctx.createRadialGradient(300, 200, 50, 300, 200, 350);
+        grad.addColorStop(0, '#0f3c26');
+        grad.addColorStop(1, '#05190e');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 600, 400);
+
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(3, 3, 594, 394);
+
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.05)';
+        ctx.lineWidth = 1;
+        for (var i = 0; i < 600; i += 30) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, 400);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = '#ffd700';
+        ctx.font = 'bold 24px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('♠ ♥ VIDEO POKER ♦ ♣', 300, 45);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px "Segoe UI", sans-serif';
+        ctx.fillText(handType.toUpperCase(), 300, 95);
+
+        ctx.fillStyle = '#4ade80';
+        ctx.font = 'bold 24px "Segoe UI", sans-serif';
+        ctx.fillText('+' + winAmount + ' CREDITS', 300, 135);
+
+        var cardW = 75;
+        var cardH = 110;
+        var gap = 15;
+        var totalW = (5 * cardW) + (4 * gap);
+        var startX = (600 - totalW) / 2;
+        var startY = 165;
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        hand.forEach(function(card, idx) {
+            var x = startX + idx * (cardW + gap);
+            var y = startY;
+
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 4;
+
+            ctx.fillStyle = '#ffffff';
+            roundRect(ctx, x, y, cardW, cardH, 8);
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+
+            ctx.strokeStyle = '#cccccc';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            var evaluated = evaluateHand(hand);
+            var isWinner = evaluated.winIndices.includes(idx) || evaluated.secondPairIndices.includes(idx) || evaluated.thirdMatchIndices.includes(idx);
+            if (isWinner) {
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 3;
+                roundRect(ctx, x, y, cardW, cardH, 8);
+                ctx.stroke();
+            }
+
+            var isRed = card.suit === '♥' || card.suit === '♦';
+            ctx.fillStyle = isRed ? '#e63946' : '#2d3748';
+            
+            ctx.font = 'bold 18px "Segoe UI", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(card.rank, x + 8, y + 22);
+
+            ctx.font = 'bold 36px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(card.suit, x + cardW / 2, y + cardH / 2 + 12);
+
+            ctx.font = 'bold 18px "Segoe UI", sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(card.rank, x + cardW - 8, y + cardH - 10);
+        });
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        roundRect(ctx, 30, 310, 540, 65, 8);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.2)';
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, 30, 310, 540, 65, 8);
+        ctx.stroke();
+
+        drawMockQRCode(ctx, 505, 318, 48);
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#ffd700';
+        ctx.font = 'bold 15px "Segoe UI", sans-serif';
+        if (inviteCode) {
+            ctx.fillText('PLAY WITH ME! ROOM CODE: ' + inviteCode, 45, 338);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '12px "Segoe UI", sans-serif';
+            ctx.fillText(inviteLink, 45, 360);
+        } else {
+            ctx.fillText('PLAY VIDEO POKER & WIN CREDITS!', 45, 348);
+        }
+    }
+
+    function drawMockQRCode(ctx, x, y, size) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x, y, size, size);
+
+        var finderSize = Math.floor(size * 7 / 25);
+        drawFinderPattern(ctx, x, y, finderSize);
+        drawFinderPattern(ctx, x + size - finderSize, y, finderSize);
+        drawFinderPattern(ctx, x, y + size - finderSize, finderSize);
+
+        ctx.fillStyle = '#000000';
+        var cellSize = size / 25;
+        for (var row = 0; row < 25; row++) {
+            for (var col = 0; col < 25; col++) {
+                if ((row < 8 && col < 8) || (row < 8 && col >= 17) || (row >= 17 && col < 8)) {
+                    continue;
+                }
+                if (Math.random() > 0.5) {
+                    ctx.fillRect(x + col * cellSize, y + row * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+    }
+
+    function drawFinderPattern(ctx, x, y, size) {
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(x, y, size, size);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x + size/7, y + size/7, size*5/7, size*5/7);
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(x + size*2/7, y + size*2/7, size*3/7, size*3/7);
+    }
     </script>
 </body>
 </html>
