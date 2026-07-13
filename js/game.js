@@ -518,12 +518,9 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 const cardEl = document.createElement('div');
                 const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || secondPairIndices.length > 0;
                 
-                // If draw is true, only unheld cards start face-down (flipped)
-                const shouldStartFlipped = isDraw ? !held[i] : true;
-                
                 const isHeld = !isResult && held[i];
                 const isUnheld = !isResult && anyHeld && !held[i];
-                let classes = `card ${shouldStartFlipped ? 'flipped' : ''} ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
+                let classes = `card ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
 
                 if (winningIndices.includes(i)) {
                     classes += ' winning';
@@ -579,25 +576,6 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 handEl.appendChild(cardEl);
             });
 
-            // Staggered flip animation trigger
-            let flipDelayIndex = 0;
-            hand.forEach((card, i) => {
-                const cardEl = handEl.children[i];
-                if (cardEl && cardEl.classList.contains('flipped')) {
-                    setTimeout(() => {
-                        const inner = cardEl.querySelector('.card-inner');
-                        if (inner) {
-                            inner.classList.add('animating');
-                            cardEl.classList.remove('flipped');
-                            playSound('deal');
-                            setTimeout(() => {
-                                inner.classList.remove('animating');
-                            }, 600);
-                        }
-                    }, flipDelayIndex * 250);
-                    flipDelayIndex++;
-                }
-            });
         }
 
         function evaluateHand(hand) {
