@@ -718,6 +718,111 @@
         .invite-room-name { text-align: center; font-size: 1.5em; color: #ffd700; font-weight: 700; margin-bottom: 6px; }
         .invite-cadence { text-align: center; color: rgba(255,255,255,0.6); font-size: 13px; margin-bottom: 18px; }
         body[dir="rtl"] .share-row .room-input { text-align: left; }
+
+        /* ===== Engagement: daily rewards, streaks, challenges ===== */
+        .eg-hidden { display: none !important; }
+        .eg-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10002; backdrop-filter: blur(4px); padding: 16px;
+        }
+        .eg-box {
+            background: linear-gradient(145deg, #0f2c1c, #07130c);
+            border: 2px solid rgba(255,215,0,0.35); border-radius: 18px;
+            padding: 28px; width: min(480px, 94vw); position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7); text-align: center;
+        }
+        .eg-box h3 { color: #ffd700; font-size: 1.5em; margin-bottom: 6px; }
+        .eg-sub { color: rgba(255,255,255,0.55); font-size: 13px; margin-bottom: 18px; }
+        .eg-close {
+            position: absolute; top: 12px; right: 12px;
+            background: none; border: none; color: rgba(255,255,255,0.4);
+            font-size: 18px; cursor: pointer; padding: 4px 8px; box-shadow: none;
+        }
+        .eg-close:hover:not(:disabled) { color: #ffd700; background: none; transform: none; box-shadow: none; }
+        .reward-calendar {
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 18px;
+        }
+        .reward-day {
+            background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px; padding: 10px 2px; font-size: 11px; color: rgba(255,255,255,0.55);
+        }
+        .reward-day .rd-amount { display: block; font-size: 14px; font-weight: 700; color: #ffd700; margin-top: 4px; }
+        .reward-day.claimed { border-color: rgba(74,222,128,0.5); background: rgba(74,222,128,0.08); }
+        .reward-day.claimed .rd-amount { color: #4ade80; }
+        .reward-day.locked { opacity: 0.55; }
+        .reward-day.today {
+            border-color: #ffd700; background: rgba(255,215,0,0.12);
+            animation: reward-glow 1.5s infinite alternate;
+        }
+        @keyframes reward-glow {
+            from { box-shadow: 0 0 6px rgba(255,215,0,0.3); }
+            to { box-shadow: 0 0 18px rgba(255,215,0,0.8); }
+        }
+        .eg-claim-btn { width: 100%; padding: 13px; font-size: 16px; border-radius: 10px; }
+        .eg-hint { color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 12px; }
+        .eg-big-credits {
+            font-size: 2.6em; font-weight: 800; color: #ffd700;
+            text-shadow: 0 0 20px rgba(255,215,0,0.6); margin: 14px 0 18px;
+        }
+        .confetti-piece {
+            position: fixed; width: 8px; height: 14px; top: -20px; z-index: 10005;
+            pointer-events: none; animation: confetti-fall linear forwards;
+        }
+        @keyframes confetti-fall {
+            to { transform: translateY(110vh) rotate(720deg); opacity: 0.7; }
+        }
+
+        .streak-bar {
+            display: none; justify-content: center; align-items: center; gap: 10px;
+            margin-bottom: 15px; padding: 8px 14px;
+            background: linear-gradient(145deg, rgba(255,120,0,0.12), rgba(0,0,0,0.4));
+            border: 1px solid rgba(255,150,0,0.4); border-radius: 12px;
+            font-weight: 700; color: #ffb347; font-size: 14px;
+        }
+        .streak-bar.active { display: flex; }
+        .streak-bar .flame { font-size: 20px; animation: flicker 1s infinite alternate; }
+        .streak-bar .streak-count { font-size: 22px; color: #ffd700; }
+        .streak-bar.bump .streak-count { animation: streak-bump 0.4s; }
+        @keyframes streak-bump {
+            0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); }
+        }
+        .streak-bonus-tag {
+            background: rgba(255,215,0,0.15); color: #ffd700; font-size: 12px;
+            padding: 2px 8px; border-radius: 12px;
+        }
+
+        .challenges {
+            background: linear-gradient(145deg, rgba(255,215,0,0.08), rgba(0,0,0,0.4));
+            border: 2px solid rgba(255,215,0,0.25); border-radius: 15px;
+            padding: 16px 20px; margin-bottom: 25px; backdrop-filter: blur(5px);
+        }
+        .challenges h3 {
+            color: #ffd700; cursor: pointer; user-select: none;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .challenge-row { margin-top: 12px; }
+        .challenge-desc {
+            display: flex; justify-content: space-between; gap: 10px;
+            font-size: 13px; color: #ddd; margin-bottom: 5px;
+        }
+        .challenge-reward { color: #ffd700; font-weight: 700; white-space: nowrap; }
+        .challenge-bar { height: 8px; background: rgba(0,0,0,0.4); border-radius: 6px; overflow: hidden; }
+        .challenge-fill {
+            height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e);
+            border-radius: 6px; transition: width 0.4s ease;
+        }
+        .challenge-row.done .challenge-fill { background: linear-gradient(90deg, #ffd700, #ffaa00); }
+        .challenge-row.done .challenge-desc { color: #4ade80; }
+        .eg-toast {
+            position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-90px);
+            background: linear-gradient(135deg, rgba(74,222,128,0.15), rgba(255,215,0,0.12));
+            border: 1px solid rgba(255,215,0,0.4); color: #ffd700;
+            padding: 12px 28px; border-radius: 12px; font-size: 16px; font-weight: 600;
+            z-index: 10006; opacity: 0; transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+            pointer-events: none;
+        }
+        .eg-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -825,6 +930,28 @@
         </div>
     </div>
 
+    <div id="eg-reward-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="egCloseModal('eg-reward-modal')">✕</button>
+            <h3 id="eg-reward-title">🎁 Daily Bonus</h3>
+            <div class="eg-sub" id="eg-reward-sub">Come back every day — the rewards keep growing!</div>
+            <div class="reward-calendar" id="eg-reward-calendar"></div>
+            <button class="eg-claim-btn" id="eg-reward-claim" onclick="egClaimDailyReward()">Claim</button>
+            <div class="eg-hint" id="eg-reward-hint">Miss a day and the streak resets to Day 1!</div>
+            <div class="eg-hint" id="eg-reward-longest"></div>
+        </div>
+    </div>
+
+    <div id="eg-comeback-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="egCloseModal('eg-comeback-modal')">✕</button>
+            <h3 id="eg-comeback-title">👋 Welcome back!</h3>
+            <div class="eg-sub" id="eg-comeback-msg"></div>
+            <div class="eg-big-credits" id="eg-comeback-amount"></div>
+            <button class="eg-claim-btn" id="eg-comeback-claim" onclick="egClaimComeback()">Collect</button>
+        </div>
+    </div>
+
     <div class="container" style="display:none; padding-top: 50px;" id="game-container">
         <div class="language-selector">
             <label for="language-select" style="margin-right: 10px; color: #ffd700;">Language / שפה / Idioma / Langue / Sprache / اللغة:</label>
@@ -869,6 +996,13 @@
                     <div class="explanation" id="explanation"></div>
                 </div>
 
+                <div class="streak-bar" id="streak-bar">
+                    <span class="flame">🔥</span>
+                    <span id="streak-label">Win Streak</span>
+                    <span class="streak-count" id="streak-count">0</span>
+                    <span class="streak-bonus-tag eg-hidden" id="streak-bonus-tag"></span>
+                </div>
+
                 <div class="stats-bar" id="stats-bar">
                     <div class="stat-item stat-won">
                         <div class="stat-label" id="stat-won-label">Won</div>
@@ -889,6 +1023,19 @@
                         <div class="stat-label" id="stat-hands-label">Hands</div>
                         <div class="stat-value" id="stat-hands-value">0</div>
                     </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item stat-hands">
+                        <div class="stat-label" id="stat-best-streak-label">Best Streak</div>
+                        <div class="stat-value" id="stat-best-streak-value">🔥 0</div>
+                    </div>
+                </div>
+
+                <div class="challenges" id="challenges-panel" style="display:none;">
+                    <h3 onclick="egToggleChallenges()">
+                        <span id="challenges-title">🎯 Daily Challenges</span>
+                        <span id="challenges-caret">▾</span>
+                    </h3>
+                    <div id="challenges-list"></div>
                 </div>
 
                 <div class="instructions">
@@ -1450,6 +1597,8 @@
         let totalLost = 0;
         let handsPlayed = 0;
         let lossStreak = 0;
+        let winStreak = 0;
+        let bestStreak = 0;
         let hourlyRebuys = 0;
         let dailyRebuys = 0;
         let weeklyRebuys = loadWeeklyRebuys();
@@ -1458,6 +1607,73 @@
         let currentWeekKey = '';
         let lastWinAmount = 0;
         let activeLbTab = 'hourly';
+
+        // --- State Persistence (localStorage backup) ---
+        function saveGameState() {
+            try {
+                const state = {
+                    balance: balance,
+                    bet: bet,
+                    totalWon: totalWon,
+                    totalLost: totalLost,
+                    handsPlayed: handsPlayed,
+                    hourlyRebuys: hourlyRebuys,
+                    dailyRebuys: dailyRebuys,
+                    lossStreak: lossStreak,
+                    winStreak: winStreak,
+                    bestStreak: bestStreak,
+                    hourKey: currentHourKey,
+                    dayKey: currentDayKey,
+                    savedAt: Date.now()
+                };
+                localStorage.setItem('vp_game_state', JSON.stringify(state));
+            } catch (e) { /* localStorage unavailable, silently fail */ }
+        }
+
+        function restoreGameState() {
+            try {
+                const raw = localStorage.getItem('vp_game_state');
+                if (!raw) return false;
+                const state = JSON.parse(raw);
+                // Only restore if saved less than 24h ago
+                if (Date.now() - state.savedAt > 24 * 60 * 60 * 1000) return false;
+                balance = state.balance || 100;
+                bet = state.bet || 5;
+                totalWon = state.totalWon || 0;
+                totalLost = state.totalLost || 0;
+                handsPlayed = state.handsPlayed || 0;
+                hourlyRebuys = state.hourlyRebuys || 0;
+                dailyRebuys = state.dailyRebuys || 0;
+                lossStreak = state.lossStreak || 0;
+                winStreak = state.winStreak || 0;
+                bestStreak = state.bestStreak || 0;
+                // Only restore hour/day rebuys if same period
+                if (state.hourKey !== getHourKey()) hourlyRebuys = 0;
+                if (state.dayKey !== getDayKey()) dailyRebuys = 0;
+                document.getElementById('balance').textContent = balance;
+                return true;
+            } catch (e) { return false; }
+        }
+
+        // --- Firebase Error Handling Wrapper ---
+        function firebaseSafe(operation, fallback) {
+            try {
+                var result = operation();
+                if (result && typeof result.catch === 'function') {
+                    return result.catch(function(err) {
+                        console.error('Firebase operation failed:', err);
+                        if (typeof fallback === 'function') fallback(err);
+                        return null;
+                    });
+                }
+                return result;
+            } catch (err) {
+                console.error('Firebase operation threw:', err);
+                if (typeof fallback === 'function') fallback(err);
+                return null;
+            }
+        }
+
 
         function checkHourReset() {
             const hk = getHourKey();
@@ -1491,6 +1707,7 @@
             saveWeeklyRebuys();
             balance = 100;
             document.getElementById('balance').textContent = balance;
+            saveGameState();
             showRebuyNotification();
         }
 
@@ -1568,6 +1785,7 @@
             }
 
             if (window.applyRoomLang) window.applyRoomLang();
+            if (window.applyEngageLang) window.applyEngageLang();
         }
 
         function renderPayouts(t) {
@@ -1657,6 +1875,7 @@
 
             balance -= bet;
             document.getElementById('balance').textContent = balance;
+            saveGameState();
 
             deck = createDeck();
             shuffle(deck);
@@ -1675,7 +1894,22 @@
             document.getElementById('explanation').innerHTML = '';
         }
 
+        function getStreakBonus(streak) {
+            if (streak >= 10) return 0.5;
+            if (streak >= 7) return 0.3;
+            if (streak >= 5) return 0.2;
+            if (streak >= 3) return 0.1;
+            return 0;
+        }
+
         function draw() {
+            // Was a pair held before the draw? (for daily challenges)
+            const heldRankCounts = {};
+            hand.forEach(function(c, i) {
+                if (held[i]) heldRankCounts[c.rank] = (heldRankCounts[c.rank] || 0) + 1;
+            });
+            const hadHeldPair = Object.values(heldRankCounts).some(function(n) { return n >= 2; });
+
             // Replace unheld cards
             for (let i = 0; i < 5; i++) {
                 if (!held[i]) {
@@ -1688,7 +1922,15 @@
             const winIndices = result.winIndices || []; // Ensure it's an array
             const thirdMatchIndices = result.thirdMatchIndices || []; // Ensure it's an array
             const secondPairIndices = result.secondPairIndices || []; // Ensure it's an array
-            const win = bet * currentPayouts[handType];
+            let win = bet * currentPayouts[handType];
+            if (win > 0) {
+                winStreak++;
+                const streakBonus = getStreakBonus(winStreak);
+                if (streakBonus > 0) win += Math.round(win * streakBonus);
+            } else {
+                winStreak = 0;
+            }
+            updateStreakUI(win > 0);
             lastWinAmount = win;
             balance += win;
             handsPlayed++;
@@ -1708,6 +1950,7 @@
             renderPayouts(TRANSLATIONS[currentLang]);
 
             document.getElementById('balance').textContent = balance;
+            saveGameState();
 
             const t = TRANSLATIONS[currentLang];
             const resultEl = document.getElementById('result');
@@ -1724,6 +1967,9 @@
 
             renderHand(winIndices, thirdMatchIndices, secondPairIndices);
             updateScores(win, bet, handType);
+            if (window.egOnHandPlayed) {
+                window.egOnHandPlayed({ handType: handType, win: win, bet: bet, heldPair: hadHeldPair, streak: winStreak });
+            }
 
             gameState = 'bet';
             document.getElementById('deal-btn').disabled = false;
@@ -1929,6 +2175,35 @@
             }
         }
 
+        function updateStreakUI(justWon) {
+            const bar = document.getElementById('streak-bar');
+            const count = document.getElementById('streak-count');
+            const tag = document.getElementById('streak-bonus-tag');
+            count.textContent = winStreak;
+            bar.classList.toggle('active', winStreak >= 2);
+            const bonus = getStreakBonus(winStreak);
+            if (bonus > 0) {
+                tag.textContent = (window.et ? et('bonusTag') : '+{n}% payout bonus').replace('{n}', Math.round(bonus * 100));
+                tag.classList.remove('eg-hidden');
+            } else {
+                tag.classList.add('eg-hidden');
+            }
+            if (justWon && winStreak >= 2) {
+                bar.classList.remove('bump');
+                void bar.offsetWidth;
+                bar.classList.add('bump');
+            }
+            if (winStreak > bestStreak) {
+                bestStreak = winStreak;
+                document.getElementById('stat-best-streak-value').textContent = '🔥 ' + bestStreak;
+                const user = auth.currentUser;
+                if (user) {
+                    db.collection('users').doc(user.uid).set({ bestStreak: bestStreak }, { merge: true })
+                        .catch(function(err) { console.error('bestStreak save:', err); });
+                }
+            }
+        }
+
         // Initialize
         changeLanguage('en');
     // Keyboard support for bet selection (keys 1-5)
@@ -2003,6 +2278,7 @@
             loadUserState(user);
             refreshLeaderboard();
             if (window.initRooms) window.initRooms(user);
+            if (window.initEngagement) window.initEngagement(user);
         } else {
             document.getElementById('login-overlay').classList.remove('hidden');
             document.getElementById('game-container').style.display = 'none';
@@ -2010,6 +2286,7 @@
             const bar = document.getElementById('user-bar');
             if (bar) bar.remove();
             if (window.teardownRooms) window.teardownRooms();
+            if (window.teardownEngagement) window.teardownEngagement();
         }
     });
 
@@ -2038,16 +2315,22 @@
     }
 
     function loadUserState(user) {
+        // Try localStorage first as instant fallback
+        restoreGameState();
+
         const hourKey = getHourKey();
         const hourlyDocId = hourKey + '_' + user.uid;
-        db.collection('hourly_scores').doc(hourlyDocId).get().then(function(doc) {
-            if (doc.exists) {
-                const data = doc.data();
-                hourlyRebuys = data.rebuys || 0;
-                balance = (data.score || 0) + 100 * (1 + hourlyRebuys);
-                updateUI();
-            }
-        }).catch(function(err) {
+        firebaseSafe(function() {
+            return db.collection('hourly_scores').doc(hourlyDocId).get().then(function(doc) {
+                if (doc.exists) {
+                    const data = doc.data();
+                    hourlyRebuys = data.rebuys || 0;
+                    balance = (data.score || 0) + 100 * (1 + hourlyRebuys);
+                    document.getElementById('balance').textContent = balance;
+                    saveGameState();
+                }
+            });
+        }, function(err) {
             console.error('Error loading hourly state:', err);
         });
 
@@ -3049,6 +3332,473 @@
     })();
 
     setInterval(refreshRoomLeaderboard, 30000);
+
+    // ===================== Engagement: Phase 1 =====================
+    // Daily login rewards, comeback bonus, win streaks, daily challenges
+
+    var EG_REWARDS = [50, 75, 100, 150, 200, 300, 500];
+    var EG_COMEBACK_SHORT_MS = 24 * 3600e3;
+    var EG_COMEBACK_LONG_MS = 72 * 3600e3;
+    var EG_COMEBACK_SHORT_CREDITS = 100;
+    var EG_COMEBACK_LONG_CREDITS = 200;
+
+    var egUser = null;
+    var egModalQueue = [];
+    var egRewardState = null;    // {day, streak, longestStreak, totalClaimed}
+    var egComebackAmount = 0;
+    var egChallenges = null;     // {dateKey, list: [{id, target, progress, completed, reward}]}
+    var egChallengesCollapsed = false;
+
+    var CHALLENGE_POOL = [
+        { id: 'play10',        type: 'play',        target: 10,  reward: 30 },
+        { id: 'play20',        type: 'play',        target: 20,  reward: 50 },
+        { id: 'play30',        type: 'play',        target: 30,  reward: 75 },
+        { id: 'win3',          type: 'win',         target: 3,   reward: 40 },
+        { id: 'win5',          type: 'win',         target: 5,   reward: 60 },
+        { id: 'win8',          type: 'win',         target: 8,   reward: 90 },
+        { id: 'streak3',       type: 'streak',      target: 3,   reward: 75 },
+        { id: 'twopair2',      type: 'hand', hand: 'Two Pair',        target: 2, reward: 40 },
+        { id: 'trips1',        type: 'hand', hand: 'Three of a Kind', target: 1, reward: 40 },
+        { id: 'trips3',        type: 'hand', hand: 'Three of a Kind', target: 3, reward: 100 },
+        { id: 'straight1',     type: 'hand', hand: 'Straight',        target: 1, reward: 60 },
+        { id: 'flush1',        type: 'hand', hand: 'Flush',           target: 1, reward: 75 },
+        { id: 'fullhouse1',    type: 'hand', hand: 'Full House',      target: 1, reward: 90 },
+        { id: 'quads1',        type: 'hand', hand: 'Four of a Kind',  target: 1, reward: 100 },
+        { id: 'jacks5',        type: 'hand', hand: 'Jacks or Better', target: 5, reward: 50 },
+        { id: 'heldpair2',     type: 'heldPairWin', target: 2,   reward: 50 },
+        { id: 'betmax3',       type: 'maxBet',      target: 3,   reward: 60 },
+        { id: 'wincredits50',  type: 'winCredits',  target: 50,  reward: 50 },
+        { id: 'wincredits150', type: 'winCredits',  target: 150, reward: 100 },
+        { id: 'bigwin20',      type: 'bigWin',      target: 1,   reward: 75 }
+    ];
+
+    var ENGAGE_I18N = {
+        en: {
+            rewardTitle: '🎁 Daily Bonus', rewardSub: 'Come back every day — the rewards keep growing!',
+            dayLabel: 'Day', claimBtn: 'Claim {n} credits',
+            rewardHint: 'Miss a day and the streak resets to Day 1!',
+            longestStreak: 'Longest streak: {n} days',
+            comebackTitle: '👋 Welcome back!', comebackMsg: 'We missed you at the table — here\'s a little something to get you going.',
+            comebackBtn: 'Collect {n} credits',
+            streakLabel: 'Win Streak', bonusTag: '+{n}% payout bonus', bestStreakStat: 'Best Streak',
+            challengesTitle: '🎯 Daily Challenges',
+            challengeToast: '🏅 Challenge complete! +{n} credits',
+            rewardToast: '🎁 +{n} credits!',
+            chPlay: 'Play {n} hands', chWin: 'Win {n} hands', chStreak: 'Win {n} in a row',
+            chHand: 'Get {hand} ×{n}', chHeldPair: 'Win holding a pair ×{n}', chMaxBet: 'Play {n} hands at max bet',
+            chWinCredits: 'Win {n} credits total', chBigWin: 'Win {n}+ credits in one hand'
+        },
+        es: {
+            rewardTitle: '🎁 Bono Diario', rewardSub: '¡Vuelve cada día — las recompensas crecen!',
+            dayLabel: 'Día', claimBtn: 'Reclamar {n} créditos',
+            rewardHint: '¡Si faltas un día, la racha vuelve al Día 1!',
+            longestStreak: 'Racha más larga: {n} días',
+            comebackTitle: '👋 ¡Bienvenido de vuelta!', comebackMsg: 'Te extrañamos en la mesa — aquí tienes algo para empezar.',
+            comebackBtn: 'Recoger {n} créditos',
+            streakLabel: 'Racha de Victorias', bonusTag: '+{n}% de bono', bestStreakStat: 'Mejor Racha',
+            challengesTitle: '🎯 Desafíos Diarios',
+            challengeToast: '🏅 ¡Desafío completado! +{n} créditos',
+            rewardToast: '🎁 ¡+{n} créditos!',
+            chPlay: 'Juega {n} manos', chWin: 'Gana {n} manos', chStreak: 'Gana {n} seguidas',
+            chHand: 'Consigue {hand} ×{n}', chHeldPair: 'Gana manteniendo una pareja ×{n}', chMaxBet: 'Juega {n} manos con apuesta máxima',
+            chWinCredits: 'Gana {n} créditos en total', chBigWin: 'Gana {n}+ créditos en una mano'
+        },
+        fr: {
+            rewardTitle: '🎁 Bonus Quotidien', rewardSub: 'Reviens chaque jour — les récompenses grandissent !',
+            dayLabel: 'Jour', claimBtn: 'Réclamer {n} crédits',
+            rewardHint: 'Un jour manqué et la série repart au Jour 1 !',
+            longestStreak: 'Plus longue série : {n} jours',
+            comebackTitle: '👋 Bon retour !', comebackMsg: 'Tu nous as manqué à la table — voici de quoi bien reprendre.',
+            comebackBtn: 'Récupérer {n} crédits',
+            streakLabel: 'Série de Victoires', bonusTag: '+{n}% de bonus', bestStreakStat: 'Meilleure Série',
+            challengesTitle: '🎯 Défis du Jour',
+            challengeToast: '🏅 Défi accompli ! +{n} crédits',
+            rewardToast: '🎁 +{n} crédits !',
+            chPlay: 'Joue {n} mains', chWin: 'Gagne {n} mains', chStreak: 'Gagne {n} de suite',
+            chHand: 'Obtiens {hand} ×{n}', chHeldPair: 'Gagne en gardant une paire ×{n}', chMaxBet: 'Joue {n} mains à la mise max',
+            chWinCredits: 'Gagne {n} crédits au total', chBigWin: 'Gagne {n}+ crédits en une main'
+        },
+        de: {
+            rewardTitle: '🎁 Täglicher Bonus', rewardSub: 'Komm jeden Tag zurück — die Belohnungen wachsen!',
+            dayLabel: 'Tag', claimBtn: '{n} Credits abholen',
+            rewardHint: 'Ein verpasster Tag setzt die Serie auf Tag 1 zurück!',
+            longestStreak: 'Längste Serie: {n} Tage',
+            comebackTitle: '👋 Willkommen zurück!', comebackMsg: 'Wir haben dich am Tisch vermisst — hier ist etwas für den Neustart.',
+            comebackBtn: '{n} Credits abholen',
+            streakLabel: 'Siegesserie', bonusTag: '+{n}% Bonus', bestStreakStat: 'Beste Serie',
+            challengesTitle: '🎯 Tägliche Herausforderungen',
+            challengeToast: '🏅 Herausforderung geschafft! +{n} Credits',
+            rewardToast: '🎁 +{n} Credits!',
+            chPlay: 'Spiele {n} Hände', chWin: 'Gewinne {n} Hände', chStreak: 'Gewinne {n} in Folge',
+            chHand: 'Erziele {hand} ×{n}', chHeldPair: 'Gewinne mit gehaltenem Paar ×{n}', chMaxBet: 'Spiele {n} Hände mit Maximaleinsatz',
+            chWinCredits: 'Gewinne insgesamt {n} Credits', chBigWin: 'Gewinne {n}+ Credits in einer Hand'
+        },
+        he: {
+            rewardTitle: '🎁 בונוס יומי', rewardSub: 'חזור כל יום — הפרסים גדלים!',
+            dayLabel: 'יום', claimBtn: 'אסוף {n} קרדיטים',
+            rewardHint: 'פספסת יום? הרצף מתאפס ליום 1!',
+            longestStreak: 'הרצף הארוך ביותר: {n} ימים',
+            comebackTitle: '👋 ברוך שובך!', comebackMsg: 'התגעגענו אליך בשולחן — הנה משהו קטן בשבילך.',
+            comebackBtn: 'אסוף {n} קרדיטים',
+            streakLabel: 'רצף ניצחונות', bonusTag: 'בונוס +{n}%', bestStreakStat: 'הרצף הטוב ביותר',
+            challengesTitle: '🎯 אתגרים יומיים',
+            challengeToast: '🏅 אתגר הושלם! +{n} קרדיטים',
+            rewardToast: '🎁 +{n} קרדיטים!',
+            chPlay: 'שחק {n} ידיים', chWin: 'נצח ב-{n} ידיים', chStreak: 'נצח {n} ברצף',
+            chHand: 'השג {hand} ×{n}', chHeldPair: 'נצח עם זוג שמור ×{n}', chMaxBet: 'שחק {n} ידיים בהימור מקסימלי',
+            chWinCredits: 'צבור {n} קרדיטים מנצחונות', chBigWin: 'זכה ב-{n}+ קרדיטים ביד אחת'
+        },
+        ar: {
+            rewardTitle: '🎁 مكافأة يومية', rewardSub: 'عُد كل يوم — المكافآت تكبر!',
+            dayLabel: 'يوم', claimBtn: 'اجمع {n} رصيداً',
+            rewardHint: 'إذا فاتك يوم، تعود السلسلة إلى اليوم 1!',
+            longestStreak: 'أطول سلسلة: {n} أيام',
+            comebackTitle: '👋 أهلاً بعودتك!', comebackMsg: 'اشتقنا إليك على الطاولة — إليك شيئاً يعيدك للعب.',
+            comebackBtn: 'اجمع {n} رصيداً',
+            streakLabel: 'سلسلة انتصارات', bonusTag: 'مكافأة +{n}%', bestStreakStat: 'أفضل سلسلة',
+            challengesTitle: '🎯 تحديات يومية',
+            challengeToast: '🏅 اكتمل التحدي! +{n} رصيد',
+            rewardToast: '🎁 +{n} رصيد!',
+            chPlay: 'العب {n} يداً', chWin: 'افز بـ{n} أيدٍ', chStreak: 'افز بـ{n} على التوالي',
+            chHand: 'احصل على {hand} ×{n}', chHeldPair: 'افز محتفظاً بزوج ×{n}', chMaxBet: 'العب {n} أيدٍ بالرهان الأقصى',
+            chWinCredits: 'اجمع {n} رصيداً من الأرباح', chBigWin: 'افز بـ{n}+ رصيد في يد واحدة'
+        }
+    };
+
+    function et(key) {
+        var pack = ENGAGE_I18N[currentLang] || ENGAGE_I18N.en;
+        return pack[key] || ENGAGE_I18N.en[key] || key;
+    }
+
+    // --- lifecycle ---
+    window.initEngagement = function(user) {
+        egUser = user;
+        egModalQueue = [];
+        applyEngageLang();
+        egLoadUserProfile(user);
+        egLoadDailyReward(user);
+        egLoadChallenges(user);
+    };
+
+    window.teardownEngagement = function() {
+        egUser = null;
+        egModalQueue = [];
+        egRewardState = null;
+        egChallenges = null;
+        winStreak = 0;
+        bestStreak = 0;
+        updateStreakUI(false);
+        document.getElementById('challenges-panel').style.display = 'none';
+        egCloseModal('eg-reward-modal');
+        egCloseModal('eg-comeback-modal');
+    };
+
+    // --- modal queue (one at a time) ---
+    function egQueueModal(id) {
+        egModalQueue.push(id);
+        if (egModalQueue.length === 1) egShowModal(id);
+    }
+
+    function egShowModal(id) {
+        document.getElementById(id).classList.remove('eg-hidden');
+    }
+
+    function egCloseModal(id) {
+        document.getElementById(id).classList.add('eg-hidden');
+        var idx = egModalQueue.indexOf(id);
+        if (idx !== -1) egModalQueue.splice(idx, 1);
+        if (egModalQueue.length > 0) egShowModal(egModalQueue[0]);
+    }
+
+    // --- toast + confetti ---
+    function egToast(text) {
+        var el = document.getElementById('eg-toast');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'eg-toast';
+            el.className = 'eg-toast';
+            document.body.appendChild(el);
+        }
+        el.textContent = text;
+        el.classList.remove('show');
+        void el.offsetWidth;
+        el.classList.add('show');
+        setTimeout(function() { el.classList.remove('show'); }, 2500);
+    }
+
+    function egConfetti() {
+        var colors = ['#ffd700', '#4ade80', '#ff6b6b', '#8a2be2', '#ffffff', '#ffaa00'];
+        for (var i = 0; i < 28; i++) {
+            var p = document.createElement('div');
+            p.className = 'confetti-piece';
+            p.style.left = (Math.random() * 100) + 'vw';
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            p.style.animationDuration = (1.2 + Math.random() * 1.3) + 's';
+            p.style.animationDelay = (Math.random() * 0.4) + 's';
+            document.body.appendChild(p);
+            setTimeout(function(el) { return function() { el.remove(); }; }(p), 3200);
+        }
+    }
+
+    function egAddCredits(amount) {
+        balance += amount;
+        document.getElementById('balance').textContent = balance;
+    }
+
+    // --- user profile (best streak + comeback) ---
+    function egLoadUserProfile(user) {
+        db.collection('users').doc(user.uid).get().then(function(doc) {
+            var data = doc.exists ? doc.data() : {};
+            bestStreak = data.bestStreak || 0;
+            document.getElementById('stat-best-streak-value').textContent = '🔥 ' + bestStreak;
+
+            var last = data.lastActiveDate && typeof data.lastActiveDate.toDate === 'function'
+                ? data.lastActiveDate.toDate().getTime() : null;
+            if (last) {
+                var gap = Date.now() - last;
+                if (gap > EG_COMEBACK_LONG_MS) egComebackAmount = EG_COMEBACK_LONG_CREDITS;
+                else if (gap > EG_COMEBACK_SHORT_MS) egComebackAmount = EG_COMEBACK_SHORT_CREDITS;
+            }
+            // Refresh presence — also guarantees one claim per absence period
+            return db.collection('users').doc(user.uid).set({
+                lastActiveDate: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        }).then(function() {
+            if (egComebackAmount > 0) {
+                document.getElementById('eg-comeback-amount').textContent = '+' + egComebackAmount;
+                document.getElementById('eg-comeback-claim').textContent =
+                    et('comebackBtn').replace('{n}', egComebackAmount);
+                egQueueModal('eg-comeback-modal');
+            }
+        }).catch(function(err) { console.error('egLoadUserProfile:', err); });
+    }
+
+    function egClaimComeback() {
+        if (!egUser || egComebackAmount <= 0) return;
+        var amount = egComebackAmount;
+        egComebackAmount = 0;
+        egAddCredits(amount);
+        egConfetti();
+        egToast(et('rewardToast').replace('{n}', amount));
+        db.collection('users').doc(egUser.uid).set({
+            comebackClaimed: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(function(err) { console.error('comeback claim:', err); });
+        egCloseModal('eg-comeback-modal');
+    }
+
+    // --- daily login reward ---
+    function egLoadDailyReward(user) {
+        db.collection('daily_rewards').doc(user.uid).get().then(function(doc) {
+            var data = doc.exists ? doc.data() : null;
+            var today = getDayKey();
+            var yesterday = getDayKey(new Date(Date.now() - 86400e3));
+            var longest = data ? (data.longestStreak || 0) : 0;
+            var claimed = data ? (data.totalClaimed || 0) : 0;
+
+            if (data && data.lastClaimDate === today) return; // already claimed today
+
+            var day, streak;
+            if (data && data.lastClaimDate === yesterday) {
+                day = ((data.currentDay || 0) % 7) + 1;
+                streak = (data.streak || data.currentDay || 0) + 1;
+            } else {
+                day = 1;
+                streak = 1;
+            }
+            egRewardState = { day: day, streak: streak, longestStreak: longest, totalClaimed: claimed };
+            egRenderRewardCalendar();
+            egQueueModal('eg-reward-modal');
+        }).catch(function(err) { console.error('egLoadDailyReward:', err); });
+    }
+
+    function egRenderRewardCalendar() {
+        if (!egRewardState) return;
+        var cal = document.getElementById('eg-reward-calendar');
+        cal.innerHTML = '';
+        for (var i = 0; i < 7; i++) {
+            var day = i + 1;
+            var cell = document.createElement('div');
+            var state = day < egRewardState.day ? 'claimed' : day === egRewardState.day ? 'today' : 'locked';
+            cell.className = 'reward-day ' + state;
+            cell.innerHTML = et('dayLabel') + ' ' + day +
+                '<span class="rd-amount">' + (day < egRewardState.day ? '✓' : EG_REWARDS[i]) + '</span>';
+            cal.appendChild(cell);
+        }
+        document.getElementById('eg-reward-claim').textContent =
+            et('claimBtn').replace('{n}', EG_REWARDS[egRewardState.day - 1]);
+        var longestEl = document.getElementById('eg-reward-longest');
+        longestEl.textContent = egRewardState.longestStreak > 0
+            ? et('longestStreak').replace('{n}', egRewardState.longestStreak) : '';
+    }
+
+    function egClaimDailyReward() {
+        if (!egUser || !egRewardState) return;
+        var s = egRewardState;
+        egRewardState = null;
+        var amount = EG_REWARDS[s.day - 1];
+        egAddCredits(amount);
+        egConfetti();
+        egToast(et('rewardToast').replace('{n}', amount));
+        db.collection('daily_rewards').doc(egUser.uid).set({
+            uid: egUser.uid,
+            currentDay: s.day,
+            lastClaimDate: getDayKey(),
+            streak: s.streak,
+            longestStreak: Math.max(s.longestStreak, s.streak),
+            totalClaimed: s.totalClaimed + amount,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(function(err) { console.error('daily reward claim:', err); });
+        egCloseModal('eg-reward-modal');
+    }
+
+    // --- daily challenges ---
+    function egPickChallenges(dateKey) {
+        var h = 0;
+        for (var i = 0; i < dateKey.length; i++) h = (h * 31 + dateKey.charCodeAt(i)) >>> 0;
+        var pool = CHALLENGE_POOL.slice();
+        var picked = [];
+        for (var k = 0; k < 3; k++) {
+            h = (h * 1103515245 + 12345) >>> 0;
+            picked.push(pool.splice(h % pool.length, 1)[0]);
+        }
+        return picked;
+    }
+
+    function egLoadChallenges(user) {
+        var dateKey = getDayKey();
+        var ref = db.collection('daily_challenges').doc(dateKey + '_' + user.uid);
+        ref.get().then(function(doc) {
+            if (doc.exists) {
+                egChallenges = { dateKey: dateKey, list: doc.data().challenges || [] };
+            } else {
+                var list = egPickChallenges(dateKey).map(function(t) {
+                    return { id: t.id, target: t.target, progress: 0, completed: false, reward: t.reward };
+                });
+                egChallenges = { dateKey: dateKey, list: list };
+                ref.set({
+                    dateKey: dateKey,
+                    uid: user.uid,
+                    challenges: list,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).catch(function(err) { console.error('challenges create:', err); });
+            }
+            egRenderChallenges();
+        }).catch(function(err) { console.error('egLoadChallenges:', err); });
+    }
+
+    function egChallengeTemplate(id) {
+        return CHALLENGE_POOL.find(function(t) { return t.id === id; }) || null;
+    }
+
+    function egChallengeDesc(ch) {
+        var t = egChallengeTemplate(ch.id);
+        if (!t) return ch.id;
+        var handName = t.hand ? (TRANSLATIONS[currentLang].payouts[t.hand] || t.hand) : '';
+        switch (t.type) {
+            case 'play':        return et('chPlay').replace('{n}', t.target);
+            case 'win':         return et('chWin').replace('{n}', t.target);
+            case 'streak':      return et('chStreak').replace('{n}', t.target);
+            case 'hand':        return et('chHand').replace('{hand}', handName).replace('{n}', t.target);
+            case 'heldPairWin': return et('chHeldPair').replace('{n}', t.target);
+            case 'maxBet':      return et('chMaxBet').replace('{n}', t.target);
+            case 'winCredits':  return et('chWinCredits').replace('{n}', t.target);
+            case 'bigWin':      return et('chBigWin').replace('{n}', 20);
+            default:            return ch.id;
+        }
+    }
+
+    function egRenderChallenges() {
+        var panel = document.getElementById('challenges-panel');
+        var listEl = document.getElementById('challenges-list');
+        if (!egChallenges || !egUser) { panel.style.display = 'none'; return; }
+        panel.style.display = '';
+        listEl.style.display = egChallengesCollapsed ? 'none' : '';
+        document.getElementById('challenges-caret').textContent = egChallengesCollapsed ? '▸' : '▾';
+        listEl.innerHTML = '';
+        egChallenges.list.forEach(function(ch) {
+            var pct = Math.min(100, Math.round((ch.progress / ch.target) * 100));
+            var row = document.createElement('div');
+            row.className = 'challenge-row' + (ch.completed ? ' done' : '');
+            row.innerHTML =
+                '<div class="challenge-desc">' +
+                    '<span>' + (ch.completed ? '✅ ' : '') + egChallengeDesc(ch) +
+                    ' <span style="opacity:0.6">(' + Math.min(ch.progress, ch.target) + '/' + ch.target + ')</span></span>' +
+                    '<span class="challenge-reward">+' + ch.reward + '</span>' +
+                '</div>' +
+                '<div class="challenge-bar"><div class="challenge-fill" style="width:' + pct + '%"></div></div>';
+            listEl.appendChild(row);
+        });
+    }
+
+    function egToggleChallenges() {
+        egChallengesCollapsed = !egChallengesCollapsed;
+        egRenderChallenges();
+    }
+
+    window.egOnHandPlayed = function(ev) {
+        if (!egUser || !egChallenges) return;
+        if (egChallenges.dateKey !== getDayKey()) {
+            // Midnight rollover — fetch today's fresh set
+            egLoadChallenges(egUser);
+            return;
+        }
+        var changed = false;
+        egChallenges.list.forEach(function(ch) {
+            if (ch.completed) return;
+            var t = egChallengeTemplate(ch.id);
+            if (!t) return;
+            var before = ch.progress;
+            switch (t.type) {
+                case 'play':        ch.progress++; break;
+                case 'win':         if (ev.win > 0) ch.progress++; break;
+                case 'streak':      ch.progress = Math.max(ch.progress, ev.streak); break;
+                case 'hand':        if (ev.handType === t.hand) ch.progress++; break;
+                case 'heldPairWin': if (ev.heldPair && ev.win > 0) ch.progress++; break;
+                case 'maxBet':      if (ev.bet >= 50) ch.progress++; break;
+                case 'winCredits':  ch.progress += ev.win; break;
+                case 'bigWin':      if (ev.win >= 20) ch.progress++; break;
+            }
+            if (ch.progress !== before) changed = true;
+            if (ch.progress >= ch.target) {
+                ch.progress = ch.target;
+                ch.completed = true;
+                changed = true;
+                egAddCredits(ch.reward);
+                egConfetti();
+                egToast(et('challengeToast').replace('{n}', ch.reward));
+            }
+        });
+        if (changed) {
+            egRenderChallenges();
+            db.collection('daily_challenges').doc(egChallenges.dateKey + '_' + egUser.uid).set({
+                dateKey: egChallenges.dateKey,
+                uid: egUser.uid,
+                challenges: egChallenges.list,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).catch(function(err) { console.error('challenges save:', err); });
+        }
+    };
+
+    // --- i18n for engagement UI ---
+    window.applyEngageLang = function() {
+        var set = function(id, text) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = text;
+        };
+        set('eg-reward-title', et('rewardTitle'));
+        set('eg-reward-sub', et('rewardSub'));
+        set('eg-reward-hint', et('rewardHint'));
+        set('eg-comeback-title', et('comebackTitle'));
+        set('eg-comeback-msg', et('comebackMsg'));
+        set('streak-label', et('streakLabel'));
+        set('stat-best-streak-label', et('bestStreakStat'));
+        set('challenges-title', et('challengesTitle'));
+        if (egComebackAmount > 0) {
+            set('eg-comeback-claim', et('comebackBtn').replace('{n}', egComebackAmount));
+        }
+        if (egRewardState) egRenderRewardCalendar();
+        if (egChallenges) egRenderChallenges();
+    };
     </script>
 </body>
 </html>
