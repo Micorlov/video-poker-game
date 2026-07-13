@@ -2,7 +2,7 @@
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'vp-cache-v2';
+const CACHE_NAME = 'vp-cache-v3';
 const ASSETS = [
   'video_poker.html',
   'manifest.json',
@@ -59,6 +59,18 @@ self.addEventListener('fetch', event => {
     event.request.url.includes('fcmregistrations.googleapis.com') ||
     event.request.url.includes('fcm.googleapis.com')
   ) {
+    return;
+  }
+  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+          return response;
+        })
+        .catch(() => caches.match(event.request).then(cached => cached || caches.match('video_poker.html')))
+    );
     return;
   }
   event.respondWith(
