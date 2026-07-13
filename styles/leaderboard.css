@@ -169,6 +169,7 @@
             justify-content: space-between;
             padding: 8px;
             position: relative;
+            overflow: hidden;
         }
         .card.red { color: #e63946; }
         .card:hover {
@@ -639,6 +640,49 @@
         }
         .google-btn:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(0,0,0,0.4); }
         .google-btn svg { width: 24px; height: 24px; }
+        .login-divider {
+            display: flex; align-items: center; gap: 14px;
+            width: 100%; max-width: 340px; margin: 4px 0;
+            color: rgba(255,255,255,0.35); font-size: 13px;
+        }
+        .login-divider::before, .login-divider::after {
+            content: ''; flex: 1; height: 1px;
+            background: rgba(255,255,255,0.15);
+        }
+        .email-login-form {
+            display: flex; flex-direction: column; gap: 10px;
+            width: 100%; max-width: 340px;
+        }
+        .email-login-row {
+            display: flex; gap: 8px;
+        }
+        .email-login-row .email-input { flex: 1; }
+        .email-input {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 12px; padding: 12px 16px;
+            color: #fff; font-size: 15px; font-family: inherit;
+            outline: none; transition: border-color 0.2s;
+            width: 100%; box-sizing: border-box;
+        }
+        .email-input:focus { border-color: rgba(77, 166, 255, 0.6); }
+        .email-input::placeholder { color: rgba(255,255,255,0.3); }
+        .email-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: linear-gradient(135deg, #4da6ff, #3b82f6);
+            color: #fff; border: none; border-radius: 40px;
+            padding: 14px 32px; font-size: 17px; font-weight: 600;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .email-btn:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5); }
+        .email-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .email-confirm {
+            display: none; text-align: center; color: #4ade80; font-size: 14px;
+            padding: 12px 16px; background: rgba(74, 222, 128, 0.1);
+            border-radius: 12px; border: 1px solid rgba(74, 222, 128, 0.2);
+            width: 100%; max-width: 340px; box-sizing: border-box;
+        }
         .user-bar {
             display: flex; align-items: center; gap: 10px;
             justify-content: center; margin-bottom: 10px;

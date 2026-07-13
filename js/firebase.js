@@ -30,11 +30,70 @@ const firebaseConfig = {
         });
     }
 
+    function signInWithEmail() {
+        var email = document.getElementById('login-email').value.trim();
+        var firstName = document.getElementById('login-first-name').value.trim();
+        var lastName = document.getElementById('login-last-name').value.trim();
+        var errorEl = document.getElementById('login-error');
+        var confirmEl = document.getElementById('email-confirm-msg');
+        var submitBtn = document.getElementById('email-submit-btn');
+
+        if (errorEl) errorEl.style.display = 'none';
+        if (confirmEl) confirmEl.style.display = 'none';
+
+        if (!email || !firstName || !lastName) {
+            if (errorEl) {
+                errorEl.textContent = 'Please fill in all fields.';
+                errorEl.style.display = 'block';
+            }
+            return;
+        }
+
+        // Store name so we can set it after sign-in completes
+        var displayName = firstName + ' ' + lastName;
+        try {
+            localStorage.setItem('vp_email_name', displayName);
+            localStorage.setItem('vp_email_address', email);
+        } catch (e) {}
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending link...';
+        }
+
+        var actionCodeSettings = {
+            url: window.location.href.split('?')[0],
+            handleCodeInApp: true
+        };
+
+        auth.sendSignInLinkToEmail(email, actionCodeSettings).then(function() {
+            // Store email locally so we don't need to ask again
+            try {
+                localStorage.setItem('vp_email_for_signin', email);
+            } catch (e) {}
+
+            if (confirmEl) confirmEl.style.display = 'block';
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✉ Continue with Email';
+            }
+        }).catch(function(err) {
+            if (errorEl) {
+                errorEl.textContent = err.message;
+                errorEl.style.display = 'block';
+            }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✉ Continue with Email';
+            }
+        });
+    }
+
     auth.onAuthStateChanged(function(user) {
         // Handle redirect result (must be called after auth state is ready)
         auth.getRedirectResult().catch(function(err) {
             if (err && err.code !== 'auth/no-current-user') {
-                const el = document.getElementById('login-error');
+                var el = document.getElementById('login-error');
                 if (el) {
                     el.textContent = err.message;
                     el.style.display = 'block';
@@ -42,7 +101,45 @@ const firebaseConfig = {
             }
         });
 
+        // Check for email link sign-in completion
+        if (!user && auth.isSignInWithEmailLink(window.location.href)) {
+            var savedEmail = '';
+            try { savedEmail = localStorage.getItem('vp_email_for_signin') || ''; } catch (e) {}
+            if (!savedEmail) {
+                savedEmail = window.prompt('Please enter your email to confirm sign-in:') || '';
+                if (savedEmail) {
+                    try { localStorage.setItem('vp_email_for_signin', savedEmail); } catch (e) {}
+                }
+            }
+            if (savedEmail) {
+                auth.signInWithEmailLink(savedEmail, window.location.href).then(function() {
+                    try { localStorage.removeItem('vp_email_for_signin'); } catch (e) {}
+                }).catch(function(err) {
+                    var el = document.getElementById('login-error');
+                    if (el) {
+                        el.textContent = err.message;
+                        el.style.display = 'block';
+                    }
+                });
+            }
+            return;
+        }
+
         if (user) {
+            // If user signed in via email link, set their display name
+            var pendingName = '';
+            try {
+                pendingName = localStorage.getItem('vp_email_name') || '';
+            } catch (e) {}
+            if (pendingName && !user.displayName) {
+                user.updateProfile({ displayName: pendingName }).then(function() {
+                    try { localStorage.removeItem('vp_email_name'); } catch (e) {}
+                    injectUserBar(user);
+                }).catch(function() {
+                    // Non-fatal: name will still be saved in Firestore
+                });
+            }
+
             document.getElementById('login-overlay').classList.add('hidden');
             document.getElementById('game-container').style.display = '';
             document.getElementById('rank-bar').classList.remove('hidden');
@@ -57,7 +154,7 @@ const firebaseConfig = {
             document.getElementById('login-overlay').classList.remove('hidden');
             document.getElementById('game-container').style.display = 'none';
             document.getElementById('rank-bar').classList.add('hidden');
-            const bar = document.getElementById('user-bar');
+            var bar = document.getElementById('user-bar');
             if (bar) bar.remove();
             if (window.teardownRooms) window.teardownRooms();
             if (window.teardownEngagement) window.teardownEngagement();
@@ -126,10 +223,21 @@ const firebaseConfig = {
     }
 
     function logUserToFirestore(user) {
+        // For email sign-in, fall back to stored name if profile has no displayName
+        var displayName = user.displayName || '';
+        if (!displayName) {
+            try {
+                var stored = localStorage.getItem('vp_email_name') || '';
+                if (stored) {
+                    displayName = stored;
+                    try { localStorage.removeItem('vp_email_name'); } catch (e) {}
+                }
+            } catch (e) {}
+        }
         db.collection('users').doc(user.uid).set({
             uid: user.uid,
             email: user.email,
-            displayName: user.displayName || '',
+            displayName: displayName,
             photoURL: user.photoURL || '',
             lastLogin: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true }).then(function() {

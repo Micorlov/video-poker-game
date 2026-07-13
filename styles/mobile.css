@@ -191,6 +191,14 @@
         font-size: 2.2em;
         padding: 0 12px;
     }
+    .login-subtitle { font-size: 0.9em; }
+    .google-btn { padding: 12px 24px; font-size: 15px; }
+    .login-divider { margin: 2px 0; font-size: 12px; }
+    .email-login-form { max-width: 100%; gap: 8px; }
+    .email-login-row { flex-direction: row; gap: 6px; }
+    .email-input { padding: 10px 14px; font-size: 14px; }
+    .email-btn { padding: 12px 24px; font-size: 15px; }
+    .email-confirm { font-size: 13px; padding: 10px 14px; }
 
     /* --- Rank bar: safe area top --- */
     .rank-bar {
