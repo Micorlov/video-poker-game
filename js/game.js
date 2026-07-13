@@ -36,11 +36,11 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             return Math.min(chance, BOOST_MAX);
         }
 
-        let currentLang = 'en';
+        var currentLang = 'en';
         let deck = [];
         let hand = [];
         let held = [false, false, false, false, false];
-        let balance = 100;
+        var balance = 100;
         let bet = 5;
         let gameState = 'bet';
         let lastHandType = null;
@@ -50,12 +50,12 @@ const SUITS = ['♠', '♥', '♦', '♣'];
         let lossStreak = 0;
         let winStreak = 0;
         let bestStreak = 0;
-        let hourlyRebuys = 0;
-        let dailyRebuys = 0;
-        let weeklyRebuys = loadWeeklyRebuys();
-        let currentHourKey = '';
-        let currentDayKey = '';
-        let currentWeekKey = '';
+        var hourlyRebuys = 0;
+        var dailyRebuys = 0;
+        var weeklyRebuys = loadWeeklyRebuys();
+        var currentHourKey = '';
+        var currentDayKey = '';
+        var currentWeekKey = '';
         let lastWinAmount = 0;
         let activeLbTab = 'hourly';
 

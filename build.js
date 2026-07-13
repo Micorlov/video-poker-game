@@ -33,8 +33,8 @@ const jsFiles = [
     'js/firebase.js',
     'js/rooms.js',
     'js/competitions.js',
-    'js/achievements.js',
     'js/challenges.js',
+    'js/achievements.js',
     'js/rewards.js',
     'js/ui.js',
     'js/game.js'
