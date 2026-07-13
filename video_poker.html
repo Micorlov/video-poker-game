@@ -140,32 +140,89 @@
         .card {
             width: 90px;
             height: 130px;
-            background: linear-gradient(145deg, #fff, #f5f5f5);
-            color: #333;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            user-select: none;
-            border: 3px solid transparent;
             position: relative;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            perspective: 1000px;
+            user-select: none;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
         }
-        .card:hover {
-            transform: translateY(-10px) rotateX(10deg);
-            box-shadow: 0 15px 30px rgba(255,215,0,0.4);
+        .card-inner.animating {
+            will-change: transform;
         }
-        .card.held {
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            box-sizing: border-box;
+        }
+        .card-front {
+            background: linear-gradient(145deg, #fff, #f5f5f5);
+            color: #333;
+            border: 3px solid transparent;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 8px;
+            position: relative;
+        }
+        .card.red { color: #e63946; }
+        .card:hover {
+            transform: translateY(-10px);
+        }
+        .card.held .card-front {
             border-color: #ffd700;
             box-shadow: 0 0 25px #ffd700, 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .card.held {
             transform: translateY(-10px);
             animation: pulse 1.5s infinite;
+        }
+        .card.winning .card-front {
+            border-color: #ff6b6b !important;
+            box-shadow: 0 0 25px #ff6b6b, 0 10px 25px rgba(0,0,0,0.5) !important;
+            background: linear-gradient(145deg, #fff5f5, #ffe0e0);
+        }
+        .card.winning {
+            transform: translateY(-10px) scale(1.05);
+            animation: win-pulse 1s infinite alternate;
+        }
+        .card.second-pair .card-front {
+            border-color: #8a2be2 !important;
+            box-shadow: 0 0 25px #8a2be2, 0 10px 25px rgba(0,0,0,0.5) !important;
+            background: linear-gradient(145deg, #f6f0ff, #e6d4ff);
+        }
+        .card.second-pair {
+            transform: translateY(-10px) scale(1.05);
+            animation: second-pulse 1s infinite alternate;
+        }
+        .card.third-match .card-front {
+            border-color: #8a2be2 !important;
+            box-shadow: 0 0 25px #8a2be2, 0 10px 25px rgba(0,0,0,0.5) !important;
+            background: linear-gradient(145deg, #e6d8f5, #ccb4e6);
+        }
+        .card.third-match {
+            transform: translateY(-15px) rotate(3deg) scale(1.08);
+            animation: third-pulse 1.2s infinite alternate;
+        }
+        .card.unheld {
+            opacity: 0.6;
+            filter: brightness(0.8) grayscale(15%);
+            transform: scale(0.95);
         }
         .card .held-badge {
             display: none;
@@ -175,7 +232,7 @@
             transform: translateX(-50%);
             background: linear-gradient(135deg, #ffd700, #ffaa00);
             color: #0c2317;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
             padding: 2px 10px;
             border-radius: 20px;
@@ -188,33 +245,6 @@
         .card.held .held-badge {
             display: block;
         }
-        .card.unheld {
-            opacity: 0.6;
-            filter: brightness(0.8) grayscale(15%);
-            transform: scale(0.95);
-        }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 15px #ffd700, 0 10px 25px rgba(0,0,0,0.5); }
-            50% { box-shadow: 0 0 30px #ffd700, 0 10px 25px rgba(0,0,0,0.5); }
-        }
-        .card.winning {
-            border-color: #ff6b6b !important;
-            box-shadow: 0 0 25px #ff6b6b, 0 10px 25px rgba(0,0,0,0.5) !important;
-            transform: translateY(-10px) scale(1.05);
-            animation: win-pulse 1s infinite alternate;
-            background: linear-gradient(145deg, #fff5f5, #ffe0e0);
-        }
-        .card.second-pair {
-            border-color: #8a2be2 !important; /* Purple/Blue-violet */
-            box-shadow: 0 0 25px #8a2be2, 0 10px 25px rgba(0,0,0,0.5) !important;
-            transform: translateY(-10px) scale(1.05);
-            animation: second-pulse 1s infinite alternate;
-            background: linear-gradient(145deg, #f6f0ff, #e6d4ff);
-        }
-        @keyframes second-pulse {
-            0% { box-shadow: 0 0 20px #8a2be2, 0 10px 25px rgba(0,0,0,0.5); }
-            100% { box-shadow: 0 0 35px #8a2be2, 0 0 50px rgba(138, 43, 226, 0.6); }
-        }
         .card .win-badge {
             display: none;
             position: absolute;
@@ -223,7 +253,7 @@
             transform: translateX(-50%);
             background: linear-gradient(135deg, #ff6b6b, #e63946);
             color: #fff;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 800;
             padding: 2px 8px;
             border-radius: 20px;
@@ -241,21 +271,201 @@
             background: linear-gradient(135deg, #8a2be2, #6a1b9a);
             box-shadow: 0 2px 8px rgba(138, 43, 226, 0.5);
         }
+        .card.third-match .win-badge {
+            display: block;
+            background: linear-gradient(135deg, #8a2be2, #6a1b9a);
+            box-shadow: 0 2px 8px rgba(138, 43, 226, 0.5);
+        }
+
+        /* Card back design: dark green with gold diamond pattern */
+        .card-back {
+            background: linear-gradient(135deg, #0f3c25, #061e12);
+            transform: rotateY(180deg);
+            border: 3px solid #ffd700;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .card-back::before {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            border-radius: 8px;
+        }
+        .card-back::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(45deg, rgba(255, 215, 0, 0.1) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(255, 215, 0, 0.1) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, rgba(255, 215, 0, 0.1) 75%),
+                linear-gradient(-45deg, transparent 75%, rgba(255, 215, 0, 0.1) 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+        }
+
+        /* Card Face Elements */
+        .card-index {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+            font-size: 13px;
+            font-weight: 800;
+        }
+        .card-index.top-left {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+        }
+        .card-index.bottom-right {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            transform: rotate(180deg);
+        }
+        .card-index-rank {
+            font-size: 13px;
+        }
+        .card-index-suit {
+            font-size: 11px;
+            margin-top: 1px;
+        }
+        .card-suit-large {
+            font-size: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            margin-top: 8px;
+        }
+        .card-royalty-center {
+            width: 48px;
+            height: 68px;
+            margin: auto;
+            border-radius: 8px;
+            border: 2px solid #ffd700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: rgba(255,255,255,0.9);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            margin-top: 18px;
+        }
+        .card-royalty-center.rank-J { background: linear-gradient(135deg, #1e40af, #3b82f6); }
+        .card-royalty-center.rank-Q { background: linear-gradient(135deg, #6b21a8, #a855f7); }
+        .card-royalty-center.rank-K { background: linear-gradient(135deg, #991b1b, #ef4444); }
+
+        .pip-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            width: 100%;
+            height: 72px;
+            margin-top: 18px;
+            padding: 2px 10px;
+            box-sizing: border-box;
+        }
+        .pip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            visibility: hidden;
+        }
+        .pip.active {
+            visibility: visible;
+        }
+
+        /* Animations & Keyframes */
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 15px #ffd700, 0 10px 25px rgba(0,0,0,0.5); }
+            50% { box-shadow: 0 0 30px #ffd700, 0 10px 25px rgba(0,0,0,0.5); }
+        }
         @keyframes win-pulse {
             0% { box-shadow: 0 0 20px #ff6b6b, 0 10px 25px rgba(0,0,0,0.5); }
             100% { box-shadow: 0 0 35px #ff6b6b, 0 0 50px rgba(255, 107, 107, 0.6); }
         }
-        .card.red { color: #e63946; }
-        .card.third-match {
-            border-color: #8a2be2 !important; /* Blue-violet */
-            box-shadow: 0 0 25px #8a2be2, 0 10px 25px rgba(0,0,0,0.5) !important;
-            transform: translateY(-15px) rotate(3deg) scale(1.08);
-            animation: third-pulse 1.2s infinite alternate;
-            background: linear-gradient(145deg, #e6d8f5, #ccb4e6);
+        @keyframes second-pulse {
+            0% { box-shadow: 0 0 20px #8a2be2, 0 10px 25px rgba(0,0,0,0.5); }
+            100% { box-shadow: 0 0 35px #8a2be2, 0 0 50px rgba(138, 43, 226, 0.6); }
         }
         @keyframes third-pulse {
             0% { box-shadow: 0 0 20px #8a2be2, 0 10px 30px rgba(0,0,0,0.5); }
             100% { box-shadow: 0 0 40px #8a2be2, 0 0 60px rgba(138, 43, 226, 0.7); }
+        }
+        @keyframes shimmer-gold {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        .shimmer-gold {
+            background: linear-gradient(90deg, #4ade80 0%, #ffd700 50%, #4ade80 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer-gold 2s linear infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-16px); }
+        }
+        .card.bounce {
+            animation: bounce 0.6s ease infinite alternate;
+        }
+        @keyframes screen-flash {
+            0% { opacity: 0.8; background: #ffffff; }
+            100% { opacity: 0; background: transparent; }
+        }
+        .flash-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            pointer-events: none;
+            animation: screen-flash 0.5s ease-out forwards;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-8px, 0); }
+            20%, 40%, 60%, 80% { transform: translate(8px, 0); }
+        }
+        .screen-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes confetti-burst {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0); opacity: 0; }
+        }
+        .confetti-burst-piece {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            z-index: 10008;
+            pointer-events: none;
+            animation: confetti-burst 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+        @keyframes gold-rain-fall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+        .gold-rain-piece {
+            position: fixed;
+            width: 5px;
+            height: 10px;
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            border-radius: 1px;
+            z-index: 10008;
+            pointer-events: none;
+            top: -20px;
+            animation: gold-rain-fall 2s linear forwards;
         }
 .suit { font-size: 42px; margin: 5px 0; }
         .rank { font-size: 22px; }
@@ -2103,6 +2313,10 @@
                 }
             }
 
+            // Clean up celebration classes & overlays
+            document.body.classList.remove('screen-shake');
+            document.querySelectorAll('.flash-overlay, .confetti-burst-piece, .gold-rain-piece').forEach(el => el.remove());
+
             balance -= bet;
             document.getElementById('balance').textContent = balance;
             saveGameState();
@@ -2179,7 +2393,12 @@
             updateStats();
             renderPayouts(TRANSLATIONS[currentLang]);
 
-            document.getElementById('balance').textContent = balance;
+            if (win === 0) {
+                document.getElementById('balance').textContent = balance;
+                playSound('loss');
+            } else {
+                triggerWinCelebration(handType, win);
+            }
             saveGameState();
 
             if (win > 0 && HAND_RANK[handType] >= 3) {
@@ -2203,7 +2422,7 @@
                 document.getElementById('explanation').textContent = t.explanations[handType];
             }
 
-            renderHand(winIndices, thirdMatchIndices, secondPairIndices);
+            renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
             updateScores(win, bet, handType);
             if (window.egOnHandPlayed) {
                 window.egOnHandPlayed({ handType: handType, win: win, bet: bet, heldPair: hadHeldPair, streak: winStreak });
@@ -2218,6 +2437,7 @@
             if (gameState !== 'hold') return;
             held[i] = !held[i];
             renderHand();
+            playSound('click');
         }
 
         function getWinBadgeText(cardIndex, handType) {
@@ -2265,18 +2485,34 @@
             return '';
         }
 
-        function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = []) {
+        function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false) {
             const handEl = document.getElementById('hand');
             handEl.innerHTML = '';
             const t = TRANSLATIONS[currentLang];
             const anyHeld = held.some(h => h);
 
+            const PIP_MAPS = {
+                '2': [1, 13],
+                '3': [1, 7, 13],
+                '4': [0, 2, 12, 14],
+                '5': [0, 2, 7, 12, 14],
+                '6': [0, 2, 6, 8, 12, 14],
+                '7': [0, 2, 6, 8, 12, 14, 4],
+                '8': [0, 2, 6, 8, 12, 14, 4, 10],
+                '9': [0, 2, 3, 5, 9, 11, 12, 14, 7],
+                '10': [0, 2, 3, 5, 9, 11, 12, 14, 4, 10]
+            };
+
             hand.forEach((card, i) => {
                 const cardEl = document.createElement('div');
                 const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || secondPairIndices.length > 0;
+                
+                // If draw is true, only unheld cards start face-down (flipped)
+                const shouldStartFlipped = isDraw ? !held[i] : true;
+                
                 const isHeld = !isResult && held[i];
                 const isUnheld = !isResult && anyHeld && !held[i];
-                let classes = `card ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
+                let classes = `card ${shouldStartFlipped ? 'flipped' : ''} ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
 
                 if (winningIndices.includes(i)) {
                     classes += ' winning';
@@ -2293,15 +2529,64 @@
                 
                 const badgeText = t.heldBadge || 'HELD';
                 const winBadgeText = isResult ? getWinBadgeText(i, lastHandType) : '';
+                
+                // Generate center content
+                let centerContent = '';
+                if (card.rank === 'A') {
+                    centerContent = `<div class="card-suit-large">${card.suit}</div>`;
+                } else if (['J', 'Q', 'K'].includes(card.rank)) {
+                    centerContent = `<div class="card-royalty-center rank-${card.rank}">${card.rank === 'J' ? '⚔️' : card.rank === 'Q' ? '👑' : '🛡️'}</div>`;
+                } else {
+                    const pips = PIP_MAPS[card.rank] || [];
+                    let gridHtml = '<div class="pip-grid">';
+                    for (let cell = 0; cell < 15; cell++) {
+                        const isActive = pips.includes(cell);
+                        gridHtml += `<div class="pip ${isActive ? 'active' : ''}">${card.suit}</div>`;
+                    }
+                    gridHtml += '</div>';
+                    centerContent = gridHtml;
+                }
+
                 cardEl.innerHTML = `
-                    <div class="held-badge">${badgeText}</div>
-                    <div class="win-badge">${winBadgeText}</div>
-                    <div class="suit">${card.suit}</div>
-                    <div class="rank">${card.rank}</div>
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="held-badge">${badgeText}</div>
+                            <div class="win-badge">${winBadgeText}</div>
+                            <div class="card-index top-left">
+                                <div class="card-index-rank">${card.rank}</div>
+                                <div class="card-index-suit">${card.suit}</div>
+                            </div>
+                            ${centerContent}
+                            <div class="card-index bottom-right">
+                                <div class="card-index-rank">${card.rank}</div>
+                                <div class="card-index-suit">${card.suit}</div>
+                            </div>
+                        </div>
+                        <div class="card-back"></div>
+                    </div>
                 `;
                 handEl.appendChild(cardEl);
             });
 
+            // Staggered flip animation trigger
+            let flipDelayIndex = 0;
+            hand.forEach((card, i) => {
+                const cardEl = handEl.children[i];
+                if (cardEl && cardEl.classList.contains('flipped')) {
+                    setTimeout(() => {
+                        const inner = cardEl.querySelector('.card-inner');
+                        if (inner) {
+                            inner.classList.add('animating');
+                            cardEl.classList.remove('flipped');
+                            playSound('deal');
+                            setTimeout(() => {
+                                inner.classList.remove('animating');
+                            }, 600);
+                        }
+                    }, flipDelayIndex * 250);
+                    flipDelayIndex++;
+                }
+            });
         }
 
         function evaluateHand(hand) {
@@ -2518,6 +2803,7 @@
             logUserToFirestore(user);
             loadUserState(user);
             refreshLeaderboard();
+            initSound();
             if (window.initRooms) window.initRooms(user);
             if (window.initEngagement) window.initEngagement(user);
         } else {
@@ -2550,9 +2836,11 @@
             '<span class="xp-text" id="ub-xp-text"></span>' +
             '<span class="ub-ach-count" id="ub-ach-count" onclick="egOpenProfile()">🏆 0</span>' +
             adminBtn +
+            '<button id="sound-toggle-btn" onclick="toggleSound()" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px; line-height:1;">🔊</button>' +
             '<button onclick="signOut()">Sign Out</button>';
         const container = document.getElementById('game-container');
         container.insertBefore(bar, container.firstChild);
+        updateSoundButtonUI();
     }
 
     function signOut() {
@@ -3840,8 +4128,10 @@
     }
 
     function egAddCredits(amount) {
+        var oldBalance = balance;
         balance += amount;
-        document.getElementById('balance').textContent = balance;
+        playSound('coin');
+        animateBalance(oldBalance, balance, 800);
     }
 
     // --- user profile (best streak + comeback + progression) ---
@@ -4318,6 +4608,7 @@
         document.getElementById('eg-levelup-note').textContent =
             style ? et('styleUnlocked').replace('{s}', style.name) : '';
         egConfetti();
+        playSound('levelUp');
         egQueueModal('eg-levelup-modal');
     }
 
@@ -5099,6 +5390,331 @@
         ctx.fillRect(x + size/7, y + size/7, size*5/7, size*5/7);
         ctx.fillStyle = '#000000';
         ctx.fillRect(x + size*2/7, y + size*2/7, size*3/7, size*3/7);
+    }
+
+    /* ===================== Phase 4: Audio & Visual Polish ===================== */
+    var audioBuffers = {};
+    var audioCtx = null;
+    var soundEnabled = true;
+
+    function initSound() {
+        try {
+            var stored = localStorage.getItem('vp_sound_enabled');
+            if (stored !== null) soundEnabled = stored === 'true';
+        } catch (e) {}
+        updateSoundButtonUI();
+    }
+
+    function ensureAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            generatePreDecodedBuffers();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function createSynthesizedBuffer(duration, synthFn) {
+        var sampleRate = audioCtx.sampleRate;
+        var buffer = audioCtx.createBuffer(1, sampleRate * duration, sampleRate);
+        var data = buffer.getChannelData(0);
+        synthFn(data, sampleRate);
+        return buffer;
+    }
+
+    function generatePreDecodedBuffers() {
+        audioBuffers.deal = createSynthesizedBuffer(0.15, synthDeal);
+        audioBuffers.flip = createSynthesizedBuffer(0.1, synthFlip);
+        audioBuffers.click = createSynthesizedBuffer(0.05, synthClick);
+        audioBuffers.loss = createSynthesizedBuffer(0.5, synthLoss);
+        audioBuffers.coin = createSynthesizedBuffer(0.3, synthCoin);
+        audioBuffers.win = createSynthesizedBuffer(0.4, synthWin);
+        audioBuffers.bigWin = createSynthesizedBuffer(1.0, synthBigWin);
+        audioBuffers.levelUp = createSynthesizedBuffer(0.8, synthLevelUp);
+    }
+
+    function playSound(name) {
+        if (!soundEnabled) return;
+        ensureAudioContext();
+        var buffer = audioBuffers[name];
+        if (!buffer) return;
+        var source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioCtx.destination);
+        source.start(0);
+    }
+
+    function toggleSound() {
+        ensureAudioContext();
+        soundEnabled = !soundEnabled;
+        try {
+            localStorage.setItem('vp_sound_enabled', soundEnabled);
+        } catch (e) {}
+        updateSoundButtonUI();
+        if (soundEnabled) {
+            playSound('click');
+        }
+    }
+
+    function updateSoundButtonUI() {
+        var btn = document.getElementById('sound-toggle-btn');
+        if (btn) {
+            btn.textContent = soundEnabled ? '🔊' : '🔇';
+        }
+    }
+
+    /* Sound Synthesizer Functions */
+    function synthDeal(data, sampleRate) {
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var freq = 600 * Math.exp(-30 * t) + 100;
+            var amp = Math.exp(-25 * t);
+            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.5;
+        }
+    }
+
+    function synthFlip(data, sampleRate) {
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var noise = Math.random() * 2 - 1;
+            var amp = Math.exp(-40 * t);
+            data[i] = (noise * 0.3 + Math.sin(2 * Math.PI * 150 * t) * 0.7) * amp * 0.6;
+        }
+    }
+
+    function synthClick(data, sampleRate) {
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var freq = 2000 * Math.exp(-100 * t);
+            var amp = Math.exp(-80 * t);
+            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.4;
+        }
+    }
+
+    function synthLoss(data, sampleRate) {
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var freq = 120 * Math.exp(-4 * t);
+            var amp = Math.exp(-3 * t);
+            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.5;
+        }
+    }
+
+    function synthCoin(data, sampleRate) {
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var amp = Math.exp(-12 * t);
+            var tone1 = Math.sin(2 * Math.PI * 1800 * t);
+            var tone2 = Math.sin(2 * Math.PI * 2400 * t);
+            data[i] = (tone1 + tone2) * 0.5 * amp * 0.4;
+        }
+    }
+
+    function synthWin(data, sampleRate) {
+        var freqs = [523.25, 659.25, 783.99, 1046.50];
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var noteIdx = Math.min(freqs.length - 1, Math.floor(t / 0.1));
+            var freq = freqs[noteIdx];
+            var amp = Math.exp(-6 * (t % 0.1)) * Math.exp(-1.5 * t);
+            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.4;
+        }
+    }
+
+    function synthBigWin(data, sampleRate) {
+        var chords = [
+            [523.25, 659.25, 783.99],
+            [587.33, 739.99, 880.00],
+            [659.25, 830.61, 987.77],
+            [783.99, 987.77, 1174.66]
+        ];
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var chordIdx = Math.min(chords.length - 1, Math.floor(t / 0.25));
+            var freqs = chords[chordIdx];
+            var amp = Math.exp(-3 * (t % 0.25)) * Math.exp(-0.5 * t);
+            var val = 0;
+            for (var f = 0; f < freqs.length; f++) {
+                val += Math.sin(2 * Math.PI * freqs[f] * t);
+            }
+            data[i] = (val / freqs.length) * amp * 0.4;
+        }
+    }
+
+    function synthLevelUp(data, sampleRate) {
+        var freqs = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var noteIdx = Math.min(freqs.length - 1, Math.floor(t / 0.08));
+            var freq = freqs[noteIdx];
+            var amp = noteIdx === freqs.length - 1 ? Math.exp(-2 * (t - 0.4)) : Math.exp(-8 * (t % 0.08));
+            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.4;
+        }
+    }
+
+    /* Win Celebrations */
+    function triggerWinCelebration(handType, win) {
+        var rank = HAND_RANK[handType] || 0;
+        
+        if (rank >= 7) {
+            playSound('bigWin');
+        } else {
+            playSound('win');
+        }
+
+        if (rank <= 2) {
+            var resultEl = document.getElementById('result');
+            if (resultEl) {
+                var winSpan = resultEl.querySelector('.win');
+                if (winSpan) winSpan.classList.add('shimmer-gold');
+            }
+        }
+        
+        if (rank === 3 || rank === 4) {
+            var cardElements = document.querySelectorAll('#hand .card.winning');
+            cardElements.forEach(function(el, idx) {
+                el.classList.add('bounce');
+                el.style.animationDelay = (idx * 0.1) + 's';
+            });
+        }
+
+        if (rank === 5 || rank === 6) {
+            confettiBurst();
+        }
+
+        if (rank === 7) {
+            confettiBurst();
+            setTimeout(confettiBurst, 200);
+            setTimeout(confettiBurst, 400);
+            triggerScreenFlash();
+        }
+
+        if (rank >= 8) {
+            launchFireworks();
+            triggerScreenFlash();
+            triggerScreenShake();
+            goldRain();
+        }
+
+        var oldBalance = balance - win;
+        animateBalance(oldBalance, balance, 1000);
+    }
+
+    function triggerScreenFlash() {
+        var flash = document.createElement('div');
+        flash.className = 'flash-overlay';
+        document.body.appendChild(flash);
+        setTimeout(function() { flash.remove(); }, 500);
+    }
+
+    function triggerScreenShake() {
+        document.body.classList.add('screen-shake');
+        setTimeout(function() {
+            document.body.classList.remove('screen-shake');
+        }, 500);
+    }
+
+    function confettiBurst() {
+        var colors = ['#ffd700', '#4ade80', '#ff6b6b', '#8a2be2', '#ffffff', '#ffaa00'];
+        var container = document.body;
+        for (var i = 0; i < 30; i++) {
+            var p = document.createElement('div');
+            p.className = 'confetti-burst-piece';
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            
+            var angle = Math.random() * Math.PI * 2;
+            var velocity = 50 + Math.random() * 150;
+            var tx = Math.cos(angle) * velocity;
+            var ty = Math.sin(angle) * velocity;
+            
+            p.style.setProperty('--tx', tx + 'px');
+            p.style.setProperty('--ty', ty + 'px');
+            
+            p.style.left = '50vw';
+            p.style.top = '50vh';
+            container.appendChild(p);
+            
+            setTimeout(function(el) { return function() { el.remove(); }; }(p), 1000);
+        }
+    }
+
+    function launchFireworks() {
+        for (var f = 0; f < 5; f++) {
+            setTimeout(function() {
+                var x = 20 + Math.random() * 60;
+                var y = 20 + Math.random() * 40;
+                createFirework(x, y);
+            }, f * 400);
+        }
+    }
+
+    function createFirework(x, y) {
+        var colors = ['#ffd700', '#ffaa00', '#ff5500', '#ff00aa', '#00ffaa', '#00aaff'];
+        var container = document.body;
+        for (var i = 0; i < 24; i++) {
+            var p = document.createElement('div');
+            p.className = 'confetti-burst-piece';
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            
+            var angle = Math.random() * Math.PI * 2;
+            var velocity = 30 + Math.random() * 120;
+            var tx = Math.cos(angle) * velocity;
+            var ty = Math.sin(angle) * velocity;
+            
+            p.style.setProperty('--tx', tx + 'px');
+            p.style.setProperty('--ty', ty + 'px');
+            
+            p.style.left = x + 'vw';
+            p.style.top = y + 'vh';
+            container.appendChild(p);
+            
+            setTimeout(function(el) { return function() { el.remove(); }; }(p), 1000);
+        }
+    }
+
+    function goldRain() {
+        for (var i = 0; i < 50; i++) {
+            var p = document.createElement('div');
+            p.className = 'gold-rain-piece';
+            p.style.left = (Math.random() * 100) + 'vw';
+            p.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+            p.style.animationDelay = (Math.random() * 1.5) + 's';
+            document.body.appendChild(p);
+            setTimeout(function(el) { return function() { el.remove(); }; }(p), 3500);
+        }
+    }
+
+    function animateBalance(startValue, endValue, durationMs) {
+        var el = document.getElementById('balance');
+        if (!el) return;
+        
+        var startTime = performance.now();
+        var coinTriggerIndex = 0;
+        
+        function update(now) {
+            var elapsed = now - startTime;
+            var pct = Math.min(1, elapsed / durationMs);
+            
+            var ease = pct * (2 - pct);
+            var current = Math.round(startValue + (endValue - startValue) * ease);
+            el.textContent = current;
+
+            // Arpeggiate coin sound every few credits
+            var step = Math.floor(current / 5);
+            if (step > coinTriggerIndex) {
+                playSound('coin');
+                coinTriggerIndex = step;
+            }
+            
+            if (pct < 1) {
+                requestAnimationFrame(update);
+            } else {
+                el.textContent = endValue;
+            }
+        }
+        
+        requestAnimationFrame(update);
     }
     </script>
 </body>
