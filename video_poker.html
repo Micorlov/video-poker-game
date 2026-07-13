@@ -3644,47 +3644,41 @@ const firebaseConfig = {
 
     function signInWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
         const el = document.getElementById('login-error');
         if (el) el.style.display = 'none';
 
-        if (isMobile) {
-            auth.signInWithRedirect(provider).catch(function(err) {
+        // Try popup first on all platforms — modern mobile browsers handle it well.
+        // Popup avoids the cross-site tracking issues that redirect has on iOS Safari.
+        auth.signInWithPopup(provider).catch(function(err) {
+            if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+                // Popup blocked — fall back to redirect
+                auth.signInWithRedirect(provider).catch(function(redirectErr) {
+                    if (el) {
+                        el.textContent = redirectErr.message;
+                        el.style.display = 'block';
+                    }
+                });
+            } else {
                 if (el) {
                     el.textContent = err.message;
                     el.style.display = 'block';
                 }
-            });
-        } else {
-            auth.signInWithPopup(provider).catch(function(err) {
-                if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
-                    auth.signInWithRedirect(provider).catch(function(redirectErr) {
-                        if (el) {
-                            el.textContent = redirectErr.message;
-                            el.style.display = 'block';
-                        }
-                    });
-                } else {
-                    if (el) {
-                        el.textContent = err.message;
-                        el.style.display = 'block';
-                    }
-                }
-            });
-        }
+            }
+        });
     }
 
-    // Handle redirect results on load
-    auth.getRedirectResult().catch(function(err) {
-        const el = document.getElementById('login-error');
-        if (el) {
-            el.textContent = err.message;
-            el.style.display = 'block';
-        }
-    });
-
     auth.onAuthStateChanged(function(user) {
+        // Handle redirect result (must be called after auth state is ready)
+        auth.getRedirectResult().catch(function(err) {
+            if (err && err.code !== 'auth/no-current-user') {
+                const el = document.getElementById('login-error');
+                if (el) {
+                    el.textContent = err.message;
+                    el.style.display = 'block';
+                }
+            }
+        });
+
         if (user) {
             document.getElementById('login-overlay').classList.add('hidden');
             document.getElementById('game-container').style.display = '';
