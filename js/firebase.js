@@ -11,7 +11,8 @@ const firebaseConfig = {
     const db = firebase.firestore();
     const ADMIN_EMAIL = 'micorlov@gmail.com';
 
-    function socialSignIn(provider, providerName) {
+    function signInWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
         const el = document.getElementById('login-error');
         if (el) el.style.display = 'none';
 
@@ -23,11 +24,6 @@ const firebaseConfig = {
                         el.style.display = 'block';
                     }
                 });
-            } else if (err.code === 'auth/operation-not-allowed') {
-                if (el) {
-                    el.textContent = providerName + ' sign-in is not enabled yet. Enable it in the Firebase Console under Authentication → Sign-in method.';
-                    el.style.display = 'block';
-                }
             } else {
                 if (el) {
                     el.textContent = err.message;
@@ -35,23 +31,6 @@ const firebaseConfig = {
                 }
             }
         });
-    }
-
-    function signInWithGoogle() {
-        socialSignIn(new firebase.auth.GoogleAuthProvider(), 'Google');
-    }
-
-    function signInWithApple() {
-        var provider = new firebase.auth.OAuthProvider('apple.com');
-        provider.addScope('email');
-        provider.addScope('name');
-        socialSignIn(provider, 'Apple');
-    }
-
-    function signInWithFacebook() {
-        var provider = new firebase.auth.FacebookAuthProvider();
-        provider.addScope('email');
-        socialSignIn(provider, 'Facebook');
     }
 
     auth.onAuthStateChanged(function(user) {

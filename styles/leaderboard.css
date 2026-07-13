@@ -639,25 +639,6 @@
         }
         .google-btn:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(0,0,0,0.4); }
         .google-btn svg { width: 24px; height: 24px; }
-        .social-login { display: flex; flex-direction: column; gap: 12px; align-items: center; }
-        .apple-btn {
-            display: flex; align-items: center; gap: 12px;
-            background: #000; color: #fff; border: none; border-radius: 40px;
-            padding: 14px 32px; font-size: 17px; font-weight: 600;
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .apple-btn:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(0,0,0,0.4); }
-        .apple-btn svg { width: 24px; height: 24px; }
-        .facebook-btn {
-            display: flex; align-items: center; gap: 12px;
-            background: #1877F2; color: #fff; border: none; border-radius: 40px;
-            padding: 14px 32px; font-size: 17px; font-weight: 600;
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(24,119,242,0.3);
-        }
-        .facebook-btn:hover { transform: scale(1.05); box-shadow: 0 6px 25px rgba(24,119,242,0.5); }
-        .facebook-btn svg { width: 24px; height: 24px; }
         .user-bar {
             display: flex; align-items: center; gap: 10px;
             justify-content: center; margin-bottom: 10px;
@@ -1639,14 +1620,6 @@
                 font-size: 0.9em;
             }
             .google-btn {
-                padding: 12px 24px;
-                font-size: 15px;
-            }
-            .apple-btn {
-                padding: 12px 24px;
-                font-size: 15px;
-            }
-            .facebook-btn {
                 padding: 12px 24px;
                 font-size: 15px;
             }
