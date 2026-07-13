@@ -1,0 +1,8 @@
+{
+  "appId": "com.videopoker.app",
+  "appName": "Video Poker",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -52,3 +52,28 @@ indexHtml = indexHtml.replace('<!-- BUILD_JS_PLACEHOLDER -->', combinedJs);
 
 fs.writeFileSync(outputPath, indexHtml, 'utf8');
 console.log('🎉 Successfully built video_poker.html!');
+
+// Copy to Capacitor www/ directory for Android app
+const wwwDir = path.join(projectDir, 'www');
+if (fs.existsSync(wwwDir)) {
+    // Copy built HTML
+    fs.copyFileSync(outputPath, path.join(wwwDir, 'video_poker.html'));
+    // Copy assets
+    const dirsToCopy = ['media', 'styles', 'js'];
+    dirsToCopy.forEach(function(dir) {
+        const src = path.join(projectDir, dir);
+        const dst = path.join(wwwDir, dir);
+        if (fs.existsSync(src)) {
+            fs.cpSync(src, dst, { recursive: true });
+        }
+    });
+    // Copy root files
+    const rootFiles = ['manifest.json', 'icon.svg', 'sw.js'];
+    rootFiles.forEach(function(file) {
+        const src = path.join(projectDir, file);
+        if (fs.existsSync(src)) {
+            fs.copyFileSync(src, path.join(wwwDir, file));
+        }
+    });
+    console.log('📱 Copied to www/ for Android app');
+}

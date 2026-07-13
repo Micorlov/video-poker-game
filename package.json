@@ -17,5 +17,10 @@
   "bugs": {
     "url": "https://github.com/Micorlov/video-poker-game/issues"
   },
-  "homepage": "https://github.com/Micorlov/video-poker-game#readme"
+  "homepage": "https://github.com/Micorlov/video-poker-game#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1"
+  }
 }
