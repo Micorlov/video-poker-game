@@ -3660,23 +3660,20 @@ const firebaseConfig = {
 
     function signInWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
         const el = document.getElementById('login-error');
         if (el) el.style.display = 'none';
 
-        auth.signInWithPopup(provider).catch(function(err) {
-            if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
-                auth.signInWithRedirect(provider).catch(function(redirectErr) {
-                    if (el) {
-                        el.textContent = redirectErr.message;
-                        el.style.display = 'block';
-                    }
-                });
-            } else {
+        // Redirect-first: avoids Safari popup blocker and ITP issues.
+        // Falls back to popup only if redirect is not supported (e.g. in some webviews).
+        auth.signInWithRedirect(provider).catch(function(redirectErr) {
+            // Redirect not available — try popup as fallback
+            auth.signInWithPopup(provider).catch(function(popupErr) {
                 if (el) {
-                    el.textContent = err.message;
+                    el.textContent = popupErr.message;
                     el.style.display = 'block';
                 }
-            }
+            });
         });
     }
 
