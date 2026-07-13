@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Poker - Jacks or Better</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0c2317">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
@@ -800,88 +798,6 @@
             height: 1px; background: rgba(255,215,0,0.12); margin: 18px 0;
         }
         .leaderboard + .leaderboard { margin-top: 16px; }
-        /* Tournament leaderboard gold border */
-        .leaderboard-tournament {
-            border: 2px solid #ffd700;
-            box-shadow: 0 0 18px rgba(255,215,0,0.18);
-            background: rgba(10,6,0,0.6);
-        }
-        .leaderboard-tournament h3 { font-size: 1.35em; letter-spacing: 0.5px; }
-        /* Tournament banner */
-        #tournament-banner {
-            display: none; margin-bottom: 16px; padding: 14px 18px;
-            background: linear-gradient(135deg, rgba(180,120,0,0.4) 0%, rgba(255,215,0,0.15) 50%, rgba(180,120,0,0.4) 100%);
-            border: 1.5px solid #ffd700; border-radius: 12px;
-            text-align: center; position: relative; overflow: hidden;
-        }
-        #tournament-banner::before {
-            content: ''; position: absolute; inset: 0;
-            background: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,215,0,0.03) 8px, rgba(255,215,0,0.03) 16px);
-        }
-        .tourn-banner-title { color: #ffd700; font-size: 1.2em; font-weight: 700; margin-bottom: 4px; }
-        .tourn-banner-sub { color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 8px; }
-        .tourn-banner-timer { color: #ffd700; font-size: 13px; }
-        .tourn-banner-prizes { display: flex; justify-content: center; gap: 16px; margin-top: 10px; }
-        .tourn-prize { text-align: center; }
-        .tourn-prize-rank { font-size: 18px; }
-        .tourn-prize-amount { color: #ffd700; font-weight: 700; font-size: 13px; }
-        .tourn-locked-msg { color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 6px; }
-        .tourn-enter-btn {
-            display: inline-block; margin-top: 10px; padding: 7px 22px;
-            background: #ffd700; color: #1a0f00; font-weight: 700; font-size: 14px;
-            border: none; border-radius: 8px; cursor: pointer; position: relative; z-index: 1;
-        }
-        .tourn-enter-btn:hover { background: #ffe44d; }
-        /* Season pass styles */
-        #pf-season-section { margin-top: 14px; }
-        .season-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
-        .season-countdown { color: rgba(255,255,255,0.45); font-size: 11px; }
-        .season-progress-wrap { position: relative; margin-bottom: 12px; }
-        .season-bar-bg {
-            height: 10px; border-radius: 5px; background: rgba(255,255,255,0.1); overflow: hidden;
-        }
-        .season-bar-fill {
-            height: 100%; border-radius: 5px; transition: width 0.6s ease;
-            background: linear-gradient(90deg, #ffd700, #ff9800);
-        }
-        .season-xp-text { color: rgba(255,255,255,0.45); font-size: 11px; margin-top: 4px; text-align: right; }
-        .season-tiers { display: flex; flex-direction: column; gap: 6px; }
-        .season-tier {
-            display: flex; align-items: center; gap: 10px; padding: 7px 10px;
-            border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
-            font-size: 13px;
-        }
-        .season-tier.unlocked { background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.25); }
-        .season-tier.claimed { opacity: 0.5; }
-        .season-tier-icon { font-size: 18px; width: 26px; text-align: center; }
-        .season-tier-info { flex: 1; }
-        .season-tier-name { font-weight: 600; color: rgba(255,255,255,0.85); }
-        .season-tier-xp { color: rgba(255,255,255,0.4); font-size: 11px; }
-        .season-tier-reward { color: #ffd700; font-size: 12px; font-weight: 600; }
-        .season-claim-btn {
-            padding: 4px 12px; background: #ffd700; color: #1a0f00; font-weight: 700;
-            font-size: 12px; border: none; border-radius: 6px; cursor: pointer;
-        }
-        .season-claim-btn:hover { background: #ffe44d; }
-        /* PWA install prompt */
-        #pwa-install-banner {
-            display: none; position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-            background: rgba(20,40,20,0.97); border: 1px solid rgba(255,215,0,0.4);
-            border-radius: 14px; padding: 14px 18px; text-align: center;
-            z-index: 9000; max-width: 340px; width: calc(100vw - 32px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-        }
-        .pwa-banner-title { color: #ffd700; font-weight: 700; font-size: 15px; margin-bottom: 4px; }
-        .pwa-banner-sub { color: rgba(255,255,255,0.65); font-size: 12px; margin-bottom: 10px; }
-        .pwa-banner-btns { display: flex; gap: 8px; justify-content: center; }
-        .pwa-install-btn {
-            padding: 8px 20px; background: #ffd700; color: #1a0f00; font-weight: 700;
-            border: none; border-radius: 8px; cursor: pointer; font-size: 14px;
-        }
-        .pwa-dismiss-btn {
-            padding: 8px 14px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6);
-            border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; cursor: pointer; font-size: 13px;
-        }
         .lb-formula-note {
             text-align: center; color: rgba(255,255,255,0.4); font-size: 11px;
             margin-top: 12px; line-height: 1.5; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);
@@ -1293,11 +1209,617 @@
         .pf-ref-sub { color: rgba(255,255,255,0.55); font-size: 12px; margin-bottom: 10px; line-height: 1.5; }
         .pf-ref-count { color: #4ade80; font-size: 13px; font-weight: 600; margin-top: 10px; text-align: center; }
 
+        /* =================================================================
+           MOBILE LAYOUT (max-width: 600px)
+           ================================================================= */
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+                font-size: 14px;
+            }
+            .container {
+                padding-top: 40px;
+                max-width: 100%;
+            }
+
+            /* --- Title & header --- */
+            h1 {
+                font-size: 1.6em;
+                margin-bottom: 6px;
+            }
+            .language-selector {
+                margin-bottom: 8px;
+            }
+            .language-selector select {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            .language-selector label {
+                display: block;
+                margin-bottom: 4px;
+                font-size: 12px;
+            }
+
+            /* --- Game layout: single column, leaderboard below --- */
+            .game-layout {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .lb-col {
+                position: static;
+                top: auto;
+            }
+
+            /* --- Payouts: compact grid --- */
+            .payouts {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 4px;
+                padding: 8px;
+                font-size: 9px;
+                margin-bottom: 12px;
+            }
+            .payout-row {
+                padding: 5px 2px;
+            }
+            .payout-value {
+                font-size: 12px;
+            }
+
+            /* --- Rules: compact --- */
+            .rules {
+                padding: 12px 14px;
+                margin-bottom: 12px;
+            }
+            .rules h3 {
+                margin-bottom: 8px;
+                font-size: 1em;
+            }
+            .rule-row {
+                font-size: 11px;
+                gap: 6px;
+                padding: 5px 0;
+            }
+            .rule-name {
+                min-width: 90px;
+                font-size: 11px;
+            }
+            .rule-pay {
+                min-width: 40px;
+                font-size: 11px;
+            }
+            .rule-desc {
+                font-size: 10px;
+            }
+
+            /* --- Game area --- */
+            .game-area {
+                padding: 14px 10px;
+                border-radius: 14px;
+                margin-bottom: 12px;
+            }
+
+            /* --- Cards: smaller for mobile --- */
+            .card {
+                width: 58px;
+                height: 84px;
+            }
+            .card-front, .card-back {
+                border-radius: 10px;
+            }
+            .card-front {
+                padding: 4px;
+            }
+            .hand {
+                gap: 6px;
+                margin-bottom: 18px;
+            }
+            .suit {
+                font-size: 24px;
+                margin: 2px 0;
+            }
+            .rank {
+                font-size: 14px;
+            }
+            .card .held-badge {
+                font-size: 8px;
+                padding: 1px 6px;
+                top: -10px;
+            }
+            .card .card-back-text {
+                font-size: 8px;
+            }
+
+            /* Keep hover effects usable on touch */
+            .card:hover {
+                transform: translateY(-4px);
+            }
+            .card.held {
+                transform: translateY(-4px);
+            }
+            .card.held .card-front {
+                box-shadow: 0 0 12px #ffd700, 0 4px 12px rgba(0,0,0,0.5);
+            }
+            .card.winning {
+                transform: translateY(-4px) scale(1.03);
+            }
+            .card.second-pair {
+                transform: translateY(-4px) scale(1.03);
+            }
+            .card.third-match {
+                transform: translateY(-8px) rotate(2deg) scale(1.04);
+            }
+            .card.unheld {
+                transform: scale(0.93);
+            }
+
+            /* --- Buttons: touch-friendly sizing --- */
+            button {
+                padding: 12px 24px;
+                font-size: 15px;
+                border-radius: 10px;
+                min-height: 44px;
+                min-width: 44px;
+            }
+            button:hover:not(:disabled) {
+                transform: none;
+                box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+            }
+            button:active {
+                transform: scale(0.97);
+            }
+
+            /* --- Bet buttons --- */
+            .bet-btn {
+                padding: 8px 12px;
+                font-size: 14px;
+                margin: 2px;
+                min-height: 40px;
+            }
+            .controls {
+                flex-wrap: wrap;
+                gap: 4px;
+                justify-content: center;
+                text-align: center;
+            }
+            .controls strong {
+                display: block;
+                width: 100%;
+                margin-bottom: 4px;
+                font-size: 13px;
+            }
+
+            /* --- Info / balance --- */
+            .info {
+                font-size: 15px;
+                margin-bottom: 8px;
+            }
+            .balance {
+                font-size: 18px;
+            }
+            .result {
+                font-size: 18px;
+                margin: 14px 0;
+                padding: 10px;
+                min-height: 36px;
+            }
+            .explanation {
+                font-size: 13px;
+                margin: 6px 0;
+            }
+
+            /* --- Stats bar --- */
+            .stats-bar {
+                gap: 10px;
+                padding: 10px 12px;
+                margin-bottom: 12px;
+                flex-wrap: wrap;
+            }
+            .stat-item {
+                min-width: 60px;
+            }
+            .stat-label {
+                font-size: 10px;
+            }
+            .stat-value {
+                font-size: 16px;
+            }
+            .stat-divider {
+                height: 28px;
+            }
+            .stat-net .stat-value {
+                font-size: 18px;
+            }
+
+            /* --- Streak bar --- */
+            .streak-bar {
+                padding: 6px 10px;
+                font-size: 12px;
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+            .streak-bar .streak-count {
+                font-size: 18px;
+            }
+
+            /* --- Challenges --- */
+            .challenges {
+                padding: 10px 14px;
+                margin-bottom: 12px;
+            }
+            .challenges h3 {
+                font-size: 0.95em;
+            }
+            .challenge-desc {
+                font-size: 11px;
+            }
+
+            /* --- Instructions --- */
+            .instructions {
+                padding: 12px;
+                font-size: 12px;
+                margin-top: 12px;
+            }
+            .instructions h3 {
+                font-size: 0.95em;
+            }
+            .instructions ul {
+                padding-left: 18px;
+            }
+            .instructions li {
+                margin: 5px 0;
+                font-size: 11px;
+            }
+
+            /* --- User bar --- */
+            .user-bar {
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+            .user-bar span {
+                font-size: 12px;
+            }
+            .user-bar img {
+                width: 26px;
+                height: 26px;
+            }
+
+            /* --- Leaderboard --- */
+            .leaderboard {
+                padding: 10px;
+                border-radius: 12px;
+            }
+            .leaderboard h3 {
+                font-size: 1.1em;
+            }
+            .leaderboard-timer {
+                font-size: 11px;
+                margin-bottom: 8px;
+            }
+            .lb-table th {
+                padding: 6px 6px;
+                font-size: 10px;
+            }
+            .lb-table td {
+                padding: 5px 6px;
+                font-size: 12px;
+            }
+            .lb-table img {
+                width: 20px;
+                height: 20px;
+                margin-right: 4px;
+            }
+            .lb-rank {
+                width: 22px;
+            }
+            .lb-formula-note {
+                font-size: 10px;
+                margin-top: 8px;
+                padding-top: 8px;
+            }
+
+            /* --- Poker rooms --- */
+            .room-tabs {
+                gap: 4px;
+                margin-bottom: 8px;
+            }
+            .room-tab {
+                padding: 4px 10px;
+                font-size: 11px;
+            }
+            .room-actions {
+                gap: 6px;
+                margin-top: 10px;
+            }
+            .room-action-btn {
+                padding: 8px 14px;
+                font-size: 12px;
+            }
+            .room-mini-btn {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+            .rooms-empty {
+                font-size: 11px;
+                padding: 10px 6px;
+            }
+
+            /* --- Modals: full-width on mobile --- */
+            .room-modal-box {
+                width: 94vw;
+                max-width: 400px;
+                padding: 20px 16px;
+            }
+            .room-modal-box h3 {
+                font-size: 1.1em;
+            }
+            .room-modal-sub {
+                font-size: 12px;
+            }
+            .room-input {
+                font-size: 14px;
+                padding: 10px 14px;
+            }
+            .room-modal-btn {
+                font-size: 15px;
+                padding: 12px;
+            }
+            .cadence-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            .whatsapp-btn {
+                padding: 10px;
+                font-size: 13px;
+            }
+            .share-row {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .share-copy-btn {
+                width: 100%;
+            }
+            .room-code-display {
+                font-size: 26px;
+                letter-spacing: 8px;
+            }
+            .room-footer {
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+
+            /* --- Engagement modals --- */
+            .eg-box {
+                padding: 20px 16px;
+                width: 94vw;
+                max-width: 380px;
+            }
+            .eg-box h3 {
+                font-size: 1.2em;
+            }
+            .eg-sub {
+                font-size: 11px;
+            }
+            .reward-calendar {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 3px;
+            }
+            .reward-day {
+                padding: 6px 1px;
+                font-size: 9px;
+                border-radius: 8px;
+            }
+            .reward-day .rd-amount {
+                font-size: 12px;
+            }
+            .eg-big-credits {
+                font-size: 2em;
+                margin: 10px 0 14px;
+            }
+            .eg-claim-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            /* --- Profile panel: full-width slide-up --- */
+            #profile-panel {
+                width: 100vw;
+                top: auto;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                height: 85vh;
+                border-radius: 18px 18px 0 0;
+                border-left: none;
+                border-top: 2px solid rgba(255,215,0,0.3);
+                transform: translateY(100%);
+            }
+            #profile-panel.open {
+                transform: none;
+            }
+            body[dir="rtl"] #profile-panel {
+                right: 0;
+                left: 0;
+                border-right: none;
+                border-top: 2px solid rgba(255,215,0,0.3);
+                transform: translateY(100%);
+            }
+            body[dir="rtl"] #profile-panel.open {
+                transform: none;
+            }
+            .profile-head img {
+                width: 44px;
+                height: 44px;
+            }
+            .pf-name {
+                font-size: 16px;
+            }
+            .ach-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+            .ach-cell {
+                padding: 6px 2px;
+                font-size: 9px;
+            }
+
+            /* --- Login overlay --- */
+            .login-title {
+                font-size: 2em;
+            }
+            .login-subtitle {
+                font-size: 0.9em;
+            }
+            .google-btn {
+                padding: 12px 24px;
+                font-size: 15px;
+            }
+
+            /* --- Rank bar (already has 700px breakpoint; reinforce for 600px) --- */
+            .rank-bar {
+                gap: 3px;
+                font-size: 10px;
+                padding: 5px 6px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .rank-bar-value {
+                font-size: 13px;
+            }
+            .rank-bar-sep {
+                margin: 0 2px;
+                font-size: 14px;
+            }
+            .rank-bar-group-label {
+                font-size: 9px;
+            }
+
+            /* --- Feed toasts --- */
+            #feed-toasts {
+                top: 44px;
+                right: 6px;
+                gap: 4px;
+            }
+            body[dir="rtl"] #feed-toasts {
+                left: 6px;
+            }
+            .feed-toast {
+                font-size: 11px;
+                padding: 8px 12px;
+                max-width: 200px;
+            }
+
+            /* --- Reaction bar --- */
+            .reaction-btn {
+                font-size: 16px;
+                padding: 4px 7px;
+                min-height: 36px;
+            }
+            .reaction-bar {
+                gap: 4px;
+            }
+
+            /* --- Share win --- */
+            #share-win-wrap canvas {
+                max-width: 100%;
+                height: auto;
+            }
+            #share-canvas {
+                max-height: 220px;
+            }
+
+            /* --- Admin panel --- */
+            .admin-panel {
+                padding: 16px;
+            }
+            .admin-panel h2 {
+                font-size: 1.4em;
+                margin-bottom: 16px;
+            }
+            .admin-stat-card {
+                padding: 12px 18px;
+            }
+            .admin-stat-card .num {
+                font-size: 1.8em;
+            }
+            .users-table th,
+            .users-table td {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            .users-table img {
+                width: 22px;
+                height: 22px;
+            }
+            .admin-close {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+
+            /* --- Rebuy notification --- */
+            .rebuy-notification {
+                font-size: 13px;
+                padding: 8px 18px;
+                top: 50px;
+            }
+
+            /* --- Eg toast --- */
+            .eg-toast {
+                font-size: 13px;
+                padding: 8px 18px;
+                top: 50px;
+            }
+
+            /* --- Level badge tweaks --- */
+            .lvl-badge {
+                min-width: 16px;
+                height: 16px;
+                font-size: 9px;
+                padding: 0 4px;
+            }
+            .lvl-badge-lg {
+                min-width: 22px;
+                height: 22px;
+                font-size: 11px;
+            }
+            .xp-bar {
+                width: 80px;
+                height: 6px;
+            }
+            .xp-text {
+                font-size: 10px;
+            }
+
+            /* --- Card style unlocks: keep original tints on mobile --- */
+            /* (no changes needed – card backgrounds inherit properly) */
+
+            /* --- Tournament banner --- */
+            #tournament-banner {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+
+            /* --- Confetti / gold-rain: keep but scale pieces down --- */
+            .confetti-piece {
+                width: 6px;
+                height: 10px;
+            }
+            .confetti-burst-piece {
+                width: 6px;
+                height: 6px;
+            }
+            .gold-rain-piece {
+                width: 4px;
+                height: 7px;
+            }
+        }
+
+
 </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 </head>
 <body>
     <div id="login-overlay" class="login-overlay">
@@ -1488,44 +2010,9 @@
             <h4 id="pf-styles-title">Card Styles</h4>
             <div class="style-row" id="pf-styles"></div>
         </div>
-        <!-- Season Pass -->
-        <div id="pf-season-section" style="display:none;">
-            <div class="season-header">
-                <h4 id="pf-season-title">🗓 Season Pass</h4>
-                <span class="season-countdown" id="pf-season-countdown"></span>
-            </div>
-            <div class="season-progress-wrap">
-                <div class="season-bar-bg"><div class="season-bar-fill" id="pf-season-fill" style="width:0%"></div></div>
-                <div class="season-xp-text" id="pf-season-xp-text">0 / 10,000 XP</div>
-            </div>
-            <div class="season-tiers" id="pf-season-tiers"></div>
-        </div>
-    </div>
-
-    <!-- PWA Install Banner -->
-    <div id="pwa-install-banner">
-        <div class="pwa-banner-title">🃏 Add to Home Screen</div>
-        <div class="pwa-banner-sub">Play Video Poker offline — install the app!</div>
-        <div class="pwa-banner-btns">
-            <button class="pwa-install-btn" onclick="pwaInstall()">Install</button>
-            <button class="pwa-dismiss-btn" onclick="pwaDismiss()">Not now</button>
-        </div>
     </div>
 
     <div class="container" style="display:none; padding-top: 50px;" id="game-container">
-        <!-- Tournament Banner -->
-        <div id="tournament-banner">
-            <div class="tourn-banner-title" id="tourn-banner-title">🏆 Saturday Tournament — LIVE NOW!</div>
-            <div class="tourn-banner-sub" id="tourn-banner-sub">Doubled payouts · Most Royal Flushes wins · Level 5+ only</div>
-            <div class="tourn-banner-timer">Ends in <span id="tourn-banner-countdown">--:--:--</span></div>
-            <div class="tourn-banner-prizes">
-                <div class="tourn-prize"><div class="tourn-prize-rank">🥇</div><div class="tourn-prize-amount">1,000 cr</div></div>
-                <div class="tourn-prize"><div class="tourn-prize-rank">🥈</div><div class="tourn-prize-amount">500 cr</div></div>
-                <div class="tourn-prize"><div class="tourn-prize-rank">🥉</div><div class="tourn-prize-amount">250 cr</div></div>
-            </div>
-            <div id="tourn-locked-msg" class="tourn-locked-msg" style="display:none">Reach Level 5 to enter the tournament!</div>
-        </div>
-
         <div class="language-selector">
             <label for="language-select" style="margin-right: 10px; color: #ffd700;">Language / שפה / Idioma / Langue / Sprache / اللغة:</label>
             <select id="language-select" onchange="changeLanguage(this.value)">
@@ -1674,20 +2161,6 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- Tournament Leaderboard (shown only when active) -->
-                <div class="leaderboard leaderboard-tournament" id="leaderboard-tournament" style="display:none; margin-top:16px;">
-                    <h3>🏆 Saturday Tournament</h3>
-                    <div class="leaderboard-timer">Ends in <span id="lb-tourn-countdown">--:--:--</span></div>
-                    <table class="lb-table">
-                        <thead><tr>
-                            <th>#</th><th>Player</th><th>Royal Flushes</th><th>Score</th>
-                        </tr></thead>
-                        <tbody id="lb-tourn-body">
-                            <tr><td colspan="4" class="lb-empty">Tournament not active</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
                 <div class="lb-formula-note" id="lb-formula-note">
                     <strong>How is score calculated?</strong><br>
                     Score = Balance - (100 × Rebuys) - 100<br>
@@ -4433,98 +4906,6 @@ var ACHIEVEMENTS = [
         panel.classList.add('eg-hidden');
     };
 
-    var ENGAGE_I18N = {
-        en: {
-            rewardTitle: '🎁 Daily Bonus', rewardSub: 'Come back every day — the rewards keep growing!',
-            dayLabel: 'Day', claimBtn: 'Claim {n} credits',
-            rewardHint: 'Miss a day and the streak resets to Day 1!',
-            longestStreak: 'Longest streak: {n} days',
-            comebackTitle: '👋 Welcome back!', comebackMsg: 'We missed you at the table — here\'s a little something to get you going.',
-            comebackBtn: 'Collect {n} credits',
-            streakLabel: 'Win Streak', bonusTag: '+{n}% payout bonus', bestStreakStat: 'Best Streak',
-            challengesTitle: '🎯 Daily Challenges',
-            challengeToast: '🏅 Challenge complete! +{n} credits',
-            rewardToast: '🎁 +{n} credits!',
-            chPlay: 'Play {n} hands', chWin: 'Win {n} hands', chStreak: 'Win {n} in a row',
-            chHand: 'Get {hand} ×{n}', chHeldPair: 'Win holding a pair ×{n}', chMaxBet: 'Play {n} hands at max bet',
-            chWinCredits: 'Win {n} credits total', chBigWin: 'Win {n}+ credits in one hand'
-        },
-        es: {
-            rewardTitle: '🎁 Bono Diario', rewardSub: '¡Vuelve cada día — las recompensas crecen!',
-            dayLabel: 'Día', claimBtn: 'Reclamar {n} créditos',
-            rewardHint: '¡Si faltas un día, la racha vuelve al Día 1!',
-            longestStreak: 'Racha más larga: {n} días',
-            comebackTitle: '👋 ¡Bienvenido de vuelta!', comebackMsg: 'Te extrañamos en la mesa — aquí tienes algo para empezar.',
-            comebackBtn: 'Recoger {n} créditos',
-            streakLabel: 'Racha de Victorias', bonusTag: '+{n}% de bono', bestStreakStat: 'Mejor Racha',
-            challengesTitle: '🎯 Desafíos Diarios',
-            challengeToast: '🏅 ¡Desafío completado! +{n} créditos',
-            rewardToast: '🎁 ¡+{n} créditos!',
-            chPlay: 'Juega {n} manos', chWin: 'Gana {n} manos', chStreak: 'Gana {n} seguidas',
-            chHand: 'Consigue {hand} ×{n}', chHeldPair: 'Gana manteniendo una pareja ×{n}', chMaxBet: 'Juega {n} manos con apuesta máxima',
-            chWinCredits: 'Gana {n} créditos en total', chBigWin: 'Gana {n}+ créditos en una mano'
-        },
-        fr: {
-            rewardTitle: '🎁 Bonus Quotidien', rewardSub: 'Reviens chaque jour — les récompenses grandissent !',
-            dayLabel: 'Jour', claimBtn: 'Réclamer {n} crédits',
-            rewardHint: 'Un jour manqué et la série repart au Jour 1 !',
-            longestStreak: 'Plus longue série : {n} jours',
-            comebackTitle: '👋 Bon retour !', comebackMsg: 'Tu nous as manqué à la table — voici de quoi bien reprendre.',
-            comebackBtn: 'Récupérer {n} crédits',
-            streakLabel: 'Série de Victoires', bonusTag: '+{n}% de bonus', bestStreakStat: 'Meilleure Série',
-            challengesTitle: '🎯 Défis du Jour',
-            challengeToast: '🏅 Défi accompli ! +{n} crédits',
-            rewardToast: '🎁 +{n} crédits !',
-            chPlay: 'Joue {n} mains', chWin: 'Gagne {n} mains', chStreak: 'Gagne {n} de suite',
-            chHand: 'Obtiens {hand} ×{n}', chHeldPair: 'Gagne en gardant une paire ×{n}', chMaxBet: 'Joue {n} mains à la mise max',
-            chWinCredits: 'Gagne {n} crédits au total', chBigWin: 'Gagne {n}+ crédits en une main'
-        },
-        de: {
-            rewardTitle: '🎁 Täglicher Bonus', rewardSub: 'Komm jeden Tag zurück — die Belohnungen wachsen!',
-            dayLabel: 'Tag', claimBtn: '{n} Credits abholen',
-            rewardHint: 'Ein verpasster Tag setzt die Serie auf Tag 1 zurück!',
-            longestStreak: 'Längste Serie: {n} Tage',
-            comebackTitle: '👋 Willkommen zurück!', comebackMsg: 'Wir haben dich am Tisch vermisst — hier ist etwas für den Neustart.',
-            comebackBtn: '{n} Credits abholen',
-            streakLabel: 'Siegesserie', bonusTag: '+{n}% Bonus', bestStreakStat: 'Beste Serie',
-            challengesTitle: '🎯 Tägliche Herausforderungen',
-            challengeToast: '🏅 Herausforderung geschafft! +{n} Credits',
-            rewardToast: '🎁 +{n} Credits!',
-            chPlay: 'Spiele {n} Hände', chWin: 'Gewinne {n} Hände', chStreak: 'Gewinne {n} in Folge',
-            chHand: 'Erziele {hand} ×{n}', chHeldPair: 'Gewinne mit gehaltenem Paar ×{n}', chMaxBet: 'Spiele {n} Hände mit Maximaleinsatz',
-            chWinCredits: 'Gewinne insgesamt {n} Credits', chBigWin: 'Gewinne {n}+ Credits in einer Hand'
-        },
-        he: {
-            rewardTitle: '🎁 בונוס יומי', rewardSub: 'חזור כל יום — הפרסים גדלים!',
-            dayLabel: 'יום', claimBtn: 'אסוף {n} קרדיטים',
-            rewardHint: 'פספסת יום? הרצף מתאפס ליום 1!',
-            longestStreak: 'הרצף הארוך ביותר: {n} ימים',
-            comebackTitle: '👋 ברוך שובך!', comebackMsg: 'התגעגענו אליך בשולחן — הנה משהו קטן בשבילך.',
-            comebackBtn: 'אסוף {n} קרדיטים',
-            streakLabel: 'רצף ניצחונות', bonusTag: 'בונוס +{n}%', bestStreakStat: 'הרצף הטוב ביותר',
-            challengesTitle: '🎯 אתגרים יומיים',
-            challengeToast: '🏅 אתגר הושלם! +{n} קרדיטים',
-            rewardToast: '🎁 +{n} קרדיטים!',
-            chPlay: 'שחק {n} ידיים', chWin: 'נצח ב-{n} ידיים', chStreak: 'נצח {n} ברצף',
-            chHand: 'השג {hand} ×{n}', chHeldPair: 'נצח עם זוג שמור ×{n}', chMaxBet: 'שחק {n} ידיים בהימור מקסימלי',
-            chWinCredits: 'צבור {n} קרדיטים מנצחונות', chBigWin: 'זכה ב-{n}+ קרדיטים ביד אחת'
-        },
-        ar: {
-            rewardTitle: '🎁 مكافأة يومية', rewardSub: 'عُد كل يوم — المكافآت تكبر!',
-            dayLabel: 'يوم', claimBtn: 'اجمع {n} رصيداً',
-            rewardHint: 'إذا فاتك يوم، تعود السلسلة إلى اليوم 1!',
-            longestStreak: 'أطول سلسلة: {n} أيام',
-            comebackTitle: '👋 أهلاً بعودتك!', comebackMsg: 'اشتقنا إليك على الطاولة — إليك شيئاً يعيدك للعب.',
-            comebackBtn: 'اجمع {n} رصيداً',
-            streakLabel: 'سلسلة انتصارات', bonusTag: 'مكافأة +{n}%', bestStreakStat: 'أفضل سلسلة',
-            challengesTitle: '🎯 تحديات يومية',
-            challengeToast: '🏅 اكتمل التحدي! +{n} رصيد',
-            rewardToast: '🎁 +{n} رصيد!',
-            chPlay: 'العب {n} يداً', chWin: 'افز بـ{n} أيدٍ', chStreak: 'افز بـ{n} على التوالي',
-            chHand: 'احصل على {hand} ×{n}', chHeldPair: 'افز محتفظاً بزوج ×{n}', chMaxBet: 'العب {n} أيدٍ بالرهان الأقصى',
-            chWinCredits: 'اجمع {n} رصيداً من الأرباح', chBigWin: 'افز بـ{n}+ رصيد في يد واحدة'
-        }
-    };
     // --- Phase 2 i18n ---
     Object.assign(ENGAGE_I18N.en, {
         levelUpTitle: '⬆️ Level Up!', levelLabel: 'Level {n}', okBtn: 'Awesome!',
@@ -4721,6 +5102,98 @@ var CHALLENGE_POOL = [
         { id: 'bigwin20',      type: 'bigWin',      target: 1,   reward: 75 }
     ];
 
+    var ENGAGE_I18N = {
+        en: {
+            rewardTitle: '🎁 Daily Bonus', rewardSub: 'Come back every day — the rewards keep growing!',
+            dayLabel: 'Day', claimBtn: 'Claim {n} credits',
+            rewardHint: 'Miss a day and the streak resets to Day 1!',
+            longestStreak: 'Longest streak: {n} days',
+            comebackTitle: '👋 Welcome back!', comebackMsg: 'We missed you at the table — here\'s a little something to get you going.',
+            comebackBtn: 'Collect {n} credits',
+            streakLabel: 'Win Streak', bonusTag: '+{n}% payout bonus', bestStreakStat: 'Best Streak',
+            challengesTitle: '🎯 Daily Challenges',
+            challengeToast: '🏅 Challenge complete! +{n} credits',
+            rewardToast: '🎁 +{n} credits!',
+            chPlay: 'Play {n} hands', chWin: 'Win {n} hands', chStreak: 'Win {n} in a row',
+            chHand: 'Get {hand} ×{n}', chHeldPair: 'Win holding a pair ×{n}', chMaxBet: 'Play {n} hands at max bet',
+            chWinCredits: 'Win {n} credits total', chBigWin: 'Win {n}+ credits in one hand'
+        },
+        es: {
+            rewardTitle: '🎁 Bono Diario', rewardSub: '¡Vuelve cada día — las recompensas crecen!',
+            dayLabel: 'Día', claimBtn: 'Reclamar {n} créditos',
+            rewardHint: '¡Si faltas un día, la racha vuelve al Día 1!',
+            longestStreak: 'Racha más larga: {n} días',
+            comebackTitle: '👋 ¡Bienvenido de vuelta!', comebackMsg: 'Te extrañamos en la mesa — aquí tienes algo para empezar.',
+            comebackBtn: 'Recoger {n} créditos',
+            streakLabel: 'Racha de Victorias', bonusTag: '+{n}% de bono', bestStreakStat: 'Mejor Racha',
+            challengesTitle: '🎯 Desafíos Diarios',
+            challengeToast: '🏅 ¡Desafío completado! +{n} créditos',
+            rewardToast: '🎁 ¡+{n} créditos!',
+            chPlay: 'Juega {n} manos', chWin: 'Gana {n} manos', chStreak: 'Gana {n} seguidas',
+            chHand: 'Consigue {hand} ×{n}', chHeldPair: 'Gana manteniendo una pareja ×{n}', chMaxBet: 'Juega {n} manos con apuesta máxima',
+            chWinCredits: 'Gana {n} créditos en total', chBigWin: 'Gana {n}+ créditos en una mano'
+        },
+        fr: {
+            rewardTitle: '🎁 Bonus Quotidien', rewardSub: 'Reviens chaque jour — les récompenses grandissent !',
+            dayLabel: 'Jour', claimBtn: 'Réclamer {n} crédits',
+            rewardHint: 'Un jour manqué et la série repart au Jour 1 !',
+            longestStreak: 'Plus longue série : {n} jours',
+            comebackTitle: '👋 Bon retour !', comebackMsg: 'Tu nous as manqué à la table — voici de quoi bien reprendre.',
+            comebackBtn: 'Récupérer {n} crédits',
+            streakLabel: 'Série de Victoires', bonusTag: '+{n}% de bonus', bestStreakStat: 'Meilleure Série',
+            challengesTitle: '🎯 Défis du Jour',
+            challengeToast: '🏅 Défi accompli ! +{n} crédits',
+            rewardToast: '🎁 +{n} crédits !',
+            chPlay: 'Joue {n} mains', chWin: 'Gagne {n} mains', chStreak: 'Gagne {n} de suite',
+            chHand: 'Obtiens {hand} ×{n}', chHeldPair: 'Gagne en gardant une paire ×{n}', chMaxBet: 'Joue {n} mains à la mise max',
+            chWinCredits: 'Gagne {n} crédits au total', chBigWin: 'Gagne {n}+ crédits en une main'
+        },
+        de: {
+            rewardTitle: '🎁 Täglicher Bonus', rewardSub: 'Komm jeden Tag zurück — die Belohnungen wachsen!',
+            dayLabel: 'Tag', claimBtn: '{n} Credits abholen',
+            rewardHint: 'Ein verpasster Tag setzt die Serie auf Tag 1 zurück!',
+            longestStreak: 'Längste Serie: {n} Tage',
+            comebackTitle: '👋 Willkommen zurück!', comebackMsg: 'Wir haben dich am Tisch vermisst — hier ist etwas für den Neustart.',
+            comebackBtn: '{n} Credits abholen',
+            streakLabel: 'Siegesserie', bonusTag: '+{n}% Bonus', bestStreakStat: 'Beste Serie',
+            challengesTitle: '🎯 Tägliche Herausforderungen',
+            challengeToast: '🏅 Herausforderung geschafft! +{n} Credits',
+            rewardToast: '🎁 +{n} Credits!',
+            chPlay: 'Spiele {n} Hände', chWin: 'Gewinne {n} Hände', chStreak: 'Gewinne {n} in Folge',
+            chHand: 'Erziele {hand} ×{n}', chHeldPair: 'Gewinne mit gehaltenem Paar ×{n}', chMaxBet: 'Spiele {n} Hände mit Maximaleinsatz',
+            chWinCredits: 'Gewinne insgesamt {n} Credits', chBigWin: 'Gewinne {n}+ Credits in einer Hand'
+        },
+        he: {
+            rewardTitle: '🎁 בונוס יומי', rewardSub: 'חזור כל יום — הפרסים גדלים!',
+            dayLabel: 'יום', claimBtn: 'אסוף {n} קרדיטים',
+            rewardHint: 'פספסת יום? הרצף מתאפס ליום 1!',
+            longestStreak: 'הרצף הארוך ביותר: {n} ימים',
+            comebackTitle: '👋 ברוך שובך!', comebackMsg: 'התגעגענו אליך בשולחן — הנה משהו קטן בשבילך.',
+            comebackBtn: 'אסוף {n} קרדיטים',
+            streakLabel: 'רצף ניצחונות', bonusTag: 'בונוס +{n}%', bestStreakStat: 'הרצף הטוב ביותר',
+            challengesTitle: '🎯 אתגרים יומיים',
+            challengeToast: '🏅 אתגר הושלם! +{n} קרדיטים',
+            rewardToast: '🎁 +{n} קרדיטים!',
+            chPlay: 'שחק {n} ידיים', chWin: 'נצח ב-{n} ידיים', chStreak: 'נצח {n} ברצף',
+            chHand: 'השג {hand} ×{n}', chHeldPair: 'נצח עם זוג שמור ×{n}', chMaxBet: 'שחק {n} ידיים בהימור מקסימלי',
+            chWinCredits: 'צבור {n} קרדיטים מנצחונות', chBigWin: 'זכה ב-{n}+ קרדיטים ביד אחת'
+        },
+        ar: {
+            rewardTitle: '🎁 مكافأة يومية', rewardSub: 'عُد كل يوم — المكافآت تكبر!',
+            dayLabel: 'يوم', claimBtn: 'اجمع {n} رصيداً',
+            rewardHint: 'إذا فاتك يوم، تعود السلسلة إلى اليوم 1!',
+            longestStreak: 'أطول سلسلة: {n} أيام',
+            comebackTitle: '👋 أهلاً بعودتك!', comebackMsg: 'اشتقنا إليك على الطاولة — إليك شيئاً يعيدك للعب.',
+            comebackBtn: 'اجمع {n} رصيداً',
+            streakLabel: 'سلسلة انتصارات', bonusTag: 'مكافأة +{n}%', bestStreakStat: 'أفضل سلسلة',
+            challengesTitle: '🎯 تحديات يومية',
+            challengeToast: '🏅 اكتمل التحدي! +{n} رصيد',
+            rewardToast: '🎁 +{n} رصيد!',
+            chPlay: 'العب {n} يداً', chWin: 'افز بـ{n} أيدٍ', chStreak: 'افز بـ{n} على التوالي',
+            chHand: 'احصل على {hand} ×{n}', chHeldPair: 'افز محتفظاً بزوج ×{n}', chMaxBet: 'العب {n} أيدٍ بالرهان الأقصى',
+            chWinCredits: 'اجمع {n} رصيداً من الأرباح', chBigWin: 'افز بـ{n}+ رصيد في يد واحدة'
+        }
+    };
 
     function et(key) {
         var pack = ENGAGE_I18N[currentLang] || ENGAGE_I18N.en;
@@ -5193,28 +5666,28 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             return Math.min(chance, BOOST_MAX);
         }
 
-        var currentLang = 'en';
-        var deck = [];
-        var hand = [];
-        var held = [false, false, false, false, false];
-        var balance = 100;
-        var bet = 5;
-        var gameState = 'bet';
-        var lastHandType = null;
-        var totalWon = 0;
-        var totalLost = 0;
-        var handsPlayed = 0;
-        var lossStreak = 0;
-        var winStreak = 0;
-        var bestStreak = 0;
-        var hourlyRebuys = 0;
-        var dailyRebuys = 0;
-        var weeklyRebuys = loadWeeklyRebuys();
-        var currentHourKey = '';
-        var currentDayKey = '';
-        var currentWeekKey = '';
-        var lastWinAmount = 0;
-        var activeLbTab = 'hourly';
+        let currentLang = 'en';
+        let deck = [];
+        let hand = [];
+        let held = [false, false, false, false, false];
+        let balance = 100;
+        let bet = 5;
+        let gameState = 'bet';
+        let lastHandType = null;
+        let totalWon = 0;
+        let totalLost = 0;
+        let handsPlayed = 0;
+        let lossStreak = 0;
+        let winStreak = 0;
+        let bestStreak = 0;
+        let hourlyRebuys = 0;
+        let dailyRebuys = 0;
+        let weeklyRebuys = loadWeeklyRebuys();
+        let currentHourKey = '';
+        let currentDayKey = '';
+        let currentWeekKey = '';
+        let lastWinAmount = 0;
+        let activeLbTab = 'hourly';
 
         // --- State Persistence (localStorage backup) ---
         function saveGameState() {
@@ -5595,10 +6068,6 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             if (window.egOnHandPlayed) {
                 window.egOnHandPlayed({ handType: handType, win: win, bet: bet, heldPair: hadHeldPair, streak: winStreak });
             }
-            if (window.updateTournamentAndSeason) {
-                var xpGained = (XP_WIN_BONUS && XP_WIN_BONUS[handType]) || (win > 0 ? 10 : 5);
-                window.updateTournamentAndSeason(auth.currentUser, handType, xpGained);
-            }
 
             gameState = 'bet';
             document.getElementById('deal-btn').disabled = false;
@@ -5915,419 +6384,6 @@ const SUITS = ['♠', '♥', '♦', '♣'];
 
     // Firebase
 
-/* ===================== Phase 5.1: Weekly Saturday Tournament ===================== */
-
-    // Saturday tournament: active from Saturday 00:00 UTC for 24 hours
-    var tournamentActive = false;
-    var tournamentWeekKey = '';
-    var tournamentRoyalFlushes = 0; // count for current user this tournament
-    var tournamentUnsubscribe = null;
-
-    function getTournamentWeekKey() {
-        var now = new Date();
-        // Find the Saturday of this ISO week
-        var day = now.getUTCDay(); // 0=Sun, 6=Sat
-        var satOffset = (6 - day + 7) % 7;
-        var sat = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (day === 6 ? 0 : -(satOffset === 0 ? 7 : satOffset))));
-        // Use ISO week
-        return sat.getUTCFullYear() + '-W' + String(getISOWeek(sat)).padStart(2, '0') + '-SAT';
-    }
-
-    function getISOWeek(d) {
-        var date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-        var dayNum = date.getUTCDay() || 7;
-        date.setUTCDate(date.getUTCDate() + 4 - dayNum);
-        var yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-        return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-    }
-
-    function isTournamentTime() {
-        var now = new Date();
-        return now.getUTCDay() === 6; // Saturday UTC
-    }
-
-    function getTournamentEndMs() {
-        var now = new Date();
-        var endUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + (6 - now.getUTCDay() + (now.getUTCDay() === 6 ? 0 : 7)) % 7, 23, 59, 59, 999));
-        if (now.getUTCDay() === 6) {
-            endUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
-        }
-        return endUTC.getTime();
-    }
-
-    function formatTournCountdown() {
-        var ms = getTournamentEndMs() - Date.now();
-        if (ms <= 0) return '00:00:00';
-        var h = Math.floor(ms / 3600000);
-        var m = Math.floor((ms % 3600000) / 60000);
-        var s = Math.floor((ms % 60000) / 1000);
-        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-    }
-
-    function updateTournamentBanner() {
-        var banner = document.getElementById('tournament-banner');
-        var lbPanel = document.getElementById('leaderboard-tournament');
-        if (!banner) return;
-        if (!isTournamentTime()) {
-            banner.style.display = 'none';
-            if (lbPanel) lbPanel.style.display = 'none';
-            return;
-        }
-        banner.style.display = 'block';
-        if (lbPanel) lbPanel.style.display = 'block';
-        var countdown = formatTournCountdown();
-        var bc = document.getElementById('tourn-banner-countdown');
-        var lc = document.getElementById('lb-tourn-countdown');
-        if (bc) bc.textContent = countdown;
-        if (lc) lc.textContent = countdown;
-        var lockedMsg = document.getElementById('tourn-locked-msg');
-        if (lockedMsg) lockedMsg.style.display = egLevel < 5 ? 'block' : 'none';
-    }
-
-    function initTournament(user) {
-        if (!isTournamentTime()) return;
-        tournamentActive = true;
-        tournamentWeekKey = getTournamentWeekKey();
-
-        // Load user's tournament Royal Flush count
-        db.collection('weekly_tournaments').doc(tournamentWeekKey)
-            .collection('scores').doc(user.uid).get()
-            .then(function(doc) {
-                if (doc.exists) tournamentRoyalFlushes = doc.data().royalFlushes || 0;
-            }).catch(function() {});
-
-        // Subscribe to leaderboard
-        if (tournamentUnsubscribe) tournamentUnsubscribe();
-        tournamentUnsubscribe = db.collection('weekly_tournaments').doc(tournamentWeekKey)
-            .collection('scores')
-            .orderBy('royalFlushes', 'desc')
-            .orderBy('score', 'desc')
-            .limit(10)
-            .onSnapshot(function(snap) {
-                renderTournamentLeaderboard(snap, user.uid);
-            }, function() {});
-
-        updateTournamentBanner();
-        setInterval(updateTournamentBanner, 1000);
-    }
-
-    function renderTournamentLeaderboard(snap, myUid) {
-        var tbody = document.getElementById('lb-tourn-body');
-        if (!tbody) return;
-        if (snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">Be the first to join!</td></tr>';
-            return;
-        }
-        var html = '';
-        var rank = 0;
-        snap.forEach(function(doc) {
-            rank++;
-            var d = doc.data();
-            var isMe = doc.id === myUid;
-            var rankClass = rank === 1 ? 'lb-rank-1' : rank === 2 ? 'lb-rank-2' : rank === 3 ? 'lb-rank-3' : '';
-            var rankLabel = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
-            var prize = rank === 1 ? ' (+1000)' : rank === 2 ? ' (+500)' : rank === 3 ? ' (+250)' : '';
-            var photo = d.photoURL ? '<img src="' + d.photoURL + '" alt="">' : '';
-            var youBadge = isMe ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
-            var scoreClass = (d.score || 0) >= 0 ? 'lb-positive' : 'lb-negative';
-            html += '<tr class="' + (isMe ? 'lb-you' : '') + '">' +
-                '<td class="lb-rank ' + rankClass + '">' + rankLabel + '</td>' +
-                '<td>' + photo + (d.name || 'Player') + youBadge + '</td>' +
-                '<td style="color:#ffd700;font-weight:700">👑 ' + (d.royalFlushes || 0) + prize + '</td>' +
-                '<td class="lb-score ' + scoreClass + '">' + (d.score >= 0 ? '+' : '') + (d.score || 0) + '</td>' +
-                '</tr>';
-        });
-        tbody.innerHTML = html;
-    }
-
-    function recordTournamentScore(user, handType) {
-        if (!tournamentActive || !isTournamentTime() || egLevel < 5) return;
-        var isRoyal = handType === 'Royal Flush';
-        if (isRoyal) tournamentRoyalFlushes++;
-        var score = balance - 100 * (1 + hourlyRebuys) - 100;
-        db.collection('weekly_tournaments').doc(tournamentWeekKey)
-            .collection('scores').doc(user.uid).set({
-                name: user.displayName || 'Player',
-                photoURL: user.photoURL || null,
-                score: score,
-                royalFlushes: tournamentRoyalFlushes,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true }).catch(function() {});
-    }
-
-    function teardownTournament() {
-        if (tournamentUnsubscribe) { tournamentUnsubscribe(); tournamentUnsubscribe = null; }
-        tournamentActive = false;
-    }
-
-    // Award top-3 prizes (idempotent: check if already awarded)
-    function checkTournamentPrizes(weekKey) {
-        if (!weekKey) return;
-        db.collection('weekly_tournaments').doc(weekKey)
-            .collection('scores')
-            .orderBy('royalFlushes', 'desc').orderBy('score', 'desc').limit(3)
-            .get().then(function(snap) {
-                var prizes = [1000, 500, 250];
-                var rank = 0;
-                snap.forEach(function(doc) {
-                    if (rank >= 3) return;
-                    var prize = prizes[rank++];
-                    var awarded = doc.data().prizeAwarded;
-                    if (!awarded) {
-                        db.collection('users').doc(doc.id).update({
-                            balance: firebase.firestore.FieldValue.increment(prize)
-                        }).catch(function() {});
-                        doc.ref.update({ prizeAwarded: true, prize: prize }).catch(function() {});
-                    }
-                });
-            }).catch(function() {});
-    }
-
-/* ===================== Phase 5.2: Season Pass ===================== */
-
-    var SEASON_TIERS = [
-        { xp: 500,   icon: '🎁', reward: '50 credits',                  creditReward: 50,  id: 'tier1' },
-        { xp: 1000,  icon: '🃏', reward: 'Emerald card back unlock',     creditReward: 0,   id: 'tier2', styleUnlock: 'emerald' },
-        { xp: 2000,  icon: '💰', reward: '100 credits',                  creditReward: 100, id: 'tier3' },
-        { xp: 3000,  icon: '🔥', reward: 'Gold card back unlock',        creditReward: 0,   id: 'tier4', styleUnlock: 'gold' },
-        { xp: 4500,  icon: '⚡', reward: '200 credits',                  creditReward: 200, id: 'tier5' },
-        { xp: 6000,  icon: '💎', reward: 'Sapphire card back unlock',    creditReward: 0,   id: 'tier6', styleUnlock: 'sapphire' },
-        { xp: 7500,  icon: '🌟', reward: '300 credits',                  creditReward: 300, id: 'tier7' },
-        { xp: 8500,  icon: '👑', reward: 'Ruby card back unlock',        creditReward: 0,   id: 'tier8', styleUnlock: 'ruby' },
-        { xp: 9500,  icon: '🏆', reward: '400 credits',                  creditReward: 400, id: 'tier9' },
-        { xp: 10000, icon: '🎖', reward: 'Exclusive badge + 500 credits', creditReward: 500, id: 'tier10', badge: true }
-    ];
-
-    var seasonXp = 0;
-    var seasonKey = '';
-    var seasonClaimedTiers = {};
-
-    function getSeasonKey() {
-        var now = new Date();
-        return now.getUTCFullYear() + '-' + String(now.getUTCMonth() + 1).padStart(2, '0');
-    }
-
-    function getSeasonDaysLeft() {
-        var now = new Date();
-        var lastDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0));
-        var ms = lastDay.getTime() - now.getTime();
-        return Math.max(1, Math.ceil(ms / 86400000));
-    }
-
-    function initSeason(user) {
-        seasonKey = getSeasonKey();
-        var docRef = db.collection('season_progress').doc(user.uid + '_' + seasonKey);
-        docRef.get().then(function(doc) {
-            if (doc.exists) {
-                seasonXp = doc.data().xp || 0;
-                seasonClaimedTiers = doc.data().claimedTiers || {};
-            }
-            renderSeasonPass();
-        }).catch(function() {});
-    }
-
-    function addSeasonXp(amount) {
-        if (!amount) return;
-        seasonXp += amount;
-        saveSeasonProgress();
-        renderSeasonPass();
-    }
-
-    function saveSeasonProgress() {
-        var user = auth.currentUser;
-        if (!user) return;
-        db.collection('season_progress').doc(user.uid + '_' + seasonKey).set({
-            xp: seasonXp,
-            claimedTiers: seasonClaimedTiers,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true }).catch(function() {});
-    }
-
-    function claimSeasonTier(tierId) {
-        var user = auth.currentUser;
-        if (!user || seasonClaimedTiers[tierId]) return;
-        var tier = SEASON_TIERS.find(function(t) { return t.id === tierId; });
-        if (!tier || seasonXp < tier.xp) return;
-
-        seasonClaimedTiers[tierId] = true;
-        if (tier.creditReward > 0) {
-            balance += tier.creditReward;
-            var balEl = document.getElementById('balance');
-            if (balEl) balEl.textContent = balance;
-            egToast('🎖 Season reward: +' + tier.creditReward + ' credits!');
-        }
-        if (tier.styleUnlock) {
-            // Grant the card style unlock (lower level requirement for season pass holders)
-            egToast('🃏 Card style unlocked: ' + tier.styleUnlock + '!');
-        }
-        if (tier.badge) {
-            egToast('🎖 Exclusive Season Badge earned!');
-            db.collection('users').doc(user.uid).set({ seasonBadge: seasonKey }, { merge: true }).catch(function() {});
-        }
-        saveSeasonProgress();
-        renderSeasonPass();
-    }
-
-    function renderSeasonPass() {
-        var section = document.getElementById('pf-season-section');
-        if (!section) return;
-        section.style.display = 'block';
-
-        var fill = document.getElementById('pf-season-fill');
-        var xpText = document.getElementById('pf-season-xp-text');
-        var countdown = document.getElementById('pf-season-countdown');
-        var tiersEl = document.getElementById('pf-season-tiers');
-
-        var maxXp = SEASON_TIERS[SEASON_TIERS.length - 1].xp;
-        var pct = Math.min(100, Math.round(seasonXp / maxXp * 100));
-        if (fill) fill.style.width = pct + '%';
-        if (xpText) xpText.textContent = seasonXp.toLocaleString() + ' / ' + maxXp.toLocaleString() + ' XP';
-        if (countdown) countdown.textContent = getSeasonDaysLeft() + ' days left';
-
-        if (!tiersEl) return;
-        tiersEl.innerHTML = SEASON_TIERS.map(function(tier) {
-            var unlocked = seasonXp >= tier.xp;
-            var claimed = !!seasonClaimedTiers[tier.id];
-            var cls = claimed ? 'season-tier claimed' : unlocked ? 'season-tier unlocked' : 'season-tier';
-            var btn = '';
-            if (unlocked && !claimed) {
-                btn = '<button class="season-claim-btn" onclick="claimSeasonTier(\'' + tier.id + '\')">Claim</button>';
-            } else if (claimed) {
-                btn = '<span style="color:#4ade80;font-size:13px">✓</span>';
-            }
-            return '<div class="' + cls + '">' +
-                '<div class="season-tier-icon">' + tier.icon + '</div>' +
-                '<div class="season-tier-info">' +
-                    '<div class="season-tier-name">' + tier.reward + '</div>' +
-                    '<div class="season-tier-xp">' + tier.xp.toLocaleString() + ' XP</div>' +
-                '</div>' +
-                btn + '</div>';
-        }).join('');
-    }
-
-/* ===================== Phase 5.3: PWA + Push Notifications (FCM) ===================== */
-
-    // VAPID public key for FCM Web Push (replace with actual key from Firebase console)
-    var FCM_VAPID_KEY = 'BCm6_Q7x2RvY3N8kP4jLtWzA1sXdHqEuCfMnGbVopI5rKJe0T9wS8yNlO6aUD3hiZ7vEcFgBRmQxk2WPjL4sY';
-
-    var messaging = null;
-    var pwaInstallPrompt = null;
-    var pwaVisitCount = 0;
-    var pwaHandsCount = 0; // notify after first game session
-    var notificationPermissionAsked = false;
-
-    function initPWA() {
-        // Service worker registration
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=6').then(function(reg) {
-                console.log('SW registered');
-            }).catch(function(err) {
-                console.warn('SW registration failed:', err);
-            });
-        }
-
-        // Track visits for install prompt
-        try {
-            pwaVisitCount = parseInt(localStorage.getItem('vp_pwa_visits') || '0', 10) + 1;
-            localStorage.setItem('vp_pwa_visits', pwaVisitCount);
-        } catch(e) {}
-
-        // Install prompt (A2HS)
-        window.addEventListener('beforeinstallprompt', function(e) {
-            e.preventDefault();
-            pwaInstallPrompt = e;
-            // Show after 3rd visit
-            if (pwaVisitCount >= 3) {
-                var dismissed = false;
-                try { dismissed = !!localStorage.getItem('vp_pwa_dismissed'); } catch(e) {}
-                if (!dismissed) showPWABanner();
-            }
-        });
-    }
-
-    function showPWABanner() {
-        var banner = document.getElementById('pwa-install-banner');
-        if (banner) banner.style.display = 'block';
-    }
-
-    function pwaInstall() {
-        var banner = document.getElementById('pwa-install-banner');
-        if (banner) banner.style.display = 'none';
-        if (!pwaInstallPrompt) return;
-        pwaInstallPrompt.prompt();
-        pwaInstallPrompt.userChoice.then(function() { pwaInstallPrompt = null; });
-    }
-
-    function pwaDismiss() {
-        var banner = document.getElementById('pwa-install-banner');
-        if (banner) banner.style.display = 'none';
-        try { localStorage.setItem('vp_pwa_dismissed', '1'); } catch(e) {}
-    }
-
-    function initFCM() {
-        if (!firebase.messaging) return;
-        try {
-            messaging = firebase.messaging();
-        } catch(e) {
-            console.warn('FCM not available:', e);
-            return;
-        }
-    }
-
-    function requestNotificationPermission() {
-        if (notificationPermissionAsked) return;
-        if (!('Notification' in window)) return;
-        if (Notification.permission === 'granted') { subscribeToFCM(); return; }
-        if (Notification.permission === 'denied') return;
-        notificationPermissionAsked = true;
-        // Ask after first completed game session (not on first visit)
-        Notification.requestPermission().then(function(permission) {
-            if (permission === 'granted') subscribeToFCM();
-        }).catch(function() {});
-    }
-
-    function subscribeToFCM() {
-        if (!messaging) return;
-        messaging.getToken({ vapidKey: FCM_VAPID_KEY }).then(function(token) {
-            if (!token) return;
-            var user = auth.currentUser;
-            if (!user) return;
-            db.collection('users').doc(user.uid).set(
-                { fcmToken: token, fcmUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() },
-                { merge: true }
-            ).catch(function() {});
-        }).catch(function(err) {
-            console.warn('FCM token error:', err);
-        });
-    }
-
-    // Hook into auth state to init all Phase 5 modules
-    (function() {
-        var _origOnAuth = auth.onAuthStateChanged.bind(auth);
-        var phase5Inited = false;
-        auth.onAuthStateChanged(function(user) {
-            if (user && !phase5Inited) {
-                phase5Inited = true;
-                initTournament(user);
-                initSeason(user);
-                initFCM();
-            }
-            if (!user) {
-                phase5Inited = false;
-                teardownTournament();
-            }
-        });
-    })();
-
-    // Notify scoring hooks: called from main game after each hand
-    window.updateTournamentAndSeason = function(user, handType, xpGained) {
-        recordTournamentScore(user, handType);
-        addSeasonXp(xpGained || 10);
-        pwaHandsCount++;
-        if (pwaHandsCount === 1) requestNotificationPermission();
-    };
-
-    initPWA();
 
 </script>
 </body>

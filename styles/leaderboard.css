@@ -1158,3 +1158,609 @@
         #pf-ref-code { font-size: 24px; letter-spacing: 6px; padding: 10px; }
         .pf-ref-sub { color: rgba(255,255,255,0.55); font-size: 12px; margin-bottom: 10px; line-height: 1.5; }
         .pf-ref-count { color: #4ade80; font-size: 13px; font-weight: 600; margin-top: 10px; text-align: center; }
+
+        /* =================================================================
+           MOBILE LAYOUT (max-width: 600px)
+           ================================================================= */
+        @media (max-width: 600px) {
+            body {
+                padding: 8px;
+                font-size: 14px;
+            }
+            .container {
+                padding-top: 40px;
+                max-width: 100%;
+            }
+
+            /* --- Title & header --- */
+            h1 {
+                font-size: 1.6em;
+                margin-bottom: 6px;
+            }
+            .language-selector {
+                margin-bottom: 8px;
+            }
+            .language-selector select {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            .language-selector label {
+                display: block;
+                margin-bottom: 4px;
+                font-size: 12px;
+            }
+
+            /* --- Game layout: single column, leaderboard below --- */
+            .game-layout {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .lb-col {
+                position: static;
+                top: auto;
+            }
+
+            /* --- Payouts: compact grid --- */
+            .payouts {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 4px;
+                padding: 8px;
+                font-size: 9px;
+                margin-bottom: 12px;
+            }
+            .payout-row {
+                padding: 5px 2px;
+            }
+            .payout-value {
+                font-size: 12px;
+            }
+
+            /* --- Rules: compact --- */
+            .rules {
+                padding: 12px 14px;
+                margin-bottom: 12px;
+            }
+            .rules h3 {
+                margin-bottom: 8px;
+                font-size: 1em;
+            }
+            .rule-row {
+                font-size: 11px;
+                gap: 6px;
+                padding: 5px 0;
+            }
+            .rule-name {
+                min-width: 90px;
+                font-size: 11px;
+            }
+            .rule-pay {
+                min-width: 40px;
+                font-size: 11px;
+            }
+            .rule-desc {
+                font-size: 10px;
+            }
+
+            /* --- Game area --- */
+            .game-area {
+                padding: 14px 10px;
+                border-radius: 14px;
+                margin-bottom: 12px;
+            }
+
+            /* --- Cards: smaller for mobile --- */
+            .card {
+                width: 58px;
+                height: 84px;
+            }
+            .card-front, .card-back {
+                border-radius: 10px;
+            }
+            .card-front {
+                padding: 4px;
+            }
+            .hand {
+                gap: 6px;
+                margin-bottom: 18px;
+            }
+            .suit {
+                font-size: 24px;
+                margin: 2px 0;
+            }
+            .rank {
+                font-size: 14px;
+            }
+            .card .held-badge {
+                font-size: 8px;
+                padding: 1px 6px;
+                top: -10px;
+            }
+            .card .card-back-text {
+                font-size: 8px;
+            }
+
+            /* Keep hover effects usable on touch */
+            .card:hover {
+                transform: translateY(-4px);
+            }
+            .card.held {
+                transform: translateY(-4px);
+            }
+            .card.held .card-front {
+                box-shadow: 0 0 12px #ffd700, 0 4px 12px rgba(0,0,0,0.5);
+            }
+            .card.winning {
+                transform: translateY(-4px) scale(1.03);
+            }
+            .card.second-pair {
+                transform: translateY(-4px) scale(1.03);
+            }
+            .card.third-match {
+                transform: translateY(-8px) rotate(2deg) scale(1.04);
+            }
+            .card.unheld {
+                transform: scale(0.93);
+            }
+
+            /* --- Buttons: touch-friendly sizing --- */
+            button {
+                padding: 12px 24px;
+                font-size: 15px;
+                border-radius: 10px;
+                min-height: 44px;
+                min-width: 44px;
+            }
+            button:hover:not(:disabled) {
+                transform: none;
+                box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+            }
+            button:active {
+                transform: scale(0.97);
+            }
+
+            /* --- Bet buttons --- */
+            .bet-btn {
+                padding: 8px 12px;
+                font-size: 14px;
+                margin: 2px;
+                min-height: 40px;
+            }
+            .controls {
+                flex-wrap: wrap;
+                gap: 4px;
+                justify-content: center;
+                text-align: center;
+            }
+            .controls strong {
+                display: block;
+                width: 100%;
+                margin-bottom: 4px;
+                font-size: 13px;
+            }
+
+            /* --- Info / balance --- */
+            .info {
+                font-size: 15px;
+                margin-bottom: 8px;
+            }
+            .balance {
+                font-size: 18px;
+            }
+            .result {
+                font-size: 18px;
+                margin: 14px 0;
+                padding: 10px;
+                min-height: 36px;
+            }
+            .explanation {
+                font-size: 13px;
+                margin: 6px 0;
+            }
+
+            /* --- Stats bar --- */
+            .stats-bar {
+                gap: 10px;
+                padding: 10px 12px;
+                margin-bottom: 12px;
+                flex-wrap: wrap;
+            }
+            .stat-item {
+                min-width: 60px;
+            }
+            .stat-label {
+                font-size: 10px;
+            }
+            .stat-value {
+                font-size: 16px;
+            }
+            .stat-divider {
+                height: 28px;
+            }
+            .stat-net .stat-value {
+                font-size: 18px;
+            }
+
+            /* --- Streak bar --- */
+            .streak-bar {
+                padding: 6px 10px;
+                font-size: 12px;
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+            .streak-bar .streak-count {
+                font-size: 18px;
+            }
+
+            /* --- Challenges --- */
+            .challenges {
+                padding: 10px 14px;
+                margin-bottom: 12px;
+            }
+            .challenges h3 {
+                font-size: 0.95em;
+            }
+            .challenge-desc {
+                font-size: 11px;
+            }
+
+            /* --- Instructions --- */
+            .instructions {
+                padding: 12px;
+                font-size: 12px;
+                margin-top: 12px;
+            }
+            .instructions h3 {
+                font-size: 0.95em;
+            }
+            .instructions ul {
+                padding-left: 18px;
+            }
+            .instructions li {
+                margin: 5px 0;
+                font-size: 11px;
+            }
+
+            /* --- User bar --- */
+            .user-bar {
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+            .user-bar span {
+                font-size: 12px;
+            }
+            .user-bar img {
+                width: 26px;
+                height: 26px;
+            }
+
+            /* --- Leaderboard --- */
+            .leaderboard {
+                padding: 10px;
+                border-radius: 12px;
+            }
+            .leaderboard h3 {
+                font-size: 1.1em;
+            }
+            .leaderboard-timer {
+                font-size: 11px;
+                margin-bottom: 8px;
+            }
+            .lb-table th {
+                padding: 6px 6px;
+                font-size: 10px;
+            }
+            .lb-table td {
+                padding: 5px 6px;
+                font-size: 12px;
+            }
+            .lb-table img {
+                width: 20px;
+                height: 20px;
+                margin-right: 4px;
+            }
+            .lb-rank {
+                width: 22px;
+            }
+            .lb-formula-note {
+                font-size: 10px;
+                margin-top: 8px;
+                padding-top: 8px;
+            }
+
+            /* --- Poker rooms --- */
+            .room-tabs {
+                gap: 4px;
+                margin-bottom: 8px;
+            }
+            .room-tab {
+                padding: 4px 10px;
+                font-size: 11px;
+            }
+            .room-actions {
+                gap: 6px;
+                margin-top: 10px;
+            }
+            .room-action-btn {
+                padding: 8px 14px;
+                font-size: 12px;
+            }
+            .room-mini-btn {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+            .rooms-empty {
+                font-size: 11px;
+                padding: 10px 6px;
+            }
+
+            /* --- Modals: full-width on mobile --- */
+            .room-modal-box {
+                width: 94vw;
+                max-width: 400px;
+                padding: 20px 16px;
+            }
+            .room-modal-box h3 {
+                font-size: 1.1em;
+            }
+            .room-modal-sub {
+                font-size: 12px;
+            }
+            .room-input {
+                font-size: 14px;
+                padding: 10px 14px;
+            }
+            .room-modal-btn {
+                font-size: 15px;
+                padding: 12px;
+            }
+            .cadence-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            .whatsapp-btn {
+                padding: 10px;
+                font-size: 13px;
+            }
+            .share-row {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .share-copy-btn {
+                width: 100%;
+            }
+            .room-code-display {
+                font-size: 26px;
+                letter-spacing: 8px;
+            }
+            .room-footer {
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+
+            /* --- Engagement modals --- */
+            .eg-box {
+                padding: 20px 16px;
+                width: 94vw;
+                max-width: 380px;
+            }
+            .eg-box h3 {
+                font-size: 1.2em;
+            }
+            .eg-sub {
+                font-size: 11px;
+            }
+            .reward-calendar {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 3px;
+            }
+            .reward-day {
+                padding: 6px 1px;
+                font-size: 9px;
+                border-radius: 8px;
+            }
+            .reward-day .rd-amount {
+                font-size: 12px;
+            }
+            .eg-big-credits {
+                font-size: 2em;
+                margin: 10px 0 14px;
+            }
+            .eg-claim-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            /* --- Profile panel: full-width slide-up --- */
+            #profile-panel {
+                width: 100vw;
+                top: auto;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                height: 85vh;
+                border-radius: 18px 18px 0 0;
+                border-left: none;
+                border-top: 2px solid rgba(255,215,0,0.3);
+                transform: translateY(100%);
+            }
+            #profile-panel.open {
+                transform: none;
+            }
+            body[dir="rtl"] #profile-panel {
+                right: 0;
+                left: 0;
+                border-right: none;
+                border-top: 2px solid rgba(255,215,0,0.3);
+                transform: translateY(100%);
+            }
+            body[dir="rtl"] #profile-panel.open {
+                transform: none;
+            }
+            .profile-head img {
+                width: 44px;
+                height: 44px;
+            }
+            .pf-name {
+                font-size: 16px;
+            }
+            .ach-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+            .ach-cell {
+                padding: 6px 2px;
+                font-size: 9px;
+            }
+
+            /* --- Login overlay --- */
+            .login-title {
+                font-size: 2em;
+            }
+            .login-subtitle {
+                font-size: 0.9em;
+            }
+            .google-btn {
+                padding: 12px 24px;
+                font-size: 15px;
+            }
+
+            /* --- Rank bar (already has 700px breakpoint; reinforce for 600px) --- */
+            .rank-bar {
+                gap: 3px;
+                font-size: 10px;
+                padding: 5px 6px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .rank-bar-value {
+                font-size: 13px;
+            }
+            .rank-bar-sep {
+                margin: 0 2px;
+                font-size: 14px;
+            }
+            .rank-bar-group-label {
+                font-size: 9px;
+            }
+
+            /* --- Feed toasts --- */
+            #feed-toasts {
+                top: 44px;
+                right: 6px;
+                gap: 4px;
+            }
+            body[dir="rtl"] #feed-toasts {
+                left: 6px;
+            }
+            .feed-toast {
+                font-size: 11px;
+                padding: 8px 12px;
+                max-width: 200px;
+            }
+
+            /* --- Reaction bar --- */
+            .reaction-btn {
+                font-size: 16px;
+                padding: 4px 7px;
+                min-height: 36px;
+            }
+            .reaction-bar {
+                gap: 4px;
+            }
+
+            /* --- Share win --- */
+            #share-win-wrap canvas {
+                max-width: 100%;
+                height: auto;
+            }
+            #share-canvas {
+                max-height: 220px;
+            }
+
+            /* --- Admin panel --- */
+            .admin-panel {
+                padding: 16px;
+            }
+            .admin-panel h2 {
+                font-size: 1.4em;
+                margin-bottom: 16px;
+            }
+            .admin-stat-card {
+                padding: 12px 18px;
+            }
+            .admin-stat-card .num {
+                font-size: 1.8em;
+            }
+            .users-table th,
+            .users-table td {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            .users-table img {
+                width: 22px;
+                height: 22px;
+            }
+            .admin-close {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+
+            /* --- Rebuy notification --- */
+            .rebuy-notification {
+                font-size: 13px;
+                padding: 8px 18px;
+                top: 50px;
+            }
+
+            /* --- Eg toast --- */
+            .eg-toast {
+                font-size: 13px;
+                padding: 8px 18px;
+                top: 50px;
+            }
+
+            /* --- Level badge tweaks --- */
+            .lvl-badge {
+                min-width: 16px;
+                height: 16px;
+                font-size: 9px;
+                padding: 0 4px;
+            }
+            .lvl-badge-lg {
+                min-width: 22px;
+                height: 22px;
+                font-size: 11px;
+            }
+            .xp-bar {
+                width: 80px;
+                height: 6px;
+            }
+            .xp-text {
+                font-size: 10px;
+            }
+
+            /* --- Card style unlocks: keep original tints on mobile --- */
+            /* (no changes needed – card backgrounds inherit properly) */
+
+            /* --- Tournament banner --- */
+            #tournament-banner {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+
+            /* --- Confetti / gold-rain: keep but scale pieces down --- */
+            .confetti-piece {
+                width: 6px;
+                height: 10px;
+            }
+            .confetti-burst-piece {
+                width: 6px;
+                height: 6px;
+            }
+            .gold-rain-piece {
+                width: 4px;
+                height: 7px;
+            }
+        }
