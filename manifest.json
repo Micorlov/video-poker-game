@@ -1,0 +1,17 @@
+{
+  "name": "Video Poker Jacks or Better",
+  "short_name": "Video Poker",
+  "description": "Professional Jacks or Better social casino poker game with rooms, competitions, and achievements.",
+  "start_url": "video_poker.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0c2317",
+  "theme_color": "#0c2317",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

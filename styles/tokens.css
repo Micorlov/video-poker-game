@@ -1,0 +1,14 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background: linear-gradient(135deg, #0c2317 0%, #051a0d 50%, #000 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+            background-attachment: fixed;
+            transition: direction 0.3s ease;
+        }
+        body[dir="rtl"] {
+            font-family: 'Noto Sans Hebrew', 'Noto Sans Arabic', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }

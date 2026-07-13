@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Poker - Jacks or Better</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+<!-- BUILD_CSS_PLACEHOLDER -->
+</style>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-title">♠ ♥ Video Poker ♦ ♣</div>
+        <div class="login-subtitle">Jacks or Better</div>
+        <button class="google-btn" onclick="signInWithGoogle()">
+            <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
+            Sign in with Google
+        </button>
+        <div id="login-error" style="color: #ff6b6b; font-size: 14px; display: none;"></div>
+    </div>
+
+    <div id="admin-panel" class="admin-panel hidden">
+        <button class="admin-close" onclick="closeAdmin()">✕ Close</button>
+        <h2>Admin Panel — Connected Users</h2>
+        <div class="admin-stats">
+            <div class="admin-stat-card">
+                <div class="num" id="admin-total">0</div>
+                <div class="label">Total Users</div>
+            </div>
+            <div class="admin-stat-card">
+                <div class="num" id="admin-today">0</div>
+                <div class="label">Today</div>
+            </div>
+        </div>
+        <table class="users-table">
+            <thead><tr><th>User</th><th>Email</th><th>First Seen</th><th>Last Login</th></tr></thead>
+            <tbody id="admin-users-body"></tbody>
+        </table>
+    </div>
+
+    <div id="rank-bar" class="rank-bar hidden">
+        <span class="rank-bar-group-label">⏱</span>
+        <div class="rank-bar-item">
+            <span class="rank-bar-label">#</span>
+            <span class="rank-bar-value" id="rb-hourly-rank">#—</span>
+        </div>
+        <div class="rank-bar-item">
+            <span class="rank-bar-value" id="rb-hourly-score">0</span>
+        </div>
+        <div class="rank-bar-timer"><span id="rb-hourly-countdown">--:--</span></div>
+        <span class="rank-bar-sep">│</span>
+        <span class="rank-bar-group-label">📅</span>
+        <div class="rank-bar-item">
+            <span class="rank-bar-label">#</span>
+            <span class="rank-bar-value" id="rb-daily-rank">#—</span>
+        </div>
+        <div class="rank-bar-item">
+            <span class="rank-bar-value" id="rb-daily-score">0</span>
+        </div>
+        <div class="rank-bar-timer"><span id="rb-daily-countdown">--:--:--</span></div>
+    </div>
+
+    <div id="room-modal" class="room-modal rm-hidden">
+        <div class="room-modal-box">
+            <button class="room-modal-close" onclick="closeRoomModal()">✕</button>
+
+            <div id="room-view-create" class="rm-hidden">
+                <h3 id="rm-create-title">Create a Poker Room</h3>
+                <div class="room-modal-sub" id="rm-create-sub">Your table, your friends, your crown</div>
+                <input class="room-input" id="room-name-input" maxlength="24" placeholder="Room name…">
+                <div class="cadence-label" id="rm-cadence-prompt">Competition resets:</div>
+                <div class="cadence-picker">
+                    <button class="cadence-btn selected" data-cadence="hourly" onclick="pickCadence('hourly')" id="cad-hourly">⏱ Hourly</button>
+                    <button class="cadence-btn" data-cadence="daily" onclick="pickCadence('daily')" id="cad-daily">📅 Daily</button>
+                    <button class="cadence-btn" data-cadence="weekly" onclick="pickCadence('weekly')" id="cad-weekly">🗓 Weekly</button>
+                </div>
+                <button class="room-modal-btn" onclick="submitCreateRoom()" id="rm-create-btn">Create &amp; Invite</button>
+            </div>
+
+            <div id="room-view-join" class="rm-hidden">
+                <h3 id="rm-join-title">Join a Room</h3>
+                <div class="room-modal-sub" id="rm-join-sub">Got a code from a friend?</div>
+                <input class="room-input code" id="room-code-input" maxlength="6" placeholder="CODE" autocomplete="off">
+                <button class="room-modal-btn" onclick="submitJoinRoom()" id="rm-join-btn">Join Room</button>
+            </div>
+
+            <div id="room-view-share" class="rm-hidden">
+                <h3 id="rm-share-title">Invite your friends!</h3>
+                <div class="room-modal-sub" id="rm-share-sub">Share the link or the code — the table is waiting</div>
+                <div class="room-code-small" id="rm-code-label">Room code</div>
+                <div class="room-code-display" id="share-code"></div>
+                <div class="share-row">
+                    <input class="room-input" id="share-link" readonly onclick="this.select()">
+                    <button class="share-copy-btn" onclick="copyShareLink()" id="rm-copy-btn">Copy Link</button>
+                </div>
+                <a class="whatsapp-btn" id="whatsapp-share" target="_blank" rel="noopener">
+                    <span>💬</span><span id="rm-wa-label">Share on WhatsApp</span>
+                </a>
+            </div>
+
+            <div id="room-view-invite" class="rm-hidden">
+                <h3 id="rm-invite-title">You're invited!</h3>
+                <div class="room-modal-sub" id="rm-invite-by"></div>
+                <div class="invite-room-name" id="rm-invite-name"></div>
+                <div class="invite-cadence" id="rm-invite-cadence"></div>
+                <button class="room-modal-btn" onclick="acceptInvite()" id="rm-invite-btn">Join the Table</button>
+            </div>
+
+            <div class="room-modal-error" id="room-modal-error"></div>
+        </div>
+    </div>
+
+    <div id="eg-reward-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="egCloseModal('eg-reward-modal')">✕</button>
+            <h3 id="eg-reward-title">🎁 Daily Bonus</h3>
+            <div class="eg-sub" id="eg-reward-sub">Come back every day — the rewards keep growing!</div>
+            <div class="reward-calendar" id="eg-reward-calendar"></div>
+            <button class="eg-claim-btn" id="eg-reward-claim" onclick="egClaimDailyReward()">Claim</button>
+            <div class="eg-hint" id="eg-reward-hint">Miss a day and the streak resets to Day 1!</div>
+            <div class="eg-hint" id="eg-reward-longest"></div>
+        </div>
+    </div>
+
+    <div id="eg-comeback-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="egCloseModal('eg-comeback-modal')">✕</button>
+            <h3 id="eg-comeback-title">👋 Welcome back!</h3>
+            <div class="eg-sub" id="eg-comeback-msg"></div>
+            <div class="eg-big-credits" id="eg-comeback-amount"></div>
+            <button class="eg-claim-btn" id="eg-comeback-claim" onclick="egClaimComeback()">Collect</button>
+        </div>
+    </div>
+
+    <div id="eg-levelup-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="egCloseModal('eg-levelup-modal')">✕</button>
+            <h3 id="eg-levelup-title">⬆️ Level Up!</h3>
+            <div class="eg-big-credits" id="eg-levelup-number"></div>
+            <div class="eg-sub" id="eg-levelup-note"></div>
+            <button class="eg-claim-btn" id="eg-levelup-ok" onclick="egCloseModal('eg-levelup-modal')">OK</button>
+        </div>
+    </div>
+
+    <div id="feed-toasts"></div>
+
+    <div id="share-win-modal" class="room-modal rm-hidden">
+        <div class="room-modal-box" style="width: min(500px, 94vw);">
+            <button class="room-modal-close" onclick="closeShareWinModal()">✕</button>
+            <h3 id="share-win-title">Share Your Win!</h3>
+            <div class="room-modal-sub" id="share-win-sub">Show off your legendary hand to your friends</div>
+            <div id="share-win-wrap">
+                <canvas id="share-canvas" width="600" height="400"></canvas>
+            </div>
+            <div class="room-actions" style="margin-top: 20px;">
+                <button class="room-action-btn" id="share-win-download-btn" onclick="downloadWinCard()" style="flex: 1;">Download PNG</button>
+                <button class="room-action-btn secondary" id="share-win-copy-btn" onclick="copyWinCardLink()" style="flex: 1;">Copy Link</button>
+            </div>
+            <a class="whatsapp-btn" id="share-win-whatsapp" target="_blank" rel="noopener" style="margin-top: 10px;">
+                <span>💬</span><span id="share-win-wa-label">Share on WhatsApp</span>
+            </a>
+        </div>
+    </div>
+
+    <div id="profile-backdrop" class="eg-hidden" onclick="egCloseProfile()"></div>
+    <div id="profile-panel" class="eg-hidden">
+        <button class="eg-close" onclick="egCloseProfile()">✕</button>
+        <div class="profile-head">
+            <img id="pf-photo" src="" alt="">
+            <div>
+                <div class="pf-name"><span id="pf-name"></span><span class="lvl-badge lvl-badge-lg" id="pf-level"></span></div>
+                <div class="pf-since" id="pf-since"></div>
+            </div>
+        </div>
+        <div class="pf-xp">
+            <span class="xp-bar"><span class="xp-fill" id="pf-xp-fill"></span></span>
+            <span class="xp-text" id="pf-xp-text"></span>
+        </div>
+        <h4 id="pf-stats-title">Stats</h4>
+        <div id="pf-stats"></div>
+        <h4 id="pf-ach-title">Achievements</h4>
+        <div class="ach-grid" id="pf-ach-grid"></div>
+        <div id="pf-ref-section-wrap" style="display: none;">
+            <h4 id="pf-ref-title">Invite Friends</h4>
+            <div class="pf-ref-sub" id="pf-ref-sub">Invite friends to play! You both get 200 bonus credits when they play their first hand.</div>
+            <div id="pf-ref-code" style="text-align:center; font-weight:bold; color:#ffd700; font-size:24px; letter-spacing:6px; margin: 10px 0;"></div>
+            <div class="share-row" style="margin-top: 8px;">
+                <input class="room-input" id="pf-ref-link" readonly onclick="this.select()" style="font-size:12px; margin-bottom: 0;">
+                <button class="share-copy-btn" onclick="copyRefLink()" id="pf-ref-copy-btn">Copy Link</button>
+            </div>
+            <a class="whatsapp-btn" id="pf-ref-whatsapp" target="_blank" rel="noopener" style="margin-top: 8px;">
+                <span>💬</span><span id="pf-ref-wa-label">Share on WhatsApp</span>
+            </a>
+            <div class="pf-ref-count" id="pf-ref-count" style="color: #4ade80; font-size: 13px; font-weight: 600; margin-top: 10px; text-align: center;"></div>
+        </div>
+        <div id="pf-styles-section">
+            <h4 id="pf-styles-title">Card Styles</h4>
+            <div class="style-row" id="pf-styles"></div>
+        </div>
+    </div>
+
+    <div class="container" style="display:none; padding-top: 50px;" id="game-container">
+        <div class="language-selector">
+            <label for="language-select" style="margin-right: 10px; color: #ffd700;">Language / שפה / Idioma / Langue / Sprache / اللغة:</label>
+            <select id="language-select" onchange="changeLanguage(this.value)">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="he">עברית</option>
+                <option value="ar">العربية</option>
+            </select>
+        </div>
+
+        <h1 id="game-title">Video Poker</h1>
+
+        <div class="game-layout">
+            <div class="game-col">
+                <div class="payouts" id="payouts"></div>
+
+                <div class="game-area">
+                    <div class="info">
+                        <span id="balance-label">Balance:</span> <span class="balance" id="balance">100</span> |
+                        <span id="bet-label">Bet:</span> <span class="bet-display" id="bet-display">5</span> <span id="credits-label">credits</span>
+                    </div>
+
+                    <div class="controls" style="margin-bottom: 20px;">
+                        <strong id="choose-bet-label">Choose Bet:</strong>
+                        <button class="bet-btn selected" onclick="setBet(5)" id="bet-5">5</button>
+                        <button class="bet-btn" onclick="setBet(10)" id="bet-10">10</button>
+                        <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
+                        <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
+                    </div>
+
+                    <div class="hand" id="hand"></div>
+
+                    <div class="controls">
+                        <button id="deal-btn" onclick="deal()">Deal</button>
+                        <button id="hold-btn" onclick="draw()" disabled>Draw</button>
+                    </div>
+
+                    <div class="result" id="result"></div>
+                    <div class="explanation" id="explanation"></div>
+                </div>
+
+                <div class="streak-bar" id="streak-bar">
+                    <span class="flame">🔥</span>
+                    <span id="streak-label">Win Streak</span>
+                    <span class="streak-count" id="streak-count">0</span>
+                    <span class="streak-bonus-tag eg-hidden" id="streak-bonus-tag"></span>
+                </div>
+
+                <div class="stats-bar" id="stats-bar">
+                    <div class="stat-item stat-won">
+                        <div class="stat-label" id="stat-won-label">Won</div>
+                        <div class="stat-value" id="stat-won-value">+0</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item stat-net zero" id="stat-net">
+                        <div class="stat-label" id="stat-net-label">Net</div>
+                        <div class="stat-value" id="stat-net-value">0</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item stat-lost">
+                        <div class="stat-label" id="stat-lost-label">Lost</div>
+                        <div class="stat-value" id="stat-lost-value">-0</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item stat-hands">
+                        <div class="stat-label" id="stat-hands-label">Hands</div>
+                        <div class="stat-value" id="stat-hands-value">0</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item stat-hands">
+                        <div class="stat-label" id="stat-best-streak-label">Best Streak</div>
+                        <div class="stat-value" id="stat-best-streak-value">🔥 0</div>
+                    </div>
+                </div>
+
+                <div class="challenges" id="challenges-panel" style="display:none;">
+                    <h3 onclick="egToggleChallenges()">
+                        <span id="challenges-title">🎯 Daily Challenges</span>
+                        <span id="challenges-caret">▾</span>
+                    </h3>
+                    <div id="challenges-list"></div>
+                </div>
+
+                <div class="instructions">
+                    <h3 id="how-to-play">How to Play:</h3>
+                    <ul id="instructions-list"></ul>
+                </div>
+            </div>
+
+            <div class="lb-col">
+                <div class="leaderboard" id="rooms-panel">
+                    <h3 id="rooms-title">🃏 Poker Rooms</h3>
+                    <div class="room-tabs" id="rooms-tabs"></div>
+                    <div class="rooms-empty" id="rooms-empty">Create a private room and challenge your friends!</div>
+                    <div id="room-lb-area" class="rm-hidden">
+                        <div class="leaderboard-timer"><span id="room-resets-label">Resets in</span> <span id="room-countdown">--</span></div>
+                        <div class="room-winner rm-hidden" id="room-winner-line"></div>
+                        <table class="lb-table">
+                            <thead><tr>
+                                <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
+                            </tr></thead>
+                            <tbody id="room-lb-body"></tbody>
+                        </table>
+                        <div class="room-nudge rm-hidden" id="room-nudge"></div>
+                        <div class="reaction-bar" id="room-reaction-bar">
+                            <button class="reaction-btn" onclick="sendReaction('👏')">👏</button>
+                            <button class="reaction-btn" onclick="sendReaction('🔥')">🔥</button>
+                            <button class="reaction-btn" onclick="sendReaction('😱')">😱</button>
+                            <button class="reaction-btn" onclick="sendReaction('😂')">😂</button>
+                            <button class="reaction-btn" onclick="sendReaction('💀')">💀</button>
+                            <button class="reaction-btn" onclick="sendReaction('🎉')">🎉</button>
+                        </div>
+                        <div class="room-footer">
+                            <button class="room-mini-btn" onclick="openShareForActiveRoom()" id="room-share-btn">🔗 Invite</button>
+                            <button class="room-mini-btn" onclick="leaveActiveRoom()" id="room-leave-btn">🚪 Leave</button>
+                        </div>
+                    </div>
+                    <div class="room-actions">
+                        <button class="room-action-btn" onclick="openRoomModal('create')" id="create-room-btn">+ Create Room</button>
+                        <button class="room-action-btn secondary" onclick="openRoomModal('join')" id="join-room-btn">Join with Code</button>
+                    </div>
+                </div>
+                <div class="leaderboard" id="leaderboard-hourly">
+                    <h3 id="lb-hourly-title">⏱ Hourly Competition</h3>
+                    <div class="leaderboard-timer">Resets in <span id="lb-hourly-countdown">--:--</span></div>
+                    <table class="lb-table">
+                        <thead><tr>
+                            <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
+                        </tr></thead>
+                        <tbody id="lb-hourly-body">
+                            <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="leaderboard" id="leaderboard-daily">
+                    <h3 id="lb-daily-title">📅 Daily Competition</h3>
+                    <div class="leaderboard-timer">Resets in <span id="lb-daily-countdown">--:--:--</span></div>
+                    <table class="lb-table">
+                        <thead><tr>
+                            <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
+                        </tr></thead>
+                        <tbody id="lb-daily-body">
+                            <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="lb-formula-note" id="lb-formula-note">
+                    <strong>How is score calculated?</strong><br>
+                    Score = Balance - (100 × Rebuys) - 100<br>
+                    <span style="opacity:0.7">(This equals your exact Net Profit/Loss)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+<!-- BUILD_JS_PLACEHOLDER -->
+</script>
+</body>
+</html>

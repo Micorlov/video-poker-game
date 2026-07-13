@@ -8,7 +8,47 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* --- styles/tokens.css --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background: linear-gradient(135deg, #0c2317 0%, #051a0d 50%, #000 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+            background-attachment: fixed;
+            transition: direction 0.3s ease;
+        }
+        body[dir="rtl"] {
+            font-family: 'Noto Sans Hebrew', 'Noto Sans Arabic', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+/* --- styles/layout.css --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background: linear-gradient(135deg, #0c2317 0%, #051a0d 50%, #000 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+            background-attachment: fixed;
+            transition: direction 0.3s ease;
+        }
+        body[dir="rtl"] {
+            font-family: 'Noto Sans Hebrew', 'Noto Sans Arabic', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+/* --- styles/cards.css --- */
+
+
+/* --- styles/animations.css --- */
+
+
+/* --- styles/leaderboard.css --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
             background: linear-gradient(135deg, #0c2317 0%, #051a0d 50%, #000 100%);
@@ -1168,7 +1208,8 @@
         #pf-ref-code { font-size: 24px; letter-spacing: 6px; padding: 10px; }
         .pf-ref-sub { color: rgba(255,255,255,0.55); font-size: 12px; margin-bottom: 10px; line-height: 1.5; }
         .pf-ref-count { color: #4ade80; font-size: 13px; font-weight: 600; margin-top: 10px; text-align: center; }
-    </style>
+
+</style>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1523,7 +1564,9 @@
     </div>
 
     <script>
-        // Global error catcher to display runtime errors on screen
+
+/* --- js/i18n.js --- */
+// Global error catcher to display runtime errors on screen
         window.addEventListener('error', function(e) {
             const errDiv = document.createElement('div');
             errDiv.style.position = 'fixed';
@@ -1578,7 +1621,8 @@
         })();
 
         // Language translations
-        const TRANSLATIONS = {
+
+const TRANSLATIONS = {
             en: {
                 dir: 'ltr',
                 title: 'Video Poker - Jacks or Better',
@@ -1987,759 +2031,332 @@
             }
         };
 
-        const SUITS = ['♠', '♥', '♦', '♣'];
-        const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-        
-        const BASE_PAYOUTS = {
-            'Royal Flush': 250,
-            'Straight Flush': 50,
-            'Four of a Kind': 20,
-            'Full House': 7,
-            'Flush': 5,
-            'Straight': 4,
-            'Three of a Kind': 3,
-            'Two Pair': 2,
-            'Jacks or Better': 1,
-            'Nothing': 0
-        };
-        let currentPayouts = { ...BASE_PAYOUTS };
+/* --- js/audio.js --- */
+var audioCtx = null;
+    var soundEnabled = true;
 
-        // --- Engagement tuning (play-money game) ---
-        const BOOST_BASE = 0.18;          // baseline chance to improve a dead deal
-        const BOOST_PER_LOSS = 0.06;      // extra boost per consecutive loss (mercy)
-        const BOOST_LOSS_CAP = 5;         // loss streak past which mercy stops growing
-        const LOW_BALANCE_HANDS = 10;     // "getting low" = fewer than this many max bets left
-        const CRITICAL_BALANCE_HANDS = 4; // "almost broke" = strong comeback help
-        const BOOST_LOW = 0.15;           // extra help when getting low
-        const BOOST_CRITICAL = 0.35;      // extra help when almost broke
-        const BOOST_MAX = 0.85;           // never a guaranteed rig
+    function initSound() {
+        try {
+            var stored = localStorage.getItem('vp_sound_enabled');
+            if (stored !== null) soundEnabled = stored === 'true';
+        } catch (e) {}
+        updateSoundButtonUI();
+    }
 
-        function getBoostChance() {
-            let chance = BOOST_BASE;
-            chance += Math.min(lossStreak, BOOST_LOSS_CAP) * BOOST_PER_LOSS;
-            if (balance <= bet * CRITICAL_BALANCE_HANDS) {
-                chance += BOOST_CRITICAL;   // comeback: keep the session alive
-            } else if (balance <= bet * LOW_BALANCE_HANDS) {
-                chance += BOOST_LOW;
-            }
-            return Math.min(chance, BOOST_MAX);
+    function ensureAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            generatePreDecodedBuffers();
         }
-
-        let currentLang = 'en';
-        let deck = [];
-        let hand = [];
-        let held = [false, false, false, false, false];
-        let balance = 100;
-        let bet = 5;
-        let gameState = 'bet';
-        let lastHandType = null;
-        let totalWon = 0;
-        let totalLost = 0;
-        let handsPlayed = 0;
-        let lossStreak = 0;
-        let winStreak = 0;
-        let bestStreak = 0;
-        let hourlyRebuys = 0;
-        let dailyRebuys = 0;
-        let weeklyRebuys = loadWeeklyRebuys();
-        let currentHourKey = '';
-        let currentDayKey = '';
-        let currentWeekKey = '';
-        let lastWinAmount = 0;
-        let activeLbTab = 'hourly';
-
-        // --- State Persistence (localStorage backup) ---
-        function saveGameState() {
-            try {
-                const state = {
-                    balance: balance,
-                    bet: bet,
-                    totalWon: totalWon,
-                    totalLost: totalLost,
-                    handsPlayed: handsPlayed,
-                    hourlyRebuys: hourlyRebuys,
-                    dailyRebuys: dailyRebuys,
-                    lossStreak: lossStreak,
-                    winStreak: winStreak,
-                    bestStreak: bestStreak,
-                    hourKey: currentHourKey,
-                    dayKey: currentDayKey,
-                    savedAt: Date.now()
-                };
-                localStorage.setItem('vp_game_state', JSON.stringify(state));
-            } catch (e) { /* localStorage unavailable, silently fail */ }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
         }
+    }
 
-        function restoreGameState() {
-            try {
-                const raw = localStorage.getItem('vp_game_state');
-                if (!raw) return false;
-                const state = JSON.parse(raw);
-                // Only restore if saved less than 24h ago
-                if (Date.now() - state.savedAt > 24 * 60 * 60 * 1000) return false;
-                balance = state.balance || 100;
-                bet = state.bet || 5;
-                totalWon = state.totalWon || 0;
-                totalLost = state.totalLost || 0;
-                handsPlayed = state.handsPlayed || 0;
-                hourlyRebuys = state.hourlyRebuys || 0;
-                dailyRebuys = state.dailyRebuys || 0;
-                lossStreak = state.lossStreak || 0;
-                winStreak = state.winStreak || 0;
-                bestStreak = state.bestStreak || 0;
-                // Only restore hour/day rebuys if same period
-                if (state.hourKey !== getHourKey()) hourlyRebuys = 0;
-                if (state.dayKey !== getDayKey()) dailyRebuys = 0;
-                document.getElementById('balance').textContent = balance;
-                return true;
-            } catch (e) { return false; }
-        }
+    function createSynthesizedBuffer(duration, synthFn) {
+        var sampleRate = audioCtx.sampleRate;
+        var buffer = audioCtx.createBuffer(1, sampleRate * duration, sampleRate);
+        var data = buffer.getChannelData(0);
+        synthFn(data, sampleRate);
+        return buffer;
+    }
 
-        // --- Firebase Error Handling Wrapper ---
-        function firebaseSafe(operation, fallback) {
-            try {
-                var result = operation();
-                if (result && typeof result.catch === 'function') {
-                    return result.catch(function(err) {
-                        console.error('Firebase operation failed:', err);
-                        if (typeof fallback === 'function') fallback(err);
-                        return null;
-                    });
-                }
-                return result;
-            } catch (err) {
-                console.error('Firebase operation threw:', err);
-                if (typeof fallback === 'function') fallback(err);
-                return null;
-            }
-        }
+    function generatePreDecodedBuffers() {
+        audioBuffers.deal = createSynthesizedBuffer(0.15, synthDeal);
+        audioBuffers.flip = createSynthesizedBuffer(0.1, synthFlip);
+        audioBuffers.click = createSynthesizedBuffer(0.05, synthClick);
+        audioBuffers.loss = createSynthesizedBuffer(0.5, synthLoss);
+        audioBuffers.coin = createSynthesizedBuffer(0.3, synthCoin);
+        audioBuffers.win = createSynthesizedBuffer(0.4, synthWin);
+        audioBuffers.bigWin = createSynthesizedBuffer(1.0, synthBigWin);
+        audioBuffers.levelUp = createSynthesizedBuffer(0.8, synthLevelUp);
+    }
 
+    function playSound(name) {
+        if (!soundEnabled) return;
+        ensureAudioContext();
+        var buffer = audioBuffers[name];
+        if (!buffer) return;
+        var source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioCtx.destination);
+        source.start(0);
+    }
 
-        function checkHourReset() {
-            const hk = getHourKey();
-            if (currentHourKey && currentHourKey !== hk) {
-                hourlyRebuys = 0;
-            }
-            currentHourKey = hk;
-        }
-
-        function checkDayReset() {
-            const dk = getDayKey();
-            if (currentDayKey && currentDayKey !== dk) {
-                dailyRebuys = 0;
-            }
-            currentDayKey = dk;
-        }
-
-        function checkWeekReset() {
-            const wk = getWeekKey();
-            if (currentWeekKey && currentWeekKey !== wk) {
-                weeklyRebuys = 0;
-                saveWeeklyRebuys();
-            }
-            currentWeekKey = wk;
-        }
-
-        function doRebuy() {
-            hourlyRebuys++;
-            dailyRebuys++;
-            weeklyRebuys++;
-            saveWeeklyRebuys();
-            balance = 100;
-            document.getElementById('balance').textContent = balance;
-            saveGameState();
-            showRebuyNotification();
-        }
-
-        function showRebuyNotification() {
-            let note = document.getElementById('rebuy-note');
-            if (!note) {
-                note = document.createElement('div');
-                note.id = 'rebuy-note';
-                note.className = 'rebuy-notification';
-                document.getElementById('game-container').appendChild(note);
-            }
-            note.textContent = '♻ +100 credits (rebuy #' + hourlyRebuys + ')';
-            note.classList.remove('show');
-            void note.offsetWidth;
-            note.classList.add('show');
-            setTimeout(function() { note.classList.remove('show'); }, 2000);
-        }
-
-        function changeLanguage(lang) {
-            currentLang = lang;
-            const t = TRANSLATIONS[lang];
-            document.documentElement.lang = lang;
-            document.documentElement.dir = t.dir;
-            document.body.dir = t.dir;
-            document.title = t.title;
-            
-            // Update UI texts
-            document.getElementById('game-title').textContent = t.gameTitle;
-            document.getElementById('balance-label').textContent = t.balanceLabel;
-            document.getElementById('bet-label').textContent = t.betLabel;
-            document.getElementById('credits-label').textContent = t.creditsLabel;
-            document.getElementById('choose-bet-label').textContent = t.chooseBetLabel;
-            document.getElementById('deal-btn').textContent = t.dealBtn;
-            document.getElementById('hold-btn').textContent = t.drawBtn;
-            document.getElementById('how-to-play').textContent = t.howToPlay;
-            
-            // Update payouts table
-            renderPayouts(t);
-            
-            // Update instructions
-            const instructionsList = document.getElementById('instructions-list');
-            instructionsList.innerHTML = '';
-            t.instructions.forEach(inst => {
-                const li = document.createElement('li');
-                li.textContent = inst;
-                instructionsList.appendChild(li);
-            });
-            
-            // Update stats labels
-            document.getElementById('stat-won-label').textContent = t.statWon;
-            document.getElementById('stat-lost-label').textContent = t.statLost;
-            document.getElementById('stat-net-label').textContent = t.statNet;
-            document.getElementById('stat-hands-label').textContent = t.statHands;
-
-            if (lastHandType) {
-                document.getElementById('explanation').textContent = t.explanations[lastHandType];
-                const resultEl = document.getElementById('result');
-                if (lastWinAmount > 0) {
-                    resultEl.innerHTML = `<span class="win">🎉 ${t.payouts[lastHandType]}! +${lastWinAmount} ${t.creditsLabel}! 🎉</span>`;
-                } else {
-                    resultEl.innerHTML = `<span style="color:#aaa">${t.payouts['Nothing']} - ${hand.map(c => c.rank + c.suit).join(' ')}</span>`;
-                }
-            }
-
-            // Update leaderboard UI language dynamically
-            const hourlyTitleEl = document.getElementById('lb-hourly-title');
-            if (hourlyTitleEl) hourlyTitleEl.textContent = '⏱ ' + (t.hourlyTitle || 'Hourly Competition');
-            const dailyTitleEl = document.getElementById('lb-daily-title');
-            if (dailyTitleEl) dailyTitleEl.textContent = '📅 ' + (t.dailyTitle || 'Daily Competition');
-
-            const formulaNote = document.getElementById('lb-formula-note');
-            if (formulaNote) {
-                formulaNote.innerHTML = '<strong>' + (t.formulaTitle || 'How is score calculated?') + '</strong><br>' +
-                                        (t.hourlyFormula || 'Score = Balance - (100 × Rebuys) - 100<br><span style="opacity:0.7">(This equals your exact Net Profit/Loss)</span>');
-            }
-
-            if (window.applyRoomLang) window.applyRoomLang();
-            if (window.applyEngageLang) window.applyEngageLang();
-        }
-
-        function renderPayouts(t) {
-            const payoutsEl = document.getElementById('payouts');
-            payoutsEl.innerHTML = '';
-            const handOrder = ['Royal Flush', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'];
-            handOrder.forEach(handType => {
-                const row = document.createElement('div');
-                row.className = 'payout-row';
-                const isBoosted = currentPayouts[handType] > BASE_PAYOUTS[handType];
-                const valStyle = isBoosted ? 'color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);' : '';
-                row.innerHTML = `<div class="payout-hand">${t.payouts[handType]}</div><div class="payout-value" style="${valStyle}">${currentPayouts[handType]}</div>`;
-                payoutsEl.appendChild(row);
-            });
-        }
-
-        function setBet(amount) {
-            bet = amount;
-            document.getElementById('bet-display').textContent = bet;
-            document.querySelectorAll('.bet-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            const btn = document.getElementById('bet-' + amount);
-            if (btn) btn.classList.add('selected');
-        }
-
-        function createDeck() {
-            const d = [];
-            for (let suit of SUITS) {
-                for (let rank of RANKS) {
-                    d.push({rank, suit});
-                }
-            }
-            return d;
-        }
-
-        function shuffle(deck) {
-            for (let i = deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [deck[i], deck[j]] = [deck[j], deck[i]];
-            }
-        }
-
-        function boostHand() {
-            if (Math.random() >= getBoostChance()) return;
-
-            const rankCounts = {};
-            hand.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
-            const counts = Object.values(rankCounts).sort((a, b) => b - a);
-
-            if (counts[0] >= 2) return;
-
-            const targetRank = hand[Math.floor(Math.random() * 5)].rank;
-            const usedSuits = hand.filter(c => c.rank === targetRank).map(c => c.suit);
-            const availableSuits = SUITS.filter(s => !usedSuits.includes(s));
-            if (availableSuits.length === 0) return;
-            const newSuit = availableSuits[Math.floor(Math.random() * availableSuits.length)];
-            const newCard = { rank: targetRank, suit: newSuit };
-
-            const otherIndices = hand.map((c, i) => c.rank !== targetRank ? i : -1).filter(i => i !== -1);
-            if (otherIndices.length === 0) return;
-            const replaceIdx = otherIndices[Math.floor(Math.random() * otherIndices.length)];
-
-            const oldCard = hand[replaceIdx];
-            deck.push(oldCard);
-            hand[replaceIdx] = newCard;
-            const deckIdx = deck.findIndex(c => c.rank === newCard.rank && c.suit === newCard.suit);
-            if (deckIdx !== -1) deck.splice(deckIdx, 1);
-        }
-
-        function deal() {
-            checkHourReset();
-            checkDayReset();
-            checkWeekReset();
-            if (balance < bet) {
-                if (balance === 0) {
-                    doRebuy();
-                } else {
-                    bet = Math.max(5, Math.floor(balance / 5) * 5);
-                    if (bet > balance) bet = 5;
-                    setBet(bet);
-                    if (balance < bet) {
-                        doRebuy();
-                    }
-                }
-            }
-
-            // Clean up celebration classes & overlays
-            document.body.classList.remove('screen-shake');
-            document.querySelectorAll('.flash-overlay, .confetti-burst-piece, .gold-rain-piece').forEach(el => el.remove());
-
-            balance -= bet;
-            document.getElementById('balance').textContent = balance;
-            saveGameState();
-
-            deck = createDeck();
-            shuffle(deck);
-            hand = deck.splice(0, 5);
-            boostHand();
-            held = [false, false, false, false, false];
-            gameState = 'hold';
-
-            renderHand();
-            document.getElementById('deal-btn').disabled = true;
-            document.getElementById('hold-btn').disabled = false;
-            lastHandType = null;
-            const resultEl = document.getElementById('result');
-            resultEl.className = 'result';
-            resultEl.innerHTML = '';
-            document.getElementById('explanation').innerHTML = '';
-        }
-
-        function getStreakBonus(streak) {
-            if (streak >= 10) return 0.5;
-            if (streak >= 7) return 0.3;
-            if (streak >= 5) return 0.2;
-            if (streak >= 3) return 0.1;
-            return 0;
-        }
-
-        function draw() {
-            // Was a pair held before the draw? (for daily challenges)
-            const heldRankCounts = {};
-            hand.forEach(function(c, i) {
-                if (held[i]) heldRankCounts[c.rank] = (heldRankCounts[c.rank] || 0) + 1;
-            });
-            const hadHeldPair = Object.values(heldRankCounts).some(function(n) { return n >= 2; });
-
-            // Replace unheld cards
-            for (let i = 0; i < 5; i++) {
-                if (!held[i]) {
-                    hand[i] = deck.pop();
-                }
-            }
-            const result = evaluateHand(hand);
-            const handType = result.type;
-            lastHandType = handType;
-            const winIndices = result.winIndices || []; // Ensure it's an array
-            const thirdMatchIndices = result.thirdMatchIndices || []; // Ensure it's an array
-            const secondPairIndices = result.secondPairIndices || []; // Ensure it's an array
-            let win = bet * currentPayouts[handType];
-            if (win > 0) {
-                winStreak++;
-                const streakBonus = getStreakBonus(winStreak);
-                if (streakBonus > 0) win += Math.round(win * streakBonus);
-            } else {
-                winStreak = 0;
-            }
-            updateStreakUI(win > 0);
-            lastWinAmount = win;
-            balance += win;
-            handsPlayed++;
-            
-            if (win > 0) {
-                totalWon += win;
-                lossStreak = 0;
-                currentPayouts = { ...BASE_PAYOUTS };
-            } else {
-                totalLost += bet;
-                lossStreak++;
-                for (let key in currentPayouts) {
-                    if (key !== 'Nothing') currentPayouts[key]++;
-                }
-            }
-            updateStats();
-            renderPayouts(TRANSLATIONS[currentLang]);
-
-            if (win === 0) {
-                document.getElementById('balance').textContent = balance;
-                playSound('loss');
-            } else {
-                triggerWinCelebration(handType, win);
-            }
-            saveGameState();
-
-            if (win > 0 && HAND_RANK[handType] >= 3) {
-                logRoomEvent('hand', handType);
-            }
-
-            const t = TRANSLATIONS[currentLang];
-            const resultEl = document.getElementById('result');
-
-            if (win > 0) {
-                resultEl.className = 'result';
-                var shareWinBtn = '';
-                if (HAND_RANK[handType] >= 3) {
-                    shareWinBtn = '<br><button id="share-win-trigger-btn" onclick="openShareWinModal()" style="margin-top: 10px; padding: 8px 16px; font-size: 14px; border-radius: 8px;">Share Win</button>';
-                }
-                resultEl.innerHTML = `<span class="win">🎉 ${t.payouts[handType]}! +${win} ${t.creditsLabel}! 🎉</span>` + shareWinBtn;
-                document.getElementById('explanation').textContent = t.explanations[handType];
-            } else {
-                resultEl.className = 'result';
-                resultEl.innerHTML = `<span style="color:#aaa">${t.payouts['Nothing']} - ${hand.map(c => c.rank + c.suit).join(' ')}</span>`;
-                document.getElementById('explanation').textContent = t.explanations[handType];
-            }
-
-            renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
-            updateScores(win, bet, handType);
-            if (window.egOnHandPlayed) {
-                window.egOnHandPlayed({ handType: handType, win: win, bet: bet, heldPair: hadHeldPair, streak: winStreak });
-            }
-
-            gameState = 'bet';
-            document.getElementById('deal-btn').disabled = false;
-            document.getElementById('hold-btn').disabled = true;
-        }
-
-        function toggleHold(i) {
-            if (gameState !== 'hold') return;
-            held[i] = !held[i];
-            renderHand();
+    function toggleSound() {
+        ensureAudioContext();
+        soundEnabled = !soundEnabled;
+        try {
+            localStorage.setItem('vp_sound_enabled', soundEnabled);
+        } catch (e) {}
+        updateSoundButtonUI();
+        if (soundEnabled) {
             playSound('click');
         }
+    }
 
-        function getWinBadgeText(cardIndex, handType) {
-            const card = hand[cardIndex];
-            const ranks = hand.map(c => c.rank);
-            const rankCounts = {};
-            ranks.forEach(r => rankCounts[r] = (rankCounts[r] || 0) + 1);
-            
-            const t = TRANSLATIONS[currentLang];
-            const wl = t.winLabels || {};
-            const rankLabel = card.rank;
+    function updateSoundButtonUI() {
+        var btn = document.getElementById('sound-toggle-btn');
+        if (btn) {
+            btn.textContent = soundEnabled ? '🔊' : '🔇';
+        }
+    }
 
-            if (handType === 'Jacks or Better') {
-                return (wl.pair || 'Pair') + ' ' + rankLabel;
+    /* Sound Synthesizer Functions */
+    function synthDeal(data, sampleRate) {
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var freq = 600 * Math.exp(-30 * t) + 100;
+            var amp = Math.exp(-25 * t);
+            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.5;
+        }
+    }
+
+    function synthFlip(data, sampleRate) {
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var noise = Math.random() * 2 - 1;
+            var amp = Math.exp(-40 * t);
+            data[i] = (noise * 0.3 + Math.sin(2 * Math.PI * 150 * t) * 0.7) * amp * 0.6;
+        }
+    }
+
+    function synthClick(data, sampleRate) {
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var freq = 2000 * Math.exp(-100 * t);
+            var amp = Math.exp(-80 * t);
+            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.4;
+        }
+    }
+
+    function synthLoss(data, sampleRate) {
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var freq = 120 * Math.exp(-4 * t);
+            var amp = Math.exp(-3 * t);
+            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.5;
+        }
+    }
+
+    function synthCoin(data, sampleRate) {
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var amp = Math.exp(-12 * t);
+            var tone1 = Math.sin(2 * Math.PI * 1800 * t);
+            var tone2 = Math.sin(2 * Math.PI * 2400 * t);
+            data[i] = (tone1 + tone2) * 0.5 * amp * 0.4;
+        }
+    }
+
+    function synthWin(data, sampleRate) {
+        var freqs = [523.25, 659.25, 783.99, 1046.50];
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var noteIdx = Math.min(freqs.length - 1, Math.floor(t / 0.1));
+            var freq = freqs[noteIdx];
+            var amp = Math.exp(-6 * (t % 0.1)) * Math.exp(-1.5 * t);
+            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.4;
+        }
+    }
+
+    function synthBigWin(data, sampleRate) {
+        var chords = [
+            [523.25, 659.25, 783.99],
+            [587.33, 739.99, 880.00],
+            [659.25, 830.61, 987.77],
+            [783.99, 987.77, 1174.66]
+        ];
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var chordIdx = Math.min(chords.length - 1, Math.floor(t / 0.25));
+            var freqs = chords[chordIdx];
+            var amp = Math.exp(-3 * (t % 0.25)) * Math.exp(-0.5 * t);
+            var val = 0;
+            for (var f = 0; f < freqs.length; f++) {
+                val += Math.sin(2 * Math.PI * freqs[f] * t);
             }
-            if (handType === 'Two Pair') {
-                return (wl.pair || 'Pair') + ' ' + rankLabel;
-            }
-            if (handType === 'Three of a Kind') {
-                return wl.threeOfKind || '3 of a Kind';
-            }
-            if (handType === 'Full House') {
-                const count = rankCounts[card.rank] || 0;
-                if (count === 3) {
-                    return wl.threeOfKind || '3 of a Kind';
-                } else if (count === 2) {
-                    return (wl.pair || 'Pair') + ' ' + rankLabel;
-                }
-            }
-            if (handType === 'Four of a Kind') {
-                return wl.fourOfKind || '4 of a Kind';
-            }
-            if (handType === 'Straight') {
-                return wl.straight || 'Straight';
-            }
-            if (handType === 'Flush') {
-                return wl.flush || 'Flush';
-            }
-            if (handType === 'Straight Flush') {
-                return wl.straightFlush || 'Str. Flush';
-            }
-            if (handType === 'Royal Flush') {
-                return wl.royalFlush || 'Royal Flush';
-            }
-            return '';
+            data[i] = (val / freqs.length) * amp * 0.4;
+        }
+    }
+
+    function synthLevelUp(data, sampleRate) {
+        var freqs = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+        for (var i = 0; i < data.length; i++) {
+            var t = i / sampleRate;
+            var noteIdx = Math.min(freqs.length - 1, Math.floor(t / 0.08));
+            var freq = freqs[noteIdx];
+            var amp = noteIdx === freqs.length - 1 ? Math.exp(-2 * (t - 0.4)) : Math.exp(-8 * (t % 0.08));
+            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.4;
+        }
+    }
+
+    /* Win Celebrations */
+    function triggerWinCelebration(handType, win) {
+        var rank = HAND_RANK[handType] || 0;
+        
+        if (rank >= 7) {
+            playSound('bigWin');
+        } else {
+            playSound('win');
         }
 
-        function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false) {
-            const handEl = document.getElementById('hand');
-            handEl.innerHTML = '';
-            const t = TRANSLATIONS[currentLang];
-            const anyHeld = held.some(h => h);
-
-            const PIP_MAPS = {
-                '2': [1, 13],
-                '3': [1, 7, 13],
-                '4': [0, 2, 12, 14],
-                '5': [0, 2, 7, 12, 14],
-                '6': [0, 2, 6, 8, 12, 14],
-                '7': [0, 2, 6, 8, 12, 14, 4],
-                '8': [0, 2, 6, 8, 12, 14, 4, 10],
-                '9': [0, 2, 3, 5, 9, 11, 12, 14, 7],
-                '10': [0, 2, 3, 5, 9, 11, 12, 14, 4, 10]
-            };
-
-            hand.forEach((card, i) => {
-                const cardEl = document.createElement('div');
-                const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || secondPairIndices.length > 0;
-                
-                // If draw is true, only unheld cards start face-down (flipped)
-                const shouldStartFlipped = isDraw ? !held[i] : true;
-                
-                const isHeld = !isResult && held[i];
-                const isUnheld = !isResult && anyHeld && !held[i];
-                let classes = `card ${shouldStartFlipped ? 'flipped' : ''} ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
-
-                if (winningIndices.includes(i)) {
-                    classes += ' winning';
-                }
-                if (secondPairIndices.includes(i)) {
-                    classes += ' second-pair';
-                }
-                if (thirdMatchIndices.includes(i)) {
-                    classes += ' third-match';
-                }
-
-                cardEl.className = classes.trim();
-                cardEl.onclick = () => toggleHold(i);
-                
-                const badgeText = t.heldBadge || 'HELD';
-                const winBadgeText = isResult ? getWinBadgeText(i, lastHandType) : '';
-                
-                // Generate center content
-                let centerContent = '';
-                if (card.rank === 'A') {
-                    centerContent = `<div class="card-suit-large">${card.suit}</div>`;
-                } else if (['J', 'Q', 'K'].includes(card.rank)) {
-                    centerContent = `<div class="card-royalty-center rank-${card.rank}">${card.rank === 'J' ? '⚔️' : card.rank === 'Q' ? '👑' : '🛡️'}</div>`;
-                } else {
-                    const pips = PIP_MAPS[card.rank] || [];
-                    let gridHtml = '<div class="pip-grid">';
-                    for (let cell = 0; cell < 15; cell++) {
-                        const isActive = pips.includes(cell);
-                        gridHtml += `<div class="pip ${isActive ? 'active' : ''}">${card.suit}</div>`;
-                    }
-                    gridHtml += '</div>';
-                    centerContent = gridHtml;
-                }
-
-                cardEl.innerHTML = `
-                    <div class="card-inner">
-                        <div class="card-front">
-                            <div class="held-badge">${badgeText}</div>
-                            <div class="win-badge">${winBadgeText}</div>
-                            <div class="card-index top-left">
-                                <div class="card-index-rank">${card.rank}</div>
-                                <div class="card-index-suit">${card.suit}</div>
-                            </div>
-                            ${centerContent}
-                            <div class="card-index bottom-right">
-                                <div class="card-index-rank">${card.rank}</div>
-                                <div class="card-index-suit">${card.suit}</div>
-                            </div>
-                        </div>
-                        <div class="card-back"></div>
-                    </div>
-                `;
-                handEl.appendChild(cardEl);
-            });
-
-            // Staggered flip animation trigger
-            let flipDelayIndex = 0;
-            hand.forEach((card, i) => {
-                const cardEl = handEl.children[i];
-                if (cardEl && cardEl.classList.contains('flipped')) {
-                    setTimeout(() => {
-                        const inner = cardEl.querySelector('.card-inner');
-                        if (inner) {
-                            inner.classList.add('animating');
-                            cardEl.classList.remove('flipped');
-                            playSound('deal');
-                            setTimeout(() => {
-                                inner.classList.remove('animating');
-                            }, 600);
-                        }
-                    }, flipDelayIndex * 250);
-                    flipDelayIndex++;
-                }
+        if (rank <= 2) {
+            var resultEl = document.getElementById('result');
+            if (resultEl) {
+                var winSpan = resultEl.querySelector('.win');
+                if (winSpan) winSpan.classList.add('shimmer-gold');
+            }
+        }
+        
+        if (rank === 3 || rank === 4) {
+            var cardElements = document.querySelectorAll('#hand .card.winning');
+            cardElements.forEach(function(el, idx) {
+                el.classList.add('bounce');
+                el.style.animationDelay = (idx * 0.1) + 's';
             });
         }
 
-        function evaluateHand(hand) {
-            const ranks = hand.map(c => c.rank);
-            const suits = hand.map(c => c.suit);
-            
-            const rankCounts = {};
-            ranks.forEach(r => rankCounts[r] = (rankCounts[r] || 0) + 1);
-            const counts = Object.values(rankCounts).sort((a, b) => b - a);
-            
-            const flush = new Set(suits).size === 1;
-            
-            let values = ranks.map(r => {
-                if (r === 'A') return 14;
-                if (r === 'J') return 11;
-                if (r === 'Q') return 12;
-                if (r === 'K') return 13;
-                return parseInt(r);
-            }).sort((a, b) => a - b);
-            
-            let straight = false;
-            const uniqueValues = [...new Set(values)];
-            if (uniqueValues.length === 5) { 
-                if (uniqueValues[4] - uniqueValues[0] === 4) {
-                    straight = true;
-                } else if (uniqueValues.join(',') === '2,3,4,5,14') { // Ace-low straight
-                    straight = true;
-                    values = [1, 2, 3, 4, 5]; // Adjust values for consistent check
-                }
-            }
-            
-            // Helper to find indices of cards matching certain ranks
-            const findIndices = (targetRanks) => {
-                return hand.map((card, i) => targetRanks.includes(card.rank) ? i : -1).filter(i => i !== -1);
-            };
-            
-            // Helper to find indices for a specific count
-            const findIndicesByCount = (targetCount) => {
-                const targetRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === targetCount);
-                return findIndices(targetRanks);
-            };
-            
-            const allIndices = [0, 1, 2, 3, 4];
-            let result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] }; // Initialize thirdMatchIndices // Initialize thirdMatchIndices
-
-            if (straight && flush) {
-                if (values.join(',') === '10,11,12,13,14') {
-                    result.type = 'Royal Flush';
-                } else {
-                    result.type = 'Straight Flush';
-                }
-                result.winIndices = allIndices;
-            } else if (counts[0] === 4) {
-                result.type = 'Four of a Kind';
-                result.winIndices = findIndicesByCount(4);
-            } else if (counts[0] === 3 && counts[1] === 2) { // Full House
-                result.type = 'Full House';
-                const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
-                const twoRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
-                result.winIndices = findIndices([threeRank]);
-                result.secondPairIndices = findIndices([twoRank]);
-            } else if (flush) {
-                result.type = 'Flush';
-                result.winIndices = allIndices;
-            } else if (straight) {
-                result.type = 'Straight';
-                result.winIndices = allIndices;
-            } else if (counts[0] === 3) { // Three of a Kind
-                result.type = 'Three of a Kind';
-                result.winIndices = findIndicesByCount(3);
-                const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
-                const threeIndices = findIndices([threeRank]);
-                if (threeRank === 'J' && threeIndices.length > 0) {
-                    result.thirdMatchIndices.push(threeIndices[0]); 
-                }
-            } else if (counts[0] === 2 && counts[1] === 2) { // Two Pair
-                const pairRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === 2);
-                result.type = 'Two Pair';
-                result.winIndices = findIndices([pairRanks[0]]);
-                result.secondPairIndices = findIndices([pairRanks[1]]);
-            } else if (counts[0] === 2) { // One Pair
-                const pairRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
-                if (['J', 'Q', 'K', 'A'].includes(pairRank)) {
-                    result.type = 'Jacks or Better';
-                    result.winIndices = findIndices([pairRank]);
-                }
-            }
-            return result;
+        if (rank === 5 || rank === 6) {
+            confettiBurst();
         }
 
-        function updateStats() {
-            const net = totalWon - totalLost;
-            document.getElementById('stat-won-value').textContent = '+' + totalWon;
-            document.getElementById('stat-lost-value').textContent = '-' + totalLost;
-            document.getElementById('stat-hands-value').textContent = handsPlayed;
+        if (rank === 7) {
+            confettiBurst();
+            setTimeout(confettiBurst, 200);
+            setTimeout(confettiBurst, 400);
+            triggerScreenFlash();
+        }
 
-            const netEl = document.getElementById('stat-net');
-            const netValueEl = document.getElementById('stat-net-value');
-            netEl.classList.remove('positive', 'negative', 'zero');
-            if (net > 0) {
-                netValueEl.textContent = '+' + net;
-                netEl.classList.add('positive');
-            } else if (net < 0) {
-                netValueEl.textContent = '' + net;
-                netEl.classList.add('negative');
+        if (rank >= 8) {
+            launchFireworks();
+            triggerScreenFlash();
+            triggerScreenShake();
+            goldRain();
+        }
+
+        var oldBalance = balance - win;
+        animateBalance(oldBalance, balance, 1000);
+    }
+
+    function triggerScreenFlash() {
+        var flash = document.createElement('div');
+        flash.className = 'flash-overlay';
+        document.body.appendChild(flash);
+        setTimeout(function() { flash.remove(); }, 500);
+    }
+
+    function triggerScreenShake() {
+        document.body.classList.add('screen-shake');
+        setTimeout(function() {
+            document.body.classList.remove('screen-shake');
+        }, 500);
+    }
+
+    function confettiBurst() {
+        var colors = ['#ffd700', '#4ade80', '#ff6b6b', '#8a2be2', '#ffffff', '#ffaa00'];
+        var container = document.body;
+        for (var i = 0; i < 30; i++) {
+            var p = document.createElement('div');
+            p.className = 'confetti-burst-piece';
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            
+            var angle = Math.random() * Math.PI * 2;
+            var velocity = 50 + Math.random() * 150;
+            var tx = Math.cos(angle) * velocity;
+            var ty = Math.sin(angle) * velocity;
+            
+            p.style.setProperty('--tx', tx + 'px');
+            p.style.setProperty('--ty', ty + 'px');
+            
+            p.style.left = '50vw';
+            p.style.top = '50vh';
+            container.appendChild(p);
+            
+            setTimeout(function(el) { return function() { el.remove(); }; }(p), 1000);
+        }
+    }
+
+    function launchFireworks() {
+        for (var f = 0; f < 5; f++) {
+            setTimeout(function() {
+                var x = 20 + Math.random() * 60;
+                var y = 20 + Math.random() * 40;
+                createFirework(x, y);
+            }, f * 400);
+        }
+    }
+
+    function createFirework(x, y) {
+        var colors = ['#ffd700', '#ffaa00', '#ff5500', '#ff00aa', '#00ffaa', '#00aaff'];
+        var container = document.body;
+        for (var i = 0; i < 24; i++) {
+            var p = document.createElement('div');
+            p.className = 'confetti-burst-piece';
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            
+            var angle = Math.random() * Math.PI * 2;
+            var velocity = 30 + Math.random() * 120;
+            var tx = Math.cos(angle) * velocity;
+            var ty = Math.sin(angle) * velocity;
+            
+            p.style.setProperty('--tx', tx + 'px');
+            p.style.setProperty('--ty', ty + 'px');
+            
+            p.style.left = x + 'vw';
+            p.style.top = y + 'vh';
+            container.appendChild(p);
+            
+            setTimeout(function(el) { return function() { el.remove(); }; }(p), 1000);
+        }
+    }
+
+    function goldRain() {
+        for (var i = 0; i < 50; i++) {
+            var p = document.createElement('div');
+            p.className = 'gold-rain-piece';
+            p.style.left = (Math.random() * 100) + 'vw';
+            p.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+            p.style.animationDelay = (Math.random() * 1.5) + 's';
+            document.body.appendChild(p);
+            setTimeout(function(el) { return function() { el.remove(); }; }(p), 3500);
+        }
+    }
+
+    function animateBalance(startValue, endValue, durationMs) {
+        var el = document.getElementById('balance');
+        if (!el) return;
+        
+        var startTime = performance.now();
+        var coinTriggerIndex = 0;
+        
+        function update(now) {
+            var elapsed = now - startTime;
+            var pct = Math.min(1, elapsed / durationMs);
+            
+            var ease = pct * (2 - pct);
+            var current = Math.round(startValue + (endValue - startValue) * ease);
+            el.textContent = current;
+
+            // Arpeggiate coin sound every few credits
+            var step = Math.floor(current / 5);
+            if (step > coinTriggerIndex) {
+                playSound('coin');
+                coinTriggerIndex = step;
+            }
+            
+            if (pct < 1) {
+                requestAnimationFrame(update);
             } else {
-                netValueEl.textContent = '0';
-                netEl.classList.add('zero');
+                el.textContent = endValue;
             }
         }
+        
+        requestAnimationFrame(update);
+    }
 
-        function updateStreakUI(justWon) {
-            const bar = document.getElementById('streak-bar');
-            const count = document.getElementById('streak-count');
-            const tag = document.getElementById('streak-bonus-tag');
-            count.textContent = winStreak;
-            bar.classList.toggle('active', winStreak >= 2);
-            const bonus = getStreakBonus(winStreak);
-            if (bonus > 0) {
-                tag.textContent = (window.et ? et('bonusTag') : '+{n}% payout bonus').replace('{n}', Math.round(bonus * 100));
-                tag.classList.remove('eg-hidden');
-            } else {
-                tag.classList.add('eg-hidden');
-            }
-            if (justWon && winStreak >= 2) {
-                bar.classList.remove('bump');
-                void bar.offsetWidth;
-                bar.classList.add('bump');
-            }
-            if (justWon && winStreak >= 5 && winStreak % 5 === 0) {
-                logRoomEvent('streak', winStreak);
-            }
-            if (winStreak > bestStreak) {
-                bestStreak = winStreak;
-                document.getElementById('stat-best-streak-value').textContent = '🔥 ' + bestStreak;
-                const user = auth.currentUser;
-                if (user) {
-                    db.collection('users').doc(user.uid).set({ bestStreak: bestStreak }, { merge: true })
-                        .catch(function(err) { console.error('bestStreak save:', err); });
-                }
-            }
-        }
-
-        // Initialize
-        changeLanguage('en');
-    // Keyboard support for bet selection (keys 1-5)
-    document.addEventListener('keydown', function(e) {
-        const keyMap = { '1': 5, '2': 10, '3': 20, '4': 50 };
-        if (keyMap[e.key]) setBet(keyMap[e.key]);
-    });
-
-    // Firebase
-    const firebaseConfig = {
+/* --- js/firebase.js --- */
+const firebaseConfig = {
         apiKey: "AIzaSyB6m0Yis89jxvm06OFBqxs8P_vADjRXk0U",
         authDomain: "video-poker-6d665.firebaseapp.com",
         projectId: "video-poker-6d665",
@@ -2935,7 +2552,455 @@
         'Straight Flush': 8, 'Royal Flush': 9
     };
 
-    function getHourKey(date) {
+/* --- js/rooms.js --- */
+function logRoomEvent(eventType, detail) {
+        var user = auth.currentUser;
+        if (!user || myRooms.length === 0) return;
+        
+        myRooms.forEach(function(room) {
+            db.collection('room_events').add({
+                roomId: room.id,
+                uid: user.uid,
+                displayName: user.displayName || '',
+                photoURL: user.photoURL || '',
+                eventType: eventType,
+                detail: detail,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(function() {
+                db.collection('room_events')
+                    .where('roomId', '==', room.id)
+                    .get()
+                    .then(function(snap) {
+                        if (snap.size > 50) {
+                            var docs = [];
+                            snap.forEach(function(d) { docs.push({ id: d.id, data: d.data() }); });
+                            docs.sort(function(a, b) {
+                                var tA = a.data.timestamp ? (a.data.timestamp.toDate ? a.data.timestamp.toDate().getTime() : a.data.timestamp) : 0;
+                                var tB = b.data.timestamp ? (b.data.timestamp.toDate ? b.data.timestamp.toDate().getTime() : b.data.timestamp) : 0;
+                                return tA - tB;
+                            });
+                            var toDeleteCount = docs.length - 50;
+                            for (var i = 0; i < toDeleteCount; i++) {
+                                db.collection('room_events').doc(docs[i].id).delete();
+                            }
+                        }
+                    }).catch(function(err) { console.error('event cleanup:', err); });
+            }).catch(function(err) { console.error('add room event:', err); });
+        });
+    }
+
+    function handleIncomingRoomEvent(data) {
+        if (data.eventType === 'reaction') {
+            triggerFloatingEmoji(data.uid, data.detail);
+        } else {
+            var text = '';
+            var name = escapeHtml(firstName(data.displayName));
+            var t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+            
+            if (data.eventType === 'hand') {
+                var handName = t.payouts[data.detail] || data.detail;
+                var template = rt('feedHitHand') || '{name} just hit a {hand}!';
+                text = template.replace('{name}', name).replace('{hand}', handName);
+            } else if (data.eventType === 'streak') {
+                var template = rt('feedStreak') || '{name} is on a {n}-win streak!';
+                text = template.replace('{name}', name).replace('{n}', data.detail);
+            } else if (data.eventType === 'levelUp') {
+                var template = rt('feedLevelUp') || '{name} just leveled up to {n}!';
+                text = template.replace('{name}', name).replace('{n}', data.detail);
+            }
+            
+            if (text) {
+                showFeedToast(text);
+            }
+        }
+    }
+
+    var maxFeedToasts = 3;
+    function showFeedToast(text) {
+        var container = document.getElementById('feed-toasts');
+        if (!container) return;
+
+        var existing = container.getElementsByClassName('feed-toast');
+        if (existing.length >= maxFeedToasts) {
+            var oldest = existing[0];
+            oldest.remove();
+        }
+
+        var toast = document.createElement('div');
+        toast.className = 'feed-toast';
+        toast.textContent = text;
+        container.appendChild(toast);
+
+        setTimeout(function() {
+            toast.classList.add('out');
+            setTimeout(function() {
+                toast.remove();
+            }, 300);
+        }, 4000);
+    }
+
+    function triggerFloatingEmoji(uid, emoji) {
+        var lbContainer = document.getElementById('rooms-panel');
+        if (!lbContainer) return;
+
+        var rowEl = document.querySelector('#room-lb-body tr[data-uid="' + uid + '"]');
+        var topOffset, leftOffset;
+        var lbRect = lbContainer.getBoundingClientRect();
+        
+        if (rowEl) {
+            var rowRect = rowEl.getBoundingClientRect();
+            topOffset = rowRect.top - lbRect.top + (rowRect.height / 2) - 15;
+            leftOffset = rowRect.left - lbRect.left + (rowRect.width / 2) - 15;
+        } else {
+            topOffset = lbRect.height / 2 - 15;
+            leftOffset = lbRect.width / 2 - 15;
+        }
+
+        var emojiEl = document.createElement('div');
+        emojiEl.className = 'float-emoji';
+        emojiEl.textContent = emoji;
+        emojiEl.style.top = topOffset + 'px';
+        emojiEl.style.left = leftOffset + 'px';
+        
+        lbContainer.appendChild(emojiEl);
+
+        setTimeout(function() {
+            emojiEl.remove();
+        }, 2000);
+    }
+
+    var lastReactionTime = 0;
+    function sendReaction(emoji) {
+        var user = auth.currentUser;
+        var room = getActiveRoom();
+        if (!user || !room) return;
+
+        var now = Date.now();
+        if (now - lastReactionTime < 5000) return;
+        lastReactionTime = now;
+
+        var buttons = document.querySelectorAll('.reaction-btn');
+        buttons.forEach(function(btn) { btn.disabled = true; });
+        setTimeout(function() {
+            buttons.forEach(function(btn) { btn.disabled = false; });
+        }, 5000);
+
+        db.collection('room_events').add({
+            roomId: room.id,
+            uid: user.uid,
+            displayName: user.displayName || '',
+            photoURL: user.photoURL || '',
+            eventType: 'reaction',
+            detail: emoji,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(function(err) { console.error('send reaction error:', err); });
+    }
+
+    function checkAndProcessReferral() {
+        var user = auth.currentUser;
+        if (!user) return;
+
+        db.collection('users').doc(user.uid).get().then(function(doc) {
+            if (!doc.exists) return;
+            var data = doc.data();
+            var referredByCode = data.referredBy;
+            if (!referredByCode) return;
+
+            db.collection('users').where('referralCode', '==', referredByCode).limit(1).get().then(function(snap) {
+                if (snap.empty) return;
+                var referrerDoc = snap.docs[0];
+                var referrerUid = referrerDoc.id;
+                
+                if (referrerUid === user.uid) return;
+                var referralDocId = referrerUid + '_' + user.uid;
+
+                db.collection('referrals').doc(referralDocId).get().then(function(refDoc) {
+                    if (refDoc.exists) return;
+
+                    db.collection('referrals').doc(referralDocId).set({
+                        referrerUid: referrerUid,
+                        refereeUid: user.uid,
+                        creditedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(function() {
+                        db.collection('users').doc(referrerUid).update({
+                            bonusCredits: firebase.firestore.FieldValue.increment(200),
+                            referralCount: firebase.firestore.FieldValue.increment(1)
+                        });
+
+                        egAddCredits(200);
+                        egConfetti();
+                        egToast('🎉 Referral Reward! +200 credits! 🎉');
+                        saveGameState();
+                    });
+                });
+            });
+        });
+    }
+
+    function copyRefLink() {
+        var link = document.getElementById('pf-ref-link').value;
+        var btn = document.getElementById('pf-ref-copy-btn');
+        var done = function() {
+            btn.textContent = rt('copied') || 'Copied ✓';
+            setTimeout(function() { btn.textContent = rt('copyLink') || 'Copy Link'; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(done).catch(function() {
+                document.getElementById('pf-ref-link').select();
+                document.execCommand('copy');
+                done();
+            });
+        } else {
+            document.getElementById('pf-ref-link').select();
+            document.execCommand('copy');
+            done();
+        }
+    }
+
+    function openShareWinModal() {
+        var canvas = document.getElementById('share-canvas');
+        if (!canvas) return;
+
+        var room = getActiveRoom();
+        var user = auth.currentUser;
+        
+        var inviteCode = '';
+        var inviteLink = '';
+        
+        if (room) {
+            inviteCode = room.id;
+            inviteLink = roomLink(room.id);
+            drawAndShowShareModal(canvas, hand, lastHandType, lastWinAmount, inviteLink, inviteCode);
+        } else if (user && user.uid) {
+            db.collection('users').doc(user.uid).get().then(function(doc) {
+                var data = doc.exists ? doc.data() : {};
+                var refCode = data.referralCode || '';
+                var refLink = location.origin + location.pathname + '?ref=' + refCode;
+                drawAndShowShareModal(canvas, hand, lastHandType, lastWinAmount, refLink, refCode);
+            });
+        }
+    }
+
+    function drawAndShowShareModal(canvas, hand, handType, winAmount, inviteLink, inviteCode) {
+        var t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+        var translatedHandType = t.payouts[handType] || handType;
+        
+        drawWinCard(canvas, hand, translatedHandType, winAmount, inviteLink, inviteCode);
+        
+        var waText = 'Wow! I just hit a ' + translatedHandType + ' and won ' + winAmount + ' credits in Video Poker! Play with me: ' + inviteLink;
+        document.getElementById('share-win-whatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(waText);
+        
+        var copyBtn = document.getElementById('share-win-copy-btn');
+        copyBtn.dataset.link = inviteLink;
+        copyBtn.textContent = rt('copyLink') || 'Copy Link';
+
+        document.getElementById('share-win-modal').classList.remove('rm-hidden');
+    }
+
+    function closeShareWinModal() {
+        document.getElementById('share-win-modal').classList.add('rm-hidden');
+    }
+
+    function copyWinCardLink() {
+        var btn = document.getElementById('share-win-copy-btn');
+        var link = btn.dataset.link;
+        var done = function() {
+            btn.textContent = rt('copied') || 'Copied ✓';
+            setTimeout(function() { btn.textContent = rt('copyLink') || 'Copy Link'; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(done).catch(function() {
+                var temp = document.createElement('input');
+                temp.value = link;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand('copy');
+                temp.remove();
+                done();
+            });
+        } else {
+            var temp = document.createElement('input');
+            temp.value = link;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            temp.remove();
+            done();
+        }
+    }
+
+    function downloadWinCard() {
+        var canvas = document.getElementById('share-canvas');
+        if (!canvas) return;
+        var link = document.createElement('a');
+        link.download = 'video_poker_win_' + lastHandType.toLowerCase().replace(/ /g, '_') + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    function drawWinCard(canvas, hand, handType, winAmount, inviteLink, inviteCode) {
+        var ctx = canvas.getContext('2d');
+        
+        var grad = ctx.createRadialGradient(300, 200, 50, 300, 200, 350);
+        grad.addColorStop(0, '#0f3c26');
+        grad.addColorStop(1, '#05190e');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 600, 400);
+
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 6;
+        ctx.strokeRect(3, 3, 594, 394);
+
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.05)';
+        ctx.lineWidth = 1;
+        for (var i = 0; i < 600; i += 30) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, 400);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = '#ffd700';
+        ctx.font = 'bold 24px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('♠ ♥ VIDEO POKER ♦ ♣', 300, 45);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px "Segoe UI", sans-serif';
+        ctx.fillText(handType.toUpperCase(), 300, 95);
+
+        ctx.fillStyle = '#4ade80';
+        ctx.font = 'bold 24px "Segoe UI", sans-serif';
+        ctx.fillText('+' + winAmount + ' CREDITS', 300, 135);
+
+        var cardW = 75;
+        var cardH = 110;
+        var gap = 15;
+        var totalW = (5 * cardW) + (4 * gap);
+        var startX = (600 - totalW) / 2;
+        var startY = 165;
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        hand.forEach(function(card, idx) {
+            var x = startX + idx * (cardW + gap);
+            var y = startY;
+
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 4;
+
+            ctx.fillStyle = '#ffffff';
+            roundRect(ctx, x, y, cardW, cardH, 8);
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+
+            ctx.strokeStyle = '#cccccc';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            var evaluated = evaluateHand(hand);
+            var isWinner = evaluated.winIndices.includes(idx) || evaluated.secondPairIndices.includes(idx) || evaluated.thirdMatchIndices.includes(idx);
+            if (isWinner) {
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 3;
+                roundRect(ctx, x, y, cardW, cardH, 8);
+                ctx.stroke();
+            }
+
+            var isRed = card.suit === '♥' || card.suit === '♦';
+            ctx.fillStyle = isRed ? '#e63946' : '#2d3748';
+            
+            ctx.font = 'bold 18px "Segoe UI", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(card.rank, x + 8, y + 22);
+
+            ctx.font = 'bold 36px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(card.suit, x + cardW / 2, y + cardH / 2 + 12);
+
+            ctx.font = 'bold 18px "Segoe UI", sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(card.rank, x + cardW - 8, y + cardH - 10);
+        });
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        roundRect(ctx, 30, 310, 540, 65, 8);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.2)';
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, 30, 310, 540, 65, 8);
+        ctx.stroke();
+
+        drawMockQRCode(ctx, 505, 318, 48);
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#ffd700';
+        ctx.font = 'bold 15px "Segoe UI", sans-serif';
+        if (inviteCode) {
+            ctx.fillText('PLAY WITH ME! ROOM CODE: ' + inviteCode, 45, 338);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '12px "Segoe UI", sans-serif';
+            ctx.fillText(inviteLink, 45, 360);
+        } else {
+            ctx.fillText('PLAY VIDEO POKER & WIN CREDITS!', 45, 348);
+        }
+    }
+
+    function drawMockQRCode(ctx, x, y, size) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x, y, size, size);
+
+        var finderSize = Math.floor(size * 7 / 25);
+        drawFinderPattern(ctx, x, y, finderSize);
+        drawFinderPattern(ctx, x + size - finderSize, y, finderSize);
+        drawFinderPattern(ctx, x, y + size - finderSize, finderSize);
+
+        ctx.fillStyle = '#000000';
+        var cellSize = size / 25;
+        for (var row = 0; row < 25; row++) {
+            for (var col = 0; col < 25; col++) {
+                if ((row < 8 && col < 8) || (row < 8 && col >= 17) || (row >= 17 && col < 8)) {
+                    continue;
+                }
+                if (Math.random() > 0.5) {
+                    ctx.fillRect(x + col * cellSize, y + row * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+    }
+
+    function drawFinderPattern(ctx, x, y, size) {
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(x, y, size, size);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x + size/7, y + size/7, size*5/7, size*5/7);
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(x + size*2/7, y + size*2/7, size*3/7, size*3/7);
+    }
+
+    /* ===================== Phase 4: Audio & Visual Polish ===================== */
+    var audioBuffers = {};
+
+/* --- js/competitions.js --- */
+function getHourKey(date) {
         const now = date || new Date();
         return now.getFullYear() + '-' +
             String(now.getMonth() + 1).padStart(2, '0') + '-' +
@@ -3928,551 +3993,8 @@
     var egChallenges = null;     // {dateKey, list: [{id, target, progress, completed, reward}]}
     var egChallengesCollapsed = false;
 
-    var CHALLENGE_POOL = [
-        { id: 'play10',        type: 'play',        target: 10,  reward: 30 },
-        { id: 'play20',        type: 'play',        target: 20,  reward: 50 },
-        { id: 'play30',        type: 'play',        target: 30,  reward: 75 },
-        { id: 'win3',          type: 'win',         target: 3,   reward: 40 },
-        { id: 'win5',          type: 'win',         target: 5,   reward: 60 },
-        { id: 'win8',          type: 'win',         target: 8,   reward: 90 },
-        { id: 'streak3',       type: 'streak',      target: 3,   reward: 75 },
-        { id: 'twopair2',      type: 'hand', hand: 'Two Pair',        target: 2, reward: 40 },
-        { id: 'trips1',        type: 'hand', hand: 'Three of a Kind', target: 1, reward: 40 },
-        { id: 'trips3',        type: 'hand', hand: 'Three of a Kind', target: 3, reward: 100 },
-        { id: 'straight1',     type: 'hand', hand: 'Straight',        target: 1, reward: 60 },
-        { id: 'flush1',        type: 'hand', hand: 'Flush',           target: 1, reward: 75 },
-        { id: 'fullhouse1',    type: 'hand', hand: 'Full House',      target: 1, reward: 90 },
-        { id: 'quads1',        type: 'hand', hand: 'Four of a Kind',  target: 1, reward: 100 },
-        { id: 'jacks5',        type: 'hand', hand: 'Jacks or Better', target: 5, reward: 50 },
-        { id: 'heldpair2',     type: 'heldPairWin', target: 2,   reward: 50 },
-        { id: 'betmax3',       type: 'maxBet',      target: 3,   reward: 60 },
-        { id: 'wincredits50',  type: 'winCredits',  target: 50,  reward: 50 },
-        { id: 'wincredits150', type: 'winCredits',  target: 150, reward: 100 },
-        { id: 'bigwin20',      type: 'bigWin',      target: 1,   reward: 75 }
-    ];
-
-    var ENGAGE_I18N = {
-        en: {
-            rewardTitle: '🎁 Daily Bonus', rewardSub: 'Come back every day — the rewards keep growing!',
-            dayLabel: 'Day', claimBtn: 'Claim {n} credits',
-            rewardHint: 'Miss a day and the streak resets to Day 1!',
-            longestStreak: 'Longest streak: {n} days',
-            comebackTitle: '👋 Welcome back!', comebackMsg: 'We missed you at the table — here\'s a little something to get you going.',
-            comebackBtn: 'Collect {n} credits',
-            streakLabel: 'Win Streak', bonusTag: '+{n}% payout bonus', bestStreakStat: 'Best Streak',
-            challengesTitle: '🎯 Daily Challenges',
-            challengeToast: '🏅 Challenge complete! +{n} credits',
-            rewardToast: '🎁 +{n} credits!',
-            chPlay: 'Play {n} hands', chWin: 'Win {n} hands', chStreak: 'Win {n} in a row',
-            chHand: 'Get {hand} ×{n}', chHeldPair: 'Win holding a pair ×{n}', chMaxBet: 'Play {n} hands at max bet',
-            chWinCredits: 'Win {n} credits total', chBigWin: 'Win {n}+ credits in one hand'
-        },
-        es: {
-            rewardTitle: '🎁 Bono Diario', rewardSub: '¡Vuelve cada día — las recompensas crecen!',
-            dayLabel: 'Día', claimBtn: 'Reclamar {n} créditos',
-            rewardHint: '¡Si faltas un día, la racha vuelve al Día 1!',
-            longestStreak: 'Racha más larga: {n} días',
-            comebackTitle: '👋 ¡Bienvenido de vuelta!', comebackMsg: 'Te extrañamos en la mesa — aquí tienes algo para empezar.',
-            comebackBtn: 'Recoger {n} créditos',
-            streakLabel: 'Racha de Victorias', bonusTag: '+{n}% de bono', bestStreakStat: 'Mejor Racha',
-            challengesTitle: '🎯 Desafíos Diarios',
-            challengeToast: '🏅 ¡Desafío completado! +{n} créditos',
-            rewardToast: '🎁 ¡+{n} créditos!',
-            chPlay: 'Juega {n} manos', chWin: 'Gana {n} manos', chStreak: 'Gana {n} seguidas',
-            chHand: 'Consigue {hand} ×{n}', chHeldPair: 'Gana manteniendo una pareja ×{n}', chMaxBet: 'Juega {n} manos con apuesta máxima',
-            chWinCredits: 'Gana {n} créditos en total', chBigWin: 'Gana {n}+ créditos en una mano'
-        },
-        fr: {
-            rewardTitle: '🎁 Bonus Quotidien', rewardSub: 'Reviens chaque jour — les récompenses grandissent !',
-            dayLabel: 'Jour', claimBtn: 'Réclamer {n} crédits',
-            rewardHint: 'Un jour manqué et la série repart au Jour 1 !',
-            longestStreak: 'Plus longue série : {n} jours',
-            comebackTitle: '👋 Bon retour !', comebackMsg: 'Tu nous as manqué à la table — voici de quoi bien reprendre.',
-            comebackBtn: 'Récupérer {n} crédits',
-            streakLabel: 'Série de Victoires', bonusTag: '+{n}% de bonus', bestStreakStat: 'Meilleure Série',
-            challengesTitle: '🎯 Défis du Jour',
-            challengeToast: '🏅 Défi accompli ! +{n} crédits',
-            rewardToast: '🎁 +{n} crédits !',
-            chPlay: 'Joue {n} mains', chWin: 'Gagne {n} mains', chStreak: 'Gagne {n} de suite',
-            chHand: 'Obtiens {hand} ×{n}', chHeldPair: 'Gagne en gardant une paire ×{n}', chMaxBet: 'Joue {n} mains à la mise max',
-            chWinCredits: 'Gagne {n} crédits au total', chBigWin: 'Gagne {n}+ crédits en une main'
-        },
-        de: {
-            rewardTitle: '🎁 Täglicher Bonus', rewardSub: 'Komm jeden Tag zurück — die Belohnungen wachsen!',
-            dayLabel: 'Tag', claimBtn: '{n} Credits abholen',
-            rewardHint: 'Ein verpasster Tag setzt die Serie auf Tag 1 zurück!',
-            longestStreak: 'Längste Serie: {n} Tage',
-            comebackTitle: '👋 Willkommen zurück!', comebackMsg: 'Wir haben dich am Tisch vermisst — hier ist etwas für den Neustart.',
-            comebackBtn: '{n} Credits abholen',
-            streakLabel: 'Siegesserie', bonusTag: '+{n}% Bonus', bestStreakStat: 'Beste Serie',
-            challengesTitle: '🎯 Tägliche Herausforderungen',
-            challengeToast: '🏅 Herausforderung geschafft! +{n} Credits',
-            rewardToast: '🎁 +{n} Credits!',
-            chPlay: 'Spiele {n} Hände', chWin: 'Gewinne {n} Hände', chStreak: 'Gewinne {n} in Folge',
-            chHand: 'Erziele {hand} ×{n}', chHeldPair: 'Gewinne mit gehaltenem Paar ×{n}', chMaxBet: 'Spiele {n} Hände mit Maximaleinsatz',
-            chWinCredits: 'Gewinne insgesamt {n} Credits', chBigWin: 'Gewinne {n}+ Credits in einer Hand'
-        },
-        he: {
-            rewardTitle: '🎁 בונוס יומי', rewardSub: 'חזור כל יום — הפרסים גדלים!',
-            dayLabel: 'יום', claimBtn: 'אסוף {n} קרדיטים',
-            rewardHint: 'פספסת יום? הרצף מתאפס ליום 1!',
-            longestStreak: 'הרצף הארוך ביותר: {n} ימים',
-            comebackTitle: '👋 ברוך שובך!', comebackMsg: 'התגעגענו אליך בשולחן — הנה משהו קטן בשבילך.',
-            comebackBtn: 'אסוף {n} קרדיטים',
-            streakLabel: 'רצף ניצחונות', bonusTag: 'בונוס +{n}%', bestStreakStat: 'הרצף הטוב ביותר',
-            challengesTitle: '🎯 אתגרים יומיים',
-            challengeToast: '🏅 אתגר הושלם! +{n} קרדיטים',
-            rewardToast: '🎁 +{n} קרדיטים!',
-            chPlay: 'שחק {n} ידיים', chWin: 'נצח ב-{n} ידיים', chStreak: 'נצח {n} ברצף',
-            chHand: 'השג {hand} ×{n}', chHeldPair: 'נצח עם זוג שמור ×{n}', chMaxBet: 'שחק {n} ידיים בהימור מקסימלי',
-            chWinCredits: 'צבור {n} קרדיטים מנצחונות', chBigWin: 'זכה ב-{n}+ קרדיטים ביד אחת'
-        },
-        ar: {
-            rewardTitle: '🎁 مكافأة يومية', rewardSub: 'عُد كل يوم — المكافآت تكبر!',
-            dayLabel: 'يوم', claimBtn: 'اجمع {n} رصيداً',
-            rewardHint: 'إذا فاتك يوم، تعود السلسلة إلى اليوم 1!',
-            longestStreak: 'أطول سلسلة: {n} أيام',
-            comebackTitle: '👋 أهلاً بعودتك!', comebackMsg: 'اشتقنا إليك على الطاولة — إليك شيئاً يعيدك للعب.',
-            comebackBtn: 'اجمع {n} رصيداً',
-            streakLabel: 'سلسلة انتصارات', bonusTag: 'مكافأة +{n}%', bestStreakStat: 'أفضل سلسلة',
-            challengesTitle: '🎯 تحديات يومية',
-            challengeToast: '🏅 اكتمل التحدي! +{n} رصيد',
-            rewardToast: '🎁 +{n} رصيد!',
-            chPlay: 'العب {n} يداً', chWin: 'افز بـ{n} أيدٍ', chStreak: 'افز بـ{n} على التوالي',
-            chHand: 'احصل على {hand} ×{n}', chHeldPair: 'افز محتفظاً بزوج ×{n}', chMaxBet: 'العب {n} أيدٍ بالرهان الأقصى',
-            chWinCredits: 'اجمع {n} رصيداً من الأرباح', chBigWin: 'افز بـ{n}+ رصيد في يد واحدة'
-        }
-    };
-
-    function et(key) {
-        var pack = ENGAGE_I18N[currentLang] || ENGAGE_I18N.en;
-        return pack[key] || ENGAGE_I18N.en[key] || key;
-    }
-
-    // --- lifecycle ---
-    window.initEngagement = function(user) {
-        egUser = user;
-        egModalQueue = [];
-        applyEngageLang();
-        egLoadUserProfile(user);
-        egLoadDailyReward(user);
-        egLoadChallenges(user);
-    };
-
-    window.teardownEngagement = function() {
-        egUser = null;
-        egModalQueue = [];
-        egRewardState = null;
-        egChallenges = null;
-        winStreak = 0;
-        bestStreak = 0;
-        egXp = 0;
-        egLevel = 1;
-        egStats = null;
-        egAchievements = {};
-        egHourHands = 0;
-        egApplyCardStyle('classic');
-        updateStreakUI(false);
-        document.getElementById('challenges-panel').style.display = 'none';
-        egCloseModal('eg-reward-modal');
-        egCloseModal('eg-comeback-modal');
-        egCloseModal('eg-levelup-modal');
-        egCloseProfile();
-    };
-
-    // --- modal queue (one at a time) ---
-    function egQueueModal(id) {
-        egModalQueue.push(id);
-        if (egModalQueue.length === 1) egShowModal(id);
-    }
-
-    function egShowModal(id) {
-        document.getElementById(id).classList.remove('eg-hidden');
-    }
-
-    function egCloseModal(id) {
-        document.getElementById(id).classList.add('eg-hidden');
-        var idx = egModalQueue.indexOf(id);
-        if (idx !== -1) egModalQueue.splice(idx, 1);
-        if (egModalQueue.length > 0) egShowModal(egModalQueue[0]);
-    }
-
-    // --- toast + confetti ---
-    function egToast(text) {
-        var el = document.getElementById('eg-toast');
-        if (!el) {
-            el = document.createElement('div');
-            el.id = 'eg-toast';
-            el.className = 'eg-toast';
-            document.body.appendChild(el);
-        }
-        el.textContent = text;
-        el.classList.remove('show');
-        void el.offsetWidth;
-        el.classList.add('show');
-        setTimeout(function() { el.classList.remove('show'); }, 2500);
-    }
-
-    function egConfetti() {
-        var colors = ['#ffd700', '#4ade80', '#ff6b6b', '#8a2be2', '#ffffff', '#ffaa00'];
-        for (var i = 0; i < 28; i++) {
-            var p = document.createElement('div');
-            p.className = 'confetti-piece';
-            p.style.left = (Math.random() * 100) + 'vw';
-            p.style.background = colors[Math.floor(Math.random() * colors.length)];
-            p.style.animationDuration = (1.2 + Math.random() * 1.3) + 's';
-            p.style.animationDelay = (Math.random() * 0.4) + 's';
-            document.body.appendChild(p);
-            setTimeout(function(el) { return function() { el.remove(); }; }(p), 3200);
-        }
-    }
-
-    function egAddCredits(amount) {
-        var oldBalance = balance;
-        balance += amount;
-        playSound('coin');
-        animateBalance(oldBalance, balance, 800);
-    }
-
-    // --- user profile (best streak + comeback + progression) ---
-    function egLoadUserProfile(user) {
-        db.collection('users').doc(user.uid).get().then(function(doc) {
-            var data = doc.exists ? doc.data() : {};
-            bestStreak = data.bestStreak || 0;
-            document.getElementById('stat-best-streak-value').textContent = '🔥 ' + bestStreak;
-
-            egXp = data.xp || 0;
-            egLevel = Math.max(data.level || 1, egLevelFromXp(egXp));
-            egStats = {
-                totalHands: data.totalHands || 0,
-                totalWins: data.totalWins || 0,
-                bestHand: data.bestHand || null,
-                bestHandRank: data.bestHandRank || 0,
-                challengesCompleted: data.challengesCompleted || 0,
-                firstSeen: data.firstSeen || null
-            };
-            egApplyCardStyle(data.cardStyle || 'classic');
-            egRenderXpBar();
-
-            if (data.bonusCredits && data.bonusCredits > 0) {
-                var bonus = data.bonusCredits;
-                egAddCredits(bonus);
-                egConfetti();
-                egToast('🎁 Referral bonus! You received ' + bonus + ' credits.');
-                saveGameState();
-                db.collection('users').doc(user.uid).update({
-                    bonusCredits: 0
-                });
-            }
-
-            var refCount = data.referralCount || 0;
-            if (refCount >= 3) {
-                egUnlock('invite3');
-            }
-
-            db.collection('users').doc(user.uid).collection('achievements').get().then(function(snap) {
-                snap.forEach(function(d) { egAchievements[d.id] = true; });
-                egUpdateAchCount();
-            }).catch(function(err) { console.error('achievements load:', err); });
-
-            var last = data.lastActiveDate && typeof data.lastActiveDate.toDate === 'function'
-                ? data.lastActiveDate.toDate().getTime() : null;
-            if (last) {
-                var gap = Date.now() - last;
-                if (gap > EG_COMEBACK_LONG_MS) egComebackAmount = EG_COMEBACK_LONG_CREDITS;
-                else if (gap > EG_COMEBACK_SHORT_MS) egComebackAmount = EG_COMEBACK_SHORT_CREDITS;
-            }
-            // Refresh presence — also guarantees one claim per absence period
-            return db.collection('users').doc(user.uid).set({
-                lastActiveDate: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-        }).then(function() {
-            if (egComebackAmount > 0) {
-                document.getElementById('eg-comeback-amount').textContent = '+' + egComebackAmount;
-                document.getElementById('eg-comeback-claim').textContent =
-                    et('comebackBtn').replace('{n}', egComebackAmount);
-                egQueueModal('eg-comeback-modal');
-            }
-        }).catch(function(err) { console.error('egLoadUserProfile:', err); });
-    }
-
-    function egClaimComeback() {
-        if (!egUser || egComebackAmount <= 0) return;
-        var amount = egComebackAmount;
-        egComebackAmount = 0;
-        egAddCredits(amount);
-        egConfetti();
-        egToast(et('rewardToast').replace('{n}', amount));
-        db.collection('users').doc(egUser.uid).set({
-            comebackClaimed: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true }).catch(function(err) { console.error('comeback claim:', err); });
-        egCloseModal('eg-comeback-modal');
-    }
-
-    // --- daily login reward ---
-    function egLoadDailyReward(user) {
-        db.collection('daily_rewards').doc(user.uid).get().then(function(doc) {
-            var data = doc.exists ? doc.data() : null;
-            var today = getDayKey();
-            var yesterday = getDayKey(new Date(Date.now() - 86400e3));
-            var longest = data ? (data.longestStreak || 0) : 0;
-            var claimed = data ? (data.totalClaimed || 0) : 0;
-
-            if (data && data.lastClaimDate === today) return; // already claimed today
-
-            var day, streak;
-            if (data && data.lastClaimDate === yesterday) {
-                day = ((data.currentDay || 0) % 7) + 1;
-                streak = (data.streak || data.currentDay || 0) + 1;
-            } else {
-                day = 1;
-                streak = 1;
-            }
-            egRewardState = { day: day, streak: streak, longestStreak: longest, totalClaimed: claimed };
-            egRenderRewardCalendar();
-            egQueueModal('eg-reward-modal');
-        }).catch(function(err) { console.error('egLoadDailyReward:', err); });
-    }
-
-    function egRenderRewardCalendar() {
-        if (!egRewardState) return;
-        var cal = document.getElementById('eg-reward-calendar');
-        cal.innerHTML = '';
-        for (var i = 0; i < 7; i++) {
-            var day = i + 1;
-            var cell = document.createElement('div');
-            var state = day < egRewardState.day ? 'claimed' : day === egRewardState.day ? 'today' : 'locked';
-            cell.className = 'reward-day ' + state;
-            cell.innerHTML = et('dayLabel') + ' ' + day +
-                '<span class="rd-amount">' + (day < egRewardState.day ? '✓' : EG_REWARDS[i]) + '</span>';
-            cal.appendChild(cell);
-        }
-        document.getElementById('eg-reward-claim').textContent =
-            et('claimBtn').replace('{n}', EG_REWARDS[egRewardState.day - 1]);
-        var longestEl = document.getElementById('eg-reward-longest');
-        longestEl.textContent = egRewardState.longestStreak > 0
-            ? et('longestStreak').replace('{n}', egRewardState.longestStreak) : '';
-    }
-
-    function egClaimDailyReward() {
-        if (!egUser || !egRewardState) return;
-        var s = egRewardState;
-        egRewardState = null;
-        var amount = EG_REWARDS[s.day - 1];
-        egAddCredits(amount);
-        egConfetti();
-        egToast(et('rewardToast').replace('{n}', amount));
-        db.collection('daily_rewards').doc(egUser.uid).set({
-            uid: egUser.uid,
-            currentDay: s.day,
-            lastClaimDate: getDayKey(),
-            streak: s.streak,
-            longestStreak: Math.max(s.longestStreak, s.streak),
-            totalClaimed: s.totalClaimed + amount,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(function(err) { console.error('daily reward claim:', err); });
-        if (s.streak >= 7) egUnlock('login7');
-        egCloseModal('eg-reward-modal');
-    }
-
-    // --- daily challenges ---
-    function egPickChallenges(dateKey) {
-        var h = 0;
-        for (var i = 0; i < dateKey.length; i++) h = (h * 31 + dateKey.charCodeAt(i)) >>> 0;
-        var pool = CHALLENGE_POOL.slice();
-        var picked = [];
-        for (var k = 0; k < 3; k++) {
-            h = (h * 1103515245 + 12345) >>> 0;
-            picked.push(pool.splice(h % pool.length, 1)[0]);
-        }
-        return picked;
-    }
-
-    function egLoadChallenges(user) {
-        var dateKey = getDayKey();
-        var ref = db.collection('daily_challenges').doc(dateKey + '_' + user.uid);
-        ref.get().then(function(doc) {
-            if (doc.exists) {
-                egChallenges = { dateKey: dateKey, list: doc.data().challenges || [] };
-            } else {
-                var list = egPickChallenges(dateKey).map(function(t) {
-                    return { id: t.id, target: t.target, progress: 0, completed: false, reward: t.reward };
-                });
-                egChallenges = { dateKey: dateKey, list: list };
-                ref.set({
-                    dateKey: dateKey,
-                    uid: user.uid,
-                    challenges: list,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }).catch(function(err) { console.error('challenges create:', err); });
-            }
-            egRenderChallenges();
-        }).catch(function(err) { console.error('egLoadChallenges:', err); });
-    }
-
-    function egChallengeTemplate(id) {
-        return CHALLENGE_POOL.find(function(t) { return t.id === id; }) || null;
-    }
-
-    function egChallengeDesc(ch) {
-        var t = egChallengeTemplate(ch.id);
-        if (!t) return ch.id;
-        var handName = t.hand ? (TRANSLATIONS[currentLang].payouts[t.hand] || t.hand) : '';
-        switch (t.type) {
-            case 'play':        return et('chPlay').replace('{n}', t.target);
-            case 'win':         return et('chWin').replace('{n}', t.target);
-            case 'streak':      return et('chStreak').replace('{n}', t.target);
-            case 'hand':        return et('chHand').replace('{hand}', handName).replace('{n}', t.target);
-            case 'heldPairWin': return et('chHeldPair').replace('{n}', t.target);
-            case 'maxBet':      return et('chMaxBet').replace('{n}', t.target);
-            case 'winCredits':  return et('chWinCredits').replace('{n}', t.target);
-            case 'bigWin':      return et('chBigWin').replace('{n}', 20);
-            default:            return ch.id;
-        }
-    }
-
-    function egRenderChallenges() {
-        var panel = document.getElementById('challenges-panel');
-        var listEl = document.getElementById('challenges-list');
-        if (!egChallenges || !egUser) { panel.style.display = 'none'; return; }
-        panel.style.display = '';
-        listEl.style.display = egChallengesCollapsed ? 'none' : '';
-        document.getElementById('challenges-caret').textContent = egChallengesCollapsed ? '▸' : '▾';
-        listEl.innerHTML = '';
-        egChallenges.list.forEach(function(ch) {
-            var pct = Math.min(100, Math.round((ch.progress / ch.target) * 100));
-            var row = document.createElement('div');
-            row.className = 'challenge-row' + (ch.completed ? ' done' : '');
-            row.innerHTML =
-                '<div class="challenge-desc">' +
-                    '<span>' + (ch.completed ? '✅ ' : '') + egChallengeDesc(ch) +
-                    ' <span style="opacity:0.6">(' + Math.min(ch.progress, ch.target) + '/' + ch.target + ')</span></span>' +
-                    '<span class="challenge-reward">+' + ch.reward + '</span>' +
-                '</div>' +
-                '<div class="challenge-bar"><div class="challenge-fill" style="width:' + pct + '%"></div></div>';
-            listEl.appendChild(row);
-        });
-    }
-
-    function egToggleChallenges() {
-        egChallengesCollapsed = !egChallengesCollapsed;
-        egRenderChallenges();
-    }
-
-    window.egOnHandPlayed = function(ev) {
-        if (!egUser) return;
-        egProcessXpAndAchievements(ev);
-        egProcessChallenges(ev);
-    };
-
-    function egProcessChallenges(ev) {
-        if (!egChallenges) return;
-        if (egChallenges.dateKey !== getDayKey()) {
-            // Midnight rollover — fetch today's fresh set
-            egLoadChallenges(egUser);
-            return;
-        }
-        var changed = false;
-        egChallenges.list.forEach(function(ch) {
-            if (ch.completed) return;
-            var t = egChallengeTemplate(ch.id);
-            if (!t) return;
-            var before = ch.progress;
-            switch (t.type) {
-                case 'play':        ch.progress++; break;
-                case 'win':         if (ev.win > 0) ch.progress++; break;
-                case 'streak':      ch.progress = Math.max(ch.progress, ev.streak); break;
-                case 'hand':        if (ev.handType === t.hand) ch.progress++; break;
-                case 'heldPairWin': if (ev.heldPair && ev.win > 0) ch.progress++; break;
-                case 'maxBet':      if (ev.bet >= 50) ch.progress++; break;
-                case 'winCredits':  ch.progress += ev.win; break;
-                case 'bigWin':      if (ev.win >= 20) ch.progress++; break;
-            }
-            if (ch.progress !== before) changed = true;
-            if (ch.progress >= ch.target) {
-                ch.progress = ch.target;
-                ch.completed = true;
-                changed = true;
-                egAddCredits(ch.reward);
-                egConfetti();
-                egToast(et('challengeToast').replace('{n}', ch.reward));
-                if (egStats) {
-                    egStats.challengesCompleted++;
-                    db.collection('users').doc(egUser.uid).set({
-                        challengesCompleted: firebase.firestore.FieldValue.increment(1)
-                    }, { merge: true }).catch(function(err) { console.error('challenge count:', err); });
-                    if (egStats.challengesCompleted >= 10) egUnlock('challenge10');
-                    if (egStats.challengesCompleted >= 50) egUnlock('challenge50');
-                }
-            }
-        });
-        if (changed) {
-            egRenderChallenges();
-            db.collection('daily_challenges').doc(egChallenges.dateKey + '_' + egUser.uid).set({
-                dateKey: egChallenges.dateKey,
-                uid: egUser.uid,
-                challenges: egChallenges.list,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true }).catch(function(err) { console.error('challenges save:', err); });
-        }
-    }
-
-    // --- i18n for engagement UI ---
-    window.applyEngageLang = function() {
-        var set = function(id, text) {
-            var el = document.getElementById(id);
-            if (el) el.textContent = text;
-        };
-        set('eg-reward-title', et('rewardTitle'));
-        set('eg-reward-sub', et('rewardSub'));
-        set('eg-reward-hint', et('rewardHint'));
-        set('eg-comeback-title', et('comebackTitle'));
-        set('eg-comeback-msg', et('comebackMsg'));
-        set('streak-label', et('streakLabel'));
-        set('stat-best-streak-label', et('bestStreakStat'));
-        set('challenges-title', et('challengesTitle'));
-        if (egComebackAmount > 0) {
-            set('eg-comeback-claim', et('comebackBtn').replace('{n}', egComebackAmount));
-        }
-        if (egRewardState) egRenderRewardCalendar();
-        if (egChallenges) egRenderChallenges();
-        set('eg-levelup-title', et('levelUpTitle'));
-        set('eg-levelup-ok', et('okBtn'));
-        set('pf-stats-title', et('profileStats'));
-        set('pf-ach-title', et('profileAchievements'));
-        set('pf-styles-title', et('profileStyles'));
-    };
-
-    // ===================== Progression: Phase 2 =====================
-    // XP & levels, achievements, player profile, card style unlocks
-
-    var egXp = 0;
-    var egLevel = 1;
-    var egStats = null;
-    var egAchievements = {};
-    var egHourKey = '';
-    var egHourHands = 0;
-    var egCardStyle = 'classic';
-
-    var MAX_LEVEL = 50;
-    var XP_WIN_BONUS = {
-        'Jacks or Better': 5, 'Two Pair': 10, 'Three of a Kind': 15,
-        'Straight': 25, 'Flush': 30, 'Full House': 50,
-        'Four of a Kind': 100, 'Straight Flush': 250, 'Royal Flush': 500
-    };
-
-    var CARD_STYLES = [
-        { id: 'classic',  level: 0,  name: 'Classic' },
-        { id: 'emerald',  level: 5,  name: 'Emerald' },
-        { id: 'gold',     level: 10, name: 'Gold' },
-        { id: 'sapphire', level: 15, name: 'Sapphire' },
-        { id: 'ruby',     level: 20, name: 'Ruby' },
-        { id: 'onyx',     level: 30, name: 'Onyx' },
-        { id: 'amethyst', level: 40, name: 'Amethyst' },
-        { id: 'royal',    level: 50, name: 'Royal' }
-    ];
-
-    var ACHIEVEMENTS = [
+/* --- js/achievements.js --- */
+var ACHIEVEMENTS = [
         { id: 'firstHand',   icon: '🃏' },
         { id: 'hands100',    icon: '💯' },
         { id: 'hands500',    icon: '🎰' },
@@ -4949,773 +4471,1309 @@
             });
     }
 
-    function logRoomEvent(eventType, detail) {
-        var user = auth.currentUser;
-        if (!user || myRooms.length === 0) return;
-        
-        myRooms.forEach(function(room) {
-            db.collection('room_events').add({
-                roomId: room.id,
-                uid: user.uid,
-                displayName: user.displayName || '',
-                photoURL: user.photoURL || '',
-                eventType: eventType,
-                detail: detail,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(function() {
-                db.collection('room_events')
-                    .where('roomId', '==', room.id)
-                    .get()
-                    .then(function(snap) {
-                        if (snap.size > 50) {
-                            var docs = [];
-                            snap.forEach(function(d) { docs.push({ id: d.id, data: d.data() }); });
-                            docs.sort(function(a, b) {
-                                var tA = a.data.timestamp ? (a.data.timestamp.toDate ? a.data.timestamp.toDate().getTime() : a.data.timestamp) : 0;
-                                var tB = b.data.timestamp ? (b.data.timestamp.toDate ? b.data.timestamp.toDate().getTime() : b.data.timestamp) : 0;
-                                return tA - tB;
-                            });
-                            var toDeleteCount = docs.length - 50;
-                            for (var i = 0; i < toDeleteCount; i++) {
-                                db.collection('room_events').doc(docs[i].id).delete();
-                            }
-                        }
-                    }).catch(function(err) { console.error('event cleanup:', err); });
-            }).catch(function(err) { console.error('add room event:', err); });
-        });
+/* --- js/challenges.js --- */
+var CHALLENGE_POOL = [
+        { id: 'play10',        type: 'play',        target: 10,  reward: 30 },
+        { id: 'play20',        type: 'play',        target: 20,  reward: 50 },
+        { id: 'play30',        type: 'play',        target: 30,  reward: 75 },
+        { id: 'win3',          type: 'win',         target: 3,   reward: 40 },
+        { id: 'win5',          type: 'win',         target: 5,   reward: 60 },
+        { id: 'win8',          type: 'win',         target: 8,   reward: 90 },
+        { id: 'streak3',       type: 'streak',      target: 3,   reward: 75 },
+        { id: 'twopair2',      type: 'hand', hand: 'Two Pair',        target: 2, reward: 40 },
+        { id: 'trips1',        type: 'hand', hand: 'Three of a Kind', target: 1, reward: 40 },
+        { id: 'trips3',        type: 'hand', hand: 'Three of a Kind', target: 3, reward: 100 },
+        { id: 'straight1',     type: 'hand', hand: 'Straight',        target: 1, reward: 60 },
+        { id: 'flush1',        type: 'hand', hand: 'Flush',           target: 1, reward: 75 },
+        { id: 'fullhouse1',    type: 'hand', hand: 'Full House',      target: 1, reward: 90 },
+        { id: 'quads1',        type: 'hand', hand: 'Four of a Kind',  target: 1, reward: 100 },
+        { id: 'jacks5',        type: 'hand', hand: 'Jacks or Better', target: 5, reward: 50 },
+        { id: 'heldpair2',     type: 'heldPairWin', target: 2,   reward: 50 },
+        { id: 'betmax3',       type: 'maxBet',      target: 3,   reward: 60 },
+        { id: 'wincredits50',  type: 'winCredits',  target: 50,  reward: 50 },
+        { id: 'wincredits150', type: 'winCredits',  target: 150, reward: 100 },
+        { id: 'bigwin20',      type: 'bigWin',      target: 1,   reward: 75 }
+    ];
+
+    var ENGAGE_I18N = {
+        en: {
+            rewardTitle: '🎁 Daily Bonus', rewardSub: 'Come back every day — the rewards keep growing!',
+            dayLabel: 'Day', claimBtn: 'Claim {n} credits',
+            rewardHint: 'Miss a day and the streak resets to Day 1!',
+            longestStreak: 'Longest streak: {n} days',
+            comebackTitle: '👋 Welcome back!', comebackMsg: 'We missed you at the table — here\'s a little something to get you going.',
+            comebackBtn: 'Collect {n} credits',
+            streakLabel: 'Win Streak', bonusTag: '+{n}% payout bonus', bestStreakStat: 'Best Streak',
+            challengesTitle: '🎯 Daily Challenges',
+            challengeToast: '🏅 Challenge complete! +{n} credits',
+            rewardToast: '🎁 +{n} credits!',
+            chPlay: 'Play {n} hands', chWin: 'Win {n} hands', chStreak: 'Win {n} in a row',
+            chHand: 'Get {hand} ×{n}', chHeldPair: 'Win holding a pair ×{n}', chMaxBet: 'Play {n} hands at max bet',
+            chWinCredits: 'Win {n} credits total', chBigWin: 'Win {n}+ credits in one hand'
+        },
+        es: {
+            rewardTitle: '🎁 Bono Diario', rewardSub: '¡Vuelve cada día — las recompensas crecen!',
+            dayLabel: 'Día', claimBtn: 'Reclamar {n} créditos',
+            rewardHint: '¡Si faltas un día, la racha vuelve al Día 1!',
+            longestStreak: 'Racha más larga: {n} días',
+            comebackTitle: '👋 ¡Bienvenido de vuelta!', comebackMsg: 'Te extrañamos en la mesa — aquí tienes algo para empezar.',
+            comebackBtn: 'Recoger {n} créditos',
+            streakLabel: 'Racha de Victorias', bonusTag: '+{n}% de bono', bestStreakStat: 'Mejor Racha',
+            challengesTitle: '🎯 Desafíos Diarios',
+            challengeToast: '🏅 ¡Desafío completado! +{n} créditos',
+            rewardToast: '🎁 ¡+{n} créditos!',
+            chPlay: 'Juega {n} manos', chWin: 'Gana {n} manos', chStreak: 'Gana {n} seguidas',
+            chHand: 'Consigue {hand} ×{n}', chHeldPair: 'Gana manteniendo una pareja ×{n}', chMaxBet: 'Juega {n} manos con apuesta máxima',
+            chWinCredits: 'Gana {n} créditos en total', chBigWin: 'Gana {n}+ créditos en una mano'
+        },
+        fr: {
+            rewardTitle: '🎁 Bonus Quotidien', rewardSub: 'Reviens chaque jour — les récompenses grandissent !',
+            dayLabel: 'Jour', claimBtn: 'Réclamer {n} crédits',
+            rewardHint: 'Un jour manqué et la série repart au Jour 1 !',
+            longestStreak: 'Plus longue série : {n} jours',
+            comebackTitle: '👋 Bon retour !', comebackMsg: 'Tu nous as manqué à la table — voici de quoi bien reprendre.',
+            comebackBtn: 'Récupérer {n} crédits',
+            streakLabel: 'Série de Victoires', bonusTag: '+{n}% de bonus', bestStreakStat: 'Meilleure Série',
+            challengesTitle: '🎯 Défis du Jour',
+            challengeToast: '🏅 Défi accompli ! +{n} crédits',
+            rewardToast: '🎁 +{n} crédits !',
+            chPlay: 'Joue {n} mains', chWin: 'Gagne {n} mains', chStreak: 'Gagne {n} de suite',
+            chHand: 'Obtiens {hand} ×{n}', chHeldPair: 'Gagne en gardant une paire ×{n}', chMaxBet: 'Joue {n} mains à la mise max',
+            chWinCredits: 'Gagne {n} crédits au total', chBigWin: 'Gagne {n}+ crédits en une main'
+        },
+        de: {
+            rewardTitle: '🎁 Täglicher Bonus', rewardSub: 'Komm jeden Tag zurück — die Belohnungen wachsen!',
+            dayLabel: 'Tag', claimBtn: '{n} Credits abholen',
+            rewardHint: 'Ein verpasster Tag setzt die Serie auf Tag 1 zurück!',
+            longestStreak: 'Längste Serie: {n} Tage',
+            comebackTitle: '👋 Willkommen zurück!', comebackMsg: 'Wir haben dich am Tisch vermisst — hier ist etwas für den Neustart.',
+            comebackBtn: '{n} Credits abholen',
+            streakLabel: 'Siegesserie', bonusTag: '+{n}% Bonus', bestStreakStat: 'Beste Serie',
+            challengesTitle: '🎯 Tägliche Herausforderungen',
+            challengeToast: '🏅 Herausforderung geschafft! +{n} Credits',
+            rewardToast: '🎁 +{n} Credits!',
+            chPlay: 'Spiele {n} Hände', chWin: 'Gewinne {n} Hände', chStreak: 'Gewinne {n} in Folge',
+            chHand: 'Erziele {hand} ×{n}', chHeldPair: 'Gewinne mit gehaltenem Paar ×{n}', chMaxBet: 'Spiele {n} Hände mit Maximaleinsatz',
+            chWinCredits: 'Gewinne insgesamt {n} Credits', chBigWin: 'Gewinne {n}+ Credits in einer Hand'
+        },
+        he: {
+            rewardTitle: '🎁 בונוס יומי', rewardSub: 'חזור כל יום — הפרסים גדלים!',
+            dayLabel: 'יום', claimBtn: 'אסוף {n} קרדיטים',
+            rewardHint: 'פספסת יום? הרצף מתאפס ליום 1!',
+            longestStreak: 'הרצף הארוך ביותר: {n} ימים',
+            comebackTitle: '👋 ברוך שובך!', comebackMsg: 'התגעגענו אליך בשולחן — הנה משהו קטן בשבילך.',
+            comebackBtn: 'אסוף {n} קרדיטים',
+            streakLabel: 'רצף ניצחונות', bonusTag: 'בונוס +{n}%', bestStreakStat: 'הרצף הטוב ביותר',
+            challengesTitle: '🎯 אתגרים יומיים',
+            challengeToast: '🏅 אתגר הושלם! +{n} קרדיטים',
+            rewardToast: '🎁 +{n} קרדיטים!',
+            chPlay: 'שחק {n} ידיים', chWin: 'נצח ב-{n} ידיים', chStreak: 'נצח {n} ברצף',
+            chHand: 'השג {hand} ×{n}', chHeldPair: 'נצח עם זוג שמור ×{n}', chMaxBet: 'שחק {n} ידיים בהימור מקסימלי',
+            chWinCredits: 'צבור {n} קרדיטים מנצחונות', chBigWin: 'זכה ב-{n}+ קרדיטים ביד אחת'
+        },
+        ar: {
+            rewardTitle: '🎁 مكافأة يومية', rewardSub: 'عُد كل يوم — المكافآت تكبر!',
+            dayLabel: 'يوم', claimBtn: 'اجمع {n} رصيداً',
+            rewardHint: 'إذا فاتك يوم، تعود السلسلة إلى اليوم 1!',
+            longestStreak: 'أطول سلسلة: {n} أيام',
+            comebackTitle: '👋 أهلاً بعودتك!', comebackMsg: 'اشتقنا إليك على الطاولة — إليك شيئاً يعيدك للعب.',
+            comebackBtn: 'اجمع {n} رصيداً',
+            streakLabel: 'سلسلة انتصارات', bonusTag: 'مكافأة +{n}%', bestStreakStat: 'أفضل سلسلة',
+            challengesTitle: '🎯 تحديات يومية',
+            challengeToast: '🏅 اكتمل التحدي! +{n} رصيد',
+            rewardToast: '🎁 +{n} رصيد!',
+            chPlay: 'العب {n} يداً', chWin: 'افز بـ{n} أيدٍ', chStreak: 'افز بـ{n} على التوالي',
+            chHand: 'احصل على {hand} ×{n}', chHeldPair: 'افز محتفظاً بزوج ×{n}', chMaxBet: 'العب {n} أيدٍ بالرهان الأقصى',
+            chWinCredits: 'اجمع {n} رصيداً من الأرباح', chBigWin: 'افز بـ{n}+ رصيد في يد واحدة'
+        }
+    };
+
+    function et(key) {
+        var pack = ENGAGE_I18N[currentLang] || ENGAGE_I18N.en;
+        return pack[key] || ENGAGE_I18N.en[key] || key;
     }
 
-    function handleIncomingRoomEvent(data) {
-        if (data.eventType === 'reaction') {
-            triggerFloatingEmoji(data.uid, data.detail);
-        } else {
-            var text = '';
-            var name = escapeHtml(firstName(data.displayName));
-            var t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
-            
-            if (data.eventType === 'hand') {
-                var handName = t.payouts[data.detail] || data.detail;
-                var template = rt('feedHitHand') || '{name} just hit a {hand}!';
-                text = template.replace('{name}', name).replace('{hand}', handName);
-            } else if (data.eventType === 'streak') {
-                var template = rt('feedStreak') || '{name} is on a {n}-win streak!';
-                text = template.replace('{name}', name).replace('{n}', data.detail);
-            } else if (data.eventType === 'levelUp') {
-                var template = rt('feedLevelUp') || '{name} just leveled up to {n}!';
-                text = template.replace('{name}', name).replace('{n}', data.detail);
+    // --- lifecycle ---
+    window.initEngagement = function(user) {
+        egUser = user;
+        egModalQueue = [];
+        applyEngageLang();
+        egLoadUserProfile(user);
+        egLoadDailyReward(user);
+        egLoadChallenges(user);
+    };
+
+    window.teardownEngagement = function() {
+        egUser = null;
+        egModalQueue = [];
+        egRewardState = null;
+        egChallenges = null;
+        winStreak = 0;
+        bestStreak = 0;
+        egXp = 0;
+        egLevel = 1;
+        egStats = null;
+        egAchievements = {};
+        egHourHands = 0;
+        egApplyCardStyle('classic');
+        updateStreakUI(false);
+        document.getElementById('challenges-panel').style.display = 'none';
+        egCloseModal('eg-reward-modal');
+        egCloseModal('eg-comeback-modal');
+        egCloseModal('eg-levelup-modal');
+        egCloseProfile();
+    };
+
+    // --- modal queue (one at a time) ---
+    function egQueueModal(id) {
+        egModalQueue.push(id);
+        if (egModalQueue.length === 1) egShowModal(id);
+    }
+
+    function egShowModal(id) {
+        document.getElementById(id).classList.remove('eg-hidden');
+    }
+
+    function egCloseModal(id) {
+        document.getElementById(id).classList.add('eg-hidden');
+        var idx = egModalQueue.indexOf(id);
+        if (idx !== -1) egModalQueue.splice(idx, 1);
+        if (egModalQueue.length > 0) egShowModal(egModalQueue[0]);
+    }
+
+    // --- toast + confetti ---
+
+/* --- js/rewards.js --- */
+function egLoadDailyReward(user) {
+        db.collection('daily_rewards').doc(user.uid).get().then(function(doc) {
+            var data = doc.exists ? doc.data() : null;
+            var today = getDayKey();
+            var yesterday = getDayKey(new Date(Date.now() - 86400e3));
+            var longest = data ? (data.longestStreak || 0) : 0;
+            var claimed = data ? (data.totalClaimed || 0) : 0;
+
+            if (data && data.lastClaimDate === today) return; // already claimed today
+
+            var day, streak;
+            if (data && data.lastClaimDate === yesterday) {
+                day = ((data.currentDay || 0) % 7) + 1;
+                streak = (data.streak || data.currentDay || 0) + 1;
+            } else {
+                day = 1;
+                streak = 1;
             }
-            
-            if (text) {
-                showFeedToast(text);
-            }
+            egRewardState = { day: day, streak: streak, longestStreak: longest, totalClaimed: claimed };
+            egRenderRewardCalendar();
+            egQueueModal('eg-reward-modal');
+        }).catch(function(err) { console.error('egLoadDailyReward:', err); });
+    }
+
+    function egRenderRewardCalendar() {
+        if (!egRewardState) return;
+        var cal = document.getElementById('eg-reward-calendar');
+        cal.innerHTML = '';
+        for (var i = 0; i < 7; i++) {
+            var day = i + 1;
+            var cell = document.createElement('div');
+            var state = day < egRewardState.day ? 'claimed' : day === egRewardState.day ? 'today' : 'locked';
+            cell.className = 'reward-day ' + state;
+            cell.innerHTML = et('dayLabel') + ' ' + day +
+                '<span class="rd-amount">' + (day < egRewardState.day ? '✓' : EG_REWARDS[i]) + '</span>';
+            cal.appendChild(cell);
         }
+        document.getElementById('eg-reward-claim').textContent =
+            et('claimBtn').replace('{n}', EG_REWARDS[egRewardState.day - 1]);
+        var longestEl = document.getElementById('eg-reward-longest');
+        longestEl.textContent = egRewardState.longestStreak > 0
+            ? et('longestStreak').replace('{n}', egRewardState.longestStreak) : '';
     }
 
-    var maxFeedToasts = 3;
-    function showFeedToast(text) {
-        var container = document.getElementById('feed-toasts');
-        if (!container) return;
+    function egClaimDailyReward() {
+        if (!egUser || !egRewardState) return;
+        var s = egRewardState;
+        egRewardState = null;
+        var amount = EG_REWARDS[s.day - 1];
+        egAddCredits(amount);
+        egConfetti();
+        egToast(et('rewardToast').replace('{n}', amount));
+        db.collection('daily_rewards').doc(egUser.uid).set({
+            uid: egUser.uid,
+            currentDay: s.day,
+            lastClaimDate: getDayKey(),
+            streak: s.streak,
+            longestStreak: Math.max(s.longestStreak, s.streak),
+            totalClaimed: s.totalClaimed + amount,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(function(err) { console.error('daily reward claim:', err); });
+        if (s.streak >= 7) egUnlock('login7');
+        egCloseModal('eg-reward-modal');
+    }
 
-        var existing = container.getElementsByClassName('feed-toast');
-        if (existing.length >= maxFeedToasts) {
-            var oldest = existing[0];
-            oldest.remove();
+    // --- daily challenges ---
+    function egPickChallenges(dateKey) {
+        var h = 0;
+        for (var i = 0; i < dateKey.length; i++) h = (h * 31 + dateKey.charCodeAt(i)) >>> 0;
+        var pool = CHALLENGE_POOL.slice();
+        var picked = [];
+        for (var k = 0; k < 3; k++) {
+            h = (h * 1103515245 + 12345) >>> 0;
+            picked.push(pool.splice(h % pool.length, 1)[0]);
         }
-
-        var toast = document.createElement('div');
-        toast.className = 'feed-toast';
-        toast.textContent = text;
-        container.appendChild(toast);
-
-        setTimeout(function() {
-            toast.classList.add('out');
-            setTimeout(function() {
-                toast.remove();
-            }, 300);
-        }, 4000);
+        return picked;
     }
 
-    function triggerFloatingEmoji(uid, emoji) {
-        var lbContainer = document.getElementById('rooms-panel');
-        if (!lbContainer) return;
-
-        var rowEl = document.querySelector('#room-lb-body tr[data-uid="' + uid + '"]');
-        var topOffset, leftOffset;
-        var lbRect = lbContainer.getBoundingClientRect();
-        
-        if (rowEl) {
-            var rowRect = rowEl.getBoundingClientRect();
-            topOffset = rowRect.top - lbRect.top + (rowRect.height / 2) - 15;
-            leftOffset = rowRect.left - lbRect.left + (rowRect.width / 2) - 15;
-        } else {
-            topOffset = lbRect.height / 2 - 15;
-            leftOffset = lbRect.width / 2 - 15;
-        }
-
-        var emojiEl = document.createElement('div');
-        emojiEl.className = 'float-emoji';
-        emojiEl.textContent = emoji;
-        emojiEl.style.top = topOffset + 'px';
-        emojiEl.style.left = leftOffset + 'px';
-        
-        lbContainer.appendChild(emojiEl);
-
-        setTimeout(function() {
-            emojiEl.remove();
-        }, 2000);
-    }
-
-    var lastReactionTime = 0;
-    function sendReaction(emoji) {
-        var user = auth.currentUser;
-        var room = getActiveRoom();
-        if (!user || !room) return;
-
-        var now = Date.now();
-        if (now - lastReactionTime < 5000) return;
-        lastReactionTime = now;
-
-        var buttons = document.querySelectorAll('.reaction-btn');
-        buttons.forEach(function(btn) { btn.disabled = true; });
-        setTimeout(function() {
-            buttons.forEach(function(btn) { btn.disabled = false; });
-        }, 5000);
-
-        db.collection('room_events').add({
-            roomId: room.id,
-            uid: user.uid,
-            displayName: user.displayName || '',
-            photoURL: user.photoURL || '',
-            eventType: 'reaction',
-            detail: emoji,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(function(err) { console.error('send reaction error:', err); });
-    }
-
-    function checkAndProcessReferral() {
-        var user = auth.currentUser;
-        if (!user) return;
-
-        db.collection('users').doc(user.uid).get().then(function(doc) {
-            if (!doc.exists) return;
-            var data = doc.data();
-            var referredByCode = data.referredBy;
-            if (!referredByCode) return;
-
-            db.collection('users').where('referralCode', '==', referredByCode).limit(1).get().then(function(snap) {
-                if (snap.empty) return;
-                var referrerDoc = snap.docs[0];
-                var referrerUid = referrerDoc.id;
-                
-                if (referrerUid === user.uid) return;
-                var referralDocId = referrerUid + '_' + user.uid;
-
-                db.collection('referrals').doc(referralDocId).get().then(function(refDoc) {
-                    if (refDoc.exists) return;
-
-                    db.collection('referrals').doc(referralDocId).set({
-                        referrerUid: referrerUid,
-                        refereeUid: user.uid,
-                        creditedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }).then(function() {
-                        db.collection('users').doc(referrerUid).update({
-                            bonusCredits: firebase.firestore.FieldValue.increment(200),
-                            referralCount: firebase.firestore.FieldValue.increment(1)
-                        });
-
-                        egAddCredits(200);
-                        egConfetti();
-                        egToast('🎉 Referral Reward! +200 credits! 🎉');
-                        saveGameState();
-                    });
+    function egLoadChallenges(user) {
+        var dateKey = getDayKey();
+        var ref = db.collection('daily_challenges').doc(dateKey + '_' + user.uid);
+        ref.get().then(function(doc) {
+            if (doc.exists) {
+                egChallenges = { dateKey: dateKey, list: doc.data().challenges || [] };
+            } else {
+                var list = egPickChallenges(dateKey).map(function(t) {
+                    return { id: t.id, target: t.target, progress: 0, completed: false, reward: t.reward };
                 });
-            });
+                egChallenges = { dateKey: dateKey, list: list };
+                ref.set({
+                    dateKey: dateKey,
+                    uid: user.uid,
+                    challenges: list,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).catch(function(err) { console.error('challenges create:', err); });
+            }
+            egRenderChallenges();
+        }).catch(function(err) { console.error('egLoadChallenges:', err); });
+    }
+
+    function egChallengeTemplate(id) {
+        return CHALLENGE_POOL.find(function(t) { return t.id === id; }) || null;
+    }
+
+    function egChallengeDesc(ch) {
+        var t = egChallengeTemplate(ch.id);
+        if (!t) return ch.id;
+        var handName = t.hand ? (TRANSLATIONS[currentLang].payouts[t.hand] || t.hand) : '';
+        switch (t.type) {
+            case 'play':        return et('chPlay').replace('{n}', t.target);
+            case 'win':         return et('chWin').replace('{n}', t.target);
+            case 'streak':      return et('chStreak').replace('{n}', t.target);
+            case 'hand':        return et('chHand').replace('{hand}', handName).replace('{n}', t.target);
+            case 'heldPairWin': return et('chHeldPair').replace('{n}', t.target);
+            case 'maxBet':      return et('chMaxBet').replace('{n}', t.target);
+            case 'winCredits':  return et('chWinCredits').replace('{n}', t.target);
+            case 'bigWin':      return et('chBigWin').replace('{n}', 20);
+            default:            return ch.id;
+        }
+    }
+
+    function egRenderChallenges() {
+        var panel = document.getElementById('challenges-panel');
+        var listEl = document.getElementById('challenges-list');
+        if (!egChallenges || !egUser) { panel.style.display = 'none'; return; }
+        panel.style.display = '';
+        listEl.style.display = egChallengesCollapsed ? 'none' : '';
+        document.getElementById('challenges-caret').textContent = egChallengesCollapsed ? '▸' : '▾';
+        listEl.innerHTML = '';
+        egChallenges.list.forEach(function(ch) {
+            var pct = Math.min(100, Math.round((ch.progress / ch.target) * 100));
+            var row = document.createElement('div');
+            row.className = 'challenge-row' + (ch.completed ? ' done' : '');
+            row.innerHTML =
+                '<div class="challenge-desc">' +
+                    '<span>' + (ch.completed ? '✅ ' : '') + egChallengeDesc(ch) +
+                    ' <span style="opacity:0.6">(' + Math.min(ch.progress, ch.target) + '/' + ch.target + ')</span></span>' +
+                    '<span class="challenge-reward">+' + ch.reward + '</span>' +
+                '</div>' +
+                '<div class="challenge-bar"><div class="challenge-fill" style="width:' + pct + '%"></div></div>';
+            listEl.appendChild(row);
         });
     }
 
-    function copyRefLink() {
-        var link = document.getElementById('pf-ref-link').value;
-        var btn = document.getElementById('pf-ref-copy-btn');
-        var done = function() {
-            btn.textContent = rt('copied') || 'Copied ✓';
-            setTimeout(function() { btn.textContent = rt('copyLink') || 'Copy Link'; }, 1500);
+    function egToggleChallenges() {
+        egChallengesCollapsed = !egChallengesCollapsed;
+        egRenderChallenges();
+    }
+
+    window.egOnHandPlayed = function(ev) {
+        if (!egUser) return;
+        egProcessXpAndAchievements(ev);
+        egProcessChallenges(ev);
+    };
+
+    function egProcessChallenges(ev) {
+        if (!egChallenges) return;
+        if (egChallenges.dateKey !== getDayKey()) {
+            // Midnight rollover — fetch today's fresh set
+            egLoadChallenges(egUser);
+            return;
+        }
+        var changed = false;
+        egChallenges.list.forEach(function(ch) {
+            if (ch.completed) return;
+            var t = egChallengeTemplate(ch.id);
+            if (!t) return;
+            var before = ch.progress;
+            switch (t.type) {
+                case 'play':        ch.progress++; break;
+                case 'win':         if (ev.win > 0) ch.progress++; break;
+                case 'streak':      ch.progress = Math.max(ch.progress, ev.streak); break;
+                case 'hand':        if (ev.handType === t.hand) ch.progress++; break;
+                case 'heldPairWin': if (ev.heldPair && ev.win > 0) ch.progress++; break;
+                case 'maxBet':      if (ev.bet >= 50) ch.progress++; break;
+                case 'winCredits':  ch.progress += ev.win; break;
+                case 'bigWin':      if (ev.win >= 20) ch.progress++; break;
+            }
+            if (ch.progress !== before) changed = true;
+            if (ch.progress >= ch.target) {
+                ch.progress = ch.target;
+                ch.completed = true;
+                changed = true;
+                egAddCredits(ch.reward);
+                egConfetti();
+                egToast(et('challengeToast').replace('{n}', ch.reward));
+                if (egStats) {
+                    egStats.challengesCompleted++;
+                    db.collection('users').doc(egUser.uid).set({
+                        challengesCompleted: firebase.firestore.FieldValue.increment(1)
+                    }, { merge: true }).catch(function(err) { console.error('challenge count:', err); });
+                    if (egStats.challengesCompleted >= 10) egUnlock('challenge10');
+                    if (egStats.challengesCompleted >= 50) egUnlock('challenge50');
+                }
+            }
+        });
+        if (changed) {
+            egRenderChallenges();
+            db.collection('daily_challenges').doc(egChallenges.dateKey + '_' + egUser.uid).set({
+                dateKey: egChallenges.dateKey,
+                uid: egUser.uid,
+                challenges: egChallenges.list,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).catch(function(err) { console.error('challenges save:', err); });
+        }
+    }
+
+    // --- i18n for engagement UI ---
+    window.applyEngageLang = function() {
+        var set = function(id, text) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = text;
         };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(link).then(done).catch(function() {
-                document.getElementById('pf-ref-link').select();
-                document.execCommand('copy');
-                done();
-            });
-        } else {
-            document.getElementById('pf-ref-link').select();
-            document.execCommand('copy');
-            done();
+        set('eg-reward-title', et('rewardTitle'));
+        set('eg-reward-sub', et('rewardSub'));
+        set('eg-reward-hint', et('rewardHint'));
+        set('eg-comeback-title', et('comebackTitle'));
+        set('eg-comeback-msg', et('comebackMsg'));
+        set('streak-label', et('streakLabel'));
+        set('stat-best-streak-label', et('bestStreakStat'));
+        set('challenges-title', et('challengesTitle'));
+        if (egComebackAmount > 0) {
+            set('eg-comeback-claim', et('comebackBtn').replace('{n}', egComebackAmount));
+        }
+        if (egRewardState) egRenderRewardCalendar();
+        if (egChallenges) egRenderChallenges();
+        set('eg-levelup-title', et('levelUpTitle'));
+        set('eg-levelup-ok', et('okBtn'));
+        set('pf-stats-title', et('profileStats'));
+        set('pf-ach-title', et('profileAchievements'));
+        set('pf-styles-title', et('profileStyles'));
+    };
+
+    // ===================== Progression: Phase 2 =====================
+    // XP & levels, achievements, player profile, card style unlocks
+
+    var egXp = 0;
+    var egLevel = 1;
+    var egStats = null;
+    var egAchievements = {};
+    var egHourKey = '';
+    var egHourHands = 0;
+    var egCardStyle = 'classic';
+
+    var MAX_LEVEL = 50;
+    var XP_WIN_BONUS = {
+        'Jacks or Better': 5, 'Two Pair': 10, 'Three of a Kind': 15,
+        'Straight': 25, 'Flush': 30, 'Full House': 50,
+        'Four of a Kind': 100, 'Straight Flush': 250, 'Royal Flush': 500
+    };
+
+    var CARD_STYLES = [
+        { id: 'classic',  level: 0,  name: 'Classic' },
+        { id: 'emerald',  level: 5,  name: 'Emerald' },
+        { id: 'gold',     level: 10, name: 'Gold' },
+        { id: 'sapphire', level: 15, name: 'Sapphire' },
+        { id: 'ruby',     level: 20, name: 'Ruby' },
+        { id: 'onyx',     level: 30, name: 'Onyx' },
+        { id: 'amethyst', level: 40, name: 'Amethyst' },
+        { id: 'royal',    level: 50, name: 'Royal' }
+    ];
+
+/* --- js/ui.js --- */
+function egToast(text) {
+        var el = document.getElementById('eg-toast');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'eg-toast';
+            el.className = 'eg-toast';
+            document.body.appendChild(el);
+        }
+        el.textContent = text;
+        el.classList.remove('show');
+        void el.offsetWidth;
+        el.classList.add('show');
+        setTimeout(function() { el.classList.remove('show'); }, 2500);
+    }
+
+    function egConfetti() {
+        var colors = ['#ffd700', '#4ade80', '#ff6b6b', '#8a2be2', '#ffffff', '#ffaa00'];
+        for (var i = 0; i < 28; i++) {
+            var p = document.createElement('div');
+            p.className = 'confetti-piece';
+            p.style.left = (Math.random() * 100) + 'vw';
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            p.style.animationDuration = (1.2 + Math.random() * 1.3) + 's';
+            p.style.animationDelay = (Math.random() * 0.4) + 's';
+            document.body.appendChild(p);
+            setTimeout(function(el) { return function() { el.remove(); }; }(p), 3200);
         }
     }
 
-    function openShareWinModal() {
-        var canvas = document.getElementById('share-canvas');
-        if (!canvas) return;
-
-        var room = getActiveRoom();
-        var user = auth.currentUser;
-        
-        var inviteCode = '';
-        var inviteLink = '';
-        
-        if (room) {
-            inviteCode = room.id;
-            inviteLink = roomLink(room.id);
-            drawAndShowShareModal(canvas, hand, lastHandType, lastWinAmount, inviteLink, inviteCode);
-        } else if (user && user.uid) {
-            db.collection('users').doc(user.uid).get().then(function(doc) {
-                var data = doc.exists ? doc.data() : {};
-                var refCode = data.referralCode || '';
-                var refLink = location.origin + location.pathname + '?ref=' + refCode;
-                drawAndShowShareModal(canvas, hand, lastHandType, lastWinAmount, refLink, refCode);
-            });
-        }
+    function egAddCredits(amount) {
+        var oldBalance = balance;
+        balance += amount;
+        playSound('coin');
+        animateBalance(oldBalance, balance, 800);
     }
 
-    function drawAndShowShareModal(canvas, hand, handType, winAmount, inviteLink, inviteCode) {
-        var t = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
-        var translatedHandType = t.payouts[handType] || handType;
-        
-        drawWinCard(canvas, hand, translatedHandType, winAmount, inviteLink, inviteCode);
-        
-        var waText = 'Wow! I just hit a ' + translatedHandType + ' and won ' + winAmount + ' credits in Video Poker! Play with me: ' + inviteLink;
-        document.getElementById('share-win-whatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(waText);
-        
-        var copyBtn = document.getElementById('share-win-copy-btn');
-        copyBtn.dataset.link = inviteLink;
-        copyBtn.textContent = rt('copyLink') || 'Copy Link';
+    // --- user profile (best streak + comeback + progression) ---
+    function egLoadUserProfile(user) {
+        db.collection('users').doc(user.uid).get().then(function(doc) {
+            var data = doc.exists ? doc.data() : {};
+            bestStreak = data.bestStreak || 0;
+            document.getElementById('stat-best-streak-value').textContent = '🔥 ' + bestStreak;
 
-        document.getElementById('share-win-modal').classList.remove('rm-hidden');
-    }
+            egXp = data.xp || 0;
+            egLevel = Math.max(data.level || 1, egLevelFromXp(egXp));
+            egStats = {
+                totalHands: data.totalHands || 0,
+                totalWins: data.totalWins || 0,
+                bestHand: data.bestHand || null,
+                bestHandRank: data.bestHandRank || 0,
+                challengesCompleted: data.challengesCompleted || 0,
+                firstSeen: data.firstSeen || null
+            };
+            egApplyCardStyle(data.cardStyle || 'classic');
+            egRenderXpBar();
 
-    function closeShareWinModal() {
-        document.getElementById('share-win-modal').classList.add('rm-hidden');
-    }
-
-    function copyWinCardLink() {
-        var btn = document.getElementById('share-win-copy-btn');
-        var link = btn.dataset.link;
-        var done = function() {
-            btn.textContent = rt('copied') || 'Copied ✓';
-            setTimeout(function() { btn.textContent = rt('copyLink') || 'Copy Link'; }, 1500);
-        };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(link).then(done).catch(function() {
-                var temp = document.createElement('input');
-                temp.value = link;
-                document.body.appendChild(temp);
-                temp.select();
-                document.execCommand('copy');
-                temp.remove();
-                done();
-            });
-        } else {
-            var temp = document.createElement('input');
-            temp.value = link;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            temp.remove();
-            done();
-        }
-    }
-
-    function downloadWinCard() {
-        var canvas = document.getElementById('share-canvas');
-        if (!canvas) return;
-        var link = document.createElement('a');
-        link.download = 'video_poker_win_' + lastHandType.toLowerCase().replace(/ /g, '_') + '.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    }
-
-    function drawWinCard(canvas, hand, handType, winAmount, inviteLink, inviteCode) {
-        var ctx = canvas.getContext('2d');
-        
-        var grad = ctx.createRadialGradient(300, 200, 50, 300, 200, 350);
-        grad.addColorStop(0, '#0f3c26');
-        grad.addColorStop(1, '#05190e');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 600, 400);
-
-        ctx.strokeStyle = '#ffd700';
-        ctx.lineWidth = 6;
-        ctx.strokeRect(3, 3, 594, 394);
-
-        ctx.strokeStyle = 'rgba(255, 215, 0, 0.05)';
-        ctx.lineWidth = 1;
-        for (var i = 0; i < 600; i += 30) {
-            ctx.beginPath();
-            ctx.moveTo(i, 0);
-            ctx.lineTo(i, 400);
-            ctx.stroke();
-        }
-
-        ctx.fillStyle = '#ffd700';
-        ctx.font = 'bold 24px "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('♠ ♥ VIDEO POKER ♦ ♣', 300, 45);
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 36px "Segoe UI", sans-serif';
-        ctx.fillText(handType.toUpperCase(), 300, 95);
-
-        ctx.fillStyle = '#4ade80';
-        ctx.font = 'bold 24px "Segoe UI", sans-serif';
-        ctx.fillText('+' + winAmount + ' CREDITS', 300, 135);
-
-        var cardW = 75;
-        var cardH = 110;
-        var gap = 15;
-        var totalW = (5 * cardW) + (4 * gap);
-        var startX = (600 - totalW) / 2;
-        var startY = 165;
-
-        function roundRect(ctx, x, y, width, height, radius) {
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            ctx.lineTo(x + width, y + height - radius);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            ctx.lineTo(x + radius, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
-            ctx.closePath();
-        }
-
-        hand.forEach(function(card, idx) {
-            var x = startX + idx * (cardW + gap);
-            var y = startY;
-
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 4;
-
-            ctx.fillStyle = '#ffffff';
-            roundRect(ctx, x, y, cardW, cardH, 8);
-            ctx.fill();
-
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-
-            ctx.strokeStyle = '#cccccc';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            var evaluated = evaluateHand(hand);
-            var isWinner = evaluated.winIndices.includes(idx) || evaluated.secondPairIndices.includes(idx) || evaluated.thirdMatchIndices.includes(idx);
-            if (isWinner) {
-                ctx.strokeStyle = '#ffd700';
-                ctx.lineWidth = 3;
-                roundRect(ctx, x, y, cardW, cardH, 8);
-                ctx.stroke();
+            if (data.bonusCredits && data.bonusCredits > 0) {
+                var bonus = data.bonusCredits;
+                egAddCredits(bonus);
+                egConfetti();
+                egToast('🎁 Referral bonus! You received ' + bonus + ' credits.');
+                saveGameState();
+                db.collection('users').doc(user.uid).update({
+                    bonusCredits: 0
+                });
             }
 
-            var isRed = card.suit === '♥' || card.suit === '♦';
-            ctx.fillStyle = isRed ? '#e63946' : '#2d3748';
+            var refCount = data.referralCount || 0;
+            if (refCount >= 3) {
+                egUnlock('invite3');
+            }
+
+            db.collection('users').doc(user.uid).collection('achievements').get().then(function(snap) {
+                snap.forEach(function(d) { egAchievements[d.id] = true; });
+                egUpdateAchCount();
+            }).catch(function(err) { console.error('achievements load:', err); });
+
+            var last = data.lastActiveDate && typeof data.lastActiveDate.toDate === 'function'
+                ? data.lastActiveDate.toDate().getTime() : null;
+            if (last) {
+                var gap = Date.now() - last;
+                if (gap > EG_COMEBACK_LONG_MS) egComebackAmount = EG_COMEBACK_LONG_CREDITS;
+                else if (gap > EG_COMEBACK_SHORT_MS) egComebackAmount = EG_COMEBACK_SHORT_CREDITS;
+            }
+            // Refresh presence — also guarantees one claim per absence period
+            return db.collection('users').doc(user.uid).set({
+                lastActiveDate: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        }).then(function() {
+            if (egComebackAmount > 0) {
+                document.getElementById('eg-comeback-amount').textContent = '+' + egComebackAmount;
+                document.getElementById('eg-comeback-claim').textContent =
+                    et('comebackBtn').replace('{n}', egComebackAmount);
+                egQueueModal('eg-comeback-modal');
+            }
+        }).catch(function(err) { console.error('egLoadUserProfile:', err); });
+    }
+
+    function egClaimComeback() {
+        if (!egUser || egComebackAmount <= 0) return;
+        var amount = egComebackAmount;
+        egComebackAmount = 0;
+        egAddCredits(amount);
+        egConfetti();
+        egToast(et('rewardToast').replace('{n}', amount));
+        db.collection('users').doc(egUser.uid).set({
+            comebackClaimed: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(function(err) { console.error('comeback claim:', err); });
+        egCloseModal('eg-comeback-modal');
+    }
+
+    // --- daily login reward ---
+
+/* --- js/game.js --- */
+const SUITS = ['♠', '♥', '♦', '♣'];
+        const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        
+        const BASE_PAYOUTS = {
+            'Royal Flush': 250,
+            'Straight Flush': 50,
+            'Four of a Kind': 20,
+            'Full House': 7,
+            'Flush': 5,
+            'Straight': 4,
+            'Three of a Kind': 3,
+            'Two Pair': 2,
+            'Jacks or Better': 1,
+            'Nothing': 0
+        };
+        let currentPayouts = { ...BASE_PAYOUTS };
+
+        // --- Engagement tuning (play-money game) ---
+        const BOOST_BASE = 0.18;          // baseline chance to improve a dead deal
+        const BOOST_PER_LOSS = 0.06;      // extra boost per consecutive loss (mercy)
+        const BOOST_LOSS_CAP = 5;         // loss streak past which mercy stops growing
+        const LOW_BALANCE_HANDS = 10;     // "getting low" = fewer than this many max bets left
+        const CRITICAL_BALANCE_HANDS = 4; // "almost broke" = strong comeback help
+        const BOOST_LOW = 0.15;           // extra help when getting low
+        const BOOST_CRITICAL = 0.35;      // extra help when almost broke
+        const BOOST_MAX = 0.85;           // never a guaranteed rig
+
+        function getBoostChance() {
+            let chance = BOOST_BASE;
+            chance += Math.min(lossStreak, BOOST_LOSS_CAP) * BOOST_PER_LOSS;
+            if (balance <= bet * CRITICAL_BALANCE_HANDS) {
+                chance += BOOST_CRITICAL;   // comeback: keep the session alive
+            } else if (balance <= bet * LOW_BALANCE_HANDS) {
+                chance += BOOST_LOW;
+            }
+            return Math.min(chance, BOOST_MAX);
+        }
+
+        let currentLang = 'en';
+        let deck = [];
+        let hand = [];
+        let held = [false, false, false, false, false];
+        let balance = 100;
+        let bet = 5;
+        let gameState = 'bet';
+        let lastHandType = null;
+        let totalWon = 0;
+        let totalLost = 0;
+        let handsPlayed = 0;
+        let lossStreak = 0;
+        let winStreak = 0;
+        let bestStreak = 0;
+        let hourlyRebuys = 0;
+        let dailyRebuys = 0;
+        let weeklyRebuys = loadWeeklyRebuys();
+        let currentHourKey = '';
+        let currentDayKey = '';
+        let currentWeekKey = '';
+        let lastWinAmount = 0;
+        let activeLbTab = 'hourly';
+
+        // --- State Persistence (localStorage backup) ---
+        function saveGameState() {
+            try {
+                const state = {
+                    balance: balance,
+                    bet: bet,
+                    totalWon: totalWon,
+                    totalLost: totalLost,
+                    handsPlayed: handsPlayed,
+                    hourlyRebuys: hourlyRebuys,
+                    dailyRebuys: dailyRebuys,
+                    lossStreak: lossStreak,
+                    winStreak: winStreak,
+                    bestStreak: bestStreak,
+                    hourKey: currentHourKey,
+                    dayKey: currentDayKey,
+                    savedAt: Date.now()
+                };
+                localStorage.setItem('vp_game_state', JSON.stringify(state));
+            } catch (e) { /* localStorage unavailable, silently fail */ }
+        }
+
+        function restoreGameState() {
+            try {
+                const raw = localStorage.getItem('vp_game_state');
+                if (!raw) return false;
+                const state = JSON.parse(raw);
+                // Only restore if saved less than 24h ago
+                if (Date.now() - state.savedAt > 24 * 60 * 60 * 1000) return false;
+                balance = state.balance || 100;
+                bet = state.bet || 5;
+                totalWon = state.totalWon || 0;
+                totalLost = state.totalLost || 0;
+                handsPlayed = state.handsPlayed || 0;
+                hourlyRebuys = state.hourlyRebuys || 0;
+                dailyRebuys = state.dailyRebuys || 0;
+                lossStreak = state.lossStreak || 0;
+                winStreak = state.winStreak || 0;
+                bestStreak = state.bestStreak || 0;
+                // Only restore hour/day rebuys if same period
+                if (state.hourKey !== getHourKey()) hourlyRebuys = 0;
+                if (state.dayKey !== getDayKey()) dailyRebuys = 0;
+                document.getElementById('balance').textContent = balance;
+                return true;
+            } catch (e) { return false; }
+        }
+
+        // --- Firebase Error Handling Wrapper ---
+        function firebaseSafe(operation, fallback) {
+            try {
+                var result = operation();
+                if (result && typeof result.catch === 'function') {
+                    return result.catch(function(err) {
+                        console.error('Firebase operation failed:', err);
+                        if (typeof fallback === 'function') fallback(err);
+                        return null;
+                    });
+                }
+                return result;
+            } catch (err) {
+                console.error('Firebase operation threw:', err);
+                if (typeof fallback === 'function') fallback(err);
+                return null;
+            }
+        }
+
+
+        function checkHourReset() {
+            const hk = getHourKey();
+            if (currentHourKey && currentHourKey !== hk) {
+                hourlyRebuys = 0;
+            }
+            currentHourKey = hk;
+        }
+
+        function checkDayReset() {
+            const dk = getDayKey();
+            if (currentDayKey && currentDayKey !== dk) {
+                dailyRebuys = 0;
+            }
+            currentDayKey = dk;
+        }
+
+        function checkWeekReset() {
+            const wk = getWeekKey();
+            if (currentWeekKey && currentWeekKey !== wk) {
+                weeklyRebuys = 0;
+                saveWeeklyRebuys();
+            }
+            currentWeekKey = wk;
+        }
+
+        function doRebuy() {
+            hourlyRebuys++;
+            dailyRebuys++;
+            weeklyRebuys++;
+            saveWeeklyRebuys();
+            balance = 100;
+            document.getElementById('balance').textContent = balance;
+            saveGameState();
+            showRebuyNotification();
+        }
+
+        function showRebuyNotification() {
+            let note = document.getElementById('rebuy-note');
+            if (!note) {
+                note = document.createElement('div');
+                note.id = 'rebuy-note';
+                note.className = 'rebuy-notification';
+                document.getElementById('game-container').appendChild(note);
+            }
+            note.textContent = '♻ +100 credits (rebuy #' + hourlyRebuys + ')';
+            note.classList.remove('show');
+            void note.offsetWidth;
+            note.classList.add('show');
+            setTimeout(function() { note.classList.remove('show'); }, 2000);
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            const t = TRANSLATIONS[lang];
+            document.documentElement.lang = lang;
+            document.documentElement.dir = t.dir;
+            document.body.dir = t.dir;
+            document.title = t.title;
             
-            ctx.font = 'bold 18px "Segoe UI", sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(card.rank, x + 8, y + 22);
+            // Update UI texts
+            document.getElementById('game-title').textContent = t.gameTitle;
+            document.getElementById('balance-label').textContent = t.balanceLabel;
+            document.getElementById('bet-label').textContent = t.betLabel;
+            document.getElementById('credits-label').textContent = t.creditsLabel;
+            document.getElementById('choose-bet-label').textContent = t.chooseBetLabel;
+            document.getElementById('deal-btn').textContent = t.dealBtn;
+            document.getElementById('hold-btn').textContent = t.drawBtn;
+            document.getElementById('how-to-play').textContent = t.howToPlay;
+            
+            // Update payouts table
+            renderPayouts(t);
+            
+            // Update instructions
+            const instructionsList = document.getElementById('instructions-list');
+            instructionsList.innerHTML = '';
+            t.instructions.forEach(inst => {
+                const li = document.createElement('li');
+                li.textContent = inst;
+                instructionsList.appendChild(li);
+            });
+            
+            // Update stats labels
+            document.getElementById('stat-won-label').textContent = t.statWon;
+            document.getElementById('stat-lost-label').textContent = t.statLost;
+            document.getElementById('stat-net-label').textContent = t.statNet;
+            document.getElementById('stat-hands-label').textContent = t.statHands;
 
-            ctx.font = 'bold 36px "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(card.suit, x + cardW / 2, y + cardH / 2 + 12);
-
-            ctx.font = 'bold 18px "Segoe UI", sans-serif';
-            ctx.textAlign = 'right';
-            ctx.fillText(card.rank, x + cardW - 8, y + cardH - 10);
-        });
-
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        roundRect(ctx, 30, 310, 540, 65, 8);
-        ctx.fill();
-
-        ctx.strokeStyle = 'rgba(255, 215, 0, 0.2)';
-        ctx.lineWidth = 1.5;
-        roundRect(ctx, 30, 310, 540, 65, 8);
-        ctx.stroke();
-
-        drawMockQRCode(ctx, 505, 318, 48);
-
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#ffd700';
-        ctx.font = 'bold 15px "Segoe UI", sans-serif';
-        if (inviteCode) {
-            ctx.fillText('PLAY WITH ME! ROOM CODE: ' + inviteCode, 45, 338);
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '12px "Segoe UI", sans-serif';
-            ctx.fillText(inviteLink, 45, 360);
-        } else {
-            ctx.fillText('PLAY VIDEO POKER & WIN CREDITS!', 45, 348);
-        }
-    }
-
-    function drawMockQRCode(ctx, x, y, size) {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(x, y, size, size);
-
-        var finderSize = Math.floor(size * 7 / 25);
-        drawFinderPattern(ctx, x, y, finderSize);
-        drawFinderPattern(ctx, x + size - finderSize, y, finderSize);
-        drawFinderPattern(ctx, x, y + size - finderSize, finderSize);
-
-        ctx.fillStyle = '#000000';
-        var cellSize = size / 25;
-        for (var row = 0; row < 25; row++) {
-            for (var col = 0; col < 25; col++) {
-                if ((row < 8 && col < 8) || (row < 8 && col >= 17) || (row >= 17 && col < 8)) {
-                    continue;
-                }
-                if (Math.random() > 0.5) {
-                    ctx.fillRect(x + col * cellSize, y + row * cellSize, cellSize, cellSize);
+            if (lastHandType) {
+                document.getElementById('explanation').textContent = t.explanations[lastHandType];
+                const resultEl = document.getElementById('result');
+                if (lastWinAmount > 0) {
+                    resultEl.innerHTML = `<span class="win">🎉 ${t.payouts[lastHandType]}! +${lastWinAmount} ${t.creditsLabel}! 🎉</span>`;
+                } else {
+                    resultEl.innerHTML = `<span style="color:#aaa">${t.payouts['Nothing']} - ${hand.map(c => c.rank + c.suit).join(' ')}</span>`;
                 }
             }
+
+            // Update leaderboard UI language dynamically
+            const hourlyTitleEl = document.getElementById('lb-hourly-title');
+            if (hourlyTitleEl) hourlyTitleEl.textContent = '⏱ ' + (t.hourlyTitle || 'Hourly Competition');
+            const dailyTitleEl = document.getElementById('lb-daily-title');
+            if (dailyTitleEl) dailyTitleEl.textContent = '📅 ' + (t.dailyTitle || 'Daily Competition');
+
+            const formulaNote = document.getElementById('lb-formula-note');
+            if (formulaNote) {
+                formulaNote.innerHTML = '<strong>' + (t.formulaTitle || 'How is score calculated?') + '</strong><br>' +
+                                        (t.hourlyFormula || 'Score = Balance - (100 × Rebuys) - 100<br><span style="opacity:0.7">(This equals your exact Net Profit/Loss)</span>');
+            }
+
+            if (window.applyRoomLang) window.applyRoomLang();
+            if (window.applyEngageLang) window.applyEngageLang();
         }
-    }
 
-    function drawFinderPattern(ctx, x, y, size) {
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(x, y, size, size);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(x + size/7, y + size/7, size*5/7, size*5/7);
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(x + size*2/7, y + size*2/7, size*3/7, size*3/7);
-    }
-
-    /* ===================== Phase 4: Audio & Visual Polish ===================== */
-    var audioBuffers = {};
-    var audioCtx = null;
-    var soundEnabled = true;
-
-    function initSound() {
-        try {
-            var stored = localStorage.getItem('vp_sound_enabled');
-            if (stored !== null) soundEnabled = stored === 'true';
-        } catch (e) {}
-        updateSoundButtonUI();
-    }
-
-    function ensureAudioContext() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            generatePreDecodedBuffers();
+        function renderPayouts(t) {
+            const payoutsEl = document.getElementById('payouts');
+            payoutsEl.innerHTML = '';
+            const handOrder = ['Royal Flush', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'];
+            handOrder.forEach(handType => {
+                const row = document.createElement('div');
+                row.className = 'payout-row';
+                const isBoosted = currentPayouts[handType] > BASE_PAYOUTS[handType];
+                const valStyle = isBoosted ? 'color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);' : '';
+                row.innerHTML = `<div class="payout-hand">${t.payouts[handType]}</div><div class="payout-value" style="${valStyle}">${currentPayouts[handType]}</div>`;
+                payoutsEl.appendChild(row);
+            });
         }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
+
+        function setBet(amount) {
+            bet = amount;
+            document.getElementById('bet-display').textContent = bet;
+            document.querySelectorAll('.bet-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            const btn = document.getElementById('bet-' + amount);
+            if (btn) btn.classList.add('selected');
         }
-    }
 
-    function createSynthesizedBuffer(duration, synthFn) {
-        var sampleRate = audioCtx.sampleRate;
-        var buffer = audioCtx.createBuffer(1, sampleRate * duration, sampleRate);
-        var data = buffer.getChannelData(0);
-        synthFn(data, sampleRate);
-        return buffer;
-    }
+        function createDeck() {
+            const d = [];
+            for (let suit of SUITS) {
+                for (let rank of RANKS) {
+                    d.push({rank, suit});
+                }
+            }
+            return d;
+        }
 
-    function generatePreDecodedBuffers() {
-        audioBuffers.deal = createSynthesizedBuffer(0.15, synthDeal);
-        audioBuffers.flip = createSynthesizedBuffer(0.1, synthFlip);
-        audioBuffers.click = createSynthesizedBuffer(0.05, synthClick);
-        audioBuffers.loss = createSynthesizedBuffer(0.5, synthLoss);
-        audioBuffers.coin = createSynthesizedBuffer(0.3, synthCoin);
-        audioBuffers.win = createSynthesizedBuffer(0.4, synthWin);
-        audioBuffers.bigWin = createSynthesizedBuffer(1.0, synthBigWin);
-        audioBuffers.levelUp = createSynthesizedBuffer(0.8, synthLevelUp);
-    }
+        function shuffle(deck) {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
 
-    function playSound(name) {
-        if (!soundEnabled) return;
-        ensureAudioContext();
-        var buffer = audioBuffers[name];
-        if (!buffer) return;
-        var source = audioCtx.createBufferSource();
-        source.buffer = buffer;
-        source.connect(audioCtx.destination);
-        source.start(0);
-    }
+        function boostHand() {
+            if (Math.random() >= getBoostChance()) return;
 
-    function toggleSound() {
-        ensureAudioContext();
-        soundEnabled = !soundEnabled;
-        try {
-            localStorage.setItem('vp_sound_enabled', soundEnabled);
-        } catch (e) {}
-        updateSoundButtonUI();
-        if (soundEnabled) {
+            const rankCounts = {};
+            hand.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
+            const counts = Object.values(rankCounts).sort((a, b) => b - a);
+
+            if (counts[0] >= 2) return;
+
+            const targetRank = hand[Math.floor(Math.random() * 5)].rank;
+            const usedSuits = hand.filter(c => c.rank === targetRank).map(c => c.suit);
+            const availableSuits = SUITS.filter(s => !usedSuits.includes(s));
+            if (availableSuits.length === 0) return;
+            const newSuit = availableSuits[Math.floor(Math.random() * availableSuits.length)];
+            const newCard = { rank: targetRank, suit: newSuit };
+
+            const otherIndices = hand.map((c, i) => c.rank !== targetRank ? i : -1).filter(i => i !== -1);
+            if (otherIndices.length === 0) return;
+            const replaceIdx = otherIndices[Math.floor(Math.random() * otherIndices.length)];
+
+            const oldCard = hand[replaceIdx];
+            deck.push(oldCard);
+            hand[replaceIdx] = newCard;
+            const deckIdx = deck.findIndex(c => c.rank === newCard.rank && c.suit === newCard.suit);
+            if (deckIdx !== -1) deck.splice(deckIdx, 1);
+        }
+
+        function deal() {
+            checkHourReset();
+            checkDayReset();
+            checkWeekReset();
+            if (balance < bet) {
+                if (balance === 0) {
+                    doRebuy();
+                } else {
+                    bet = Math.max(5, Math.floor(balance / 5) * 5);
+                    if (bet > balance) bet = 5;
+                    setBet(bet);
+                    if (balance < bet) {
+                        doRebuy();
+                    }
+                }
+            }
+
+            // Clean up celebration classes & overlays
+            document.body.classList.remove('screen-shake');
+            document.querySelectorAll('.flash-overlay, .confetti-burst-piece, .gold-rain-piece').forEach(el => el.remove());
+
+            balance -= bet;
+            document.getElementById('balance').textContent = balance;
+            saveGameState();
+
+            deck = createDeck();
+            shuffle(deck);
+            hand = deck.splice(0, 5);
+            boostHand();
+            held = [false, false, false, false, false];
+            gameState = 'hold';
+
+            renderHand();
+            document.getElementById('deal-btn').disabled = true;
+            document.getElementById('hold-btn').disabled = false;
+            lastHandType = null;
+            const resultEl = document.getElementById('result');
+            resultEl.className = 'result';
+            resultEl.innerHTML = '';
+            document.getElementById('explanation').innerHTML = '';
+        }
+
+        function getStreakBonus(streak) {
+            if (streak >= 10) return 0.5;
+            if (streak >= 7) return 0.3;
+            if (streak >= 5) return 0.2;
+            if (streak >= 3) return 0.1;
+            return 0;
+        }
+
+        function draw() {
+            // Was a pair held before the draw? (for daily challenges)
+            const heldRankCounts = {};
+            hand.forEach(function(c, i) {
+                if (held[i]) heldRankCounts[c.rank] = (heldRankCounts[c.rank] || 0) + 1;
+            });
+            const hadHeldPair = Object.values(heldRankCounts).some(function(n) { return n >= 2; });
+
+            // Replace unheld cards
+            for (let i = 0; i < 5; i++) {
+                if (!held[i]) {
+                    hand[i] = deck.pop();
+                }
+            }
+            const result = evaluateHand(hand);
+            const handType = result.type;
+            lastHandType = handType;
+            const winIndices = result.winIndices || []; // Ensure it's an array
+            const thirdMatchIndices = result.thirdMatchIndices || []; // Ensure it's an array
+            const secondPairIndices = result.secondPairIndices || []; // Ensure it's an array
+            let win = bet * currentPayouts[handType];
+            if (win > 0) {
+                winStreak++;
+                const streakBonus = getStreakBonus(winStreak);
+                if (streakBonus > 0) win += Math.round(win * streakBonus);
+            } else {
+                winStreak = 0;
+            }
+            updateStreakUI(win > 0);
+            lastWinAmount = win;
+            balance += win;
+            handsPlayed++;
+            
+            if (win > 0) {
+                totalWon += win;
+                lossStreak = 0;
+                currentPayouts = { ...BASE_PAYOUTS };
+            } else {
+                totalLost += bet;
+                lossStreak++;
+                for (let key in currentPayouts) {
+                    if (key !== 'Nothing') currentPayouts[key]++;
+                }
+            }
+            updateStats();
+            renderPayouts(TRANSLATIONS[currentLang]);
+
+            if (win === 0) {
+                document.getElementById('balance').textContent = balance;
+                playSound('loss');
+            } else {
+                triggerWinCelebration(handType, win);
+            }
+            saveGameState();
+
+            if (win > 0 && HAND_RANK[handType] >= 3) {
+                logRoomEvent('hand', handType);
+            }
+
+            const t = TRANSLATIONS[currentLang];
+            const resultEl = document.getElementById('result');
+
+            if (win > 0) {
+                resultEl.className = 'result';
+                var shareWinBtn = '';
+                if (HAND_RANK[handType] >= 3) {
+                    shareWinBtn = '<br><button id="share-win-trigger-btn" onclick="openShareWinModal()" style="margin-top: 10px; padding: 8px 16px; font-size: 14px; border-radius: 8px;">Share Win</button>';
+                }
+                resultEl.innerHTML = `<span class="win">🎉 ${t.payouts[handType]}! +${win} ${t.creditsLabel}! 🎉</span>` + shareWinBtn;
+                document.getElementById('explanation').textContent = t.explanations[handType];
+            } else {
+                resultEl.className = 'result';
+                resultEl.innerHTML = `<span style="color:#aaa">${t.payouts['Nothing']} - ${hand.map(c => c.rank + c.suit).join(' ')}</span>`;
+                document.getElementById('explanation').textContent = t.explanations[handType];
+            }
+
+            renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
+            updateScores(win, bet, handType);
+            if (window.egOnHandPlayed) {
+                window.egOnHandPlayed({ handType: handType, win: win, bet: bet, heldPair: hadHeldPair, streak: winStreak });
+            }
+
+            gameState = 'bet';
+            document.getElementById('deal-btn').disabled = false;
+            document.getElementById('hold-btn').disabled = true;
+        }
+
+        function toggleHold(i) {
+            if (gameState !== 'hold') return;
+            held[i] = !held[i];
+            renderHand();
             playSound('click');
         }
-    }
 
-    function updateSoundButtonUI() {
-        var btn = document.getElementById('sound-toggle-btn');
-        if (btn) {
-            btn.textContent = soundEnabled ? '🔊' : '🔇';
-        }
-    }
+        function getWinBadgeText(cardIndex, handType) {
+            const card = hand[cardIndex];
+            const ranks = hand.map(c => c.rank);
+            const rankCounts = {};
+            ranks.forEach(r => rankCounts[r] = (rankCounts[r] || 0) + 1);
+            
+            const t = TRANSLATIONS[currentLang];
+            const wl = t.winLabels || {};
+            const rankLabel = card.rank;
 
-    /* Sound Synthesizer Functions */
-    function synthDeal(data, sampleRate) {
-        for (var i = 0; i < data.length; i++) {
-            var t = i / sampleRate;
-            var freq = 600 * Math.exp(-30 * t) + 100;
-            var amp = Math.exp(-25 * t);
-            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.5;
-        }
-    }
-
-    function synthFlip(data, sampleRate) {
-        for (var i = 0; i < data.length; i++) {
-            var t = i / sampleRate;
-            var noise = Math.random() * 2 - 1;
-            var amp = Math.exp(-40 * t);
-            data[i] = (noise * 0.3 + Math.sin(2 * Math.PI * 150 * t) * 0.7) * amp * 0.6;
-        }
-    }
-
-    function synthClick(data, sampleRate) {
-        for (var i = 0; i < data.length; i++) {
-            var t = i / sampleRate;
-            var freq = 2000 * Math.exp(-100 * t);
-            var amp = Math.exp(-80 * t);
-            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.4;
-        }
-    }
-
-    function synthLoss(data, sampleRate) {
-        for (var i = 0; i < data.length; i++) {
-            var t = i / sampleRate;
-            var freq = 120 * Math.exp(-4 * t);
-            var amp = Math.exp(-3 * t);
-            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.5;
-        }
-    }
-
-    function synthCoin(data, sampleRate) {
-        for (var i = 0; i < data.length; i++) {
-            var t = i / sampleRate;
-            var amp = Math.exp(-12 * t);
-            var tone1 = Math.sin(2 * Math.PI * 1800 * t);
-            var tone2 = Math.sin(2 * Math.PI * 2400 * t);
-            data[i] = (tone1 + tone2) * 0.5 * amp * 0.4;
-        }
-    }
-
-    function synthWin(data, sampleRate) {
-        var freqs = [523.25, 659.25, 783.99, 1046.50];
-        for (var i = 0; i < data.length; i++) {
-            var t = i / sampleRate;
-            var noteIdx = Math.min(freqs.length - 1, Math.floor(t / 0.1));
-            var freq = freqs[noteIdx];
-            var amp = Math.exp(-6 * (t % 0.1)) * Math.exp(-1.5 * t);
-            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.4;
-        }
-    }
-
-    function synthBigWin(data, sampleRate) {
-        var chords = [
-            [523.25, 659.25, 783.99],
-            [587.33, 739.99, 880.00],
-            [659.25, 830.61, 987.77],
-            [783.99, 987.77, 1174.66]
-        ];
-        for (var i = 0; i < data.length; i++) {
-            var t = i / sampleRate;
-            var chordIdx = Math.min(chords.length - 1, Math.floor(t / 0.25));
-            var freqs = chords[chordIdx];
-            var amp = Math.exp(-3 * (t % 0.25)) * Math.exp(-0.5 * t);
-            var val = 0;
-            for (var f = 0; f < freqs.length; f++) {
-                val += Math.sin(2 * Math.PI * freqs[f] * t);
+            if (handType === 'Jacks or Better') {
+                return (wl.pair || 'Pair') + ' ' + rankLabel;
             }
-            data[i] = (val / freqs.length) * amp * 0.4;
-        }
-    }
-
-    function synthLevelUp(data, sampleRate) {
-        var freqs = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
-        for (var i = 0; i < data.length; i++) {
-            var t = i / sampleRate;
-            var noteIdx = Math.min(freqs.length - 1, Math.floor(t / 0.08));
-            var freq = freqs[noteIdx];
-            var amp = noteIdx === freqs.length - 1 ? Math.exp(-2 * (t - 0.4)) : Math.exp(-8 * (t % 0.08));
-            data[i] = Math.sin(2 * Math.PI * freq * t) * amp * 0.4;
-        }
-    }
-
-    /* Win Celebrations */
-    function triggerWinCelebration(handType, win) {
-        var rank = HAND_RANK[handType] || 0;
-        
-        if (rank >= 7) {
-            playSound('bigWin');
-        } else {
-            playSound('win');
-        }
-
-        if (rank <= 2) {
-            var resultEl = document.getElementById('result');
-            if (resultEl) {
-                var winSpan = resultEl.querySelector('.win');
-                if (winSpan) winSpan.classList.add('shimmer-gold');
+            if (handType === 'Two Pair') {
+                return (wl.pair || 'Pair') + ' ' + rankLabel;
             }
+            if (handType === 'Three of a Kind') {
+                return wl.threeOfKind || '3 of a Kind';
+            }
+            if (handType === 'Full House') {
+                const count = rankCounts[card.rank] || 0;
+                if (count === 3) {
+                    return wl.threeOfKind || '3 of a Kind';
+                } else if (count === 2) {
+                    return (wl.pair || 'Pair') + ' ' + rankLabel;
+                }
+            }
+            if (handType === 'Four of a Kind') {
+                return wl.fourOfKind || '4 of a Kind';
+            }
+            if (handType === 'Straight') {
+                return wl.straight || 'Straight';
+            }
+            if (handType === 'Flush') {
+                return wl.flush || 'Flush';
+            }
+            if (handType === 'Straight Flush') {
+                return wl.straightFlush || 'Str. Flush';
+            }
+            if (handType === 'Royal Flush') {
+                return wl.royalFlush || 'Royal Flush';
+            }
+            return '';
         }
-        
-        if (rank === 3 || rank === 4) {
-            var cardElements = document.querySelectorAll('#hand .card.winning');
-            cardElements.forEach(function(el, idx) {
-                el.classList.add('bounce');
-                el.style.animationDelay = (idx * 0.1) + 's';
+
+        function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false) {
+            const handEl = document.getElementById('hand');
+            handEl.innerHTML = '';
+            const t = TRANSLATIONS[currentLang];
+            const anyHeld = held.some(h => h);
+
+            const PIP_MAPS = {
+                '2': [1, 13],
+                '3': [1, 7, 13],
+                '4': [0, 2, 12, 14],
+                '5': [0, 2, 7, 12, 14],
+                '6': [0, 2, 6, 8, 12, 14],
+                '7': [0, 2, 6, 8, 12, 14, 4],
+                '8': [0, 2, 6, 8, 12, 14, 4, 10],
+                '9': [0, 2, 3, 5, 9, 11, 12, 14, 7],
+                '10': [0, 2, 3, 5, 9, 11, 12, 14, 4, 10]
+            };
+
+            hand.forEach((card, i) => {
+                const cardEl = document.createElement('div');
+                const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || secondPairIndices.length > 0;
+                
+                // If draw is true, only unheld cards start face-down (flipped)
+                const shouldStartFlipped = isDraw ? !held[i] : true;
+                
+                const isHeld = !isResult && held[i];
+                const isUnheld = !isResult && anyHeld && !held[i];
+                let classes = `card ${shouldStartFlipped ? 'flipped' : ''} ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
+
+                if (winningIndices.includes(i)) {
+                    classes += ' winning';
+                }
+                if (secondPairIndices.includes(i)) {
+                    classes += ' second-pair';
+                }
+                if (thirdMatchIndices.includes(i)) {
+                    classes += ' third-match';
+                }
+
+                cardEl.className = classes.trim();
+                cardEl.onclick = () => toggleHold(i);
+                
+                const badgeText = t.heldBadge || 'HELD';
+                const winBadgeText = isResult ? getWinBadgeText(i, lastHandType) : '';
+                
+                // Generate center content
+                let centerContent = '';
+                if (card.rank === 'A') {
+                    centerContent = `<div class="card-suit-large">${card.suit}</div>`;
+                } else if (['J', 'Q', 'K'].includes(card.rank)) {
+                    centerContent = `<div class="card-royalty-center rank-${card.rank}">${card.rank === 'J' ? '⚔️' : card.rank === 'Q' ? '👑' : '🛡️'}</div>`;
+                } else {
+                    const pips = PIP_MAPS[card.rank] || [];
+                    let gridHtml = '<div class="pip-grid">';
+                    for (let cell = 0; cell < 15; cell++) {
+                        const isActive = pips.includes(cell);
+                        gridHtml += `<div class="pip ${isActive ? 'active' : ''}">${card.suit}</div>`;
+                    }
+                    gridHtml += '</div>';
+                    centerContent = gridHtml;
+                }
+
+                cardEl.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="held-badge">${badgeText}</div>
+                            <div class="win-badge">${winBadgeText}</div>
+                            <div class="card-index top-left">
+                                <div class="card-index-rank">${card.rank}</div>
+                                <div class="card-index-suit">${card.suit}</div>
+                            </div>
+                            ${centerContent}
+                            <div class="card-index bottom-right">
+                                <div class="card-index-rank">${card.rank}</div>
+                                <div class="card-index-suit">${card.suit}</div>
+                            </div>
+                        </div>
+                        <div class="card-back"></div>
+                    </div>
+                `;
+                handEl.appendChild(cardEl);
+            });
+
+            // Staggered flip animation trigger
+            let flipDelayIndex = 0;
+            hand.forEach((card, i) => {
+                const cardEl = handEl.children[i];
+                if (cardEl && cardEl.classList.contains('flipped')) {
+                    setTimeout(() => {
+                        const inner = cardEl.querySelector('.card-inner');
+                        if (inner) {
+                            inner.classList.add('animating');
+                            cardEl.classList.remove('flipped');
+                            playSound('deal');
+                            setTimeout(() => {
+                                inner.classList.remove('animating');
+                            }, 600);
+                        }
+                    }, flipDelayIndex * 250);
+                    flipDelayIndex++;
+                }
             });
         }
 
-        if (rank === 5 || rank === 6) {
-            confettiBurst();
-        }
-
-        if (rank === 7) {
-            confettiBurst();
-            setTimeout(confettiBurst, 200);
-            setTimeout(confettiBurst, 400);
-            triggerScreenFlash();
-        }
-
-        if (rank >= 8) {
-            launchFireworks();
-            triggerScreenFlash();
-            triggerScreenShake();
-            goldRain();
-        }
-
-        var oldBalance = balance - win;
-        animateBalance(oldBalance, balance, 1000);
-    }
-
-    function triggerScreenFlash() {
-        var flash = document.createElement('div');
-        flash.className = 'flash-overlay';
-        document.body.appendChild(flash);
-        setTimeout(function() { flash.remove(); }, 500);
-    }
-
-    function triggerScreenShake() {
-        document.body.classList.add('screen-shake');
-        setTimeout(function() {
-            document.body.classList.remove('screen-shake');
-        }, 500);
-    }
-
-    function confettiBurst() {
-        var colors = ['#ffd700', '#4ade80', '#ff6b6b', '#8a2be2', '#ffffff', '#ffaa00'];
-        var container = document.body;
-        for (var i = 0; i < 30; i++) {
-            var p = document.createElement('div');
-            p.className = 'confetti-burst-piece';
-            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        function evaluateHand(hand) {
+            const ranks = hand.map(c => c.rank);
+            const suits = hand.map(c => c.suit);
             
-            var angle = Math.random() * Math.PI * 2;
-            var velocity = 50 + Math.random() * 150;
-            var tx = Math.cos(angle) * velocity;
-            var ty = Math.sin(angle) * velocity;
+            const rankCounts = {};
+            ranks.forEach(r => rankCounts[r] = (rankCounts[r] || 0) + 1);
+            const counts = Object.values(rankCounts).sort((a, b) => b - a);
             
-            p.style.setProperty('--tx', tx + 'px');
-            p.style.setProperty('--ty', ty + 'px');
+            const flush = new Set(suits).size === 1;
             
-            p.style.left = '50vw';
-            p.style.top = '50vh';
-            container.appendChild(p);
+            let values = ranks.map(r => {
+                if (r === 'A') return 14;
+                if (r === 'J') return 11;
+                if (r === 'Q') return 12;
+                if (r === 'K') return 13;
+                return parseInt(r);
+            }).sort((a, b) => a - b);
             
-            setTimeout(function(el) { return function() { el.remove(); }; }(p), 1000);
-        }
-    }
-
-    function launchFireworks() {
-        for (var f = 0; f < 5; f++) {
-            setTimeout(function() {
-                var x = 20 + Math.random() * 60;
-                var y = 20 + Math.random() * 40;
-                createFirework(x, y);
-            }, f * 400);
-        }
-    }
-
-    function createFirework(x, y) {
-        var colors = ['#ffd700', '#ffaa00', '#ff5500', '#ff00aa', '#00ffaa', '#00aaff'];
-        var container = document.body;
-        for (var i = 0; i < 24; i++) {
-            var p = document.createElement('div');
-            p.className = 'confetti-burst-piece';
-            p.style.background = colors[Math.floor(Math.random() * colors.length)];
-            
-            var angle = Math.random() * Math.PI * 2;
-            var velocity = 30 + Math.random() * 120;
-            var tx = Math.cos(angle) * velocity;
-            var ty = Math.sin(angle) * velocity;
-            
-            p.style.setProperty('--tx', tx + 'px');
-            p.style.setProperty('--ty', ty + 'px');
-            
-            p.style.left = x + 'vw';
-            p.style.top = y + 'vh';
-            container.appendChild(p);
-            
-            setTimeout(function(el) { return function() { el.remove(); }; }(p), 1000);
-        }
-    }
-
-    function goldRain() {
-        for (var i = 0; i < 50; i++) {
-            var p = document.createElement('div');
-            p.className = 'gold-rain-piece';
-            p.style.left = (Math.random() * 100) + 'vw';
-            p.style.animationDuration = (1.5 + Math.random() * 2) + 's';
-            p.style.animationDelay = (Math.random() * 1.5) + 's';
-            document.body.appendChild(p);
-            setTimeout(function(el) { return function() { el.remove(); }; }(p), 3500);
-        }
-    }
-
-    function animateBalance(startValue, endValue, durationMs) {
-        var el = document.getElementById('balance');
-        if (!el) return;
-        
-        var startTime = performance.now();
-        var coinTriggerIndex = 0;
-        
-        function update(now) {
-            var elapsed = now - startTime;
-            var pct = Math.min(1, elapsed / durationMs);
-            
-            var ease = pct * (2 - pct);
-            var current = Math.round(startValue + (endValue - startValue) * ease);
-            el.textContent = current;
-
-            // Arpeggiate coin sound every few credits
-            var step = Math.floor(current / 5);
-            if (step > coinTriggerIndex) {
-                playSound('coin');
-                coinTriggerIndex = step;
+            let straight = false;
+            const uniqueValues = [...new Set(values)];
+            if (uniqueValues.length === 5) { 
+                if (uniqueValues[4] - uniqueValues[0] === 4) {
+                    straight = true;
+                } else if (uniqueValues.join(',') === '2,3,4,5,14') { // Ace-low straight
+                    straight = true;
+                    values = [1, 2, 3, 4, 5]; // Adjust values for consistent check
+                }
             }
             
-            if (pct < 1) {
-                requestAnimationFrame(update);
+            // Helper to find indices of cards matching certain ranks
+            const findIndices = (targetRanks) => {
+                return hand.map((card, i) => targetRanks.includes(card.rank) ? i : -1).filter(i => i !== -1);
+            };
+            
+            // Helper to find indices for a specific count
+            const findIndicesByCount = (targetCount) => {
+                const targetRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === targetCount);
+                return findIndices(targetRanks);
+            };
+            
+            const allIndices = [0, 1, 2, 3, 4];
+            let result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] }; // Initialize thirdMatchIndices // Initialize thirdMatchIndices
+
+            if (straight && flush) {
+                if (values.join(',') === '10,11,12,13,14') {
+                    result.type = 'Royal Flush';
+                } else {
+                    result.type = 'Straight Flush';
+                }
+                result.winIndices = allIndices;
+            } else if (counts[0] === 4) {
+                result.type = 'Four of a Kind';
+                result.winIndices = findIndicesByCount(4);
+            } else if (counts[0] === 3 && counts[1] === 2) { // Full House
+                result.type = 'Full House';
+                const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
+                const twoRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
+                result.winIndices = findIndices([threeRank]);
+                result.secondPairIndices = findIndices([twoRank]);
+            } else if (flush) {
+                result.type = 'Flush';
+                result.winIndices = allIndices;
+            } else if (straight) {
+                result.type = 'Straight';
+                result.winIndices = allIndices;
+            } else if (counts[0] === 3) { // Three of a Kind
+                result.type = 'Three of a Kind';
+                result.winIndices = findIndicesByCount(3);
+                const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
+                const threeIndices = findIndices([threeRank]);
+                if (threeRank === 'J' && threeIndices.length > 0) {
+                    result.thirdMatchIndices.push(threeIndices[0]); 
+                }
+            } else if (counts[0] === 2 && counts[1] === 2) { // Two Pair
+                const pairRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === 2);
+                result.type = 'Two Pair';
+                result.winIndices = findIndices([pairRanks[0]]);
+                result.secondPairIndices = findIndices([pairRanks[1]]);
+            } else if (counts[0] === 2) { // One Pair
+                const pairRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
+                if (['J', 'Q', 'K', 'A'].includes(pairRank)) {
+                    result.type = 'Jacks or Better';
+                    result.winIndices = findIndices([pairRank]);
+                }
+            }
+            return result;
+        }
+
+        function updateStats() {
+            const net = totalWon - totalLost;
+            document.getElementById('stat-won-value').textContent = '+' + totalWon;
+            document.getElementById('stat-lost-value').textContent = '-' + totalLost;
+            document.getElementById('stat-hands-value').textContent = handsPlayed;
+
+            const netEl = document.getElementById('stat-net');
+            const netValueEl = document.getElementById('stat-net-value');
+            netEl.classList.remove('positive', 'negative', 'zero');
+            if (net > 0) {
+                netValueEl.textContent = '+' + net;
+                netEl.classList.add('positive');
+            } else if (net < 0) {
+                netValueEl.textContent = '' + net;
+                netEl.classList.add('negative');
             } else {
-                el.textContent = endValue;
+                netValueEl.textContent = '0';
+                netEl.classList.add('zero');
             }
         }
-        
-        requestAnimationFrame(update);
-    }
-    </script>
+
+        function updateStreakUI(justWon) {
+            const bar = document.getElementById('streak-bar');
+            const count = document.getElementById('streak-count');
+            const tag = document.getElementById('streak-bonus-tag');
+            count.textContent = winStreak;
+            bar.classList.toggle('active', winStreak >= 2);
+            const bonus = getStreakBonus(winStreak);
+            if (bonus > 0) {
+                tag.textContent = (window.et ? et('bonusTag') : '+{n}% payout bonus').replace('{n}', Math.round(bonus * 100));
+                tag.classList.remove('eg-hidden');
+            } else {
+                tag.classList.add('eg-hidden');
+            }
+            if (justWon && winStreak >= 2) {
+                bar.classList.remove('bump');
+                void bar.offsetWidth;
+                bar.classList.add('bump');
+            }
+            if (justWon && winStreak >= 5 && winStreak % 5 === 0) {
+                logRoomEvent('streak', winStreak);
+            }
+            if (winStreak > bestStreak) {
+                bestStreak = winStreak;
+                document.getElementById('stat-best-streak-value').textContent = '🔥 ' + bestStreak;
+                const user = auth.currentUser;
+                if (user) {
+                    db.collection('users').doc(user.uid).set({ bestStreak: bestStreak }, { merge: true })
+                        .catch(function(err) { console.error('bestStreak save:', err); });
+                }
+            }
+        }
+
+        // Initialize
+        changeLanguage('en');
+    // Keyboard support for bet selection (keys 1-5)
+    document.addEventListener('keydown', function(e) {
+        const keyMap = { '1': 5, '2': 10, '3': 20, '4': 50 };
+        if (keyMap[e.key]) setBet(keyMap[e.key]);
+    });
+
+    // Firebase
+
+</script>
 </body>
 </html>
