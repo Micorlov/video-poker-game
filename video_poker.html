@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Poker - Jacks or Better</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0c2317">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
@@ -798,6 +800,88 @@
             height: 1px; background: rgba(255,215,0,0.12); margin: 18px 0;
         }
         .leaderboard + .leaderboard { margin-top: 16px; }
+        /* Tournament leaderboard gold border */
+        .leaderboard-tournament {
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 18px rgba(255,215,0,0.18);
+            background: rgba(10,6,0,0.6);
+        }
+        .leaderboard-tournament h3 { font-size: 1.35em; letter-spacing: 0.5px; }
+        /* Tournament banner */
+        #tournament-banner {
+            display: none; margin-bottom: 16px; padding: 14px 18px;
+            background: linear-gradient(135deg, rgba(180,120,0,0.4) 0%, rgba(255,215,0,0.15) 50%, rgba(180,120,0,0.4) 100%);
+            border: 1.5px solid #ffd700; border-radius: 12px;
+            text-align: center; position: relative; overflow: hidden;
+        }
+        #tournament-banner::before {
+            content: ''; position: absolute; inset: 0;
+            background: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,215,0,0.03) 8px, rgba(255,215,0,0.03) 16px);
+        }
+        .tourn-banner-title { color: #ffd700; font-size: 1.2em; font-weight: 700; margin-bottom: 4px; }
+        .tourn-banner-sub { color: rgba(255,255,255,0.7); font-size: 13px; margin-bottom: 8px; }
+        .tourn-banner-timer { color: #ffd700; font-size: 13px; }
+        .tourn-banner-prizes { display: flex; justify-content: center; gap: 16px; margin-top: 10px; }
+        .tourn-prize { text-align: center; }
+        .tourn-prize-rank { font-size: 18px; }
+        .tourn-prize-amount { color: #ffd700; font-weight: 700; font-size: 13px; }
+        .tourn-locked-msg { color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 6px; }
+        .tourn-enter-btn {
+            display: inline-block; margin-top: 10px; padding: 7px 22px;
+            background: #ffd700; color: #1a0f00; font-weight: 700; font-size: 14px;
+            border: none; border-radius: 8px; cursor: pointer; position: relative; z-index: 1;
+        }
+        .tourn-enter-btn:hover { background: #ffe44d; }
+        /* Season pass styles */
+        #pf-season-section { margin-top: 14px; }
+        .season-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+        .season-countdown { color: rgba(255,255,255,0.45); font-size: 11px; }
+        .season-progress-wrap { position: relative; margin-bottom: 12px; }
+        .season-bar-bg {
+            height: 10px; border-radius: 5px; background: rgba(255,255,255,0.1); overflow: hidden;
+        }
+        .season-bar-fill {
+            height: 100%; border-radius: 5px; transition: width 0.6s ease;
+            background: linear-gradient(90deg, #ffd700, #ff9800);
+        }
+        .season-xp-text { color: rgba(255,255,255,0.45); font-size: 11px; margin-top: 4px; text-align: right; }
+        .season-tiers { display: flex; flex-direction: column; gap: 6px; }
+        .season-tier {
+            display: flex; align-items: center; gap: 10px; padding: 7px 10px;
+            border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+            font-size: 13px;
+        }
+        .season-tier.unlocked { background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.25); }
+        .season-tier.claimed { opacity: 0.5; }
+        .season-tier-icon { font-size: 18px; width: 26px; text-align: center; }
+        .season-tier-info { flex: 1; }
+        .season-tier-name { font-weight: 600; color: rgba(255,255,255,0.85); }
+        .season-tier-xp { color: rgba(255,255,255,0.4); font-size: 11px; }
+        .season-tier-reward { color: #ffd700; font-size: 12px; font-weight: 600; }
+        .season-claim-btn {
+            padding: 4px 12px; background: #ffd700; color: #1a0f00; font-weight: 700;
+            font-size: 12px; border: none; border-radius: 6px; cursor: pointer;
+        }
+        .season-claim-btn:hover { background: #ffe44d; }
+        /* PWA install prompt */
+        #pwa-install-banner {
+            display: none; position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(20,40,20,0.97); border: 1px solid rgba(255,215,0,0.4);
+            border-radius: 14px; padding: 14px 18px; text-align: center;
+            z-index: 9000; max-width: 340px; width: calc(100vw - 32px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        }
+        .pwa-banner-title { color: #ffd700; font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+        .pwa-banner-sub { color: rgba(255,255,255,0.65); font-size: 12px; margin-bottom: 10px; }
+        .pwa-banner-btns { display: flex; gap: 8px; justify-content: center; }
+        .pwa-install-btn {
+            padding: 8px 20px; background: #ffd700; color: #1a0f00; font-weight: 700;
+            border: none; border-radius: 8px; cursor: pointer; font-size: 14px;
+        }
+        .pwa-dismiss-btn {
+            padding: 8px 14px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; cursor: pointer; font-size: 13px;
+        }
         .lb-formula-note {
             text-align: center; color: rgba(255,255,255,0.4); font-size: 11px;
             margin-top: 12px; line-height: 1.5; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05);
@@ -1213,6 +1297,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 </head>
 <body>
     <div id="login-overlay" class="login-overlay">
@@ -1403,9 +1488,44 @@
             <h4 id="pf-styles-title">Card Styles</h4>
             <div class="style-row" id="pf-styles"></div>
         </div>
+        <!-- Season Pass -->
+        <div id="pf-season-section" style="display:none;">
+            <div class="season-header">
+                <h4 id="pf-season-title">🗓 Season Pass</h4>
+                <span class="season-countdown" id="pf-season-countdown"></span>
+            </div>
+            <div class="season-progress-wrap">
+                <div class="season-bar-bg"><div class="season-bar-fill" id="pf-season-fill" style="width:0%"></div></div>
+                <div class="season-xp-text" id="pf-season-xp-text">0 / 10,000 XP</div>
+            </div>
+            <div class="season-tiers" id="pf-season-tiers"></div>
+        </div>
+    </div>
+
+    <!-- PWA Install Banner -->
+    <div id="pwa-install-banner">
+        <div class="pwa-banner-title">🃏 Add to Home Screen</div>
+        <div class="pwa-banner-sub">Play Video Poker offline — install the app!</div>
+        <div class="pwa-banner-btns">
+            <button class="pwa-install-btn" onclick="pwaInstall()">Install</button>
+            <button class="pwa-dismiss-btn" onclick="pwaDismiss()">Not now</button>
+        </div>
     </div>
 
     <div class="container" style="display:none; padding-top: 50px;" id="game-container">
+        <!-- Tournament Banner -->
+        <div id="tournament-banner">
+            <div class="tourn-banner-title" id="tourn-banner-title">🏆 Saturday Tournament — LIVE NOW!</div>
+            <div class="tourn-banner-sub" id="tourn-banner-sub">Doubled payouts · Most Royal Flushes wins · Level 5+ only</div>
+            <div class="tourn-banner-timer">Ends in <span id="tourn-banner-countdown">--:--:--</span></div>
+            <div class="tourn-banner-prizes">
+                <div class="tourn-prize"><div class="tourn-prize-rank">🥇</div><div class="tourn-prize-amount">1,000 cr</div></div>
+                <div class="tourn-prize"><div class="tourn-prize-rank">🥈</div><div class="tourn-prize-amount">500 cr</div></div>
+                <div class="tourn-prize"><div class="tourn-prize-rank">🥉</div><div class="tourn-prize-amount">250 cr</div></div>
+            </div>
+            <div id="tourn-locked-msg" class="tourn-locked-msg" style="display:none">Reach Level 5 to enter the tournament!</div>
+        </div>
+
         <div class="language-selector">
             <label for="language-select" style="margin-right: 10px; color: #ffd700;">Language / שפה / Idioma / Langue / Sprache / اللغة:</label>
             <select id="language-select" onchange="changeLanguage(this.value)">
@@ -1554,6 +1674,20 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Tournament Leaderboard (shown only when active) -->
+                <div class="leaderboard leaderboard-tournament" id="leaderboard-tournament" style="display:none; margin-top:16px;">
+                    <h3>🏆 Saturday Tournament</h3>
+                    <div class="leaderboard-timer">Ends in <span id="lb-tourn-countdown">--:--:--</span></div>
+                    <table class="lb-table">
+                        <thead><tr>
+                            <th>#</th><th>Player</th><th>Royal Flushes</th><th>Score</th>
+                        </tr></thead>
+                        <tbody id="lb-tourn-body">
+                            <tr><td colspan="4" class="lb-empty">Tournament not active</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <div class="lb-formula-note" id="lb-formula-note">
                     <strong>How is score calculated?</strong><br>
                     Score = Balance - (100 × Rebuys) - 100<br>
@@ -5461,6 +5595,10 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             if (window.egOnHandPlayed) {
                 window.egOnHandPlayed({ handType: handType, win: win, bet: bet, heldPair: hadHeldPair, streak: winStreak });
             }
+            if (window.updateTournamentAndSeason) {
+                var xpGained = (XP_WIN_BONUS && XP_WIN_BONUS[handType]) || (win > 0 ? 10 : 5);
+                window.updateTournamentAndSeason(auth.currentUser, handType, xpGained);
+            }
 
             gameState = 'bet';
             document.getElementById('deal-btn').disabled = false;
@@ -5773,6 +5911,420 @@ const SUITS = ['♠', '♥', '♦', '♣'];
     });
 
     // Firebase
+
+/* ===================== Phase 5.1: Weekly Saturday Tournament ===================== */
+
+    // Saturday tournament: active from Saturday 00:00 UTC for 24 hours
+    var tournamentActive = false;
+    var tournamentWeekKey = '';
+    var tournamentRoyalFlushes = 0; // count for current user this tournament
+    var tournamentUnsubscribe = null;
+
+    function getTournamentWeekKey() {
+        var now = new Date();
+        // Find the Saturday of this ISO week
+        var day = now.getUTCDay(); // 0=Sun, 6=Sat
+        var satOffset = (6 - day + 7) % 7;
+        var sat = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - (day === 6 ? 0 : -(satOffset === 0 ? 7 : satOffset))));
+        // Use ISO week
+        return sat.getUTCFullYear() + '-W' + String(getISOWeek(sat)).padStart(2, '0') + '-SAT';
+    }
+
+    function getISOWeek(d) {
+        var date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+        var dayNum = date.getUTCDay() || 7;
+        date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+        var yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+        return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function isTournamentTime() {
+        var now = new Date();
+        return now.getUTCDay() === 6; // Saturday UTC
+    }
+
+    function getTournamentEndMs() {
+        var now = new Date();
+        var endUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + (6 - now.getUTCDay() + (now.getUTCDay() === 6 ? 0 : 7)) % 7, 23, 59, 59, 999));
+        if (now.getUTCDay() === 6) {
+            endUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+        }
+        return endUTC.getTime();
+    }
+
+    function formatTournCountdown() {
+        var ms = getTournamentEndMs() - Date.now();
+        if (ms <= 0) return '00:00:00';
+        var h = Math.floor(ms / 3600000);
+        var m = Math.floor((ms % 3600000) / 60000);
+        var s = Math.floor((ms % 60000) / 1000);
+        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    function updateTournamentBanner() {
+        var banner = document.getElementById('tournament-banner');
+        var lbPanel = document.getElementById('leaderboard-tournament');
+        if (!banner) return;
+        if (!isTournamentTime()) {
+            banner.style.display = 'none';
+            if (lbPanel) lbPanel.style.display = 'none';
+            return;
+        }
+        banner.style.display = 'block';
+        if (lbPanel) lbPanel.style.display = 'block';
+        var countdown = formatTournCountdown();
+        var bc = document.getElementById('tourn-banner-countdown');
+        var lc = document.getElementById('lb-tourn-countdown');
+        if (bc) bc.textContent = countdown;
+        if (lc) lc.textContent = countdown;
+        var lockedMsg = document.getElementById('tourn-locked-msg');
+        if (lockedMsg) lockedMsg.style.display = egLevel < 5 ? 'block' : 'none';
+    }
+
+    function initTournament(user) {
+        if (!isTournamentTime()) return;
+        tournamentActive = true;
+        tournamentWeekKey = getTournamentWeekKey();
+
+        // Load user's tournament Royal Flush count
+        db.collection('weekly_tournaments').doc(tournamentWeekKey)
+            .collection('scores').doc(user.uid).get()
+            .then(function(doc) {
+                if (doc.exists) tournamentRoyalFlushes = doc.data().royalFlushes || 0;
+            }).catch(function() {});
+
+        // Subscribe to leaderboard
+        if (tournamentUnsubscribe) tournamentUnsubscribe();
+        tournamentUnsubscribe = db.collection('weekly_tournaments').doc(tournamentWeekKey)
+            .collection('scores')
+            .orderBy('royalFlushes', 'desc')
+            .orderBy('score', 'desc')
+            .limit(10)
+            .onSnapshot(function(snap) {
+                renderTournamentLeaderboard(snap, user.uid);
+            }, function() {});
+
+        updateTournamentBanner();
+        setInterval(updateTournamentBanner, 1000);
+    }
+
+    function renderTournamentLeaderboard(snap, myUid) {
+        var tbody = document.getElementById('lb-tourn-body');
+        if (!tbody) return;
+        if (snap.empty) {
+            tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">Be the first to join!</td></tr>';
+            return;
+        }
+        var html = '';
+        var rank = 0;
+        snap.forEach(function(doc) {
+            rank++;
+            var d = doc.data();
+            var isMe = doc.id === myUid;
+            var rankClass = rank === 1 ? 'lb-rank-1' : rank === 2 ? 'lb-rank-2' : rank === 3 ? 'lb-rank-3' : '';
+            var rankLabel = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+            var prize = rank === 1 ? ' (+1000)' : rank === 2 ? ' (+500)' : rank === 3 ? ' (+250)' : '';
+            var photo = d.photoURL ? '<img src="' + d.photoURL + '" alt="">' : '';
+            var youBadge = isMe ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
+            var scoreClass = (d.score || 0) >= 0 ? 'lb-positive' : 'lb-negative';
+            html += '<tr class="' + (isMe ? 'lb-you' : '') + '">' +
+                '<td class="lb-rank ' + rankClass + '">' + rankLabel + '</td>' +
+                '<td>' + photo + (d.name || 'Player') + youBadge + '</td>' +
+                '<td style="color:#ffd700;font-weight:700">👑 ' + (d.royalFlushes || 0) + prize + '</td>' +
+                '<td class="lb-score ' + scoreClass + '">' + (d.score >= 0 ? '+' : '') + (d.score || 0) + '</td>' +
+                '</tr>';
+        });
+        tbody.innerHTML = html;
+    }
+
+    function recordTournamentScore(user, handType) {
+        if (!tournamentActive || !isTournamentTime() || egLevel < 5) return;
+        var isRoyal = handType === 'Royal Flush';
+        if (isRoyal) tournamentRoyalFlushes++;
+        var score = balance - 100 * (1 + hourlyRebuys) - 100;
+        db.collection('weekly_tournaments').doc(tournamentWeekKey)
+            .collection('scores').doc(user.uid).set({
+                name: user.displayName || 'Player',
+                photoURL: user.photoURL || null,
+                score: score,
+                royalFlushes: tournamentRoyalFlushes,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).catch(function() {});
+    }
+
+    function teardownTournament() {
+        if (tournamentUnsubscribe) { tournamentUnsubscribe(); tournamentUnsubscribe = null; }
+        tournamentActive = false;
+    }
+
+    // Award top-3 prizes (idempotent: check if already awarded)
+    function checkTournamentPrizes(weekKey) {
+        if (!weekKey) return;
+        db.collection('weekly_tournaments').doc(weekKey)
+            .collection('scores')
+            .orderBy('royalFlushes', 'desc').orderBy('score', 'desc').limit(3)
+            .get().then(function(snap) {
+                var prizes = [1000, 500, 250];
+                var rank = 0;
+                snap.forEach(function(doc) {
+                    if (rank >= 3) return;
+                    var prize = prizes[rank++];
+                    var awarded = doc.data().prizeAwarded;
+                    if (!awarded) {
+                        db.collection('users').doc(doc.id).update({
+                            balance: firebase.firestore.FieldValue.increment(prize)
+                        }).catch(function() {});
+                        doc.ref.update({ prizeAwarded: true, prize: prize }).catch(function() {});
+                    }
+                });
+            }).catch(function() {});
+    }
+
+/* ===================== Phase 5.2: Season Pass ===================== */
+
+    var SEASON_TIERS = [
+        { xp: 500,   icon: '🎁', reward: '50 credits',                  creditReward: 50,  id: 'tier1' },
+        { xp: 1000,  icon: '🃏', reward: 'Emerald card back unlock',     creditReward: 0,   id: 'tier2', styleUnlock: 'emerald' },
+        { xp: 2000,  icon: '💰', reward: '100 credits',                  creditReward: 100, id: 'tier3' },
+        { xp: 3000,  icon: '🔥', reward: 'Gold card back unlock',        creditReward: 0,   id: 'tier4', styleUnlock: 'gold' },
+        { xp: 4500,  icon: '⚡', reward: '200 credits',                  creditReward: 200, id: 'tier5' },
+        { xp: 6000,  icon: '💎', reward: 'Sapphire card back unlock',    creditReward: 0,   id: 'tier6', styleUnlock: 'sapphire' },
+        { xp: 7500,  icon: '🌟', reward: '300 credits',                  creditReward: 300, id: 'tier7' },
+        { xp: 8500,  icon: '👑', reward: 'Ruby card back unlock',        creditReward: 0,   id: 'tier8', styleUnlock: 'ruby' },
+        { xp: 9500,  icon: '🏆', reward: '400 credits',                  creditReward: 400, id: 'tier9' },
+        { xp: 10000, icon: '🎖', reward: 'Exclusive badge + 500 credits', creditReward: 500, id: 'tier10', badge: true }
+    ];
+
+    var seasonXp = 0;
+    var seasonKey = '';
+    var seasonClaimedTiers = {};
+
+    function getSeasonKey() {
+        var now = new Date();
+        return now.getUTCFullYear() + '-' + String(now.getUTCMonth() + 1).padStart(2, '0');
+    }
+
+    function getSeasonDaysLeft() {
+        var now = new Date();
+        var lastDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0));
+        var ms = lastDay.getTime() - now.getTime();
+        return Math.max(1, Math.ceil(ms / 86400000));
+    }
+
+    function initSeason(user) {
+        seasonKey = getSeasonKey();
+        var docRef = db.collection('season_progress').doc(user.uid + '_' + seasonKey);
+        docRef.get().then(function(doc) {
+            if (doc.exists) {
+                seasonXp = doc.data().xp || 0;
+                seasonClaimedTiers = doc.data().claimedTiers || {};
+            }
+            renderSeasonPass();
+        }).catch(function() {});
+    }
+
+    function addSeasonXp(amount) {
+        if (!amount) return;
+        seasonXp += amount;
+        saveSeasonProgress();
+        renderSeasonPass();
+    }
+
+    function saveSeasonProgress() {
+        var user = auth.currentUser;
+        if (!user) return;
+        db.collection('season_progress').doc(user.uid + '_' + seasonKey).set({
+            xp: seasonXp,
+            claimedTiers: seasonClaimedTiers,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(function() {});
+    }
+
+    function claimSeasonTier(tierId) {
+        var user = auth.currentUser;
+        if (!user || seasonClaimedTiers[tierId]) return;
+        var tier = SEASON_TIERS.find(function(t) { return t.id === tierId; });
+        if (!tier || seasonXp < tier.xp) return;
+
+        seasonClaimedTiers[tierId] = true;
+        if (tier.creditReward > 0) {
+            balance += tier.creditReward;
+            var balEl = document.getElementById('balance');
+            if (balEl) balEl.textContent = balance;
+            egToast('🎖 Season reward: +' + tier.creditReward + ' credits!');
+        }
+        if (tier.styleUnlock) {
+            // Grant the card style unlock (lower level requirement for season pass holders)
+            egToast('🃏 Card style unlocked: ' + tier.styleUnlock + '!');
+        }
+        if (tier.badge) {
+            egToast('🎖 Exclusive Season Badge earned!');
+            db.collection('users').doc(user.uid).set({ seasonBadge: seasonKey }, { merge: true }).catch(function() {});
+        }
+        saveSeasonProgress();
+        renderSeasonPass();
+    }
+
+    function renderSeasonPass() {
+        var section = document.getElementById('pf-season-section');
+        if (!section) return;
+        section.style.display = 'block';
+
+        var fill = document.getElementById('pf-season-fill');
+        var xpText = document.getElementById('pf-season-xp-text');
+        var countdown = document.getElementById('pf-season-countdown');
+        var tiersEl = document.getElementById('pf-season-tiers');
+
+        var maxXp = SEASON_TIERS[SEASON_TIERS.length - 1].xp;
+        var pct = Math.min(100, Math.round(seasonXp / maxXp * 100));
+        if (fill) fill.style.width = pct + '%';
+        if (xpText) xpText.textContent = seasonXp.toLocaleString() + ' / ' + maxXp.toLocaleString() + ' XP';
+        if (countdown) countdown.textContent = getSeasonDaysLeft() + ' days left';
+
+        if (!tiersEl) return;
+        tiersEl.innerHTML = SEASON_TIERS.map(function(tier) {
+            var unlocked = seasonXp >= tier.xp;
+            var claimed = !!seasonClaimedTiers[tier.id];
+            var cls = claimed ? 'season-tier claimed' : unlocked ? 'season-tier unlocked' : 'season-tier';
+            var btn = '';
+            if (unlocked && !claimed) {
+                btn = '<button class="season-claim-btn" onclick="claimSeasonTier(\'' + tier.id + '\')">Claim</button>';
+            } else if (claimed) {
+                btn = '<span style="color:#4ade80;font-size:13px">✓</span>';
+            }
+            return '<div class="' + cls + '">' +
+                '<div class="season-tier-icon">' + tier.icon + '</div>' +
+                '<div class="season-tier-info">' +
+                    '<div class="season-tier-name">' + tier.reward + '</div>' +
+                    '<div class="season-tier-xp">' + tier.xp.toLocaleString() + ' XP</div>' +
+                '</div>' +
+                btn + '</div>';
+        }).join('');
+    }
+
+/* ===================== Phase 5.3: PWA + Push Notifications (FCM) ===================== */
+
+    // VAPID public key for FCM Web Push (replace with actual key from Firebase console)
+    var FCM_VAPID_KEY = 'BCm6_Q7x2RvY3N8kP4jLtWzA1sXdHqEuCfMnGbVopI5rKJe0T9wS8yNlO6aUD3hiZ7vEcFgBRmQxk2WPjL4sY';
+
+    var messaging = null;
+    var pwaInstallPrompt = null;
+    var pwaVisitCount = 0;
+    var pwaHandsCount = 0; // notify after first game session
+    var notificationPermissionAsked = false;
+
+    function initPWA() {
+        // Service worker registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then(function(reg) {
+                console.log('SW registered');
+            }).catch(function(err) {
+                console.warn('SW registration failed:', err);
+            });
+        }
+
+        // Track visits for install prompt
+        try {
+            pwaVisitCount = parseInt(localStorage.getItem('vp_pwa_visits') || '0', 10) + 1;
+            localStorage.setItem('vp_pwa_visits', pwaVisitCount);
+        } catch(e) {}
+
+        // Install prompt (A2HS)
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            pwaInstallPrompt = e;
+            // Show after 3rd visit
+            if (pwaVisitCount >= 3) {
+                var dismissed = false;
+                try { dismissed = !!localStorage.getItem('vp_pwa_dismissed'); } catch(e) {}
+                if (!dismissed) showPWABanner();
+            }
+        });
+    }
+
+    function showPWABanner() {
+        var banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.style.display = 'block';
+    }
+
+    function pwaInstall() {
+        var banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.style.display = 'none';
+        if (!pwaInstallPrompt) return;
+        pwaInstallPrompt.prompt();
+        pwaInstallPrompt.userChoice.then(function() { pwaInstallPrompt = null; });
+    }
+
+    function pwaDismiss() {
+        var banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.style.display = 'none';
+        try { localStorage.setItem('vp_pwa_dismissed', '1'); } catch(e) {}
+    }
+
+    function initFCM() {
+        if (!firebase.messaging) return;
+        try {
+            messaging = firebase.messaging();
+        } catch(e) {
+            console.warn('FCM not available:', e);
+            return;
+        }
+    }
+
+    function requestNotificationPermission() {
+        if (notificationPermissionAsked) return;
+        if (!('Notification' in window)) return;
+        if (Notification.permission === 'granted') { subscribeToFCM(); return; }
+        if (Notification.permission === 'denied') return;
+        notificationPermissionAsked = true;
+        // Ask after first completed game session (not on first visit)
+        Notification.requestPermission().then(function(permission) {
+            if (permission === 'granted') subscribeToFCM();
+        }).catch(function() {});
+    }
+
+    function subscribeToFCM() {
+        if (!messaging) return;
+        messaging.getToken({ vapidKey: FCM_VAPID_KEY }).then(function(token) {
+            if (!token) return;
+            var user = auth.currentUser;
+            if (!user) return;
+            db.collection('users').doc(user.uid).set(
+                { fcmToken: token, fcmUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+                { merge: true }
+            ).catch(function() {});
+        }).catch(function(err) {
+            console.warn('FCM token error:', err);
+        });
+    }
+
+    // Hook into auth state to init all Phase 5 modules
+    (function() {
+        var _origOnAuth = auth.onAuthStateChanged.bind(auth);
+        var phase5Inited = false;
+        auth.onAuthStateChanged(function(user) {
+            if (user && !phase5Inited) {
+                phase5Inited = true;
+                initTournament(user);
+                initSeason(user);
+                initFCM();
+            }
+            if (!user) {
+                phase5Inited = false;
+                teardownTournament();
+            }
+        });
+    })();
+
+    // Notify scoring hooks: called from main game after each hand
+    window.updateTournamentAndSeason = function(user, handType, xpGained) {
+        recordTournamentScore(user, handType);
+        addSeasonXp(xpGained || 10);
+        pwaHandsCount++;
+        if (pwaHandsCount === 1) requestNotificationPermission();
+    };
+
+    initPWA();
 
 </script>
 </body>
