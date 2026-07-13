@@ -98,19 +98,20 @@ const firebaseConfig = {
         });
     }
 
-    auth.onAuthStateChanged(function(user) {
-        // Handle redirect result (must be called after auth state is ready)
-        auth.getRedirectResult().catch(function(err) {
-            if (err && err.code !== 'auth/no-current-user') {
-                console.error('Redirect sign-in result error:', err.code, err.message);
-                var el = document.getElementById('login-error');
-                if (el) {
-                    el.textContent = err.message;
-                    el.style.display = 'block';
-                }
+    // Handle redirect result on page load — must be before onAuthStateChanged
+    // so the redirect is processed before any auth state listener fires.
+    auth.getRedirectResult().catch(function(err) {
+        if (err && err.code !== 'auth/no-current-user') {
+            console.error('Redirect sign-in result error:', err.code, err.message);
+            var el = document.getElementById('login-error');
+            if (el) {
+                el.textContent = err.message;
+                el.style.display = 'block';
             }
-        });
+        }
+    });
 
+    auth.onAuthStateChanged(function(user) {
         // Check for email link sign-in completion
         if (!user && auth.isSignInWithEmailLink(window.location.href)) {
             var savedEmail = '';
