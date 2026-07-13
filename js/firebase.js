@@ -11,22 +11,23 @@ const firebaseConfig = {
     const db = firebase.firestore();
     const ADMIN_EMAIL = 'micorlov@gmail.com';
 
-    function signInWithGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
+    function socialSignIn(provider, providerName) {
         const el = document.getElementById('login-error');
         if (el) el.style.display = 'none';
 
-        // Try popup first on all platforms — modern mobile browsers handle it well.
-        // Popup avoids the cross-site tracking issues that redirect has on iOS Safari.
         auth.signInWithPopup(provider).catch(function(err) {
             if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
-                // Popup blocked — fall back to redirect
                 auth.signInWithRedirect(provider).catch(function(redirectErr) {
                     if (el) {
                         el.textContent = redirectErr.message;
                         el.style.display = 'block';
                     }
                 });
+            } else if (err.code === 'auth/operation-not-allowed') {
+                if (el) {
+                    el.textContent = providerName + ' sign-in is not enabled yet. Enable it in the Firebase Console under Authentication → Sign-in method.';
+                    el.style.display = 'block';
+                }
             } else {
                 if (el) {
                     el.textContent = err.message;
@@ -34,6 +35,23 @@ const firebaseConfig = {
                 }
             }
         });
+    }
+
+    function signInWithGoogle() {
+        socialSignIn(new firebase.auth.GoogleAuthProvider(), 'Google');
+    }
+
+    function signInWithApple() {
+        var provider = new firebase.auth.OAuthProvider('apple.com');
+        provider.addScope('email');
+        provider.addScope('name');
+        socialSignIn(provider, 'Apple');
+    }
+
+    function signInWithFacebook() {
+        var provider = new firebase.auth.FacebookAuthProvider();
+        provider.addScope('email');
+        socialSignIn(provider, 'Facebook');
     }
 
     auth.onAuthStateChanged(function(user) {
