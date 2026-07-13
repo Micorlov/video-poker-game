@@ -17,16 +17,25 @@ const firebaseConfig = {
         const el = document.getElementById('login-error');
         if (el) el.style.display = 'none';
 
-        // Redirect-first: avoids Safari popup blocker and ITP issues.
-        // Falls back to popup only if redirect is not supported (e.g. in some webviews).
-        auth.signInWithRedirect(provider).catch(function(redirectErr) {
-            // Redirect not available — try popup as fallback
-            auth.signInWithPopup(provider).catch(function(popupErr) {
+        // Popup-first: gives immediate feedback on all modern browsers.
+        // Falls back to redirect only when the popup is explicitly blocked.
+        auth.signInWithPopup(provider).catch(function(popupErr) {
+            console.error('Google sign-in popup failed:', popupErr.code, popupErr.message);
+            if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
+                // Popup blocked — try redirect as fallback
+                auth.signInWithRedirect(provider).catch(function(redirectErr) {
+                    console.error('Google sign-in redirect also failed:', redirectErr.code, redirectErr.message);
+                    if (el) {
+                        el.textContent = redirectErr.message;
+                        el.style.display = 'block';
+                    }
+                });
+            } else {
                 if (el) {
                     el.textContent = popupErr.message;
                     el.style.display = 'block';
                 }
-            });
+            }
         });
     }
 
@@ -93,6 +102,7 @@ const firebaseConfig = {
         // Handle redirect result (must be called after auth state is ready)
         auth.getRedirectResult().catch(function(err) {
             if (err && err.code !== 'auth/no-current-user') {
+                console.error('Redirect sign-in result error:', err.code, err.message);
                 var el = document.getElementById('login-error');
                 if (el) {
                     el.textContent = err.message;
