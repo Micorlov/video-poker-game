@@ -3396,11 +3396,12 @@ var audioCtx = null;
             generatePreDecodedBuffers();
         }
         if (audioCtx.state === 'suspended') {
-            audioCtx.resume().catch(function(e) {
+            return audioCtx.resume().catch(function(e) {
                 // Some browsers reject resume() if no user gesture — that's fine,
                 // the unlock listener will retry on the next user interaction
             });
         }
+        return Promise.resolve();
     }
 
     function createSynthesizedBuffer(duration, synthFn) {
@@ -3424,25 +3425,27 @@ var audioCtx = null;
 
     function playSound(name) {
         if (!soundEnabled) return;
-        ensureAudioContext();
-        var buffer = audioBuffers[name];
-        if (!buffer) return;
-        var source = audioCtx.createBufferSource();
-        source.buffer = buffer;
-        source.connect(audioCtx.destination);
-        source.start(0);
+        ensureAudioContext().then(function() {
+            var buffer = audioBuffers[name];
+            if (!buffer) return;
+            var source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+            source.start(0);
+        });
     }
 
     function toggleSound() {
-        ensureAudioContext();
-        soundEnabled = !soundEnabled;
-        try {
-            localStorage.setItem('vp_sound_enabled', soundEnabled);
-        } catch (e) {}
-        updateSoundButtonUI();
-        if (soundEnabled) {
-            playSound('click');
-        }
+        ensureAudioContext().then(function() {
+            soundEnabled = !soundEnabled;
+            try {
+                localStorage.setItem('vp_sound_enabled', soundEnabled);
+            } catch (e) {}
+            updateSoundButtonUI();
+            if (soundEnabled) {
+                playSound('click');
+            }
+        });
     }
 
     function updateSoundButtonUI() {
