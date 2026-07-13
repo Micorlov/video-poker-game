@@ -823,6 +823,134 @@
             pointer-events: none;
         }
         .eg-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* ===== Progression: XP, levels, achievements, profile ===== */
+        .lvl-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 20px; height: 20px; padding: 0 5px; border-radius: 50%;
+            background: linear-gradient(145deg, #ffd700, #e6a800); color: #1a472a;
+            font-size: 11px; font-weight: 800; margin: 0 4px; vertical-align: middle;
+        }
+        .lvl-badge-lg { min-width: 26px; height: 26px; font-size: 13px; }
+        .xp-bar {
+            width: 110px; height: 8px; background: rgba(0,0,0,0.5);
+            border-radius: 6px; overflow: hidden; display: inline-block; vertical-align: middle;
+        }
+        .xp-fill {
+            display: block; height: 100%; width: 0%;
+            background: linear-gradient(90deg, #4ade80, #ffd700);
+            border-radius: 6px; transition: width 0.4s ease;
+        }
+        .xp-text { font-size: 11px; color: rgba(255,255,255,0.5); }
+        .lb-name { cursor: pointer; }
+        .lb-name:hover { color: #ffd700; }
+        .ub-ach-count {
+            font-size: 12px; color: #ffd700; cursor: pointer; margin: 0 2px;
+        }
+
+        #profile-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            z-index: 10003; backdrop-filter: blur(2px);
+        }
+        #profile-panel {
+            position: fixed; top: 0; right: 0; bottom: 0; width: min(400px, 92vw);
+            background: linear-gradient(160deg, #0f2c1c, #07130c);
+            border-left: 2px solid rgba(255,215,0,0.3); z-index: 10004;
+            overflow-y: auto; padding: 24px;
+            transform: translateX(100%); transition: transform 0.3s ease;
+        }
+        #profile-panel.open { transform: none; }
+        body[dir="rtl"] #profile-panel {
+            right: auto; left: 0; transform: translateX(-100%);
+            border-left: none; border-right: 2px solid rgba(255,215,0,0.3);
+        }
+        body[dir="rtl"] #profile-panel.open { transform: none; }
+        .profile-head { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; margin-top: 8px; }
+        .profile-head img {
+            width: 56px; height: 56px; border-radius: 50%;
+            border: 2px solid rgba(255,215,0,0.4);
+        }
+        .pf-name { font-size: 18px; font-weight: 700; color: #fff; }
+        .pf-since { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+        #profile-panel h4 {
+            color: #ffd700; margin: 20px 0 6px; font-size: 13px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .pf-stat-row {
+            display: flex; justify-content: space-between; padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 13px; color: #ddd;
+        }
+        .pf-stat-row b { color: #ffd700; }
+        .ach-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+        .ach-cell {
+            background: rgba(0,0,0,0.35); border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 10px; padding: 8px 4px; text-align: center;
+            font-size: 10px; color: #ddd; line-height: 1.3;
+        }
+        .ach-cell .ach-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+        .ach-cell.locked { opacity: 0.35; filter: grayscale(1); }
+        .style-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .style-chip {
+            padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+            font-size: 12px; cursor: pointer; color: #ddd; background: rgba(0,0,0,0.3);
+            user-select: none;
+        }
+        .style-chip.selected { border-color: #ffd700; color: #ffd700; background: rgba(255,215,0,0.1); }
+        .style-chip.locked { opacity: 0.4; cursor: default; }
+
+        /* Card style unlocks (cosmetic card face tints) */
+        .hand.cs-emerald .card { background: linear-gradient(145deg, #eafff0, #cdeedd); }
+        .hand.cs-gold .card { background: linear-gradient(145deg, #fff9e0, #f5e6b0); }
+        .hand.cs-sapphire .card { background: linear-gradient(145deg, #e8f1ff, #c9dcf5); }
+        .hand.cs-ruby .card { background: linear-gradient(145deg, #ffecec, #f5cccc); }
+        .hand.cs-onyx .card { background: linear-gradient(145deg, #e2e2e6, #c4c4cc); }
+        .hand.cs-amethyst .card { background: linear-gradient(145deg, #f4e9ff, #e0cbf5); }
+        .hand.cs-royal .card {
+            background: linear-gradient(145deg, #fff6d8, #ffe08a);
+            border-color: rgba(255,215,0,0.7);
+        }
+
+        /* ===== Social: activity feed, reactions, referrals, share ===== */
+        #feed-toasts {
+            position: fixed; top: 60px; right: 16px; z-index: 10007;
+            display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+        }
+        body[dir="rtl"] #feed-toasts { right: auto; left: 16px; }
+        .feed-toast {
+            background: linear-gradient(135deg, rgba(15,44,28,0.95), rgba(7,19,12,0.95));
+            border: 1px solid rgba(255,215,0,0.35); color: #ffd700;
+            padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
+            max-width: 260px; animation: feed-in 0.3s ease-out;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        @keyframes feed-in {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: none; opacity: 1; }
+        }
+        .feed-toast.out { transition: opacity 0.3s, transform 0.3s; opacity: 0; transform: translateX(120%); }
+        .reaction-bar { display: flex; justify-content: center; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+        .reaction-btn {
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px; font-size: 18px; padding: 4px 9px; cursor: pointer;
+            box-shadow: none; line-height: 1.3;
+        }
+        .reaction-btn:hover:not(:disabled) {
+            border-color: rgba(255,215,0,0.5); transform: translateY(-2px);
+            background: rgba(255,215,0,0.08); box-shadow: none;
+        }
+        .float-emoji {
+            position: absolute; font-size: 26px; pointer-events: none;
+            animation: float-up 2s ease-out forwards; z-index: 50;
+        }
+        @keyframes float-up {
+            0% { transform: translateY(0) scale(0.8); opacity: 1; }
+            100% { transform: translateY(-130px) scale(1.3); opacity: 0; }
+        }
+        #share-win-wrap { text-align: center; margin-top: 10px; }
+        #share-canvas { width: 100%; border-radius: 12px; display: block; }
+        #pf-ref-code { font-size: 24px; letter-spacing: 6px; padding: 10px; }
+        .pf-ref-sub { color: rgba(255,255,255,0.55); font-size: 12px; margin-bottom: 10px; line-height: 1.5; }
+        .pf-ref-count { color: #4ade80; font-size: 13px; font-weight: 600; margin-top: 10px; text-align: center; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -949,6 +1077,40 @@
             <div class="eg-sub" id="eg-comeback-msg"></div>
             <div class="eg-big-credits" id="eg-comeback-amount"></div>
             <button class="eg-claim-btn" id="eg-comeback-claim" onclick="egClaimComeback()">Collect</button>
+        </div>
+    </div>
+
+    <div id="eg-levelup-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="egCloseModal('eg-levelup-modal')">✕</button>
+            <h3 id="eg-levelup-title">⬆️ Level Up!</h3>
+            <div class="eg-big-credits" id="eg-levelup-number"></div>
+            <div class="eg-sub" id="eg-levelup-note"></div>
+            <button class="eg-claim-btn" id="eg-levelup-ok" onclick="egCloseModal('eg-levelup-modal')">OK</button>
+        </div>
+    </div>
+
+    <div id="profile-backdrop" class="eg-hidden" onclick="egCloseProfile()"></div>
+    <div id="profile-panel" class="eg-hidden">
+        <button class="eg-close" onclick="egCloseProfile()">✕</button>
+        <div class="profile-head">
+            <img id="pf-photo" src="" alt="">
+            <div>
+                <div class="pf-name"><span id="pf-name"></span><span class="lvl-badge lvl-badge-lg" id="pf-level"></span></div>
+                <div class="pf-since" id="pf-since"></div>
+            </div>
+        </div>
+        <div class="pf-xp">
+            <span class="xp-bar"><span class="xp-fill" id="pf-xp-fill"></span></span>
+            <span class="xp-text" id="pf-xp-text"></span>
+        </div>
+        <h4 id="pf-stats-title">Stats</h4>
+        <div id="pf-stats"></div>
+        <h4 id="pf-ach-title">Achievements</h4>
+        <div class="ach-grid" id="pf-ach-grid"></div>
+        <div id="pf-styles-section">
+            <h4 id="pf-styles-title">Card Styles</h4>
+            <div class="style-row" id="pf-styles"></div>
         </div>
     </div>
 
@@ -2297,13 +2459,17 @@
         bar.id = 'user-bar';
         bar.className = 'user-bar';
         const photo = user.photoURL
-            ? '<img src="' + user.photoURL + '" alt="">'
+            ? '<img src="' + user.photoURL + '" alt="" onclick="egOpenProfile()" style="cursor:pointer">'
             : '';
         const adminBtn = user.email === ADMIN_EMAIL
             ? '<a class="admin-link" href="admin.html" target="_blank">Admin</a>'
             : '';
         bar.innerHTML = photo +
-            '<span>' + (user.displayName || user.email) + '</span>' +
+            '<span onclick="egOpenProfile()" style="cursor:pointer">' + (user.displayName || user.email) + '</span>' +
+            '<span class="lvl-badge" id="ub-level" onclick="egOpenProfile()" style="cursor:pointer">1</span>' +
+            '<span class="xp-bar"><span class="xp-fill" id="ub-xp-fill"></span></span>' +
+            '<span class="xp-text" id="ub-xp-text"></span>' +
+            '<span class="ub-ach-count" id="ub-ach-count" onclick="egOpenProfile()">🏆 0</span>' +
             adminBtn +
             '<button onclick="signOut()">Sign Out</button>';
         const container = document.getElementById('game-container');
@@ -2432,6 +2598,7 @@
                     rebuys: hourlyRebuys,
                     hands: firebase.firestore.FieldValue.increment(1),
                     bestHand: handRank > prevBestRank ? handType : data.bestHand,
+                    level: egLevel,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             } else {
@@ -2444,6 +2611,7 @@
                     rebuys: hourlyRebuys,
                     hands: 1,
                     bestHand: handType,
+                    level: egLevel,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }
@@ -2465,6 +2633,7 @@
                     rebuys: dailyRebuys,
                     hands: firebase.firestore.FieldValue.increment(1),
                     bestHand: handRank > prevBestRank ? handType : data.bestHand,
+                    level: egLevel,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             } else {
@@ -2477,6 +2646,7 @@
                     rebuys: dailyRebuys,
                     hands: 1,
                     bestHand: handType,
+                    level: egLevel,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }
@@ -2528,11 +2698,12 @@
             const scoreText = s > 0 ? '+' + s : '' + s;
             const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
 
+            const lvlBadge = d.level ? '<span class="lvl-badge">' + d.level + '</span>' : '';
             const row = document.createElement('tr');
             if (isYou) row.className = 'lb-you';
             row.innerHTML =
                 '<td class="lb-rank' + rankClass + '">' + medal + '</td>' +
-                '<td>' + photo + name + badge + rebuyBadge + onlineIndicator + '</td>' +
+                '<td><span class="lb-name" onclick="egOpenProfile(\'' + d.uid + '\')">' + photo + name + '</span>' + lvlBadge + badge + rebuyBadge + onlineIndicator + '</td>' +
                 '<td class="' + scoreClass + '">' + scoreText + '</td>' +
                 '<td>' + d.hands + '</td>';
             tbody.appendChild(row);
@@ -2911,6 +3082,7 @@
                 renderRoomTabs();
                 refreshRoomLeaderboard();
                 openShareView(room);
+                if (window.egOnRoomEvent) window.egOnRoomEvent('create');
             });
         }).catch(function(err) { showRoomError(err.message); });
     }
@@ -2937,6 +3109,7 @@
                 myRooms.push(room);
                 switchRoom(code);
                 closeRoomModal();
+                if (window.egOnRoomEvent) window.egOnRoomEvent('join');
             });
         }).catch(function(err) { showRoomError(err.message); });
     }
@@ -2998,6 +3171,7 @@
                         rebuys: rebuys,
                         hands: firebase.firestore.FieldValue.increment(1),
                         bestHand: handRank > prevBestRank ? handType : doc.data().bestHand,
+                        level: egLevel,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
@@ -3012,6 +3186,7 @@
                     rebuys: rebuys,
                     hands: 1,
                     bestHand: handType,
+                    level: egLevel,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }).then(function() {
@@ -3085,11 +3260,12 @@
             var scoreText = s > 0 ? '+' + s : '' + s;
             var medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
 
+            var lvlBadge = d.level ? '<span class="lvl-badge">' + d.level + '</span>' : '';
             var row = document.createElement('tr');
             if (isYou) row.className = 'lb-you';
             row.innerHTML =
                 '<td class="lb-rank' + rankClass + '">' + medal + '</td>' +
-                '<td>' + photo + escapeHtml(firstName(d.displayName)) + badge + rebuyBadge + onlineIndicator + '</td>' +
+                '<td><span class="lb-name" onclick="egOpenProfile(\'' + d.uid + '\')">' + photo + escapeHtml(firstName(d.displayName)) + '</span>' + lvlBadge + badge + rebuyBadge + onlineIndicator + '</td>' +
                 '<td class="' + scoreClass + '">' + scoreText + '</td>' +
                 '<td>' + (d.hands || 0) + '</td>';
             tbody.appendChild(row);
@@ -3487,10 +3663,18 @@
         egChallenges = null;
         winStreak = 0;
         bestStreak = 0;
+        egXp = 0;
+        egLevel = 1;
+        egStats = null;
+        egAchievements = {};
+        egHourHands = 0;
+        egApplyCardStyle('classic');
         updateStreakUI(false);
         document.getElementById('challenges-panel').style.display = 'none';
         egCloseModal('eg-reward-modal');
         egCloseModal('eg-comeback-modal');
+        egCloseModal('eg-levelup-modal');
+        egCloseProfile();
     };
 
     // --- modal queue (one at a time) ---
@@ -3545,12 +3729,29 @@
         document.getElementById('balance').textContent = balance;
     }
 
-    // --- user profile (best streak + comeback) ---
+    // --- user profile (best streak + comeback + progression) ---
     function egLoadUserProfile(user) {
         db.collection('users').doc(user.uid).get().then(function(doc) {
             var data = doc.exists ? doc.data() : {};
             bestStreak = data.bestStreak || 0;
             document.getElementById('stat-best-streak-value').textContent = '🔥 ' + bestStreak;
+
+            egXp = data.xp || 0;
+            egLevel = Math.max(data.level || 1, egLevelFromXp(egXp));
+            egStats = {
+                totalHands: data.totalHands || 0,
+                totalWins: data.totalWins || 0,
+                bestHand: data.bestHand || null,
+                bestHandRank: data.bestHandRank || 0,
+                challengesCompleted: data.challengesCompleted || 0,
+                firstSeen: data.firstSeen || null
+            };
+            egApplyCardStyle(data.cardStyle || 'classic');
+            egRenderXpBar();
+            db.collection('users').doc(user.uid).collection('achievements').get().then(function(snap) {
+                snap.forEach(function(d) { egAchievements[d.id] = true; });
+                egUpdateAchCount();
+            }).catch(function(err) { console.error('achievements load:', err); });
 
             var last = data.lastActiveDate && typeof data.lastActiveDate.toDate === 'function'
                 ? data.lastActiveDate.toDate().getTime() : null;
@@ -3648,6 +3849,7 @@
             totalClaimed: s.totalClaimed + amount,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }).catch(function(err) { console.error('daily reward claim:', err); });
+        if (s.streak >= 7) egUnlock('login7');
         egCloseModal('eg-reward-modal');
     }
 
@@ -3736,7 +3938,13 @@
     }
 
     window.egOnHandPlayed = function(ev) {
-        if (!egUser || !egChallenges) return;
+        if (!egUser) return;
+        egProcessXpAndAchievements(ev);
+        egProcessChallenges(ev);
+    };
+
+    function egProcessChallenges(ev) {
+        if (!egChallenges) return;
         if (egChallenges.dateKey !== getDayKey()) {
             // Midnight rollover — fetch today's fresh set
             egLoadChallenges(egUser);
@@ -3766,6 +3974,14 @@
                 egAddCredits(ch.reward);
                 egConfetti();
                 egToast(et('challengeToast').replace('{n}', ch.reward));
+                if (egStats) {
+                    egStats.challengesCompleted++;
+                    db.collection('users').doc(egUser.uid).set({
+                        challengesCompleted: firebase.firestore.FieldValue.increment(1)
+                    }, { merge: true }).catch(function(err) { console.error('challenge count:', err); });
+                    if (egStats.challengesCompleted >= 10) egUnlock('challenge10');
+                    if (egStats.challengesCompleted >= 50) egUnlock('challenge50');
+                }
             }
         });
         if (changed) {
@@ -3777,7 +3993,7 @@
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true }).catch(function(err) { console.error('challenges save:', err); });
         }
-    };
+    }
 
     // --- i18n for engagement UI ---
     window.applyEngageLang = function() {
@@ -3798,7 +4014,400 @@
         }
         if (egRewardState) egRenderRewardCalendar();
         if (egChallenges) egRenderChallenges();
+        set('eg-levelup-title', et('levelUpTitle'));
+        set('eg-levelup-ok', et('okBtn'));
+        set('pf-stats-title', et('profileStats'));
+        set('pf-ach-title', et('profileAchievements'));
+        set('pf-styles-title', et('profileStyles'));
     };
+
+    // ===================== Progression: Phase 2 =====================
+    // XP & levels, achievements, player profile, card style unlocks
+
+    var egXp = 0;
+    var egLevel = 1;
+    var egStats = null;
+    var egAchievements = {};
+    var egHourKey = '';
+    var egHourHands = 0;
+    var egCardStyle = 'classic';
+
+    var MAX_LEVEL = 50;
+    var XP_WIN_BONUS = {
+        'Jacks or Better': 5, 'Two Pair': 10, 'Three of a Kind': 15,
+        'Straight': 25, 'Flush': 30, 'Full House': 50,
+        'Four of a Kind': 100, 'Straight Flush': 250, 'Royal Flush': 500
+    };
+
+    var CARD_STYLES = [
+        { id: 'classic',  level: 0,  name: 'Classic' },
+        { id: 'emerald',  level: 5,  name: 'Emerald' },
+        { id: 'gold',     level: 10, name: 'Gold' },
+        { id: 'sapphire', level: 15, name: 'Sapphire' },
+        { id: 'ruby',     level: 20, name: 'Ruby' },
+        { id: 'onyx',     level: 30, name: 'Onyx' },
+        { id: 'amethyst', level: 40, name: 'Amethyst' },
+        { id: 'royal',    level: 50, name: 'Royal' }
+    ];
+
+    var ACHIEVEMENTS = [
+        { id: 'firstHand',   icon: '🃏' },
+        { id: 'hands100',    icon: '💯' },
+        { id: 'hands500',    icon: '🎰' },
+        { id: 'hands1000',   icon: '🏛️' },
+        { id: 'firstWin',    icon: '🎉' },
+        { id: 'royal',       icon: '👑' },
+        { id: 'sflush',      icon: '🌈' },
+        { id: 'quads',       icon: '🍀' },
+        { id: 'streak5',     icon: '🔥' },
+        { id: 'streak10',    icon: '☄️' },
+        { id: 'login7',      icon: '📅' },
+        { id: 'joinRoom',    icon: '🚪' },
+        { id: 'createRoom',  icon: '🏗️' },
+        { id: 'invite3',     icon: '🤝' },
+        { id: 'rooms3',      icon: '🎭' },
+        { id: 'challenge10', icon: '🎯' },
+        { id: 'challenge50', icon: '🏅' },
+        { id: 'credits500',  icon: '💰' },
+        { id: 'credits1000', icon: '💎' },
+        { id: 'ironhour',    icon: '🛡️' }
+    ];
+
+    // Cumulative XP required to reach level n (level n→n+1 costs n×100 XP)
+    function egXpForLevel(n) {
+        return 100 * (n - 1) * n / 2;
+    }
+
+    function egLevelFromXp(xp) {
+        var n = 1;
+        while (n < MAX_LEVEL && xp >= egXpForLevel(n + 1)) n++;
+        return n;
+    }
+
+    function egProcessXpAndAchievements(ev) {
+        var gain = 10 + Math.floor(ev.bet / 5) + (XP_WIN_BONUS[ev.handType] || 0);
+        egXp += gain;
+        var newLevel = egLevelFromXp(egXp);
+        if (newLevel > egLevel) {
+            egLevel = newLevel;
+            egShowLevelUp(newLevel);
+        }
+        egRenderXpBar();
+
+        if (!egStats) return;
+        egStats.totalHands++;
+        if (ev.win > 0) egStats.totalWins++;
+        var rank = HAND_RANK[ev.handType] || 0;
+        var userUpdate = {
+            xp: egXp,
+            level: egLevel,
+            totalHands: firebase.firestore.FieldValue.increment(1)
+        };
+        if (ev.win > 0) userUpdate.totalWins = firebase.firestore.FieldValue.increment(1);
+        if (rank > egStats.bestHandRank) {
+            egStats.bestHandRank = rank;
+            egStats.bestHand = ev.handType;
+            userUpdate.bestHand = ev.handType;
+            userUpdate.bestHandRank = rank;
+        }
+        db.collection('users').doc(egUser.uid).set(userUpdate, { merge: true })
+            .catch(function(err) { console.error('xp save:', err); });
+
+        egUnlock('firstHand');
+        if (egStats.totalHands >= 100) egUnlock('hands100');
+        if (egStats.totalHands >= 500) egUnlock('hands500');
+        if (egStats.totalHands >= 1000) egUnlock('hands1000');
+        if (ev.win > 0) egUnlock('firstWin');
+        if (ev.handType === 'Royal Flush') egUnlock('royal');
+        if (ev.handType === 'Straight Flush') egUnlock('sflush');
+        if (ev.handType === 'Four of a Kind') egUnlock('quads');
+        if (ev.streak >= 5) egUnlock('streak5');
+        if (ev.streak >= 10) egUnlock('streak10');
+        if (balance >= 500) egUnlock('credits500');
+        if (balance >= 1000) egUnlock('credits1000');
+
+        var hk = getHourKey();
+        if (egHourKey !== hk) { egHourKey = hk; egHourHands = 0; }
+        egHourHands++;
+        if (egHourHands >= 20 && hourlyRebuys === 0) egUnlock('ironhour');
+    }
+
+    function egUnlock(id) {
+        if (!egUser || egAchievements[id]) return;
+        egAchievements[id] = true;
+        db.collection('users').doc(egUser.uid).collection('achievements').doc(id).set({
+            unlockedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(function(err) { console.error('achievement save:', err); });
+        var ach = ACHIEVEMENTS.find(function(a) { return a.id === id; });
+        egToast('🏆 ' + (ach ? ach.icon + ' ' : '') + et('ach_' + id));
+        egConfetti();
+        egUpdateAchCount();
+        if (egProfileOpenUid === egUser.uid) egOpenProfile();
+    }
+
+    function egUpdateAchCount() {
+        var el = document.getElementById('ub-ach-count');
+        if (el) el.textContent = '🏆 ' + Object.keys(egAchievements).length;
+    }
+
+    window.egOnRoomEvent = function(type) {
+        if (type === 'create') egUnlock('createRoom');
+        if (type === 'join') egUnlock('joinRoom');
+        if (myRooms.length >= 3) egUnlock('rooms3');
+    };
+
+    // --- XP bar (user bar) ---
+    function egRenderXpBar() {
+        var lvlEl = document.getElementById('ub-level');
+        var fillEl = document.getElementById('ub-xp-fill');
+        var textEl = document.getElementById('ub-xp-text');
+        if (!lvlEl || !fillEl || !textEl) return;
+        lvlEl.textContent = egLevel;
+        if (egLevel >= MAX_LEVEL) {
+            fillEl.style.width = '100%';
+            textEl.textContent = 'MAX';
+            return;
+        }
+        var cur = egXp - egXpForLevel(egLevel);
+        var need = egXpForLevel(egLevel + 1) - egXpForLevel(egLevel);
+        fillEl.style.width = Math.min(100, Math.round((cur / need) * 100)) + '%';
+        textEl.textContent = cur + '/' + need + ' XP';
+    }
+
+    function egShowLevelUp(level) {
+        document.getElementById('eg-levelup-number').textContent =
+            et('levelLabel').replace('{n}', level);
+        var style = CARD_STYLES.find(function(s) { return s.level === level; });
+        document.getElementById('eg-levelup-note').textContent =
+            style ? et('styleUnlocked').replace('{s}', style.name) : '';
+        egConfetti();
+        egQueueModal('eg-levelup-modal');
+    }
+
+    // --- card styles ---
+    function egApplyCardStyle(id) {
+        egCardStyle = id;
+        var handEl = document.getElementById('hand');
+        if (!handEl) return;
+        handEl.className = 'hand' + (id !== 'classic' ? ' cs-' + id : '');
+    }
+
+    function egSelectCardStyle(id) {
+        var style = CARD_STYLES.find(function(s) { return s.id === id; });
+        if (!style || style.level > egLevel) return;
+        egApplyCardStyle(id);
+        db.collection('users').doc(egUser.uid).set({ cardStyle: id }, { merge: true })
+            .catch(function(err) { console.error('card style save:', err); });
+        egRenderStylePicker();
+    }
+
+    function egRenderStylePicker() {
+        var wrap = document.getElementById('pf-styles');
+        wrap.innerHTML = '';
+        CARD_STYLES.forEach(function(s) {
+            var chip = document.createElement('div');
+            var locked = s.level > egLevel;
+            chip.className = 'style-chip' +
+                (s.id === egCardStyle ? ' selected' : '') + (locked ? ' locked' : '');
+            chip.textContent = s.name + (locked ? ' 🔒 ' + et('lockedLv').replace('{n}', s.level) : '');
+            if (!locked) chip.onclick = function() { egSelectCardStyle(s.id); };
+            wrap.appendChild(chip);
+        });
+    }
+
+    // --- profile panel ---
+    var egProfileOpenUid = null;
+
+    window.egOpenProfile = function(uid) {
+        if (!egUser) return;
+        var isMe = !uid || uid === egUser.uid;
+        var targetUid = isMe ? egUser.uid : uid;
+        egProfileOpenUid = targetUid;
+        document.getElementById('profile-backdrop').classList.remove('eg-hidden');
+        var panel = document.getElementById('profile-panel');
+        panel.classList.remove('eg-hidden');
+        requestAnimationFrame(function() { panel.classList.add('open'); });
+        document.getElementById('pf-styles-section').style.display = isMe ? '' : 'none';
+
+        if (isMe) {
+            egRenderProfile({
+                displayName: egUser.displayName,
+                photoURL: egUser.photoURL,
+                xp: egXp, level: egLevel,
+                totalHands: egStats ? egStats.totalHands : 0,
+                totalWins: egStats ? egStats.totalWins : 0,
+                bestHand: egStats ? egStats.bestHand : null,
+                bestStreak: bestStreak,
+                challengesCompleted: egStats ? egStats.challengesCompleted : 0,
+                firstSeen: egStats ? egStats.firstSeen : null
+            }, egAchievements, true);
+            return;
+        }
+        // Other player: fetch their public profile
+        Promise.all([
+            db.collection('users').doc(targetUid).get(),
+            db.collection('users').doc(targetUid).collection('achievements').get()
+        ]).then(function(results) {
+            if (egProfileOpenUid !== targetUid) return; // switched mid-flight
+            var data = results[0].exists ? results[0].data() : {};
+            var achSet = {};
+            results[1].forEach(function(d) { achSet[d.id] = true; });
+            egRenderProfile(data, achSet, false);
+        }).catch(function(err) {
+            console.error('profile load:', err);
+            egCloseProfile();
+        });
+    };
+
+    function egRenderProfile(data, achSet, isMe) {
+        var photoEl = document.getElementById('pf-photo');
+        photoEl.src = data.photoURL || '';
+        photoEl.style.display = data.photoURL ? '' : 'none';
+        document.getElementById('pf-name').textContent = firstName(data.displayName);
+        document.getElementById('pf-level').textContent = data.level || 1;
+
+        var since = data.firstSeen && typeof data.firstSeen.toDate === 'function'
+            ? data.firstSeen.toDate().toLocaleDateString() : null;
+        document.getElementById('pf-since').textContent =
+            since ? et('memberSince').replace('{d}', since) : '';
+
+        var xp = data.xp || 0;
+        var level = data.level || 1;
+        var fillEl = document.getElementById('pf-xp-fill');
+        var textEl = document.getElementById('pf-xp-text');
+        if (level >= MAX_LEVEL) {
+            fillEl.style.width = '100%';
+            textEl.textContent = 'MAX';
+        } else {
+            var cur = xp - egXpForLevel(level);
+            var need = egXpForLevel(level + 1) - egXpForLevel(level);
+            fillEl.style.width = Math.max(0, Math.min(100, Math.round((cur / need) * 100))) + '%';
+            textEl.textContent = Math.max(0, cur) + '/' + need + ' XP';
+        }
+
+        var t = TRANSLATIONS[currentLang];
+        var stats = [
+            [et('stTotalHands'), data.totalHands || 0],
+            [et('stTotalWins'), data.totalWins || 0],
+            [et('stBestHand'), data.bestHand ? (t.payouts[data.bestHand] || data.bestHand) : '—'],
+            [et('stBestStreak'), '🔥 ' + (data.bestStreak || 0)],
+            [et('stChallenges'), data.challengesCompleted || 0]
+        ];
+        if (isMe) stats.push([et('stRooms'), myRooms.length]);
+        var statsEl = document.getElementById('pf-stats');
+        statsEl.innerHTML = '';
+        stats.forEach(function(row) {
+            var div = document.createElement('div');
+            div.className = 'pf-stat-row';
+            div.innerHTML = '<span>' + row[0] + '</span><b>' + row[1] + '</b>';
+            statsEl.appendChild(div);
+        });
+
+        var grid = document.getElementById('pf-ach-grid');
+        grid.innerHTML = '';
+        ACHIEVEMENTS.forEach(function(a) {
+            var cell = document.createElement('div');
+            cell.className = 'ach-cell' + (achSet[a.id] ? '' : ' locked');
+            cell.innerHTML = '<span class="ach-icon">' + a.icon + '</span>' + et('ach_' + a.id);
+            grid.appendChild(cell);
+        });
+
+        if (isMe) egRenderStylePicker();
+    }
+
+    window.egCloseProfile = function() {
+        egProfileOpenUid = null;
+        document.getElementById('profile-backdrop').classList.add('eg-hidden');
+        var panel = document.getElementById('profile-panel');
+        panel.classList.remove('open');
+        panel.classList.add('eg-hidden');
+    };
+
+    // --- Phase 2 i18n ---
+    Object.assign(ENGAGE_I18N.en, {
+        levelUpTitle: '⬆️ Level Up!', levelLabel: 'Level {n}', okBtn: 'Awesome!',
+        styleUnlocked: 'New card style unlocked: {s}',
+        profileStats: 'Stats', profileAchievements: 'Achievements', profileStyles: 'Card Styles',
+        memberSince: 'Member since {d}', lockedLv: 'Lv {n}',
+        stTotalHands: 'Total Hands', stTotalWins: 'Total Wins', stBestHand: 'Best Hand',
+        stBestStreak: 'Best Streak', stChallenges: 'Challenges Completed', stRooms: 'Rooms Joined',
+        ach_firstHand: 'First Hand', ach_hands100: '100 Hands', ach_hands500: '500 Hands', ach_hands1000: '1000 Hands',
+        ach_firstWin: 'First Win', ach_royal: 'Royal Flush Club', ach_sflush: 'Straight Flush Club', ach_quads: 'Four of a Kind Club',
+        ach_streak5: 'Hot Streak 5', ach_streak10: 'Unstoppable 10', ach_login7: 'Perfect Week',
+        ach_joinRoom: 'Room Guest', ach_createRoom: 'Room Host', ach_invite3: 'Recruiter', ach_rooms3: 'Socialite',
+        ach_challenge10: 'Challenger 10', ach_challenge50: 'Challenge Master',
+        ach_credits500: 'High Roller', ach_credits1000: 'Credit Tycoon', ach_ironhour: 'Iron Bankroll'
+    });
+    Object.assign(ENGAGE_I18N.es, {
+        levelUpTitle: '⬆️ ¡Subiste de Nivel!', levelLabel: 'Nivel {n}', okBtn: '¡Genial!',
+        styleUnlocked: 'Nuevo estilo de cartas: {s}',
+        profileStats: 'Estadísticas', profileAchievements: 'Logros', profileStyles: 'Estilos de Cartas',
+        memberSince: 'Miembro desde {d}', lockedLv: 'Nv {n}',
+        stTotalHands: 'Manos Totales', stTotalWins: 'Victorias Totales', stBestHand: 'Mejor Mano',
+        stBestStreak: 'Mejor Racha', stChallenges: 'Desafíos Completados', stRooms: 'Salas Unidas',
+        ach_firstHand: 'Primera Mano', ach_hands100: '100 Manos', ach_hands500: '500 Manos', ach_hands1000: '1000 Manos',
+        ach_firstWin: 'Primera Victoria', ach_royal: 'Club Escalera Real', ach_sflush: 'Club Escalera de Color', ach_quads: 'Club del Póker',
+        ach_streak5: 'Racha de 5', ach_streak10: 'Imparable 10', ach_login7: 'Semana Perfecta',
+        ach_joinRoom: 'Invitado', ach_createRoom: 'Anfitrión', ach_invite3: 'Reclutador', ach_rooms3: 'Sociable',
+        ach_challenge10: 'Retador 10', ach_challenge50: 'Maestro de Desafíos',
+        ach_credits500: 'Gran Apostador', ach_credits1000: 'Magnate', ach_ironhour: 'Banca de Hierro'
+    });
+    Object.assign(ENGAGE_I18N.fr, {
+        levelUpTitle: '⬆️ Niveau Supérieur !', levelLabel: 'Niveau {n}', okBtn: 'Super !',
+        styleUnlocked: 'Nouveau style de cartes : {s}',
+        profileStats: 'Statistiques', profileAchievements: 'Succès', profileStyles: 'Styles de Cartes',
+        memberSince: 'Membre depuis {d}', lockedLv: 'Nv {n}',
+        stTotalHands: 'Mains Totales', stTotalWins: 'Victoires Totales', stBestHand: 'Meilleure Main',
+        stBestStreak: 'Meilleure Série', stChallenges: 'Défis Accomplis', stRooms: 'Salons Rejoints',
+        ach_firstHand: 'Première Main', ach_hands100: '100 Mains', ach_hands500: '500 Mains', ach_hands1000: '1000 Mains',
+        ach_firstWin: 'Première Victoire', ach_royal: 'Club Quinte Royale', ach_sflush: 'Club Quinte Flush', ach_quads: 'Club du Carré',
+        ach_streak5: 'Série de 5', ach_streak10: 'Inarrêtable 10', ach_login7: 'Semaine Parfaite',
+        ach_joinRoom: 'Invité', ach_createRoom: 'Hôte', ach_invite3: 'Recruteur', ach_rooms3: 'Mondain',
+        ach_challenge10: 'Défieur 10', ach_challenge50: 'Maître des Défis',
+        ach_credits500: 'Gros Joueur', ach_credits1000: 'Magnat', ach_ironhour: 'Banque de Fer'
+    });
+    Object.assign(ENGAGE_I18N.de, {
+        levelUpTitle: '⬆️ Level Aufstieg!', levelLabel: 'Level {n}', okBtn: 'Super!',
+        styleUnlocked: 'Neuer Kartenstil freigeschaltet: {s}',
+        profileStats: 'Statistiken', profileAchievements: 'Erfolge', profileStyles: 'Kartenstile',
+        memberSince: 'Mitglied seit {d}', lockedLv: 'Lv {n}',
+        stTotalHands: 'Hände Gesamt', stTotalWins: 'Siege Gesamt', stBestHand: 'Beste Hand',
+        stBestStreak: 'Beste Serie', stChallenges: 'Geschaffte Herausforderungen', stRooms: 'Beigetretene Räume',
+        ach_firstHand: 'Erste Hand', ach_hands100: '100 Hände', ach_hands500: '500 Hände', ach_hands1000: '1000 Hände',
+        ach_firstWin: 'Erster Sieg', ach_royal: 'Royal-Flush-Club', ach_sflush: 'Straight-Flush-Club', ach_quads: 'Vierling-Club',
+        ach_streak5: 'Serie von 5', ach_streak10: 'Unaufhaltsam 10', ach_login7: 'Perfekte Woche',
+        ach_joinRoom: 'Gast', ach_createRoom: 'Gastgeber', ach_invite3: 'Anwerber', ach_rooms3: 'Gesellig',
+        ach_challenge10: 'Herausforderer 10', ach_challenge50: 'Herausforderungs-Meister',
+        ach_credits500: 'High Roller', ach_credits1000: 'Magnat', ach_ironhour: 'Eiserne Bank'
+    });
+    Object.assign(ENGAGE_I18N.he, {
+        levelUpTitle: '⬆️ עלית רמה!', levelLabel: 'רמה {n}', okBtn: 'מעולה!',
+        styleUnlocked: 'סגנון קלפים חדש נפתח: {s}',
+        profileStats: 'סטטיסטיקות', profileAchievements: 'הישגים', profileStyles: 'סגנונות קלפים',
+        memberSince: 'חבר מאז {d}', lockedLv: 'רמה {n}',
+        stTotalHands: 'סה"כ ידיים', stTotalWins: 'סה"כ ניצחונות', stBestHand: 'היד הטובה ביותר',
+        stBestStreak: 'הרצף הטוב ביותר', stChallenges: 'אתגרים שהושלמו', stRooms: 'חדרים',
+        ach_firstHand: 'יד ראשונה', ach_hands100: '100 ידיים', ach_hands500: '500 ידיים', ach_hands1000: '1000 ידיים',
+        ach_firstWin: 'ניצחון ראשון', ach_royal: 'מועדון רויאל פלאש', ach_sflush: 'מועדון סטרייט פלאש', ach_quads: 'מועדון הרביעייה',
+        ach_streak5: 'רצף של 5', ach_streak10: 'בלתי ניתן לעצירה', ach_login7: 'שבוע מושלם',
+        ach_joinRoom: 'אורח', ach_createRoom: 'מארח', ach_invite3: 'מגייס', ach_rooms3: 'חברותי',
+        ach_challenge10: 'מאתגר 10', ach_challenge50: 'מאסטר האתגרים',
+        ach_credits500: 'שחקן כבד', ach_credits1000: 'טייקון', ach_ironhour: 'בנק ברזל'
+    });
+    Object.assign(ENGAGE_I18N.ar, {
+        levelUpTitle: '⬆️ ارتفع مستواك!', levelLabel: 'المستوى {n}', okBtn: 'رائع!',
+        styleUnlocked: 'فُتح نمط بطاقات جديد: {s}',
+        profileStats: 'إحصائيات', profileAchievements: 'إنجازات', profileStyles: 'أنماط البطاقات',
+        memberSince: 'عضو منذ {d}', lockedLv: 'مستوى {n}',
+        stTotalHands: 'إجمالي الأيدي', stTotalWins: 'إجمالي الانتصارات', stBestHand: 'أفضل يد',
+        stBestStreak: 'أفضل سلسلة', stChallenges: 'تحديات مكتملة', stRooms: 'الغرف',
+        ach_firstHand: 'اليد الأولى', ach_hands100: '100 يد', ach_hands500: '500 يد', ach_hands1000: '1000 يد',
+        ach_firstWin: 'أول فوز', ach_royal: 'نادي رويال فلاش', ach_sflush: 'نادي ستريت فلاش', ach_quads: 'نادي الرباعية',
+        ach_streak5: 'سلسلة 5', ach_streak10: 'لا يُوقف 10', ach_login7: 'أسبوع مثالي',
+        ach_joinRoom: 'ضيف', ach_createRoom: 'مضيف', ach_invite3: 'مجنِّد', ach_rooms3: 'اجتماعي',
+        ach_challenge10: 'متحدٍ 10', ach_challenge50: 'سيد التحديات',
+        ach_credits500: 'مقامر كبير', ach_credits1000: 'قطب', ach_ironhour: 'بنك حديدي'
+    });
     </script>
 </body>
 </html>
