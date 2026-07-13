@@ -18,7 +18,8 @@ const cssFiles = [
     'styles/layout.css',
     'styles/cards.css',
     'styles/animations.css',
-    'styles/leaderboard.css'
+    'styles/leaderboard.css',
+    'styles/mobile.css'
 ];
 
 let combinedCss = '';
