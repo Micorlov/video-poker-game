@@ -1,6 +1,5 @@
 var audioCtx = null;
     var soundEnabled = true;
-    var audioUnlocked = false;
 
     function initSound() {
         try {
@@ -8,44 +7,32 @@ var audioCtx = null;
             if (stored !== null) soundEnabled = stored === 'true';
         } catch (e) {}
         updateSoundButtonUI();
-        unlockAudioOnInteraction();
     }
 
-    // Mobile browsers suspend AudioContext until a user gesture unlocks it.
-    function unlockAudioOnInteraction() {
-        if (audioUnlocked) return;
-        function unlock() {
-            if (audioUnlocked) return;
-            audioUnlocked = true;
-            try {
-                ensureAudioContext();
-                // Play a silent buffer to fully unlock the audio subsystem
-                var buf = audioCtx.createBuffer(1, 1, 22050);
-                var src = audioCtx.createBufferSource();
-                src.buffer = buf;
-                src.connect(audioCtx.destination);
-                src.start(0);
-            } catch (e) {}
-        }
-        document.addEventListener('touchstart', unlock, { once: true, capture: true });
-        document.addEventListener('click', unlock, { once: true, capture: true });
-    }
-
+    // Lazy-init the AudioContext on first use. On mobile, this must happen
+    // synchronously inside a user gesture (click/touch) — no Promises, no async.
     function ensureAudioContext() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            generatePreDecodedBuffers();
+        if (audioCtx) {
+            // Already created — just resume if suspended (iOS keeps it alive after first unlock)
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return;
         }
-        if (audioCtx.state === 'suspended') {
-            return audioCtx.resume().catch(function(e) {
-                // Some browsers reject resume() if no user gesture — that's fine,
-                // the unlock listener will retry on the next user interaction
-            });
-        }
-        return Promise.resolve();
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        generatePreDecodedBuffers();
+        // Play a silent buffer immediately to satisfy iOS audio unlock requirements
+        try {
+            var buf = audioCtx.createBuffer(1, 1, 22050);
+            var src = audioCtx.createBufferSource();
+            src.buffer = buf;
+            src.connect(audioCtx.destination);
+            src.start(0);
+        } catch (e) {}
     }
 
     function createSynthesizedBuffer(duration, synthFn) {
+        if (!audioCtx) return null;
         var sampleRate = audioCtx.sampleRate;
         var buffer = audioCtx.createBuffer(1, sampleRate * duration, sampleRate);
         var data = buffer.getChannelData(0);
@@ -66,27 +53,27 @@ var audioCtx = null;
 
     function playSound(name) {
         if (!soundEnabled) return;
-        ensureAudioContext().then(function() {
-            var buffer = audioBuffers[name];
-            if (!buffer) return;
+        ensureAudioContext();
+        var buffer = audioBuffers[name];
+        if (!buffer) return;
+        try {
             var source = audioCtx.createBufferSource();
             source.buffer = buffer;
             source.connect(audioCtx.destination);
             source.start(0);
-        });
+        } catch (e) {}
     }
 
     function toggleSound() {
-        ensureAudioContext().then(function() {
-            soundEnabled = !soundEnabled;
-            try {
-                localStorage.setItem('vp_sound_enabled', soundEnabled);
-            } catch (e) {}
-            updateSoundButtonUI();
-            if (soundEnabled) {
-                playSound('click');
-            }
-        });
+        ensureAudioContext();
+        soundEnabled = !soundEnabled;
+        try {
+            localStorage.setItem('vp_sound_enabled', soundEnabled);
+        } catch (e) {}
+        updateSoundButtonUI();
+        if (soundEnabled) {
+            playSound('click');
+        }
     }
 
     function updateSoundButtonUI() {
