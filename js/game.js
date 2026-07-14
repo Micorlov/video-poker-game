@@ -382,6 +382,7 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 winStreak++;
                 const streakBonus = getStreakBonus(winStreak);
                 if (streakBonus > 0) win += Math.round(win * streakBonus);
+                if (window.vpTournamentMultiplier) win = Math.round(win * vpTournamentMultiplier());
             } else {
                 winStreak = 0;
             }

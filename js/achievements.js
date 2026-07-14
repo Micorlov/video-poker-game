@@ -35,6 +35,7 @@ var ACHIEVEMENTS = [
     function egProcessXpAndAchievements(ev) {
         var gain = 10 + Math.floor(ev.bet / 5) + (XP_WIN_BONUS[ev.handType] || 0);
         egXp += gain;
+        if (window.egProcessSeason) egProcessSeason(gain);
         var newLevel = egLevelFromXp(egXp);
         if (newLevel > egLevel) {
             egLevel = newLevel;
@@ -111,6 +112,7 @@ var ACHIEVEMENTS = [
 
     // --- XP bar (user bar) ---
     function egRenderXpBar() {
+        if (window.egRenderTournamentBanner) egRenderTournamentBanner();
         var lvlEl = document.getElementById('ub-level');
         var fillEl = document.getElementById('ub-xp-fill');
         var textEl = document.getElementById('ub-xp-text');
@@ -269,6 +271,15 @@ var ACHIEVEMENTS = [
         const refSectionWrap = document.getElementById('pf-ref-section-wrap');
         if (refSectionWrap) {
             refSectionWrap.style.display = isMe ? '' : 'none';
+        }
+
+        const seasonSection = document.getElementById('pf-season-section');
+        if (seasonSection) {
+            if (isMe && window.egRenderSeason) {
+                egRenderSeason();
+            } else {
+                seasonSection.style.display = 'none';
+            }
         }
 
         if (isMe) {

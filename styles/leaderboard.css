@@ -1765,3 +1765,124 @@
                 height: 7px;
             }
         }
+
+/* --- Phase 5: Weekly Tournament --- */
+#tournament-banner {
+    margin: 0 auto 18px;
+    max-width: 900px;
+    padding: 12px 18px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    color: #1a1a1a;
+    background: linear-gradient(90deg, #ffd700, #ffaa00, #ffd700);
+    background-size: 200% 100%;
+    border: 1px solid #ffe066;
+    border-radius: 12px;
+    box-shadow: 0 0 18px rgba(255, 215, 0, 0.35);
+    animation: tourneyShimmer 3s linear infinite;
+}
+#tournament-banner.locked {
+    background: linear-gradient(90deg, #3a3a3a, #4a4a3a);
+    color: #ffd700;
+    animation: none;
+    box-shadow: none;
+}
+@keyframes tourneyShimmer {
+    0% { background-position: 0% 0; }
+    100% { background-position: 200% 0; }
+}
+.lb-tournament {
+    border: 2px solid #ffd700 !important;
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.25);
+}
+.lb-tournament h3 {
+    color: #ffd700;
+}
+.lb-tournament-note {
+    font-size: 11px;
+    opacity: 0.75;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+/* --- Phase 5: Season Pass --- */
+.pf-season-ends {
+    font-size: 12px;
+    color: #ffd700;
+    margin-bottom: 6px;
+}
+.season-bar {
+    background: rgba(255, 255, 255, 0.12);
+}
+.season-fill {
+    background: linear-gradient(90deg, #8a2be2, #ffd700);
+}
+.season-tiers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+.season-tier {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 40px;
+    padding: 5px 6px;
+    border-radius: 8px;
+    background: rgba(255, 215, 0, 0.12);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    font-size: 11px;
+    color: #ffd700;
+}
+.season-tier .st-num {
+    font-weight: 700;
+    font-size: 13px;
+}
+.season-tier.claimed {
+    background: rgba(74, 222, 128, 0.18);
+    border-color: #4ade80;
+    color: #4ade80;
+}
+.season-tier.locked {
+    opacity: 0.4;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #aaa;
+}
+
+/* --- Phase 5.3: PWA prompt bar --- */
+.pwa-bar {
+    position: fixed;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: #12331f;
+    border: 1px solid #ffd700;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+    max-width: min(94vw, 480px);
+}
+.pwa-bar button {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.pwa-bar-yes {
+    background: #ffd700;
+    color: #1a1a1a;
+}
+.pwa-bar-no {
+    background: transparent;
+    color: #aaa;
+}

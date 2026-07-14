@@ -127,6 +127,9 @@ var CHALLENGE_POOL = [
         egLoadUserProfile(user);
         egLoadDailyReward(user);
         egLoadChallenges(user);
+        if (window.initTournament) initTournament(user);
+        if (window.initSeason) initSeason(user);
+        if (window.initPwa) initPwa(user);
     };
 
     window.teardownEngagement = function() {
@@ -148,6 +151,8 @@ var CHALLENGE_POOL = [
         egCloseModal('eg-comeback-modal');
         egCloseModal('eg-levelup-modal');
         egCloseProfile();
+        if (window.teardownTournament) teardownTournament();
+        if (window.teardownSeason) teardownSeason();
     };
 
     // --- modal queue (one at a time) ---

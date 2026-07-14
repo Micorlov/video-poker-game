@@ -230,6 +230,7 @@ function getHourKey(date) {
         if (rbDaily) rbDaily.textContent = dailyStr;
 
         if (window.updateRoomCountdown) window.updateRoomCountdown();
+        if (window.updateTournamentCountdown) window.updateTournamentCountdown();
     }
 
     setInterval(updateCountdown, 1000);

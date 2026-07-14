@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Poker - Jacks or Better</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0c2317">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
@@ -45,6 +48,16 @@
 
 
 /* --- styles/animations.css --- */
+/* Respect users who prefer reduced motion — collapse all animation/transition
+   durations so state changes still happen, just instantly. */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
 
 
 /* --- styles/leaderboard.css --- */
@@ -1816,6 +1829,127 @@
             }
         }
 
+/* --- Phase 5: Weekly Tournament --- */
+#tournament-banner {
+    margin: 0 auto 18px;
+    max-width: 900px;
+    padding: 12px 18px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    color: #1a1a1a;
+    background: linear-gradient(90deg, #ffd700, #ffaa00, #ffd700);
+    background-size: 200% 100%;
+    border: 1px solid #ffe066;
+    border-radius: 12px;
+    box-shadow: 0 0 18px rgba(255, 215, 0, 0.35);
+    animation: tourneyShimmer 3s linear infinite;
+}
+#tournament-banner.locked {
+    background: linear-gradient(90deg, #3a3a3a, #4a4a3a);
+    color: #ffd700;
+    animation: none;
+    box-shadow: none;
+}
+@keyframes tourneyShimmer {
+    0% { background-position: 0% 0; }
+    100% { background-position: 200% 0; }
+}
+.lb-tournament {
+    border: 2px solid #ffd700 !important;
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.25);
+}
+.lb-tournament h3 {
+    color: #ffd700;
+}
+.lb-tournament-note {
+    font-size: 11px;
+    opacity: 0.75;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+/* --- Phase 5: Season Pass --- */
+.pf-season-ends {
+    font-size: 12px;
+    color: #ffd700;
+    margin-bottom: 6px;
+}
+.season-bar {
+    background: rgba(255, 255, 255, 0.12);
+}
+.season-fill {
+    background: linear-gradient(90deg, #8a2be2, #ffd700);
+}
+.season-tiers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+.season-tier {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 40px;
+    padding: 5px 6px;
+    border-radius: 8px;
+    background: rgba(255, 215, 0, 0.12);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    font-size: 11px;
+    color: #ffd700;
+}
+.season-tier .st-num {
+    font-weight: 700;
+    font-size: 13px;
+}
+.season-tier.claimed {
+    background: rgba(74, 222, 128, 0.18);
+    border-color: #4ade80;
+    color: #4ade80;
+}
+.season-tier.locked {
+    opacity: 0.4;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #aaa;
+}
+
+/* --- Phase 5.3: PWA prompt bar --- */
+.pwa-bar {
+    position: fixed;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: #12331f;
+    border: 1px solid #ffd700;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+    max-width: min(94vw, 480px);
+}
+.pwa-bar button {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.pwa-bar-yes {
+    background: #ffd700;
+    color: #1a1a1a;
+}
+.pwa-bar-no {
+    background: transparent;
+    color: #aaa;
+}
+
 
 /* --- styles/mobile.css --- */
 /* =================================================================
@@ -2666,6 +2800,15 @@
             </a>
             <div class="pf-ref-count" id="pf-ref-count" style="color: #4ade80; font-size: 13px; font-weight: 600; margin-top: 10px; text-align: center;"></div>
         </div>
+        <div id="pf-season-section" style="display:none;">
+            <h4 id="pf-season-title">🎫 Season Pass</h4>
+            <div class="pf-season-ends" id="pf-season-ends"></div>
+            <div class="pf-xp">
+                <span class="xp-bar season-bar"><span class="xp-fill season-fill" id="pf-season-fill"></span></span>
+                <span class="xp-text" id="pf-season-text"></span>
+            </div>
+            <div class="season-tiers" id="pf-season-tiers"></div>
+        </div>
         <div id="pf-styles-section">
             <h4 id="pf-styles-title">Card Styles</h4>
             <div class="style-row" id="pf-styles"></div>
@@ -2686,6 +2829,8 @@
         </div>
 
         <h1 id="game-title">Video Poker</h1>
+
+        <div id="tournament-banner" class="eg-hidden"></div>
 
         <div class="game-layout">
             <div class="game-col">
@@ -2796,6 +2941,19 @@
                         <button class="room-action-btn" onclick="openRoomModal('create')" id="create-room-btn">+ Create Room</button>
                         <button class="room-action-btn secondary" onclick="openRoomModal('join')" id="join-room-btn">Join with Code</button>
                     </div>
+                </div>
+                <div class="leaderboard lb-tournament eg-hidden" id="leaderboard-tournament">
+                    <h3 id="lb-tournament-title">🏆 Weekly Tournament</h3>
+                    <div class="leaderboard-timer"><span id="lb-tournament-resets-label">Ends in</span> <span id="lb-tournament-countdown">--:--:--</span></div>
+                    <div class="lb-tournament-note" id="lb-tournament-note">Score = credits won today · Top 3: 1000 / 500 / 250</div>
+                    <table class="lb-table">
+                        <thead><tr>
+                            <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
+                        </tr></thead>
+                        <tbody id="lb-tournament-body">
+                            <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="leaderboard" id="leaderboard-hourly">
                     <h3 id="lb-hourly-title">⏱ Hourly Competition</h3>
@@ -4514,6 +4672,7 @@ function getHourKey(date) {
         if (rbDaily) rbDaily.textContent = dailyStr;
 
         if (window.updateRoomCountdown) window.updateRoomCountdown();
+        if (window.updateTournamentCountdown) window.updateTournamentCountdown();
     }
 
     setInterval(updateCountdown, 1000);
@@ -5405,6 +5564,9 @@ var CHALLENGE_POOL = [
         egLoadUserProfile(user);
         egLoadDailyReward(user);
         egLoadChallenges(user);
+        if (window.initTournament) initTournament(user);
+        if (window.initSeason) initSeason(user);
+        if (window.initPwa) initPwa(user);
     };
 
     window.teardownEngagement = function() {
@@ -5426,6 +5588,8 @@ var CHALLENGE_POOL = [
         egCloseModal('eg-comeback-modal');
         egCloseModal('eg-levelup-modal');
         egCloseProfile();
+        if (window.teardownTournament) teardownTournament();
+        if (window.teardownSeason) teardownSeason();
     };
 
     // --- modal queue (one at a time) ---
@@ -5485,6 +5649,7 @@ var ACHIEVEMENTS = [
     function egProcessXpAndAchievements(ev) {
         var gain = 10 + Math.floor(ev.bet / 5) + (XP_WIN_BONUS[ev.handType] || 0);
         egXp += gain;
+        if (window.egProcessSeason) egProcessSeason(gain);
         var newLevel = egLevelFromXp(egXp);
         if (newLevel > egLevel) {
             egLevel = newLevel;
@@ -5561,6 +5726,7 @@ var ACHIEVEMENTS = [
 
     // --- XP bar (user bar) ---
     function egRenderXpBar() {
+        if (window.egRenderTournamentBanner) egRenderTournamentBanner();
         var lvlEl = document.getElementById('ub-level');
         var fillEl = document.getElementById('ub-xp-fill');
         var textEl = document.getElementById('ub-xp-text');
@@ -5719,6 +5885,15 @@ var ACHIEVEMENTS = [
         const refSectionWrap = document.getElementById('pf-ref-section-wrap');
         if (refSectionWrap) {
             refSectionWrap.style.display = isMe ? '' : 'none';
+        }
+
+        const seasonSection = document.getElementById('pf-season-section');
+        if (seasonSection) {
+            if (isMe && window.egRenderSeason) {
+                egRenderSeason();
+            } else {
+                seasonSection.style.display = 'none';
+            }
         }
 
         if (isMe) {
@@ -5925,6 +6100,372 @@ var ACHIEVEMENTS = [
             });
     }
 
+/* --- js/tournaments.js --- */
+// ===================== Phase 5: Weekly Tournament + Season Pass =====================
+
+    var TOURNAMENT_MIN_LEVEL = 5;
+    var TOURNAMENT_PRIZES = [1000, 500, 250];
+    var TOURNAMENT_DAY = 6; // Saturday
+
+    var SEASON_TIERS = [
+        { xp: 500,   credits: 50 },
+        { xp: 1000,  credits: 75 },
+        { xp: 1500,  credits: 100 },
+        { xp: 2500,  credits: 150 },
+        { xp: 3500,  credits: 200 },
+        { xp: 5000,  credits: 250 },
+        { xp: 6500,  credits: 300 },
+        { xp: 8000,  credits: 400 },
+        { xp: 9000,  credits: 450 },
+        { xp: 10000, credits: 500 } // + season badge
+    ];
+
+    var egSeason = null;   // {monthKey, xp, claimedTiers: {tierIdx: true}}
+    var egTournamentCheckedPrizes = false;
+
+    ACHIEVEMENTS.push({ id: 'season10', icon: '🎖️' });
+
+    Object.assign(ENGAGE_I18N.en, {
+        tourneyBanner: '🏆 Weekly Tournament LIVE — all payouts ×2! Top 3 win bonus credits!',
+        tourneyLocked: '🏆 Weekly Tournament today — reach Level {n} to enter!',
+        tourneyTitle: '🏆 Weekly Tournament', tourneyEndsIn: 'Ends in',
+        tourneyPrizeToast: '🏆 Tournament prize: +{n} credits! You finished #{r}!',
+        tourneyScoreNote: 'Score = credits won today · Top 3: 1000 / 500 / 250',
+        seasonTitle: '🎫 Season Pass', seasonEnds: 'Season ends in {n} days',
+        seasonTierToast: '🎫 Season tier {t} reached! +{n} credits',
+        seasonMax: 'All tiers complete — legend!',
+        seasonNext: '{cur}/{next} XP to tier {t}',
+        ach_season10: 'Season Legend',
+        notifyPromptText: '🔔 Get your daily bonus reminders?', notifyYes: 'Enable', notifyNo: 'Not now',
+        installPromptText: '📲 Add Video Poker to your home screen!', installYes: 'Install'
+    });
+    Object.assign(ENGAGE_I18N.es, {
+        tourneyBanner: '🏆 Torneo Semanal EN VIVO — ¡pagos ×2! ¡Top 3 ganan créditos extra!',
+        tourneyLocked: '🏆 Torneo Semanal hoy — ¡alcanza el Nivel {n} para entrar!',
+        tourneyTitle: '🏆 Torneo Semanal', tourneyEndsIn: 'Termina en',
+        tourneyPrizeToast: '🏆 Premio del torneo: +{n} créditos! ¡Quedaste #{r}!',
+        tourneyScoreNote: 'Puntos = créditos ganados hoy · Top 3: 1000 / 500 / 250',
+        seasonTitle: '🎫 Pase de Temporada', seasonEnds: 'La temporada termina en {n} días',
+        seasonTierToast: '🎫 ¡Nivel {t} de temporada! +{n} créditos',
+        seasonMax: '¡Todos los niveles completos — leyenda!',
+        seasonNext: '{cur}/{next} XP para el nivel {t}',
+        ach_season10: 'Leyenda de Temporada',
+        notifyPromptText: '🔔 ¿Recibir recordatorios del bono diario?', notifyYes: 'Activar', notifyNo: 'Ahora no',
+        installPromptText: '📲 ¡Añade Video Póker a tu pantalla de inicio!', installYes: 'Instalar'
+    });
+    Object.assign(ENGAGE_I18N.fr, {
+        tourneyBanner: '🏆 Tournoi Hebdo EN DIRECT — gains ×2 ! Top 3 gagnent des crédits bonus !',
+        tourneyLocked: '🏆 Tournoi Hebdo aujourd\'hui — atteins le Niveau {n} pour participer !',
+        tourneyTitle: '🏆 Tournoi Hebdo', tourneyEndsIn: 'Fin dans',
+        tourneyPrizeToast: '🏆 Prix du tournoi : +{n} crédits ! Tu finis #{r} !',
+        tourneyScoreNote: 'Score = crédits gagnés aujourd\'hui · Top 3 : 1000 / 500 / 250',
+        seasonTitle: '🎫 Passe de Saison', seasonEnds: 'La saison se termine dans {n} jours',
+        seasonTierToast: '🎫 Palier {t} atteint ! +{n} crédits',
+        seasonMax: 'Tous les paliers complétés — légende !',
+        seasonNext: '{cur}/{next} XP pour le palier {t}',
+        ach_season10: 'Légende de la Saison',
+        notifyPromptText: '🔔 Recevoir les rappels du bonus quotidien ?', notifyYes: 'Activer', notifyNo: 'Plus tard',
+        installPromptText: '📲 Ajoute Video Poker à ton écran d\'accueil !', installYes: 'Installer'
+    });
+    Object.assign(ENGAGE_I18N.de, {
+        tourneyBanner: '🏆 Wochenturnier LIVE — alle Gewinne ×2! Top 3 gewinnen Bonus-Credits!',
+        tourneyLocked: '🏆 Wochenturnier heute — erreiche Level {n}, um teilzunehmen!',
+        tourneyTitle: '🏆 Wochenturnier', tourneyEndsIn: 'Endet in',
+        tourneyPrizeToast: '🏆 Turnierpreis: +{n} Credits! Du wurdest #{r}!',
+        tourneyScoreNote: 'Punkte = heute gewonnene Credits · Top 3: 1000 / 500 / 250',
+        seasonTitle: '🎫 Season Pass', seasonEnds: 'Saison endet in {n} Tagen',
+        seasonTierToast: '🎫 Saison-Stufe {t} erreicht! +{n} Credits',
+        seasonMax: 'Alle Stufen geschafft — Legende!',
+        seasonNext: '{cur}/{next} XP bis Stufe {t}',
+        ach_season10: 'Saison-Legende',
+        notifyPromptText: '🔔 Tägliche Bonus-Erinnerungen erhalten?', notifyYes: 'Aktivieren', notifyNo: 'Nicht jetzt',
+        installPromptText: '📲 Füge Video Poker deinem Startbildschirm hinzu!', installYes: 'Installieren'
+    });
+    Object.assign(ENGAGE_I18N.he, {
+        tourneyBanner: '🏆 טורניר שבועי חי — כל הזכיות ×2! שלושת הראשונים זוכים בקרדיטים!',
+        tourneyLocked: '🏆 טורניר שבועי היום — הגע לרמה {n} כדי להשתתף!',
+        tourneyTitle: '🏆 טורניר שבועי', tourneyEndsIn: 'מסתיים בעוד',
+        tourneyPrizeToast: '🏆 פרס טורניר: +{n} קרדיטים! סיימת במקום {r}!',
+        tourneyScoreNote: 'ניקוד = קרדיטים שנצברו היום · טופ 3: 1000 / 500 / 250',
+        seasonTitle: '🎫 כרטיס עונה', seasonEnds: 'העונה מסתיימת בעוד {n} ימים',
+        seasonTierToast: '🎫 הגעת לשלב {t} בעונה! +{n} קרדיטים',
+        seasonMax: 'כל השלבים הושלמו — אגדה!',
+        seasonNext: '{cur}/{next} XP לשלב {t}',
+        ach_season10: 'אגדת העונה',
+        notifyPromptText: '🔔 לקבל תזכורות לבונוס היומי?', notifyYes: 'הפעל', notifyNo: 'לא עכשיו',
+        installPromptText: '📲 הוסף את וידאו פוקר למסך הבית!', installYes: 'התקן'
+    });
+    Object.assign(ENGAGE_I18N.ar, {
+        tourneyBanner: '🏆 البطولة الأسبوعية مباشرة — كل الأرباح ×2! أفضل 3 يفوزون برصيد إضافي!',
+        tourneyLocked: '🏆 البطولة الأسبوعية اليوم — صِل إلى المستوى {n} للمشاركة!',
+        tourneyTitle: '🏆 البطولة الأسبوعية', tourneyEndsIn: 'تنتهي خلال',
+        tourneyPrizeToast: '🏆 جائزة البطولة: +{n} رصيد! أنهيت في المركز {r}!',
+        tourneyScoreNote: 'النقاط = الرصيد المكتسب اليوم · أفضل 3: 1000 / 500 / 250',
+        seasonTitle: '🎫 بطاقة الموسم', seasonEnds: 'ينتهي الموسم خلال {n} أيام',
+        seasonTierToast: '🎫 وصلت إلى المرحلة {t}! +{n} رصيد',
+        seasonMax: 'اكتملت كل المراحل — أسطورة!',
+        seasonNext: '{cur}/{next} XP للمرحلة {t}',
+        ach_season10: 'أسطورة الموسم',
+        notifyPromptText: '🔔 تلقّي تذكيرات المكافأة اليومية؟', notifyYes: 'تفعيل', notifyNo: 'ليس الآن',
+        installPromptText: '📲 أضف فيديو بوكر إلى شاشتك الرئيسية!', installYes: 'تثبيت'
+    });
+
+    // --- weekly tournament ---
+    function isTournamentDay(date) {
+        return (date || new Date()).getDay() === TOURNAMENT_DAY;
+    }
+
+    function tournamentKey(date) {
+        return getDayKey(date); // active only on Saturdays, so the day key is unique per tournament
+    }
+
+    function lastTournamentDate() {
+        // Most recent Saturday strictly before today
+        var d = new Date();
+        var back = (d.getDay() - TOURNAMENT_DAY + 7) % 7;
+        if (back === 0) back = 7;
+        d.setDate(d.getDate() - back);
+        return d;
+    }
+
+    function egTournamentEligible() {
+        return egLevel >= TOURNAMENT_MIN_LEVEL;
+    }
+
+    // Called from draw(): ×2 payouts while the tournament is live and the player entered
+    window.vpTournamentMultiplier = function() {
+        return (egUser && isTournamentDay() && egTournamentEligible()) ? 2 : 1;
+    };
+
+    window.initTournament = function(user) {
+        egTournamentCheckPrizes(user);
+        egRenderTournamentBanner();
+        egRefreshTournamentLb();
+    };
+
+    window.teardownTournament = function() {
+        egTournamentCheckedPrizes = false;
+        var banner = document.getElementById('tournament-banner');
+        if (banner) banner.classList.add('eg-hidden');
+        var panel = document.getElementById('leaderboard-tournament');
+        if (panel) panel.classList.add('eg-hidden');
+    };
+
+    window.egRenderTournamentBanner = function() {
+        var banner = document.getElementById('tournament-banner');
+        if (!banner) return;
+        if (!egUser || !isTournamentDay()) {
+            banner.classList.add('eg-hidden');
+            return;
+        }
+        banner.classList.remove('eg-hidden');
+        banner.classList.toggle('locked', !egTournamentEligible());
+        banner.textContent = egTournamentEligible()
+            ? et('tourneyBanner')
+            : et('tourneyLocked').replace('{n}', TOURNAMENT_MIN_LEVEL);
+        var panel = document.getElementById('leaderboard-tournament');
+        if (panel) panel.classList.remove('eg-hidden');
+    };
+
+    window.egProcessTournament = function(ev) {
+        if (!egUser || !isTournamentDay() || !egTournamentEligible()) return;
+        var tKey = tournamentKey();
+        db.collection('weekly_tournaments').doc(tKey + '_' + egUser.uid).set({
+            tKey: tKey,
+            uid: egUser.uid,
+            displayName: egUser.displayName || '',
+            photoURL: egUser.photoURL || '',
+            score: firebase.firestore.FieldValue.increment(ev.win || 0),
+            hands: firebase.firestore.FieldValue.increment(1),
+            level: egLevel,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).then(function() {
+            egRefreshTournamentLb();
+        }).catch(function(err) { console.error('tournament score:', err); });
+    };
+
+    function egRefreshTournamentLb() {
+        if (!egUser || !isTournamentDay()) return;
+        var tKey = tournamentKey();
+        db.collection('weekly_tournaments')
+            .where('tKey', '==', tKey)
+            .limit(50)
+            .get()
+            .then(function(snap) {
+                var rows = [];
+                snap.forEach(function(d) { rows.push(d.data()); });
+                rows.sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
+                var tbody = document.getElementById('lb-tournament-body');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                if (!rows.length) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="lb-empty">' + rt('playToJoin') + '</td></tr>';
+                    return;
+                }
+                rows.slice(0, 20).forEach(function(d, idx) {
+                    var rank = idx + 1;
+                    var isYou = d.uid === egUser.uid;
+                    var medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+                    var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+                    var lvlBadge = d.level ? '<span class="lvl-badge">' + d.level + '</span>' : '';
+                    var badge = isYou ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
+                    var row = document.createElement('tr');
+                    if (isYou) row.className = 'lb-you';
+                    row.innerHTML =
+                        '<td class="lb-rank' + (rank <= 3 ? ' lb-rank-' + rank : '') + '">' + medal + '</td>' +
+                        '<td><span class="lb-name" onclick="egOpenProfile(\'' + d.uid + '\')">' + photo + escapeHtml(firstName(d.displayName)) + '</span>' + lvlBadge + badge + '</td>' +
+                        '<td class="lb-positive lb-score">+' + (d.score || 0) + '</td>' +
+                        '<td>' + (d.hands || 0) + '</td>';
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(function(err) { console.error('tournament lb:', err); });
+    }
+
+    function egTournamentCheckPrizes(user) {
+        if (egTournamentCheckedPrizes) return;
+        egTournamentCheckedPrizes = true;
+        var prevKey = tournamentKey(lastTournamentDate());
+        var claimRef = db.collection('tournament_claims').doc(prevKey + '_' + user.uid);
+        claimRef.get().then(function(claimDoc) {
+            if (claimDoc.exists) return;
+            return db.collection('weekly_tournaments')
+                .where('tKey', '==', prevKey)
+                .limit(50)
+                .get()
+                .then(function(snap) {
+                    var rows = [];
+                    snap.forEach(function(d) { rows.push(d.data()); });
+                    rows.sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
+                    var myRank = -1;
+                    rows.slice(0, 3).forEach(function(d, idx) {
+                        if (d.uid === user.uid) myRank = idx;
+                    });
+                    if (myRank === -1) return;
+                    var prize = TOURNAMENT_PRIZES[myRank];
+                    return claimRef.set({
+                        tKey: prevKey,
+                        uid: user.uid,
+                        rank: myRank + 1,
+                        prize: prize,
+                        claimedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }).then(function() {
+                        egAddCredits(prize);
+                        egConfetti();
+                        egToast(et('tourneyPrizeToast').replace('{n}', prize).replace('{r}', myRank + 1));
+                    });
+                });
+        }).catch(function(err) { console.error('tournament prizes:', err); });
+    }
+
+    window.updateTournamentCountdown = function() {
+        if (!isTournamentDay()) return;
+        var el = document.getElementById('lb-tournament-countdown');
+        if (!el) return;
+        var now = new Date();
+        var end = new Date(now);
+        end.setHours(24, 0, 0, 0);
+        var s = Math.max(0, Math.floor((end - now) / 1000));
+        el.textContent = String(Math.floor(s / 3600)).padStart(2, '0') + ':' +
+            String(Math.floor((s % 3600) / 60)).padStart(2, '0') + ':' +
+            String(s % 60).padStart(2, '0');
+    };
+
+    setInterval(egRefreshTournamentLb, 60000);
+
+    // --- season pass (monthly, XP-based tiers) ---
+    function getMonthKey(date) {
+        var now = date || new Date();
+        return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    }
+
+    function seasonDaysLeft() {
+        var now = new Date();
+        var end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        return Math.max(1, Math.ceil((end - now) / 86400e3));
+    }
+
+    window.initSeason = function(user) {
+        var monthKey = getMonthKey();
+        db.collection('season_progress').doc(monthKey + '_' + user.uid).get().then(function(doc) {
+            var data = doc.exists ? doc.data() : {};
+            egSeason = {
+                monthKey: monthKey,
+                xp: data.xp || 0,
+                claimedTiers: data.claimedTiers || {}
+            };
+        }).catch(function(err) { console.error('initSeason:', err); });
+    };
+
+    window.teardownSeason = function() {
+        egSeason = null;
+    };
+
+    window.egProcessSeason = function(xpGain) {
+        if (!egUser || !egSeason) return;
+        if (egSeason.monthKey !== getMonthKey()) {
+            // Month rollover mid-session — start fresh
+            egSeason = { monthKey: getMonthKey(), xp: 0, claimedTiers: {} };
+        }
+        egSeason.xp += xpGain;
+        var newlyClaimed = false;
+        SEASON_TIERS.forEach(function(tier, idx) {
+            if (egSeason.xp >= tier.xp && !egSeason.claimedTiers[idx]) {
+                egSeason.claimedTiers[idx] = true;
+                newlyClaimed = true;
+                egAddCredits(tier.credits);
+                egConfetti();
+                egToast(et('seasonTierToast').replace('{t}', idx + 1).replace('{n}', tier.credits));
+                if (idx === SEASON_TIERS.length - 1) egUnlock('season10');
+            }
+        });
+        db.collection('season_progress').doc(egSeason.monthKey + '_' + egUser.uid).set({
+            monthKey: egSeason.monthKey,
+            uid: egUser.uid,
+            xp: egSeason.xp,
+            claimedTiers: egSeason.claimedTiers,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(function(err) { console.error('season save:', err); });
+        if (newlyClaimed && egProfileOpenUid === egUser.uid) egRenderSeason();
+    };
+
+    window.egRenderSeason = function() {
+        var section = document.getElementById('pf-season-section');
+        if (!section) return;
+        if (!egSeason) { section.style.display = 'none'; return; }
+        section.style.display = '';
+        document.getElementById('pf-season-title').textContent = et('seasonTitle');
+        document.getElementById('pf-season-ends').textContent =
+            et('seasonEnds').replace('{n}', seasonDaysLeft());
+
+        var xp = egSeason.xp;
+        var nextIdx = SEASON_TIERS.findIndex(function(t) { return xp < t.xp; });
+        var fillEl = document.getElementById('pf-season-fill');
+        var textEl = document.getElementById('pf-season-text');
+        if (nextIdx === -1) {
+            fillEl.style.width = '100%';
+            textEl.textContent = et('seasonMax');
+        } else {
+            var prevXp = nextIdx === 0 ? 0 : SEASON_TIERS[nextIdx - 1].xp;
+            var need = SEASON_TIERS[nextIdx].xp - prevXp;
+            var cur = xp - prevXp;
+            fillEl.style.width = Math.min(100, Math.round((cur / need) * 100)) + '%';
+            textEl.textContent = et('seasonNext')
+                .replace('{cur}', xp).replace('{next}', SEASON_TIERS[nextIdx].xp).replace('{t}', nextIdx + 1);
+        }
+
+        var dots = document.getElementById('pf-season-tiers');
+        dots.innerHTML = '';
+        SEASON_TIERS.forEach(function(tier, idx) {
+            var dot = document.createElement('div');
+            dot.className = 'season-tier' + (egSeason.claimedTiers[idx] ? ' claimed' : xp >= tier.xp ? '' : ' locked');
+            dot.title = tier.xp + ' XP → +' + tier.credits;
+            dot.innerHTML = '<span class="st-num">' + (idx + 1) + '</span><span class="st-credits">+' + tier.credits + '</span>';
+            dots.appendChild(dot);
+        });
+    };
+
+
 /* --- js/rewards.js --- */
 function egLoadDailyReward(user) {
         db.collection('daily_rewards').doc(user.uid).get().then(function(doc) {
@@ -6079,6 +6620,8 @@ function egLoadDailyReward(user) {
         if (!egUser) return;
         egProcessXpAndAchievements(ev);
         egProcessChallenges(ev);
+        if (window.egProcessTournament) egProcessTournament(ev);
+        if (window.pwaOnHandPlayed) pwaOnHandPlayed();
     };
 
     function egProcessChallenges(ev) {
@@ -6157,6 +6700,11 @@ function egLoadDailyReward(user) {
         set('pf-stats-title', et('profileStats'));
         set('pf-ach-title', et('profileAchievements'));
         set('pf-styles-title', et('profileStyles'));
+        set('lb-tournament-title', et('tourneyTitle'));
+        set('lb-tournament-resets-label', et('tourneyEndsIn'));
+        set('lb-tournament-note', et('tourneyScoreNote'));
+        if (window.egRenderTournamentBanner) egRenderTournamentBanner();
+        if (window.egRenderSeason && egSeason) egRenderSeason();
     };
 
     // ===================== Progression: Phase 2 =====================
@@ -6687,6 +7235,7 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 winStreak++;
                 const streakBonus = getStreakBonus(winStreak);
                 if (streakBonus > 0) win += Math.round(win * streakBonus);
+                if (window.vpTournamentMultiplier) win = Math.round(win * vpTournamentMultiplier());
             } else {
                 winStreak = 0;
             }
@@ -7058,6 +7607,142 @@ const SUITS = ['♠', '♥', '♦', '♣'];
     });
 
     // Firebase
+
+
+/* --- js/pwa.js --- */
+// ===================== Phase 5.3 / 6.2: PWA, install prompt, push notifications =====================
+
+    // Paste the Web Push certificate key pair (VAPID public key) from
+    // Firebase Console → Project Settings → Cloud Messaging to enable FCM push.
+    var FCM_VAPID_KEY = '';
+
+    var NOTIFY_PROMPT_AFTER_HANDS = 5;
+    var INSTALL_PROMPT_AFTER_VISITS = 3;
+
+    var pwaDeferredInstall = null;
+    var pwaSessionHands = 0;
+
+    function pwaCanUseSw() {
+        return 'serviceWorker' in navigator &&
+            (location.protocol === 'https:' || location.hostname === 'localhost');
+    }
+
+    function pwaRegisterSw() {
+        if (!pwaCanUseSw()) return;
+        navigator.serviceWorker.register('sw.js').catch(function(err) {
+            console.error('SW registration failed:', err);
+        });
+    }
+
+    function pwaTrackVisit() {
+        try {
+            var today = getDayKey();
+            var raw = localStorage.getItem('vp_visits');
+            var v = raw ? JSON.parse(raw) : { count: 0, last: '' };
+            if (v.last !== today) {
+                v.count++;
+                v.last = today;
+                localStorage.setItem('vp_visits', JSON.stringify(v));
+            }
+            return v.count;
+        } catch (e) { return 0; }
+    }
+
+    // --- generic dismissible prompt bar ---
+    function pwaShowBar(id, text, yesLabel, onYes, noLabel) {
+        if (document.getElementById(id)) return;
+        var bar = document.createElement('div');
+        bar.id = id;
+        bar.className = 'pwa-bar';
+        var yes = document.createElement('button');
+        yes.className = 'pwa-bar-yes';
+        yes.textContent = yesLabel;
+        yes.onclick = function() { bar.remove(); onYes(); };
+        var no = document.createElement('button');
+        no.className = 'pwa-bar-no';
+        no.textContent = noLabel || '✕';
+        no.onclick = function() { bar.remove(); };
+        var span = document.createElement('span');
+        span.textContent = text;
+        bar.appendChild(span);
+        bar.appendChild(yes);
+        bar.appendChild(no);
+        document.body.appendChild(bar);
+    }
+
+    // --- install prompt (after 3rd distinct visit day) ---
+    window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        pwaDeferredInstall = e;
+        maybeShowInstallBar();
+    });
+
+    function maybeShowInstallBar() {
+        if (!pwaDeferredInstall) return;
+        var dismissed = false;
+        try { dismissed = localStorage.getItem('vp_install_dismissed') === '1'; } catch (e) {}
+        if (dismissed) return;
+        var visits = 0;
+        try { visits = (JSON.parse(localStorage.getItem('vp_visits')) || {}).count || 0; } catch (e) {}
+        if (visits < INSTALL_PROMPT_AFTER_VISITS) return;
+        pwaShowBar('pwa-install-bar', et('installPromptText'), et('installYes'), function() {
+            pwaDeferredInstall.prompt();
+            pwaDeferredInstall = null;
+        });
+        try { localStorage.setItem('vp_install_dismissed', '1'); } catch (e) {}
+    }
+
+    // --- notification permission (after first real play session, not on first visit) ---
+    function pwaMaybeAskNotifications() {
+        if (typeof Notification === 'undefined' || Notification.permission !== 'default') return;
+        var asked = false;
+        try { asked = localStorage.getItem('vp_notify_asked') === '1'; } catch (e) {}
+        if (asked) return;
+        try { localStorage.setItem('vp_notify_asked', '1'); } catch (e) {}
+        pwaShowBar('pwa-notify-bar', et('notifyPromptText'), et('notifyYes'), function() {
+            Notification.requestPermission().then(function(perm) {
+                if (perm === 'granted') pwaSetupFcm();
+            });
+        }, et('notifyNo'));
+    }
+
+    // --- FCM token registration (requires VAPID key) ---
+    function pwaSetupFcm() {
+        if (!FCM_VAPID_KEY || !pwaCanUseSw() || !auth.currentUser) return;
+        var s = document.createElement('script');
+        s.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js';
+        s.onload = function() {
+            navigator.serviceWorker.ready.then(function(reg) {
+                return firebase.messaging().getToken({
+                    vapidKey: FCM_VAPID_KEY,
+                    serviceWorkerRegistration: reg
+                });
+            }).then(function(token) {
+                if (!token || !auth.currentUser) return;
+                return db.collection('users').doc(auth.currentUser.uid).set({
+                    fcmToken: token,
+                    fcmUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            }).catch(function(err) { console.error('FCM setup:', err); });
+        };
+        document.head.appendChild(s);
+    }
+
+    // Hand-played hook (called from egOnHandPlayed)
+    window.pwaOnHandPlayed = function() {
+        pwaSessionHands++;
+        if (pwaSessionHands === NOTIFY_PROMPT_AFTER_HANDS) pwaMaybeAskNotifications();
+    };
+
+    window.initPwa = function() {
+        pwaTrackVisit();
+        maybeShowInstallBar();
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            pwaSetupFcm();
+        }
+    };
+
+    pwaRegisterSw();
 
 
 </script>

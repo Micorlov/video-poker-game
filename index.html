@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Poker - Jacks or Better</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0c2317">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
@@ -200,6 +203,15 @@
             </a>
             <div class="pf-ref-count" id="pf-ref-count" style="color: #4ade80; font-size: 13px; font-weight: 600; margin-top: 10px; text-align: center;"></div>
         </div>
+        <div id="pf-season-section" style="display:none;">
+            <h4 id="pf-season-title">🎫 Season Pass</h4>
+            <div class="pf-season-ends" id="pf-season-ends"></div>
+            <div class="pf-xp">
+                <span class="xp-bar season-bar"><span class="xp-fill season-fill" id="pf-season-fill"></span></span>
+                <span class="xp-text" id="pf-season-text"></span>
+            </div>
+            <div class="season-tiers" id="pf-season-tiers"></div>
+        </div>
         <div id="pf-styles-section">
             <h4 id="pf-styles-title">Card Styles</h4>
             <div class="style-row" id="pf-styles"></div>
@@ -220,6 +232,8 @@
         </div>
 
         <h1 id="game-title">Video Poker</h1>
+
+        <div id="tournament-banner" class="eg-hidden"></div>
 
         <div class="game-layout">
             <div class="game-col">
@@ -330,6 +344,19 @@
                         <button class="room-action-btn" onclick="openRoomModal('create')" id="create-room-btn">+ Create Room</button>
                         <button class="room-action-btn secondary" onclick="openRoomModal('join')" id="join-room-btn">Join with Code</button>
                     </div>
+                </div>
+                <div class="leaderboard lb-tournament eg-hidden" id="leaderboard-tournament">
+                    <h3 id="lb-tournament-title">🏆 Weekly Tournament</h3>
+                    <div class="leaderboard-timer"><span id="lb-tournament-resets-label">Ends in</span> <span id="lb-tournament-countdown">--:--:--</span></div>
+                    <div class="lb-tournament-note" id="lb-tournament-note">Score = credits won today · Top 3: 1000 / 500 / 250</div>
+                    <table class="lb-table">
+                        <thead><tr>
+                            <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
+                        </tr></thead>
+                        <tbody id="lb-tournament-body">
+                            <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="leaderboard" id="leaderboard-hourly">
                     <h3 id="lb-hourly-title">⏱ Hourly Competition</h3>

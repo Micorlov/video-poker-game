@@ -151,6 +151,8 @@ function egLoadDailyReward(user) {
         if (!egUser) return;
         egProcessXpAndAchievements(ev);
         egProcessChallenges(ev);
+        if (window.egProcessTournament) egProcessTournament(ev);
+        if (window.pwaOnHandPlayed) pwaOnHandPlayed();
     };
 
     function egProcessChallenges(ev) {
@@ -229,6 +231,11 @@ function egLoadDailyReward(user) {
         set('pf-stats-title', et('profileStats'));
         set('pf-ach-title', et('profileAchievements'));
         set('pf-styles-title', et('profileStyles'));
+        set('lb-tournament-title', et('tourneyTitle'));
+        set('lb-tournament-resets-label', et('tourneyEndsIn'));
+        set('lb-tournament-note', et('tourneyScoreNote'));
+        if (window.egRenderTournamentBanner) egRenderTournamentBanner();
+        if (window.egRenderSeason && egSeason) egRenderSeason();
     };
 
     // ===================== Progression: Phase 2 =====================

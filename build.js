@@ -36,9 +36,11 @@ const jsFiles = [
     'js/competitions.js',
     'js/challenges.js',
     'js/achievements.js',
+    'js/tournaments.js',
     'js/rewards.js',
     'js/ui.js',
-    'js/game.js'
+    'js/game.js',
+    'js/pwa.js'
 ];
 
 let combinedJs = '';
