@@ -141,14 +141,14 @@
     .card-royalty-center.rank-Q { background: linear-gradient(135deg, #6b21a8, #a855f7); }
     .card-royalty-center.rank-K { background: linear-gradient(135deg, #991b1b, #ef4444); }
 
-    /* --- Cards in a scrollable row (if 5 cards overflow) --- */
+    /* Cards are sized via calc() above to always fit 5 across, so no
+       scrolling is needed. overflow-x:auto here would force the other
+       axis to auto too (per spec), silently clipping the HELD badge
+       (top: -10px) and the held/winning card's lift + glow. */
     .hand {
         flex-wrap: nowrap;
-        overflow-x: auto;
         justify-content: center;
-        -webkit-overflow-scrolling: touch;
-        scroll-snap-type: x proximity;
-        padding: 4px 0;
+        padding: 22px 8px 8px;
     }
 
     /* --- Leaderboard: make collapsible sections feel like sheets --- */
@@ -185,14 +185,33 @@
 
     /* --- Login overlay: better mobile sizing --- */
     .login-overlay {
-        padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+        height: 100dvh;
+        padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    }
+    .login-card {
+        max-width: 100%;
+        padding: 30px 22px 24px;
+        border-radius: 20px;
+        gap: 12px;
+    }
+    .login-badge {
+        width: 58px;
+        height: 82px;
     }
     .login-title {
-        font-size: 2.2em;
-        padding: 0 12px;
+        font-size: 1.9em;
     }
-    .login-subtitle { font-size: 0.9em; }
-    .google-btn { padding: 12px 24px; font-size: 15px; }
+    .login-subtitle {
+        font-size: 0.8em;
+        letter-spacing: 1.5px;
+    }
+    .google-btn {
+        padding: 14px 20px;
+        font-size: 15px;
+        min-height: 50px;
+    }
+    /* Trim the drifting suit motifs so they don't crowd a small viewport */
+    .ls-5, .ls-6 { display: none; }
 
     /* --- Rank bar: safe area top --- */
     .rank-bar {
@@ -396,6 +415,20 @@
     #profile-panel {
         height: 88vh;
     }
+
+    /* --- Login overlay: squeeze further on very small phones --- */
+    .login-card {
+        padding: 24px 18px 20px;
+        gap: 10px;
+    }
+    .login-badge {
+        width: 50px;
+        height: 70px;
+    }
+    .login-badge-rank { font-size: 20px; }
+    .login-title { font-size: 1.6em; }
+    .login-footer { font-size: 10.5px; }
+    .ls-1, .ls-2, .ls-3, .ls-4 { font-size: 50px; }
 }
 
 /* =================================================================
@@ -410,6 +443,26 @@
     .container {
         padding-top: 4px;
     }
+
+    /* --- Login overlay: fit a short landscape viewport --- */
+    .login-overlay {
+        overflow-y: auto;
+        align-items: flex-start;
+    }
+    .login-card {
+        margin: auto 0;
+        padding: 18px 22px;
+        gap: 8px;
+    }
+    .login-badge {
+        width: 44px;
+        height: 62px;
+    }
+    .login-badge-rank { font-size: 18px; }
+    .login-title { font-size: 1.5em; }
+    .login-subtitle { margin-top: -4px; }
+    .google-btn { min-height: 44px; padding: 10px 20px; }
+    .ls-suit { display: none; }
 
     h1 {
         font-size: 1.2em;

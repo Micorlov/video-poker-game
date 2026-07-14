@@ -606,10 +606,10 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 }
 
                 cardEl.innerHTML = `
+                    <div class="held-badge">${badgeText}</div>
+                    <div class="win-badge">${winBadgeText}</div>
                     <div class="card-inner">
                         <div class="card-front">
-                            <div class="held-badge">${badgeText}</div>
-                            <div class="win-badge">${winBadgeText}</div>
                             <div class="card-index top-left">
                                 <div class="card-index-rank">${card.rank}</div>
                                 <div class="card-index-suit">${card.suit}</div>
