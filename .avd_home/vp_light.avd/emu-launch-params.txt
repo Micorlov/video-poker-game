@@ -1,0 +1,7 @@
+/Users/michael/video_poker_game
+/Users/michael/Library/Android/sdk/emulator/emulator
+4
+/Users/michael/Library/Android/sdk/emulator/emulator
+-avd
+vp_light
+-no-snapshot

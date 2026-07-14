@@ -256,7 +256,9 @@ function egLoadDailyReward(user) {
         'Straight': 25, 'Flush': 30, 'Full House': 50,
         'Four of a Kind': 100, 'Straight Flush': 250, 'Royal Flush': 500,
         // Deuces Wild extras
-        'Five of a Kind': 150, 'Wild Royal Flush': 300, 'Four Deuces': 250
+        'Five of a Kind': 150, 'Wild Royal Flush': 300, 'Four Deuces': 250,
+        // Bonus Poker quad subtypes
+        'Four 5s-Ks': 100, 'Four 2s-4s': 120, 'Four Aces': 150
     };
 
     var CARD_STYLES = [

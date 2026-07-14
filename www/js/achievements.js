@@ -18,7 +18,8 @@ var ACHIEVEMENTS = [
         { id: 'challenge50', icon: '🏅' },
         { id: 'credits500',  icon: '💰' },
         { id: 'credits1000', icon: '💎' },
-        { id: 'ironhour',    icon: '🛡️' }
+        { id: 'ironhour',    icon: '🛡️' },
+        { id: 'perfect20',   icon: '🧠' }
     ];
 
     // Cumulative XP required to reach level n (level n→n+1 costs n×100 XP)
@@ -34,6 +35,7 @@ var ACHIEVEMENTS = [
 
     function egProcessXpAndAchievements(ev) {
         var gain = 10 + Math.floor(ev.bet / 5) + (XP_WIN_BONUS[ev.handType] || 0);
+        if (window.vpEventXpMult) gain = Math.round(gain * vpEventXpMult());
         egXp += gain;
         if (window.egProcessSeason) egProcessSeason(gain);
         var newLevel = egLevelFromXp(egXp);
@@ -123,6 +125,10 @@ var ACHIEVEMENTS = [
     // --- XP bar (user bar) ---
     function egRenderXpBar() {
         if (window.egRenderTournamentBanner) egRenderTournamentBanner();
+        if (window.updateVariantUI) updateVariantUI();
+        if (window.updateMultiHandUI) updateMultiHandUI();
+        if (window.egRenderVipBadge) egRenderVipBadge();
+        if (window.egApplyThemeUnlocks) egApplyThemeUnlocks();
         var lvlEl = document.getElementById('ub-level');
         var fillEl = document.getElementById('ub-xp-fill');
         var textEl = document.getElementById('ub-xp-text');

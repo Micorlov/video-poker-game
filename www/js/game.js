@@ -26,15 +26,48 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 'Straight': 2,
                 'Three of a Kind': 1,
                 'Nothing': 0
+            },
+            bonus: {
+                'Royal Flush': 250,
+                'Straight Flush': 50,
+                'Four Aces': 80,
+                'Four 2s-4s': 40,
+                'Four 5s-Ks': 25,
+                'Full House': 8,
+                'Flush': 5,
+                'Straight': 4,
+                'Three of a Kind': 3,
+                'Two Pair': 2,
+                'Jacks or Better': 1,
+                'Nothing': 0
+            },
+            doubleBonus: {
+                'Royal Flush': 250,
+                'Straight Flush': 50,
+                'Four Aces': 160,
+                'Four 2s-4s': 80,
+                'Four 5s-Ks': 50,
+                'Full House': 10,
+                'Flush': 7,
+                'Straight': 5,
+                'Three of a Kind': 3,
+                'Two Pair': 1,
+                'Jacks or Better': 1,
+                'Nothing': 0
             }
         };
         const HAND_ORDERS = {
             jacks: ['Royal Flush', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
-            deuces: ['Royal Flush', 'Four Deuces', 'Wild Royal Flush', 'Five of a Kind', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Nothing']
+            deuces: ['Royal Flush', 'Four Deuces', 'Wild Royal Flush', 'Five of a Kind', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Nothing'],
+            bonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
+            doubleBonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing']
         };
+        // Variants unlock as the player levels up — gives leveling a purpose
+        const VARIANT_MIN_LEVEL = { jacks: 1, deuces: 3, bonus: 8, doubleBonus: 15 };
         let gameVariant = 'jacks';
         try {
-            if (localStorage.getItem('vp_game_variant') === 'deuces') gameVariant = 'deuces';
+            const savedVariant = localStorage.getItem('vp_game_variant');
+            if (savedVariant && PAYTABLES[savedVariant]) gameVariant = savedVariant;
         } catch (e) {}
 
         function basePayouts() {
@@ -42,20 +75,38 @@ const SUITS = ['♠', '♥', '♦', '♣'];
         }
         let currentPayouts = { ...basePayouts() };
 
+        function variantUnlocked(v) {
+            const lvl = (typeof egLevel !== 'undefined' && window.egUser) ? egLevel : 1;
+            return lvl >= (VARIANT_MIN_LEVEL[v] || 1);
+        }
+
         function setGameVariant(v) {
             if (!PAYTABLES[v] || gameState !== 'bet' || v === gameVariant) return;
+            if (!variantUnlocked(v)) {
+                egToast('🔒 ' + (window.et ? et('variantLocked') : 'Unlocks at level {n}').replace('{n}', VARIANT_MIN_LEVEL[v]));
+                return;
+            }
             gameVariant = v;
             try { localStorage.setItem('vp_game_variant', v); } catch (e) {}
             currentPayouts = { ...basePayouts() };
             updateVariantUI();
             renderPayouts(TRANSLATIONS[currentLang]);
+            if (window.vpRenderHints) vpRenderHints();
         }
 
         function updateVariantUI() {
-            const jacksBtn = document.getElementById('variant-jacks');
-            const deucesBtn = document.getElementById('variant-deuces');
-            if (jacksBtn) jacksBtn.classList.toggle('selected', gameVariant === 'jacks');
-            if (deucesBtn) deucesBtn.classList.toggle('selected', gameVariant === 'deuces');
+            Object.keys(PAYTABLES).forEach(function(v) {
+                const btn = document.getElementById('variant-' + v);
+                if (!btn) return;
+                btn.classList.toggle('selected', gameVariant === v);
+                const locked = !variantUnlocked(v);
+                btn.classList.toggle('locked', locked);
+                const lockEl = btn.querySelector('.variant-lock');
+                if (lockEl) {
+                    lockEl.textContent = locked ? '🔒 ' + VARIANT_MIN_LEVEL[v] : '';
+                    lockEl.style.display = locked ? '' : 'none';
+                }
+            });
         }
 
         // --- Engagement tuning (play-money game) ---
@@ -351,6 +402,60 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             if (deckIdx !== -1) deck.splice(deckIdx, 1);
         }
 
+        // --- Multi-hand mode (Triple/Five Play) — unlocks at level 10 ---
+        const MULTI_HAND_MIN_LEVEL = 10;
+        let multiHandCount = 1;
+        let dealtHand = [];
+        try {
+            const savedMulti = parseInt(localStorage.getItem('vp_multi_hands'), 10);
+            if ([1, 3, 5].includes(savedMulti)) multiHandCount = savedMulti;
+        } catch (e) {}
+
+        function multiHandUnlocked() {
+            return (typeof egLevel !== 'undefined' && window.egUser) ? egLevel >= MULTI_HAND_MIN_LEVEL : false;
+        }
+
+        function setMultiHand(n) {
+            if (![1, 3, 5].includes(n) || gameState !== 'bet') return;
+            if (n > 1 && !multiHandUnlocked()) {
+                egToast('🔒 ' + (window.et ? et('multiLocked') : 'Multi-hand unlocks at level {n}').replace('{n}', MULTI_HAND_MIN_LEVEL));
+                return;
+            }
+            multiHandCount = n;
+            try { localStorage.setItem('vp_multi_hands', String(n)); } catch (e) {}
+            updateMultiHandUI();
+        }
+
+        function updateMultiHandUI() {
+            [1, 3, 5].forEach(function(n) {
+                const btn = document.getElementById('multi-' + n);
+                if (!btn) return;
+                btn.classList.toggle('selected', multiHandCount === n);
+                btn.classList.toggle('locked', n > 1 && !multiHandUnlocked());
+            });
+        }
+
+        function renderMultiHands(extraResults) {
+            const wrap = document.getElementById('multi-hands');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+            if (!extraResults || !extraResults.length) return;
+            const t = TRANSLATIONS[currentLang];
+            extraResults.forEach(function(r) {
+                const row = document.createElement('div');
+                row.className = 'multi-hand-row' + (r.win > 0 ? ' won' : '');
+                const cards = r.hand.map(function(c) {
+                    const red = c.suit === '♥' || c.suit === '♦';
+                    return '<span class="mini-card' + (red ? ' red' : '') + '">' + c.rank + c.suit + '</span>';
+                }).join('');
+                const label = r.win > 0
+                    ? '<span class="mh-win">' + (t.payouts[r.type] || r.type) + ' +' + r.win + '</span>'
+                    : '<span class="mh-lose">—</span>';
+                row.innerHTML = cards + label;
+                wrap.appendChild(row);
+            });
+        }
+
         function deal() {
             checkHourReset();
             checkDayReset();
@@ -367,23 +472,35 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                     }
                 }
             }
+            // Drop to an affordable hand count rather than force a rebuy loop
+            if (multiHandCount > 1 && balance < bet * multiHandCount) {
+                setMultiHand(bet * 3 <= balance ? 3 : 1);
+            }
+            const totalBet = bet * multiHandCount;
 
             // Clean up celebration classes & overlays
             document.body.classList.remove('screen-shake');
             document.querySelectorAll('.flash-overlay, .confetti-burst-piece, .gold-rain-piece').forEach(el => el.remove());
 
-            balance -= bet;
+            balance -= totalBet;
             document.getElementById('balance').textContent = balance;
             saveGameState();
 
             deck = createDeck();
-            shuffle(deck);
-            hand = deck.splice(0, 5);
-            boostHand();
+            if (window.vpDuelShuffle && vpDuelShuffle(deck)) {
+                // Duel mode: seeded deck shared with the opponent — no engagement boost
+                hand = deck.splice(0, 5);
+            } else {
+                shuffle(deck);
+                hand = deck.splice(0, 5);
+                boostHand();
+            }
+            dealtHand = hand.slice();
             held = [false, false, false, false, false];
             gameState = 'hold';
 
             renderHand();
+            renderMultiHands([]);
             document.getElementById('deal-btn').disabled = true;
             document.getElementById('hold-btn').disabled = false;
             lastHandType = null;
@@ -391,6 +508,8 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             resultEl.className = 'result';
             resultEl.innerHTML = '';
             document.getElementById('explanation').innerHTML = '';
+            if (window.vpRenderHints) vpRenderHints();
+            if (window.vpTutorialOnDeal) vpTutorialOnDeal();
         }
 
         function getStreakBonus(streak) {
@@ -409,24 +528,49 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             });
             const hadHeldPair = Object.values(heldRankCounts).some(function(n) { return n >= 2; });
 
+            // Perfect-play tracking must see the pre-draw hand + holds
+            if (window.vpOnDrawCheckPerfect) vpOnDrawCheckPerfect();
+
             // Replace unheld cards
             for (let i = 0; i < 5; i++) {
                 if (!held[i]) {
                     hand[i] = deck.pop();
                 }
             }
-            const result = gameVariant === 'deuces' ? evaluateDeucesHand(hand) : evaluateHand(hand);
+            const result = evaluateForVariant(hand);
             const handType = result.type;
             lastHandType = handType;
             const winIndices = result.winIndices || []; // Ensure it's an array
             const thirdMatchIndices = result.thirdMatchIndices || []; // Ensure it's an array
             const secondPairIndices = result.secondPairIndices || []; // Ensure it's an array
             let win = bet * currentPayouts[handType];
+            let bestType = handType;
+
+            // Extra hands (Triple/Five Play): same deal, independent draws
+            const extraResults = [];
+            if (multiHandCount > 1 && dealtHand.length === 5) {
+                for (let k = 1; k < multiHandCount; k++) {
+                    const sideDeck = createDeck().filter(c =>
+                        !dealtHand.some(d => d.rank === c.rank && d.suit === c.suit));
+                    shuffle(sideDeck);
+                    const sideHand = dealtHand.map((c, i) => held[i] ? c : sideDeck.pop());
+                    const sideRes = evaluateForVariant(sideHand);
+                    const sideWin = bet * currentPayouts[sideRes.type];
+                    win += sideWin;
+                    if ((HAND_RANK[sideRes.type] || 0) > (HAND_RANK[bestType] || 0)) bestType = sideRes.type;
+                    extraResults.push({ hand: sideHand, type: sideRes.type, win: sideWin });
+                }
+            }
+            const totalBet = bet * multiHandCount;
+
             if (win > 0) {
                 winStreak++;
-                const streakBonus = getStreakBonus(winStreak);
+                let streakBonus = getStreakBonus(winStreak);
+                if (window.vpEventStreakMult) streakBonus *= vpEventStreakMult();
                 if (streakBonus > 0) win += Math.round(win * streakBonus);
                 if (window.vpTournamentMultiplier) win = Math.round(win * vpTournamentMultiplier());
+                if (window.vpVipMultiplier) win = Math.round(win * vpVipMultiplier());
+                if (window.vpEventWinMultiplier) win = Math.round(win * vpEventWinMultiplier(bestType));
             } else {
                 winStreak = 0;
             }
@@ -434,18 +578,19 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             lastWinAmount = win;
             balance += win;
             handsPlayed++;
-            
+
             if (win > 0) {
                 totalWon += win;
                 lossStreak = 0;
                 currentPayouts = { ...basePayouts() };
             } else {
-                totalLost += bet;
+                totalLost += totalBet;
                 lossStreak++;
                 for (let key in currentPayouts) {
                     if (key !== 'Nothing') currentPayouts[key]++;
                 }
             }
+            renderMultiHands(extraResults);
             updateStats();
             renderPayouts(TRANSLATIONS[currentLang]);
 
@@ -453,12 +598,12 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 document.getElementById('balance').textContent = balance;
                 playSound('loss');
             } else {
-                triggerWinCelebration(handType, win);
+                triggerWinCelebration(bestType, win);
             }
             saveGameState();
 
-            if (win > 0 && HAND_RANK[handType] >= 3) {
-                logRoomEvent('hand', handType);
+            if (win > 0 && HAND_RANK[bestType] >= 3) {
+                logRoomEvent('hand', bestType);
             }
 
             const t = TRANSLATIONS[currentLang];
@@ -481,10 +626,13 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             }
 
             renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
-            updateScores(win, bet, handType);
+            updateScores(win, bet, bestType);
             if (window.egOnHandPlayed) {
-                window.egOnHandPlayed({ handType: handType, win: win, bet: bet, heldPair: hadHeldPair, streak: winStreak });
+                window.egOnHandPlayed({ handType: bestType, win: win, bet: bet, heldPair: hadHeldPair, streak: winStreak });
             }
+            if (window.vpDuelOnHand) vpDuelOnHand(win, totalBet, bestType);
+            if (window.vpSocialOnHand) vpSocialOnHand(bestType);
+            if (window.vpTutorialOnDraw) vpTutorialOnDraw(win);
 
             gameState = 'bet';
             document.getElementById('deal-btn').disabled = false;
@@ -525,7 +673,8 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                     return (wl.pair || 'Pair') + ' ' + rankLabel;
                 }
             }
-            if (handType === 'Four of a Kind') {
+            if (handType === 'Four of a Kind' || handType === 'Four Aces' ||
+                handType === 'Four 2s-4s' || handType === 'Four 5s-Ks') {
                 return wl.fourOfKind || '4 of a Kind';
             }
             if (handType === 'Straight') {
@@ -584,6 +733,18 @@ const SUITS = ['♠', '♥', '♦', '♣'];
 
                 cardEl.className = classes.trim();
                 cardEl.onclick = () => toggleHold(i);
+                // Screen reader + keyboard support
+                const SUIT_NAMES = { '♠': 'Spades', '♥': 'Hearts', '♦': 'Diamonds', '♣': 'Clubs' };
+                const RANK_NAMES = { 'A': 'Ace', 'J': 'Jack', 'Q': 'Queen', 'K': 'King' };
+                cardEl.setAttribute('role', 'button');
+                cardEl.setAttribute('tabindex', '0');
+                cardEl.setAttribute('aria-pressed', held[i] ? 'true' : 'false');
+                cardEl.setAttribute('aria-label',
+                    (RANK_NAMES[card.rank] || card.rank) + ' of ' + SUIT_NAMES[card.suit] + (held[i] ? ', held' : ''));
+                cardEl.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleHold(i); }
+                };
+                cardEl.dataset.suit = card.suit;
                 
                 const badgeText = t.heldBadge || 'HELD';
                 const winBadgeText = isResult ? getWinBadgeText(i, lastHandType) : '';
@@ -648,6 +809,7 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 });
             }
 
+            if (window.vpApplyHintClasses && gameState === 'hold') vpApplyHintClasses();
         }
 
         function evaluateHand(hand) {
@@ -734,6 +896,22 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                     result.type = 'Jacks or Better';
                     result.winIndices = findIndices([pairRank]);
                 }
+            }
+            return result;
+        }
+
+        // Evaluate a hand according to the active variant's rules
+        function evaluateForVariant(h) {
+            if (gameVariant === 'deuces') return evaluateDeucesHand(h);
+            const result = evaluateHand(h);
+            // Bonus variants split Four of a Kind by rank
+            if (result.type === 'Four of a Kind' && (gameVariant === 'bonus' || gameVariant === 'doubleBonus')) {
+                const rankCounts = {};
+                h.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
+                const quadRank = Object.keys(rankCounts).find(r => rankCounts[r] === 4);
+                if (quadRank === 'A') result.type = 'Four Aces';
+                else if (['2', '3', '4'].includes(quadRank)) result.type = 'Four 2s-4s';
+                else result.type = 'Four 5s-Ks';
             }
             return result;
         }
@@ -845,10 +1023,21 @@ const SUITS = ['♠', '♥', '♦', '♣'];
         // Initialize
         changeLanguage('en');
         updateVariantUI();
-    // Keyboard support for bet selection (keys 1-5)
+        updateMultiHandUI();
+    // Keyboard support: 1-5 toggle holds during a hand, or pick a bet between hands.
+    // D deals/draws.
     document.addEventListener('keydown', function(e) {
+        if (e.target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+        if (gameState === 'hold' && ['1', '2', '3', '4', '5'].includes(e.key)) {
+            toggleHold(parseInt(e.key, 10) - 1);
+            return;
+        }
         const keyMap = { '1': 5, '2': 10, '3': 20, '4': 50 };
         if (keyMap[e.key]) setBet(keyMap[e.key]);
+        if (e.key === 'd' || e.key === 'D') {
+            if (gameState === 'bet' && !document.getElementById('deal-btn').disabled) deal();
+            else if (gameState === 'hold') draw();
+        }
     });
 
     // Firebase

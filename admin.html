@@ -281,6 +281,37 @@
                         <tbody id="comp-body"><tr><td colspan="7" class="empty-state">Select an hour</td></tr></tbody>
                     </table>
                 </div>
+
+                <div class="panel" style="margin-top:24px;">
+                    <div class="panel-header">
+                        <h2>🎉 Limited-Time Events</h2>
+                        <span class="badge" id="events-count">0</span>
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; align-items:center;">
+                        <input id="ev-name" placeholder="Event name (e.g. Golden Weekend)" style="flex:2; min-width:180px; padding:7px 10px;">
+                        <input id="ev-emoji" placeholder="🔥" maxlength="4" style="width:56px; padding:7px 10px;">
+                        <select id="ev-type" style="padding:7px 10px;">
+                            <option value="xp">XP multiplier</option>
+                            <option value="payout">Payout multiplier</option>
+                            <option value="streak">Streak-bonus multiplier</option>
+                        </select>
+                        <input id="ev-mult" type="number" step="0.5" min="1" value="2" title="Multiplier" style="width:70px; padding:7px 10px;">
+                        <select id="ev-hand" title="Only for payout events — leave 'All hands' otherwise" style="padding:7px 10px;">
+                            <option value="">All hands</option>
+                            <option value="Flush">Flush only</option>
+                            <option value="Straight">Straight only</option>
+                            <option value="Full House">Full House only</option>
+                            <option value="Four of a Kind">Four of a Kind only</option>
+                        </select>
+                        <input id="ev-start" type="datetime-local" style="padding:7px 10px;">
+                        <input id="ev-end" type="datetime-local" style="padding:7px 10px;">
+                        <button onclick="createEvent()" style="padding:7px 14px; cursor:pointer;">Create Event</button>
+                    </div>
+                    <table>
+                        <thead><tr><th>Event</th><th>Type</th><th>×</th><th>Hand</th><th>Starts</th><th>Ends</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="events-body"><tr><td colspan="8" class="empty-state">No events</td></tr></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -328,6 +359,69 @@
         loadRecentLogins();
         loadAllUsers();
         loadCompetition(0);
+        loadEvents();
+    }
+
+    // --- limited-time events management ---
+    function loadEvents() {
+        db.collection('events').orderBy('endsAt', 'desc').limit(20).get().then(function(snap) {
+            var body = document.getElementById('events-body');
+            document.getElementById('events-count').textContent = snap.size;
+            if (snap.empty) {
+                body.innerHTML = '<tr><td colspan="8" class="empty-state">No events</td></tr>';
+                return;
+            }
+            body.innerHTML = '';
+            var now = Date.now();
+            snap.forEach(function(doc) {
+                var d = doc.data();
+                var starts = d.startsAt && d.startsAt.toDate ? d.startsAt.toDate() : null;
+                var ends = d.endsAt && d.endsAt.toDate ? d.endsAt.toDate() : null;
+                var status = !starts || !ends ? '?' :
+                    now < starts.getTime() ? 'scheduled' :
+                    now < ends.getTime() ? '🟢 LIVE' : 'ended';
+                var tr = document.createElement('tr');
+                tr.innerHTML =
+                    '<td>' + (d.emoji || '') + ' ' + (d.name || '') + '</td>' +
+                    '<td>' + (d.type || '') + '</td>' +
+                    '<td>×' + (d.multiplier || 1) + '</td>' +
+                    '<td>' + (d.handType || 'all') + '</td>' +
+                    '<td>' + (starts ? starts.toLocaleString() : '') + '</td>' +
+                    '<td>' + (ends ? ends.toLocaleString() : '') + '</td>' +
+                    '<td>' + status + '</td>' +
+                    '<td><button onclick="deleteEvent(\'' + doc.id + '\')">Delete</button></td>';
+                body.appendChild(tr);
+            });
+        }).catch(function(err) { console.error('loadEvents:', err); });
+    }
+
+    function createEvent() {
+        var name = document.getElementById('ev-name').value.trim();
+        var startVal = document.getElementById('ev-start').value;
+        var endVal = document.getElementById('ev-end').value;
+        if (!name || !startVal || !endVal) { alert('Name, start and end are required'); return; }
+        var starts = new Date(startVal);
+        var ends = new Date(endVal);
+        if (ends <= starts) { alert('End must be after start'); return; }
+        db.collection('events').add({
+            name: name,
+            emoji: document.getElementById('ev-emoji').value.trim() || '🎉',
+            type: document.getElementById('ev-type').value,
+            multiplier: parseFloat(document.getElementById('ev-mult').value) || 2,
+            handType: document.getElementById('ev-hand').value || '',
+            startsAt: firebase.firestore.Timestamp.fromDate(starts),
+            endsAt: firebase.firestore.Timestamp.fromDate(ends),
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(function() {
+            document.getElementById('ev-name').value = '';
+            loadEvents();
+        }).catch(function(err) { alert('Create failed: ' + err.message); });
+    }
+
+    function deleteEvent(id) {
+        if (!confirm('Delete this event?')) return;
+        db.collection('events').doc(id).delete().then(loadEvents)
+            .catch(function(err) { alert('Delete failed: ' + err.message); });
     }
 
     function getHourKey(offset) {

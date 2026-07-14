@@ -326,7 +326,8 @@
     };
 
     // --- avatar builder ---
-    var AVATAR_EMOJI = ['🦊', '🐯', '🦁', '🐼', '🐸', '🐙', '🦄', '🐺', '🦅', '🐢', '🐬', '🦋', '👽', '🤖', '🎩', '⭐'];
+    var AVATAR_EMOJI = ['🦊', '🐯', '🦁', '🐼', '🐸', '🐙', '🦄', '🐺', '🦅', '🐢', '🐬', '🦋', '👽', '🤖', '🎩', '⭐',
+                        '♠️', '♥️', '♦️', '♣️', '🃏', '🎰', '🎲', '👑', '💰', '🏆', '🍀', '💎'];
     var AVATAR_COLORS = ['#8a2be2', '#e11d48', '#0ea5e9', '#16a34a', '#f59e0b', '#475569', '#c026d3', '#0d9488'];
     var egAvatar = { emoji: '', color: '' };
 
@@ -339,14 +340,16 @@
         return egAvatar.emoji ? egAvatar.emoji + '|' + (egAvatar.color || AVATAR_COLORS[0]) : '';
     };
 
-    // Renders the avatar cell for a leaderboard row: custom emoji avatar wins over photo
+    // Renders the avatar cell for a leaderboard row: custom emoji avatar wins over photo.
+    // The ring color reflects the player's VIP tier.
     window.lbAvatarHtml = function(d) {
         var a = d.avatar || '';
+        var vip = window.vpVipClass ? ' ' + vpVipClass(d.level || 1) : '';
         if (a.indexOf('|') > 0) {
             var parts = a.split('|');
-            return '<span class="lb-avatar" style="background:' + escapeHtml(parts[1]) + '">' + escapeHtml(parts[0]) + '</span>';
+            return '<span class="lb-avatar' + vip + '" style="background:' + escapeHtml(parts[1]) + '">' + escapeHtml(parts[0]) + '</span>';
         }
-        return d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+        return d.photoURL ? '<img class="' + vip.trim() + '" src="' + d.photoURL + '">' : '';
     };
 
     window.egApplyAvatarToUserBar = function() {

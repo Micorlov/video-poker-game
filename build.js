@@ -19,6 +19,7 @@ const cssFiles = [
     'styles/cards.css',
     'styles/animations.css',
     'styles/leaderboard.css',
+    'styles/features.css',
     'styles/mobile.css'
 ];
 
@@ -40,7 +41,14 @@ const jsFiles = [
     'js/extras.js',
     'js/rewards.js',
     'js/ui.js',
+    'js/variants.js',
     'js/game.js',
+    'js/hints.js',
+    'js/social.js',
+    'js/duels.js',
+    'js/community.js',
+    'js/events.js',
+    'js/onboarding.js',
     'js/pwa.js'
 ];
 

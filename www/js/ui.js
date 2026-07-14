@@ -55,7 +55,9 @@ function egToast(text) {
             };
             if (window.egSetAvatarState) egSetAvatarState(data);
             egApplyCardStyle(data.cardStyle || 'classic');
+            if (data.tableTheme && window.vpSelectTheme) vpSelectTheme(data.tableTheme);
             egRenderXpBar();
+            if (window.initTutorial) initTutorial(user, data);
 
             if (data.bonusCredits && data.bonusCredits > 0) {
                 var bonus = data.bonusCredits;
@@ -82,7 +84,8 @@ function egToast(text) {
                 ? data.lastActiveDate.toDate().getTime() : null;
             if (last) {
                 var gap = Date.now() - last;
-                if (gap > EG_COMEBACK_LONG_MS) egComebackAmount = EG_COMEBACK_LONG_CREDITS;
+                if (gap > EG_COMEBACK_EPIC_MS) egComebackAmount = EG_COMEBACK_EPIC_CREDITS;
+                else if (gap > EG_COMEBACK_LONG_MS) egComebackAmount = EG_COMEBACK_LONG_CREDITS;
                 else if (gap > EG_COMEBACK_SHORT_MS) egComebackAmount = EG_COMEBACK_SHORT_CREDITS;
             }
             // Refresh presence — also guarantees one claim per absence period

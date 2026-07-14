@@ -1,0 +1,38 @@
+netsimd I 07-14 20:51:26.475 daemon/src/rust_main.rs:112 - netsim artifacts path: "/Users/michael/video_poker_game/.tmp/android-michael/netsimd"
+netsimd I 07-14 20:51:26.475 daemon/src/rust_main.rs:113 - NetsimdArgs {
+    fd_startup_str: None,
+    no_cli_ui: true,
+    no_web_ui: true,
+    pcap: false,
+    disable_address_reuse: false,
+    hci_port: None,
+    connector_instance: None,
+    instance: None,
+    logtostderr: false,
+    dev: false,
+    forward_host_mdns: false,
+    vsock: None,
+    config: None,
+    host_dns: Some(
+        "192.168.0.1",
+    ),
+    http_proxy: None,
+    wifi_tap: None,
+    wifi: None,
+    test_beacons: false,
+    no_test_beacons: false,
+    no_shutdown: false,
+    verbose: false,
+    version: false,
+    debug: DebugArgs {
+        debug_no_traffic: false,
+        debug_no_network: false,
+        debug_no_wmedium: false,
+        debug_no_mdns_wmedium: false,
+        debug_no_guest_to_host_mdns: false,
+    },
+    rssi: None,
+}
+netsimd I 07-14 20:51:26.475 daemon/src/rust_main.rs:266 - Netsim Version: 0.3.88, OS: macos, Arch: aarch64
+netsimd E 07-14 20:51:26.475 common/src/util/ini_file.rs:162 - Unable to find netsim ini file: "/Users/michael/video_poker_game/.tmp/netsim.ini"
+netsimd I 07-14 20:51:26.475 daemon/src/rust_main.rs:453 - get_server_address(1) returned None. Retrying...

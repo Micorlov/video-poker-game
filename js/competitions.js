@@ -986,10 +986,13 @@ function getHourKey(date) {
     // Daily login rewards, comeback bonus, win streaks, daily challenges
 
     var EG_REWARDS = [50, 75, 100, 150, 200, 300, 500];
+    // Anti-churn escalation: the longer they've been away, the bigger the welcome back
     var EG_COMEBACK_SHORT_MS = 24 * 3600e3;
     var EG_COMEBACK_LONG_MS = 72 * 3600e3;
-    var EG_COMEBACK_SHORT_CREDITS = 100;
-    var EG_COMEBACK_LONG_CREDITS = 200;
+    var EG_COMEBACK_EPIC_MS = 7 * 24 * 3600e3;
+    var EG_COMEBACK_SHORT_CREDITS = 200;
+    var EG_COMEBACK_LONG_CREDITS = 300;
+    var EG_COMEBACK_EPIC_CREDITS = 500;
 
     var egUser = null;
     var egModalQueue = [];

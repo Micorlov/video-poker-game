@@ -228,6 +228,42 @@
         </div>
     </div>
 
+    <div id="eg-gift-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="closeGiftModal()">✕</button>
+            <h3 id="gift-title">🎁 Send a Gift</h3>
+            <div class="eg-sub" id="gift-sub"></div>
+            <div class="gift-amounts" id="gift-amounts"></div>
+        </div>
+    </div>
+
+    <div id="duel-invite-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="duelDeclineInvite()">✕</button>
+            <h3 id="duel-invite-title">⚔️ Duel Challenge!</h3>
+            <div class="eg-sub" id="duel-invite-msg"></div>
+            <div class="duel-invite-actions">
+                <button class="eg-claim-btn" id="duel-accept-btn" onclick="duelAcceptInvite()">Accept Duel</button>
+                <button class="room-action-btn secondary" id="duel-decline-btn" onclick="duelDeclineInvite()">Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="a11y-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="closeA11yModal()">✕</button>
+            <h3 id="a11y-title">♿ Accessibility</h3>
+            <label class="a11y-row"><input type="checkbox" id="a11y-contrast" onchange="a11yChanged()">
+                <span id="a11y-contrast-label">High contrast mode</span></label>
+            <label class="a11y-row"><input type="checkbox" id="a11y-motion" onchange="a11yChanged()">
+                <span id="a11y-motion-label">Reduce motion</span></label>
+            <label class="a11y-row"><input type="checkbox" id="a11y-colorblind" onchange="a11yChanged()">
+                <span id="a11y-colorblind-label">Color-blind friendly suits</span></label>
+        </div>
+    </div>
+
+    <div id="social-ticker" class="social-ticker eg-hidden"></div>
+
     <div id="profile-backdrop" class="eg-hidden" onclick="egCloseProfile()"></div>
     <div id="profile-panel" class="eg-hidden">
         <button class="eg-close" onclick="egCloseProfile()">✕</button>
@@ -282,6 +318,10 @@
             <h4 id="pf-styles-title">Card Styles</h4>
             <div class="style-row" id="pf-styles"></div>
         </div>
+        <div id="pf-themes-section">
+            <h4 id="pf-themes-title">Table Themes</h4>
+            <div class="style-row" id="pf-themes"></div>
+        </div>
     </div>
 
     <div class="container" style="display:none; padding-top: 50px;" id="game-container">
@@ -300,12 +340,22 @@
         <h1 id="game-title">Video Poker</h1>
 
         <div id="tournament-banner" class="eg-hidden"></div>
+        <div id="event-banner" class="event-banner eg-hidden"></div>
+        <div id="duel-banner" class="duel-banner eg-hidden"></div>
 
         <div class="game-layout">
             <div class="game-col">
                 <div class="variant-picker">
-                    <button class="variant-btn selected" id="variant-jacks" onclick="setGameVariant('jacks')">🂡 Jacks or Better</button>
-                    <button class="variant-btn" id="variant-deuces" onclick="setGameVariant('deuces')">🃒 Deuces Wild</button>
+                    <button class="variant-btn selected" id="variant-jacks" onclick="setGameVariant('jacks')">🂡 Jacks or Better <span class="variant-lock"></span></button>
+                    <button class="variant-btn" id="variant-deuces" onclick="setGameVariant('deuces')">🃒 Deuces Wild <span class="variant-lock"></span></button>
+                    <button class="variant-btn" id="variant-bonus" onclick="setGameVariant('bonus')">🂱 Bonus Poker <span class="variant-lock"></span></button>
+                    <button class="variant-btn" id="variant-doubleBonus" onclick="setGameVariant('doubleBonus')">🃁 Double Bonus <span class="variant-lock"></span></button>
+                </div>
+                <div class="multi-picker">
+                    <span id="multi-label">Hands:</span>
+                    <button class="multi-btn selected" id="multi-1" onclick="setMultiHand(1)">1</button>
+                    <button class="multi-btn" id="multi-3" onclick="setMultiHand(3)">3×</button>
+                    <button class="multi-btn" id="multi-5" onclick="setMultiHand(5)">5×</button>
                 </div>
                 <div class="payouts" id="payouts"></div>
 
@@ -323,11 +373,13 @@
                         <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
                     </div>
 
+                    <div id="multi-hands"></div>
                     <div class="hand" id="hand"></div>
 
                     <div class="controls">
                         <button id="deal-btn" onclick="deal()">Deal</button>
                         <button id="hold-btn" onclick="draw()" disabled>Draw</button>
+                        <button id="hint-btn" onclick="toggleHints()" title="Strategy hints" style="opacity:0.45">💡</button>
                     </div>
 
                     <div class="result" id="result"></div>
@@ -383,6 +435,16 @@
             </div>
 
             <div class="lb-col">
+                <div class="leaderboard" id="friends-panel">
+                    <h3 id="friends-title">👥 Friends</h3>
+                    <div class="rooms-empty" id="friends-empty">Add friends by their referral code — find yours in your profile.</div>
+                    <div id="friends-list"></div>
+                    <div class="share-row" style="margin-top:10px;">
+                        <input class="room-input" id="friend-code-input" maxlength="6" placeholder="Friend code…"
+                            autocomplete="off" onkeydown="if(event.key==='Enter')addFriendByCode()">
+                        <button class="share-copy-btn" id="friend-add-btn" onclick="addFriendByCode()">Add</button>
+                    </div>
+                </div>
                 <div class="leaderboard" id="rooms-panel">
                     <h3 id="rooms-title">🃏 Poker Rooms</h3>
                     <div class="room-tabs" id="rooms-tabs"></div>
@@ -456,6 +518,10 @@
                             <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="leaderboard" id="hof-panel">
+                    <h3 id="hof-title">🏛️ Hall of Fame</h3>
+                    <div id="hof-list"></div>
                 </div>
                 <div class="lb-formula-note" id="lb-formula-note">
                     <strong>How is score calculated?</strong><br>

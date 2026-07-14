@@ -2288,6 +2288,348 @@ body.fast-deal .card-inner {
 }
 
 
+/* --- styles/features.css --- */
+/* ===================== Phases 7-10: variants, multi-hand, hints, social, VIP, events, themes, a11y ===================== */
+
+/* --- multi-hand picker (Phase 7.2) --- */
+.multi-picker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 8px 0 4px;
+    color: #ffd700;
+    font-size: 13px;
+}
+.multi-btn {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    color: #ffd700;
+    border-radius: 8px;
+    padding: 4px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+.multi-btn:hover { transform: translateY(-1px); background: rgba(255, 215, 0, 0.12); }
+.multi-btn.selected {
+    background: linear-gradient(45deg, #ffd700, #ffaa00);
+    color: #1a1a1a;
+    font-weight: 700;
+}
+.multi-btn.locked { opacity: 0.4; }
+
+.variant-btn.locked { opacity: 0.55; }
+.variant-lock { font-size: 11px; opacity: 0.9; }
+
+/* --- multi-hand result rows --- */
+#multi-hands { margin-bottom: 8px; }
+.multi-hand-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 4px 8px;
+    margin: 3px auto;
+    max-width: 480px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.multi-hand-row.won {
+    border-color: rgba(74, 222, 128, 0.5);
+    background: rgba(74, 222, 128, 0.08);
+}
+.mini-card {
+    background: #fff;
+    color: #1a1a1a;
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 26px;
+    text-align: center;
+}
+.mini-card.red { color: #cc0000; }
+.mh-win { color: #4ade80; font-size: 12px; font-weight: 700; margin-inline-start: 6px; }
+.mh-lose { color: #888; font-size: 12px; margin-inline-start: 6px; }
+
+/* --- strategy hints (Phase 7.5) --- */
+#hint-btn {
+    background: none;
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 6px 12px;
+    line-height: 1;
+    transition: opacity 0.2s ease;
+}
+.card.hint-suggest {
+    outline: 3px solid #38bdf8;
+    outline-offset: 3px;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.6);
+}
+
+/* --- friends panel (Phase 8.1) --- */
+.friend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 13px;
+}
+.friend-status {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex: none;
+}
+.friend-status.on { background: #4ade80; box-shadow: 0 0 6px rgba(74, 222, 128, 0.8); }
+.friend-status.off { background: #555; }
+.friend-avatar { display: inline-flex; }
+.friend-avatar .lb-avatar, .friend-avatar img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+.friend-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    color: #fff;
+}
+.friend-name:hover { color: #ffd700; }
+.friend-actions { display: flex; gap: 4px; }
+.friend-btn {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 3px 7px;
+    transition: transform 0.15s ease;
+}
+.friend-btn:hover { transform: scale(1.12); }
+
+/* --- gift modal (Phase 8.3) --- */
+.gift-amounts { display: flex; gap: 10px; justify-content: center; margin-top: 14px; }
+.gift-amount-btn { flex: 1; max-width: 110px; }
+
+/* --- duel (Phase 8.2) --- */
+.duel-banner {
+    margin: 8px auto;
+    max-width: 640px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, rgba(220, 38, 38, 0.25), rgba(0, 0, 0, 0.4));
+    border: 1px solid rgba(248, 113, 113, 0.5);
+    color: #fecaca;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+}
+.duel-invite-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+
+/* --- event banner (Phase 9.4) --- */
+.event-banner {
+    margin: 8px auto;
+    max-width: 640px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.2));
+    border: 1px solid rgba(217, 70, 239, 0.55);
+    color: #f5d0fe;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    animation: eventPulse 2.4s ease-in-out infinite;
+}
+@keyframes eventPulse {
+    0%, 100% { box-shadow: 0 0 6px rgba(217, 70, 239, 0.3); }
+    50% { box-shadow: 0 0 16px rgba(217, 70, 239, 0.65); }
+}
+
+/* --- VIP tiers (Phase 9.3) --- */
+.vip-badge {
+    border: 1px solid;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 1px 8px;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.lb-avatar.vip-silver, img.vip-silver { box-shadow: 0 0 0 2px #c0c0c0; }
+.lb-avatar.vip-gold, img.vip-gold { box-shadow: 0 0 0 2px #ffd700; }
+.lb-avatar.vip-platinum, img.vip-platinum { box-shadow: 0 0 0 2px #a0e8e8; }
+.lb-avatar.vip-diamond, img.vip-diamond {
+    box-shadow: 0 0 0 2px #b9f2ff, 0 0 10px rgba(185, 242, 255, 0.8);
+}
+
+/* --- social ticker (Phase 8.4) --- */
+.social-ticker {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(6px);
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 11.5px;
+    text-align: center;
+    padding: 4px 10px;
+    border-top: 1px solid rgba(255, 215, 0, 0.18);
+}
+
+/* --- hall of fame (Phase 8.5) --- */
+.hof-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 12.5px;
+}
+.hof-medal { font-size: 16px; }
+.hof-name { color: #ffd700; font-weight: 700; }
+.hof-meta { flex: 1; opacity: 0.6; font-size: 11px; }
+.hof-score { color: #4ade80; font-weight: 700; }
+.hof-empty { opacity: 0.6; font-size: 12.5px; padding: 8px 4px; }
+
+/* --- tutorial (Phase 10.1) --- */
+.tut-tip {
+    position: absolute;
+    z-index: 300;
+    width: 280px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid #ffd700;
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 14px;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.6);
+    animation: tutPop 0.3s ease;
+}
+@keyframes tutPop {
+    from { transform: translateY(6px); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+.tut-skip {
+    margin-top: 10px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+.tut-highlight {
+    position: relative;
+    z-index: 299;
+    outline: 3px solid #ffd700;
+    outline-offset: 4px;
+    border-radius: 8px;
+    animation: tutGlow 1.2s ease-in-out infinite;
+}
+@keyframes tutGlow {
+    0%, 100% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); }
+    50% { box-shadow: 0 0 22px rgba(255, 215, 0, 0.85); }
+}
+
+/* --- table themes (Phase 10.3) --- */
+body.theme-midnight {
+    background: linear-gradient(135deg, #0b1a3a 0%, #060f24 50%, #01050f 100%);
+    background-attachment: fixed;
+}
+body.theme-goldluxe {
+    background: linear-gradient(135deg, #1c1607 0%, #0f0b03 55%, #000 100%);
+    background-attachment: fixed;
+}
+body.theme-neon {
+    background: linear-gradient(135deg, #14042b 0%, #0a0118 55%, #000 100%);
+    background-attachment: fixed;
+}
+body.theme-neon .game-area, body.theme-neon .leaderboard {
+    box-shadow: 0 0 18px rgba(217, 70, 239, 0.18);
+}
+body.theme-goldluxe .game-area, body.theme-goldluxe .leaderboard {
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.14);
+}
+.theme-chip-midnight { border-color: #3b82f6; }
+.theme-chip-goldluxe { border-color: #ffd700; }
+.theme-chip-neon { border-color: #d946ef; }
+
+/* --- accessibility (Phase 10.4) --- */
+.a11y-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 4px;
+    font-size: 14px;
+    color: #fff;
+    cursor: pointer;
+    text-align: start;
+}
+.a11y-row input { width: 18px; height: 18px; accent-color: #ffd700; }
+
+body.hc-mode .card { border: 2px solid #000; }
+body.hc-mode { background: #000; }
+body.hc-mode .payout-row, body.hc-mode .lb-table td, body.hc-mode .lb-table th {
+    color: #fff;
+}
+body.hc-mode .eg-sub, body.hc-mode .stat-label { opacity: 1; color: #fff; }
+
+body.rm-mode *, body.rm-mode *::before, body.rm-mode *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001s !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001s !important;
+    }
+}
+
+/* Color-blind friendly deck: diamonds blue, clubs green (suit shape + color, not color alone) */
+body.cb-deck .card[data-suit="♦"] .card-index-suit,
+body.cb-deck .card[data-suit="♦"] .pip,
+body.cb-deck .card[data-suit="♦"] .card-suit-large { color: #0284c7; }
+body.cb-deck .card[data-suit="♣"] .card-index-suit,
+body.cb-deck .card[data-suit="♣"] .pip,
+body.cb-deck .card[data-suit="♣"] .card-suit-large { color: #15803d; }
+
+/* --- offline badge (Phase 10.5) --- */
+.offline-badge {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 400;
+    background: #7f1d1d;
+    color: #fecaca;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 16px;
+    border-radius: 0 0 10px 10px;
+    border: 1px solid rgba(248, 113, 113, 0.5);
+    border-top: none;
+}
+.eg-hidden.offline-badge, .offline-badge.eg-hidden { display: none; }
+
+
 /* --- styles/mobile.css --- */
 /* =================================================================
    MOBILE-FIRST ENHANCEMENTS
@@ -3215,6 +3557,42 @@ body.fast-deal .card-inner {
         </div>
     </div>
 
+    <div id="eg-gift-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="closeGiftModal()">✕</button>
+            <h3 id="gift-title">🎁 Send a Gift</h3>
+            <div class="eg-sub" id="gift-sub"></div>
+            <div class="gift-amounts" id="gift-amounts"></div>
+        </div>
+    </div>
+
+    <div id="duel-invite-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="duelDeclineInvite()">✕</button>
+            <h3 id="duel-invite-title">⚔️ Duel Challenge!</h3>
+            <div class="eg-sub" id="duel-invite-msg"></div>
+            <div class="duel-invite-actions">
+                <button class="eg-claim-btn" id="duel-accept-btn" onclick="duelAcceptInvite()">Accept Duel</button>
+                <button class="room-action-btn secondary" id="duel-decline-btn" onclick="duelDeclineInvite()">Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="a11y-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="closeA11yModal()">✕</button>
+            <h3 id="a11y-title">♿ Accessibility</h3>
+            <label class="a11y-row"><input type="checkbox" id="a11y-contrast" onchange="a11yChanged()">
+                <span id="a11y-contrast-label">High contrast mode</span></label>
+            <label class="a11y-row"><input type="checkbox" id="a11y-motion" onchange="a11yChanged()">
+                <span id="a11y-motion-label">Reduce motion</span></label>
+            <label class="a11y-row"><input type="checkbox" id="a11y-colorblind" onchange="a11yChanged()">
+                <span id="a11y-colorblind-label">Color-blind friendly suits</span></label>
+        </div>
+    </div>
+
+    <div id="social-ticker" class="social-ticker eg-hidden"></div>
+
     <div id="profile-backdrop" class="eg-hidden" onclick="egCloseProfile()"></div>
     <div id="profile-panel" class="eg-hidden">
         <button class="eg-close" onclick="egCloseProfile()">✕</button>
@@ -3269,6 +3647,10 @@ body.fast-deal .card-inner {
             <h4 id="pf-styles-title">Card Styles</h4>
             <div class="style-row" id="pf-styles"></div>
         </div>
+        <div id="pf-themes-section">
+            <h4 id="pf-themes-title">Table Themes</h4>
+            <div class="style-row" id="pf-themes"></div>
+        </div>
     </div>
 
     <div class="container" style="display:none; padding-top: 50px;" id="game-container">
@@ -3287,12 +3669,22 @@ body.fast-deal .card-inner {
         <h1 id="game-title">Video Poker</h1>
 
         <div id="tournament-banner" class="eg-hidden"></div>
+        <div id="event-banner" class="event-banner eg-hidden"></div>
+        <div id="duel-banner" class="duel-banner eg-hidden"></div>
 
         <div class="game-layout">
             <div class="game-col">
                 <div class="variant-picker">
-                    <button class="variant-btn selected" id="variant-jacks" onclick="setGameVariant('jacks')">🂡 Jacks or Better</button>
-                    <button class="variant-btn" id="variant-deuces" onclick="setGameVariant('deuces')">🃒 Deuces Wild</button>
+                    <button class="variant-btn selected" id="variant-jacks" onclick="setGameVariant('jacks')">🂡 Jacks or Better <span class="variant-lock"></span></button>
+                    <button class="variant-btn" id="variant-deuces" onclick="setGameVariant('deuces')">🃒 Deuces Wild <span class="variant-lock"></span></button>
+                    <button class="variant-btn" id="variant-bonus" onclick="setGameVariant('bonus')">🂱 Bonus Poker <span class="variant-lock"></span></button>
+                    <button class="variant-btn" id="variant-doubleBonus" onclick="setGameVariant('doubleBonus')">🃁 Double Bonus <span class="variant-lock"></span></button>
+                </div>
+                <div class="multi-picker">
+                    <span id="multi-label">Hands:</span>
+                    <button class="multi-btn selected" id="multi-1" onclick="setMultiHand(1)">1</button>
+                    <button class="multi-btn" id="multi-3" onclick="setMultiHand(3)">3×</button>
+                    <button class="multi-btn" id="multi-5" onclick="setMultiHand(5)">5×</button>
                 </div>
                 <div class="payouts" id="payouts"></div>
 
@@ -3310,11 +3702,13 @@ body.fast-deal .card-inner {
                         <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
                     </div>
 
+                    <div id="multi-hands"></div>
                     <div class="hand" id="hand"></div>
 
                     <div class="controls">
                         <button id="deal-btn" onclick="deal()">Deal</button>
                         <button id="hold-btn" onclick="draw()" disabled>Draw</button>
+                        <button id="hint-btn" onclick="toggleHints()" title="Strategy hints" style="opacity:0.45">💡</button>
                     </div>
 
                     <div class="result" id="result"></div>
@@ -3370,6 +3764,16 @@ body.fast-deal .card-inner {
             </div>
 
             <div class="lb-col">
+                <div class="leaderboard" id="friends-panel">
+                    <h3 id="friends-title">👥 Friends</h3>
+                    <div class="rooms-empty" id="friends-empty">Add friends by their referral code — find yours in your profile.</div>
+                    <div id="friends-list"></div>
+                    <div class="share-row" style="margin-top:10px;">
+                        <input class="room-input" id="friend-code-input" maxlength="6" placeholder="Friend code…"
+                            autocomplete="off" onkeydown="if(event.key==='Enter')addFriendByCode()">
+                        <button class="share-copy-btn" id="friend-add-btn" onclick="addFriendByCode()">Add</button>
+                    </div>
+                </div>
                 <div class="leaderboard" id="rooms-panel">
                     <h3 id="rooms-title">🃏 Poker Rooms</h3>
                     <div class="room-tabs" id="rooms-tabs"></div>
@@ -3443,6 +3847,10 @@ body.fast-deal .card-inner {
                             <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="leaderboard" id="hof-panel">
+                    <h3 id="hof-title">🏛️ Hall of Fame</h3>
+                    <div id="hof-list"></div>
                 </div>
                 <div class="lb-formula-note" id="lb-formula-note">
                     <strong>How is score calculated?</strong><br>
@@ -4272,6 +4680,12 @@ const firebaseConfig = {
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    // Offline support: cache Firestore data + queue writes while disconnected
+    try {
+        db.enablePersistence({ synchronizeTabs: true }).catch(function(err) {
+            console.warn('Firestore persistence unavailable:', err && err.code);
+        });
+    } catch (e) { /* older browser — online-only */ }
     const ADMIN_EMAIL = 'micorlov@gmail.com';
 
     function signInWithGoogle() {
@@ -4327,6 +4741,11 @@ const firebaseConfig = {
             initSound();
             if (window.initRooms) window.initRooms(user);
             if (window.initEngagement) window.initEngagement(user);
+            if (window.initSocial) window.initSocial(user);
+            if (window.initDuels) window.initDuels(user);
+            if (window.initCommunity) window.initCommunity(user);
+            if (window.initEvents) window.initEvents(user);
+            if (window.initAntiChurn) window.initAntiChurn(user);
         } else {
             document.getElementById('login-overlay').classList.remove('hidden');
             document.getElementById('game-container').style.display = 'none';
@@ -4335,6 +4754,12 @@ const firebaseConfig = {
             if (bar) bar.remove();
             if (window.teardownRooms) window.teardownRooms();
             if (window.teardownEngagement) window.teardownEngagement();
+            if (window.teardownSocial) window.teardownSocial();
+            if (window.teardownDuels) window.teardownDuels();
+            if (window.teardownCommunity) window.teardownCommunity();
+            if (window.teardownEvents) window.teardownEvents();
+            if (window.teardownAntiChurn) window.teardownAntiChurn();
+            if (window.teardownTutorial) window.teardownTutorial();
         }
     });
 
@@ -4359,6 +4784,7 @@ const firebaseConfig = {
             adminBtn +
             '<button id="sound-toggle-btn" onclick="toggleSound()" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px; line-height:1;">🔊</button>' +
             '<button id="deal-speed-btn" onclick="toggleDealSpeed()" title="Fast deal" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px 0 0; line-height:1;">⚡</button>' +
+            '<button id="a11y-btn" onclick="openA11yModal()" title="Accessibility" aria-label="Accessibility settings" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px 0 0; line-height:1;">♿</button>' +
             '<button onclick="signOut()">Sign Out</button>';
         const container = document.getElementById('game-container');
         container.insertBefore(bar, container.firstChild);
@@ -4459,7 +4885,9 @@ const firebaseConfig = {
         'Straight': 4, 'Flush': 5, 'Full House': 6, 'Four of a Kind': 7,
         'Straight Flush': 8, 'Royal Flush': 9,
         // Deuces Wild extras
-        'Five of a Kind': 7, 'Wild Royal Flush': 8, 'Four Deuces': 8
+        'Five of a Kind': 7, 'Wild Royal Flush': 8, 'Four Deuces': 8,
+        // Bonus Poker quad subtypes
+        'Four 5s-Ks': 7, 'Four 2s-4s': 7, 'Four Aces': 7
     };
 
 /* --- js/rooms.js --- */
@@ -5901,10 +6329,13 @@ function getHourKey(date) {
     // Daily login rewards, comeback bonus, win streaks, daily challenges
 
     var EG_REWARDS = [50, 75, 100, 150, 200, 300, 500];
+    // Anti-churn escalation: the longer they've been away, the bigger the welcome back
     var EG_COMEBACK_SHORT_MS = 24 * 3600e3;
     var EG_COMEBACK_LONG_MS = 72 * 3600e3;
-    var EG_COMEBACK_SHORT_CREDITS = 100;
-    var EG_COMEBACK_LONG_CREDITS = 200;
+    var EG_COMEBACK_EPIC_MS = 7 * 24 * 3600e3;
+    var EG_COMEBACK_SHORT_CREDITS = 200;
+    var EG_COMEBACK_LONG_CREDITS = 300;
+    var EG_COMEBACK_EPIC_CREDITS = 500;
 
     var egUser = null;
     var egModalQueue = [];
@@ -6112,7 +6543,8 @@ var ACHIEVEMENTS = [
         { id: 'challenge50', icon: '🏅' },
         { id: 'credits500',  icon: '💰' },
         { id: 'credits1000', icon: '💎' },
-        { id: 'ironhour',    icon: '🛡️' }
+        { id: 'ironhour',    icon: '🛡️' },
+        { id: 'perfect20',   icon: '🧠' }
     ];
 
     // Cumulative XP required to reach level n (level n→n+1 costs n×100 XP)
@@ -6128,6 +6560,7 @@ var ACHIEVEMENTS = [
 
     function egProcessXpAndAchievements(ev) {
         var gain = 10 + Math.floor(ev.bet / 5) + (XP_WIN_BONUS[ev.handType] || 0);
+        if (window.vpEventXpMult) gain = Math.round(gain * vpEventXpMult());
         egXp += gain;
         if (window.egProcessSeason) egProcessSeason(gain);
         var newLevel = egLevelFromXp(egXp);
@@ -6217,6 +6650,10 @@ var ACHIEVEMENTS = [
     // --- XP bar (user bar) ---
     function egRenderXpBar() {
         if (window.egRenderTournamentBanner) egRenderTournamentBanner();
+        if (window.updateVariantUI) updateVariantUI();
+        if (window.updateMultiHandUI) updateMultiHandUI();
+        if (window.egRenderVipBadge) egRenderVipBadge();
+        if (window.egApplyThemeUnlocks) egApplyThemeUnlocks();
         var lvlEl = document.getElementById('ub-level');
         var fillEl = document.getElementById('ub-xp-fill');
         var textEl = document.getElementById('ub-xp-text');
@@ -7294,7 +7731,8 @@ var ACHIEVEMENTS = [
     };
 
     // --- avatar builder ---
-    var AVATAR_EMOJI = ['🦊', '🐯', '🦁', '🐼', '🐸', '🐙', '🦄', '🐺', '🦅', '🐢', '🐬', '🦋', '👽', '🤖', '🎩', '⭐'];
+    var AVATAR_EMOJI = ['🦊', '🐯', '🦁', '🐼', '🐸', '🐙', '🦄', '🐺', '🦅', '🐢', '🐬', '🦋', '👽', '🤖', '🎩', '⭐',
+                        '♠️', '♥️', '♦️', '♣️', '🃏', '🎰', '🎲', '👑', '💰', '🏆', '🍀', '💎'];
     var AVATAR_COLORS = ['#8a2be2', '#e11d48', '#0ea5e9', '#16a34a', '#f59e0b', '#475569', '#c026d3', '#0d9488'];
     var egAvatar = { emoji: '', color: '' };
 
@@ -7307,14 +7745,16 @@ var ACHIEVEMENTS = [
         return egAvatar.emoji ? egAvatar.emoji + '|' + (egAvatar.color || AVATAR_COLORS[0]) : '';
     };
 
-    // Renders the avatar cell for a leaderboard row: custom emoji avatar wins over photo
+    // Renders the avatar cell for a leaderboard row: custom emoji avatar wins over photo.
+    // The ring color reflects the player's VIP tier.
     window.lbAvatarHtml = function(d) {
         var a = d.avatar || '';
+        var vip = window.vpVipClass ? ' ' + vpVipClass(d.level || 1) : '';
         if (a.indexOf('|') > 0) {
             var parts = a.split('|');
-            return '<span class="lb-avatar" style="background:' + escapeHtml(parts[1]) + '">' + escapeHtml(parts[0]) + '</span>';
+            return '<span class="lb-avatar' + vip + '" style="background:' + escapeHtml(parts[1]) + '">' + escapeHtml(parts[0]) + '</span>';
         }
-        return d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+        return d.photoURL ? '<img class="' + vip.trim() + '" src="' + d.photoURL + '">' : '';
     };
 
     window.egApplyAvatarToUserBar = function() {
@@ -7695,7 +8135,9 @@ function egLoadDailyReward(user) {
         'Straight': 25, 'Flush': 30, 'Full House': 50,
         'Four of a Kind': 100, 'Straight Flush': 250, 'Royal Flush': 500,
         // Deuces Wild extras
-        'Five of a Kind': 150, 'Wild Royal Flush': 300, 'Four Deuces': 250
+        'Five of a Kind': 150, 'Wild Royal Flush': 300, 'Four Deuces': 250,
+        // Bonus Poker quad subtypes
+        'Four 5s-Ks': 100, 'Four 2s-4s': 120, 'Four Aces': 150
     };
 
     var CARD_STYLES = [
@@ -7767,7 +8209,9 @@ function egToast(text) {
             };
             if (window.egSetAvatarState) egSetAvatarState(data);
             egApplyCardStyle(data.cardStyle || 'classic');
+            if (data.tableTheme && window.vpSelectTheme) vpSelectTheme(data.tableTheme);
             egRenderXpBar();
+            if (window.initTutorial) initTutorial(user, data);
 
             if (data.bonusCredits && data.bonusCredits > 0) {
                 var bonus = data.bonusCredits;
@@ -7794,7 +8238,8 @@ function egToast(text) {
                 ? data.lastActiveDate.toDate().getTime() : null;
             if (last) {
                 var gap = Date.now() - last;
-                if (gap > EG_COMEBACK_LONG_MS) egComebackAmount = EG_COMEBACK_LONG_CREDITS;
+                if (gap > EG_COMEBACK_EPIC_MS) egComebackAmount = EG_COMEBACK_EPIC_CREDITS;
+                else if (gap > EG_COMEBACK_LONG_MS) egComebackAmount = EG_COMEBACK_LONG_CREDITS;
                 else if (gap > EG_COMEBACK_SHORT_MS) egComebackAmount = EG_COMEBACK_SHORT_CREDITS;
             }
             // Refresh presence — also guarantees one claim per absence period
@@ -7826,6 +8271,56 @@ function egToast(text) {
 
     // --- daily login reward ---
 
+/* --- js/variants.js --- */
+// ===================== Game variants: Bonus Poker & Double Bonus (Phase 7.1) =====================
+// Hand names + explanations for the bonus-quad subtypes, merged into the main
+// translation packs. Must load before game.js (changeLanguage runs at its load).
+
+    (function() {
+        var packs = {
+            en: { fa: 'Four Aces', f24: 'Four 2s-4s', f5k: 'Four 5s-Ks',
+                  xfa: 'Four aces — the premium quad of Bonus Poker!',
+                  xf24: 'Four of a kind, twos through fours — boosted payout!',
+                  xf5k: 'Four of a kind, fives through kings.' },
+            es: { fa: 'Cuatro Ases', f24: 'Cuatro 2-4', f5k: 'Cuatro 5-K',
+                  xfa: '¡Cuatro ases — el póker premium del Bonus Poker!',
+                  xf24: 'Póker de doses a cuatros — ¡pago aumentado!',
+                  xf5k: 'Póker de cincos a reyes.' },
+            fr: { fa: 'Quatre As', f24: 'Quatre 2-4', f5k: 'Quatre 5-K',
+                  xfa: 'Quatre as — le carré premium du Bonus Poker !',
+                  xf24: 'Carré de 2 à 4 — gain augmenté !',
+                  xf5k: 'Carré de 5 à Roi.' },
+            de: { fa: 'Vier Asse', f24: 'Vier 2-4', f5k: 'Vier 5-K',
+                  xfa: 'Vier Asse — der Premium-Vierling im Bonus Poker!',
+                  xf24: 'Vierling von Zwei bis Vier — erhöhte Auszahlung!',
+                  xf5k: 'Vierling von Fünf bis König.' },
+            he: { fa: 'ארבעה אסים', f24: 'רביעייה 2-4', f5k: 'רביעייה 5-K',
+                  xfa: 'ארבעה אסים — הרביעייה המשתלמת ביותר!',
+                  xf24: 'רביעייה של 2 עד 4 — תשלום מוגדל!',
+                  xf5k: 'רביעייה של 5 עד מלך.' },
+            ar: { fa: 'أربعة آصات', f24: 'رباعية 2-4', f5k: 'رباعية 5-K',
+                  xfa: 'أربعة آصات — الرباعية الأعلى في بونص بوكر!',
+                  xf24: 'رباعية من 2 إلى 4 — دفعة مضاعفة!',
+                  xf5k: 'رباعية من 5 إلى الملك.' }
+        };
+        Object.keys(packs).forEach(function(lang) {
+            if (!TRANSLATIONS[lang]) return;
+            var p = packs[lang];
+            TRANSLATIONS[lang].payouts['Four Aces'] = p.fa;
+            TRANSLATIONS[lang].payouts['Four 2s-4s'] = p.f24;
+            TRANSLATIONS[lang].payouts['Four 5s-Ks'] = p.f5k;
+            TRANSLATIONS[lang].explanations['Four Aces'] = p.xfa;
+            TRANSLATIONS[lang].explanations['Four 2s-4s'] = p.xf24;
+            TRANSLATIONS[lang].explanations['Four 5s-Ks'] = p.xf5k;
+        });
+    })();
+
+    Object.assign(ENGAGE_I18N.en, {
+        variantLocked: 'Unlocks at level {n}',
+        multiLocked: 'Multi-hand unlocks at level {n}'
+    });
+
+
 /* --- js/game.js --- */
 const SUITS = ['♠', '♥', '♦', '♣'];
         const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -7855,15 +8350,48 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 'Straight': 2,
                 'Three of a Kind': 1,
                 'Nothing': 0
+            },
+            bonus: {
+                'Royal Flush': 250,
+                'Straight Flush': 50,
+                'Four Aces': 80,
+                'Four 2s-4s': 40,
+                'Four 5s-Ks': 25,
+                'Full House': 8,
+                'Flush': 5,
+                'Straight': 4,
+                'Three of a Kind': 3,
+                'Two Pair': 2,
+                'Jacks or Better': 1,
+                'Nothing': 0
+            },
+            doubleBonus: {
+                'Royal Flush': 250,
+                'Straight Flush': 50,
+                'Four Aces': 160,
+                'Four 2s-4s': 80,
+                'Four 5s-Ks': 50,
+                'Full House': 10,
+                'Flush': 7,
+                'Straight': 5,
+                'Three of a Kind': 3,
+                'Two Pair': 1,
+                'Jacks or Better': 1,
+                'Nothing': 0
             }
         };
         const HAND_ORDERS = {
             jacks: ['Royal Flush', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
-            deuces: ['Royal Flush', 'Four Deuces', 'Wild Royal Flush', 'Five of a Kind', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Nothing']
+            deuces: ['Royal Flush', 'Four Deuces', 'Wild Royal Flush', 'Five of a Kind', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Nothing'],
+            bonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
+            doubleBonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing']
         };
+        // Variants unlock as the player levels up — gives leveling a purpose
+        const VARIANT_MIN_LEVEL = { jacks: 1, deuces: 3, bonus: 8, doubleBonus: 15 };
         let gameVariant = 'jacks';
         try {
-            if (localStorage.getItem('vp_game_variant') === 'deuces') gameVariant = 'deuces';
+            const savedVariant = localStorage.getItem('vp_game_variant');
+            if (savedVariant && PAYTABLES[savedVariant]) gameVariant = savedVariant;
         } catch (e) {}
 
         function basePayouts() {
@@ -7871,20 +8399,38 @@ const SUITS = ['♠', '♥', '♦', '♣'];
         }
         let currentPayouts = { ...basePayouts() };
 
+        function variantUnlocked(v) {
+            const lvl = (typeof egLevel !== 'undefined' && window.egUser) ? egLevel : 1;
+            return lvl >= (VARIANT_MIN_LEVEL[v] || 1);
+        }
+
         function setGameVariant(v) {
             if (!PAYTABLES[v] || gameState !== 'bet' || v === gameVariant) return;
+            if (!variantUnlocked(v)) {
+                egToast('🔒 ' + (window.et ? et('variantLocked') : 'Unlocks at level {n}').replace('{n}', VARIANT_MIN_LEVEL[v]));
+                return;
+            }
             gameVariant = v;
             try { localStorage.setItem('vp_game_variant', v); } catch (e) {}
             currentPayouts = { ...basePayouts() };
             updateVariantUI();
             renderPayouts(TRANSLATIONS[currentLang]);
+            if (window.vpRenderHints) vpRenderHints();
         }
 
         function updateVariantUI() {
-            const jacksBtn = document.getElementById('variant-jacks');
-            const deucesBtn = document.getElementById('variant-deuces');
-            if (jacksBtn) jacksBtn.classList.toggle('selected', gameVariant === 'jacks');
-            if (deucesBtn) deucesBtn.classList.toggle('selected', gameVariant === 'deuces');
+            Object.keys(PAYTABLES).forEach(function(v) {
+                const btn = document.getElementById('variant-' + v);
+                if (!btn) return;
+                btn.classList.toggle('selected', gameVariant === v);
+                const locked = !variantUnlocked(v);
+                btn.classList.toggle('locked', locked);
+                const lockEl = btn.querySelector('.variant-lock');
+                if (lockEl) {
+                    lockEl.textContent = locked ? '🔒 ' + VARIANT_MIN_LEVEL[v] : '';
+                    lockEl.style.display = locked ? '' : 'none';
+                }
+            });
         }
 
         // --- Engagement tuning (play-money game) ---
@@ -8180,6 +8726,60 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             if (deckIdx !== -1) deck.splice(deckIdx, 1);
         }
 
+        // --- Multi-hand mode (Triple/Five Play) — unlocks at level 10 ---
+        const MULTI_HAND_MIN_LEVEL = 10;
+        let multiHandCount = 1;
+        let dealtHand = [];
+        try {
+            const savedMulti = parseInt(localStorage.getItem('vp_multi_hands'), 10);
+            if ([1, 3, 5].includes(savedMulti)) multiHandCount = savedMulti;
+        } catch (e) {}
+
+        function multiHandUnlocked() {
+            return (typeof egLevel !== 'undefined' && window.egUser) ? egLevel >= MULTI_HAND_MIN_LEVEL : false;
+        }
+
+        function setMultiHand(n) {
+            if (![1, 3, 5].includes(n) || gameState !== 'bet') return;
+            if (n > 1 && !multiHandUnlocked()) {
+                egToast('🔒 ' + (window.et ? et('multiLocked') : 'Multi-hand unlocks at level {n}').replace('{n}', MULTI_HAND_MIN_LEVEL));
+                return;
+            }
+            multiHandCount = n;
+            try { localStorage.setItem('vp_multi_hands', String(n)); } catch (e) {}
+            updateMultiHandUI();
+        }
+
+        function updateMultiHandUI() {
+            [1, 3, 5].forEach(function(n) {
+                const btn = document.getElementById('multi-' + n);
+                if (!btn) return;
+                btn.classList.toggle('selected', multiHandCount === n);
+                btn.classList.toggle('locked', n > 1 && !multiHandUnlocked());
+            });
+        }
+
+        function renderMultiHands(extraResults) {
+            const wrap = document.getElementById('multi-hands');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+            if (!extraResults || !extraResults.length) return;
+            const t = TRANSLATIONS[currentLang];
+            extraResults.forEach(function(r) {
+                const row = document.createElement('div');
+                row.className = 'multi-hand-row' + (r.win > 0 ? ' won' : '');
+                const cards = r.hand.map(function(c) {
+                    const red = c.suit === '♥' || c.suit === '♦';
+                    return '<span class="mini-card' + (red ? ' red' : '') + '">' + c.rank + c.suit + '</span>';
+                }).join('');
+                const label = r.win > 0
+                    ? '<span class="mh-win">' + (t.payouts[r.type] || r.type) + ' +' + r.win + '</span>'
+                    : '<span class="mh-lose">—</span>';
+                row.innerHTML = cards + label;
+                wrap.appendChild(row);
+            });
+        }
+
         function deal() {
             checkHourReset();
             checkDayReset();
@@ -8196,23 +8796,35 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                     }
                 }
             }
+            // Drop to an affordable hand count rather than force a rebuy loop
+            if (multiHandCount > 1 && balance < bet * multiHandCount) {
+                setMultiHand(bet * 3 <= balance ? 3 : 1);
+            }
+            const totalBet = bet * multiHandCount;
 
             // Clean up celebration classes & overlays
             document.body.classList.remove('screen-shake');
             document.querySelectorAll('.flash-overlay, .confetti-burst-piece, .gold-rain-piece').forEach(el => el.remove());
 
-            balance -= bet;
+            balance -= totalBet;
             document.getElementById('balance').textContent = balance;
             saveGameState();
 
             deck = createDeck();
-            shuffle(deck);
-            hand = deck.splice(0, 5);
-            boostHand();
+            if (window.vpDuelShuffle && vpDuelShuffle(deck)) {
+                // Duel mode: seeded deck shared with the opponent — no engagement boost
+                hand = deck.splice(0, 5);
+            } else {
+                shuffle(deck);
+                hand = deck.splice(0, 5);
+                boostHand();
+            }
+            dealtHand = hand.slice();
             held = [false, false, false, false, false];
             gameState = 'hold';
 
             renderHand();
+            renderMultiHands([]);
             document.getElementById('deal-btn').disabled = true;
             document.getElementById('hold-btn').disabled = false;
             lastHandType = null;
@@ -8220,6 +8832,8 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             resultEl.className = 'result';
             resultEl.innerHTML = '';
             document.getElementById('explanation').innerHTML = '';
+            if (window.vpRenderHints) vpRenderHints();
+            if (window.vpTutorialOnDeal) vpTutorialOnDeal();
         }
 
         function getStreakBonus(streak) {
@@ -8238,24 +8852,49 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             });
             const hadHeldPair = Object.values(heldRankCounts).some(function(n) { return n >= 2; });
 
+            // Perfect-play tracking must see the pre-draw hand + holds
+            if (window.vpOnDrawCheckPerfect) vpOnDrawCheckPerfect();
+
             // Replace unheld cards
             for (let i = 0; i < 5; i++) {
                 if (!held[i]) {
                     hand[i] = deck.pop();
                 }
             }
-            const result = gameVariant === 'deuces' ? evaluateDeucesHand(hand) : evaluateHand(hand);
+            const result = evaluateForVariant(hand);
             const handType = result.type;
             lastHandType = handType;
             const winIndices = result.winIndices || []; // Ensure it's an array
             const thirdMatchIndices = result.thirdMatchIndices || []; // Ensure it's an array
             const secondPairIndices = result.secondPairIndices || []; // Ensure it's an array
             let win = bet * currentPayouts[handType];
+            let bestType = handType;
+
+            // Extra hands (Triple/Five Play): same deal, independent draws
+            const extraResults = [];
+            if (multiHandCount > 1 && dealtHand.length === 5) {
+                for (let k = 1; k < multiHandCount; k++) {
+                    const sideDeck = createDeck().filter(c =>
+                        !dealtHand.some(d => d.rank === c.rank && d.suit === c.suit));
+                    shuffle(sideDeck);
+                    const sideHand = dealtHand.map((c, i) => held[i] ? c : sideDeck.pop());
+                    const sideRes = evaluateForVariant(sideHand);
+                    const sideWin = bet * currentPayouts[sideRes.type];
+                    win += sideWin;
+                    if ((HAND_RANK[sideRes.type] || 0) > (HAND_RANK[bestType] || 0)) bestType = sideRes.type;
+                    extraResults.push({ hand: sideHand, type: sideRes.type, win: sideWin });
+                }
+            }
+            const totalBet = bet * multiHandCount;
+
             if (win > 0) {
                 winStreak++;
-                const streakBonus = getStreakBonus(winStreak);
+                let streakBonus = getStreakBonus(winStreak);
+                if (window.vpEventStreakMult) streakBonus *= vpEventStreakMult();
                 if (streakBonus > 0) win += Math.round(win * streakBonus);
                 if (window.vpTournamentMultiplier) win = Math.round(win * vpTournamentMultiplier());
+                if (window.vpVipMultiplier) win = Math.round(win * vpVipMultiplier());
+                if (window.vpEventWinMultiplier) win = Math.round(win * vpEventWinMultiplier(bestType));
             } else {
                 winStreak = 0;
             }
@@ -8263,18 +8902,19 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             lastWinAmount = win;
             balance += win;
             handsPlayed++;
-            
+
             if (win > 0) {
                 totalWon += win;
                 lossStreak = 0;
                 currentPayouts = { ...basePayouts() };
             } else {
-                totalLost += bet;
+                totalLost += totalBet;
                 lossStreak++;
                 for (let key in currentPayouts) {
                     if (key !== 'Nothing') currentPayouts[key]++;
                 }
             }
+            renderMultiHands(extraResults);
             updateStats();
             renderPayouts(TRANSLATIONS[currentLang]);
 
@@ -8282,12 +8922,12 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 document.getElementById('balance').textContent = balance;
                 playSound('loss');
             } else {
-                triggerWinCelebration(handType, win);
+                triggerWinCelebration(bestType, win);
             }
             saveGameState();
 
-            if (win > 0 && HAND_RANK[handType] >= 3) {
-                logRoomEvent('hand', handType);
+            if (win > 0 && HAND_RANK[bestType] >= 3) {
+                logRoomEvent('hand', bestType);
             }
 
             const t = TRANSLATIONS[currentLang];
@@ -8310,10 +8950,13 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             }
 
             renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
-            updateScores(win, bet, handType);
+            updateScores(win, bet, bestType);
             if (window.egOnHandPlayed) {
-                window.egOnHandPlayed({ handType: handType, win: win, bet: bet, heldPair: hadHeldPair, streak: winStreak });
+                window.egOnHandPlayed({ handType: bestType, win: win, bet: bet, heldPair: hadHeldPair, streak: winStreak });
             }
+            if (window.vpDuelOnHand) vpDuelOnHand(win, totalBet, bestType);
+            if (window.vpSocialOnHand) vpSocialOnHand(bestType);
+            if (window.vpTutorialOnDraw) vpTutorialOnDraw(win);
 
             gameState = 'bet';
             document.getElementById('deal-btn').disabled = false;
@@ -8354,7 +8997,8 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                     return (wl.pair || 'Pair') + ' ' + rankLabel;
                 }
             }
-            if (handType === 'Four of a Kind') {
+            if (handType === 'Four of a Kind' || handType === 'Four Aces' ||
+                handType === 'Four 2s-4s' || handType === 'Four 5s-Ks') {
                 return wl.fourOfKind || '4 of a Kind';
             }
             if (handType === 'Straight') {
@@ -8413,6 +9057,18 @@ const SUITS = ['♠', '♥', '♦', '♣'];
 
                 cardEl.className = classes.trim();
                 cardEl.onclick = () => toggleHold(i);
+                // Screen reader + keyboard support
+                const SUIT_NAMES = { '♠': 'Spades', '♥': 'Hearts', '♦': 'Diamonds', '♣': 'Clubs' };
+                const RANK_NAMES = { 'A': 'Ace', 'J': 'Jack', 'Q': 'Queen', 'K': 'King' };
+                cardEl.setAttribute('role', 'button');
+                cardEl.setAttribute('tabindex', '0');
+                cardEl.setAttribute('aria-pressed', held[i] ? 'true' : 'false');
+                cardEl.setAttribute('aria-label',
+                    (RANK_NAMES[card.rank] || card.rank) + ' of ' + SUIT_NAMES[card.suit] + (held[i] ? ', held' : ''));
+                cardEl.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleHold(i); }
+                };
+                cardEl.dataset.suit = card.suit;
                 
                 const badgeText = t.heldBadge || 'HELD';
                 const winBadgeText = isResult ? getWinBadgeText(i, lastHandType) : '';
@@ -8477,6 +9133,7 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 });
             }
 
+            if (window.vpApplyHintClasses && gameState === 'hold') vpApplyHintClasses();
         }
 
         function evaluateHand(hand) {
@@ -8563,6 +9220,22 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                     result.type = 'Jacks or Better';
                     result.winIndices = findIndices([pairRank]);
                 }
+            }
+            return result;
+        }
+
+        // Evaluate a hand according to the active variant's rules
+        function evaluateForVariant(h) {
+            if (gameVariant === 'deuces') return evaluateDeucesHand(h);
+            const result = evaluateHand(h);
+            // Bonus variants split Four of a Kind by rank
+            if (result.type === 'Four of a Kind' && (gameVariant === 'bonus' || gameVariant === 'doubleBonus')) {
+                const rankCounts = {};
+                h.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
+                const quadRank = Object.keys(rankCounts).find(r => rankCounts[r] === 4);
+                if (quadRank === 'A') result.type = 'Four Aces';
+                else if (['2', '3', '4'].includes(quadRank)) result.type = 'Four 2s-4s';
+                else result.type = 'Four 5s-Ks';
             }
             return result;
         }
@@ -8674,13 +9347,1262 @@ const SUITS = ['♠', '♥', '♦', '♣'];
         // Initialize
         changeLanguage('en');
         updateVariantUI();
-    // Keyboard support for bet selection (keys 1-5)
+        updateMultiHandUI();
+    // Keyboard support: 1-5 toggle holds during a hand, or pick a bet between hands.
+    // D deals/draws.
     document.addEventListener('keydown', function(e) {
+        if (e.target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+        if (gameState === 'hold' && ['1', '2', '3', '4', '5'].includes(e.key)) {
+            toggleHold(parseInt(e.key, 10) - 1);
+            return;
+        }
         const keyMap = { '1': 5, '2': 10, '3': 20, '4': 50 };
         if (keyMap[e.key]) setBet(keyMap[e.key]);
+        if (e.key === 'd' || e.key === 'D') {
+            if (gameState === 'bet' && !document.getElementById('deal-btn').disabled) deal();
+            else if (gameState === 'hold') draw();
+        }
     });
 
     // Firebase
+
+
+/* --- js/hints.js --- */
+// ===================== Strategy hints + Perfect Play badge (Phase 7.5) =====================
+// Highlights near-optimal holds via a simplified priority strategy.
+// Loads after game.js — only defines functions and merges i18n.
+
+    Object.assign(ENGAGE_I18N.en, {
+        hintTip: '💡 Hints on — suggested holds glow blue',
+        ach_perfect20: 'Perfect Play — 20 optimal hands in a row'
+    });
+
+    var vpHintsOn = false;
+    try { vpHintsOn = localStorage.getItem('vp_hints') === '1'; } catch (e) {}
+    var vpPerfectStreak = 0;
+
+    function hintCardVal(c) {
+        if (c.rank === 'A') return 14;
+        if (c.rank === 'K') return 13;
+        if (c.rank === 'Q') return 12;
+        if (c.rank === 'J') return 11;
+        return parseInt(c.rank, 10);
+    }
+
+    // Indices of `needed`+ suited cards, all royal ranks (10+), or null
+    function hintRoyalDraw(h, needed) {
+        for (var s = 0; s < SUITS.length; s++) {
+            var idxs = [];
+            for (var i = 0; i < 5; i++) {
+                if (h[i].suit === SUITS[s] && hintCardVal(h[i]) >= 10) idxs.push(i);
+            }
+            if (idxs.length >= needed) return idxs;
+        }
+        return null;
+    }
+
+    function hintFlushDraw(h, needed) {
+        for (var s = 0; s < SUITS.length; s++) {
+            var idxs = [];
+            for (var i = 0; i < 5; i++) {
+                if (h[i].suit === SUITS[s]) idxs.push(i);
+            }
+            if (idxs.length >= needed) return idxs;
+        }
+        return null;
+    }
+
+    // 4 distinct values fitting a 5-value window; openEnded restricts to span 3
+    function hintStraightDraw(h, openEnded, requireSuited) {
+        var best = null;
+        for (var a = 0; a < 5; a++) for (var b = a + 1; b < 5; b++)
+        for (var c = b + 1; c < 5; c++) for (var d = c + 1; d < 5; d++) {
+            var idxs = [a, b, c, d];
+            if (requireSuited) {
+                var suit = h[a].suit;
+                if (!idxs.every(function(i) { return h[i].suit === suit; })) continue;
+            }
+            var vals = idxs.map(function(i) { return hintCardVal(h[i]); }).sort(function(x, y) { return x - y; });
+            var lowAce = vals.map(function(v) { return v === 14 ? 1 : v; }).sort(function(x, y) { return x - y; });
+            var check = function(vs) {
+                if (new Set(vs).size !== 4) return false;
+                var span = vs[3] - vs[0];
+                return openEnded ? span === 3 : span <= 4;
+            };
+            if (check(vals) || check(lowAce)) best = idxs;
+        }
+        return best;
+    }
+
+    function hintPairIndices(h, minVal, maxVal) {
+        var byRank = {};
+        for (var i = 0; i < 5; i++) {
+            (byRank[h[i].rank] = byRank[h[i].rank] || []).push(i);
+        }
+        var ranks = Object.keys(byRank).filter(function(r) { return byRank[r].length === 2; });
+        for (var k = 0; k < ranks.length; k++) {
+            var v = hintCardVal({ rank: ranks[k] });
+            if (v >= minVal && v <= maxVal) return byRank[ranks[k]];
+        }
+        return null;
+    }
+
+    function holdsFromIndices(idxs) {
+        var holds = [false, false, false, false, false];
+        (idxs || []).forEach(function(i) { holds[i] = true; });
+        return holds;
+    }
+
+    function hintJacksHolds(h) {
+        var res = evaluateHand(h);
+        var all = [0, 1, 2, 3, 4];
+        // Pat royals / straight flushes
+        if (res.type === 'Royal Flush' || res.type === 'Straight Flush') return holdsFromIndices(all);
+        if (res.type === 'Four of a Kind') return holdsFromIndices(res.winIndices);
+        var royal4 = hintRoyalDraw(h, 4);
+        if (royal4) return holdsFromIndices(royal4.slice(0, 4));
+        if (res.type === 'Full House') return holdsFromIndices(all);
+        if (res.type === 'Flush' || res.type === 'Straight') return holdsFromIndices(all);
+        if (res.type === 'Three of a Kind') return holdsFromIndices(res.winIndices);
+        var sf4 = hintStraightDraw(h, false, true);
+        if (sf4) return holdsFromIndices(sf4);
+        if (res.type === 'Two Pair') return holdsFromIndices(res.winIndices.concat(res.secondPairIndices));
+        var highPair = hintPairIndices(h, 11, 14);
+        if (highPair) return holdsFromIndices(highPair);
+        var royal3 = hintRoyalDraw(h, 3);
+        if (royal3) return holdsFromIndices(royal3.slice(0, 3));
+        var flush4 = hintFlushDraw(h, 4);
+        if (flush4) return holdsFromIndices(flush4);
+        var lowPair = hintPairIndices(h, 2, 10);
+        if (lowPair) return holdsFromIndices(lowPair);
+        var straight4 = hintStraightDraw(h, true, false);
+        if (straight4) return holdsFromIndices(straight4);
+        // Suited high cards
+        for (var s = 0; s < SUITS.length; s++) {
+            var suitedHigh = [];
+            for (var i = 0; i < 5; i++) {
+                if (h[i].suit === SUITS[s] && hintCardVal(h[i]) >= 11) suitedHigh.push(i);
+            }
+            if (suitedHigh.length >= 2) return holdsFromIndices(suitedHigh.slice(0, 2));
+        }
+        // Unsuited high cards — keep at most the two lowest
+        var highs = [];
+        for (var j = 0; j < 5; j++) {
+            if (hintCardVal(h[j]) >= 11) highs.push(j);
+        }
+        highs.sort(function(a, b) { return hintCardVal(h[a]) - hintCardVal(h[b]); });
+        if (highs.length > 0) return holdsFromIndices(highs.slice(0, 2));
+        return holdsFromIndices([]);
+    }
+
+    function hintDeucesHolds(h) {
+        var deuces = [];
+        var naturals = [];
+        for (var i = 0; i < 5; i++) {
+            if (h[i].rank === '2') deuces.push(i); else naturals.push(i);
+        }
+        var res = evaluateDeucesHand(h);
+        var all = [0, 1, 2, 3, 4];
+        var patAll = ['Royal Flush', 'Wild Royal Flush', 'Five of a Kind', 'Straight Flush',
+                      'Full House', 'Flush', 'Straight', 'Four Deuces'];
+        if (patAll.indexOf(res.type) !== -1) return holdsFromIndices(all);
+        if (res.type === 'Four of a Kind' || res.type === 'Three of a Kind') {
+            // Hold deuces + the most frequent natural rank
+            var byRank = {};
+            naturals.forEach(function(idx) {
+                (byRank[h[idx].rank] = byRank[h[idx].rank] || []).push(idx);
+            });
+            var bestRank = null;
+            Object.keys(byRank).forEach(function(r) {
+                if (!bestRank || byRank[r].length > byRank[bestRank].length) bestRank = r;
+            });
+            return holdsFromIndices(deuces.concat(bestRank ? byRank[bestRank] : []));
+        }
+        if (deuces.length >= 3) return holdsFromIndices(deuces);
+        // 4 to a (wild) royal: deuces + suited naturals 10+
+        for (var s = 0; s < SUITS.length; s++) {
+            var royals = naturals.filter(function(idx) {
+                return h[idx].suit === SUITS[s] && hintCardVal(h[idx]) >= 10;
+            });
+            if (deuces.length + royals.length >= 4) {
+                return holdsFromIndices(deuces.concat(royals));
+            }
+        }
+        // Natural pair (one only — never two pair in deuces)
+        var pair = hintPairIndices(h, 3, 14);
+        if (pair) return holdsFromIndices(deuces.concat(pair));
+        if (deuces.length > 0) return holdsFromIndices(deuces);
+        var flush4 = hintFlushDraw(h, 4);
+        if (flush4) return holdsFromIndices(flush4);
+        var straight4 = hintStraightDraw(h, true, false);
+        if (straight4) return holdsFromIndices(straight4);
+        return holdsFromIndices([]);
+    }
+
+    window.vpComputeHolds = function(h) {
+        return gameVariant === 'deuces' ? hintDeucesHolds(h) : hintJacksHolds(h);
+    };
+
+    window.vpApplyHintClasses = function() {
+        var handEl = document.getElementById('hand');
+        if (!handEl || !handEl.children.length) return;
+        Array.prototype.forEach.call(handEl.children, function(el) {
+            el.classList.remove('hint-suggest');
+        });
+        if (!vpHintsOn || gameState !== 'hold') return;
+        var holds = vpComputeHolds(hand);
+        holds.forEach(function(hold, i) {
+            if (hold && handEl.children[i]) handEl.children[i].classList.add('hint-suggest');
+        });
+    };
+    window.vpRenderHints = window.vpApplyHintClasses;
+
+    window.toggleHints = function() {
+        vpHintsOn = !vpHintsOn;
+        try { localStorage.setItem('vp_hints', vpHintsOn ? '1' : '0'); } catch (e) {}
+        updateHintButtonUI();
+        vpApplyHintClasses();
+        if (vpHintsOn) egToast(et('hintTip'));
+    };
+
+    window.updateHintButtonUI = function() {
+        var btn = document.getElementById('hint-btn');
+        if (btn) btn.style.opacity = vpHintsOn ? '1' : '0.45';
+    };
+
+    updateHintButtonUI();
+
+    // Perfect Play: 20 consecutive hands where the player's holds match the hint strategy
+    window.vpOnDrawCheckPerfect = function() {
+        if (!window.egUser) return;
+        var optimal = vpComputeHolds(hand);
+        var matches = held.every(function(v, i) { return v === optimal[i]; });
+        vpPerfectStreak = matches ? vpPerfectStreak + 1 : 0;
+        if (vpPerfectStreak >= 20 && typeof egUnlock === 'function') egUnlock('perfect20');
+    };
+
+
+/* --- js/social.js --- */
+// ===================== Friends list + gift credits (Phase 8.1 / 8.3) =====================
+
+    Object.assign(ENGAGE_I18N.en, {
+        friendsTitle: '👥 Friends',
+        friendsEmpty: 'Add friends by their referral code — find yours in your profile.',
+        friendAddPh: 'Friend code…', friendAddBtn: 'Add',
+        friendAdded: '✅ {name} added as a friend!',
+        friendNotFound: 'No player found with that code.',
+        friendSelf: 'That is your own code!',
+        friendDup: 'Already in your friends list.',
+        giftTitle: '🎁 Send a Gift', giftSub: 'Send credits to {name}',
+        giftSent: '🎁 You sent {n} credits to {name}!',
+        giftLimit: 'Daily gift limit reached ({n} credits per day).',
+        giftReceived: '🎁 {name} sent you {n} credits!',
+        challengeBtn: '⚔️', giftBtn: '🎁',
+        online: 'online', offlineLastSeen: 'last seen {t}'
+    });
+
+    var GIFT_AMOUNTS = [25, 50, 100];
+    var GIFT_DAILY_CAP = 200;
+    var ONLINE_WINDOW_MS = 5 * 60 * 1000;
+
+    var socialFriends = [];          // [{uid, displayName, ...userDocData}]
+    var socialGiftState = { dayKey: '', sent: 0 };
+    var socialGiftTarget = null;
+
+    window.initSocial = function(user) {
+        loadFriends(user);
+        claimPendingGifts(user);
+        db.collection('users').doc(user.uid).get().then(function(doc) {
+            var d = doc.exists ? doc.data() : {};
+            socialGiftState = {
+                dayKey: d.giftDayKey === getDayKey() ? d.giftDayKey : getDayKey(),
+                sent: d.giftDayKey === getDayKey() ? (d.giftSent || 0) : 0
+            };
+        }).catch(function(err) { console.error('gift state load:', err); });
+    };
+
+    window.teardownSocial = function() {
+        socialFriends = [];
+        socialGiftTarget = null;
+        renderFriends();
+    };
+
+    function loadFriends(user) {
+        db.collection('users').doc(user.uid).collection('friends').get().then(function(snap) {
+            var uids = [];
+            snap.forEach(function(d) { uids.push(d.id); });
+            if (!uids.length) { socialFriends = []; renderFriends(); return; }
+            // Fetch each friend's live user doc for level / presence / avatar
+            return Promise.all(uids.map(function(uid) {
+                return db.collection('users').doc(uid).get().catch(function() { return null; });
+            })).then(function(docs) {
+                socialFriends = docs
+                    .filter(function(d) { return d && d.exists; })
+                    .map(function(d) { var data = d.data(); data.uid = d.id; return data; });
+                renderFriends();
+            });
+        }).catch(function(err) { console.error('friends load:', err); });
+    }
+
+    function friendIsOnline(f) {
+        var last = f.lastActiveDate && typeof f.lastActiveDate.toDate === 'function'
+            ? f.lastActiveDate.toDate().getTime() : 0;
+        return Date.now() - last < ONLINE_WINDOW_MS;
+    }
+
+    function renderFriends() {
+        var listEl = document.getElementById('friends-list');
+        var emptyEl = document.getElementById('friends-empty');
+        if (!listEl) return;
+        listEl.innerHTML = '';
+        var hasFriends = socialFriends.length > 0;
+        if (emptyEl) {
+            emptyEl.style.display = hasFriends ? 'none' : '';
+            emptyEl.textContent = et('friendsEmpty');
+        }
+        socialFriends
+            .slice()
+            .sort(function(a, b) { return friendIsOnline(b) - friendIsOnline(a); })
+            .forEach(function(f) {
+                var row = document.createElement('div');
+                row.className = 'friend-row';
+                var vipClass = window.vpVipClass ? vpVipClass(f.level || 1) : '';
+                row.innerHTML =
+                    '<span class="friend-status ' + (friendIsOnline(f) ? 'on' : 'off') + '"></span>' +
+                    '<span class="friend-avatar ' + vipClass + '">' + (window.lbAvatarHtml ? lbAvatarHtml(f) : '') + '</span>' +
+                    '<span class="friend-name" data-uid="' + escapeHtml(f.uid) + '">' + escapeHtml(f.displayName || '?') + '</span>' +
+                    '<span class="lvl-badge">' + (f.level || 1) + '</span>' +
+                    '<span class="friend-actions">' +
+                        '<button class="friend-btn" title="Send gift" data-act="gift" data-uid="' + escapeHtml(f.uid) + '">🎁</button>' +
+                        '<button class="friend-btn" title="Challenge to a duel" data-act="duel" data-uid="' + escapeHtml(f.uid) + '">⚔️</button>' +
+                    '</span>';
+                listEl.appendChild(row);
+            });
+        listEl.onclick = function(e) {
+            var btn = e.target.closest('.friend-btn');
+            if (btn) {
+                var f = socialFriends.find(function(x) { return x.uid === btn.dataset.uid; });
+                if (!f) return;
+                if (btn.dataset.act === 'gift') openGiftModal(f);
+                if (btn.dataset.act === 'duel' && window.duelChallenge) duelChallenge(f);
+                return;
+            }
+            var name = e.target.closest('.friend-name');
+            if (name && window.egOpenProfile) egOpenProfile(name.dataset.uid);
+        };
+    }
+
+    window.addFriendByCode = function() {
+        var user = auth.currentUser;
+        var input = document.getElementById('friend-code-input');
+        if (!user || !input) return;
+        var code = input.value.trim().toUpperCase();
+        if (!code) return;
+        db.collection('users').where('referralCode', '==', code).limit(1).get().then(function(snap) {
+            if (snap.empty) { egToast('❌ ' + et('friendNotFound')); return; }
+            var doc = snap.docs[0];
+            if (doc.id === user.uid) { egToast('🙃 ' + et('friendSelf')); return; }
+            if (socialFriends.some(function(f) { return f.uid === doc.id; })) {
+                egToast('ℹ️ ' + et('friendDup'));
+                return;
+            }
+            var d = doc.data();
+            return db.collection('users').doc(user.uid).collection('friends').doc(doc.id).set({
+                uid: doc.id,
+                displayName: d.displayName || '',
+                addedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(function() {
+                input.value = '';
+                egToast(et('friendAdded').replace('{name}', d.displayName || '?'));
+                loadFriends(user);
+            });
+        }).catch(function(err) { console.error('add friend:', err); });
+    };
+
+    window.refreshFriends = function() {
+        var user = auth.currentUser;
+        if (user) loadFriends(user);
+    };
+
+    // --- gifts ---
+    function openGiftModal(friend) {
+        socialGiftTarget = friend;
+        document.getElementById('gift-title').textContent = et('giftTitle');
+        document.getElementById('gift-sub').textContent =
+            et('giftSub').replace('{name}', friend.displayName || '?');
+        var wrap = document.getElementById('gift-amounts');
+        wrap.innerHTML = '';
+        GIFT_AMOUNTS.forEach(function(n) {
+            var btn = document.createElement('button');
+            btn.className = 'eg-claim-btn gift-amount-btn';
+            btn.textContent = '🎁 ' + n;
+            btn.onclick = function() { sendGift(n); };
+            wrap.appendChild(btn);
+        });
+        document.getElementById('eg-gift-modal').classList.remove('eg-hidden');
+    }
+
+    window.closeGiftModal = function() {
+        document.getElementById('eg-gift-modal').classList.add('eg-hidden');
+        socialGiftTarget = null;
+    };
+
+    function sendGift(amount) {
+        var user = auth.currentUser;
+        var friend = socialGiftTarget;
+        if (!user || !friend) return;
+        if (socialGiftState.dayKey !== getDayKey()) {
+            socialGiftState = { dayKey: getDayKey(), sent: 0 };
+        }
+        if (socialGiftState.sent + amount > GIFT_DAILY_CAP) {
+            egToast('⛔ ' + et('giftLimit').replace('{n}', GIFT_DAILY_CAP));
+            return;
+        }
+        socialGiftState.sent += amount;
+        db.collection('gifts').add({
+            fromUid: user.uid,
+            fromName: user.displayName || '',
+            toUid: friend.uid,
+            amount: amount,
+            dayKey: getDayKey(),
+            claimed: false,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(function() {
+            return db.collection('users').doc(user.uid).set({
+                giftDayKey: socialGiftState.dayKey,
+                giftSent: socialGiftState.sent
+            }, { merge: true });
+        }).then(function() {
+            egToast(et('giftSent').replace('{n}', amount).replace('{name}', friend.displayName || '?'));
+            closeGiftModal();
+        }).catch(function(err) { console.error('send gift:', err); });
+    }
+
+    function claimPendingGifts(user) {
+        db.collection('gifts')
+            .where('toUid', '==', user.uid)
+            .where('claimed', '==', false)
+            .get().then(function(snap) {
+                snap.forEach(function(doc) {
+                    var g = doc.data();
+                    doc.ref.update({ claimed: true }).then(function() {
+                        egAddCredits(g.amount);
+                        egConfetti();
+                        egToast(et('giftReceived')
+                            .replace('{name}', g.fromName || '?')
+                            .replace('{n}', g.amount));
+                        saveGameState();
+                    }).catch(function(err) { console.error('gift claim:', err); });
+                });
+            }).catch(function(err) { console.error('gifts query:', err); });
+    }
+
+
+/* --- js/duels.js --- */
+// ===================== Head-to-head duels (Phase 8.2) =====================
+// Best-of-10 vs a friend: both players get the SAME shuffled decks (seeded),
+// highest net profit after 10 hands wins +100 credits.
+
+    Object.assign(ENGAGE_I18N.en, {
+        duelSentToast: '⚔️ Challenge sent to {name} — waiting for them to accept…',
+        duelInviteTitle: '⚔️ Duel Challenge!',
+        duelInviteMsg: '{name} challenges you to a best-of-10 duel. Same cards, best player wins 100 credits!',
+        duelAccept: 'Accept Duel', duelDecline: 'Decline',
+        duelBanner: '⚔️ Duel vs {name} · You: {me} · Them: {them} · Hand {h}/10',
+        duelWaiting: '⚔️ Duel vs {name} · You finished ({me}) — waiting for them…',
+        duelWon: '🏆 You won the duel vs {name}! +100 credits',
+        duelLost: '😤 You lost the duel vs {name}. Rematch?',
+        duelTie: '🤝 The duel vs {name} ended in a tie!',
+        duelQuit: 'Forfeit'
+    });
+
+    var DUEL_HANDS = 10;
+    var DUEL_REWARD = 100;
+    var duelActive = null;      // { id, data }
+    var duelUnsub = null;
+    var duelInviteUnsub = null;
+    var duelPendingInvite = null;
+
+    function mulberry32(seed) {
+        var a = seed >>> 0;
+        return function() {
+            a |= 0; a = a + 0x6D2B79F5 | 0;
+            var t = Math.imul(a ^ a >>> 15, 1 | a);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+    }
+
+    function seededShuffle(arr, seed) {
+        var rand = mulberry32(seed);
+        for (var i = arr.length - 1; i > 0; i--) {
+            var j = Math.floor(rand() * (i + 1));
+            var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+        }
+    }
+
+    window.initDuels = function(user) {
+        // Invites addressed to me
+        duelInviteUnsub = db.collection('duels')
+            .where('opponentUid', '==', user.uid)
+            .where('status', '==', 'open')
+            .onSnapshot(function(snap) {
+                if (!snap.empty && !duelActive) showDuelInvite(snap.docs[0]);
+            }, function(err) { console.error('duel invites:', err); });
+        // Resume an active duel (as either side)
+        ['challengerUid', 'opponentUid'].forEach(function(field) {
+            db.collection('duels')
+                .where(field, '==', user.uid)
+                .where('status', '==', 'active')
+                .get().then(function(snap) {
+                    if (!snap.empty && !duelActive) attachDuel(snap.docs[0].id);
+                }).catch(function(err) { console.error('duel resume:', err); });
+        });
+    };
+
+    window.teardownDuels = function() {
+        if (duelUnsub) { duelUnsub(); duelUnsub = null; }
+        if (duelInviteUnsub) { duelInviteUnsub(); duelInviteUnsub = null; }
+        duelActive = null;
+        duelPendingInvite = null;
+        renderDuelBanner();
+    };
+
+    // --- challenge flow ---
+    window.duelChallenge = function(friend) {
+        var user = auth.currentUser;
+        if (!user || duelActive) return;
+        var p = {};
+        p[user.uid] = { name: user.displayName || '', net: 0, hands: 0, done: false };
+        db.collection('duels').add({
+            challengerUid: user.uid,
+            challengerName: user.displayName || '',
+            opponentUid: friend.uid,
+            opponentName: friend.displayName || '',
+            variant: gameVariant,
+            seed: Math.floor(Math.random() * 2147483647),
+            status: 'open',
+            p: p,
+            winnerUid: '',
+            rewardClaimed: false,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(function(ref) {
+            egToast(et('duelSentToast').replace('{name}', friend.displayName || '?'));
+            attachDuel(ref.id);
+        }).catch(function(err) { console.error('duel create:', err); });
+    };
+
+    function showDuelInvite(doc) {
+        duelPendingInvite = doc;
+        var d = doc.data();
+        document.getElementById('duel-invite-title').textContent = et('duelInviteTitle');
+        document.getElementById('duel-invite-msg').textContent =
+            et('duelInviteMsg').replace('{name}', d.challengerName || '?');
+        document.getElementById('duel-accept-btn').textContent = et('duelAccept');
+        document.getElementById('duel-decline-btn').textContent = et('duelDecline');
+        document.getElementById('duel-invite-modal').classList.remove('eg-hidden');
+    }
+
+    window.duelAcceptInvite = function() {
+        var user = auth.currentUser;
+        var doc = duelPendingInvite;
+        document.getElementById('duel-invite-modal').classList.add('eg-hidden');
+        if (!user || !doc) return;
+        duelPendingInvite = null;
+        var update = { status: 'active' };
+        update['p.' + user.uid] = { name: user.displayName || '', net: 0, hands: 0, done: false };
+        doc.ref.update(update).then(function() {
+            attachDuel(doc.id);
+        }).catch(function(err) { console.error('duel accept:', err); });
+    };
+
+    window.duelDeclineInvite = function() {
+        var doc = duelPendingInvite;
+        duelPendingInvite = null;
+        document.getElementById('duel-invite-modal').classList.add('eg-hidden');
+        if (doc) doc.ref.update({ status: 'declined' }).catch(function(err) { console.error('duel decline:', err); });
+    };
+
+    // --- live duel state ---
+    function attachDuel(id) {
+        if (duelUnsub) duelUnsub();
+        duelUnsub = db.collection('duels').doc(id).onSnapshot(function(doc) {
+            if (!doc.exists) { duelActive = null; renderDuelBanner(); return; }
+            var d = doc.data();
+            if (d.status === 'declined' || d.status === 'done') {
+                if (d.status === 'done') handleDuelEnd(doc);
+                duelActive = null;
+                if (duelUnsub) { duelUnsub(); duelUnsub = null; }
+                renderDuelBanner();
+                return;
+            }
+            duelActive = { id: doc.id, data: d };
+            if (d.status === 'active') {
+                // Duel constraints: single hand, challenger's variant, seeded decks
+                if (multiHandCount !== 1) setMultiHand(1);
+                if (d.variant && gameVariant !== d.variant && PAYTABLES[d.variant]) {
+                    gameVariant = d.variant;
+                    currentPayouts = Object.assign({}, basePayouts());
+                    updateVariantUI();
+                    renderPayouts(TRANSLATIONS[currentLang]);
+                }
+                checkDuelCompletion(doc);
+            }
+            renderDuelBanner();
+        }, function(err) { console.error('duel listen:', err); });
+    }
+
+    function myDuelEntry() {
+        var user = auth.currentUser;
+        if (!user || !duelActive) return null;
+        return (duelActive.data.p || {})[user.uid] || null;
+    }
+
+    function theirDuelEntry() {
+        var user = auth.currentUser;
+        if (!user || !duelActive) return null;
+        var p = duelActive.data.p || {};
+        var otherUid = Object.keys(p).find(function(uid) { return uid !== user.uid; });
+        return otherUid ? p[otherUid] : null;
+    }
+
+    // Called by deal(): seeds the deck for the current duel hand. Returns true if seeded.
+    window.vpDuelShuffle = function(deck) {
+        var me = myDuelEntry();
+        if (!duelActive || duelActive.data.status !== 'active' || !me || me.done) return false;
+        seededShuffle(deck, duelActive.data.seed + me.hands * 7919);
+        return true;
+    };
+
+    // Called by draw() after each hand
+    window.vpDuelOnHand = function(win, totalBet) {
+        var user = auth.currentUser;
+        var me = myDuelEntry();
+        if (!duelActive || duelActive.data.status !== 'active' || !me || me.done) return;
+        me.net += win - totalBet;
+        me.hands++;
+        if (me.hands >= DUEL_HANDS) me.done = true;
+        var update = {};
+        update['p.' + user.uid] = me;
+        db.collection('duels').doc(duelActive.id).update(update)
+            .catch(function(err) { console.error('duel hand save:', err); });
+        renderDuelBanner();
+    };
+
+    function checkDuelCompletion(doc) {
+        var user = auth.currentUser;
+        var d = doc.data();
+        var entries = Object.keys(d.p || {}).map(function(uid) {
+            return { uid: uid, e: d.p[uid] };
+        });
+        if (entries.length < 2 || !entries.every(function(x) { return x.e.done; })) return;
+        // Single writer: only the challenger settles the duel
+        if (user.uid !== d.challengerUid || d.winnerUid !== '') {
+            if (d.winnerUid !== '') return; // already settled, status flips to done next write
+            return;
+        }
+        entries.sort(function(a, b) { return b.e.net - a.e.net; });
+        var winnerUid = entries[0].e.net === entries[1].e.net ? 'tie' : entries[0].uid;
+        doc.ref.update({ winnerUid: winnerUid, status: 'done' })
+            .catch(function(err) { console.error('duel settle:', err); });
+    }
+
+    function handleDuelEnd(doc) {
+        var user = auth.currentUser;
+        var d = doc.data();
+        if (!user || !d.winnerUid) return;
+        var otherName = user.uid === d.challengerUid ? (d.opponentName || '?') : (d.challengerName || '?');
+        if (d.winnerUid === 'tie') {
+            egToast(et('duelTie').replace('{name}', otherName));
+        } else if (d.winnerUid === user.uid) {
+            if (!d.rewardClaimed) {
+                doc.ref.update({ rewardClaimed: true }).then(function() {
+                    egAddCredits(DUEL_REWARD);
+                    egConfetti();
+                    saveGameState();
+                }).catch(function(err) { console.error('duel reward:', err); });
+            }
+            egToast(et('duelWon').replace('{name}', otherName));
+        } else {
+            egToast(et('duelLost').replace('{name}', otherName));
+        }
+    }
+
+    window.duelForfeit = function() {
+        var user = auth.currentUser;
+        var me = myDuelEntry();
+        if (!duelActive || !me) return;
+        me.done = true;
+        me.hands = DUEL_HANDS;
+        var update = {};
+        update['p.' + user.uid] = me;
+        db.collection('duels').doc(duelActive.id).update(update)
+            .catch(function(err) { console.error('duel forfeit:', err); });
+    };
+
+    function renderDuelBanner() {
+        var el = document.getElementById('duel-banner');
+        if (!el) return;
+        var me = myDuelEntry();
+        var them = theirDuelEntry();
+        if (!duelActive || duelActive.data.status !== 'active' || !me) {
+            el.classList.add('eg-hidden');
+            el.innerHTML = '';
+            return;
+        }
+        var user = auth.currentUser;
+        var d = duelActive.data;
+        var otherName = user.uid === d.challengerUid ? (d.opponentName || '?') : (d.challengerName || '?');
+        var key = me.done ? 'duelWaiting' : 'duelBanner';
+        el.innerHTML = escapeHtml(
+            et(key).replace('{name}', otherName)
+                   .replace('{me}', (me.net >= 0 ? '+' : '') + me.net)
+                   .replace('{them}', them ? (them.net >= 0 ? '+' : '') + them.net : '—')
+                   .replace('{h}', Math.min(me.hands + 1, DUEL_HANDS))) +
+            ' <button class="room-mini-btn" onclick="duelForfeit()">' + et('duelQuit') + '</button>';
+        el.classList.remove('eg-hidden');
+    }
+
+
+/* --- js/community.js --- */
+// ===================== Social proof ticker + Hall of Fame (Phase 8.4 / 8.5) =====================
+
+    Object.assign(ENGAGE_I18N.en, {
+        tickerOnline: '{n} players online',
+        tickerHands: '{n} hands played today',
+        tickerRoyals: '{n} royal flushes today',
+        hofTitle: '🏛️ Hall of Fame',
+        hofEmpty: 'Champions will be immortalized here.',
+        hofDaily: 'Daily Champion', hofWeekly: 'Weekly Tournament'
+    });
+
+    var TICKER_REFRESH_MS = 60 * 1000;
+    var PRESENCE_HEARTBEAT_MS = 4 * 60 * 1000;
+    var STATS_FLUSH_EVERY = 10; // hands buffered per aggregate write
+
+    var communityTimers = [];
+    var pendingHands = 0;
+    var pendingRoyals = 0;
+
+    window.initCommunity = function(user) {
+        refreshTicker();
+        renderHallOfFame();
+        ensureHallOfFame();
+        communityTimers.push(setInterval(refreshTicker, TICKER_REFRESH_MS));
+        communityTimers.push(setInterval(function() {
+            db.collection('users').doc(user.uid).set({
+                lastActiveDate: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).catch(function() {});
+        }, PRESENCE_HEARTBEAT_MS));
+        document.addEventListener('visibilitychange', flushGlobalStats);
+    };
+
+    window.teardownCommunity = function() {
+        communityTimers.forEach(clearInterval);
+        communityTimers = [];
+        flushGlobalStats();
+        var el = document.getElementById('social-ticker');
+        if (el) el.classList.add('eg-hidden');
+    };
+
+    // --- aggregate counters (batched, not per-hand) ---
+    window.vpSocialOnHand = function(bestType) {
+        pendingHands++;
+        if (bestType === 'Royal Flush' || bestType === 'Wild Royal Flush') pendingRoyals++;
+        if (pendingHands >= STATS_FLUSH_EVERY) flushGlobalStats();
+    };
+
+    function flushGlobalStats() {
+        if (pendingHands === 0 && pendingRoyals === 0) return;
+        var hands = pendingHands, royals = pendingRoyals;
+        pendingHands = 0; pendingRoyals = 0;
+        db.collection('global_stats').doc(getDayKey()).set({
+            dayKey: getDayKey(),
+            hands: firebase.firestore.FieldValue.increment(hands),
+            royals: firebase.firestore.FieldValue.increment(royals),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(function() {
+            pendingHands += hands; pendingRoyals += royals; // retry next flush
+        });
+    }
+
+    function refreshTicker() {
+        var el = document.getElementById('social-ticker');
+        if (!el || !auth.currentUser) return;
+        var parts = { online: null, hands: 0, royals: 0 };
+        var render = function() {
+            var bits = [];
+            if (parts.online !== null && parts.online > 0) {
+                bits.push('🟢 ' + et('tickerOnline').replace('{n}', parts.online));
+            }
+            bits.push('🃏 ' + et('tickerHands').replace('{n}', parts.hands));
+            if (parts.royals > 0) {
+                bits.push('👑 ' + et('tickerRoyals').replace('{n}', parts.royals));
+            }
+            el.textContent = bits.join(' · ');
+            el.classList.remove('eg-hidden');
+        };
+        db.collection('global_stats').doc(getDayKey()).get().then(function(doc) {
+            if (doc.exists) {
+                parts.hands = doc.data().hands || 0;
+                parts.royals = doc.data().royals || 0;
+            }
+            render();
+        }).catch(function() {});
+        try {
+            var cutoff = new Date(Date.now() - 5 * 60 * 1000);
+            var q = db.collection('users').where('lastActiveDate', '>', cutoff);
+            if (typeof q.count === 'function') {
+                q.count().get().then(function(snap) {
+                    parts.online = snap.data().count;
+                    render();
+                }).catch(function() {});
+            }
+        } catch (e) { /* count() unsupported — ticker shows hands only */ }
+    }
+
+    // --- Hall of Fame ---
+    // First client to load after a period rolls over writes the champion record.
+    // Doc ids are deterministic (daily_<day> / week_<week>) so writes are idempotent.
+    function ensureHallOfFame() {
+        var yesterday = getDayKey(new Date(Date.now() - 86400e3));
+        writeChampionIfMissing('daily_' + yesterday, function() {
+            return db.collection('daily_scores')
+                .where('dayKey', '==', yesterday)
+                .orderBy('score', 'desc').limit(1).get();
+        }, 'daily');
+
+        var prevWeek = getWeekKey(new Date(Date.now() - 7 * 86400e3));
+        writeChampionIfMissing('week_' + prevWeek, function() {
+            return db.collection('weekly_tournaments')
+                .where('tKey', '==', prevWeek)
+                .orderBy('score', 'desc').limit(1).get();
+        }, 'weekly');
+    }
+
+    function writeChampionIfMissing(docId, queryFn, period) {
+        var ref = db.collection('hall_of_fame').doc(docId);
+        ref.get().then(function(doc) {
+            if (doc.exists) return;
+            return queryFn().then(function(snap) {
+                if (snap.empty) return;
+                var d = snap.docs[0].data();
+                if ((d.score || 0) <= 0) return; // no champion for a losing period
+                return ref.set({
+                    period: period,
+                    periodKey: docId,
+                    uid: d.uid,
+                    displayName: d.displayName || '',
+                    photoURL: d.photoURL || '',
+                    avatar: d.avatar || '',
+                    score: d.score || 0,
+                    level: d.level || 1,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(renderHallOfFame);
+            });
+        }).catch(function(err) { console.error('hall of fame write:', err); });
+    }
+
+    function renderHallOfFame() {
+        var listEl = document.getElementById('hof-list');
+        var panel = document.getElementById('hof-panel');
+        if (!listEl || !panel) return;
+        document.getElementById('hof-title').textContent = et('hofTitle');
+        db.collection('hall_of_fame').orderBy('createdAt', 'desc').limit(8).get().then(function(snap) {
+            listEl.innerHTML = '';
+            if (snap.empty) {
+                listEl.innerHTML = '<div class="hof-empty">' + et('hofEmpty') + '</div>';
+                return;
+            }
+            snap.forEach(function(doc) {
+                var d = doc.data();
+                var dateLabel = (d.periodKey || '').replace('daily_', '').replace('week_', '');
+                var row = document.createElement('div');
+                row.className = 'hof-row';
+                row.innerHTML =
+                    '<span class="hof-medal">' + (d.period === 'weekly' ? '🏆' : '🥇') + '</span>' +
+                    '<span class="friend-avatar">' + (window.lbAvatarHtml ? lbAvatarHtml(d) : '') + '</span>' +
+                    '<span class="hof-name">' + escapeHtml(d.displayName || '?') + '</span>' +
+                    '<span class="hof-meta">' + escapeHtml(dateLabel) +
+                        ' · ' + et(d.period === 'weekly' ? 'hofWeekly' : 'hofDaily') + '</span>' +
+                    '<span class="hof-score">+' + (d.score || 0) + '</span>';
+                listEl.appendChild(row);
+            });
+        }).catch(function(err) { console.error('hall of fame load:', err); });
+    }
+
+
+/* --- js/events.js --- */
+// ===================== VIP tiers + limited-time events + anti-churn (Phase 9.3 / 9.4 / 9.5) =====================
+
+    Object.assign(ENGAGE_I18N.en, {
+        vipLabel: 'VIP', vipBonusNote: '+{n}% on every win',
+        eventEndsIn: 'ends in {t}',
+        streakRiskNotify: '🔥 Your daily streak is about to break — claim today\'s bonus!',
+        streakRiskToast: '⏰ Claim your daily bonus before midnight or the streak resets!'
+    });
+
+    // --- VIP tiers (Phase 9.3): passive payout bonus + status ring ---
+    var VIP_TIERS = [
+        { id: 'bronze',   name: 'Bronze',   min: 1,  bonus: 0,    color: '#cd7f32' },
+        { id: 'silver',   name: 'Silver',   min: 10, bonus: 0.05, color: '#c0c0c0' },
+        { id: 'gold',     name: 'Gold',     min: 20, bonus: 0.10, color: '#ffd700' },
+        { id: 'platinum', name: 'Platinum', min: 35, bonus: 0.15, color: '#a0e8e8' },
+        { id: 'diamond',  name: 'Diamond',  min: 50, bonus: 0.20, color: '#b9f2ff' }
+    ];
+
+    window.vpVipTier = function(level) {
+        var tier = VIP_TIERS[0];
+        VIP_TIERS.forEach(function(t) { if ((level || 1) >= t.min) tier = t; });
+        return tier;
+    };
+
+    window.vpVipClass = function(level) {
+        return 'vip-' + vpVipTier(level).id;
+    };
+
+    // Applied in draw() to every win
+    window.vpVipMultiplier = function() {
+        if (!window.egUser) return 1;
+        return 1 + vpVipTier(egLevel).bonus;
+    };
+
+    window.egRenderVipBadge = function() {
+        var bar = document.getElementById('user-bar');
+        if (!bar || !window.egUser) return;
+        var tier = vpVipTier(egLevel);
+        var badge = document.getElementById('ub-vip');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.id = 'ub-vip';
+            badge.className = 'vip-badge';
+            badge.onclick = function() { egOpenProfile(); };
+            var lvlEl = document.getElementById('ub-level');
+            if (lvlEl && lvlEl.parentNode === bar) bar.insertBefore(badge, lvlEl.nextSibling);
+            else bar.appendChild(badge);
+        }
+        badge.textContent = tier.name;
+        badge.style.borderColor = tier.color;
+        badge.style.color = tier.color;
+        badge.title = et('vipBonusNote').replace('{n}', Math.round(tier.bonus * 100));
+    };
+
+    // --- limited-time events (Phase 9.4) ---
+    // events docs: { name, emoji, type: 'xp'|'payout'|'streak', multiplier,
+    //               handType (payout-only, optional), startsAt, endsAt }
+    var activeEvent = null;
+    var eventTimers = [];
+
+    window.initEvents = function() {
+        loadActiveEvent();
+        eventTimers.push(setInterval(loadActiveEvent, 5 * 60 * 1000));
+        eventTimers.push(setInterval(renderEventBanner, 1000));
+    };
+
+    window.teardownEvents = function() {
+        eventTimers.forEach(clearInterval);
+        eventTimers = [];
+        activeEvent = null;
+        renderEventBanner();
+    };
+
+    function loadActiveEvent() {
+        db.collection('events')
+            .where('endsAt', '>', firebase.firestore.Timestamp.now())
+            .orderBy('endsAt', 'asc').limit(5)
+            .get().then(function(snap) {
+                var now = Date.now();
+                activeEvent = null;
+                snap.forEach(function(doc) {
+                    var d = doc.data();
+                    var starts = d.startsAt && d.startsAt.toDate ? d.startsAt.toDate().getTime() : 0;
+                    if (!activeEvent && starts <= now) activeEvent = d;
+                });
+                renderEventBanner();
+            }).catch(function(err) { console.error('events load:', err); });
+    }
+
+    window.vpEventXpMult = function() {
+        return activeEvent && activeEvent.type === 'xp' ? (activeEvent.multiplier || 1) : 1;
+    };
+
+    window.vpEventWinMultiplier = function(handType) {
+        if (!activeEvent || activeEvent.type !== 'payout') return 1;
+        if (activeEvent.handType && activeEvent.handType !== handType) return 1;
+        return activeEvent.multiplier || 1;
+    };
+
+    window.vpEventStreakMult = function() {
+        return activeEvent && activeEvent.type === 'streak' ? (activeEvent.multiplier || 1) : 1;
+    };
+
+    function formatCountdown(ms) {
+        var s = Math.max(0, Math.floor(ms / 1000));
+        var h = Math.floor(s / 3600);
+        var m = Math.floor((s % 3600) / 60);
+        if (h >= 1) return h + 'h ' + String(m).padStart(2, '0') + 'm';
+        return m + 'm ' + String(s % 60).padStart(2, '0') + 's';
+    }
+
+    function renderEventBanner() {
+        var el = document.getElementById('event-banner');
+        if (!el) return;
+        if (!activeEvent || !window.egUser) {
+            el.classList.add('eg-hidden');
+            return;
+        }
+        var ends = activeEvent.endsAt && activeEvent.endsAt.toDate ? activeEvent.endsAt.toDate().getTime() : 0;
+        if (ends <= Date.now()) {
+            activeEvent = null;
+            el.classList.add('eg-hidden');
+            return;
+        }
+        el.textContent = (activeEvent.emoji || '🎉') + ' ' + (activeEvent.name || 'Special Event') +
+            ' — ' + et('eventEndsIn').replace('{t}', formatCountdown(ends - Date.now()));
+        el.classList.remove('eg-hidden');
+    }
+
+    // --- anti-churn (Phase 9.5): streak-risk nudge while the tab is open ---
+    // (Real closed-app push needs the FCM VAPID key + a scheduled sender — see js/pwa.js)
+    var streakNudgeTimer = null;
+
+    window.initAntiChurn = function(user) {
+        if (streakNudgeTimer) clearTimeout(streakNudgeTimer);
+        var evening = new Date();
+        evening.setHours(20, 0, 0, 0);
+        var delay = evening.getTime() - Date.now();
+        if (delay <= 0) return; // already evening — daily modal flow handles it
+        streakNudgeTimer = setTimeout(function() {
+            db.collection('daily_rewards').doc(user.uid).get().then(function(doc) {
+                if (!doc.exists) return;
+                var d = doc.data();
+                if (d.lastClaimDate === getDayKey() || (d.streak || 0) < 2) return;
+                egToast(et('streakRiskToast'));
+                if (typeof Notification !== 'undefined' && Notification.permission === 'granted' &&
+                    navigator.serviceWorker && navigator.serviceWorker.ready) {
+                    navigator.serviceWorker.ready.then(function(reg) {
+                        reg.showNotification('Video Poker', {
+                            body: et('streakRiskNotify'),
+                            icon: 'icon.svg',
+                            tag: 'streak-risk'
+                        });
+                    }).catch(function() {});
+                }
+            }).catch(function() {});
+        }, delay);
+    };
+
+    window.teardownAntiChurn = function() {
+        if (streakNudgeTimer) { clearTimeout(streakNudgeTimer); streakNudgeTimer = null; }
+    };
+
+
+/* --- js/onboarding.js --- */
+// ===================== Onboarding, themes & accessibility (Phase 10) =====================
+
+    Object.assign(ENGAGE_I18N.en, {
+        tutSkip: 'Skip tutorial',
+        tutDeal: '👋 Welcome! Press DEAL to get your first five cards.',
+        tutHold: 'These are your cards. Tap the ones you want to KEEP — they\'ll show a HELD badge.',
+        tutDraw: 'Now press DRAW to replace the cards you didn\'t hold.',
+        tutWin: '🎉 You won — your balance went up! Come back daily for bonuses. Good luck!',
+        tutLose: 'No win this time — that\'s poker! Your balance is at the top. Good luck!',
+        themesTitle: 'Table Themes',
+        themeLockedLv: 'Lv {n}',
+        a11yTitle: '♿ Accessibility',
+        a11yContrast: 'High contrast mode',
+        a11yMotion: 'Reduce motion',
+        a11yColorblind: 'Color-blind friendly suits',
+        offlineBadge: '📡 Offline Mode — progress syncs when you reconnect',
+        backOnline: '✅ Back online — syncing your progress'
+    });
+
+    // --- table themes (Phase 10.3) — cosmetic rewards for leveling ---
+    var TABLE_THEMES = [
+        { id: 'classic',  name: 'Classic Casino', level: 1 },
+        { id: 'midnight', name: 'Midnight Blue',  level: 10 },
+        { id: 'goldluxe', name: 'Royal Gold',     level: 20 },
+        { id: 'neon',     name: 'Neon Vegas',     level: 35 }
+    ];
+    var vpTheme = 'classic';
+    try { vpTheme = localStorage.getItem('vp_theme') || 'classic'; } catch (e) {}
+
+    function applyTheme(id) {
+        if (!TABLE_THEMES.some(function(t) { return t.id === id; })) id = 'classic';
+        vpTheme = id;
+        TABLE_THEMES.forEach(function(t) {
+            document.body.classList.toggle('theme-' + t.id, t.id === id && id !== 'classic');
+        });
+    }
+    applyTheme(vpTheme);
+
+    window.vpSelectTheme = function(id) {
+        var theme = TABLE_THEMES.find(function(t) { return t.id === id; });
+        if (!theme || (window.egUser && theme.level > egLevel)) return;
+        applyTheme(id);
+        try { localStorage.setItem('vp_theme', id); } catch (e) {}
+        if (window.egUser) {
+            db.collection('users').doc(egUser.uid).set({ tableTheme: id }, { merge: true })
+                .catch(function(err) { console.error('theme save:', err); });
+        }
+        egApplyThemeUnlocks();
+    };
+
+    // Renders the theme picker in the profile panel (called on level change too)
+    window.egApplyThemeUnlocks = function() {
+        var wrap = document.getElementById('pf-themes');
+        if (!wrap) return;
+        var titleEl = document.getElementById('pf-themes-title');
+        if (titleEl) titleEl.textContent = et('themesTitle');
+        wrap.innerHTML = '';
+        TABLE_THEMES.forEach(function(t) {
+            var locked = window.egUser ? t.level > egLevel : t.level > 1;
+            var chip = document.createElement('div');
+            chip.className = 'style-chip theme-chip-' + t.id +
+                (t.id === vpTheme ? ' selected' : '') + (locked ? ' locked' : '');
+            chip.textContent = t.name + (locked ? ' 🔒 ' + et('themeLockedLv').replace('{n}', t.level) : '');
+            if (!locked) chip.onclick = function() { vpSelectTheme(t.id); };
+            wrap.appendChild(chip);
+        });
+    };
+
+    // --- accessibility settings (Phase 10.4) ---
+    var a11ySettings = { contrast: false, motion: false, colorblind: false };
+    try { a11ySettings = Object.assign(a11ySettings, JSON.parse(localStorage.getItem('vp_a11y') || '{}')); } catch (e) {}
+
+    function applyA11y() {
+        document.body.classList.toggle('hc-mode', a11ySettings.contrast);
+        document.body.classList.toggle('rm-mode', a11ySettings.motion);
+        document.body.classList.toggle('cb-deck', a11ySettings.colorblind);
+    }
+    applyA11y();
+
+    window.openA11yModal = function() {
+        var modal = document.getElementById('a11y-modal');
+        document.getElementById('a11y-title').textContent = et('a11yTitle');
+        [['contrast', 'a11yContrast'], ['motion', 'a11yMotion'], ['colorblind', 'a11yColorblind']]
+            .forEach(function(pair) {
+                document.getElementById('a11y-' + pair[0] + '-label').textContent = et(pair[1]);
+                document.getElementById('a11y-' + pair[0]).checked = a11ySettings[pair[0]];
+            });
+        modal.classList.remove('eg-hidden');
+    };
+
+    window.closeA11yModal = function() {
+        document.getElementById('a11y-modal').classList.add('eg-hidden');
+    };
+
+    window.a11yChanged = function() {
+        a11ySettings = {
+            contrast: document.getElementById('a11y-contrast').checked,
+            motion: document.getElementById('a11y-motion').checked,
+            colorblind: document.getElementById('a11y-colorblind').checked
+        };
+        try { localStorage.setItem('vp_a11y', JSON.stringify(a11ySettings)); } catch (e) {}
+        applyA11y();
+    };
+
+    // --- offline badge (Phase 10.5) ---
+    function renderOfflineBadge() {
+        var el = document.getElementById('offline-badge');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'offline-badge';
+            el.className = 'offline-badge eg-hidden';
+            document.body.appendChild(el);
+        }
+        if (navigator.onLine === false) {
+            el.textContent = et('offlineBadge');
+            el.classList.remove('eg-hidden');
+        } else {
+            el.classList.add('eg-hidden');
+        }
+    }
+    window.addEventListener('offline', renderOfflineBadge);
+    window.addEventListener('online', function() {
+        renderOfflineBadge();
+        egToast(et('backOnline'));
+    });
+    renderOfflineBadge();
+
+    // --- new player tutorial (Phase 10.1) ---
+    var tutState = null; // null = inactive, else current step name
+
+    function tutDone(persist) {
+        tutState = null;
+        removeTutTip();
+        try { localStorage.setItem('vp_tutorial_done', '1'); } catch (e) {}
+        if (persist && window.egUser) {
+            db.collection('users').doc(egUser.uid).set({ tutorialDone: true }, { merge: true })
+                .catch(function() {});
+        }
+    }
+
+    function removeTutTip() {
+        var tip = document.getElementById('tut-tip');
+        if (tip) tip.remove();
+        document.querySelectorAll('.tut-highlight').forEach(function(el) {
+            el.classList.remove('tut-highlight');
+        });
+    }
+
+    function showTutTip(targetId, text) {
+        removeTutTip();
+        var target = document.getElementById(targetId);
+        if (!target) return;
+        target.classList.add('tut-highlight');
+        var tip = document.createElement('div');
+        tip.id = 'tut-tip';
+        tip.className = 'tut-tip';
+        tip.innerHTML = '<div class="tut-text">' + text + '</div>' +
+            '<button class="tut-skip" onclick="vpSkipTutorial()">' + et('tutSkip') + '</button>';
+        document.body.appendChild(tip);
+        var rect = target.getBoundingClientRect();
+        var top = rect.bottom + window.scrollY + 12;
+        var left = Math.max(10, Math.min(window.innerWidth - 290,
+            rect.left + window.scrollX + rect.width / 2 - 140));
+        tip.style.top = top + 'px';
+        tip.style.left = left + 'px';
+        target.scrollIntoView({ block: 'center', behavior: a11ySettings.motion ? 'auto' : 'smooth' });
+    }
+
+    window.vpSkipTutorial = function() { tutDone(true); };
+
+    window.initTutorial = function(user, userData) {
+        var doneLocal = false;
+        try { doneLocal = localStorage.getItem('vp_tutorial_done') === '1'; } catch (e) {}
+        if (doneLocal || (userData && userData.tutorialDone) || (userData && (userData.totalHands || 0) > 0)) return;
+        tutState = 'deal';
+        showTutTip('deal-btn', et('tutDeal'));
+    };
+
+    window.teardownTutorial = function() {
+        tutState = null;
+        removeTutTip();
+    };
+
+    // Hooks called from game.js
+    window.vpTutorialOnDeal = function() {
+        if (tutState !== 'deal') return;
+        tutState = 'hold';
+        setTimeout(function() {
+            if (tutState !== 'hold') return;
+            showTutTip('hand', et('tutHold'));
+            setTimeout(function() {
+                if (tutState === 'hold') {
+                    tutState = 'draw';
+                    showTutTip('hold-btn', et('tutDraw'));
+                }
+            }, 6000);
+        }, 1800);
+    };
+
+    window.vpTutorialOnDraw = function(win) {
+        if (!tutState) return;
+        showTutTip('balance', win > 0 ? et('tutWin') : et('tutLose'));
+        var finalMsgMs = 6000;
+        setTimeout(function() { tutDone(true); }, finalMsgMs);
+    };
 
 
 /* --- js/pwa.js --- */

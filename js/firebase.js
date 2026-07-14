@@ -9,6 +9,12 @@ const firebaseConfig = {
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    // Offline support: cache Firestore data + queue writes while disconnected
+    try {
+        db.enablePersistence({ synchronizeTabs: true }).catch(function(err) {
+            console.warn('Firestore persistence unavailable:', err && err.code);
+        });
+    } catch (e) { /* older browser — online-only */ }
     const ADMIN_EMAIL = 'micorlov@gmail.com';
 
     function signInWithGoogle() {
@@ -64,6 +70,11 @@ const firebaseConfig = {
             initSound();
             if (window.initRooms) window.initRooms(user);
             if (window.initEngagement) window.initEngagement(user);
+            if (window.initSocial) window.initSocial(user);
+            if (window.initDuels) window.initDuels(user);
+            if (window.initCommunity) window.initCommunity(user);
+            if (window.initEvents) window.initEvents(user);
+            if (window.initAntiChurn) window.initAntiChurn(user);
         } else {
             document.getElementById('login-overlay').classList.remove('hidden');
             document.getElementById('game-container').style.display = 'none';
@@ -72,6 +83,12 @@ const firebaseConfig = {
             if (bar) bar.remove();
             if (window.teardownRooms) window.teardownRooms();
             if (window.teardownEngagement) window.teardownEngagement();
+            if (window.teardownSocial) window.teardownSocial();
+            if (window.teardownDuels) window.teardownDuels();
+            if (window.teardownCommunity) window.teardownCommunity();
+            if (window.teardownEvents) window.teardownEvents();
+            if (window.teardownAntiChurn) window.teardownAntiChurn();
+            if (window.teardownTutorial) window.teardownTutorial();
         }
     });
 
@@ -96,6 +113,7 @@ const firebaseConfig = {
             adminBtn +
             '<button id="sound-toggle-btn" onclick="toggleSound()" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px; line-height:1;">🔊</button>' +
             '<button id="deal-speed-btn" onclick="toggleDealSpeed()" title="Fast deal" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px 0 0; line-height:1;">⚡</button>' +
+            '<button id="a11y-btn" onclick="openA11yModal()" title="Accessibility" aria-label="Accessibility settings" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px 0 0; line-height:1;">♿</button>' +
             '<button onclick="signOut()">Sign Out</button>';
         const container = document.getElementById('game-container');
         container.insertBefore(bar, container.firstChild);
@@ -196,5 +214,7 @@ const firebaseConfig = {
         'Straight': 4, 'Flush': 5, 'Full House': 6, 'Four of a Kind': 7,
         'Straight Flush': 8, 'Royal Flush': 9,
         // Deuces Wild extras
-        'Five of a Kind': 7, 'Wild Royal Flush': 8, 'Four Deuces': 8
+        'Five of a Kind': 7, 'Wild Royal Flush': 8, 'Four Deuces': 8,
+        // Bonus Poker quad subtypes
+        'Four 5s-Ks': 7, 'Four 2s-4s': 7, 'Four Aces': 7
     };
