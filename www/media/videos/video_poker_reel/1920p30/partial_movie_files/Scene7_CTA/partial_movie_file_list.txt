@@ -1,0 +1,9 @@
+# This file is used internally by FFMPEG.
+file 'file:/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/partial_movie_files/Scene7_CTA/2736838652_1675346973_223132457.mp4'
+file 'file:/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/partial_movie_files/Scene7_CTA/761263725_2318836581_1394438664.mp4'
+file 'file:/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/partial_movie_files/Scene7_CTA/761263725_954974301_178033730.mp4'
+file 'file:/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/partial_movie_files/Scene7_CTA/761263725_84329896_733336226.mp4'
+file 'file:/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/partial_movie_files/Scene7_CTA/761263725_84329896_733336226.mp4'
+file 'file:/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/partial_movie_files/Scene7_CTA/761263725_282882093_3360337812.mp4'
+file 'file:/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/partial_movie_files/Scene7_CTA/761263725_1998819872_2582958978.mp4'
+file 'file:/Users/michael/video_poker_game/media/videos/video_poker_reel/1920p30/partial_movie_files/Scene7_CTA/761263725_2844360058_937438367.mp4'

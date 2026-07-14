@@ -1,11 +1,10 @@
 .claude/
-# Capacitor / Android build outputs
-www/
+# Node
+node_modules/
+# Android build outputs
+android/.gradle/
 android/app/build/
 android/build/
-android/.gradle/
 android/capacitor-cordova-android-plugins/build/
 android/capacitor-android/build/
 android/local.properties
-# Node
-node_modules/
