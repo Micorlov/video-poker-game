@@ -95,10 +95,13 @@ const firebaseConfig = {
             '<span class="ub-ach-count" id="ub-ach-count" onclick="egOpenProfile()">🏆 0</span>' +
             adminBtn +
             '<button id="sound-toggle-btn" onclick="toggleSound()" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px; line-height:1;">🔊</button>' +
+            '<button id="deal-speed-btn" onclick="toggleDealSpeed()" title="Fast deal" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px 0 0; line-height:1;">⚡</button>' +
             '<button onclick="signOut()">Sign Out</button>';
         const container = document.getElementById('game-container');
         container.insertBefore(bar, container.firstChild);
         updateSoundButtonUI();
+        if (window.updateDealSpeedButtonUI) updateDealSpeedButtonUI();
+        if (window.egApplyAvatarToUserBar) egApplyAvatarToUserBar();
     }
 
     function signOut() {
@@ -191,5 +194,7 @@ const firebaseConfig = {
     const HAND_RANK = {
         'Nothing': 0, 'Jacks or Better': 1, 'Two Pair': 2, 'Three of a Kind': 3,
         'Straight': 4, 'Flush': 5, 'Full House': 6, 'Four of a Kind': 7,
-        'Straight Flush': 8, 'Royal Flush': 9
+        'Straight Flush': 8, 'Royal Flush': 9,
+        // Deuces Wild extras
+        'Five of a Kind': 7, 'Wild Royal Flush': 8, 'Four Deuces': 8
     };

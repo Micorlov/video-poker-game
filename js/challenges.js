@@ -130,6 +130,7 @@ var CHALLENGE_POOL = [
         if (window.initTournament) initTournament(user);
         if (window.initSeason) initSeason(user);
         if (window.initPwa) initPwa(user);
+        if (window.egCheckDailySpin) egCheckDailySpin(user);
     };
 
     window.teardownEngagement = function() {

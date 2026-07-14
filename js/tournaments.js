@@ -172,6 +172,7 @@
             uid: egUser.uid,
             displayName: egUser.displayName || '',
             photoURL: egUser.photoURL || '',
+            avatar: window.egAvatarStr ? egAvatarStr() : '',
             score: firebase.firestore.FieldValue.increment(ev.win || 0),
             hands: firebase.firestore.FieldValue.increment(1),
             level: egLevel,
@@ -203,7 +204,7 @@
                     var rank = idx + 1;
                     var isYou = d.uid === egUser.uid;
                     var medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
-                    var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+                    var photo = window.lbAvatarHtml ? lbAvatarHtml(d) : (d.photoURL ? '<img src="' + d.photoURL + '">' : '');
                     var lvlBadge = d.level ? '<span class="lvl-badge">' + d.level + '</span>' : '';
                     var badge = isYou ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
                     var row = document.createElement('tr');

@@ -1886,3 +1886,248 @@
     background: transparent;
     color: #aaa;
 }
+
+/* --- Extras: game variant picker --- */
+.variant-picker {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+.variant-btn {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    background: rgba(0, 0, 0, 0.3);
+    color: #ccc;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.variant-btn.selected {
+    background: #ffd700;
+    color: #1a1a1a;
+    border-color: #ffd700;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+}
+
+/* --- Extras: red/black gamble --- */
+.gamble-card {
+    width: 90px;
+    height: 130px;
+    margin: 14px auto;
+    border-radius: 10px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    font-weight: 800;
+    color: #1a1a1a;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+.gamble-card .gamble-back {
+    color: #999;
+    font-size: 44px;
+}
+.gamble-card .gamble-face.red {
+    color: #d61c1c;
+}
+.gamble-choices {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin: 10px 0;
+}
+.gamble-btn {
+    font-size: 30px;
+    padding: 8px 26px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+.gamble-btn:hover:not(:disabled) {
+    transform: scale(1.08);
+}
+.gamble-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+.gamble-result {
+    min-height: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+/* --- Extras: daily spin wheel --- */
+.spin-wrap {
+    position: relative;
+    width: 180px;
+    height: 190px;
+    margin: 10px auto;
+}
+.spin-pointer {
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffd700;
+    font-size: 20px;
+    z-index: 2;
+    text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+}
+.spin-wheel {
+    position: absolute;
+    top: 14px;
+    left: 10px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: 4px solid #ffd700;
+    background: conic-gradient(
+        #14532d 0deg 45deg, #0c2317 45deg 90deg,
+        #14532d 90deg 135deg, #0c2317 135deg 180deg,
+        #14532d 180deg 225deg, #0c2317 225deg 270deg,
+        #b8860b 270deg 315deg, #0c2317 315deg 360deg);
+    box-shadow: 0 0 18px rgba(255, 215, 0, 0.3);
+}
+.spin-labels {
+    position: absolute;
+    top: 14px;
+    left: 10px;
+    width: 160px;
+    height: 160px;
+    pointer-events: none;
+}
+.spin-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -9px 0 0 -14px;
+    width: 28px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #ffd700;
+    transform-origin: 50% 50%;
+}
+
+/* --- Extras: mystery box --- */
+.box-icon {
+    font-size: 64px;
+    margin: 14px 0;
+}
+.box-icon.shaking {
+    display: inline-block;
+    animation: boxShake 0.7s ease-in-out infinite;
+}
+@keyframes boxShake {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-8deg) scale(1.04); }
+    75% { transform: rotate(8deg) scale(1.04); }
+}
+
+/* --- Extras: room chat --- */
+.chat-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+.chat-row .chat-input {
+    flex: 1;
+    margin-bottom: 0;
+    font-size: 13px;
+    padding: 8px 10px;
+}
+
+/* --- Extras: custom avatars --- */
+.lb-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 13px;
+    margin-inline-end: 5px;
+    vertical-align: middle;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+}
+#user-bar .ub-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+}
+.avatar-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.avatar-cell {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+.avatar-cell.selected {
+    border-color: #ffd700;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+.avatar-colors {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+.avatar-color {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+.avatar-color.selected {
+    border-color: #ffd700;
+}
+
+/* --- Extras: winning-hand distribution --- */
+.dist-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+    font-size: 12px;
+}
+.dist-name {
+    flex: 0 0 40%;
+    color: #ccc;
+}
+.dist-bar {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+.dist-fill {
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #4ade80, #ffd700);
+}
+.dist-count {
+    flex: 0 0 28px;
+    text-align: end;
+    color: #ffd700;
+    font-weight: 700;
+}
+
+/* --- Extras: fast deal mode --- */
+body.fast-deal .card-inner {
+    transition-duration: 0.22s !important;
+}

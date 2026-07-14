@@ -154,6 +154,45 @@
 
     <div id="feed-toasts"></div>
 
+    <div id="eg-gamble-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="closeGamble()">✕</button>
+            <h3 id="eg-gamble-title">🎴 Red or Black?</h3>
+            <div class="eg-sub" id="eg-gamble-stake"></div>
+            <div class="gamble-card" id="eg-gamble-card"><span class="gamble-back">?</span></div>
+            <div class="gamble-choices">
+                <button class="gamble-btn gamble-red" id="eg-gamble-red" onclick="pickGamble('red')">🔴</button>
+                <button class="gamble-btn gamble-black" id="eg-gamble-black" onclick="pickGamble('black')">⚫</button>
+            </div>
+            <div class="gamble-result" id="eg-gamble-result"></div>
+            <button class="eg-claim-btn" id="eg-gamble-collect" onclick="closeGamble()">Collect</button>
+        </div>
+    </div>
+
+    <div id="eg-spin-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="egCloseModal('eg-spin-modal')">✕</button>
+            <h3 id="eg-spin-title">🎡 Daily Spin</h3>
+            <div class="eg-sub" id="eg-spin-sub"></div>
+            <div class="spin-wrap">
+                <div class="spin-pointer">▼</div>
+                <div class="spin-wheel" id="eg-spin-wheel"></div>
+                <div class="spin-labels" id="eg-spin-labels"></div>
+            </div>
+            <button class="eg-claim-btn" id="eg-spin-btn" onclick="doDailySpin()">SPIN</button>
+        </div>
+    </div>
+
+    <div id="eg-box-modal" class="eg-modal eg-hidden">
+        <div class="eg-box">
+            <button class="eg-close" onclick="egCloseModal('eg-box-modal')">✕</button>
+            <h3 id="eg-box-title">📦 Mystery Box!</h3>
+            <div class="eg-sub" id="eg-box-sub"></div>
+            <div class="box-icon" id="eg-box-icon">📦</div>
+            <button class="eg-claim-btn" id="eg-box-open" onclick="openMysteryBox()">Open the box</button>
+        </div>
+    </div>
+
     <div id="share-win-modal" class="room-modal rm-hidden">
         <div class="room-modal-box" style="width: min(500px, 94vw);">
             <button class="room-modal-close" onclick="closeShareWinModal()">✕</button>
@@ -186,8 +225,18 @@
             <span class="xp-bar"><span class="xp-fill" id="pf-xp-fill"></span></span>
             <span class="xp-text" id="pf-xp-text"></span>
         </div>
+        <div id="pf-avatar-section" style="display:none;">
+            <h4 id="pf-avatar-title">Avatar</h4>
+            <div class="avatar-grid" id="pf-avatar-emoji"></div>
+            <div class="avatar-colors" id="pf-avatar-colors"></div>
+            <button class="share-copy-btn" id="pf-avatar-reset" style="margin-top:8px;">Use my photo</button>
+        </div>
         <h4 id="pf-stats-title">Stats</h4>
         <div id="pf-stats"></div>
+        <div id="pf-hand-dist" style="display:none;">
+            <h4 id="pf-dist-title">Winning Hands</h4>
+            <div id="pf-dist-list"></div>
+        </div>
         <h4 id="pf-ach-title">Achievements</h4>
         <div class="ach-grid" id="pf-ach-grid"></div>
         <div id="pf-ref-section-wrap" style="display: none;">
@@ -237,6 +286,10 @@
 
         <div class="game-layout">
             <div class="game-col">
+                <div class="variant-picker">
+                    <button class="variant-btn selected" id="variant-jacks" onclick="setGameVariant('jacks')">🂡 Jacks or Better</button>
+                    <button class="variant-btn" id="variant-deuces" onclick="setGameVariant('deuces')">🃒 Deuces Wild</button>
+                </div>
                 <div class="payouts" id="payouts"></div>
 
                 <div class="game-area">
@@ -334,6 +387,11 @@
                             <button class="reaction-btn" onclick="sendReaction('😂')">😂</button>
                             <button class="reaction-btn" onclick="sendReaction('💀')">💀</button>
                             <button class="reaction-btn" onclick="sendReaction('🎉')">🎉</button>
+                        </div>
+                        <div class="chat-row">
+                            <input class="room-input chat-input" id="room-chat-input" maxlength="100"
+                                placeholder="Say something…" onkeydown="if(event.key==='Enter')sendRoomChat()">
+                            <button class="share-copy-btn" id="room-chat-send" onclick="sendRoomChat()">Send</button>
                         </div>
                         <div class="room-footer">
                             <button class="room-mini-btn" onclick="openShareForActiveRoom()" id="room-share-btn">🔗 Invite</button>

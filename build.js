@@ -37,6 +37,7 @@ const jsFiles = [
     'js/challenges.js',
     'js/achievements.js',
     'js/tournaments.js',
+    'js/extras.js',
     'js/rewards.js',
     'js/ui.js',
     'js/game.js',

@@ -49,8 +49,11 @@ function egToast(text) {
                 bestHand: data.bestHand || null,
                 bestHandRank: data.bestHandRank || 0,
                 challengesCompleted: data.challengesCompleted || 0,
-                firstSeen: data.firstSeen || null
+                firstSeen: data.firstSeen || null,
+                biggestWin: data.biggestWin || 0,
+                handCounts: data.handCounts || {}
             };
+            if (window.egSetAvatarState) egSetAvatarState(data);
             egApplyCardStyle(data.cardStyle || 'classic');
             egRenderXpBar();
 

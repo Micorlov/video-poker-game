@@ -52,6 +52,9 @@ function logRoomEvent(eventType, detail) {
             } else if (data.eventType === 'levelUp') {
                 var template = rt('feedLevelUp') || '{name} just leveled up to {n}!';
                 text = template.replace('{name}', name).replace('{n}', data.detail);
+            } else if (data.eventType === 'chat') {
+                // showFeedToast assigns via textContent, so the raw message is safe here
+                text = firstName(data.displayName) + ': ' + String(data.detail || '').slice(0, 120);
             }
             
             if (text) {

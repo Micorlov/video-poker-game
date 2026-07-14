@@ -51,6 +51,7 @@ function getHourKey(date) {
                     hands: firebase.firestore.FieldValue.increment(1),
                     bestHand: handRank > prevBestRank ? handType : data.bestHand,
                     level: egLevel,
+                    avatar: window.egAvatarStr ? egAvatarStr() : '',
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             } else {
@@ -59,6 +60,7 @@ function getHourKey(date) {
                     uid: user.uid,
                     displayName: user.displayName || '',
                     photoURL: user.photoURL || '',
+                    avatar: window.egAvatarStr ? egAvatarStr() : '',
                     score: hourlyScoreVal,
                     rebuys: hourlyRebuys,
                     hands: 1,
@@ -86,6 +88,7 @@ function getHourKey(date) {
                     hands: firebase.firestore.FieldValue.increment(1),
                     bestHand: handRank > prevBestRank ? handType : data.bestHand,
                     level: egLevel,
+                    avatar: window.egAvatarStr ? egAvatarStr() : '',
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
             } else {
@@ -94,6 +97,7 @@ function getHourKey(date) {
                     uid: user.uid,
                     displayName: user.displayName || '',
                     photoURL: user.photoURL || '',
+                    avatar: window.egAvatarStr ? egAvatarStr() : '',
                     score: dailyScoreVal,
                     rebuys: dailyRebuys,
                     hands: 1,
@@ -131,7 +135,7 @@ function getHourKey(date) {
             const d = doc.data();
             const isYou = user && d.uid === user.uid;
             if (isYou) { myRank = rank; myScore = d.score || 0; }
-            const photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+            const photo = window.lbAvatarHtml ? lbAvatarHtml(d) : (d.photoURL ? '<img src="' + d.photoURL + '">' : '');
             const name = (d.displayName || 'Anonymous').split(' ')[0];
             const badge = isYou ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
             const rebuyBadge = d.rebuys > 0 ? '<span class="lb-badge lb-badge-rebuys">♻' + d.rebuys + '</span>' : '';
@@ -631,6 +635,7 @@ function getHourKey(date) {
                         hands: firebase.firestore.FieldValue.increment(1),
                         bestHand: handRank > prevBestRank ? handType : doc.data().bestHand,
                         level: egLevel,
+                        avatar: window.egAvatarStr ? egAvatarStr() : '',
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
@@ -641,6 +646,7 @@ function getHourKey(date) {
                     uid: user.uid,
                     displayName: user.displayName || '',
                     photoURL: user.photoURL || '',
+                    avatar: window.egAvatarStr ? egAvatarStr() : '',
                     score: score,
                     rebuys: rebuys,
                     hands: 1,
@@ -703,7 +709,7 @@ function getHourKey(date) {
                 meRow = d;
                 aboveRow = idx > 0 ? rows[idx - 1] : null;
             }
-            var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+            var photo = window.lbAvatarHtml ? lbAvatarHtml(d) : (d.photoURL ? '<img src="' + d.photoURL + '">' : '');
             var badge = isYou ? '<span class="lb-badge lb-badge-you">YOU</span>' : '';
             var rebuyBadge = d.rebuys > 0 ? '<span class="lb-badge lb-badge-rebuys">♻' + d.rebuys + '</span>' : '';
             var isOnline = false;

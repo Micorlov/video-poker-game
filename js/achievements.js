@@ -51,13 +51,23 @@ var ACHIEVEMENTS = [
         }
         egStats.totalHands++;
         if (ev.win > 0) egStats.totalWins++;
+        if (egStats.totalHands % 50 === 0 && window.egMysteryBox) egMysteryBox(egStats.totalHands);
         var rank = HAND_RANK[ev.handType] || 0;
         var userUpdate = {
             xp: egXp,
             level: egLevel,
             totalHands: firebase.firestore.FieldValue.increment(1)
         };
-        if (ev.win > 0) userUpdate.totalWins = firebase.firestore.FieldValue.increment(1);
+        if (ev.win > 0) {
+            userUpdate.totalWins = firebase.firestore.FieldValue.increment(1);
+            userUpdate.handCounts = {};
+            userUpdate.handCounts[ev.handType] = firebase.firestore.FieldValue.increment(1);
+            egStats.handCounts[ev.handType] = (egStats.handCounts[ev.handType] || 0) + 1;
+            if (ev.win > (egStats.biggestWin || 0)) {
+                egStats.biggestWin = ev.win;
+                userUpdate.biggestWin = ev.win;
+            }
+        }
         if (rank > egStats.bestHandRank) {
             egStats.bestHandRank = rank;
             egStats.bestHand = ev.handType;
@@ -195,7 +205,9 @@ var ACHIEVEMENTS = [
                 bestHand: egStats ? egStats.bestHand : null,
                 bestStreak: bestStreak,
                 challengesCompleted: egStats ? egStats.challengesCompleted : 0,
-                firstSeen: egStats ? egStats.firstSeen : null
+                firstSeen: egStats ? egStats.firstSeen : null,
+                biggestWin: egStats ? egStats.biggestWin : 0,
+                handCounts: egStats ? egStats.handCounts : {}
             }, egAchievements, true);
             return;
         }
@@ -258,6 +270,12 @@ var ACHIEVEMENTS = [
             div.innerHTML = '<span>' + row[0] + '</span><b>' + row[1] + '</b>';
             statsEl.appendChild(div);
         });
+        if (window.egRenderExtraStats) egRenderExtraStats(data);
+        var avatarSection = document.getElementById('pf-avatar-section');
+        if (avatarSection) {
+            avatarSection.style.display = isMe ? '' : 'none';
+            if (isMe && window.egRenderAvatarPicker) egRenderAvatarPicker();
+        }
 
         var grid = document.getElementById('pf-ach-grid');
         grid.innerHTML = '';

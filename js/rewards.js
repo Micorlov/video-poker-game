@@ -236,6 +236,7 @@ function egLoadDailyReward(user) {
         set('lb-tournament-note', et('tourneyScoreNote'));
         if (window.egRenderTournamentBanner) egRenderTournamentBanner();
         if (window.egRenderSeason && egSeason) egRenderSeason();
+        if (window.applyExtrasLang) applyExtrasLang();
     };
 
     // ===================== Progression: Phase 2 =====================
@@ -253,7 +254,9 @@ function egLoadDailyReward(user) {
     var XP_WIN_BONUS = {
         'Jacks or Better': 5, 'Two Pair': 10, 'Three of a Kind': 15,
         'Straight': 25, 'Flush': 30, 'Full House': 50,
-        'Four of a Kind': 100, 'Straight Flush': 250, 'Royal Flush': 500
+        'Four of a Kind': 100, 'Straight Flush': 250, 'Royal Flush': 500,
+        // Deuces Wild extras
+        'Five of a Kind': 150, 'Wild Royal Flush': 300, 'Four Deuces': 250
     };
 
     var CARD_STYLES = [

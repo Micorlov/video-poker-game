@@ -1,19 +1,62 @@
 const SUITS = ['♠', '♥', '♦', '♣'];
         const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
         
-        const BASE_PAYOUTS = {
-            'Royal Flush': 250,
-            'Straight Flush': 50,
-            'Four of a Kind': 20,
-            'Full House': 7,
-            'Flush': 5,
-            'Straight': 4,
-            'Three of a Kind': 3,
-            'Two Pair': 2,
-            'Jacks or Better': 1,
-            'Nothing': 0
+        const PAYTABLES = {
+            jacks: {
+                'Royal Flush': 250,
+                'Straight Flush': 50,
+                'Four of a Kind': 20,
+                'Full House': 7,
+                'Flush': 5,
+                'Straight': 4,
+                'Three of a Kind': 3,
+                'Two Pair': 2,
+                'Jacks or Better': 1,
+                'Nothing': 0
+            },
+            deuces: {
+                'Royal Flush': 250,
+                'Four Deuces': 200,
+                'Wild Royal Flush': 25,
+                'Five of a Kind': 15,
+                'Straight Flush': 9,
+                'Four of a Kind': 5,
+                'Full House': 3,
+                'Flush': 2,
+                'Straight': 2,
+                'Three of a Kind': 1,
+                'Nothing': 0
+            }
         };
-        let currentPayouts = { ...BASE_PAYOUTS };
+        const HAND_ORDERS = {
+            jacks: ['Royal Flush', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
+            deuces: ['Royal Flush', 'Four Deuces', 'Wild Royal Flush', 'Five of a Kind', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Nothing']
+        };
+        let gameVariant = 'jacks';
+        try {
+            if (localStorage.getItem('vp_game_variant') === 'deuces') gameVariant = 'deuces';
+        } catch (e) {}
+
+        function basePayouts() {
+            return PAYTABLES[gameVariant];
+        }
+        let currentPayouts = { ...basePayouts() };
+
+        function setGameVariant(v) {
+            if (!PAYTABLES[v] || gameState !== 'bet' || v === gameVariant) return;
+            gameVariant = v;
+            try { localStorage.setItem('vp_game_variant', v); } catch (e) {}
+            currentPayouts = { ...basePayouts() };
+            updateVariantUI();
+            renderPayouts(TRANSLATIONS[currentLang]);
+        }
+
+        function updateVariantUI() {
+            const jacksBtn = document.getElementById('variant-jacks');
+            const deucesBtn = document.getElementById('variant-deuces');
+            if (jacksBtn) jacksBtn.classList.toggle('selected', gameVariant === 'jacks');
+            if (deucesBtn) deucesBtn.classList.toggle('selected', gameVariant === 'deuces');
+        }
 
         // --- Engagement tuning (play-money game) ---
         const BOOST_BASE = 0.18;          // baseline chance to improve a dead deal
@@ -102,6 +145,7 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                 if (state.hourKey !== getHourKey()) hourlyRebuys = 0;
                 if (state.dayKey !== getDayKey()) dailyRebuys = 0;
                 document.getElementById('balance').textContent = balance;
+                setBet(bet); // keep the bet display and selected button in sync with the restored value
                 return true;
             } catch (e) { return false; }
         }
@@ -242,11 +286,11 @@ const SUITS = ['♠', '♥', '♦', '♣'];
         function renderPayouts(t) {
             const payoutsEl = document.getElementById('payouts');
             payoutsEl.innerHTML = '';
-            const handOrder = ['Royal Flush', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'];
+            const handOrder = HAND_ORDERS[gameVariant];
             handOrder.forEach(handType => {
                 const row = document.createElement('div');
                 row.className = 'payout-row';
-                const isBoosted = currentPayouts[handType] > BASE_PAYOUTS[handType];
+                const isBoosted = currentPayouts[handType] > basePayouts()[handType];
                 const valStyle = isBoosted ? 'color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);' : '';
                 row.innerHTML = `<div class="payout-hand">${t.payouts[handType]}</div><div class="payout-value" style="${valStyle}">${currentPayouts[handType]}</div>`;
                 payoutsEl.appendChild(row);
@@ -371,7 +415,7 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                     hand[i] = deck.pop();
                 }
             }
-            const result = evaluateHand(hand);
+            const result = gameVariant === 'deuces' ? evaluateDeucesHand(hand) : evaluateHand(hand);
             const handType = result.type;
             lastHandType = handType;
             const winIndices = result.winIndices || []; // Ensure it's an array
@@ -394,7 +438,7 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             if (win > 0) {
                 totalWon += win;
                 lossStreak = 0;
-                currentPayouts = { ...BASE_PAYOUTS };
+                currentPayouts = { ...basePayouts() };
             } else {
                 totalLost += bet;
                 lossStreak++;
@@ -422,9 +466,11 @@ const SUITS = ['♠', '♥', '♦', '♣'];
 
             if (win > 0) {
                 resultEl.className = 'result';
-                var shareWinBtn = '';
+                var shareWinBtn = '<br>';
+                shareWinBtn += '<button id="gamble-trigger-btn" onclick="openGamble()" style="margin-top: 10px; margin-inline-end: 8px; padding: 8px 16px; font-size: 14px; border-radius: 8px;">' +
+                    (window.et ? et('gambleBtn') : '🎴 Gamble') + '</button>';
                 if (HAND_RANK[handType] >= 3) {
-                    shareWinBtn = '<br><button id="share-win-trigger-btn" onclick="openShareWinModal()" style="margin-top: 10px; padding: 8px 16px; font-size: 14px; border-radius: 8px;">Share Win</button>';
+                    shareWinBtn += '<button id="share-win-trigger-btn" onclick="openShareWinModal()" style="margin-top: 10px; padding: 8px 16px; font-size: 14px; border-radius: 8px;">Share Win</button>';
                 }
                 resultEl.innerHTML = `<span class="win">🎉 ${t.payouts[handType]}! +${win} ${t.creditsLabel}! 🎉</span>` + shareWinBtn;
                 document.getElementById('explanation').textContent = t.explanations[handType];
@@ -596,7 +642,7 @@ const SUITS = ['♠', '♥', '♦', '♣'];
                                     inner.classList.remove('animating');
                                 }, 600);
                             }
-                        }, flipDelayIndex * 250);
+                        }, flipDelayIndex * (window.vpDealStagger ? vpDealStagger() : 250));
                         flipDelayIndex++;
                     }
                 });
@@ -692,6 +738,57 @@ const SUITS = ['♠', '♥', '♦', '♣'];
             return result;
         }
 
+        // Deuces Wild: 2s substitute for any card. Minimum paying hand is Three of a Kind.
+        function evaluateDeucesHand(hand) {
+            const allIndices = [0, 1, 2, 3, 4];
+            const result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] };
+            const others = hand.filter(c => c.rank !== '2');
+            const n = 5 - others.length; // wild deuces count
+
+            if (n === 4) {
+                result.type = 'Four Deuces';
+                result.winIndices = allIndices;
+                return result;
+            }
+
+            const rankCounts = {};
+            others.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
+            const counts = Object.values(rankCounts).sort((a, b) => b - a);
+            const maxCount = counts[0] || 0;
+            const flush = new Set(others.map(c => c.suit)).size <= 1;
+            const vals = others.map(c =>
+                c.rank === 'A' ? 14 : c.rank === 'J' ? 11 : c.rank === 'Q' ? 12 : c.rank === 'K' ? 13 : parseInt(c.rank));
+            const distinct = new Set(vals).size === others.length;
+
+            // Distinct natural cards + wilds can form a straight iff they fit a 5-value window
+            const fitsWindow = arr => arr.length === 0 || (Math.max(...arr) - Math.min(...arr) <= 4);
+            const straight = distinct && (fitsWindow(vals) || (vals.includes(14) && fitsWindow(vals.map(v => v === 14 ? 1 : v))));
+            const allRoyalVals = distinct && vals.every(v => v >= 10);
+
+            if (n === 0 && flush && straight && Math.min(...vals) === 10) {
+                result.type = 'Royal Flush';
+            } else if (n > 0 && flush && allRoyalVals) {
+                result.type = 'Wild Royal Flush';
+            } else if (maxCount + n >= 5) {
+                result.type = 'Five of a Kind';
+            } else if (flush && straight) {
+                result.type = 'Straight Flush';
+            } else if (maxCount + n >= 4) {
+                result.type = 'Four of a Kind';
+            } else if ((maxCount === 3 && counts[1] === 2) || (n === 1 && maxCount === 2 && counts[1] === 2)) {
+                result.type = 'Full House';
+            } else if (flush) {
+                result.type = 'Flush';
+            } else if (straight) {
+                result.type = 'Straight';
+            } else if (maxCount + n >= 3) {
+                result.type = 'Three of a Kind';
+            }
+
+            if (result.type !== 'Nothing') result.winIndices = allIndices;
+            return result;
+        }
+
         function updateStats() {
             const net = totalWon - totalLost;
             document.getElementById('stat-won-value').textContent = '+' + totalWon;
@@ -747,6 +844,7 @@ const SUITS = ['♠', '♥', '♦', '♣'];
 
         // Initialize
         changeLanguage('en');
+        updateVariantUI();
     // Keyboard support for bet selection (keys 1-5)
     document.addEventListener('keydown', function(e) {
         const keyMap = { '1': 5, '2': 10, '3': 20, '4': 50 };
