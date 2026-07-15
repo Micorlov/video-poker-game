@@ -1,220 +1,139 @@
+// Lazy, optional Firebase auth — powers Friends/Rooms only. The core game
+// never depends on this; it's fine if the player is never signed in.
+
 const firebaseConfig = {
-        apiKey: "AIzaSyB6m0Yis89jxvm06OFBqxs8P_vADjRXk0U",
-        authDomain: "video-poker-6d665.firebaseapp.com",
-        projectId: "video-poker-6d665",
-        storageBucket: "video-poker-6d665.firebasestorage.app",
-        messagingSenderId: "53702406091",
-        appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    // Offline support: cache Firestore data + queue writes while disconnected
+    apiKey: "AIzaSyB6m0Yis89jxvm06OFBqxs8P_vADjRXk0U",
+    authDomain: "video-poker-6d665.firebaseapp.com",
+    projectId: "video-poker-6d665",
+    storageBucket: "video-poker-6d665.firebasestorage.app",
+    messagingSenderId: "53702406091",
+    appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+try {
+    db.enablePersistence({ synchronizeTabs: true }).catch(function() { /* multi-tab or unsupported */ });
+} catch (e) { /* older browser — online-only */ }
+
+const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars
+
+function generateRoomCode() {
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+        code += ROOM_CODE_CHARS[Math.floor(Math.random() * ROOM_CODE_CHARS.length)];
+    }
+    return code;
+}
+
+function firebaseSafe(operation, fallback) {
     try {
-        db.enablePersistence({ synchronizeTabs: true }).catch(function(err) {
-            console.warn('Firestore persistence unavailable:', err && err.code);
-        });
-    } catch (e) { /* older browser — online-only */ }
-    const ADMIN_EMAIL = 'micorlov@gmail.com';
-
-    function signInWithGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-        const el = document.getElementById('login-error');
-        if (el) el.style.display = 'none';
-
-        // Popup-first: gives immediate feedback on all modern browsers.
-        // Falls back to redirect only when the popup is explicitly blocked.
-        auth.signInWithPopup(provider).catch(function(popupErr) {
-            console.error('Google sign-in popup failed:', popupErr.code, popupErr.message);
-            if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
-                // Popup blocked — try redirect as fallback
-                auth.signInWithRedirect(provider).catch(function(redirectErr) {
-                    console.error('Google sign-in redirect also failed:', redirectErr.code, redirectErr.message);
-                    if (el) {
-                        el.textContent = redirectErr.message;
-                        el.style.display = 'block';
-                    }
-                });
-            } else {
-                if (el) {
-                    el.textContent = popupErr.message;
-                    el.style.display = 'block';
-                }
-            }
-        });
-    }
-
-    // Handle redirect result on page load — must be before onAuthStateChanged
-    // so the redirect is processed before any auth state listener fires.
-    auth.getRedirectResult().catch(function(err) {
-        if (err && err.code !== 'auth/no-current-user') {
-            console.error('Redirect sign-in result error:', err.code, err.message);
-            var el = document.getElementById('login-error');
-            if (el) {
-                el.textContent = err.message;
-                el.style.display = 'block';
-            }
-        }
-    });
-
-    auth.onAuthStateChanged(function(user) {
-        if (user) {
-            document.getElementById('login-overlay').classList.add('hidden');
-            document.getElementById('game-container').style.display = '';
-            document.getElementById('rank-bar').classList.remove('hidden');
-            injectUserBar(user);
-            logUserToFirestore(user);
-            loadUserState(user);
-            refreshLeaderboard();
-            initSound();
-            if (window.initRooms) window.initRooms(user);
-            if (window.initEngagement) window.initEngagement(user);
-            if (window.initSocial) window.initSocial(user);
-            if (window.initDuels) window.initDuels(user);
-            if (window.initCommunity) window.initCommunity(user);
-            if (window.initEvents) window.initEvents(user);
-            if (window.initAntiChurn) window.initAntiChurn(user);
-        } else {
-            document.getElementById('login-overlay').classList.remove('hidden');
-            document.getElementById('game-container').style.display = 'none';
-            document.getElementById('rank-bar').classList.add('hidden');
-            var bar = document.getElementById('user-bar');
-            if (bar) bar.remove();
-            if (window.teardownRooms) window.teardownRooms();
-            if (window.teardownEngagement) window.teardownEngagement();
-            if (window.teardownSocial) window.teardownSocial();
-            if (window.teardownDuels) window.teardownDuels();
-            if (window.teardownCommunity) window.teardownCommunity();
-            if (window.teardownEvents) window.teardownEvents();
-            if (window.teardownAntiChurn) window.teardownAntiChurn();
-            if (window.teardownTutorial) window.teardownTutorial();
-        }
-    });
-
-    function injectUserBar(user) {
-        let bar = document.getElementById('user-bar');
-        if (bar) bar.remove();
-        bar = document.createElement('div');
-        bar.id = 'user-bar';
-        bar.className = 'user-bar';
-        const photo = user.photoURL
-            ? '<img src="' + user.photoURL + '" alt="" onclick="egOpenProfile()" style="cursor:pointer">'
-            : '';
-        const adminBtn = user.email === ADMIN_EMAIL
-            ? '<a class="admin-link" href="admin.html" target="_blank">Admin</a>'
-            : '';
-        bar.innerHTML = photo +
-            '<span onclick="egOpenProfile()" style="cursor:pointer">' + (user.displayName || user.email) + '</span>' +
-            '<span class="lvl-badge" id="ub-level" onclick="egOpenProfile()" style="cursor:pointer">1</span>' +
-            '<span class="xp-bar"><span class="xp-fill" id="ub-xp-fill"></span></span>' +
-            '<span class="xp-text" id="ub-xp-text"></span>' +
-            '<span class="ub-ach-count" id="ub-ach-count" onclick="egOpenProfile()">🏆 0</span>' +
-            adminBtn +
-            '<button id="sound-toggle-btn" onclick="toggleSound()" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px; line-height:1;">🔊</button>' +
-            '<button id="deal-speed-btn" onclick="toggleDealSpeed()" title="Fast deal" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px 0 0; line-height:1;">⚡</button>' +
-            '<button id="a11y-btn" onclick="openA11yModal()" title="Accessibility" aria-label="Accessibility settings" style="background:none; border:none; color:#ffd700; font-size:18px; cursor:pointer; padding:0 10px 0 0; line-height:1;">♿</button>' +
-            '<button onclick="signOut()">Sign Out</button>';
-        const container = document.getElementById('game-container');
-        container.insertBefore(bar, container.firstChild);
-        updateSoundButtonUI();
-        if (window.updateDealSpeedButtonUI) updateDealSpeedButtonUI();
-        if (window.egApplyAvatarToUserBar) egApplyAvatarToUserBar();
-    }
-
-    function signOut() {
-        auth.signOut();
-    }
-
-    function loadUserState(user) {
-        // Try localStorage first as instant fallback
-        restoreGameState();
-
-        const hourKey = getHourKey();
-        const hourlyDocId = hourKey + '_' + user.uid;
-        firebaseSafe(function() {
-            return db.collection('hourly_scores').doc(hourlyDocId).get().then(function(doc) {
-                if (doc.exists) {
-                    const data = doc.data();
-                    hourlyRebuys = data.rebuys || 0;
-                    balance = (data.score || 0) + 100 * (1 + hourlyRebuys);
-                    document.getElementById('balance').textContent = balance;
-                    saveGameState();
-                }
+        const result = operation();
+        if (result && typeof result.catch === 'function') {
+            return result.catch(function(err) {
+                if (typeof fallback === 'function') fallback(err);
+                return null;
             });
-        }, function(err) {
-            console.error('Error loading hourly state:', err);
-        });
+        }
+        return result;
+    } catch (err) {
+        if (typeof fallback === 'function') fallback(err);
+        return null;
+    }
+}
 
-        const dayKey = getDayKey();
-        const dailyDocId = dayKey + '_' + user.uid;
-        db.collection('daily_scores').doc(dailyDocId).get().then(function(doc) {
-            if (doc.exists) {
-                dailyRebuys = doc.data().rebuys || 0;
-            }
+function isNativeApp() {
+    return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+}
+
+function signInWithGoogle() {
+    const el = document.getElementById('signin-error');
+    if (el) el.classList.add('hidden');
+
+    if (isNativeApp()) {
+        // Firebase's web popup/redirect auth doesn't work inside a native WebView
+        // (no real popup window, no https origin) — use the native Google Sign-In
+        // plugin instead, then hand its ID token to the Firebase JS SDK so
+        // auth.currentUser / Firestore security rules see the same session.
+        window.Capacitor.Plugins.FirebaseAuthentication.signInWithGoogle().then(function(result) {
+            const idToken = result && result.credential && result.credential.idToken;
+            if (!idToken) throw new Error('No ID token returned from Google sign-in.');
+            const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+            return auth.signInWithCredential(credential);
         }).catch(function(err) {
-            console.error('Error loading daily state:', err);
+            if (el) { el.textContent = err.message || String(err); el.classList.remove('hidden'); }
         });
+        return;
     }
 
-    function logUserToFirestore(user) {
-        var displayName = user.displayName || '';
-        db.collection('users').doc(user.uid).set({
-            uid: user.uid,
-            email: user.email,
-            displayName: displayName,
-            photoURL: user.photoURL || '',
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true }).then(function() {
-            return db.collection('users').doc(user.uid).get();
-        }).then(function(doc) {
-            var updateData = {};
-            var data = doc.exists ? doc.data() : {};
-            
-            if (!data.referralCode) {
-                updateData.referralCode = generateRoomCode();
-            }
-            
-            if (doc.exists && !data.firstSeen) {
-                updateData.firstSeen = firebase.firestore.FieldValue.serverTimestamp();
-                updateData.referralCount = 0;
-                
-                var refCode = '';
-                try {
-                    refCode = (sessionStorage.getItem('vp_referred_by_code') || '').trim().toUpperCase();
-                    sessionStorage.removeItem('vp_referred_by_code');
-                } catch (e) {}
-                
-                if (refCode && refCode !== updateData.referralCode) {
-                    updateData.referredBy = refCode;
-                }
-            }
-            
-            if (Object.keys(updateData).length > 0) {
-                return db.collection('users').doc(user.uid).update(updateData);
-            }
-        }).catch(function(err) {
-            console.error('logUserToFirestore error:', err);
-        });
-    }
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    auth.signInWithPopup(provider).catch(function(popupErr) {
+        if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
+            auth.signInWithRedirect(provider).catch(function(redirectErr) {
+                if (el) { el.textContent = redirectErr.message; el.classList.remove('hidden'); }
+            });
+        } else if (el) {
+            el.textContent = popupErr.message;
+            el.classList.remove('hidden');
+        }
+    });
+}
 
-    function openAdmin() {
-        const panel = document.getElementById('admin-panel');
-        panel.classList.remove('hidden');
-        loadAdminData();
+function signOutUser() {
+    if (isNativeApp()) {
+        firebaseSafe(function() { return window.Capacitor.Plugins.FirebaseAuthentication.signOut(); });
     }
+    auth.signOut();
+}
 
-    function closeAdmin() {
-        document.getElementById('admin-panel').classList.add('hidden');
+auth.getRedirectResult().catch(function(err) {
+    if (err && err.code !== 'auth/no-current-user') {
+        const el = document.getElementById('signin-error');
+        if (el) { el.textContent = err.message; el.classList.remove('hidden'); }
     }
+});
 
-    // Hourly Competition
-    const HAND_RANK = {
-        'Nothing': 0, 'Jacks or Better': 1, 'Two Pair': 2, 'Three of a Kind': 3,
-        'Straight': 4, 'Flush': 5, 'Full House': 6, 'Four of a Kind': 7,
-        'Straight Flush': 8, 'Royal Flush': 9,
-        // Deuces Wild extras
-        'Five of a Kind': 7, 'Wild Royal Flush': 8, 'Four Deuces': 8,
-        // Bonus Poker quad subtypes
-        'Four 5s-Ks': 7, 'Four 2s-4s': 7, 'Four Aces': 7
-    };
+function logUserToFirestore(user) {
+    return db.collection('users').doc(user.uid).set({
+        uid: user.uid,
+        displayName: user.displayName || '',
+        photoURL: user.photoURL || '',
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).then(function() {
+        return db.collection('users').doc(user.uid).get();
+    }).then(function(doc) {
+        const data = doc.exists ? doc.data() : {};
+        if (!data.referralCode) {
+            const code = generateRoomCode();
+            return db.collection('users').doc(user.uid).update({ referralCode: code }).then(function() {
+                window.egUserDoc = Object.assign({}, data, { referralCode: code });
+                if (window.renderFriendsScreen) renderFriendsScreen();
+            });
+        }
+        window.egUserDoc = data;
+        if (window.renderFriendsScreen) renderFriendsScreen();
+    });
+}
+
+auth.onAuthStateChanged(function(user) {
+    window.egUser = user || null;
+    if (window.closeSignInModal) closeSignInModal();
+    if (window.updateAccountUI) updateAccountUI();
+    if (user) {
+        firebaseSafe(function() { return logUserToFirestore(user); });
+        firebaseSafe(function() { return pushNetProfit(); });
+        if (window.loadFriends) loadFriends();
+        if (window.loadMyRooms) loadMyRooms();
+        // Handle pending invite from deep link
+        if (window._pendingInviteCode && window.addFriendByInviteCode) {
+            var code = window._pendingInviteCode;
+            window._pendingInviteCode = null;
+            addFriendByInviteCode(code);
+        }
+    } else {
+        if (window.cleanupFriendsListeners) cleanupFriendsListeners();
+        if (window.renderFriendsScreen) renderFriendsScreen();
+        if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
+    }
+});

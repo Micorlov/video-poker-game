@@ -1,4 +1,5 @@
 var audioCtx = null;
+    var audioBuffers = {};
     var soundEnabled = true;
 
     function initSound() {

@@ -1,14 +1,50 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-            background: linear-gradient(135deg, #0c2317 0%, #051a0d 50%, #000 100%);
-            min-height: 100vh;
-            color: #fff;
-            padding: 20px;
-            background-attachment: fixed;
-            transition: direction 0.3s ease;
-        }
-        body[dir="rtl"] {
-            font-family: 'Noto Sans Hebrew', 'Noto Sans Arabic', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-        }
-        .container { max-width: 1200px; margin: 0 auto; }
+
+:root {
+    --felt-900: #061711;
+    --felt-800: #0c2419;
+    --felt-700: #123222;
+    --felt-600: #1a4029;
+    --bg-top: var(--felt-800);
+    --bg-bottom: var(--felt-900);
+    --panel: var(--felt-700);
+    --panel-solid: var(--felt-700);
+    --border: var(--felt-600);
+    --border-strong: var(--felt-600);
+    --gold: #e8b93f;
+    --gold-600: #c99a2e;
+    --gold-100: #fbe8b8;
+    --gold-dim: rgba(232, 185, 63, 0.1);
+    --green: #4caf7d;
+    --green-dim: rgba(76, 175, 125, 0.15);
+    --red: #e6533f;
+    --red-dim: rgba(230, 83, 63, 0.12);
+    --text: #eef6f0;
+    --text-muted: rgba(238, 246, 240, 0.6);
+    --text-faint: rgba(238, 246, 240, 0.45);
+    --radius-lg: 16px;
+    --radius-md: 14px;
+    --radius-sm: 12px;
+    --nav-height: 64px;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: 'Manrope', 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom) 60%);
+    min-height: 100vh;
+    color: var(--text);
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+button, input, select {
+    font-family: inherit;
+    color: inherit;
+}
+
+.hidden { display: none !important; }

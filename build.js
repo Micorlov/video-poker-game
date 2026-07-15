@@ -17,10 +17,7 @@ const cssFiles = [
     'styles/tokens.css',
     'styles/layout.css',
     'styles/cards.css',
-    'styles/animations.css',
-    'styles/leaderboard.css',
-    'styles/features.css',
-    'styles/mobile.css'
+    'styles/animations.css'
 ];
 
 let combinedCss = '';
@@ -30,25 +27,15 @@ cssFiles.forEach(file => {
 
 // Combine JS files in dependency order
 const jsFiles = [
-    'js/i18n.js',
     'js/audio.js',
-    'js/firebase.js',
-    'js/rooms.js',
-    'js/competitions.js',
-    'js/challenges.js',
-    'js/achievements.js',
-    'js/tournaments.js',
-    'js/extras.js',
-    'js/rewards.js',
     'js/ui.js',
-    'js/variants.js',
+    'js/progress.js',
+    'js/firebase.js',
+    'js/friends.js',
+    'js/rooms.js',
     'js/game.js',
     'js/hints.js',
-    'js/social.js',
-    'js/duels.js',
-    'js/community.js',
-    'js/events.js',
-    'js/onboarding.js',
+    'js/tabs.js',
     'js/pwa.js'
 ];
 

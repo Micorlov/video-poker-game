@@ -3,6 +3,13 @@
   "appName": "Video Poker",
   "webDir": "www",
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "zoomEnabled": false
+  },
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": false,
+      "providers": ["google.com"]
+    }
   }
 }

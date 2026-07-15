@@ -2,14 +2,14 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Poker - Jacks or Better</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Video Poker</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0c2317">
+    <meta name="theme-color" content="#0c2419">
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
 <!-- BUILD_CSS_PLACEHOLDER -->
 </style>
@@ -18,517 +18,306 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
-    <div id="login-overlay" class="login-overlay">
-        <div class="login-felt-glow" aria-hidden="true"></div>
-        <div class="login-suits" aria-hidden="true">
-            <span class="ls-suit ls-1">♠</span><span class="ls-suit ls-2">♥</span>
-            <span class="ls-suit ls-3">♦</span><span class="ls-suit ls-4">♣</span>
-            <span class="ls-suit ls-5">♠</span><span class="ls-suit ls-6">♥</span>
-        </div>
-
-        <div class="login-card">
-            <div class="login-badge">
-                <span class="login-badge-suit tl">♠</span>
-                <span class="login-badge-rank">JB</span>
-                <span class="login-badge-suit br">♠</span>
-            </div>
-            <div class="login-title">Video Poker</div>
-            <div class="login-subtitle">Jacks or Better</div>
-
-            <button class="google-btn" onclick="signInWithGoogle()">
-                <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
-                <span>Sign in with Google</span>
-            </button>
-
-            <div id="login-error" class="login-error"></div>
-
-            <div class="login-footer">🎰 Play-money only · No real-money wagering</div>
-        </div>
-    </div>
-
-    <div id="admin-panel" class="admin-panel hidden">
-        <button class="admin-close" onclick="closeAdmin()">✕ Close</button>
-        <h2>Admin Panel — Connected Users</h2>
-        <div class="admin-stats">
-            <div class="admin-stat-card">
-                <div class="num" id="admin-total">0</div>
-                <div class="label">Total Users</div>
-            </div>
-            <div class="admin-stat-card">
-                <div class="num" id="admin-today">0</div>
-                <div class="label">Today</div>
-            </div>
-        </div>
-        <table class="users-table">
-            <thead><tr><th>User</th><th>Email</th><th>First Seen</th><th>Last Login</th></tr></thead>
-            <tbody id="admin-users-body"></tbody>
-        </table>
-    </div>
-
-    <div id="rank-bar" class="rank-bar hidden">
-        <span class="rank-bar-group-label">⏱</span>
-        <div class="rank-bar-item">
-            <span class="rank-bar-label">#</span>
-            <span class="rank-bar-value" id="rb-hourly-rank">#—</span>
-        </div>
-        <div class="rank-bar-item">
-            <span class="rank-bar-value" id="rb-hourly-score">0</span>
-        </div>
-        <div class="rank-bar-timer"><span id="rb-hourly-countdown">--:--</span></div>
-        <span class="rank-bar-sep">│</span>
-        <span class="rank-bar-group-label">📅</span>
-        <div class="rank-bar-item">
-            <span class="rank-bar-label">#</span>
-            <span class="rank-bar-value" id="rb-daily-rank">#—</span>
-        </div>
-        <div class="rank-bar-item">
-            <span class="rank-bar-value" id="rb-daily-score">0</span>
-        </div>
-        <div class="rank-bar-timer"><span id="rb-daily-countdown">--:--:--</span></div>
-    </div>
-
-    <div id="room-modal" class="room-modal rm-hidden">
-        <div class="room-modal-box">
-            <button class="room-modal-close" onclick="closeRoomModal()">✕</button>
-
-            <div id="room-view-create" class="rm-hidden">
-                <h3 id="rm-create-title">Create a Poker Room</h3>
-                <div class="room-modal-sub" id="rm-create-sub">Your table, your friends, your crown</div>
-                <input class="room-input" id="room-name-input" maxlength="24" placeholder="Room name…">
-                <div class="cadence-label" id="rm-cadence-prompt">Competition resets:</div>
-                <div class="cadence-picker">
-                    <button class="cadence-btn selected" data-cadence="hourly" onclick="pickCadence('hourly')" id="cad-hourly">⏱ Hourly</button>
-                    <button class="cadence-btn" data-cadence="daily" onclick="pickCadence('daily')" id="cad-daily">📅 Daily</button>
-                    <button class="cadence-btn" data-cadence="weekly" onclick="pickCadence('weekly')" id="cad-weekly">🗓 Weekly</button>
+    <div class="app">
+        <section id="screen-play" class="screen active">
+            <div class="brandrow">
+                <div class="app-title">Video Poker</div>
+                <div class="tpill" id="tournament-pill" onclick="toggleTournamentPill()">
+                    <span>⏱ #1 · 26:55</span>
+                    <span class="tour-chev" id="tour-chev">▾</span>
                 </div>
-                <button class="room-modal-btn" onclick="submitCreateRoom()" id="rm-create-btn">Create &amp; Invite</button>
+            </div>
+            <div class="texpand hidden" id="tournament-expand">
+                <span>🏆 Tournament #2</span>
+                <span>09:26:55</span>
             </div>
 
-            <div id="room-view-join" class="rm-hidden">
-                <h3 id="rm-join-title">Join a Room</h3>
-                <div class="room-modal-sub" id="rm-join-sub">Got a code from a friend?</div>
-                <input class="room-input code" id="room-code-input" maxlength="6" placeholder="CODE" autocomplete="off">
-                <button class="room-modal-btn" onclick="submitJoinRoom()" id="rm-join-btn">Join Room</button>
-            </div>
-
-            <div id="room-view-share" class="rm-hidden">
-                <h3 id="rm-share-title">Invite your friends!</h3>
-                <div class="room-modal-sub" id="rm-share-sub">Share the link or the code — the table is waiting</div>
-                <div class="room-code-small" id="rm-code-label">Room code</div>
-                <div class="room-code-display" id="share-code"></div>
-                <div class="share-row">
-                    <input class="room-input" id="share-link" readonly onclick="this.select()">
-                    <button class="share-copy-btn" onclick="copyShareLink()" id="rm-copy-btn">Copy Link</button>
+            <div class="panel balance-panel">
+                <div class="balance-row">
+                    <div>
+                        <div class="section-label">Balance</div>
+                        <div class="balance-value" id="balance">500</div>
+                    </div>
+                    <div>
+                        <div class="section-label">Total Bet</div>
+                        <div class="bet-value" id="bet-display">10</div>
+                    </div>
                 </div>
-                <a class="whatsapp-btn" id="whatsapp-share" target="_blank" rel="noopener">
-                    <span>💬</span><span id="rm-wa-label">Share on WhatsApp</span>
-                </a>
-            </div>
-
-            <div id="room-view-invite" class="rm-hidden">
-                <h3 id="rm-invite-title">You're invited!</h3>
-                <div class="room-modal-sub" id="rm-invite-by"></div>
-                <div class="invite-room-name" id="rm-invite-name"></div>
-                <div class="invite-cadence" id="rm-invite-cadence"></div>
-                <button class="room-modal-btn" onclick="acceptInvite()" id="rm-invite-btn">Join the Table</button>
-            </div>
-
-            <div class="room-modal-error" id="room-modal-error"></div>
-        </div>
-    </div>
-
-    <div id="eg-reward-modal" class="eg-modal eg-hidden">
-        <div class="eg-box">
-            <button class="eg-close" onclick="egCloseModal('eg-reward-modal')">✕</button>
-            <h3 id="eg-reward-title">🎁 Daily Bonus</h3>
-            <div class="eg-sub" id="eg-reward-sub">Come back every day — the rewards keep growing!</div>
-            <div class="reward-calendar" id="eg-reward-calendar"></div>
-            <button class="eg-claim-btn" id="eg-reward-claim" onclick="egClaimDailyReward()">Claim</button>
-            <div class="eg-hint" id="eg-reward-hint">Miss a day and the streak resets to Day 1!</div>
-            <div class="eg-hint" id="eg-reward-longest"></div>
-        </div>
-    </div>
-
-    <div id="eg-comeback-modal" class="eg-modal eg-hidden">
-        <div class="eg-box">
-            <button class="eg-close" onclick="egCloseModal('eg-comeback-modal')">✕</button>
-            <h3 id="eg-comeback-title">👋 Welcome back!</h3>
-            <div class="eg-sub" id="eg-comeback-msg"></div>
-            <div class="eg-big-credits" id="eg-comeback-amount"></div>
-            <button class="eg-claim-btn" id="eg-comeback-claim" onclick="egClaimComeback()">Collect</button>
-        </div>
-    </div>
-
-    <div id="eg-levelup-modal" class="eg-modal eg-hidden">
-        <div class="eg-box">
-            <button class="eg-close" onclick="egCloseModal('eg-levelup-modal')">✕</button>
-            <h3 id="eg-levelup-title">⬆️ Level Up!</h3>
-            <div class="eg-big-credits" id="eg-levelup-number"></div>
-            <div class="eg-sub" id="eg-levelup-note"></div>
-            <button class="eg-claim-btn" id="eg-levelup-ok" onclick="egCloseModal('eg-levelup-modal')">OK</button>
-        </div>
-    </div>
-
-    <div id="feed-toasts"></div>
-
-    <div id="eg-gamble-modal" class="eg-modal eg-hidden">
-        <div class="eg-box">
-            <button class="eg-close" onclick="closeGamble()">✕</button>
-            <h3 id="eg-gamble-title">🎴 Red or Black?</h3>
-            <div class="eg-sub" id="eg-gamble-stake"></div>
-            <div class="gamble-card" id="eg-gamble-card"><span class="gamble-back">?</span></div>
-            <div class="gamble-choices">
-                <button class="gamble-btn gamble-red" id="eg-gamble-red" onclick="pickGamble('red')">🔴</button>
-                <button class="gamble-btn gamble-black" id="eg-gamble-black" onclick="pickGamble('black')">⚫</button>
-            </div>
-            <div class="gamble-result" id="eg-gamble-result"></div>
-            <button class="eg-claim-btn" id="eg-gamble-collect" onclick="closeGamble()">Collect</button>
-        </div>
-    </div>
-
-    <div id="eg-spin-modal" class="eg-modal eg-hidden">
-        <div class="eg-box">
-            <button class="eg-close" onclick="egCloseModal('eg-spin-modal')">✕</button>
-            <h3 id="eg-spin-title">🎡 Daily Spin</h3>
-            <div class="eg-sub" id="eg-spin-sub"></div>
-            <div class="spin-wrap">
-                <div class="spin-pointer">▼</div>
-                <div class="spin-wheel" id="eg-spin-wheel"></div>
-                <div class="spin-labels" id="eg-spin-labels"></div>
-            </div>
-            <button class="eg-claim-btn" id="eg-spin-btn" onclick="doDailySpin()">SPIN</button>
-        </div>
-    </div>
-
-    <div id="eg-box-modal" class="eg-modal eg-hidden">
-        <div class="eg-box">
-            <button class="eg-close" onclick="egCloseModal('eg-box-modal')">✕</button>
-            <h3 id="eg-box-title">📦 Mystery Box!</h3>
-            <div class="eg-sub" id="eg-box-sub"></div>
-            <div class="box-icon" id="eg-box-icon">📦</div>
-            <button class="eg-claim-btn" id="eg-box-open" onclick="openMysteryBox()">Open the box</button>
-        </div>
-    </div>
-
-    <div id="share-win-modal" class="room-modal rm-hidden">
-        <div class="room-modal-box" style="width: min(500px, 94vw);">
-            <button class="room-modal-close" onclick="closeShareWinModal()">✕</button>
-            <h3 id="share-win-title">Share Your Win!</h3>
-            <div class="room-modal-sub" id="share-win-sub">Show off your legendary hand to your friends</div>
-            <div id="share-win-wrap">
-                <canvas id="share-canvas" width="600" height="400"></canvas>
-            </div>
-            <div class="room-actions" style="margin-top: 20px;">
-                <button class="room-action-btn" id="share-win-download-btn" onclick="downloadWinCard()" style="flex: 1;">Download PNG</button>
-                <button class="room-action-btn secondary" id="share-win-copy-btn" onclick="copyWinCardLink()" style="flex: 1;">Copy Link</button>
-            </div>
-            <a class="whatsapp-btn" id="share-win-whatsapp" target="_blank" rel="noopener" style="margin-top: 10px;">
-                <span>💬</span><span id="share-win-wa-label">Share on WhatsApp</span>
-            </a>
-        </div>
-    </div>
-
-    <div id="eg-gift-modal" class="eg-modal eg-hidden">
-        <div class="eg-box">
-            <button class="eg-close" onclick="closeGiftModal()">✕</button>
-            <h3 id="gift-title">🎁 Send a Gift</h3>
-            <div class="eg-sub" id="gift-sub"></div>
-            <div class="gift-amounts" id="gift-amounts"></div>
-        </div>
-    </div>
-
-    <div id="duel-invite-modal" class="eg-modal eg-hidden">
-        <div class="eg-box">
-            <button class="eg-close" onclick="duelDeclineInvite()">✕</button>
-            <h3 id="duel-invite-title">⚔️ Duel Challenge!</h3>
-            <div class="eg-sub" id="duel-invite-msg"></div>
-            <div class="duel-invite-actions">
-                <button class="eg-claim-btn" id="duel-accept-btn" onclick="duelAcceptInvite()">Accept Duel</button>
-                <button class="room-action-btn secondary" id="duel-decline-btn" onclick="duelDeclineInvite()">Decline</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="a11y-modal" class="eg-modal eg-hidden">
-        <div class="eg-box">
-            <button class="eg-close" onclick="closeA11yModal()">✕</button>
-            <h3 id="a11y-title">♿ Accessibility</h3>
-            <label class="a11y-row"><input type="checkbox" id="a11y-contrast" onchange="a11yChanged()">
-                <span id="a11y-contrast-label">High contrast mode</span></label>
-            <label class="a11y-row"><input type="checkbox" id="a11y-motion" onchange="a11yChanged()">
-                <span id="a11y-motion-label">Reduce motion</span></label>
-            <label class="a11y-row"><input type="checkbox" id="a11y-colorblind" onchange="a11yChanged()">
-                <span id="a11y-colorblind-label">Color-blind friendly suits</span></label>
-        </div>
-    </div>
-
-    <div id="social-ticker" class="social-ticker eg-hidden"></div>
-
-    <div id="profile-backdrop" class="eg-hidden" onclick="egCloseProfile()"></div>
-    <div id="profile-panel" class="eg-hidden">
-        <button class="eg-close" onclick="egCloseProfile()">✕</button>
-        <div class="profile-head">
-            <img id="pf-photo" src="" alt="">
-            <div>
-                <div class="pf-name"><span id="pf-name"></span><span class="lvl-badge lvl-badge-lg" id="pf-level"></span></div>
-                <div class="pf-since" id="pf-since"></div>
-            </div>
-        </div>
-        <div class="pf-xp">
-            <span class="xp-bar"><span class="xp-fill" id="pf-xp-fill"></span></span>
-            <span class="xp-text" id="pf-xp-text"></span>
-        </div>
-        <div id="pf-avatar-section" style="display:none;">
-            <h4 id="pf-avatar-title">Avatar</h4>
-            <div class="avatar-grid" id="pf-avatar-emoji"></div>
-            <div class="avatar-colors" id="pf-avatar-colors"></div>
-            <button class="share-copy-btn" id="pf-avatar-reset" style="margin-top:8px;">Use my photo</button>
-        </div>
-        <h4 id="pf-stats-title">Stats</h4>
-        <div id="pf-stats"></div>
-        <div id="pf-hand-dist" style="display:none;">
-            <h4 id="pf-dist-title">Winning Hands</h4>
-            <div id="pf-dist-list"></div>
-        </div>
-        <h4 id="pf-ach-title">Achievements</h4>
-        <div class="ach-grid" id="pf-ach-grid"></div>
-        <div id="pf-ref-section-wrap" style="display: none;">
-            <h4 id="pf-ref-title">Invite Friends</h4>
-            <div class="pf-ref-sub" id="pf-ref-sub">Invite friends to play! You both get 200 bonus credits when they play their first hand.</div>
-            <div id="pf-ref-code" style="text-align:center; font-weight:bold; color:#ffd700; font-size:24px; letter-spacing:6px; margin: 10px 0;"></div>
-            <div class="share-row" style="margin-top: 8px;">
-                <input class="room-input" id="pf-ref-link" readonly onclick="this.select()" style="font-size:12px; margin-bottom: 0;">
-                <button class="share-copy-btn" onclick="copyRefLink()" id="pf-ref-copy-btn">Copy Link</button>
-            </div>
-            <a class="whatsapp-btn" id="pf-ref-whatsapp" target="_blank" rel="noopener" style="margin-top: 8px;">
-                <span>💬</span><span id="pf-ref-wa-label">Share on WhatsApp</span>
-            </a>
-            <div class="pf-ref-count" id="pf-ref-count" style="color: #4ade80; font-size: 13px; font-weight: 600; margin-top: 10px; text-align: center;"></div>
-        </div>
-        <div id="pf-season-section" style="display:none;">
-            <h4 id="pf-season-title">🎫 Season Pass</h4>
-            <div class="pf-season-ends" id="pf-season-ends"></div>
-            <div class="pf-xp">
-                <span class="xp-bar season-bar"><span class="xp-fill season-fill" id="pf-season-fill"></span></span>
-                <span class="xp-text" id="pf-season-text"></span>
-            </div>
-            <div class="season-tiers" id="pf-season-tiers"></div>
-        </div>
-        <div id="pf-styles-section">
-            <h4 id="pf-styles-title">Card Styles</h4>
-            <div class="style-row" id="pf-styles"></div>
-        </div>
-        <div id="pf-themes-section">
-            <h4 id="pf-themes-title">Table Themes</h4>
-            <div class="style-row" id="pf-themes"></div>
-        </div>
-    </div>
-
-    <div class="container" style="display:none; padding-top: 50px;" id="game-container">
-        <div class="language-selector">
-            <label for="language-select" style="margin-right: 10px; color: #ffd700;">Language / שפה / Idioma / Langue / Sprache / اللغة:</label>
-            <select id="language-select" onchange="changeLanguage(this.value)">
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-                <option value="he">עברית</option>
-                <option value="ar">العربية</option>
-            </select>
-        </div>
-
-        <h1 id="game-title">Video Poker</h1>
-
-        <div id="tournament-banner" class="eg-hidden"></div>
-        <div id="event-banner" class="event-banner eg-hidden"></div>
-        <div id="duel-banner" class="duel-banner eg-hidden"></div>
-
-        <div class="game-layout">
-            <div class="game-col">
-                <div class="variant-picker">
-                    <button class="variant-btn selected" id="variant-jacks" onclick="setGameVariant('jacks')">🂡 Jacks or Better <span class="variant-lock"></span></button>
-                    <button class="variant-btn" id="variant-deuces" onclick="setGameVariant('deuces')">🃒 Deuces Wild <span class="variant-lock"></span></button>
-                    <button class="variant-btn" id="variant-bonus" onclick="setGameVariant('bonus')">🂱 Bonus Poker <span class="variant-lock"></span></button>
-                    <button class="variant-btn" id="variant-doubleBonus" onclick="setGameVariant('doubleBonus')">🃁 Double Bonus <span class="variant-lock"></span></button>
+                <div class="bet-row">
+                    <button class="bet-btn" onclick="setBet(5)" id="bet-5">5</button>
+                    <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
+                    <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
+                    <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
                 </div>
-                <div class="multi-picker">
-                    <span id="multi-label">Hands:</span>
-                    <button class="multi-btn selected" id="multi-1" onclick="setMultiHand(1)">1</button>
-                    <button class="multi-btn" id="multi-3" onclick="setMultiHand(3)">3×</button>
-                    <button class="multi-btn" id="multi-5" onclick="setMultiHand(5)">5×</button>
+            </div>
+
+            <div id="multi-hands"></div>
+            <div class="hand" id="hand"></div>
+            <div class="hand-placeholder-text" id="hand-placeholder-text">Tap a card or Deal to start the hand</div>
+
+            <div class="action-row">
+                <button id="deal-btn" class="btn-primary" onclick="deal()">Deal</button>
+                <button id="hold-btn" class="btn-secondary" onclick="draw()" disabled>Draw</button>
+                <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
+            </div>
+
+            <div class="streak-bar" id="streak-bar">
+                <span>🔥</span>
+                <span>Win Streak</span>
+                <span class="streak-count" id="streak-count">0</span>
+                <span class="streak-bonus-tag hidden" id="streak-bonus-tag"></span>
+            </div>
+
+            <div class="panel friends-signin-prompt" id="friends-signin-prompt" onclick="openSignInModal()">
+                <span class="settings-row-label">Sign in to play with friends</span>
+                <span class="settings-chevron">›</span>
+            </div>
+
+            <div class="panel vs-friends-card hidden" id="vs-friends-card" onclick="showScreen('friends')">
+                <div class="vs-friends-rank" id="vs-friends-rank">#—</div>
+                <div>
+                    <div class="section-label">Vs Friends</div>
+                    <div class="vs-friends-detail" id="vs-friends-detail"></div>
                 </div>
+                <span class="settings-chevron">›</span>
+            </div>
+
+            <div class="panel play-rooms-panel">
+                <div class="play-rooms-header">
+                    <span class="section-label">Play With Friends</span>
+                    <span class="see-all-link" onclick="showScreen('friends')">See All ›</span>
+                </div>
+                <div id="play-rooms-list"></div>
+                <button class="create-room-link" onclick="openRoomModal()">+ Create a Poker Room with Friends</button>
+            </div>
+
+            <div class="result-panel" id="result">Place your bet and deal to play</div>
+            <div class="explanation" id="explanation"></div>
+
+            <div class="panel payout-panel" id="payout-panel">
+                <button class="payout-header" onclick="document.getElementById('payout-panel').classList.toggle('collapsed')">
+                    <span class="payout-header-label">Payout Table</span>
+                    <span class="payout-caret">▲</span>
+                </button>
                 <div class="payouts" id="payouts"></div>
+                <button class="payout-help-toggle" onclick="const h=this.nextElementSibling;h.classList.toggle('visible');this.classList.toggle('open')">
+                    <span>ℹ️</span> How to read
+                </button>
+                <div class="payout-help">
+                    <p>Numbers show credits won <strong>per credit bet</strong>.</p>
+                    <p>Multiply the value by your bet for the actual payout.</p>
+                    <p class="payout-help-example">Example: Bet <strong>10</strong>, hit Flush (<strong>5×</strong>) → <strong>50</strong> credits won</p>
+                </div>
+            </div>
+        </section>
 
-                <div class="game-area">
-                    <div class="info">
-                        <span id="balance-label">Balance:</span> <span class="balance" id="balance">100</span> |
-                        <span id="bet-label">Bet:</span> <span class="bet-display" id="bet-display">5</span> <span id="credits-label">credits</span>
-                    </div>
+        <section id="screen-stats" class="screen">
+            <h1 class="screen-title">Statistics</h1>
+            <div class="stats-toggle">
+                <button class="stats-toggle-btn selected" id="stats-tab-today" onclick="setStatsTab('today')">Today</button>
+                <button class="stats-toggle-btn" id="stats-tab-alltime" onclick="setStatsTab('alltime')">All-Time</button>
+            </div>
+            <div class="panel stats-net-panel">
+                <div class="section-label">Net</div>
+                <div class="stats-net-value zero" id="stats-net-value">+0</div>
+            </div>
+            <div class="stats-grid">
+                <div class="panel">
+                    <div class="section-label">Won</div>
+                    <div class="stat-tile-value won" id="stats-won-value">+0</div>
+                </div>
+                <div class="panel">
+                    <div class="section-label">Lost</div>
+                    <div class="stat-tile-value lost" id="stats-lost-value">-0</div>
+                </div>
+                <div class="panel">
+                    <div class="section-label">Hands Played</div>
+                    <div class="stat-tile-value" id="stats-hands-value">0</div>
+                </div>
+                <div class="panel">
+                    <div class="section-label">Best Streak</div>
+                    <div class="stat-tile-value" id="stats-streak-value">0</div>
+                </div>
+            </div>
+        </section>
 
-                    <div class="controls" style="margin-bottom: 20px;">
-                        <strong id="choose-bet-label">Choose Bet:</strong>
-                        <button class="bet-btn selected" onclick="setBet(5)" id="bet-5">5</button>
-                        <button class="bet-btn" onclick="setBet(10)" id="bet-10">10</button>
-                        <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
-                        <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
-                    </div>
+        <section id="screen-friends" class="screen">
+            <h1 class="screen-title">Friends</h1>
 
-                    <div id="multi-hands"></div>
-                    <div class="hand" id="hand"></div>
+            <div class="panel friends-signin-prompt" id="friends-signed-out" onclick="openSignInModal()">
+                <span class="settings-row-label">Sign in to add friends</span>
+                <span class="settings-chevron">›</span>
+            </div>
 
-                    <div class="controls">
-                        <button id="deal-btn" onclick="deal()">Deal</button>
-                        <button id="hold-btn" onclick="draw()" disabled>Draw</button>
-                        <button id="hint-btn" onclick="toggleHints()" title="Strategy hints" style="opacity:0.45">💡</button>
-                    </div>
+            <div id="friends-signed-in-wrap" class="hidden">
+                <div class="section-label">Your Code</div>
+                <div class="panel own-code-panel" id="own-referral-code">—</div>
 
-                    <div class="result" id="result"></div>
-                    <div class="explanation" id="explanation"></div>
+                <div class="section-label">Invite Friends</div>
+                <div class="invite-row">
+                    <button class="invite-btn" onclick="copyInviteLink()" id="invite-copy-btn">
+                        <span class="invite-icon">📋</span>
+                        <span>Copy Invite Link</span>
+                    </button>
+                    <button class="invite-btn whatsapp" onclick="shareViaWhatsApp()" id="invite-whatsapp-btn">
+                        <span class="invite-icon">💬</span>
+                        <span>WhatsApp</span>
+                    </button>
                 </div>
 
-                <div class="streak-bar" id="streak-bar">
-                    <span class="flame">🔥</span>
-                    <span id="streak-label">Win Streak</span>
-                    <span class="streak-count" id="streak-count">0</span>
-                    <span class="streak-bonus-tag eg-hidden" id="streak-bonus-tag"></span>
+                <div class="section-label">Add a Friend</div>
+                <div class="panel add-friend-row">
+                    <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
+                    <button class="btn-primary add-friend-btn" onclick="addFriendByCode()">Add</button>
                 </div>
 
-                <div class="stats-bar" id="stats-bar">
-                    <div class="stat-item stat-won">
-                        <div class="stat-label" id="stat-won-label">Won</div>
-                        <div class="stat-value" id="stat-won-value">+0</div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat-item stat-net zero" id="stat-net">
-                        <div class="stat-label" id="stat-net-label">Net</div>
-                        <div class="stat-value" id="stat-net-value">0</div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat-item stat-lost">
-                        <div class="stat-label" id="stat-lost-label">Lost</div>
-                        <div class="stat-value" id="stat-lost-value">-0</div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat-item stat-hands">
-                        <div class="stat-label" id="stat-hands-label">Hands</div>
-                        <div class="stat-value" id="stat-hands-value">0</div>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat-item stat-hands">
-                        <div class="stat-label" id="stat-best-streak-label">Best Streak</div>
-                        <div class="stat-value" id="stat-best-streak-value">🔥 0</div>
+                <div class="stats-toggle">
+                    <button class="stats-toggle-btn selected" id="friends-tab-leaderboard" onclick="setFriendsTab('leaderboard')">Leaderboard</button>
+                    <button class="stats-toggle-btn" id="friends-tab-rooms" onclick="setFriendsTab('rooms')">Poker Rooms</button>
+                </div>
+
+                <div id="friends-leaderboard-view">
+                    <div class="panel">
+                        <div class="rooms-empty hidden" id="friends-empty">Add friends by their code to compare scores.</div>
+                        <div id="friends-list"></div>
                     </div>
                 </div>
 
-                <div class="challenges" id="challenges-panel" style="display:none;">
-                    <h3 onclick="egToggleChallenges()">
-                        <span id="challenges-title">🎯 Daily Challenges</span>
-                        <span id="challenges-caret">▾</span>
-                    </h3>
-                    <div id="challenges-list"></div>
+                <div id="friends-rooms-view" class="hidden">
+                    <div class="rooms-empty hidden" id="friends-rooms-empty">No rooms yet — create one below.</div>
+                    <div id="friends-rooms-list"></div>
+                    <button class="create-room-link" onclick="openRoomModal()">+ Create Room with Friends</button>
                 </div>
+            </div>
+        </section>
 
-                <div class="instructions">
-                    <h3 id="how-to-play">How to Play:</h3>
-                    <ul id="instructions-list"></ul>
+        <section id="screen-settings" class="screen">
+            <h1 class="screen-title">Settings</h1>
+
+            <div class="section-label">Gameplay</div>
+            <div class="panel">
+                <div class="settings-row">
+                    <span class="settings-row-label">Sound Effects</span>
+                    <input type="checkbox" class="toggle-switch" id="settings-sound-toggle">
+                </div>
+                <div class="settings-row">
+                    <span class="settings-row-label">Haptic Feedback</span>
+                    <input type="checkbox" class="toggle-switch" id="settings-haptics-toggle">
                 </div>
             </div>
 
-            <div class="lb-col">
-                <div class="leaderboard" id="friends-panel">
-                    <h3 id="friends-title">👥 Friends</h3>
-                    <div class="rooms-empty" id="friends-empty">Add friends by their referral code — find yours in your profile.</div>
-                    <div id="friends-list"></div>
-                    <div class="share-row" style="margin-top:10px;">
-                        <input class="room-input" id="friend-code-input" maxlength="6" placeholder="Friend code…"
-                            autocomplete="off" onkeydown="if(event.key==='Enter')addFriendByCode()">
-                        <button class="share-copy-btn" id="friend-add-btn" onclick="addFriendByCode()">Add</button>
-                    </div>
+            <div class="section-label">Default Bet</div>
+            <div class="panel default-bet-row">
+                <button class="bet-btn" id="settings-defaultbet-5">5</button>
+                <button class="bet-btn" id="settings-defaultbet-10">10</button>
+                <button class="bet-btn" id="settings-defaultbet-20">20</button>
+                <button class="bet-btn" id="settings-defaultbet-50">50</button>
+            </div>
+
+            <div class="section-label">Game Variant</div>
+            <div class="variant-picker">
+                <button class="variant-btn selected" id="variant-jacks" onclick="setGameVariant('jacks')">Jacks or Better<span class="variant-lock"></span></button>
+                <button class="variant-btn" id="variant-deuces" onclick="setGameVariant('deuces')">Deuces Wild<span class="variant-lock"></span></button>
+                <button class="variant-btn" id="variant-bonus" onclick="setGameVariant('bonus')">Bonus Poker<span class="variant-lock"></span></button>
+                <button class="variant-btn" id="variant-doubleBonus" onclick="setGameVariant('doubleBonus')">Double Bonus<span class="variant-lock"></span></button>
+            </div>
+
+            <div class="section-label">Hands per Deal</div>
+            <div class="multi-picker">
+                <button class="multi-btn selected" id="multi-1" onclick="setMultiHand(1)">1 Hand</button>
+                <button class="multi-btn" id="multi-3" onclick="setMultiHand(3)">3× Hands</button>
+                <button class="multi-btn" id="multi-5" onclick="setMultiHand(5)">5× Hands</button>
+            </div>
+
+            <div class="section-label">Support</div>
+            <div class="panel payout-panel collapsed" id="payout-panel">
+                <button class="payout-header" onclick="document.getElementById('payout-panel').classList.toggle('collapsed')" id="settings-view-paytable">
+                    <span class="payout-header-label">Payout Table</span>
+                    <span class="payout-caret">▲</span>
+                </button>
+                <div class="payouts" id="payouts"></div>
+            </div>
+
+            <div class="section-label">Account</div>
+            <div class="panel">
+                <div class="settings-row" id="account-signed-out" onclick="openSignInModal()" style="cursor:pointer;">
+                    <span class="settings-row-label">Sign in with Google</span>
+                    <span class="settings-chevron">›</span>
                 </div>
-                <div class="leaderboard" id="rooms-panel">
-                    <h3 id="rooms-title">🃏 Poker Rooms</h3>
-                    <div class="room-tabs" id="rooms-tabs"></div>
-                    <div class="rooms-empty" id="rooms-empty">Create a private room and challenge your friends!</div>
-                    <div id="room-lb-area" class="rm-hidden">
-                        <div class="leaderboard-timer"><span id="room-resets-label">Resets in</span> <span id="room-countdown">--</span></div>
-                        <div class="room-winner rm-hidden" id="room-winner-line"></div>
-                        <table class="lb-table">
-                            <thead><tr>
-                                <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
-                            </tr></thead>
-                            <tbody id="room-lb-body"></tbody>
-                        </table>
-                        <div class="room-nudge rm-hidden" id="room-nudge"></div>
-                        <div class="reaction-bar" id="room-reaction-bar">
-                            <button class="reaction-btn" onclick="sendReaction('👏')">👏</button>
-                            <button class="reaction-btn" onclick="sendReaction('🔥')">🔥</button>
-                            <button class="reaction-btn" onclick="sendReaction('😱')">😱</button>
-                            <button class="reaction-btn" onclick="sendReaction('😂')">😂</button>
-                            <button class="reaction-btn" onclick="sendReaction('💀')">💀</button>
-                            <button class="reaction-btn" onclick="sendReaction('🎉')">🎉</button>
-                        </div>
-                        <div class="chat-row">
-                            <input class="room-input chat-input" id="room-chat-input" maxlength="100"
-                                placeholder="Say something…" onkeydown="if(event.key==='Enter')sendRoomChat()">
-                            <button class="share-copy-btn" id="room-chat-send" onclick="sendRoomChat()">Send</button>
-                        </div>
-                        <div class="room-footer">
-                            <button class="room-mini-btn" onclick="openShareForActiveRoom()" id="room-share-btn">🔗 Invite</button>
-                            <button class="room-mini-btn" onclick="leaveActiveRoom()" id="room-leave-btn">🚪 Leave</button>
-                        </div>
-                    </div>
-                    <div class="room-actions">
-                        <button class="room-action-btn" onclick="openRoomModal('create')" id="create-room-btn">+ Create Room</button>
-                        <button class="room-action-btn secondary" onclick="openRoomModal('join')" id="join-room-btn">Join with Code</button>
-                    </div>
-                </div>
-                <div class="leaderboard lb-tournament eg-hidden" id="leaderboard-tournament">
-                    <h3 id="lb-tournament-title">🏆 Weekly Tournament</h3>
-                    <div class="leaderboard-timer"><span id="lb-tournament-resets-label">Ends in</span> <span id="lb-tournament-countdown">--:--:--</span></div>
-                    <div class="lb-tournament-note" id="lb-tournament-note">Score = credits won today · Top 3: 1000 / 500 / 250</div>
-                    <table class="lb-table">
-                        <thead><tr>
-                            <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
-                        </tr></thead>
-                        <tbody id="lb-tournament-body">
-                            <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="leaderboard" id="leaderboard-hourly">
-                    <h3 id="lb-hourly-title">⏱ Hourly Competition</h3>
-                    <div class="leaderboard-timer">Resets in <span id="lb-hourly-countdown">--:--</span></div>
-                    <table class="lb-table">
-                        <thead><tr>
-                            <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
-                        </tr></thead>
-                        <tbody id="lb-hourly-body">
-                            <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="leaderboard" id="leaderboard-daily">
-                    <h3 id="lb-daily-title">📅 Daily Competition</h3>
-                    <div class="leaderboard-timer">Resets in <span id="lb-daily-countdown">--:--:--</span></div>
-                    <table class="lb-table">
-                        <thead><tr>
-                            <th>#</th><th>Player</th><th>Score</th><th>Hands</th>
-                        </tr></thead>
-                        <tbody id="lb-daily-body">
-                            <tr><td colspan="4" class="lb-empty">Play a hand to join!</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="leaderboard" id="hof-panel">
-                    <h3 id="hof-title">🏛️ Hall of Fame</h3>
-                    <div id="hof-list"></div>
-                </div>
-                <div class="lb-formula-note" id="lb-formula-note">
-                    <strong>How is score calculated?</strong><br>
-                    Score = Balance - (100 × Rebuys) - 100<br>
-                    <span style="opacity:0.7">(This equals your exact Net Profit/Loss)</span>
+                <div class="settings-row hidden" id="account-signed-in">
+                    <span class="settings-row-label" id="account-display-name">Signed in</span>
+                    <button class="btn-danger account-signout-btn" onclick="signOutUser()">Sign Out</button>
                 </div>
             </div>
+
+            <button class="btn-danger" id="settings-reset-stats">Reset Statistics</button>
+
+            <div class="settings-footer">Video Poker · v3.0</div>
+        </section>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="bottom-nav-inner">
+            <button class="nav-btn active" id="nav-play" onclick="showScreen('play')">
+                <span class="nav-icon">♠</span>
+                <span>Play</span>
+            </button>
+            <button class="nav-btn" id="nav-stats" onclick="showScreen('stats')">
+                <span class="nav-icon">📊</span>
+                <span>Stats</span>
+            </button>
+            <button class="nav-btn" id="nav-friends" onclick="showScreen('friends')">
+                <span class="nav-icon">👥</span>
+                <span>Friends</span>
+            </button>
+            <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
+                <span class="nav-icon">⚙️</span>
+                <span>Settings</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="modal-backdrop hidden" id="signin-modal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeSignInModal()">✕</button>
+            <div class="modal-title">Sign in to play with friends</div>
+            <div class="modal-sub">Add friends, join rooms, and compare scores.</div>
+            <button class="google-btn" onclick="signInWithGoogle()">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
+                <span>Continue with Google</span>
+            </button>
+            <div class="modal-error hidden" id="signin-error"></div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="room-modal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeRoomModal()">✕</button>
+            <div class="modal-title">Create a Poker Room</div>
+            <input class="friend-code-input" id="room-name-input" maxlength="24" placeholder="Room name…">
+            <div class="default-bet-row" style="margin: 10px 0;">
+                <select class="room-stake-select" id="room-stake-input">
+                    <option value="5">Stake 5</option>
+                    <option value="10" selected>Stake 10</option>
+                    <option value="20">Stake 20</option>
+                    <option value="50">Stake 50</option>
+                </select>
+            </div>
+            <button class="btn-primary" style="width:100%;" onclick="createRoom()">Create Room</button>
+            <div class="modal-sub" style="margin-top:16px;">Got a code from a friend?</div>
+            <div class="add-friend-row">
+                <input class="friend-code-input" id="room-code-input" maxlength="6" placeholder="Room code…" autocomplete="off">
+                <button class="btn-secondary" onclick="joinRoomByCode()">Join</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="room-detail-modal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeRoomDetail()">✕</button>
+            <div class="modal-title" id="room-detail-name">Room</div>
+            <div class="modal-sub">Code: <span id="room-detail-code"></span></div>
+            <div id="room-detail-members" style="margin-top:12px;"></div>
         </div>
     </div>
 

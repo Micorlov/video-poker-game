@@ -1,12 +1,12 @@
 {
-  "name": "Video Poker Jacks or Better",
+  "name": "Video Poker",
   "short_name": "Video Poker",
-  "description": "Professional Jacks or Better social casino poker game with rooms, competitions, and achievements.",
+  "description": "Video poker with Jacks or Better, Deuces Wild, Bonus Poker, and Double Bonus variants.",
   "start_url": "video_poker.html",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#0c2317",
-  "theme_color": "#0c2317",
+  "background_color": "#061711",
+  "theme_color": "#0c2419",
   "icons": [
     {
       "src": "icon.svg",

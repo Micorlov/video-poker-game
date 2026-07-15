@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.videopoker.app"
+    namespace = "com.micorlov.videopoker"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.videopoker.app"
+        applicationId "com.micorlov.videopoker"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

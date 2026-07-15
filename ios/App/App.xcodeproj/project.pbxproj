@@ -9,13 +9,11 @@
 /* Begin PBXBuildFile section */
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
+		AA000001GOOGLE001 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AA000001GOOGLE000 /* GoogleService-Info.plist */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
-		A00000010001 /* Capacitor.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A00000090001 /* Capacitor.xcframework */; };
-		A00000020001 /* Cordova.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A000000A0001 /* Cordova.xcframework */; };
 		A00000030001 /* CapApp-SPM/Sources/CapApp-SPM/CapApp-SPM.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000B0001 /* CapApp-SPM/Sources/CapApp-SPM/CapApp-SPM.swift */; };
-		A00000040001 /* Capacitor.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A00000090001 /* Capacitor.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		A00000050001 /* Cordova.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A000000A0001 /* Cordova.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		BB0003SPMBUILDFILE1 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = BB0002SPMPRODDEP01 /* CapApp-SPM */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,8 +23,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				A00000040001 /* Capacitor.xcframework in Embed Frameworks */,
-				A00000050001 /* Cordova.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -36,6 +32,7 @@
 /* Begin PBXFileReference section */
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
+		AA000001GOOGLE000 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		504EC30C1FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -44,8 +41,6 @@
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
-		A00000090001 /* Capacitor.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Capacitor.xcframework; path = Frameworks/Capacitor.xcframework; sourceTree = "<group>"; };
-		A000000A0001 /* Cordova.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Cordova.xcframework; path = Frameworks/Cordova.xcframework; sourceTree = "<group>"; };
 		A000000B0001 /* CapApp-SPM/Sources/CapApp-SPM/CapApp-SPM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CapApp-SPM/Sources/CapApp-SPM/CapApp-SPM.swift"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -54,8 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A00000010001 /* Capacitor.xcframework in Frameworks */,
-				A00000020001 /* Cordova.xcframework in Frameworks */,
+				BB0003SPMBUILDFILE1 /* CapApp-SPM in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,7 +61,6 @@
 			children = (
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
-				A000000C0001 /* Frameworks */,
 				504EC3051FED79650016851F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -84,6 +77,7 @@
 			isa = PBXGroup;
 			children = (
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
+				AA000001GOOGLE000 /* GoogleService-Info.plist */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
@@ -94,15 +88,6 @@
 				A000000B0001 /* CapApp-SPM/Sources/CapApp-SPM/CapApp-SPM.swift */,
 			);
 			path = App;
-			sourceTree = "<group>";
-		};
-		A000000C0001 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				A00000090001 /* Capacitor.xcframework */,
-				A000000A0001 /* Cordova.xcframework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -122,6 +107,9 @@
 			dependencies = (
 			);
 			name = App;
+			packageProductDependencies = (
+				BB0002SPMPRODDEP01 /* CapApp-SPM */,
+			);
 			productName = App;
 			productReference = 504EC3041FED79650016851F /* App.app */;
 			productType = "com.apple.product-type.application";
@@ -151,6 +139,9 @@
 				Base,
 			);
 			mainGroup = 504EC2FB1FED79650016851F;
+			packageReferences = (
+				BB0001SPMPKGREF01 /* XCLocalSwiftPackageReference "CapApp-SPM" */,
+			);
 			productRefGroup = 504EC3051FED79650016851F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -168,6 +159,7 @@
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
+				AA000001GOOGLE001 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -203,6 +195,20 @@
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		BB0001SPMPKGREF01 /* XCLocalSwiftPackageReference "CapApp-SPM" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "CapApp-SPM";
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BB0002SPMPRODDEP01 /* CapApp-SPM */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = "CapApp-SPM";
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCBuildConfiguration section */
 		504EC3141FED79650016851F /* Debug */ = {
