@@ -92,7 +92,7 @@
     display: flex;
     justify-content: center;
     gap: 0;
-    background: rgba(10, 22, 16, 0.92);
+    background: color-mix(in srgb, var(--felt-800) 92%, transparent);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-top: 1px solid var(--border);

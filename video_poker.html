@@ -16,31 +16,67 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --felt-900: #061711;
-    --felt-800: #0c2419;
-    --felt-700: #123222;
-    --felt-600: #1a4029;
+    --felt-900: #0a2b1d;
+    --felt-800: #123825;
+    --felt-700: #1a452e;
+    --felt-600: #2a5a3d;
     --bg-top: var(--felt-800);
     --bg-bottom: var(--felt-900);
     --panel: var(--felt-700);
     --panel-solid: var(--felt-700);
     --border: var(--felt-600);
     --border-strong: var(--felt-600);
-    --gold: #e8b93f;
-    --gold-600: #c99a2e;
-    --gold-100: #fbe8b8;
-    --gold-dim: rgba(232, 185, 63, 0.1);
+    --gold: #d4af37;
+    --gold-600: #b8952e;
+    --gold-100: #f5e6b8;
+    --gold-dim: rgba(212, 175, 55, 0.1);
     --green: #4caf7d;
     --green-dim: rgba(76, 175, 125, 0.15);
     --red: #e6533f;
     --red-dim: rgba(230, 83, 63, 0.12);
-    --text: #eef6f0;
-    --text-muted: rgba(238, 246, 240, 0.6);
-    --text-faint: rgba(238, 246, 240, 0.45);
+    --text: #f3ede0;
+    --text-muted: #b9c4b6;
+    --text-faint: rgba(185, 196, 182, 0.6);
     --radius-lg: 16px;
     --radius-md: 14px;
     --radius-sm: 12px;
     --nav-height: 64px;
+}
+
+/* --- Blue theme --- */
+body.theme-blue {
+    --felt-900: #081018;
+    --felt-800: #0f1c2b;
+    --felt-700: #172a3d;
+    --felt-600: #25405a;
+    --bg-top: var(--felt-800);
+    --bg-bottom: var(--felt-900);
+    --panel: var(--felt-700);
+    --panel-solid: var(--felt-700);
+    --border: var(--felt-600);
+    --border-strong: var(--felt-600);
+    --text: #f0f4f8;
+    --text-muted: #a9b7c4;
+    --text-faint: rgba(169, 183, 196, 0.6);
+}
+
+/* --- Crimson theme --- */
+body.theme-crimson {
+    --felt-900: #1a0708;
+    --felt-800: #2b0c0d;
+    --felt-700: #3d1416;
+    --felt-600: #5c1e21;
+    --bg-top: var(--felt-800);
+    --bg-bottom: var(--felt-900);
+    --panel: var(--felt-700);
+    --panel-solid: var(--felt-700);
+    --border: var(--felt-600);
+    --border-strong: var(--felt-600);
+    --text: #f3ede0;
+    --text-muted: #c9b6b6;
+    --text-faint: rgba(201, 182, 182, 0.6);
+    --red: #ff6b6b;
+    --red-dim: rgba(255, 107, 107, 0.12);
 }
 
 html, body {
@@ -160,7 +196,7 @@ button, input, select {
     display: flex;
     justify-content: center;
     gap: 0;
-    background: rgba(10, 22, 16, 0.92);
+    background: color-mix(in srgb, var(--felt-800) 92%, transparent);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-top: 1px solid var(--border);
@@ -237,6 +273,33 @@ button, input, select {
     font-weight: 600;
     margin-top: 2px;
     opacity: 0.8;
+}
+
+/* --- Theme picker --- */
+.theme-picker {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.theme-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 10px 4px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.theme-btn.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #1c1608;
 }
 
 /* --- Multi-hand picker --- */
@@ -445,7 +508,7 @@ button, input, select {
 /* --- Hand / cards --- */
 .hand {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     justify-content: center;
     padding: 16px 0 8px;
 }
@@ -460,7 +523,7 @@ button, input, select {
 .card {
     position: relative;
     flex: 1;
-    min-width: 0;
+    max-width: 78px;
     aspect-ratio: 2 / 3;
     cursor: pointer;
     perspective: 600px;
@@ -484,14 +547,14 @@ button, input, select {
     position: absolute;
     inset: 0;
     backface-visibility: hidden;
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
 .card-front {
-    background: #f4f1e8;
+    background: #fbfaf6;
     color: #1a1a1a;
     padding: 6%;
     justify-content: space-between;
@@ -531,14 +594,16 @@ button, input, select {
 
 .card-suit-large {
     flex: 1;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(30px, 9vw, 48px);
+    font-size: clamp(20px, 5.5vw, 30px);
 }
 
 .card-royalty-center {
     flex: 1;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -553,9 +618,10 @@ button, input, select {
 
 .pip-grid {
     flex: 1;
+    min-height: 0;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(5, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(5, minmax(0, 1fr));
     gap: 1px;
     margin: 6% 4%;
 }
@@ -591,6 +657,56 @@ button, input, select {
 .card.held .held-badge,
 .card.winning .win-badge {
     opacity: 1;
+}
+
+/* --- Multi-hand results --- */
+#multi-hands {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+}
+
+.multi-hand-row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+}
+
+.mini-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 52px;
+    max-width: 62px;
+    background: #fbfaf6;
+    color: #1a1a1a;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    flex: 1;
+}
+
+.mini-card.red {
+    color: var(--red);
+}
+
+.mh-win {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--green);
+    margin-left: 4px;
+    white-space: nowrap;
+}
+
+.mh-lose {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-faint);
+    margin-left: 4px;
 }
 
 /* --- Action row --- */
@@ -1162,6 +1278,54 @@ button, input, select {
     margin-top: 10px;
 }
 
+.room-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.roomname {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.roomstatus {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+}
+
+.roomstatus.open {
+    background: var(--gold-100);
+    color: var(--green);
+}
+
+.roomstatus.playing {
+    background: var(--gold-100);
+    color: var(--gold);
+}
+
+.roommeta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.roomjoin {
+    margin-top: 10px;
+    text-align: center;
+    padding: 9px 0;
+    border-radius: 8px;
+    background: var(--gold);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+}
+
 .rooms-empty {
     font-size: 12.5px;
     color: var(--text-faint);
@@ -1252,6 +1416,826 @@ button, input, select {
     color: var(--text);
     padding: 12px;
     font-size: 14px;
+}
+
+
+/* --- styles/social.css --- */
+/* ========================================================================
+   Social layer — matched pixel-for-pixel to Video Poker App.dc.html
+   Maps design vars: --ig-text→--text, --ig-sub→--text-muted, --ig-grad
+   → our gold gradient. --felt-* mapped to our existing felt tokens.
+   ======================================================================== */
+
+/* --- Stories row (.storiesrow) --- */
+.stories-row {
+    display: flex;
+    gap: 14px;
+    margin-top: 16px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.stories-row::-webkit-scrollbar { display: none; }
+
+.story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 56px;
+}
+
+.story-ring {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5px;
+    box-sizing: border-box;
+}
+
+.story-ring.empty {
+    background: var(--border);
+}
+
+.story-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    background: var(--bg-top);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    border: 2px solid var(--bg-bottom);
+    overflow: hidden;
+}
+
+.story-name {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 56px;
+}
+
+.story-empty-msg {
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: center;
+    padding: 8px 0;
+}
+
+/* --- Story Viewer (full-screen overlay with centered card) --- */
+.story-viewer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.story-viewer-card {
+    position: relative;
+    width: 92%;
+    max-width: 400px;
+    background: var(--panel-solid);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* Progress bars on top of the viewer card */
+.story-progress-row {
+    display: flex;
+    gap: 3px;
+    padding: 10px 12px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+}
+
+.story-bar {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.2);
+    overflow: hidden;
+}
+
+.story-bar-fill {
+    height: 100%;
+    background: var(--text);
+    border-radius: 2px;
+    transition: width 0.1s linear;
+}
+
+.story-bar-fill.done {
+    width: 100%;
+}
+
+.story-bar-fill.active {
+    background: var(--gold);
+}
+
+/* Viewer header */
+.story-viewer-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 28px 14px 10px;
+}
+
+.story-viewer-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--panel-solid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.story-viewer-name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.story-viewer-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+}
+
+/* Tap zones overlay within the viewer card */
+.story-tap-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 35%;
+    height: 100%;
+    z-index: 3;
+    cursor: pointer;
+}
+
+.story-tap-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 35%;
+    height: 100%;
+    z-index: 3;
+    cursor: pointer;
+}
+
+/* Viewer body */
+.story-viewer-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 24px 32px;
+    gap: 16px;
+}
+
+.story-hand-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--gold);
+    text-align: center;
+    font-family: 'Manrope', sans-serif;
+}
+
+.story-cards {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.story-card {
+    flex: 1;
+    max-width: 62px;
+    aspect-ratio: 2/3;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+
+.story-card-rank {
+    font-size: 19px;
+    color: #262626;
+}
+
+.story-card-suit {
+    font-size: 21px;
+    margin-top: 2px;
+    color: #262626;
+}
+
+.story-card.red .story-card-rank,
+.story-card.red .story-card-suit {
+    color: #ed4956;
+}
+
+.story-payout {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+}
+
+/* --- Nearby panels (Friends Leaderboard & Hourly Champions) --- */
+.nearby-panel .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.nearby-panel .panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.nearby-panel .panel-sub {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.champ-countdown {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.nearby-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.nearby-row:last-child {
+    border-bottom: none;
+}
+
+.nearby-row.me {
+    background: var(--gold-dim);
+    border-radius: 10px;
+    border-bottom-color: transparent;
+}
+
+.nearby-rank {
+    width: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.nearby-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.nearby-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+}
+
+.nearby-avatar.champ {
+    background: linear-gradient(135deg, var(--gold), var(--gold-100), var(--gold));
+    color: #1a1a1a;
+}
+
+.online-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    border: 2px solid var(--panel-solid);
+}
+
+.online-dot.offline {
+    background: var(--text-faint);
+}
+
+.nearby-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text);
+    min-width: 0;
+}
+
+.country-flag {
+    font-size: 14px;
+    line-height: 1;
+    margin-left: 4px;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.country-chip {
+    font-size: 9px;
+    font-weight: 700;
+    background: var(--panel-solid);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+}
+
+.nearby-net {
+    font-size: 13px;
+    font-weight: 700;
+    width: 58px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.nearby-net.positive { color: var(--green); }
+.nearby-net.negative { color: var(--red); }
+.nearby-net.zero     { color: var(--text-muted); }
+
+/* --- Play With Friends panel — mini room cards --- */
+.mini-room {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-bottom);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    box-sizing: border-box;
+    gap: 8px;
+}
+
+.mr-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.mr-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.mr-status {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.mr-status.open {
+    background: var(--gold-dim);
+    color: var(--green);
+}
+
+.mr-status.playing {
+    background: var(--gold-dim);
+    color: var(--gold);
+}
+
+.mr-join {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--gold);
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    flex-shrink: 0;
+    border: none;
+    font-family: inherit;
+}
+
+.create-room-dashed {
+    margin-top: 12px;
+    text-align: center;
+    padding: 11px 0;
+    border-radius: 10px;
+    border: 1.5px dashed var(--border);
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    background: none;
+    width: 100%;
+    font-family: inherit;
+}
+
+/* --- See All link --- */
+.see-all-link {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    cursor: pointer;
+}
+
+/* --- Friends header --- */
+.friends-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.friends-header .screen-title {
+    margin-bottom: 0;
+}
+
+.invite-pill {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--gold);
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+}
+
+/* --- Bottom sheets (modals) --- */
+.sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: flex-end;
+    z-index: 500;
+}
+
+.sheet {
+    width: 100%;
+    background: var(--panel-solid);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 18px max(28px, env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    max-width: 460px;
+    margin: 0 auto;
+}
+
+.sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.sheet-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+}
+
+.sheet-close {
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    background: none;
+    border: none;
+    line-height: 1;
+}
+
+.sheet-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.sheet-link-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.sheet-link-text {
+    flex: 1;
+    background: var(--bg-bottom);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: monospace;
+}
+
+.sheet-copy-btn {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 9px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+    background: none;
+    font-family: inherit;
+    min-width: 80px;
+    text-align: center;
+}
+
+.sheet-copy-btn.copied {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+}
+
+.sheet-share-btn {
+    text-align: center;
+    padding: 13px 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Share chips (WhatsApp / Telegram) */
+.share-chips-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.share-chip {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    color: #fff;
+    font-family: inherit;
+}
+
+.share-chip.whatsapp { background: #25D366; }
+.share-chip.telegram { background: #229ED9; }
+
+.sheet-done-btn {
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px 0;
+    border-radius: 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* --- Inline room form --- */
+.inline-room-form {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    margin-top: 12px;
+}
+
+.inline-room-form .room-form-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 12px;
+    border-radius: 8px;
+    background: var(--bg-bottom);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.inline-room-form .room-form-input::placeholder {
+    color: var(--text-faint);
+}
+
+.inline-room-form .room-form-stakes {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.inline-room-form .room-form-stake {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    border-radius: 10px;
+    background: var(--bg-bottom);
+    border: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.inline-room-form .room-form-stake.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #1c1608;
+}
+
+.inline-room-form .room-form-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.inline-room-form .room-form-actions button {
+    flex: 1;
+    padding: 13px 0;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+}
+
+.room-form-create-btn {
+    background: var(--gold);
+    color: #fff;
+}
+
+.room-form-cancel-btn {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border) !important;
+}
+
+/* --- Friends leaderboard rows (Friends screen) --- */
+.friend-leaderboard-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.friend-leaderboard-row:last-child {
+    border-bottom: none;
+}
+
+.friend-leaderboard-row.me {
+    background: var(--gold-dim);
+    border-radius: 10px;
+    border-bottom-color: transparent;
+}
+
+.friend-lb-rank {
+    width: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.friend-lb-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.friend-lb-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+}
+
+.friend-lb-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text);
+    min-width: 0;
+}
+
+.friend-lb-streak {
+    font-size: 12px;
+    color: var(--text-muted);
+    width: 38px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.friend-lb-net {
+    font-size: 13px;
+    font-weight: 700;
+    width: 58px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.friend-lb-net.positive { color: var(--green); }
+.friend-lb-net.negative { color: var(--red); }
+.friend-lb-net.zero     { color: var(--text-muted); }
+
+/* --- Friend "You" tag --- */
+.friend-you-tag {
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--gold);
+    padding: 2px 6px;
+    border-radius: 999px;
+}
+
+/* --- Sign-in prompt row --- */
+.social-signin-prompt {
+    padding: 14px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    margin-top: 6px;
 }
 
 
@@ -1377,6 +2361,9 @@ body.screen-shake {
                 <span>09:26:55</span>
             </div>
 
+            <!-- Phase 2: Stories row -->
+            <div class="stories-row" id="stories-row"></div>
+
             <div class="panel balance-panel">
                 <div class="balance-row">
                     <div>
@@ -1401,8 +2388,7 @@ body.screen-shake {
             <div class="hand-placeholder-text" id="hand-placeholder-text">Tap a card or Deal to start the hand</div>
 
             <div class="action-row">
-                <button id="deal-btn" class="btn-primary" onclick="deal()">Deal</button>
-                <button id="hold-btn" class="btn-secondary" onclick="draw()" disabled>Draw</button>
+                <button id="main-btn" class="btn-primary" onclick="mainAction()">Deal</button>
                 <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
             </div>
 
@@ -1413,21 +2399,27 @@ body.screen-shake {
                 <span class="streak-bonus-tag hidden" id="streak-bonus-tag"></span>
             </div>
 
-            <div class="panel friends-signin-prompt" id="friends-signin-prompt" onclick="openSignInModal()">
-                <span class="settings-row-label">Sign in to play with friends</span>
-                <span class="settings-chevron">›</span>
-            </div>
-
-            <div class="panel vs-friends-card hidden" id="vs-friends-card" onclick="showScreen('friends')">
-                <div class="vs-friends-rank" id="vs-friends-rank">#—</div>
-                <div>
-                    <div class="section-label">Vs Friends</div>
-                    <div class="vs-friends-detail" id="vs-friends-detail"></div>
+            <!-- Phase 2: Friends Leaderboard panel -->
+            <div class="panel nearby-panel" id="nearby-panel">
+                <div class="panel-head" onclick="showScreen('friends')">
+                    <span class="panel-title">Friends Leaderboard</span>
+                    <span class="panel-sub" id="nearby-panel-header">#— · —</span>
                 </div>
-                <span class="settings-chevron">›</span>
+                <div id="nearby-body"></div>
+                <div class="social-signin-prompt hidden" id="nearby-signin-prompt" onclick="openSignInModal()">Sign in to see your friends</div>
             </div>
 
-            <div class="panel play-rooms-panel">
+            <!-- Phase 2: Hourly Champions panel -->
+            <div class="panel nearby-panel">
+                <div class="panel-head">
+                    <span class="panel-title">⏱ Hourly Champions</span>
+                    <span class="champ-countdown" id="champ-countdown">Resets in —m</span>
+                </div>
+                <div id="champions-body"></div>
+                <div class="social-signin-prompt hidden" id="champions-signin-prompt" onclick="openSignInModal()">Sign in to compete for the hourly crown</div>
+            </div>
+
+            <div class="panel pwf-panel">
                 <div class="play-rooms-header">
                     <span class="section-label">Play With Friends</span>
                     <span class="see-all-link" onclick="showScreen('friends')">See All ›</span>
@@ -1438,22 +2430,6 @@ body.screen-shake {
 
             <div class="result-panel" id="result">Place your bet and deal to play</div>
             <div class="explanation" id="explanation"></div>
-
-            <div class="panel payout-panel" id="payout-panel">
-                <button class="payout-header" onclick="document.getElementById('payout-panel').classList.toggle('collapsed')">
-                    <span class="payout-header-label">Payout Table</span>
-                    <span class="payout-caret">▲</span>
-                </button>
-                <div class="payouts" id="payouts"></div>
-                <button class="payout-help-toggle" onclick="const h=this.nextElementSibling;h.classList.toggle('visible');this.classList.toggle('open')">
-                    <span>ℹ️</span> How to read
-                </button>
-                <div class="payout-help">
-                    <p>Numbers show credits won <strong>per credit bet</strong>.</p>
-                    <p>Multiply the value by your bet for the actual payout.</p>
-                    <p class="payout-help-example">Example: Bet <strong>10</strong>, hit Flush (<strong>5×</strong>) → <strong>50</strong> credits won</p>
-                </div>
-            </div>
         </section>
 
         <section id="screen-stats" class="screen">
@@ -1487,7 +2463,10 @@ body.screen-shake {
         </section>
 
         <section id="screen-friends" class="screen">
-            <h1 class="screen-title">Friends</h1>
+            <div class="friends-header">
+                <h1 class="screen-title">Friends</h1>
+                <button class="invite-pill" onclick="openInviteSheet()">+ Invite</button>
+            </div>
 
             <div class="panel friends-signin-prompt" id="friends-signed-out" onclick="openSignInModal()">
                 <span class="settings-row-label">Sign in to add friends</span>
@@ -1531,7 +2510,20 @@ body.screen-shake {
                 <div id="friends-rooms-view" class="hidden">
                     <div class="rooms-empty hidden" id="friends-rooms-empty">No rooms yet — create one below.</div>
                     <div id="friends-rooms-list"></div>
-                    <button class="create-room-link" onclick="openRoomModal()">+ Create Room with Friends</button>
+                    <button class="create-room-link create-room-dashed" id="friends-create-room-btn" onclick="toggleInlineRoomForm()">+ Create a Poker Room with Friends</button>
+                    <div class="inline-room-form hidden" id="inline-room-form">
+                        <input class="room-form-input" id="inline-room-name" maxlength="24" placeholder="Room name…">
+                        <div class="room-form-stakes" id="inline-room-stakes">
+                            <button class="room-form-stake selected" onclick="selectInlineStake(5)">5</button>
+                            <button class="room-form-stake" onclick="selectInlineStake(10)">10</button>
+                            <button class="room-form-stake" onclick="selectInlineStake(20)">20</button>
+                            <button class="room-form-stake" onclick="selectInlineStake(50)">50</button>
+                        </div>
+                        <div class="room-form-actions">
+                            <button class="room-form-create-btn" onclick="createRoomInline()">Create &amp; Invite</button>
+                            <button class="room-form-cancel-btn" onclick="toggleInlineRoomForm()">Cancel</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1549,6 +2541,13 @@ body.screen-shake {
                     <span class="settings-row-label">Haptic Feedback</span>
                     <input type="checkbox" class="toggle-switch" id="settings-haptics-toggle">
                 </div>
+            </div>
+
+            <div class="section-label">Theme</div>
+            <div class="theme-picker">
+                <button class="theme-btn selected" id="theme-green" onclick="setTheme('green')">🟢 Green</button>
+                <button class="theme-btn" id="theme-blue" onclick="setTheme('blue')">🔵 Blue</button>
+                <button class="theme-btn" id="theme-crimson" onclick="setTheme('crimson')">🔴 Crimson</button>
             </div>
 
             <div class="section-label">Default Bet</div>
@@ -1608,7 +2607,7 @@ body.screen-shake {
                 <span>Play</span>
             </button>
             <button class="nav-btn" id="nav-stats" onclick="showScreen('stats')">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon">▤</span>
                 <span>Stats</span>
             </button>
             <button class="nav-btn" id="nav-friends" onclick="showScreen('friends')">
@@ -1616,7 +2615,7 @@ body.screen-shake {
                 <span>Friends</span>
             </button>
             <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
-                <span class="nav-icon">⚙️</span>
+                <span class="nav-icon">⚙</span>
                 <span>Settings</span>
             </button>
         </div>
@@ -1666,8 +2665,43 @@ body.screen-shake {
         </div>
     </div>
 
-    <script>
+    <!-- Phase 2: Invite Friends bottom sheet -->
+    <div class="sheet-backdrop hidden" id="invite-sheet" onclick="if(event.target===this)closeSheet('invite-sheet')">
+        <div class="sheet">
+            <div class="sheet-header">
+                <span class="sheet-title">Invite Friends</span>
+                <button class="sheet-close" onclick="closeSheet('invite-sheet')">✕</button>
+            </div>
+            <div class="sheet-link-row">
+                <span class="sheet-link-text" id="invite-sheet-link">—</span>
+                <button class="sheet-copy-btn" id="invite-sheet-copy" onclick="copyInviteSheetLink()">Copy</button>
+            </div>
+            <button class="sheet-share-btn" onclick="shareInviteLink()">Share Invite Link</button>
+        </div>
+    </div>
 
+    <!-- Phase 2: Room Created bottom sheet -->
+    <div class="sheet-backdrop hidden" id="room-created-sheet" onclick="if(event.target===this)closeSheet('room-created-sheet')">
+        <div class="sheet">
+            <div class="sheet-header">
+                <span class="sheet-title">Room Created 🎉</span>
+                <button class="sheet-close" onclick="closeSheet('room-created-sheet')">✕</button>
+            </div>
+            <div class="sheet-sub">Invite friends to "<span id="room-created-name">—</span>"</div>
+            <div class="sheet-link-row">
+                <span class="sheet-link-text" id="room-created-link">—</span>
+                <button class="sheet-copy-btn" id="room-created-copy" onclick="copyRoomLink()">Copy</button>
+            </div>
+            <div class="share-chips-row">
+                <button class="share-chip whatsapp" onclick="shareRoomViaWhatsApp()">WhatsApp</button>
+                <button class="share-chip telegram" onclick="shareRoomViaTelegram()">Telegram</button>
+            </div>
+            <button class="sheet-done-btn" onclick="closeSheet('room-created-sheet')">Done</button>
+        </div>
+    </div>
+
+    <script>
+ 
 /* --- js/audio.js --- */
 var audioCtx = null;
     var audioBuffers = {};
@@ -2112,12 +3146,30 @@ const firebaseConfig = {
     messagingSenderId: "53702406091",
     appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+let auth = null;
+let db = null;
 try {
-    db.enablePersistence({ synchronizeTabs: true }).catch(function() { /* multi-tab or unsupported */ });
-} catch (e) { /* older browser — online-only */ }
+    if (typeof firebase === 'undefined') throw new Error('Firebase SDK failed to load (offline or blocked CDN)');
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    try {
+        db.enablePersistence({ synchronizeTabs: true }).catch(function() { /* multi-tab or unsupported */ });
+    } catch (e) { /* older browser — online-only */ }
+} catch (e) {
+    // Core game must never depend on Firebase — run fully offline/local-only.
+    console.warn('Firebase unavailable, continuing in offline mode:', e);
+}
+
+const SHARE_BASE_URL = 'https://micorlov.github.io/video-poker-game/video_poker.html';
+
+function getShareBaseUrl() {
+    const origin = window.location.origin || '';
+    if (origin === 'https://localhost' || origin.startsWith('capacitor://')) {
+        return SHARE_BASE_URL;
+    }
+    return origin + window.location.pathname;
+}
 
 const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars
 
@@ -2183,19 +3235,50 @@ function signInWithGoogle() {
     });
 }
 
+function signInWithFacebook() {
+    const el = document.getElementById('signin-error');
+    if (el) el.classList.add('hidden');
+
+    if (isNativeApp()) {
+        window.Capacitor.Plugins.FirebaseAuthentication.signInWithFacebook().then(function(result) {
+            const accessToken = result && result.credential && result.credential.accessToken;
+            if (!accessToken) throw new Error('No access token returned from Facebook sign-in.');
+            const credential = firebase.auth.FacebookAuthProvider.credential(accessToken);
+            return auth.signInWithCredential(credential);
+        }).catch(function(err) {
+            if (el) { el.textContent = err.message || String(err); el.classList.remove('hidden'); }
+        });
+        return;
+    }
+
+    const provider = new firebase.auth.FacebookAuthProvider();
+    auth.signInWithPopup(provider).catch(function(popupErr) {
+        if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
+            auth.signInWithRedirect(provider).catch(function(redirectErr) {
+                if (el) { el.textContent = redirectErr.message; el.classList.remove('hidden'); }
+            });
+        } else if (el) {
+            el.textContent = popupErr.message;
+            el.classList.remove('hidden');
+        }
+    });
+}
+
 function signOutUser() {
     if (isNativeApp()) {
         firebaseSafe(function() { return window.Capacitor.Plugins.FirebaseAuthentication.signOut(); });
     }
-    auth.signOut();
+    if (auth) auth.signOut();
 }
 
-auth.getRedirectResult().catch(function(err) {
-    if (err && err.code !== 'auth/no-current-user') {
-        const el = document.getElementById('signin-error');
-        if (el) { el.textContent = err.message; el.classList.remove('hidden'); }
-    }
-});
+if (auth) {
+    auth.getRedirectResult().catch(function(err) {
+        if (err && err.code !== 'auth/no-current-user') {
+            const el = document.getElementById('signin-error');
+            if (el) { el.textContent = err.message; el.classList.remove('hidden'); }
+        }
+    });
+}
 
 function logUserToFirestore(user) {
     return db.collection('users').doc(user.uid).set({
@@ -2219,26 +3302,143 @@ function logUserToFirestore(user) {
     });
 }
 
-auth.onAuthStateChanged(function(user) {
-    window.egUser = user || null;
-    if (window.closeSignInModal) closeSignInModal();
-    if (window.updateAccountUI) updateAccountUI();
-    if (user) {
-        firebaseSafe(function() { return logUserToFirestore(user); });
-        firebaseSafe(function() { return pushNetProfit(); });
-        if (window.loadFriends) loadFriends();
-        if (window.loadMyRooms) loadMyRooms();
-        // Handle pending invite from deep link
-        if (window._pendingInviteCode && window.addFriendByInviteCode) {
-            var code = window._pendingInviteCode;
-            window._pendingInviteCode = null;
-            addFriendByInviteCode(code);
+if (auth) {
+    auth.onAuthStateChanged(function(user) {
+        window.egUser = user || null;
+        if (window.closeSignInModal) closeSignInModal();
+        if (window.updateAccountUI) updateAccountUI();
+        if (user) {
+            firebaseSafe(function() { return logUserToFirestore(user); });
+            firebaseSafe(function() { return pushNetProfit(); });
+            if (window.loadFriends) loadFriends();
+            if (window.loadMyRooms) loadMyRooms();
+            // Phase 2: start presence heartbeat
+            if (window.startPresence) startPresence();
+            // Phase 2: subscribe champions
+            if (window.subscribeChampions) subscribeChampions();
+            // Handle pending invite from deep link
+            if (window._pendingInviteCode && window.addFriendByInviteCode) {
+                var code = window._pendingInviteCode;
+                window._pendingInviteCode = null;
+                addFriendByInviteCode(code);
+            }
+            // Phase 2: handle pending room join from deep link
+            if (window._pendingJoinCode && window.joinRoomByDeepLink) {
+                var joinCode = window._pendingJoinCode;
+                window._pendingJoinCode = null;
+                joinRoomByDeepLink(joinCode);
+            }
+        } else {
+            if (window.cleanupFriendsListeners) cleanupFriendsListeners();
+            if (window.stopPresence) stopPresence();
+            if (window.cleanupChampions) cleanupChampions();
+            if (window.renderFriendsScreen) renderFriendsScreen();
+            if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
         }
-    } else {
-        if (window.cleanupFriendsListeners) cleanupFriendsListeners();
-        if (window.renderFriendsScreen) renderFriendsScreen();
-        if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
+    });
+}
+
+
+/* --- js/presence.js --- */
+// Presence — heartbeat + country detection.
+// Every 60s while signed in, write lastSeen timestamp to Firestore.
+// Country resolved from IP via ipapi.co; falls back to navigator.language.
+
+let presenceInterval = null;
+let userCountry = '';
+let countryResolved = false;
+
+function _countryFromLanguage() {
+    try {
+        const lang = navigator.language || 'en-US';
+        const parts = lang.split('-');
+        return (parts.length > 1 ? parts[1] : lang).toUpperCase();
+    } catch (e) {
+        return 'US';
     }
+}
+
+function getCountry() {
+    return userCountry || _countryFromLanguage();
+}
+
+function resolveCountryFromIP() {
+    if (countryResolved) return Promise.resolve(userCountry);
+    return fetch('https://ipapi.co/country_code/', { cache: 'force-cache' })
+        .then(function(r) { return r.ok ? r.text() : null; })
+        .then(function(code) {
+            if (code) {
+                code = code.trim().toUpperCase();
+                if (/^[A-Z]{2}$/.test(code)) userCountry = code;
+            }
+        })
+        .catch(function() { /* fall through to language fallback */ })
+        .finally(function() {
+            if (!userCountry) userCountry = _countryFromLanguage();
+            countryResolved = true;
+        });
+}
+
+// Kick off IP lookup immediately so it's ready before first game hand.
+resolveCountryFromIP();
+
+function startPresence() {
+    const user = window.egUser;
+    if (!user) return;
+
+    resolveCountryFromIP().then(function() {
+        firebaseSafe(function() {
+            return db.collection('users').doc(user.uid).set({
+                country: getCountry(),
+                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        });
+    });
+
+    // Heartbeat every 60s
+    if (presenceInterval) clearInterval(presenceInterval);
+    presenceInterval = setInterval(function() {
+        const user = window.egUser;
+        if (!user) { stopPresence(); return; }
+        firebaseSafe(function() {
+            return db.collection('users').doc(user.uid).set({
+                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        });
+    }, 60000);
+}
+
+function stopPresence() {
+    if (presenceInterval) {
+        clearInterval(presenceInterval);
+        presenceInterval = null;
+    }
+}
+
+function isOnline(lastSeen) {
+    if (!lastSeen) return false;
+    if (lastSeen.toDate) lastSeen = lastSeen.toDate();
+    if (typeof lastSeen === 'number' || lastSeen instanceof Date) {
+        const ms = typeof lastSeen === 'number' ? lastSeen : lastSeen.getTime();
+        return (Date.now() - ms) < 120000; // 2 minutes
+    }
+    return false;
+}
+
+// Resume presence on app foreground (Capacitor)
+document.addEventListener('resume', function() {
+    const user = window.egUser;
+    if (!user) return;
+    firebaseSafe(function() {
+        return db.collection('users').doc(user.uid).set({
+            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+    });
+});
+
+// Pause presence on app background
+document.addEventListener('pause', function() {
+    // let the last heartbeat age out naturally
 });
 
 
@@ -2354,24 +3554,36 @@ function renderFriendsScreen() {
     if (typeof friendsTab !== 'undefined' && friendsTab === 'rooms') renderFriendsRoomsList();
 
     listEl.innerHTML = '';
-    const ranked = friendsList.concat([{ displayName: 'You', netProfit: ownNetProfit(), bestStreak: bestStreak, self: true }])
+    const ranked = friendsList.concat([{ displayName: 'You', netProfit: ownNetProfit(), bestStreak: bestStreak, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
         .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
     if (emptyEl) emptyEl.classList.toggle('hidden', friendsList.length > 0);
     ranked.forEach(function(f, i) {
         const row = document.createElement('div');
-        row.className = 'friend-row' + (f.self ? ' me' : '');
+        row.className = 'friend-leaderboard-row' + (f.self ? ' me' : '');
 
         const rankEl = document.createElement('span');
-        rankEl.className = 'friend-rank';
+        rankEl.className = 'friend-lb-rank';
         rankEl.textContent = String(i + 1);
 
+        const avatarWrap = document.createElement('span');
+        avatarWrap.className = 'friend-lb-avatar-wrap';
         const avatarEl = document.createElement('span');
-        avatarEl.className = 'friend-avatar';
+        avatarEl.className = 'friend-lb-avatar';
         avatarEl.textContent = (f.displayName || 'P').charAt(0).toUpperCase();
+        const dot = document.createElement('span');
+        dot.className = 'online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline');
+        avatarWrap.appendChild(avatarEl);
+        avatarWrap.appendChild(dot);
 
         const nameEl = document.createElement('span');
-        nameEl.className = 'friend-name';
+        nameEl.className = 'friend-lb-name';
         nameEl.textContent = f.displayName || 'Player';
+        if (f.country) {
+            const chip = document.createElement('span');
+            chip.className = 'country-chip';
+            chip.textContent = f.country;
+            nameEl.appendChild(chip);
+        }
         if (f.self) {
             const youTag = document.createElement('span');
             youTag.className = 'friend-you-tag';
@@ -2380,17 +3592,17 @@ function renderFriendsScreen() {
         }
 
         const streakEl = document.createElement('span');
-        streakEl.className = 'friend-streak';
+        streakEl.className = 'friend-lb-streak';
         streakEl.textContent = '🔥' + (f.bestStreak || 0);
 
         const scoreEl = document.createElement('span');
-        scoreEl.className = 'friend-score';
+        scoreEl.className = 'friend-lb-net';
         const np = f.netProfit || 0;
         scoreEl.textContent = (np >= 0 ? '+' : '') + np;
         scoreEl.classList.add(np > 0 ? 'positive' : np < 0 ? 'negative' : 'zero');
 
         row.appendChild(rankEl);
-        row.appendChild(avatarEl);
+        row.appendChild(avatarWrap);
         row.appendChild(nameEl);
         row.appendChild(streakEl);
         row.appendChild(scoreEl);
@@ -2398,38 +3610,7 @@ function renderFriendsScreen() {
     });
 }
 
-function renderFriendsRoomsList() {
-    const listEl = document.getElementById('friends-rooms-list');
-    const emptyEl = document.getElementById('friends-rooms-empty');
-    if (!listEl) return;
-    listEl.innerHTML = '';
-    if (emptyEl) emptyEl.classList.toggle('hidden', myRooms.length > 0);
-    myRooms.forEach(function(room) {
-        const card = document.createElement('div');
-        card.className = 'room-card';
-
-        const head = document.createElement('div');
-        head.className = 'room-card-head';
-        const nameEl = document.createElement('span');
-        nameEl.className = 'room-row-name';
-        nameEl.textContent = room.name || 'Room';
-        head.appendChild(nameEl);
-
-        const meta = document.createElement('div');
-        meta.className = 'room-row-sub';
-        meta.textContent = (room.memberUids || []).length + ' friends · Stake ' + room.stake;
-
-        const btn = document.createElement('button');
-        btn.className = 'btn-primary room-row-btn';
-        btn.textContent = 'Enter Table';
-        btn.onclick = function() { openRoomDetail(room.id); };
-
-        card.appendChild(head);
-        card.appendChild(meta);
-        card.appendChild(btn);
-        listEl.appendChild(card);
-    });
-}
+// renderFriendsRoomsList moved to js/rooms.js (Phase 2)
 
 function getInviteLink() {
     const user = window.egUser;
@@ -2437,7 +3618,7 @@ function getInviteLink() {
     const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
     if (!code) return '';
     // Use the Firebase hosting URL as the canonical base
-    const base = window.location.origin + window.location.pathname;
+    const base = getShareBaseUrl();
     return base + '?ref=' + encodeURIComponent(code);
 }
 
@@ -2543,48 +3724,98 @@ function addFriendByInviteCode(code) {
 }
 
 function renderPlayFriendsWidgets() {
-    const card = document.getElementById('vs-friends-card');
-    const signInPrompt = document.getElementById('friends-signin-prompt');
-    if (!card) return;
     const user = window.egUser;
 
+    // Render stories row (always)
+    if (window.renderStoriesRow) renderStoriesRow();
+
+    // Render nearby leaderboard panel
+    renderNearbyPanel(user);
+
+    // Champions panel is handled by champions.js subscription
+
+    if (window.renderRoomsList) renderRoomsList();
+}
+
+function renderNearbyPanel(user) {
+    const bodyEl = document.getElementById('nearby-body');
+    const headerEl = document.getElementById('nearby-panel-header');
+    const promptEl = document.getElementById('nearby-signin-prompt');
+    if (!bodyEl) return;
+
     if (!user) {
-        card.classList.add('hidden');
-        if (signInPrompt) signInPrompt.classList.remove('hidden');
+        if (promptEl) promptEl.classList.remove('hidden');
+        bodyEl.innerHTML = '';
+        if (headerEl) headerEl.textContent = '#— · —';
         return;
     }
-    if (signInPrompt) signInPrompt.classList.add('hidden');
+    if (promptEl) promptEl.classList.add('hidden');
 
     if (!friendsList.length) {
-        card.classList.add('hidden');
+        bodyEl.innerHTML = '';
+        if (headerEl) headerEl.textContent = '#— · —';
         return;
     }
-    card.classList.remove('hidden');
 
     const own = ownNetProfit();
-    const ranked = friendsList.concat([{ displayName: 'You', netProfit: own, self: true }])
+    const ranked = friendsList.concat([{ displayName: 'You', netProfit: own, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
         .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
     const ownRank = ranked.findIndex(function(p) { return p.self; }) + 1;
     const leader = ranked[0];
 
-    document.getElementById('vs-friends-rank').textContent = '#' + ownRank;
-    const detailEl = document.getElementById('vs-friends-detail');
+    // Header: "#myRank · leader leads by X"
     if (leader.self) {
-        detailEl.textContent = 'You\'re leading the pack!';
+        headerEl.textContent = '#' + ownRank + ' · You\'re #1!';
     } else {
         const gap = (leader.netProfit || 0) - own;
-        detailEl.textContent = (leader.displayName || 'A friend') + ' leads by ' + gap;
+        headerEl.textContent = '#' + ownRank + ' · ' + (leader.displayName || 'Leader') + ' leads by ' + gap;
     }
+
+    // Body: show user's own row + friends ranked immediately above (up to 5 rows including self)
+    bodyEl.innerHTML = '';
+    const ownIdx = ranked.findIndex(function(p) { return p.self; });
+    // Show up to 4 rows above plus self (max 5 total)
+    const startIdx = Math.max(0, ownIdx - 4);
+    const visible = ranked.slice(startIdx, ownIdx + 1);
+
+    visible.forEach(function(f, vi) {
+        const globalRank = startIdx + vi + 1;
+        const row = document.createElement('div');
+        row.className = 'nearby-row' + (f.self ? ' me' : '');
+
+        row.innerHTML =
+            '<span class="nearby-rank">' + globalRank + '</span>' +
+            '<span class="nearby-avatar-wrap">' +
+                '<span class="nearby-avatar">' + (f.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
+                '<span class="online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline') + '"></span>' +
+            '</span>' +
+            '<span class="nearby-name">' + (f.displayName || 'Player') +
+                (f.country ? '<span class="country-chip">' + f.country + '</span>' : '') +
+            '</span>' +
+            '<span class="nearby-net ' + ((f.netProfit || 0) > 0 ? 'positive' : (f.netProfit || 0) < 0 ? 'negative' : 'zero') + '">' +
+                ((f.netProfit || 0) >= 0 ? '+' : '') + (f.netProfit || 0) +
+            '</span>';
+
+        bodyEl.appendChild(row);
+    });
 }
 
 
 /* --- js/rooms.js --- */
 // Simple private poker rooms — a room is just a shared, code-joinable
 // net-profit leaderboard. No chat, no reactions, no reset cadence.
+// Phase 2: adds capacity, status derivation, inline creation, share sheet.
 
 let myRooms = [];
 let activeRoomId = null;
 let roomDetailUnsubscribe = null;
+let inlineStake = 10;
+
+function getRoomStatus(room) {
+    // A room is "playing" if it has more than 1 member; otherwise "open"
+    const count = (room.memberUids || []).length;
+    return count > 1 ? 'playing' : 'open';
+}
 
 function pushNetProfit() {
     const user = window.egUser;
@@ -2627,28 +3858,51 @@ function renderRoomsList() {
     const listEl = document.getElementById('play-rooms-list');
     if (!listEl) return;
     listEl.innerHTML = '';
-    myRooms.slice(0, 3).forEach(function(room) {
+    const previews = myRooms.slice(0, 2); // Play screen: max 2 preview
+    previews.forEach(function(room) {
         const row = document.createElement('div');
-        row.className = 'room-row';
+        row.className = 'mini-room';
+        const status = getRoomStatus(room);
+        const memberCount = (room.memberUids || []).length;
+        const capacity = room.capacity || 6;
 
-        const info = document.createElement('div');
-        const nameEl = document.createElement('div');
-        nameEl.className = 'room-row-name';
-        nameEl.textContent = room.name || 'Room';
-        const subEl = document.createElement('div');
-        subEl.className = 'room-row-sub';
-        subEl.textContent = (room.memberUids || []).length + ' friends · Stake ' + room.stake;
-        info.appendChild(nameEl);
-        info.appendChild(subEl);
+        row.innerHTML =
+            '<div>' +
+                '<div class="mr-name">' + (room.name || 'Room') + '</div>' +
+                '<div class="mr-meta">' + memberCount + '/' + capacity + ' friends · Stake ' + (room.stake || 10) + '</div>' +
+            '</div>' +
+            '<span class="mr-status ' + status + '">' + (status === 'open' ? 'Open' : 'In Progress') + '</span>' +
+            '<button class="mr-join" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? 'Join Table' : 'Enter Table') + '</button>';
 
-        const btn = document.createElement('button');
-        btn.className = 'btn-primary room-row-btn';
-        btn.textContent = 'Enter Table';
-        btn.onclick = function() { openRoomDetail(room.id); };
-
-        row.appendChild(info);
-        row.appendChild(btn);
         listEl.appendChild(row);
+    });
+    // Also render the friends-tab rooms list
+    renderFriendsRoomsList();
+}
+
+function renderFriendsRoomsList() {
+    const listEl = document.getElementById('friends-rooms-list');
+    const emptyEl = document.getElementById('friends-rooms-empty');
+    const btn = document.getElementById('friends-create-room-btn');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    if (emptyEl) emptyEl.classList.toggle('hidden', myRooms.length > 0);
+    myRooms.forEach(function(room) {
+        const card = document.createElement('div');
+        card.className = 'room-card';
+        const status = getRoomStatus(room);
+        const memberCount = (room.memberUids || []).length;
+        const capacity = room.capacity || 6;
+
+        card.innerHTML =
+            '<div class="room-head">' +
+                '<span class="roomname">' + (room.name || 'Room') + '</span>' +
+                '<span class="roomstatus ' + status + '">' + (status === 'open' ? 'Open' : 'In Progress') + '</span>' +
+            '</div>' +
+            '<div class="roommeta">' + memberCount + '/' + capacity + ' friends · Stake ' + (room.stake || 10) + '</div>' +
+            '<div class="roomjoin" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? 'Join Table' : 'Enter Table') + '</div>';
+
+        listEl.appendChild(card);
     });
 }
 
@@ -2661,27 +3915,72 @@ function createRoom() {
     const stake = parseInt(stakeInput.value, 10) || 10;
     if (!name) { showToast('Give your room a name.'); return; }
 
+    _doCreateRoom(name, stake, function(code) {
+        nameInput.value = '';
+        closeRoomModal();
+        showToast('Room created — code: ' + code);
+        loadMyRooms();
+    });
+}
+
+function _doCreateRoom(name, stake, callback) {
+    const user = window.egUser;
+    if (!user) return;
     firebaseSafe(function() {
         const code = generateRoomCode();
         return db.collection('rooms').add({
             name: name,
             stake: stake,
             code: code,
+            capacity: 6,
             ownerUid: user.uid,
             memberUids: [user.uid],
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         }).then(function(ref) {
             return db.collection('rooms').doc(ref.id).collection('members').doc(user.uid).set({
                 displayName: user.displayName || '',
-                netProfit: balance - 500
+                netProfit: balance - 500,
+                bestStreak: bestStreak
             }).then(function() {
-                nameInput.value = '';
-                closeRoomModal();
-                showToast('Room created — code: ' + code);
-                loadMyRooms();
+                if (callback) callback(code);
+                // Open share sheet
+                if (window.openRoomCreatedSheet) openRoomCreatedSheet(name, code);
             });
         });
     }, function() { showToast('Could not create room — try again.'); });
+}
+
+// --- Inline room creation (Friends tab) ---
+function toggleInlineRoomForm() {
+    const form = document.getElementById('inline-room-form');
+    if (!form) return;
+    form.classList.toggle('hidden');
+    if (!form.classList.contains('hidden')) {
+        document.getElementById('inline-room-name').focus();
+    }
+}
+
+function selectInlineStake(v) {
+    inlineStake = v;
+    const btns = document.querySelectorAll('#inline-room-stakes .room-form-stake');
+    btns.forEach(function(b) {
+        b.classList.toggle('selected', parseInt(b.textContent) === v);
+    });
+}
+
+function createRoomInline() {
+    const user = window.egUser;
+    if (!user) { openSignInModal(); return; }
+    const nameInput = document.getElementById('inline-room-name');
+    const name = (nameInput.value || '').trim();
+    if (!name) { showToast('Give your room a name.'); return; }
+
+    _doCreateRoom(name, inlineStake, function(code) {
+        nameInput.value = '';
+        toggleInlineRoomForm();
+        showToast('Room created — code: ' + code);
+        loadMyRooms();
+    });
 }
 
 function joinRoomByCode() {
@@ -2767,6 +4066,552 @@ function openRoomModal() {
 function closeRoomModal() {
     document.getElementById('room-modal').classList.add('hidden');
 }
+
+
+/* --- js/stories.js --- */
+// Stories — personal-best tracking + story viewer overlay.
+// Works offline (localStorage) with optional Firestore push when signed in.
+// One story per person: the best hand they've ever won.
+
+// --- Personal best (localStorage) ---
+function getBestHand() {
+    try {
+        const raw = localStorage.getItem('vp_best_hand');
+        if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+}
+
+function setBestHand(handData) {
+    try { localStorage.setItem('vp_best_hand', JSON.stringify(handData)); } catch (e) {}
+    pushBestHandToFirestore(handData);
+}
+
+function pushBestHandToFirestore(handData) {
+    const user = window.egUser;
+    if (!user) return;
+    firebaseSafe(function() {
+        return db.collection('users').doc(user.uid).set({
+            bestHand: {
+                handName: handData.handName,
+                mult: handData.mult,
+                payout: handData.payout,
+                cards: handData.cards,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }
+        }, { merge: true });
+    });
+}
+
+// Called by game.js after every winning draw
+function checkAndUpdateBestHand(handType, win, hand) {
+    if (win <= 0) return;
+    const current = getBestHand();
+    if (current && current.payout >= win) return;
+
+    const cards = hand.map(function(c) {
+        return { rank: c.rank, suit: c.suit };
+    });
+
+    const mult = Math.round(win / bet);
+    setBestHand({
+        handName: handType,
+        mult: mult,
+        payout: win,
+        cards: cards,
+        updatedAt: Date.now()
+    });
+}
+
+// --- Stories list assembly ---
+function buildStoriesList() {
+    const stories = [];
+    const user = window.egUser;
+
+    // Always include my own best hand (even if offline)
+    const myBest = getBestHand();
+    stories.push({
+        id: 'me',
+        name: 'You',
+        initial: user ? (user.displayName || 'Y').charAt(0).toUpperCase() : 'Y',
+        bestHand: myBest,
+        isMe: true
+    });
+
+    // Add friends' best hands (only if signed in and we have friend data)
+    if (user && typeof friendsList !== 'undefined' && friendsList.length) {
+        friendsList.forEach(function(f) {
+            if (f.bestHand && f.bestHand.handName) {
+                stories.push({
+                    id: f.uid,
+                    name: f.displayName || 'Player',
+                    initial: (f.displayName || 'P').charAt(0).toUpperCase(),
+                    bestHand: f.bestHand,
+                    isMe: false
+                });
+            }
+        });
+    }
+
+    return stories;
+}
+
+function renderStoriesRow() {
+    const row = document.getElementById('stories-row');
+    if (!row) return;
+    row.innerHTML = '';
+
+    const stories = buildStoriesList();
+
+    stories.forEach(function(s, i) {
+        const item = document.createElement('div');
+        item.className = 'story-item';
+        item.onclick = function() { openStoryViewer(i); };
+
+        const ring = document.createElement('div');
+        ring.className = 'story-ring' + (s.bestHand ? '' : ' empty');
+
+        const avatar = document.createElement('div');
+        avatar.className = 'story-avatar';
+        avatar.textContent = s.initial;
+
+        ring.appendChild(avatar);
+
+        const name = document.createElement('div');
+        name.className = 'story-name' + (s.isMe ? ' you' : '');
+        name.textContent = s.isMe ? 'You' : s.name;
+
+        item.appendChild(ring);
+        item.appendChild(name);
+        row.appendChild(item);
+    });
+}
+
+// --- Story Viewer ---
+let storyViewerData = [];
+let storyViewerIndex = 0;
+let storyProgressTimer = null;
+let storyProgressMs = 0;
+const STORY_DURATION_MS = 5000;
+
+function openStoryViewer(index) {
+    storyViewerData = buildStoriesList();
+    storyViewerIndex = Math.max(0, Math.min(index, storyViewerData.length - 1));
+    renderStoryViewer();
+}
+
+function closeStoryViewer() {
+    if (storyProgressTimer) {
+        clearInterval(storyProgressTimer);
+        storyProgressTimer = null;
+    }
+    const el = document.getElementById('story-viewer');
+    if (el) el.remove();
+}
+
+function navigateStory(direction) {
+    storyViewerIndex += direction;
+    if (storyViewerIndex < 0) {
+        closeStoryViewer();
+        return;
+    }
+    if (storyViewerIndex >= storyViewerData.length) {
+        closeStoryViewer();
+        return;
+    }
+    renderStoryViewer();
+}
+
+function renderStoryViewer() {
+    // Remove any existing viewer
+    const existing = document.getElementById('story-viewer');
+    if (existing) existing.remove();
+
+    const story = storyViewerData[storyViewerIndex];
+    if (!story) return;
+
+    // Outer overlay (dismiss on backdrop tap) — matches design .modaloverlay
+    const overlay = document.createElement('div');
+    overlay.id = 'story-viewer';
+    overlay.className = 'story-viewer-overlay';
+    overlay.onclick = function(e) { if (e.target === overlay) closeStoryViewer(); };
+
+    // Card — matches design .storycard
+    const card = document.createElement('div');
+    card.className = 'story-viewer-card';
+
+    // Progress bars — matches design .storyprogress > .storybar > .storybarfill
+    let progressHtml = '<div class="story-progress-row">';
+    storyViewerData.forEach(function(s, i) {
+        let fillClass = 'story-bar-fill';
+        if (i < storyViewerIndex) fillClass += ' done';
+        if (i === storyViewerIndex) fillClass += ' active';
+        progressHtml += '<div class="story-bar"><div class="' + fillClass + '" style="width:' + (i < storyViewerIndex ? '100%' : '0%') + '"></div></div>';
+    });
+    progressHtml += '</div>';
+
+    // Header
+    let headerHtml = '<div class="story-viewer-header">';
+    headerHtml += '<div class="story-viewer-avatar">' + story.initial + '</div>';
+    headerHtml += '<div class="story-viewer-name">' + story.name + '</div>';
+    headerHtml += '<button class="story-viewer-close" onclick="closeStoryViewer()">✕</button>';
+    headerHtml += '</div>';
+
+    // Body
+    let bodyHtml = '<div class="story-viewer-body">';
+    if (story.bestHand) {
+        bodyHtml += '<div class="story-hand-name">' + story.bestHand.handName + '</div>';
+        bodyHtml += '<div class="story-cards">';
+        story.bestHand.cards.forEach(function(c) {
+            var red = c.suit === '♥' || c.suit === '♦';
+            bodyHtml += '<div class="story-card' + (red ? ' red' : '') + '">';
+            bodyHtml += '<div class="story-card-rank">' + c.rank + '</div>';
+            bodyHtml += '<div class="story-card-suit">' + c.suit + '</div>';
+            bodyHtml += '</div>';
+        });
+        bodyHtml += '</div>';
+        bodyHtml += '<div class="story-payout">+' + story.bestHand.payout + ' credits · ' + story.bestHand.mult + '×</div>';
+    } else {
+        bodyHtml += '<div class="story-hand-name" style="color:var(--text-muted)">No winning hands yet</div>';
+        bodyHtml += '<div style="color:var(--text-faint);font-size:13px">Win a hand to create your story</div>';
+    }
+    bodyHtml += '</div>';
+
+    // Tap zones (design: .storytapzone.left / .storytapzone.right)
+    bodyHtml += '<div class="story-tap-left" onclick="event.stopPropagation();navigateStory(-1)"></div>';
+    bodyHtml += '<div class="story-tap-right" onclick="event.stopPropagation();navigateStory(1)"></div>';
+
+    card.innerHTML = progressHtml + headerHtml + bodyHtml;
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    // Start progress timer
+    storyProgressMs = 0;
+    if (storyProgressTimer) clearInterval(storyProgressTimer);
+
+    var fillEl = card.querySelector('.story-bar-fill.active');
+    storyProgressTimer = setInterval(function() {
+        storyProgressMs += 100;
+        var pct = Math.min(100, (storyProgressMs / STORY_DURATION_MS) * 100);
+        if (fillEl) fillEl.style.width = pct + '%';
+        if (storyProgressMs >= STORY_DURATION_MS) {
+            clearInterval(storyProgressTimer);
+            storyProgressTimer = null;
+            navigateStory(1);
+        }
+    }, 100);
+}
+
+// Keyboard shortcut for story viewer
+document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('story-viewer')) return;
+    if (e.key === 'Escape') { closeStoryViewer(); return; }
+    if (e.key === 'ArrowLeft') { navigateStory(-1); return; }
+    if (e.key === 'ArrowRight') { navigateStory(1); return; }
+});
+
+
+/* --- js/champions.js --- */
+// Hourly Champions — global top-5 by points, serverless (Firestore only).
+// Each client writes its own points doc into hourly/{YYYYMMDDHH}/entries/{uid}
+// on every winning draw. The Play screen subscribes to the top-5 for display.
+
+function countryToFlag(code) {
+    if (!code || !/^[A-Z]{2}$/i.test(code)) return '';
+    return code.toUpperCase().replace(/[A-Z]/g, function(c) {
+        return String.fromCodePoint(0x1F1E0 + c.charCodeAt(0) - 65);
+    });
+}
+
+let championsUnsubscribe = null;
+let championsList = [];
+let champTimerInterval = null;
+
+function getHourKey() {
+    const d = new Date();
+    const yyyy = d.getUTCFullYear();
+    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(d.getUTCDate()).padStart(2, '0');
+    const hh = String(d.getUTCHours()).padStart(2, '0');
+    return yyyy + mm + dd + hh;
+}
+
+function pushChampionPoints(handType, win) {
+    const user = window.egUser;
+    if (!user || win <= 0) return;
+    const points = Math.max(1, Math.floor(win / 10));
+    const hourKey = getHourKey();
+    firebaseSafe(function() {
+        return db.collection('hourly').doc(hourKey).collection('entries').doc(user.uid).set({
+            displayName: user.displayName || 'Player',
+            country: getCountry(),
+            points: firebase.firestore.FieldValue.increment(points),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+    });
+}
+
+function subscribeChampions() {
+    const user = window.egUser;
+    if (!user) {
+        championsList = [];
+        renderChampionsPanel();
+        return;
+    }
+
+    if (championsUnsubscribe) championsUnsubscribe();
+    const hourKey = getHourKey();
+
+    championsUnsubscribe = db.collection('hourly').doc(hourKey).collection('entries')
+        .orderBy('points', 'desc')
+        .limit(5)
+        .onSnapshot(function(snap) {
+            championsList = [];
+            snap.forEach(function(d) {
+                championsList.push(Object.assign({ uid: d.id }, d.data()));
+            });
+            renderChampionsPanel();
+        }, function() { /* silently ignore */ });
+
+    // Start countdown timer
+    if (!champTimerInterval) {
+        champTimerInterval = setInterval(renderChampionsTimer, 30000);
+    }
+}
+
+function renderChampionsTimer() {
+    const el = document.getElementById('champ-countdown');
+    if (!el) return;
+    const now = new Date();
+    const minsLeft = 59 - now.getUTCMinutes();
+    el.textContent = 'Resets in ' + minsLeft + 'm';
+}
+
+function renderChampionsPanel() {
+    const bodyEl = document.getElementById('champions-body');
+    const timerEl = document.getElementById('champ-countdown');
+    const promptEl = document.getElementById('champions-signin-prompt');
+    if (!bodyEl) return;
+
+    if (timerEl) renderChampionsTimer();
+
+    const user = window.egUser;
+    if (!user) {
+        if (promptEl) promptEl.classList.remove('hidden');
+        bodyEl.innerHTML = '';
+        return;
+    }
+    if (promptEl) promptEl.classList.add('hidden');
+
+    bodyEl.innerHTML = '';
+    if (!championsList.length) {
+        const row = document.createElement('div');
+        row.className = 'nearby-row';
+        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">No champions yet this hour — be the first!</span>';
+        bodyEl.appendChild(row);
+        return;
+    }
+
+    championsList.forEach(function(ch, i) {
+        const row = document.createElement('div');
+        row.className = 'nearby-row';
+        const isMe = user && ch.uid === user.uid;
+        if (isMe) row.className += ' me';
+
+        row.innerHTML =
+            '<span class="nearby-rank">' + (i + 1) + '</span>' +
+            '<span class="nearby-avatar-wrap">' +
+                '<span class="nearby-avatar champ">' + (ch.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
+                '<span class="online-dot"></span>' +
+            '</span>' +
+            '<span class="nearby-name">' + (ch.displayName || 'Player') +
+                (ch.country ? '<span class="country-flag" title="' + ch.country + '">' + countryToFlag(ch.country) + '</span>' : '') +
+            '</span>' +
+            '<span class="nearby-net positive">' + (ch.points || 0) + ' pts</span>';
+
+        bodyEl.appendChild(row);
+    });
+}
+
+function cleanupChampions() {
+    if (championsUnsubscribe) { championsUnsubscribe(); championsUnsubscribe = null; }
+    if (champTimerInterval) { clearInterval(champTimerInterval); champTimerInterval = null; }
+    championsList = [];
+}
+
+
+/* --- js/invite.js --- */
+// Invites & Sharing — two bottom sheets (invite friends, room created),
+// clipboard copy, OS share sheet, WhatsApp/Telegram intents, deep-link handling.
+
+// --- Generic sheet helpers ---
+function openSheet(sheetId) {
+    document.getElementById(sheetId).classList.remove('hidden');
+}
+
+function closeSheet(sheetId) {
+    document.getElementById(sheetId).classList.add('hidden');
+}
+
+// --- Invite Friends bottom sheet ---
+function openInviteSheet() {
+    const user = window.egUser;
+    if (!user) { openSignInModal(); return; }
+    const link = getInviteLink();
+    if (!link) { showToast('Could not generate invite link.'); return; }
+    document.getElementById('invite-sheet-link').textContent = link;
+    document.getElementById('invite-sheet-link').setAttribute('data-link', link);
+    // Reset copy button state
+    const copyBtn = document.getElementById('invite-sheet-copy');
+    copyBtn.textContent = 'Copy';
+    copyBtn.classList.remove('copied');
+    openSheet('invite-sheet');
+}
+
+function copyInviteSheetLink() {
+    const linkEl = document.getElementById('invite-sheet-link');
+    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+    const copyBtn = document.getElementById('invite-sheet-copy');
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(function() {
+            copyBtn.textContent = 'Copied!';
+            copyBtn.classList.add('copied');
+            setTimeout(function() {
+                copyBtn.textContent = 'Copy';
+                copyBtn.classList.remove('copied');
+            }, 2000);
+        }).catch(function() { fallbackCopySheet(link, copyBtn); });
+    } else {
+        fallbackCopySheet(link, copyBtn);
+    }
+}
+
+function fallbackCopySheet(text, btn) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    } catch (e) {
+        showToast('Could not copy — tap and hold the link.');
+    }
+    document.body.removeChild(ta);
+}
+
+function shareInviteLink() {
+    const linkEl = document.getElementById('invite-sheet-link');
+    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+    const user = window.egUser;
+    const name = user ? (user.displayName || 'A friend') : 'A friend';
+    const text = name + ' wants to play Video Poker with you! Join here: ' + link;
+
+    // Try native share first
+    if (navigator.share) {
+        navigator.share({ title: 'Video Poker', text: text, url: link }).catch(function() {});
+    } else if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+        window.Capacitor.Plugins.Share.share({ title: 'Video Poker', text: text, url: link }).catch(function() {});
+    } else {
+        // Fallback: copy to clipboard
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(function() {
+                showToast('Link copied — share it with friends!');
+            });
+        }
+    }
+}
+
+// --- Room Created bottom sheet ---
+function openRoomCreatedSheet(roomName, roomCode) {
+    const base = getShareBaseUrl();
+    const link = base + '?join=' + encodeURIComponent(roomCode);
+    document.getElementById('room-created-name').textContent = roomName;
+    document.getElementById('room-created-link').textContent = link;
+    document.getElementById('room-created-link').setAttribute('data-link', link);
+    document.getElementById('room-created-link').setAttribute('data-code', roomCode);
+    // Reset copy button
+    const copyBtn = document.getElementById('room-created-copy');
+    copyBtn.textContent = 'Copy';
+    copyBtn.classList.remove('copied');
+    openSheet('room-created-sheet');
+}
+
+function copyRoomLink() {
+    const linkEl = document.getElementById('room-created-link');
+    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+    const copyBtn = document.getElementById('room-created-copy');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(function() {
+            copyBtn.textContent = 'Copied!';
+            copyBtn.classList.add('copied');
+            setTimeout(function() { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
+        }).catch(function() { fallbackCopySheet(link, copyBtn); });
+    } else {
+        fallbackCopySheet(link, copyBtn);
+    }
+}
+
+function shareRoomViaWhatsApp() {
+    const linkEl = document.getElementById('room-created-link');
+    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+    const name = document.getElementById('room-created-name').textContent;
+    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
+    window.open('https://wa.me/?text=' + text, '_blank');
+}
+
+function shareRoomViaTelegram() {
+    const linkEl = document.getElementById('room-created-link');
+    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+    const name = document.getElementById('room-created-name').textContent;
+    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
+    window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
+}
+
+// --- Deep-link handling (?join=ROOMCODE) ---
+function handleJoinDeepLink() {
+    try {
+        var params = new URLSearchParams(window.location.search);
+        var joinCode = params.get('join');
+        if (!joinCode) return;
+        joinCode = joinCode.trim().toUpperCase();
+        if (!joinCode) return;
+
+        // Clean URL
+        if (window.history && window.history.replaceState) {
+            var url = new URL(window.location);
+            url.searchParams.delete('join');
+            window.history.replaceState({}, '', url);
+        }
+
+        // Store for after sign-in
+        window._pendingJoinCode = joinCode;
+
+        if (window.egUser) {
+            joinRoomByDeepLink(joinCode);
+        } else {
+            openSignInModal();
+            showToast('Sign in to join the poker room!');
+        }
+    } catch (e) {}
+}
+
+function joinRoomByDeepLink(code) {
+    var user = window.egUser;
+    if (!user) return;
+    var input = document.getElementById('room-code-input');
+    if (input) input.value = code;
+    joinRoomByCode(); // reuses existing join logic after setting the input
+}
+
+// Hook into auth state change to handle pending join
+// (Add to the existing firebase.js onAuthStateChanged handler)
+var _origAuthHandler = null; // will be set by build order
 
 
 /* --- js/game.js --- */
@@ -2941,6 +4786,8 @@ const CRITICAL_BALANCE_HANDS = 4; // "almost broke" = strong comeback help
 const BOOST_LOW = 0.15;           // extra help when getting low
 const BOOST_CRITICAL = 0.35;      // extra help when almost broke
 const BOOST_MAX = 0.85;           // never a guaranteed rig
+const BOOST_FLUSH_SHARE = 0.25;   // of triggered boosts (non-critical), aim for a 4-to-flush tease instead of a pair
+const FLUSH_BOOST_TARGET = 4;     // "4 cards to a flush" is the classic nail-biter shape
 
 function getBoostChance() {
     let chance = BOOST_BASE;
@@ -3065,6 +4912,17 @@ function shuffle(deck) {
 function boostHand() {
     if (Math.random() >= getBoostChance()) return;
 
+    // Critical-balance rescues stay on the reliable pair path; everywhere else,
+    // sometimes reach for the bigger emotional payoff of a 4-to-flush tease instead.
+    const isCritical = balance <= bet * CRITICAL_BALANCE_HANDS;
+    if (!isCritical && Math.random() < BOOST_FLUSH_SHARE) {
+        boostToFlushDraw();
+        return;
+    }
+    boostToPair();
+}
+
+function boostToPair() {
     const rankCounts = {};
     hand.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
     const counts = Object.values(rankCounts).sort((a, b) => b - a);
@@ -3087,6 +4945,35 @@ function boostHand() {
     hand[replaceIdx] = newCard;
     const deckIdx = deck.findIndex(c => c.rank === newCard.rank && c.suit === newCard.suit);
     if (deckIdx !== -1) deck.splice(deckIdx, 1);
+}
+
+function boostToFlushDraw() {
+    const suitCounts = {};
+    hand.forEach(c => suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1);
+    const bestSuit = Object.keys(suitCounts).reduce((a, b) => suitCounts[a] >= suitCounts[b] ? a : b);
+    const count = suitCounts[bestSuit] || 0;
+    if (count >= FLUSH_BOOST_TARGET || count === 5) return;
+
+    const otherIndices = hand.map((c, i) => c.suit !== bestSuit ? i : -1).filter(i => i !== -1);
+    const usedRanksInSuit = new Set(hand.filter(c => c.suit === bestSuit).map(c => c.rank));
+    let needed = FLUSH_BOOST_TARGET - count;
+
+    while (needed > 0 && otherIndices.length > 0) {
+        const pickPos = Math.floor(Math.random() * otherIndices.length);
+        const idx = otherIndices.splice(pickPos, 1)[0];
+        const availableRanks = RANKS.filter(r => !usedRanksInSuit.has(r));
+        if (availableRanks.length === 0) break;
+        const newRank = availableRanks[Math.floor(Math.random() * availableRanks.length)];
+        const newCard = { rank: newRank, suit: bestSuit };
+
+        const oldCard = hand[idx];
+        deck.push(oldCard);
+        hand[idx] = newCard;
+        usedRanksInSuit.add(newRank);
+        const deckIdx = deck.findIndex(c => c.rank === newCard.rank && c.suit === newCard.suit);
+        if (deckIdx !== -1) deck.splice(deckIdx, 1);
+        needed--;
+    }
 }
 
 // --- Multi-hand mode (Triple/Five Play) — unlocks at level 10 ---
@@ -3138,6 +5025,17 @@ function renderMultiHands(extraResults) {
     });
 }
 
+function updateMainButton() {
+    const btn = document.getElementById('main-btn');
+    btn.textContent = gameState === 'hold' ? 'Draw' : 'Deal';
+    btn.className = 'btn-primary';
+}
+
+function mainAction() {
+    if (gameState === 'bet') deal();
+    else if (gameState === 'hold') draw();
+}
+
 function deal() {
     if (balance < bet) {
         if (balance === 0) {
@@ -3174,8 +5072,7 @@ function deal() {
 
     renderHand();
     renderMultiHands([]);
-    document.getElementById('deal-btn').disabled = true;
-    document.getElementById('hold-btn').disabled = false;
+    updateMainButton();
     lastHandType = null;
     const resultEl = document.getElementById('result');
     resultEl.className = 'result-panel';
@@ -3247,6 +5144,10 @@ function draw() {
         totalWon += win;
         lossStreak = 0;
         currentPayouts = { ...basePayouts() };
+        // Phase 2: update personal best for stories
+        if (window.checkAndUpdateBestHand) checkAndUpdateBestHand(bestType, win, hand);
+        // Phase 2: push hourly champion points
+        if (window.pushChampionPoints) pushChampionPoints(bestType, win);
     } else {
         totalLost += totalBet;
         lossStreak++;
@@ -3286,8 +5187,7 @@ function draw() {
     renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
 
     gameState = 'bet';
-    document.getElementById('deal-btn').disabled = false;
-    document.getElementById('hold-btn').disabled = true;
+    updateMainButton();
 }
 
 function toggleHold(i) {
@@ -3624,7 +5524,8 @@ function initGame() {
     updateVariantUI();
     updateMultiHandUI();
     renderPayouts();
-    document.getElementById('hold-btn').disabled = true;
+    // Greet the player with an already-dealt hand, as if Deal was just pressed
+    deal();
 }
 
 document.addEventListener('keydown', function(e) {
@@ -3635,10 +5536,7 @@ document.addEventListener('keydown', function(e) {
     }
     const keyMap = { '1': 5, '2': 10, '3': 20, '4': 50 };
     if (keyMap[e.key] && gameState === 'bet') setBet(keyMap[e.key]);
-    if (e.key === 'd' || e.key === 'D') {
-        if (gameState === 'bet' && !document.getElementById('deal-btn').disabled) deal();
-        else if (gameState === 'hold') draw();
-    }
+    if (e.key === 'd' || e.key === 'D') mainAction();
 });
 
 
@@ -3881,6 +5779,35 @@ function renderStatsScreen() {
     document.getElementById('stats-streak-value').textContent = streak;
 }
 
+// --- Theme switching ---
+let currentTheme = 'green';
+try {
+    const saved = localStorage.getItem('vp_theme');
+    if (saved && ['green', 'blue', 'crimson'].includes(saved)) currentTheme = saved;
+} catch (e) {}
+
+function setTheme(theme) {
+    if (!['green', 'blue', 'crimson'].includes(theme) || theme === currentTheme) return;
+    currentTheme = theme;
+    try { localStorage.setItem('vp_theme', theme); } catch (e) {}
+    document.body.classList.remove('theme-blue', 'theme-crimson');
+    if (theme !== 'green') document.body.classList.add('theme-' + theme);
+    ['green', 'blue', 'crimson'].forEach(function(t) {
+        const btn = document.getElementById('theme-' + t);
+        if (btn) btn.classList.toggle('selected', t === theme);
+    });
+    triggerHaptic('LIGHT');
+}
+
+function applyTheme() {
+    document.body.classList.remove('theme-blue', 'theme-crimson');
+    if (currentTheme !== 'green') document.body.classList.add('theme-' + currentTheme);
+    ['green', 'blue', 'crimson'].forEach(function(t) {
+        const btn = document.getElementById('theme-' + t);
+        if (btn) btn.classList.toggle('selected', t === currentTheme);
+    });
+}
+
 function initSettingsScreen() {
     const soundToggle = document.getElementById('settings-sound-toggle');
     soundToggle.checked = soundEnabled;
@@ -3953,6 +5880,7 @@ function resetStatistics() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    applyTheme();
     initSound();
     initGame();
     initSettingsScreen();
@@ -4048,6 +5976,6 @@ function initPwa() {
 pwaRegisterSw();
 
 
-</script>
+ </script>
 </body>
 </html>

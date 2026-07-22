@@ -1,9 +1,17 @@
 // Simple private poker rooms — a room is just a shared, code-joinable
 // net-profit leaderboard. No chat, no reactions, no reset cadence.
+// Phase 2: adds capacity, status derivation, inline creation, share sheet.
 
 let myRooms = [];
 let activeRoomId = null;
 let roomDetailUnsubscribe = null;
+let inlineStake = 10;
+
+function getRoomStatus(room) {
+    // A room is "playing" if it has more than 1 member; otherwise "open"
+    const count = (room.memberUids || []).length;
+    return count > 1 ? 'playing' : 'open';
+}
 
 function pushNetProfit() {
     const user = window.egUser;
@@ -46,28 +54,51 @@ function renderRoomsList() {
     const listEl = document.getElementById('play-rooms-list');
     if (!listEl) return;
     listEl.innerHTML = '';
-    myRooms.slice(0, 3).forEach(function(room) {
+    const previews = myRooms.slice(0, 2); // Play screen: max 2 preview
+    previews.forEach(function(room) {
         const row = document.createElement('div');
-        row.className = 'room-row';
+        row.className = 'mini-room';
+        const status = getRoomStatus(room);
+        const memberCount = (room.memberUids || []).length;
+        const capacity = room.capacity || 6;
 
-        const info = document.createElement('div');
-        const nameEl = document.createElement('div');
-        nameEl.className = 'room-row-name';
-        nameEl.textContent = room.name || 'Room';
-        const subEl = document.createElement('div');
-        subEl.className = 'room-row-sub';
-        subEl.textContent = (room.memberUids || []).length + ' friends · Stake ' + room.stake;
-        info.appendChild(nameEl);
-        info.appendChild(subEl);
+        row.innerHTML =
+            '<div>' +
+                '<div class="mr-name">' + (room.name || 'Room') + '</div>' +
+                '<div class="mr-meta">' + memberCount + '/' + capacity + ' friends · Stake ' + (room.stake || 10) + '</div>' +
+            '</div>' +
+            '<span class="mr-status ' + status + '">' + (status === 'open' ? 'Open' : 'In Progress') + '</span>' +
+            '<button class="mr-join" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? 'Join Table' : 'Enter Table') + '</button>';
 
-        const btn = document.createElement('button');
-        btn.className = 'btn-primary room-row-btn';
-        btn.textContent = 'Enter Table';
-        btn.onclick = function() { openRoomDetail(room.id); };
-
-        row.appendChild(info);
-        row.appendChild(btn);
         listEl.appendChild(row);
+    });
+    // Also render the friends-tab rooms list
+    renderFriendsRoomsList();
+}
+
+function renderFriendsRoomsList() {
+    const listEl = document.getElementById('friends-rooms-list');
+    const emptyEl = document.getElementById('friends-rooms-empty');
+    const btn = document.getElementById('friends-create-room-btn');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    if (emptyEl) emptyEl.classList.toggle('hidden', myRooms.length > 0);
+    myRooms.forEach(function(room) {
+        const card = document.createElement('div');
+        card.className = 'room-card';
+        const status = getRoomStatus(room);
+        const memberCount = (room.memberUids || []).length;
+        const capacity = room.capacity || 6;
+
+        card.innerHTML =
+            '<div class="room-head">' +
+                '<span class="roomname">' + (room.name || 'Room') + '</span>' +
+                '<span class="roomstatus ' + status + '">' + (status === 'open' ? 'Open' : 'In Progress') + '</span>' +
+            '</div>' +
+            '<div class="roommeta">' + memberCount + '/' + capacity + ' friends · Stake ' + (room.stake || 10) + '</div>' +
+            '<div class="roomjoin" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? 'Join Table' : 'Enter Table') + '</div>';
+
+        listEl.appendChild(card);
     });
 }
 
@@ -80,27 +111,72 @@ function createRoom() {
     const stake = parseInt(stakeInput.value, 10) || 10;
     if (!name) { showToast('Give your room a name.'); return; }
 
+    _doCreateRoom(name, stake, function(code) {
+        nameInput.value = '';
+        closeRoomModal();
+        showToast('Room created — code: ' + code);
+        loadMyRooms();
+    });
+}
+
+function _doCreateRoom(name, stake, callback) {
+    const user = window.egUser;
+    if (!user) return;
     firebaseSafe(function() {
         const code = generateRoomCode();
         return db.collection('rooms').add({
             name: name,
             stake: stake,
             code: code,
+            capacity: 6,
             ownerUid: user.uid,
             memberUids: [user.uid],
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         }).then(function(ref) {
             return db.collection('rooms').doc(ref.id).collection('members').doc(user.uid).set({
                 displayName: user.displayName || '',
-                netProfit: balance - 500
+                netProfit: balance - 500,
+                bestStreak: bestStreak
             }).then(function() {
-                nameInput.value = '';
-                closeRoomModal();
-                showToast('Room created — code: ' + code);
-                loadMyRooms();
+                if (callback) callback(code);
+                // Open share sheet
+                if (window.openRoomCreatedSheet) openRoomCreatedSheet(name, code);
             });
         });
     }, function() { showToast('Could not create room — try again.'); });
+}
+
+// --- Inline room creation (Friends tab) ---
+function toggleInlineRoomForm() {
+    const form = document.getElementById('inline-room-form');
+    if (!form) return;
+    form.classList.toggle('hidden');
+    if (!form.classList.contains('hidden')) {
+        document.getElementById('inline-room-name').focus();
+    }
+}
+
+function selectInlineStake(v) {
+    inlineStake = v;
+    const btns = document.querySelectorAll('#inline-room-stakes .room-form-stake');
+    btns.forEach(function(b) {
+        b.classList.toggle('selected', parseInt(b.textContent) === v);
+    });
+}
+
+function createRoomInline() {
+    const user = window.egUser;
+    if (!user) { openSignInModal(); return; }
+    const nameInput = document.getElementById('inline-room-name');
+    const name = (nameInput.value || '').trim();
+    if (!name) { showToast('Give your room a name.'); return; }
+
+    _doCreateRoom(name, inlineStake, function(code) {
+        nameInput.value = '';
+        toggleInlineRoomForm();
+        showToast('Room created — code: ' + code);
+        loadMyRooms();
+    });
 }
 
 function joinRoomByCode() {

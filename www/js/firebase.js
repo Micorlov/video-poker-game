@@ -9,12 +9,30 @@ const firebaseConfig = {
     messagingSenderId: "53702406091",
     appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+let auth = null;
+let db = null;
 try {
-    db.enablePersistence({ synchronizeTabs: true }).catch(function() { /* multi-tab or unsupported */ });
-} catch (e) { /* older browser — online-only */ }
+    if (typeof firebase === 'undefined') throw new Error('Firebase SDK failed to load (offline or blocked CDN)');
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    try {
+        db.enablePersistence({ synchronizeTabs: true }).catch(function() { /* multi-tab or unsupported */ });
+    } catch (e) { /* older browser — online-only */ }
+} catch (e) {
+    // Core game must never depend on Firebase — run fully offline/local-only.
+    console.warn('Firebase unavailable, continuing in offline mode:', e);
+}
+
+const SHARE_BASE_URL = 'https://micorlov.github.io/video-poker-game/video_poker.html';
+
+function getShareBaseUrl() {
+    const origin = window.location.origin || '';
+    if (origin === 'https://localhost' || origin.startsWith('capacitor://')) {
+        return SHARE_BASE_URL;
+    }
+    return origin + window.location.pathname;
+}
 
 const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars
 
@@ -80,19 +98,50 @@ function signInWithGoogle() {
     });
 }
 
+function signInWithFacebook() {
+    const el = document.getElementById('signin-error');
+    if (el) el.classList.add('hidden');
+
+    if (isNativeApp()) {
+        window.Capacitor.Plugins.FirebaseAuthentication.signInWithFacebook().then(function(result) {
+            const accessToken = result && result.credential && result.credential.accessToken;
+            if (!accessToken) throw new Error('No access token returned from Facebook sign-in.');
+            const credential = firebase.auth.FacebookAuthProvider.credential(accessToken);
+            return auth.signInWithCredential(credential);
+        }).catch(function(err) {
+            if (el) { el.textContent = err.message || String(err); el.classList.remove('hidden'); }
+        });
+        return;
+    }
+
+    const provider = new firebase.auth.FacebookAuthProvider();
+    auth.signInWithPopup(provider).catch(function(popupErr) {
+        if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
+            auth.signInWithRedirect(provider).catch(function(redirectErr) {
+                if (el) { el.textContent = redirectErr.message; el.classList.remove('hidden'); }
+            });
+        } else if (el) {
+            el.textContent = popupErr.message;
+            el.classList.remove('hidden');
+        }
+    });
+}
+
 function signOutUser() {
     if (isNativeApp()) {
         firebaseSafe(function() { return window.Capacitor.Plugins.FirebaseAuthentication.signOut(); });
     }
-    auth.signOut();
+    if (auth) auth.signOut();
 }
 
-auth.getRedirectResult().catch(function(err) {
-    if (err && err.code !== 'auth/no-current-user') {
-        const el = document.getElementById('signin-error');
-        if (el) { el.textContent = err.message; el.classList.remove('hidden'); }
-    }
-});
+if (auth) {
+    auth.getRedirectResult().catch(function(err) {
+        if (err && err.code !== 'auth/no-current-user') {
+            const el = document.getElementById('signin-error');
+            if (el) { el.textContent = err.message; el.classList.remove('hidden'); }
+        }
+    });
+}
 
 function logUserToFirestore(user) {
     return db.collection('users').doc(user.uid).set({
@@ -116,24 +165,38 @@ function logUserToFirestore(user) {
     });
 }
 
-auth.onAuthStateChanged(function(user) {
-    window.egUser = user || null;
-    if (window.closeSignInModal) closeSignInModal();
-    if (window.updateAccountUI) updateAccountUI();
-    if (user) {
-        firebaseSafe(function() { return logUserToFirestore(user); });
-        firebaseSafe(function() { return pushNetProfit(); });
-        if (window.loadFriends) loadFriends();
-        if (window.loadMyRooms) loadMyRooms();
-        // Handle pending invite from deep link
-        if (window._pendingInviteCode && window.addFriendByInviteCode) {
-            var code = window._pendingInviteCode;
-            window._pendingInviteCode = null;
-            addFriendByInviteCode(code);
+if (auth) {
+    auth.onAuthStateChanged(function(user) {
+        window.egUser = user || null;
+        if (window.closeSignInModal) closeSignInModal();
+        if (window.updateAccountUI) updateAccountUI();
+        if (user) {
+            firebaseSafe(function() { return logUserToFirestore(user); });
+            firebaseSafe(function() { return pushNetProfit(); });
+            if (window.loadFriends) loadFriends();
+            if (window.loadMyRooms) loadMyRooms();
+            // Phase 2: start presence heartbeat
+            if (window.startPresence) startPresence();
+            // Phase 2: subscribe champions
+            if (window.subscribeChampions) subscribeChampions();
+            // Handle pending invite from deep link
+            if (window._pendingInviteCode && window.addFriendByInviteCode) {
+                var code = window._pendingInviteCode;
+                window._pendingInviteCode = null;
+                addFriendByInviteCode(code);
+            }
+            // Phase 2: handle pending room join from deep link
+            if (window._pendingJoinCode && window.joinRoomByDeepLink) {
+                var joinCode = window._pendingJoinCode;
+                window._pendingJoinCode = null;
+                joinRoomByDeepLink(joinCode);
+            }
+        } else {
+            if (window.cleanupFriendsListeners) cleanupFriendsListeners();
+            if (window.stopPresence) stopPresence();
+            if (window.cleanupChampions) cleanupChampions();
+            if (window.renderFriendsScreen) renderFriendsScreen();
+            if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
         }
-    } else {
-        if (window.cleanupFriendsListeners) cleanupFriendsListeners();
-        if (window.renderFriendsScreen) renderFriendsScreen();
-        if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
-    }
-});
+    });
+}

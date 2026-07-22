@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Reader</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a12;
+      --surface: #12121e;
+      --surface2: #1a1a2e;
+      --border: #2a2a45;
+      --text: #e0e0f0;
+      --text-dim: #8888aa;
+      --accent: #6c5ce7;
+      --accent-glow: rgba(108, 92, 231, 0.3);
+      --green: #00e676;
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+    }
+    .header .subtitle {
+      color: var(--text-dim);
+      font-size: 13px;
+      margin-left: auto;
+    }
+
+    .app {
+      display: flex;
+      flex: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .panel-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface);
+    }
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(108, 92, 231, 0.05);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .drop-zone .icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+    .drop-zone p { color: var(--text-dim); font-size: 14px; }
+    .drop-zone .browse {
+      color: var(--accent);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .drop-zone .hint {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 8px;
+      opacity: 0.6;
+    }
+    .drop-zone .hint kbd {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: inherit;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .drop-zone.has-image {
+      border-color: var(--green);
+      padding: 12px;
+    }
+    .drop-zone.has-image .icon,
+    .drop-zone.has-image p,
+    .drop-zone.has-image .hint {
+      display: none;
+    }
+
+    .image-preview {
+      display: none;
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .image-preview.show { display: block; }
+    .image-preview img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      background: #000;
+      border-radius: var(--radius);
+      display: block;
+    }
+    .image-preview .remove-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .image-preview .remove-btn:hover { background: rgba(255,0,0,0.7); }
+    .image-preview .filename {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(0,0,0,0.7);
+      color: var(--text-dim);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .config-bar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .config-bar input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .config-bar input:focus { border-color: var(--accent); }
+    .config-bar input::placeholder { color: var(--text-dim); opacity: 0.5; }
+    .config-bar .model-select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .ask-row {
+      display: flex;
+      gap: 12px;
+    }
+    .ask-row input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .ask-row input:focus { border-color: var(--accent); }
+    .ask-row input::placeholder { color: var(--text-dim); opacity: 0.5; }
+    .ask-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      min-width: 80px;
+    }
+    .ask-btn:hover { filter: brightness(1.15); }
+    .ask-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      filter: none;
+    }
+
+    .panel-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+    .panel-right .label {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .results {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      overflow-y: auto;
+      min-height: 200px;
+    }
+    .results .empty {
+      color: var(--text-dim);
+      font-size: 14px;
+      text-align: center;
+      padding: 60px 20px;
+      opacity: 0.5;
+    }
+    .results .empty .emoji { font-size: 32px; display: block; margin-bottom: 12px; }
+
+    .msg { margin-bottom: 16px; line-height: 1.6; }
+    .msg .role {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+    .msg .role.user { color: var(--accent); }
+    .msg .role.ai { color: var(--green); }
+    .msg .role.error { color: #ff5252; }
+    .msg .body {
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .progress-area {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px 0;
+    }
+    .progress-area.show { display: flex; }
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar .fill {
+      height: 100%;
+      width: 30%;
+      background: linear-gradient(90deg, var(--accent), #a29bfe);
+      border-radius: 4px;
+      animation: progress-indeterminate 1.4s ease-in-out infinite;
+    }
+    @keyframes progress-indeterminate {
+      0%   { transform: translateX(-100%); width: 30%; }
+      50%  { transform: translateX(180%); width: 50%; }
+      100% { transform: translateX(350%); width: 30%; }
+    }
+    .progress-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-label .dots {
+      min-width: 20px;
+    }
+
+    .meta {
+      font-size: 11px;
+      color: var(--text-dim);
+      opacity: 0.6;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .app { flex-direction: column; padding: 16px; }
+      .config-bar { flex-wrap: wrap; }
+      .config-bar input { min-width: 100%; }
+      .ask-row input { font-size: 16px; }
+    }
+
+    .results::-webkit-scrollbar { width: 6px; }
+    .results::-webkit-scrollbar-track { background: transparent; }
+    .results::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Image Reader</h1>
+  <span class="subtitle">Upload an image, ask what's in it</span>
+</div>
+
+<div class="app">
+  <div class="panel-left">
+    <div class="drop-zone" id="dropZone">
+      <div class="icon">🖼️</div>
+      <p>Drag &amp; drop an image here, or <span class="browse" id="browseBtn">browse</span></p>
+      <div class="hint">Supports PNG, JPG, WebP, GIF — or press <kbd>⌘V</kbd> to paste a screenshot</div>
+    </div>
+
+    <div class="image-preview" id="preview">
+      <img id="previewImg" alt="Uploaded image" />
+      <button class="remove-btn" id="removeBtn" title="Remove image">✕</button>
+      <span class="filename" id="filename"></span>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*" hidden />
+
+    <div class="config-bar">
+      <select class="model-select" id="providerSelect" style="max-width:120px">
+        <option value="anthropic">Anthropic</option>
+        <option value="deepseek">DeepSeek</option>
+        <option value="openai">OpenAI</option>
+        <option value="ollama">Ollama (local)</option>
+      </select>
+      <input type="password" id="apiKey" placeholder="API Key" />
+      <select class="model-select" id="modelSelect"></select>
+    </div>
+
+    <div class="ask-row">
+      <input type="text" id="question" placeholder="e.g. What's in this image? Describe it in detail." />
+      <button class="ask-btn" id="askBtn">Ask</button>
+    </div>
+  </div>
+
+  <div class="panel-right">
+    <div class="label">Responses</div>
+    <div class="results" id="results">
+      <div class="empty" id="emptyState">
+        <span class="emoji">🔍</span>
+        Upload an image and ask a question<br/>
+        or just type "what do you see?"
+      </div>
+    </div>
+    <div class="progress-area" id="progressArea">
+      <div class="progress-bar"><div class="fill"></div></div>
+      <div class="progress-label">
+        <span><span class="dots"></span></span>
+        <span id="progressProvider">Analyzing image</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// === State ===
+let currentFile = null;
+let currentBase64 = null;
+let savedKeys = {};
+let dotsInterval = null;
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const preview = document.getElementById('preview');
+const previewImg = document.getElementById('previewImg');
+const filename = document.getElementById('filename');
+const removeBtn = document.getElementById('removeBtn');
+const apiKeyInput = document.getElementById('apiKey');
+const modelSelect = document.getElementById('modelSelect');
+const providerSelect = document.getElementById('providerSelect');
+const questionInput = document.getElementById('question');
+const askBtn = document.getElementById('askBtn');
+const results = document.getElementById('results');
+const emptyState = document.getElementById('emptyState');
+const progressArea = document.getElementById('progressArea');
+const progressProvider = document.getElementById('progressProvider');
+
+// === Provider config ===
+const PROVIDERS = {
+  anthropic: {
+    placeholder: 'Anthropic API Key (sk-ant-...)',
+    roleLabel: 'Claude Vision',
+    models: [
+      { value: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4' },
+      { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
+      { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus' },
+    ],
+  },
+  deepseek: {
+    placeholder: 'DeepSeek API Key (sk-...)',
+    roleLabel: 'DeepSeek Vision',
+    models: [
+      { value: 'deepseek-chat', label: 'DeepSeek Chat (V3)' },
+      { value: 'deepseek-reasoner', label: 'DeepSeek Reasoner (R1)' },
+    ],
+  },
+  openai: {
+    placeholder: 'OpenAI API Key (sk-...)',
+    roleLabel: 'GPT-4 Vision',
+    models: [
+      { value: 'gpt-4o', label: 'GPT-4o' },
+      { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+    ],
+  },
+  ollama: {
+    placeholder: 'Ollama URL (leave blank for http://localhost:11434)',
+    roleLabel: 'Ollama (local)',
+    models: [
+      { value: 'moondream', label: 'MoonDream' },
+      { value: 'llava', label: 'LLaVA (7B)' },
+      { value: 'llava:13b', label: 'LLaVA (13B)' },
+      { value: 'bakllava', label: 'BakLLaVA' },
+      { value: 'llama3.2-vision', label: 'Llama 3.2 Vision' },
+      { value: 'llama3.2-vision:90b', label: 'Llama 3.2 Vision (90B)' },
+    ],
+  },
+};
+
+// Load saved keys from localStorage
+try {
+  const raw = localStorage.getItem('image-reader-keys');
+  if (raw) savedKeys = JSON.parse(raw);
+} catch {}
+
+function populateModels(provider) {
+  modelSelect.innerHTML = '';
+  PROVIDERS[provider].models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.value;
+    opt.textContent = m.label;
+    modelSelect.appendChild(opt);
+  });
+}
+
+function switchProvider(provider) {
+  const config = PROVIDERS[provider];
+  apiKeyInput.placeholder = config.placeholder;
+  apiKeyInput.value = savedKeys[provider] || '';
+  apiKeyInput.type = provider === 'ollama' ? 'text' : 'password';
+  populateModels(provider);
+  progressProvider.textContent = `Analyzing with ${config.roleLabel}`;
+}
+
+switchProvider('anthropic');
+
+providerSelect.addEventListener('change', () => {
+  switchProvider(providerSelect.value);
+});
+
+// === Image handling ===
+function handleFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  currentFile = file;
+  filename.textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    currentBase64 = e.target.result;
+    previewImg.src = currentBase64;
+    preview.classList.add('show');
+    dropZone.classList.add('has-image');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  currentFile = null;
+  currentBase64 = null;
+  previewImg.src = '';
+  preview.classList.remove('show');
+  dropZone.classList.remove('has-image');
+  fileInput.value = '';
+}
+
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleFile(e.target.files[0]); });
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+removeBtn.addEventListener('click', removeImage);
+
+// === Paste support (Cmd+V for screenshots) ===
+document.addEventListener('paste', (e) => {
+  for (const item of e.clipboardData.items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault();
+      const file = item.getAsFile();
+      if (file) { handleFile(file); setTimeout(() => questionInput.focus(), 100); }
+      break;
+    }
+  }
+});
+questionInput.addEventListener('paste', (e) => {
+  for (const item of e.clipboardData.items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault();
+      const file = item.getAsFile();
+      if (file) handleFile(file);
+      break;
+    }
+  }
+});
+
+// === Vision API calls ===
+async function extractError(res) {
+  const text = await res.text();
+  try { const j = JSON.parse(text); return new Error(j.error?.message || j.error || text); }
+  catch { return new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`); }
+}
+
+async function askAnthropic(imageBase64, question, apiKey, model) {
+  const b64 = imageBase64.split(',')[1];
+  const mediaType = imageBase64.split(';')[0].split(':')[1];
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+    body: JSON.stringify({
+      model, max_tokens: 4096,
+      messages: [{ role: 'user', content: [{ type: 'text', text: question }, { type: 'image', source: { type: 'base64', media_type: mediaType, data: b64 } }] }]
+    }),
+  });
+  if (!res.ok) throw await extractError(res);
+  const data = await res.json();
+  return { text: data.content.map(c => c.text).join('\n'), usage: data.usage || {} };
+}
+
+async function askOpenAI(baseURL, imageBase64, question, apiKey, model) {
+  const res = await fetch(`${baseURL}/v1/chat/completions`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${apiKey}`, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      model, max_tokens: 4096,
+      messages: [{ role: 'user', content: [{ type: 'text', text: question }, { type: 'image_url', image_url: { url: imageBase64 } }] }]
+    }),
+  });
+  if (!res.ok) throw await extractError(res);
+  const data = await res.json();
+  const raw = data.choices[0].message.content;
+  const text = Array.isArray(raw) ? raw.map(c => c.text || '').join('') : raw;
+  return { text, usage: data.usage || {} };
+}
+
+async function askVision(imageBase64, question, apiKey, model, provider) {
+  switch (provider) {
+    case 'anthropic': return askAnthropic(imageBase64, question, apiKey, model);
+    case 'deepseek':  return askOpenAI('https://api.deepseek.com', imageBase64, question, apiKey, model);
+    case 'openai':    return askOpenAI('https://api.openai.com', imageBase64, question, apiKey, model);
+    case 'ollama': {
+      const baseURL = apiKey || 'http://localhost:11434';
+      return askOpenAI(baseURL, imageBase64, question, '', model);
+    }
+    default: throw new Error(`Unknown provider: ${provider}`);
+  }
+}
+
+// === Add message ===
+function addMessage(role, content, meta) {
+  emptyState.style.display = 'none';
+  const div = document.createElement('div');
+  div.className = 'msg';
+  const roleEl = document.createElement('div');
+  roleEl.className = `role ${role}`;
+  const label = role === 'user' ? 'You asked'
+    : role === 'error' ? 'Error'
+    : (PROVIDERS[providerSelect.value]?.roleLabel || 'Vision');
+  roleEl.textContent = label;
+  const body = document.createElement('div');
+  body.className = 'body';
+  body.textContent = content;
+  div.appendChild(roleEl);
+  div.appendChild(body);
+  if (meta) { const m = document.createElement('div'); m.className = 'meta'; m.textContent = meta; div.appendChild(m); }
+  results.appendChild(div);
+  results.scrollTop = results.scrollHeight;
+}
+
+// === Ask ===
+askBtn.addEventListener('click', async () => {
+  const question = questionInput.value.trim() || 'What do you see in this image? Describe it in detail.';
+  const apiKey = apiKeyInput.value.trim();
+  const model = modelSelect.value;
+  const provider = providerSelect.value;
+
+  if (!currentBase64) { addMessage('error', 'Please upload an image first.'); return; }
+  if (provider !== 'ollama' && !apiKey) { addMessage('error', `Please enter your ${PROVIDERS[provider]?.placeholder || 'API'} key.`); return; }
+
+  savedKeys[provider] = apiKey;
+  try { localStorage.setItem('image-reader-keys', JSON.stringify(savedKeys)); } catch {}
+
+  addMessage('user', question);
+  askBtn.disabled = true;
+  progressArea.classList.add('show');
+  let dots = 0;
+  dotsInterval = setInterval(() => {
+    dots = (dots + 1) % 4;
+    document.querySelector('.progress-label .dots').textContent = '.'.repeat(dots);
+  }, 500);
+
+  try {
+    const result = await askVision(currentBase64, question, apiKey, model, provider);
+    const usage = result.usage;
+    const meta = usage.input_tokens ? `Tokens: ${usage.input_tokens} in / ${usage.output_tokens} out` : '';
+    addMessage('ai', result.text, meta);
+  } catch (err) {
+    addMessage('error', `Failed: ${err.message}${err.message.includes('Failed to fetch') ? ' — if using Ollama, make sure OLLAMA_ORIGINS=* is set and Ollama is running.' : ''}`);
+  } finally {
+    askBtn.disabled = false;
+    progressArea.classList.remove('show');
+    if (dotsInterval) { clearInterval(dotsInterval); dotsInterval = null; }
+  }
+});
+
+questionInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') askBtn.click(); });
+
+const observer = new MutationObserver(() => { if (currentBase64) questionInput.focus(); });
+observer.observe(preview, { attributes: true, attributeFilter: ['class'] });
+</script>
+</body>
+</html>

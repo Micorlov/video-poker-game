@@ -169,6 +169,8 @@ const CRITICAL_BALANCE_HANDS = 4; // "almost broke" = strong comeback help
 const BOOST_LOW = 0.15;           // extra help when getting low
 const BOOST_CRITICAL = 0.35;      // extra help when almost broke
 const BOOST_MAX = 0.85;           // never a guaranteed rig
+const BOOST_FLUSH_SHARE = 0.25;   // of triggered boosts (non-critical), aim for a 4-to-flush tease instead of a pair
+const FLUSH_BOOST_TARGET = 4;     // "4 cards to a flush" is the classic nail-biter shape
 
 function getBoostChance() {
     let chance = BOOST_BASE;
@@ -293,6 +295,17 @@ function shuffle(deck) {
 function boostHand() {
     if (Math.random() >= getBoostChance()) return;
 
+    // Critical-balance rescues stay on the reliable pair path; everywhere else,
+    // sometimes reach for the bigger emotional payoff of a 4-to-flush tease instead.
+    const isCritical = balance <= bet * CRITICAL_BALANCE_HANDS;
+    if (!isCritical && Math.random() < BOOST_FLUSH_SHARE) {
+        boostToFlushDraw();
+        return;
+    }
+    boostToPair();
+}
+
+function boostToPair() {
     const rankCounts = {};
     hand.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
     const counts = Object.values(rankCounts).sort((a, b) => b - a);
@@ -315,6 +328,35 @@ function boostHand() {
     hand[replaceIdx] = newCard;
     const deckIdx = deck.findIndex(c => c.rank === newCard.rank && c.suit === newCard.suit);
     if (deckIdx !== -1) deck.splice(deckIdx, 1);
+}
+
+function boostToFlushDraw() {
+    const suitCounts = {};
+    hand.forEach(c => suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1);
+    const bestSuit = Object.keys(suitCounts).reduce((a, b) => suitCounts[a] >= suitCounts[b] ? a : b);
+    const count = suitCounts[bestSuit] || 0;
+    if (count >= FLUSH_BOOST_TARGET || count === 5) return;
+
+    const otherIndices = hand.map((c, i) => c.suit !== bestSuit ? i : -1).filter(i => i !== -1);
+    const usedRanksInSuit = new Set(hand.filter(c => c.suit === bestSuit).map(c => c.rank));
+    let needed = FLUSH_BOOST_TARGET - count;
+
+    while (needed > 0 && otherIndices.length > 0) {
+        const pickPos = Math.floor(Math.random() * otherIndices.length);
+        const idx = otherIndices.splice(pickPos, 1)[0];
+        const availableRanks = RANKS.filter(r => !usedRanksInSuit.has(r));
+        if (availableRanks.length === 0) break;
+        const newRank = availableRanks[Math.floor(Math.random() * availableRanks.length)];
+        const newCard = { rank: newRank, suit: bestSuit };
+
+        const oldCard = hand[idx];
+        deck.push(oldCard);
+        hand[idx] = newCard;
+        usedRanksInSuit.add(newRank);
+        const deckIdx = deck.findIndex(c => c.rank === newCard.rank && c.suit === newCard.suit);
+        if (deckIdx !== -1) deck.splice(deckIdx, 1);
+        needed--;
+    }
 }
 
 // --- Multi-hand mode (Triple/Five Play) — unlocks at level 10 ---
@@ -366,6 +408,17 @@ function renderMultiHands(extraResults) {
     });
 }
 
+function updateMainButton() {
+    const btn = document.getElementById('main-btn');
+    btn.textContent = gameState === 'hold' ? 'Draw' : 'Deal';
+    btn.className = 'btn-primary';
+}
+
+function mainAction() {
+    if (gameState === 'bet') deal();
+    else if (gameState === 'hold') draw();
+}
+
 function deal() {
     if (balance < bet) {
         if (balance === 0) {
@@ -402,8 +455,7 @@ function deal() {
 
     renderHand();
     renderMultiHands([]);
-    document.getElementById('deal-btn').disabled = true;
-    document.getElementById('hold-btn').disabled = false;
+    updateMainButton();
     lastHandType = null;
     const resultEl = document.getElementById('result');
     resultEl.className = 'result-panel';
@@ -475,6 +527,10 @@ function draw() {
         totalWon += win;
         lossStreak = 0;
         currentPayouts = { ...basePayouts() };
+        // Phase 2: update personal best for stories
+        if (window.checkAndUpdateBestHand) checkAndUpdateBestHand(bestType, win, hand);
+        // Phase 2: push hourly champion points
+        if (window.pushChampionPoints) pushChampionPoints(bestType, win);
     } else {
         totalLost += totalBet;
         lossStreak++;
@@ -514,8 +570,7 @@ function draw() {
     renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
 
     gameState = 'bet';
-    document.getElementById('deal-btn').disabled = false;
-    document.getElementById('hold-btn').disabled = true;
+    updateMainButton();
 }
 
 function toggleHold(i) {
@@ -852,7 +907,8 @@ function initGame() {
     updateVariantUI();
     updateMultiHandUI();
     renderPayouts();
-    document.getElementById('hold-btn').disabled = true;
+    // Greet the player with an already-dealt hand, as if Deal was just pressed
+    deal();
 }
 
 document.addEventListener('keydown', function(e) {
@@ -863,8 +919,5 @@ document.addEventListener('keydown', function(e) {
     }
     const keyMap = { '1': 5, '2': 10, '3': 20, '4': 50 };
     if (keyMap[e.key] && gameState === 'bet') setBet(keyMap[e.key]);
-    if (e.key === 'd' || e.key === 'D') {
-        if (gameState === 'bet' && !document.getElementById('deal-btn').disabled) deal();
-        else if (gameState === 'hold') draw();
-    }
+    if (e.key === 'd' || e.key === 'D') mainAction();
 });

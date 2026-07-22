@@ -8,3 +8,7 @@ android/build/
 android/capacitor-cordova-android-plugins/build/
 android/capacitor-android/build/
 android/local.properties
+# Sensitive Android signing/credentials — never commit to a public repo
+android/keystore.properties
+android/app/*.jks
+android/app/google-services.json

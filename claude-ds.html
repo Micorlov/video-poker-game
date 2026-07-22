@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Claude DS · Design System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght=500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --felt-900: #061711;
+            --felt-800: #0c2419;
+            --felt-700: #123222;
+            --felt-600: #1a4029;
+            --bg-top: var(--felt-800);
+            --bg-bottom: var(--felt-900);
+            --panel: var(--felt-700);
+            --panel-solid: var(--felt-700);
+            --border: var(--felt-600);
+            --gold: #e8b93f;
+            --gold-600: #c99a2e;
+            --gold-100: #fbe8b8;
+            --gold-dim: rgba(232, 185, 63, 0.1);
+            --green: #4caf7d;
+            --green-dim: rgba(76, 175, 125, 0.15);
+            --red: #e6533f;
+            --red-dim: rgba(230, 83, 63, 0.12);
+            --text: #eef6f0;
+            --text-muted: rgba(238, 246, 240, 0.6);
+            --text-faint: rgba(238, 246, 240, 0.45);
+            --radius-lg: 16px;
+            --radius-md: 14px;
+            --radius-sm: 12px;
+            --nav-height: 64px;
+            --blue: #5b9cf5;
+            --blue-dim: rgba(91, 156, 245, 0.12);
+            --purple: #a78bfa;
+            --purple-dim: rgba(167, 139, 250, 0.12);
+            --orange: #f59e0b;
+            --orange-dim: rgba(245, 158, 11, 0.12);
+        }
+
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom) 60%);
+            min-height: 100vh;
+            color: var(--text);
+            padding-bottom: 0;
+        }
+
+        .ds-app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+
+        /* ─── Auth Gate ─── */
+        .auth-gate {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .auth-gate-inner {
+            text-align: center;
+            max-width: 380px;
+        }
+        .auth-gate-inner h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .auth-gate-inner p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+        .google-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            color: #333;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: opacity .15s;
+        }
+        .google-btn:hover { opacity: .9; }
+        .auth-error {
+            color: var(--red);
+            font-size: 13px;
+            margin-top: 12px;
+        }
+        .auth-error.hidden { display: none; }
+
+        /* ─── Top Bar ─── */
+        .ds-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0 16px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .ds-logo {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -.02em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ds-logo span { color: var(--gold); }
+        .ds-logo-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .ds-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+        }
+        .ds-topbar-right .user-photo {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+        }
+        .ds-topbar-link {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .ds-topbar-link:hover { text-decoration: underline; }
+        .ds-signout-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+        }
+        .ds-signout-btn:hover { border-color: var(--text-muted); }
+
+        /* ─── Summary Row ─── */
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .summary-card {
+            background: var(--panel);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+        .summary-card-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .summary-card-value {
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        .summary-card-value.gold { color: var(--gold); }
+        .summary-card-value.green { color: var(--green); }
+        .summary-card-value.blue { color: var(--blue); }
+        .summary-card-value.purple { color: var(--purple); }
+
+        /* ─── Tabs ─── */
+        .ds-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .ds-tab {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 18px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            white-space: nowrap;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: color .15s, border-color .15s;
+        }
+        .ds-tab:hover { color: var(--text); }
+        .ds-tab.selected {
+            color: var(--gold);
+            border-bottom-color: var(--gold);
+        }
+
+        /* ─── Tab Content ─── */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        .ds-section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin: 28px 0 14px;
+        }
+        .ds-section-title:first-child { margin-top: 4px; }
+
+        /* ─── Cards / Tables ─── */
+        .ds-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .ds-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            cursor: pointer;
+            gap: 12px;
+        }
+        .ds-card-header:hover { background: rgba(255,255,255,.03); }
+        .ds-card-header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .ds-card-header-left .name { font-weight: 700; font-size: 14px; }
+        .ds-card-header-left .sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .ds-card-body {
+            padding: 0 16px 16px;
+            display: none;
+        }
+        .ds-card.open .ds-card-body { display: block; }
+        .ds-card-caret {
+            transition: transform .2s;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+        .ds-card.open .ds-card-caret { transform: rotate(180deg); }
+
+        /* Status badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            flex-shrink: 0;
+        }
+        .badge-done { background: var(--green-dim); color: var(--green); }
+        .badge-progress { background: var(--gold-dim); color: var(--gold); }
+        .badge-pending { background: var(--red-dim); color: var(--red); }
+        .badge-optional { background: rgba(255,255,255,.06); color: var(--text-muted); }
+
+        /* Token chips */
+        .token-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255,255,255,.06);
+            color: var(--gold-100);
+            cursor: default;
+            transition: background .15s;
+        }
+        .token-chip:hover { background: rgba(255,255,255,.1); }
+        .token-chip .count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            font-size: 10px;
+            background: var(--gold-dim);
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* Token usage bar */
+        .token-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 0;
+        }
+        .token-bar-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            min-width: 120px;
+            color: var(--text);
+        }
+        .token-bar-track {
+            flex: 1;
+            height: 14px;
+            background: rgba(255,255,255,.06);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .token-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width .6s ease;
+        }
+        .token-bar-fill.high { background: var(--gold); }
+        .token-bar-fill.med { background: var(--green); }
+        .token-bar-fill.low { background: var(--blue); }
+
+        /* Component grid */
+        .comp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 10px;
+        }
+        .comp-card {
+            background: rgba(255,255,255,.03);
+            border: 1px solid rgba(255,255,255,.06);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+        }
+        .comp-card .name {
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+        .comp-card .file {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .comp-card .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 6px;
+        }
+        .comp-card .tags .tag {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 99px;
+            background: rgba(255,255,255,.06);
+            color: var(--text-muted);
+        }
+
+        /* Token detail table */
+        .token-detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .token-detail-table th {
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+        }
+        .token-detail-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,.04);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+        .token-detail-table td:first-child {
+            font-weight: 600;
+            color: var(--gold-100);
+        }
+        .token-detail-table td:nth-child(2) { color: var(--text-muted); }
+        .token-detail-table tr:hover td { background: rgba(255,255,255,.03); }
+
+        /* Animation cards */
+        .anim-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+        }
+        .anim-card {
+            background: rgba(255,255,255,.03);
+            border: 1px solid rgba(255,255,255,.06);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+        }
+        .anim-card .name {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--gold);
+        }
+        .anim-card .desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .anim-card .file {
+            font-size: 10px;
+            color: var(--text-faint);
+            margin-top: 6px;
+        }
+
+        /* Task checklist */
+        .task-list { margin: 0; }
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,.04);
+        }
+        .task-item:last-child { border-bottom: none; }
+        .task-item .check {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--text-muted);
+            border-radius: 4px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            transition: border-color .15s, background .15s;
+        }
+        .task-item.done .check {
+            background: var(--green);
+            border-color: var(--green);
+            color: #fff;
+            content: "✓";
+        }
+        .task-item .task-text {
+            font-size: 13px;
+            line-height: 1.4;
+            flex: 1;
+        }
+        .task-item .task-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .task-item.done .task-text { color: var(--text-muted); }
+
+        /* File badge */
+        .file-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-faint);
+            background: rgba(255,255,255,.04);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Color swatch */
+        .swatch {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            vertical-align: middle;
+            border: 1px solid rgba(255,255,255,.1);
+            flex-shrink: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .ds-app { padding: 12px 10px 30px; }
+            .ds-logo { font-size: 17px; }
+            .ds-tab { padding: 8px 12px; font-size: 12px; }
+            .summary-row { grid-template-columns: repeat(2, 1fr); }
+            .comp-grid { grid-template-columns: 1fr; }
+            .token-bar-label { min-width: 80px; font-size: 10px; }
+            .token-bar-track { height: 12px; }
+            .ds-card-header { padding: 12px; }
+            .ds-card-body { padding: 0 12px 12px; }
+            .token-detail-table td, .token-detail-table th { padding: 6px 8px; font-size: 11px; }
+        }
+
+        /* Loading state */
+        .ds-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .ds-loading::after {
+            content: '';
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: ds-spin .7s linear infinite;
+        }
+        @keyframes ds-spin { to { transform: rotate(360deg); } }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<!-- ─── AUTH GATE ─── -->
+<div class="auth-gate hidden" id="auth-gate">
+    <div class="auth-gate-inner">
+        <h1>Claude <span style="color:var(--gold);">DS</span></h1>
+        <p>Design System inventory, token analytics, and component status for the Video Poker game.</p>
+        <button class="google-btn" onclick="signInWithGoogle()">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
+            <span>Sign in with Google</span>
+        </button>
+        <div class="auth-error hidden" id="auth-error"></div>
+    </div>
+</div>
+
+<!-- ─── MAIN APP ─── -->
+<div class="ds-app hidden" id="ds-app">
+
+    <!-- Top bar -->
+    <div class="ds-topbar">
+        <div>
+            <div class="ds-logo">
+                Claude <span>DS</span>
+                <span class="ds-logo-sub">v3.0 · Video Poker</span>
+            </div>
+        </div>
+        <div class="ds-topbar-right">
+            <img class="user-photo" id="user-photo" src="" alt="">
+            <span id="user-name" style="font-weight:600;"></span>
+            <a href="./index.html" class="ds-topbar-link">♠ Play</a>
+            <a href="./admin.html" class="ds-topbar-link">⚙ Admin</a>
+            <button class="ds-signout-btn" onclick="signOutUser()">Sign Out</button>
+        </div>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="summary-row" id="summary-row"></div>
+
+    <!-- Tabs -->
+    <div class="ds-tabs" id="ds-tabs">
+        <button class="ds-tab selected" data-tab="overview">Overview</button>
+        <button class="ds-tab" data-tab="tokens">Tokens</button>
+        <button class="ds-tab" data-tab="components">Components</button>
+        <button class="ds-tab" data-tab="animations">Animations</button>
+        <button class="ds-tab" data-tab="tasks">Tasks</button>
+    </div>
+
+    <!-- Tab: Overview -->
+    <div class="tab-panel active" id="panel-overview">
+        <div class="ds-section-title">At a Glance</div>
+        <div id="overview-content" class="ds-loading">Loading</div>
+    </div>
+
+    <!-- Tab: Tokens -->
+    <div class="tab-panel" id="panel-tokens">
+        <div class="ds-section-title">Design Token Usage</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">
+            CSS custom properties usage counts across all stylesheets. Tokens used ≥10 times are gold-highlighted.
+        </p>
+        <div id="token-bars"></div>
+        <div class="ds-section-title" style="margin-top:28px;">Token Reference</div>
+        <div id="token-table-wrapper">
+            <table class="token-detail-table">
+                <thead><tr><th>Token</th><th>Value</th><th>Usage</th><th>Category</th></tr></thead>
+                <tbody id="token-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tab: Components -->
+    <div class="tab-panel" id="panel-components">
+        <div class="ds-section-title">By Category</div>
+        <div id="components-content"></div>
+    </div>
+
+    <!-- Tab: Animations -->
+    <div class="tab-panel" id="panel-animations">
+        <div class="ds-section-title">Animation Keyframes</div>
+        <div id="animations-grid"></div>
+    </div>
+
+    <!-- Tab: Tasks -->
+    <div class="tab-panel" id="panel-tasks">
+        <div class="ds-section-title">Component Tasks</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">
+            Design system implementation checklist. Toggle items to track progress; state is saved locally.
+        </p>
+        <div id="tasks-content"></div>
+    </div>
+</div>
+<script>
+// ─── Firebase Config ───
+firebase.initializeApp({
+    apiKey: "AIzaSyB6m0Yis89jxvm06OFBqxs8P_vADjRXk0U",
+    authDomain: "video-poker-6d665.firebaseapp.com",
+    projectId: "video-poker-6d665",
+    storageBucket: "video-poker-6d665.firebasestorage.app",
+    messagingSenderId: "53702406091",
+    appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e"
+});
+const auth = firebase.auth();
+
+// ─── Design System Data ───
+
+const DESIGN_TOKENS = [
+    { name: '--felt-900',       value: '#061711',                    usage: 1,  category: 'Background' },
+    { name: '--felt-800',       value: '#0c2419',                    usage: 2,  category: 'Background' },
+    { name: '--felt-700',       value: '#123222',                    usage: 2,  category: 'Background' },
+    { name: '--felt-600',       value: '#1a4029',                    usage: 4,  category: 'Background' },
+    { name: '--bg-top',         value: 'var(--felt-800)',            usage: 1,  category: 'Background' },
+    { name: '--bg-bottom',      value: 'var(--felt-900)',            usage: 1,  category: 'Background' },
+    { name: '--panel',          value: 'var(--felt-700)',            usage: 5,  category: 'Surface' },
+    { name: '--panel-solid',    value: 'var(--felt-700)',            usage: 5,  category: 'Surface' },
+    { name: '--border',         value: 'var(--felt-600)',            usage: 16, category: 'Border' },
+    { name: '--border-strong',  value: 'var(--felt-600)',            usage: 6,  category: 'Border' },
+    { name: '--gold',           value: '#e8b93f',                    usage: 26, category: 'Accent' },
+    { name: '--gold-600',       value: '#c99a2e',                    usage: 0,  category: 'Accent' },
+    { name: '--gold-100',       value: '#fbe8b8',                    usage: 1,  category: 'Accent' },
+    { name: '--gold-dim',       value: 'rgba(232,185,63,0.1)',       usage: 3,  category: 'Accent' },
+    { name: '--green',          value: '#4caf7d',                    usage: 12, category: 'Status' },
+    { name: '--green-dim',      value: 'rgba(76,175,125,0.15)',      usage: 3,  category: 'Status' },
+    { name: '--red',            value: '#e6533f',                    usage: 6,  category: 'Status' },
+    { name: '--red-dim',        value: 'rgba(230,83,63,0.12)',       usage: 1,  category: 'Status' },
+    { name: '--text',           value: '#eef6f0',                    usage: 14, category: 'Text' },
+    { name: '--text-muted',     value: 'rgba(238,246,240,0.6)',      usage: 13, category: 'Text' },
+    { name: '--text-faint',     value: 'rgba(238,246,240,0.45)',     usage: 7,  category: 'Text' },
+    { name: '--radius-lg',      value: '16px',                       usage: 2,  category: 'Radius' },
+    { name: '--radius-md',      value: '14px',                       usage: 2,  category: 'Radius' },
+    { name: '--radius-sm',      value: '12px',                       usage: 11, category: 'Radius' },
+    { name: '--nav-height',     value: '64px',                        usage: 2,  category: 'Layout' },
+];
+
+const COMPONENTS = [
+    // Layout components (layout.css)
+    { name: '.app',       file: 'layout.css', category: 'Layout',       status: 'done',    tags: ['root', 'container'] },
+    { name: '.brandrow',  file: 'layout.css', category: 'Layout',       status: 'done',    tags: ['header', 'title-row'] },
+    { name: '.app-title', file: 'layout.css', category: 'Typography',   status: 'done',    tags: ['header', 'branding'] },
+    { name: '.tpill',     file: 'layout.css', category: 'Navigation',   status: 'done',    tags: ['tournament', 'pill'] },
+    { name: '.texpand',   file: 'layout.css', category: 'Navigation',   status: 'done',    tags: ['tournament', 'expand'] },
+    { name: '.screen',    file: 'layout.css', category: 'Layout',       status: 'done',    tags: ['section', 'page'] },
+    { name: '.screen-title', file: 'layout.css', category: 'Typography', status: 'done',   tags: ['page-title'] },
+    { name: '.panel',     file: 'layout.css', category: 'Surface',      status: 'done',    tags: ['card', 'container'] },
+    { name: '.section-label', file: 'layout.css', category: 'Typography', status: 'done',  tags: ['label', 'heading'] },
+    { name: '.bottom-nav',    file: 'layout.css', category: 'Navigation', status: 'done',  tags: ['nav', 'tabs'] },
+    { name: '.nav-btn',       file: 'layout.css', category: 'Navigation', status: 'done',  tags: ['nav', 'button'] },
+    { name: '.modal-backdrop', file: 'cards.css',  category: 'Overlay',    status: 'done',  tags: ['modal', 'backdrop'] },
+    { name: '.modal-box',      file: 'cards.css',  category: 'Overlay',    status: 'done',  tags: ['modal', 'dialog'] },
+    { name: '.modal-title',    file: 'cards.css',  category: 'Typography', status: 'done',  tags: ['modal', 'heading'] },
+    { name: '.modal-sub',      file: 'cards.css',  category: 'Typography', status: 'done',  tags: ['modal', 'subtitle'] },
+    { name: '.modal-close',    file: 'cards.css',  category: 'Overlay',    status: 'done',  tags: ['modal', 'close'] },
+    { name: '.modal-error',    file: 'cards.css',  category: 'Feedback',   status: 'done',  tags: ['modal', 'error'] },
+
+    // Balance & Bet
+    { name: '.balance-panel', file: 'cards.css', category: 'Game UI',     status: 'done',  tags: ['balance', 'panel'] },
+    { name: '.balance-row',   file: 'cards.css', category: 'Game UI',     status: 'done',  tags: ['balance', 'row'] },
+    { name: '.balance-value', file: 'cards.css', category: 'Game UI',     status: 'done',  tags: ['balance', 'value'] },
+    { name: '.bet-value',     file: 'cards.css', category: 'Game UI',     status: 'done',  tags: ['bet', 'value'] },
+    { name: '.bet-row',       file: 'cards.css', category: 'Game UI',     status: 'done',  tags: ['bet', 'row'] },
+    { name: '.bet-btn',       file: 'cards.css', category: 'Game UI',     status: 'done',  tags: ['bet', 'button'] },
+
+    // Cards
+    { name: '.hand',          file: 'cards.css', category: 'Card',        status: 'done',  tags: ['hand', 'container'] },
+    { name: '.hand-placeholder-text', file: 'cards.css', category: 'Card', status: 'done', tags: ['placeholder'] },
+    { name: '.card',          file: 'cards.css', category: 'Card',        status: 'done',  tags: ['card', 'flip'] },
+    { name: '.card-inner',    file: 'cards.css', category: 'Card',        status: 'done',  tags: ['card', 'flip'] },
+    { name: '.card-front',    file: 'cards.css', category: 'Card',        status: 'done',  tags: ['card', 'face'] },
+    { name: '.card-back',     file: 'cards.css', category: 'Card',        status: 'done',  tags: ['card', 'face'] },
+    { name: '.card-index',    file: 'cards.css', category: 'Card',        status: 'done',  tags: ['card', 'index'] },
+    { name: '.card-suit-large', file: 'cards.css', category: 'Card',      status: 'done',  tags: ['card', 'suit'] },
+    { name: '.card-royalty-center', file: 'cards.css', category: 'Card',  status: 'done',  tags: ['card', 'royalty'] },
+    { name: '.pip-grid',      file: 'cards.css', category: 'Card',        status: 'done',  tags: ['card', 'pip'] },
+    { name: '.pip',           file: 'cards.css', category: 'Card',        status: 'done',  tags: ['card', 'pip'] },
+    { name: '.held-badge',    file: 'cards.css', category: 'Card',        status: 'done',  tags: ['card', 'badge'] },
+    { name: '.win-badge',     file: 'cards.css', category: 'Card',        status: 'done',  tags: ['card', 'badge'] },
+
+    // Actions
+    { name: '.action-row',   file: 'cards.css', category: 'Game UI',     status: 'done',  tags: ['actions', 'row'] },
+    { name: '.btn-primary',  file: 'cards.css', category: 'Game UI',     status: 'done',  tags: ['button', 'primary'] },
+    { name: '.btn-secondary',file: 'cards.css', category: 'Game UI',     status: 'done',  tags: ['button', 'secondary'] },
+    { name: '.hint-btn',     file: 'cards.css', category: 'Game UI',     status: 'done',  tags: ['button', 'hint'] },
+
+    // Result & Feedback
+    { name: '.result-panel', file: 'cards.css', category: 'Feedback',    status: 'done',  tags: ['result', 'panel'] },
+    { name: '.explanation',  file: 'cards.css', category: 'Feedback',    status: 'done',  tags: ['explanation', 'text'] },
+    { name: '.streak-bar',   file: 'cards.css', category: 'Feedback',    status: 'done',  tags: ['streak', 'bar'] },
+
+    // Picker Variants
+    { name: '.variant-picker', file: 'cards.css', category: 'Picker',    status: 'done',  tags: ['variant', 'grid'] },
+    { name: '.variant-btn',    file: 'cards.css', category: 'Picker',    status: 'done',  tags: ['variant', 'button'] },
+    { name: '.multi-picker',   file: 'cards.css', category: 'Picker',    status: 'done',  tags: ['multi-hand', 'grid'] },
+    { name: '.multi-btn',      file: 'cards.css', category: 'Picker',    status: 'done',  tags: ['multi-hand', 'button'] },
+    { name: '.payout-panel',   file: 'cards.css', category: 'Info',      status: 'done',  tags: ['payout', 'table'] },
+    { name: '.payout-header',  file: 'cards.css', category: 'Info',      status: 'done',  tags: ['payout', 'header'] },
+    { name: '.payouts',        file: 'cards.css', category: 'Info',      status: 'done',  tags: ['payout', 'rows'] },
+    { name: '.payout-row',     file: 'cards.css', category: 'Info',      status: 'done',  tags: ['payout', 'row'] },
+    { name: '.payout-help',    file: 'cards.css', category: 'Info',      status: 'done',  tags: ['payout', 'help'] },
+
+    // Stats
+    { name: '.stats-toggle',      file: 'cards.css', category: 'Stats',   status: 'done',  tags: ['stats', 'toggle'] },
+    { name: '.stats-toggle-btn',  file: 'cards.css', category: 'Stats',   status: 'done',  tags: ['stats', 'button'] },
+    { name: '.stats-net-panel',   file: 'cards.css', category: 'Stats',   status: 'done',  tags: ['stats', 'net'] },
+    { name: '.stats-net-value',   file: 'cards.css', category: 'Stats',   status: 'done',  tags: ['stats', 'value'] },
+    { name: '.stats-grid',        file: 'cards.css', category: 'Stats',   status: 'done',  tags: ['stats', 'grid'] },
+    { name: '.stat-tile-value',   file: 'cards.css', category: 'Stats',   status: 'done',  tags: ['stats', 'tile'] },
+
+    // Settings
+    { name: '.settings-row',     file: 'cards.css', category: 'Settings', status: 'done',  tags: ['settings', 'row'] },
+    { name: '.settings-row-label', file: 'cards.css', category: 'Typography', status: 'done', tags: ['settings', 'label'] },
+    { name: '.settings-chevron', file: 'cards.css', category: 'Navigation', status: 'done', tags: ['chevron', 'arrow'] },
+    { name: '.toggle-switch',    file: 'cards.css', category: 'Settings', status: 'done',  tags: ['toggle', 'switch'] },
+    { name: '.default-bet-row',  file: 'cards.css', category: 'Settings', status: 'done',  tags: ['bet', 'default'] },
+    { name: '.btn-danger',       file: 'cards.css', category: 'Game UI',  status: 'done',  tags: ['button', 'danger'] },
+    { name: '.settings-footer',  file: 'cards.css', category: 'Typography', status: 'done', tags: ['footer', 'version'] },
+
+    // Toast / PWA
+    { name: '.toast',    file: 'cards.css', category: 'Feedback',  status: 'done',  tags: ['toast', 'notification'] },
+    { name: '.pwa-bar',  file: 'cards.css', category: 'Navigation',status: 'done',  tags: ['pwa', 'install', 'bar'] },
+
+    // Friends
+    { name: '.friends-signin-prompt', file: 'cards.css', category: 'Social', status: 'done', tags: ['friends', 'signin'] },
+    { name: '.vs-friends-card',       file: 'cards.css', category: 'Social', status: 'done', tags: ['friends', 'compare'] },
+    { name: '.play-rooms-panel',      file: 'cards.css', category: 'Social', status: 'done', tags: ['rooms', 'panel'] },
+    { name: '.see-all-link',          file: 'cards.css', category: 'Navigation', status: 'done', tags: ['link', 'see-all'] },
+    { name: '.room-row',              file: 'cards.css', category: 'Social', status: 'done', tags: ['room', 'row'] },
+    { name: '.create-room-link',      file: 'cards.css', category: 'Social', status: 'done', tags: ['room', 'create'] },
+    { name: '.own-code-panel',        file: 'cards.css', category: 'Social', status: 'done', tags: ['referral', 'code'] },
+    { name: '.invite-row',            file: 'cards.css', category: 'Social', status: 'done', tags: ['invite', 'row'] },
+    { name: '.invite-btn',            file: 'cards.css', category: 'Social', status: 'done', tags: ['invite', 'button'] },
+    { name: '.add-friend-row',        file: 'cards.css', category: 'Social', status: 'done', tags: ['friend', 'add'] },
+    { name: '.friend-code-input',     file: 'cards.css', category: 'Social', status: 'done', tags: ['input', 'code'] },
+    { name: '.friend-row',            file: 'cards.css', category: 'Social', status: 'done', tags: ['friend', 'row'] },
+    { name: '.friend-rank',           file: 'cards.css', category: 'Social', status: 'done', tags: ['friend', 'rank'] },
+    { name: '.friend-avatar',         file: 'cards.css', category: 'Social', status: 'done', tags: ['avatar', 'photo'] },
+    { name: '.room-card',             file: 'cards.css', category: 'Social', status: 'done', tags: ['room', 'card'] },
+
+    // Animations
+    { name: '.flash-overlay',        file: 'animations.css', category: 'Animation', status: 'done', tags: ['flash', 'screen'] },
+    { name: '.confetti-burst-piece', file: 'animations.css', category: 'Animation', status: 'done', tags: ['confetti', 'burst'] },
+    { name: '.gold-rain-piece',      file: 'animations.css', category: 'Animation', status: 'done', tags: ['gold', 'rain'] },
+    { name: '.shimmer-gold',         file: 'animations.css', category: 'Animation', status: 'done', tags: ['shimmer', 'gold'] },
+    { name: '.card.bounce',          file: 'animations.css', category: 'Animation', status: 'done', tags: ['card', 'bounce'] },
+    { name: '.streak-bar.bump',      file: 'animations.css', category: 'Animation', status: 'done', tags: ['streak', 'bump'] },
+];
+
+const ANIMATIONS = [
+    { name: 'screen-shake',    desc: 'Shakes the game screen on joker/power play',        file: 'animations.css', line: 10 },
+    { name: 'flash-fade',      desc: 'White overlay flash on win',                        file: 'animations.css', line: 32 },
+    { name: 'confetti-burst-fly', desc: 'Confetti pieces fly outward on big win',          file: 'animations.css', line: 47 },
+    { name: 'gold-rain-fall',  desc: 'Gold coins rain down on royal flush',               file: 'animations.css', line: 66 },
+    { name: 'shimmer',         desc: 'Gold shimmer sweep across payout highlight',        file: 'animations.css', line: 79 },
+    { name: 'card-bounce',     desc: 'Bounce animation when a card is held/drawn',        file: 'animations.css', line: 87 },
+    { name: 'streak-bump',     desc: 'Pulse bump on the streak bar when streak increases',file: 'animations.css', line: 96 },
+];
+
+const TASKS = [
+    { id: 't1',  text: 'Design tokens defined in tokens.css', sub: 'All CSS custom properties for colors, surfaces, radius, spacing', done: true },
+    { id: 't2',  text: 'Typography system', sub: 'Manrope font stack, section-label, screen-title, settings-row-label', done: true },
+    { id: 't3',  text: 'Layout system: screens, panels, app shell', sub: '.app, .screen, .panel, .bottom-nav', done: true },
+    { id: 't4',  text: 'Card component with flip animation', sub: '.card, .card-inner, .card-front, .card-back, .flipped', done: true },
+    { id: 't5',  text: 'Card suit system with pips', sub: '.card-suit-large, .pip-grid, .pip, .card-royalty-center', done: true },
+    { id: 't6',  text: 'Card index (rank + suit in corners)', sub: '.card-index, .card-index-rank, .card-index-suit', done: true },
+    { id: 't7',  text: 'Held / Win badges overlay on cards', sub: '.held-badge, .win-badge, .card.held, .card.winning', done: true },
+    { id: 't8',  text: 'Strategy hint highlights on cards', sub: '.hint-btn, .hint-suggest', done: true },
+    { id: 't9',  text: 'Balance & Bet controls', sub: '.balance-panel, .balance-value, .bet-row, .bet-btn', done: true },
+    { id: 't10', text: 'Action buttons: Deal / Draw', sub: '.btn-primary, .btn-secondary, .action-row', done: true },
+    { id: 't11', text: 'Result panel with explanations', sub: '.result-panel, .explanation', done: true },
+    { id: 't12', text: 'Streak bar with bonus tag', sub: '.streak-bar, .streak-bonus-tag, .streak-count', done: true },
+    { id: 't13', text: 'Payout table / panel', sub: '.payout-panel, .payout-header, .payout-row, .payout-help', done: true },
+    { id: 't14', text: 'Game variant picker (Jacks/Deuces/Bonus/Double)', sub: '.variant-picker, .variant-btn', done: true },
+    { id: 't15', text: 'Multi-hand picker (1×/3×/5×)', sub: '.multi-picker, .multi-btn', done: true },
+    { id: 't16', text: 'Stats screen: today/all-time toggle', sub: '.stats-toggle, .stats-toggle-btn, .stats-grid', done: true },
+    { id: 't17', text: 'Friend system: invite, leaderboard, rooms', sub: '.invite-row, .friend-row, .room-card', done: true },
+    { id: 't18', text: 'Settings: toggles, default bet, account', sub: '.toggle-switch, .settings-row, .account-signout-btn', done: true },
+    { id: 't19', text: 'Modal system for sign-in and rooms', sub: '.modal-backdrop, .modal-box, .google-btn', done: true },
+    { id: 't20', text: 'Toast notification system', sub: '.toast, .toast.show', done: true },
+    { id: 't21', text: 'PWA install banner', sub: '.pwa-bar, .pwa-bar-yes, .pwa-bar-no', done: true },
+    { id: 't22', text: 'Win animations: screen shake, flash, confetti, gold rain', sub: '@keyframes screen-shake, flash-fade, confetti-burst-fly, gold-rain-fall', done: true },
+    { id: 't23', text: 'Shimmer highlight effect', sub: '@keyframes shimmer, .shimmer-gold', done: true },
+    { id: 't24', text: 'Card bounce & streak bump animations', sub: '@keyframes card-bounce, streak-bump', done: true },
+    { id: 't25', text: 'Elite card art: J/Q/K royalty center designs', sub: '.card-royalty-center.rank-J/Q/K with gradient backgrounds', done: true },
+    { id: 't26', text: 'Dark felt theme consistency', sub: 'All components use the same felt palette via CSS variables', done: true },
+    { id: 't27', text: 'Touch & haptic feedback support', sub: 'Settings toggle, Capacitor haptics integration', done: true },
+    { id: 't28', text: 'Responsive/mobile-first breakpoints', sub: 'Clamp-based sizing, flexible grids, no horizontal overflow', done: true },
+];
+
+// ─── Auth ───
+let appReady = false;
+
+function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    auth.signInWithPopup(provider).catch(function(err) {
+        var el = document.getElementById('auth-error');
+        if (el) { el.textContent = err.message; el.classList.remove('hidden'); }
+    });
+}
+
+function signOutUser() {
+    auth.signOut();
+}
+
+auth.onAuthStateChanged(function(user) {
+    if (user) {
+        document.getElementById('auth-gate').classList.add('hidden');
+        document.getElementById('ds-app').classList.remove('hidden');
+        document.getElementById('user-name').textContent = user.displayName || user.email || 'User';
+        document.getElementById('user-photo').src = user.photoURL || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%230c2419" width="100" height="100"/><text x="50" y="65" text-anchor="middle" fill="%23e8b93f" font-size="40" font-family="sans-serif">?</text></svg>';
+        if (!appReady) { initApp(); appReady = true; }
+    } else {
+        document.getElementById('auth-gate').classList.remove('hidden');
+        document.getElementById('ds-app').classList.add('hidden');
+        appReady = false;
+    }
+});
+
+// ─── Main App ───
+function $(id) { return document.getElementById(id); }
+
+function initApp() {
+    buildSummaryRow();
+    buildTokenBars();
+    buildTokenTable();
+    buildComponentsContent();
+    buildAnimationsGrid();
+    buildTasksContent();
+    buildOverviewContent();
+    setupTabs();
+}
+
+function buildSummaryRow() {
+    var totalComponents = COMPONENTS.length;
+    var doneCount = COMPONENTS.filter(function(c) { return c.status === 'done'; }).length;
+    var tokenUsageTotal = DESIGN_TOKENS.reduce(function(s, t) { return s + t.usage; }, 0);
+    var animationsCount = ANIMATIONS.length;
+    var cssLines = 99 + 1053 + 131 + 50; // from wc output
+
+    $('summary-row').innerHTML = [
+        { label: 'Components', value: totalComponents, cls: 'gold' },
+        { label: 'Completed', value: doneCount + '/' + totalComponents, cls: 'green' },
+        { label: 'Design Tokens', value: DESIGN_TOKENS.length, cls: 'blue' },
+        { label: 'Token References', value: tokenUsageTotal, cls: 'purple' },
+        { label: 'Animations', value: animationsCount, cls: 'gold' },
+        { label: 'CSS Lines', value: cssLines.toLocaleString(), cls: '' },
+    ].map(function(s) {
+        return '<div class="summary-card"><div class="summary-card-label">' + s.label +
+            '</div><div class="summary-card-value' + (s.cls ? ' ' + s.cls : '') + '">' + s.value + '</div></div>';
+    }).join('');
+}
+
+function buildTokenBars() {
+    var sorted = DESIGN_TOKENS.slice().sort(function(a, b) { return b.usage - a.usage; });
+    var maxUsage = sorted[0] ? sorted[0].usage : 1;
+
+    var html = sorted.map(function(t) {
+        var pct = Math.round((t.usage / maxUsage) * 100);
+        var fillCls = t.usage >= 10 ? 'high' : (t.usage >= 4 ? 'med' : 'low');
+        return '<div class="token-bar-wrap">' +
+            '<span class="token-bar-label">' + t.name + '</span>' +
+            '<div class="token-bar-track"><div class="token-bar-fill ' + fillCls + '" style="width:' + pct + '%"></div></div>' +
+            '<span style="font-family:JetBrains Mono,monospace;font-size:11px;min-width:28px;text-align:right;color:var(--text-muted)">' + t.usage + '</span>' +
+            '</div>';
+    }).join('');
+    $('token-bars').innerHTML = html;
+}
+
+function buildTokenTable() {
+    var html = DESIGN_TOKENS.map(function(t) {
+        var swatch = t.value && t.value.indexOf('var(') !== 0 ? '<span class="swatch" style="background:' + t.value + '"></span> ' : '';
+        return '<tr><td>' + t.name + '</td><td>' + swatch + t.value + '</td><td>' + t.usage + '</td><td>' + t.category + '</td></tr>';
+    }).join('');
+    $('token-table-body').innerHTML = html;
+}
+
+function buildComponentsContent() {
+    var categories = {};
+    COMPONENTS.forEach(function(c) {
+        if (!categories[c.category]) categories[c.category] = [];
+        categories[c.category].push(c);
+    });
+    var order = ['Layout', 'Navigation', 'Surface', 'Game UI', 'Card', 'Typography', 'Picker', 'Info', 'Stats', 'Settings', 'Social', 'Feedback', 'Overlay', 'Animation'];
+    var html = '';
+    order.forEach(function(cat) {
+        if (!categories[cat]) return;
+        var items = categories[cat];
+        html += '<div class="ds-section-title">' + cat + ' <span style="font-weight:500;color:var(--text-faint);font-size:12px;">(' + items.length + ')</span></div>';
+        html += '<div class="comp-grid">';
+        items.forEach(function(c) {
+            var badgeCls = c.status === 'done' ? 'badge-done' : (c.status === 'progress' ? 'badge-progress' : 'badge-pending');
+            var badgeText = c.status === 'done' ? 'Done' : (c.status === 'progress' ? 'WIP' : 'Pending');
+            html += '<div class="comp-card">' +
+                '<div class="name">' + c.name + '</div>' +
+                '<div class="file">' + c.file + '</div>' +
+                '<div class="tags">' +
+                '<span class="badge ' + badgeCls + '">' + badgeText + '</span>' +
+                c.tags.map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('') +
+                '</div></div>';
+        });
+        html += '</div>';
+    });
+    $('components-content').innerHTML = html;
+}
+
+function buildAnimationsGrid() {
+    var html = '<div class="anim-grid">';
+    ANIMATIONS.forEach(function(a) {
+        html += '<div class="anim-card">' +
+            '<div class="name">@keyframes ' + a.name + '</div>' +
+            '<div class="desc">' + a.desc + '</div>' +
+            '<div class="file">' + a.file + ' · line ' + a.line + '</div>' +
+            '</div>';
+    });
+    html += '</div>';
+    $('animations-grid').innerHTML = html;
+}
+
+function buildTasksContent() {
+    var done = TASKS.filter(function(t) { return t.done; }).length;
+    var html = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">' +
+        '<div style="flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">' +
+        '<div style="height:100%;width:' + Math.round((done / TASKS.length) * 100) + '%;background:var(--green);border-radius:99px;transition:width .5s;"></div>' +
+        '</div>' +
+        '<span style="font-size:13px;font-weight:700;color:var(--text-muted);flex-shrink:0;">' + done + '/' + TASKS.length + '</span>' +
+        '</div>';
+    html += '<div class="ds-card"><div class="ds-card-body" style="display:block;padding:4px 16px 12px;">';
+    TASKS.forEach(function(t) {
+        html += '<div class="task-item' + (t.done ? ' done' : '') + '" data-id="' + t.id + '" onclick="toggleTask(this)">' +
+            '<div class="check">' + (t.done ? '✓' : '') + '</div>' +
+            '<div><div class="task-text">' + t.text + '</div><div class="task-sub">' + t.sub + '</div></div>' +
+            '</div>';
+    });
+    html += '</div></div>';
+    $('tasks-content').innerHTML = html;
+}
+
+function toggleTask(el) {
+    el.classList.toggle('done');
+    var check = el.querySelector('.check');
+    check.textContent = el.classList.contains('done') ? '✓' : '';
+    // Rebuild progress
+    var items = document.querySelectorAll('.task-item');
+    var done = 0;
+    items.forEach(function(i) { if (i.classList.contains('done')) done++; });
+    // Update progress bar
+    var progressWrap = document.querySelector('#tasks-content > div:first-child');
+    if (progressWrap) {
+        var fill = progressWrap.querySelector('div > div');
+        if (fill) fill.style.width = Math.round((done / TASKS.length) * 100) + '%';
+        var label = progressWrap.querySelector('span');
+        if (label) label.textContent = done + '/' + TASKS.length;
+    }
+}
+
+function buildOverviewContent() {
+    var categories = {};
+    COMPONENTS.forEach(function(c) {
+        if (!categories[c.category]) categories[c.category] = { total: 0, done: 0 };
+        categories[c.category].total++;
+        if (c.status === 'done') categories[c.category].done++;
+    });
+    var order = ['Layout', 'Navigation', 'Surface', 'Game UI', 'Card', 'Typography', 'Picker', 'Info', 'Stats', 'Settings', 'Social', 'Feedback', 'Overlay', 'Animation'];
+    var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">';
+    order.forEach(function(cat) {
+        if (!categories[cat]) return;
+        var c = categories[cat];
+        var pct = c.total > 0 ? Math.round((c.done / c.total) * 100) : 0;
+        html += '<div class="comp-card">' +
+            '<div class="name" style="font-size:14px;">' + cat + '</div>' +
+            '<div style="margin:8px 0 4px;font-size:24px;font-weight:800;">' + c.done + '<span style="font-size:14px;color:var(--text-muted);font-weight:500;">/' + c.total + '</span></div>' +
+            '<div style="height:4px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;">' +
+            '<div style="height:100%;width:' + pct + '%;background:' + (pct === 100 ? 'var(--green)' : 'var(--gold)') + ';border-radius:99px;"></div></div>' +
+            '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">' + pct + '% complete</div>' +
+            '</div>';
+    });
+    html += '</div>';
+
+    // Recent activity section
+    html += '<div class="ds-section-title" style="margin-top:28px;">Recent Development Activity</div>';
+    html += '<div class="ds-card"><div class="ds-card-body" style="display:block;padding:12px 16px;">';
+    html += '<div style="font-size:13px;line-height:1.6;">' +
+        '<div style="display:flex;gap:10px;padding:4px 0;"><span style="color:var(--gold);font-weight:700;">v3.0</span><span style="color:var(--text-muted);">Full Claude DS redesign: cards, layout, tokens, animations</span></div>' +
+        '<div style="display:flex;gap:10px;padding:4px 0;"><span style="color:var(--green);font-weight:700;">v2.5</span><span style="color:var(--text-muted);">Deuces Wild, gamble, daily spin, chat, avatars, mystery box, stats</span></div>' +
+        '<div style="display:flex;gap:10px;padding:4px 0;"><span style="color:var(--blue);font-weight:700;">v2.0</span><span style="color:var(--text-muted);">Firebase auth, friends system, rooms, leaderboard</span></div>' +
+        '<div style="display:flex;gap:10px;padding:4px 0;"><span style="color:var(--text-faint);font-weight:700;">v1.0</span><span style="color:var(--text-muted);">Core Jacks or Better, card rendering, basic stats</span></div>' +
+        '</div>';
+    html += '</div></div>';
+
+    $('overview-content').innerHTML = html;
+    $('overview-content').classList.remove('ds-loading');
+}
+
+function setupTabs() {
+    var tabs = document.querySelectorAll('.ds-tab');
+    tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            tabs.forEach(function(t) { t.classList.remove('selected'); });
+            tab.classList.add('selected');
+            var panels = document.querySelectorAll('.tab-panel');
+            panels.forEach(function(p) { p.classList.remove('active'); });
+            var panel = document.getElementById('panel-' + tab.getAttribute('data-tab'));
+            if (panel) panel.classList.add('active');
+        });
+    });
+}
+
+// Start auth check immediately
+</script>
+</body>
+</html>

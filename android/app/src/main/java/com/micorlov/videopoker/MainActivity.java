@@ -1,4 +1,4 @@
-package com.videopoker.app;
+package com.micorlov.videopoker;
 
 import com.getcapacitor.BridgeActivity;
 

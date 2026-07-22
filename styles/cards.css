@@ -37,6 +37,33 @@
     opacity: 0.8;
 }
 
+/* --- Theme picker --- */
+.theme-picker {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.theme-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 10px 4px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.theme-btn.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #1c1608;
+}
+
 /* --- Multi-hand picker --- */
 .multi-picker {
     display: grid;
@@ -243,7 +270,7 @@
 /* --- Hand / cards --- */
 .hand {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     justify-content: center;
     padding: 16px 0 8px;
 }
@@ -258,7 +285,7 @@
 .card {
     position: relative;
     flex: 1;
-    min-width: 0;
+    max-width: 78px;
     aspect-ratio: 2 / 3;
     cursor: pointer;
     perspective: 600px;
@@ -282,14 +309,14 @@
     position: absolute;
     inset: 0;
     backface-visibility: hidden;
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
 .card-front {
-    background: #f4f1e8;
+    background: #fbfaf6;
     color: #1a1a1a;
     padding: 6%;
     justify-content: space-between;
@@ -329,14 +356,16 @@
 
 .card-suit-large {
     flex: 1;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(30px, 9vw, 48px);
+    font-size: clamp(20px, 5.5vw, 30px);
 }
 
 .card-royalty-center {
     flex: 1;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -351,9 +380,10 @@
 
 .pip-grid {
     flex: 1;
+    min-height: 0;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(5, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(5, minmax(0, 1fr));
     gap: 1px;
     margin: 6% 4%;
 }
@@ -389,6 +419,56 @@
 .card.held .held-badge,
 .card.winning .win-badge {
     opacity: 1;
+}
+
+/* --- Multi-hand results --- */
+#multi-hands {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 10px;
+}
+
+.multi-hand-row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+}
+
+.mini-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 52px;
+    max-width: 62px;
+    background: #fbfaf6;
+    color: #1a1a1a;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    flex: 1;
+}
+
+.mini-card.red {
+    color: var(--red);
+}
+
+.mh-win {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--green);
+    margin-left: 4px;
+    white-space: nowrap;
+}
+
+.mh-lose {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-faint);
+    margin-left: 4px;
 }
 
 /* --- Action row --- */
@@ -958,6 +1038,54 @@
 .room-card .room-row-btn {
     width: 100%;
     margin-top: 10px;
+}
+
+.room-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.roomname {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.roomstatus {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+}
+
+.roomstatus.open {
+    background: var(--gold-100);
+    color: var(--green);
+}
+
+.roomstatus.playing {
+    background: var(--gold-100);
+    color: var(--gold);
+}
+
+.roommeta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.roomjoin {
+    margin-top: 10px;
+    text-align: center;
+    padding: 9px 0;
+    border-radius: 8px;
+    background: var(--gold);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
 }
 
 .rooms-empty {

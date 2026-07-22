@@ -1,0 +1,817 @@
+/* ========================================================================
+   Social layer — matched pixel-for-pixel to Video Poker App.dc.html
+   Maps design vars: --ig-text→--text, --ig-sub→--text-muted, --ig-grad
+   → our gold gradient. --felt-* mapped to our existing felt tokens.
+   ======================================================================== */
+
+/* --- Stories row (.storiesrow) --- */
+.stories-row {
+    display: flex;
+    gap: 14px;
+    margin-top: 16px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.stories-row::-webkit-scrollbar { display: none; }
+
+.story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 56px;
+}
+
+.story-ring {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5px;
+    box-sizing: border-box;
+}
+
+.story-ring.empty {
+    background: var(--border);
+}
+
+.story-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    background: var(--bg-top);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    border: 2px solid var(--bg-bottom);
+    overflow: hidden;
+}
+
+.story-name {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 56px;
+}
+
+.story-empty-msg {
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: center;
+    padding: 8px 0;
+}
+
+/* --- Story Viewer (full-screen overlay with centered card) --- */
+.story-viewer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.story-viewer-card {
+    position: relative;
+    width: 92%;
+    max-width: 400px;
+    background: var(--panel-solid);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* Progress bars on top of the viewer card */
+.story-progress-row {
+    display: flex;
+    gap: 3px;
+    padding: 10px 12px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+}
+
+.story-bar {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.2);
+    overflow: hidden;
+}
+
+.story-bar-fill {
+    height: 100%;
+    background: var(--text);
+    border-radius: 2px;
+    transition: width 0.1s linear;
+}
+
+.story-bar-fill.done {
+    width: 100%;
+}
+
+.story-bar-fill.active {
+    background: var(--gold);
+}
+
+/* Viewer header */
+.story-viewer-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 28px 14px 10px;
+}
+
+.story-viewer-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--panel-solid);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.story-viewer-name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.story-viewer-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+}
+
+/* Tap zones overlay within the viewer card */
+.story-tap-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 35%;
+    height: 100%;
+    z-index: 3;
+    cursor: pointer;
+}
+
+.story-tap-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 35%;
+    height: 100%;
+    z-index: 3;
+    cursor: pointer;
+}
+
+/* Viewer body */
+.story-viewer-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 24px 32px;
+    gap: 16px;
+}
+
+.story-hand-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--gold);
+    text-align: center;
+    font-family: 'Manrope', sans-serif;
+}
+
+.story-cards {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.story-card {
+    flex: 1;
+    max-width: 62px;
+    aspect-ratio: 2/3;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+
+.story-card-rank {
+    font-size: 19px;
+    color: #262626;
+}
+
+.story-card-suit {
+    font-size: 21px;
+    margin-top: 2px;
+    color: #262626;
+}
+
+.story-card.red .story-card-rank,
+.story-card.red .story-card-suit {
+    color: #ed4956;
+}
+
+.story-payout {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+}
+
+/* --- Nearby panels (Friends Leaderboard & Hourly Champions) --- */
+.nearby-panel .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.nearby-panel .panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.nearby-panel .panel-sub {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.champ-countdown {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.nearby-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.nearby-row:last-child {
+    border-bottom: none;
+}
+
+.nearby-row.me {
+    background: var(--gold-dim);
+    border-radius: 10px;
+    border-bottom-color: transparent;
+}
+
+.nearby-rank {
+    width: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.nearby-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.nearby-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+}
+
+.nearby-avatar.champ {
+    background: linear-gradient(135deg, var(--gold), var(--gold-100), var(--gold));
+    color: #1a1a1a;
+}
+
+.online-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    border: 2px solid var(--panel-solid);
+}
+
+.online-dot.offline {
+    background: var(--text-faint);
+}
+
+.nearby-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text);
+    min-width: 0;
+}
+
+.country-flag {
+    font-size: 14px;
+    line-height: 1;
+    margin-left: 4px;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.country-chip {
+    font-size: 9px;
+    font-weight: 700;
+    background: var(--panel-solid);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+}
+
+.nearby-net {
+    font-size: 13px;
+    font-weight: 700;
+    width: 58px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.nearby-net.positive { color: var(--green); }
+.nearby-net.negative { color: var(--red); }
+.nearby-net.zero     { color: var(--text-muted); }
+
+/* --- Play With Friends panel — mini room cards --- */
+.mini-room {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-bottom);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    box-sizing: border-box;
+    gap: 8px;
+}
+
+.mr-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.mr-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.mr-status {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.mr-status.open {
+    background: var(--gold-dim);
+    color: var(--green);
+}
+
+.mr-status.playing {
+    background: var(--gold-dim);
+    color: var(--gold);
+}
+
+.mr-join {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--gold);
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    flex-shrink: 0;
+    border: none;
+    font-family: inherit;
+}
+
+.create-room-dashed {
+    margin-top: 12px;
+    text-align: center;
+    padding: 11px 0;
+    border-radius: 10px;
+    border: 1.5px dashed var(--border);
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    background: none;
+    width: 100%;
+    font-family: inherit;
+}
+
+/* --- See All link --- */
+.see-all-link {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    cursor: pointer;
+}
+
+/* --- Friends header --- */
+.friends-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.friends-header .screen-title {
+    margin-bottom: 0;
+}
+
+.invite-pill {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--gold);
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+}
+
+/* --- Bottom sheets (modals) --- */
+.sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: flex-end;
+    z-index: 500;
+}
+
+.sheet {
+    width: 100%;
+    background: var(--panel-solid);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 18px max(28px, env(safe-area-inset-bottom));
+    box-sizing: border-box;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    max-width: 460px;
+    margin: 0 auto;
+}
+
+.sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.sheet-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+}
+
+.sheet-close {
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    background: none;
+    border: none;
+    line-height: 1;
+}
+
+.sheet-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+.sheet-link-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.sheet-link-text {
+    flex: 1;
+    background: var(--bg-bottom);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: monospace;
+}
+
+.sheet-copy-btn {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 9px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+    background: none;
+    font-family: inherit;
+    min-width: 80px;
+    text-align: center;
+}
+
+.sheet-copy-btn.copied {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+}
+
+.sheet-share-btn {
+    text-align: center;
+    padding: 13px 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Share chips (WhatsApp / Telegram) */
+.share-chips-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.share-chip {
+    flex: 1;
+    text-align: center;
+    padding: 12px 0;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    color: #fff;
+    font-family: inherit;
+}
+
+.share-chip.whatsapp { background: #25D366; }
+.share-chip.telegram { background: #229ED9; }
+
+.sheet-done-btn {
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px 0;
+    border-radius: 10px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* --- Inline room form --- */
+.inline-room-form {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    margin-top: 12px;
+}
+
+.inline-room-form .room-form-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 12px;
+    border-radius: 8px;
+    background: var(--bg-bottom);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.inline-room-form .room-form-input::placeholder {
+    color: var(--text-faint);
+}
+
+.inline-room-form .room-form-stakes {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.inline-room-form .room-form-stake {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    border-radius: 10px;
+    background: var(--bg-bottom);
+    border: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.inline-room-form .room-form-stake.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #1c1608;
+}
+
+.inline-room-form .room-form-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.inline-room-form .room-form-actions button {
+    flex: 1;
+    padding: 13px 0;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+}
+
+.room-form-create-btn {
+    background: var(--gold);
+    color: #fff;
+}
+
+.room-form-cancel-btn {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border) !important;
+}
+
+/* --- Friends leaderboard rows (Friends screen) --- */
+.friend-leaderboard-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.friend-leaderboard-row:last-child {
+    border-bottom: none;
+}
+
+.friend-leaderboard-row.me {
+    background: var(--gold-dim);
+    border-radius: 10px;
+    border-bottom-color: transparent;
+}
+
+.friend-lb-rank {
+    width: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.friend-lb-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.friend-lb-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+}
+
+.friend-lb-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text);
+    min-width: 0;
+}
+
+.friend-lb-streak {
+    font-size: 12px;
+    color: var(--text-muted);
+    width: 38px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.friend-lb-net {
+    font-size: 13px;
+    font-weight: 700;
+    width: 58px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.friend-lb-net.positive { color: var(--green); }
+.friend-lb-net.negative { color: var(--red); }
+.friend-lb-net.zero     { color: var(--text-muted); }
+
+/* --- Friend "You" tag --- */
+.friend-you-tag {
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--gold);
+    padding: 2px 6px;
+    border-radius: 999px;
+}
+
+/* --- Sign-in prompt row --- */
+.social-signin-prompt {
+    padding: 14px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    margin-top: 6px;
+}

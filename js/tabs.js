@@ -47,6 +47,35 @@ function renderStatsScreen() {
     document.getElementById('stats-streak-value').textContent = streak;
 }
 
+// --- Theme switching ---
+let currentTheme = 'green';
+try {
+    const saved = localStorage.getItem('vp_theme');
+    if (saved && ['green', 'blue', 'crimson'].includes(saved)) currentTheme = saved;
+} catch (e) {}
+
+function setTheme(theme) {
+    if (!['green', 'blue', 'crimson'].includes(theme) || theme === currentTheme) return;
+    currentTheme = theme;
+    try { localStorage.setItem('vp_theme', theme); } catch (e) {}
+    document.body.classList.remove('theme-blue', 'theme-crimson');
+    if (theme !== 'green') document.body.classList.add('theme-' + theme);
+    ['green', 'blue', 'crimson'].forEach(function(t) {
+        const btn = document.getElementById('theme-' + t);
+        if (btn) btn.classList.toggle('selected', t === theme);
+    });
+    triggerHaptic('LIGHT');
+}
+
+function applyTheme() {
+    document.body.classList.remove('theme-blue', 'theme-crimson');
+    if (currentTheme !== 'green') document.body.classList.add('theme-' + currentTheme);
+    ['green', 'blue', 'crimson'].forEach(function(t) {
+        const btn = document.getElementById('theme-' + t);
+        if (btn) btn.classList.toggle('selected', t === currentTheme);
+    });
+}
+
 function initSettingsScreen() {
     const soundToggle = document.getElementById('settings-sound-toggle');
     soundToggle.checked = soundEnabled;
@@ -119,6 +148,7 @@ function resetStatistics() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    applyTheme();
     initSound();
     initGame();
     initSettingsScreen();

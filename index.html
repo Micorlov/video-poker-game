@@ -32,6 +32,9 @@
                 <span>09:26:55</span>
             </div>
 
+            <!-- Phase 2: Stories row -->
+            <div class="stories-row" id="stories-row"></div>
+
             <div class="panel balance-panel">
                 <div class="balance-row">
                     <div>
@@ -56,8 +59,7 @@
             <div class="hand-placeholder-text" id="hand-placeholder-text">Tap a card or Deal to start the hand</div>
 
             <div class="action-row">
-                <button id="deal-btn" class="btn-primary" onclick="deal()">Deal</button>
-                <button id="hold-btn" class="btn-secondary" onclick="draw()" disabled>Draw</button>
+                <button id="main-btn" class="btn-primary" onclick="mainAction()">Deal</button>
                 <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
             </div>
 
@@ -68,21 +70,27 @@
                 <span class="streak-bonus-tag hidden" id="streak-bonus-tag"></span>
             </div>
 
-            <div class="panel friends-signin-prompt" id="friends-signin-prompt" onclick="openSignInModal()">
-                <span class="settings-row-label">Sign in to play with friends</span>
-                <span class="settings-chevron">›</span>
-            </div>
-
-            <div class="panel vs-friends-card hidden" id="vs-friends-card" onclick="showScreen('friends')">
-                <div class="vs-friends-rank" id="vs-friends-rank">#—</div>
-                <div>
-                    <div class="section-label">Vs Friends</div>
-                    <div class="vs-friends-detail" id="vs-friends-detail"></div>
+            <!-- Phase 2: Friends Leaderboard panel -->
+            <div class="panel nearby-panel" id="nearby-panel">
+                <div class="panel-head" onclick="showScreen('friends')">
+                    <span class="panel-title">Friends Leaderboard</span>
+                    <span class="panel-sub" id="nearby-panel-header">#— · —</span>
                 </div>
-                <span class="settings-chevron">›</span>
+                <div id="nearby-body"></div>
+                <div class="social-signin-prompt hidden" id="nearby-signin-prompt" onclick="openSignInModal()">Sign in to see your friends</div>
             </div>
 
-            <div class="panel play-rooms-panel">
+            <!-- Phase 2: Hourly Champions panel -->
+            <div class="panel nearby-panel">
+                <div class="panel-head">
+                    <span class="panel-title">⏱ Hourly Champions</span>
+                    <span class="champ-countdown" id="champ-countdown">Resets in —m</span>
+                </div>
+                <div id="champions-body"></div>
+                <div class="social-signin-prompt hidden" id="champions-signin-prompt" onclick="openSignInModal()">Sign in to compete for the hourly crown</div>
+            </div>
+
+            <div class="panel pwf-panel">
                 <div class="play-rooms-header">
                     <span class="section-label">Play With Friends</span>
                     <span class="see-all-link" onclick="showScreen('friends')">See All ›</span>
@@ -93,22 +101,6 @@
 
             <div class="result-panel" id="result">Place your bet and deal to play</div>
             <div class="explanation" id="explanation"></div>
-
-            <div class="panel payout-panel" id="payout-panel">
-                <button class="payout-header" onclick="document.getElementById('payout-panel').classList.toggle('collapsed')">
-                    <span class="payout-header-label">Payout Table</span>
-                    <span class="payout-caret">▲</span>
-                </button>
-                <div class="payouts" id="payouts"></div>
-                <button class="payout-help-toggle" onclick="const h=this.nextElementSibling;h.classList.toggle('visible');this.classList.toggle('open')">
-                    <span>ℹ️</span> How to read
-                </button>
-                <div class="payout-help">
-                    <p>Numbers show credits won <strong>per credit bet</strong>.</p>
-                    <p>Multiply the value by your bet for the actual payout.</p>
-                    <p class="payout-help-example">Example: Bet <strong>10</strong>, hit Flush (<strong>5×</strong>) → <strong>50</strong> credits won</p>
-                </div>
-            </div>
         </section>
 
         <section id="screen-stats" class="screen">
@@ -142,7 +134,10 @@
         </section>
 
         <section id="screen-friends" class="screen">
-            <h1 class="screen-title">Friends</h1>
+            <div class="friends-header">
+                <h1 class="screen-title">Friends</h1>
+                <button class="invite-pill" onclick="openInviteSheet()">+ Invite</button>
+            </div>
 
             <div class="panel friends-signin-prompt" id="friends-signed-out" onclick="openSignInModal()">
                 <span class="settings-row-label">Sign in to add friends</span>
@@ -186,7 +181,20 @@
                 <div id="friends-rooms-view" class="hidden">
                     <div class="rooms-empty hidden" id="friends-rooms-empty">No rooms yet — create one below.</div>
                     <div id="friends-rooms-list"></div>
-                    <button class="create-room-link" onclick="openRoomModal()">+ Create Room with Friends</button>
+                    <button class="create-room-link create-room-dashed" id="friends-create-room-btn" onclick="toggleInlineRoomForm()">+ Create a Poker Room with Friends</button>
+                    <div class="inline-room-form hidden" id="inline-room-form">
+                        <input class="room-form-input" id="inline-room-name" maxlength="24" placeholder="Room name…">
+                        <div class="room-form-stakes" id="inline-room-stakes">
+                            <button class="room-form-stake selected" onclick="selectInlineStake(5)">5</button>
+                            <button class="room-form-stake" onclick="selectInlineStake(10)">10</button>
+                            <button class="room-form-stake" onclick="selectInlineStake(20)">20</button>
+                            <button class="room-form-stake" onclick="selectInlineStake(50)">50</button>
+                        </div>
+                        <div class="room-form-actions">
+                            <button class="room-form-create-btn" onclick="createRoomInline()">Create &amp; Invite</button>
+                            <button class="room-form-cancel-btn" onclick="toggleInlineRoomForm()">Cancel</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -204,6 +212,13 @@
                     <span class="settings-row-label">Haptic Feedback</span>
                     <input type="checkbox" class="toggle-switch" id="settings-haptics-toggle">
                 </div>
+            </div>
+
+            <div class="section-label">Theme</div>
+            <div class="theme-picker">
+                <button class="theme-btn selected" id="theme-green" onclick="setTheme('green')">🟢 Green</button>
+                <button class="theme-btn" id="theme-blue" onclick="setTheme('blue')">🔵 Blue</button>
+                <button class="theme-btn" id="theme-crimson" onclick="setTheme('crimson')">🔴 Crimson</button>
             </div>
 
             <div class="section-label">Default Bet</div>
@@ -263,7 +278,7 @@
                 <span>Play</span>
             </button>
             <button class="nav-btn" id="nav-stats" onclick="showScreen('stats')">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon">▤</span>
                 <span>Stats</span>
             </button>
             <button class="nav-btn" id="nav-friends" onclick="showScreen('friends')">
@@ -271,7 +286,7 @@
                 <span>Friends</span>
             </button>
             <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
-                <span class="nav-icon">⚙️</span>
+                <span class="nav-icon">⚙</span>
                 <span>Settings</span>
             </button>
         </div>
@@ -321,8 +336,43 @@
         </div>
     </div>
 
+    <!-- Phase 2: Invite Friends bottom sheet -->
+    <div class="sheet-backdrop hidden" id="invite-sheet" onclick="if(event.target===this)closeSheet('invite-sheet')">
+        <div class="sheet">
+            <div class="sheet-header">
+                <span class="sheet-title">Invite Friends</span>
+                <button class="sheet-close" onclick="closeSheet('invite-sheet')">✕</button>
+            </div>
+            <div class="sheet-link-row">
+                <span class="sheet-link-text" id="invite-sheet-link">—</span>
+                <button class="sheet-copy-btn" id="invite-sheet-copy" onclick="copyInviteSheetLink()">Copy</button>
+            </div>
+            <button class="sheet-share-btn" onclick="shareInviteLink()">Share Invite Link</button>
+        </div>
+    </div>
+
+    <!-- Phase 2: Room Created bottom sheet -->
+    <div class="sheet-backdrop hidden" id="room-created-sheet" onclick="if(event.target===this)closeSheet('room-created-sheet')">
+        <div class="sheet">
+            <div class="sheet-header">
+                <span class="sheet-title">Room Created 🎉</span>
+                <button class="sheet-close" onclick="closeSheet('room-created-sheet')">✕</button>
+            </div>
+            <div class="sheet-sub">Invite friends to "<span id="room-created-name">—</span>"</div>
+            <div class="sheet-link-row">
+                <span class="sheet-link-text" id="room-created-link">—</span>
+                <button class="sheet-copy-btn" id="room-created-copy" onclick="copyRoomLink()">Copy</button>
+            </div>
+            <div class="share-chips-row">
+                <button class="share-chip whatsapp" onclick="shareRoomViaWhatsApp()">WhatsApp</button>
+                <button class="share-chip telegram" onclick="shareRoomViaTelegram()">Telegram</button>
+            </div>
+            <button class="sheet-done-btn" onclick="closeSheet('room-created-sheet')">Done</button>
+        </div>
+    </div>
+
     <script>
-<!-- BUILD_JS_PLACEHOLDER -->
-</script>
+ <!-- BUILD_JS_PLACEHOLDER -->
+ </script>
 </body>
 </html>

@@ -1,31 +1,67 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-    --felt-900: #061711;
-    --felt-800: #0c2419;
-    --felt-700: #123222;
-    --felt-600: #1a4029;
+    --felt-900: #0a2b1d;
+    --felt-800: #123825;
+    --felt-700: #1a452e;
+    --felt-600: #2a5a3d;
     --bg-top: var(--felt-800);
     --bg-bottom: var(--felt-900);
     --panel: var(--felt-700);
     --panel-solid: var(--felt-700);
     --border: var(--felt-600);
     --border-strong: var(--felt-600);
-    --gold: #e8b93f;
-    --gold-600: #c99a2e;
-    --gold-100: #fbe8b8;
-    --gold-dim: rgba(232, 185, 63, 0.1);
+    --gold: #d4af37;
+    --gold-600: #b8952e;
+    --gold-100: #f5e6b8;
+    --gold-dim: rgba(212, 175, 55, 0.1);
     --green: #4caf7d;
     --green-dim: rgba(76, 175, 125, 0.15);
     --red: #e6533f;
     --red-dim: rgba(230, 83, 63, 0.12);
-    --text: #eef6f0;
-    --text-muted: rgba(238, 246, 240, 0.6);
-    --text-faint: rgba(238, 246, 240, 0.45);
+    --text: #f3ede0;
+    --text-muted: #b9c4b6;
+    --text-faint: rgba(185, 196, 182, 0.6);
     --radius-lg: 16px;
     --radius-md: 14px;
     --radius-sm: 12px;
     --nav-height: 64px;
+}
+
+/* --- Blue theme --- */
+body.theme-blue {
+    --felt-900: #081018;
+    --felt-800: #0f1c2b;
+    --felt-700: #172a3d;
+    --felt-600: #25405a;
+    --bg-top: var(--felt-800);
+    --bg-bottom: var(--felt-900);
+    --panel: var(--felt-700);
+    --panel-solid: var(--felt-700);
+    --border: var(--felt-600);
+    --border-strong: var(--felt-600);
+    --text: #f0f4f8;
+    --text-muted: #a9b7c4;
+    --text-faint: rgba(169, 183, 196, 0.6);
+}
+
+/* --- Crimson theme --- */
+body.theme-crimson {
+    --felt-900: #1a0708;
+    --felt-800: #2b0c0d;
+    --felt-700: #3d1416;
+    --felt-600: #5c1e21;
+    --bg-top: var(--felt-800);
+    --bg-bottom: var(--felt-900);
+    --panel: var(--felt-700);
+    --panel-solid: var(--felt-700);
+    --border: var(--felt-600);
+    --border-strong: var(--felt-600);
+    --text: #f3ede0;
+    --text-muted: #c9b6b6;
+    --text-faint: rgba(201, 182, 182, 0.6);
+    --red: #ff6b6b;
+    --red-dim: rgba(255, 107, 107, 0.12);
 }
 
 html, body {

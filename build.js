@@ -17,6 +17,7 @@ const cssFiles = [
     'styles/tokens.css',
     'styles/layout.css',
     'styles/cards.css',
+    'styles/social.css',
     'styles/animations.css'
 ];
 
@@ -31,8 +32,12 @@ const jsFiles = [
     'js/ui.js',
     'js/progress.js',
     'js/firebase.js',
+    'js/presence.js',
     'js/friends.js',
     'js/rooms.js',
+    'js/stories.js',
+    'js/champions.js',
+    'js/invite.js',
     'js/game.js',
     'js/hints.js',
     'js/tabs.js',

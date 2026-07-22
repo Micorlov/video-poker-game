@@ -109,24 +109,36 @@ function renderFriendsScreen() {
     if (typeof friendsTab !== 'undefined' && friendsTab === 'rooms') renderFriendsRoomsList();
 
     listEl.innerHTML = '';
-    const ranked = friendsList.concat([{ displayName: 'You', netProfit: ownNetProfit(), bestStreak: bestStreak, self: true }])
+    const ranked = friendsList.concat([{ displayName: 'You', netProfit: ownNetProfit(), bestStreak: bestStreak, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
         .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
     if (emptyEl) emptyEl.classList.toggle('hidden', friendsList.length > 0);
     ranked.forEach(function(f, i) {
         const row = document.createElement('div');
-        row.className = 'friend-row' + (f.self ? ' me' : '');
+        row.className = 'friend-leaderboard-row' + (f.self ? ' me' : '');
 
         const rankEl = document.createElement('span');
-        rankEl.className = 'friend-rank';
+        rankEl.className = 'friend-lb-rank';
         rankEl.textContent = String(i + 1);
 
+        const avatarWrap = document.createElement('span');
+        avatarWrap.className = 'friend-lb-avatar-wrap';
         const avatarEl = document.createElement('span');
-        avatarEl.className = 'friend-avatar';
+        avatarEl.className = 'friend-lb-avatar';
         avatarEl.textContent = (f.displayName || 'P').charAt(0).toUpperCase();
+        const dot = document.createElement('span');
+        dot.className = 'online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline');
+        avatarWrap.appendChild(avatarEl);
+        avatarWrap.appendChild(dot);
 
         const nameEl = document.createElement('span');
-        nameEl.className = 'friend-name';
+        nameEl.className = 'friend-lb-name';
         nameEl.textContent = f.displayName || 'Player';
+        if (f.country) {
+            const chip = document.createElement('span');
+            chip.className = 'country-chip';
+            chip.textContent = f.country;
+            nameEl.appendChild(chip);
+        }
         if (f.self) {
             const youTag = document.createElement('span');
             youTag.className = 'friend-you-tag';
@@ -135,17 +147,17 @@ function renderFriendsScreen() {
         }
 
         const streakEl = document.createElement('span');
-        streakEl.className = 'friend-streak';
+        streakEl.className = 'friend-lb-streak';
         streakEl.textContent = '🔥' + (f.bestStreak || 0);
 
         const scoreEl = document.createElement('span');
-        scoreEl.className = 'friend-score';
+        scoreEl.className = 'friend-lb-net';
         const np = f.netProfit || 0;
         scoreEl.textContent = (np >= 0 ? '+' : '') + np;
         scoreEl.classList.add(np > 0 ? 'positive' : np < 0 ? 'negative' : 'zero');
 
         row.appendChild(rankEl);
-        row.appendChild(avatarEl);
+        row.appendChild(avatarWrap);
         row.appendChild(nameEl);
         row.appendChild(streakEl);
         row.appendChild(scoreEl);
@@ -153,38 +165,7 @@ function renderFriendsScreen() {
     });
 }
 
-function renderFriendsRoomsList() {
-    const listEl = document.getElementById('friends-rooms-list');
-    const emptyEl = document.getElementById('friends-rooms-empty');
-    if (!listEl) return;
-    listEl.innerHTML = '';
-    if (emptyEl) emptyEl.classList.toggle('hidden', myRooms.length > 0);
-    myRooms.forEach(function(room) {
-        const card = document.createElement('div');
-        card.className = 'room-card';
-
-        const head = document.createElement('div');
-        head.className = 'room-card-head';
-        const nameEl = document.createElement('span');
-        nameEl.className = 'room-row-name';
-        nameEl.textContent = room.name || 'Room';
-        head.appendChild(nameEl);
-
-        const meta = document.createElement('div');
-        meta.className = 'room-row-sub';
-        meta.textContent = (room.memberUids || []).length + ' friends · Stake ' + room.stake;
-
-        const btn = document.createElement('button');
-        btn.className = 'btn-primary room-row-btn';
-        btn.textContent = 'Enter Table';
-        btn.onclick = function() { openRoomDetail(room.id); };
-
-        card.appendChild(head);
-        card.appendChild(meta);
-        card.appendChild(btn);
-        listEl.appendChild(card);
-    });
-}
+// renderFriendsRoomsList moved to js/rooms.js (Phase 2)
 
 function getInviteLink() {
     const user = window.egUser;
@@ -192,7 +173,7 @@ function getInviteLink() {
     const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
     if (!code) return '';
     // Use the Firebase hosting URL as the canonical base
-    const base = window.location.origin + window.location.pathname;
+    const base = getShareBaseUrl();
     return base + '?ref=' + encodeURIComponent(code);
 }
 
@@ -298,36 +279,78 @@ function addFriendByInviteCode(code) {
 }
 
 function renderPlayFriendsWidgets() {
-    const card = document.getElementById('vs-friends-card');
-    const signInPrompt = document.getElementById('friends-signin-prompt');
-    if (!card) return;
     const user = window.egUser;
 
+    // Render stories row (always)
+    if (window.renderStoriesRow) renderStoriesRow();
+
+    // Render nearby leaderboard panel
+    renderNearbyPanel(user);
+
+    // Champions panel is handled by champions.js subscription
+
+    if (window.renderRoomsList) renderRoomsList();
+}
+
+function renderNearbyPanel(user) {
+    const bodyEl = document.getElementById('nearby-body');
+    const headerEl = document.getElementById('nearby-panel-header');
+    const promptEl = document.getElementById('nearby-signin-prompt');
+    if (!bodyEl) return;
+
     if (!user) {
-        card.classList.add('hidden');
-        if (signInPrompt) signInPrompt.classList.remove('hidden');
+        if (promptEl) promptEl.classList.remove('hidden');
+        bodyEl.innerHTML = '';
+        if (headerEl) headerEl.textContent = '#— · —';
         return;
     }
-    if (signInPrompt) signInPrompt.classList.add('hidden');
+    if (promptEl) promptEl.classList.add('hidden');
 
     if (!friendsList.length) {
-        card.classList.add('hidden');
+        bodyEl.innerHTML = '';
+        if (headerEl) headerEl.textContent = '#— · —';
         return;
     }
-    card.classList.remove('hidden');
 
     const own = ownNetProfit();
-    const ranked = friendsList.concat([{ displayName: 'You', netProfit: own, self: true }])
+    const ranked = friendsList.concat([{ displayName: 'You', netProfit: own, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
         .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
     const ownRank = ranked.findIndex(function(p) { return p.self; }) + 1;
     const leader = ranked[0];
 
-    document.getElementById('vs-friends-rank').textContent = '#' + ownRank;
-    const detailEl = document.getElementById('vs-friends-detail');
+    // Header: "#myRank · leader leads by X"
     if (leader.self) {
-        detailEl.textContent = 'You\'re leading the pack!';
+        headerEl.textContent = '#' + ownRank + ' · You\'re #1!';
     } else {
         const gap = (leader.netProfit || 0) - own;
-        detailEl.textContent = (leader.displayName || 'A friend') + ' leads by ' + gap;
+        headerEl.textContent = '#' + ownRank + ' · ' + (leader.displayName || 'Leader') + ' leads by ' + gap;
     }
+
+    // Body: show user's own row + friends ranked immediately above (up to 5 rows including self)
+    bodyEl.innerHTML = '';
+    const ownIdx = ranked.findIndex(function(p) { return p.self; });
+    // Show up to 4 rows above plus self (max 5 total)
+    const startIdx = Math.max(0, ownIdx - 4);
+    const visible = ranked.slice(startIdx, ownIdx + 1);
+
+    visible.forEach(function(f, vi) {
+        const globalRank = startIdx + vi + 1;
+        const row = document.createElement('div');
+        row.className = 'nearby-row' + (f.self ? ' me' : '');
+
+        row.innerHTML =
+            '<span class="nearby-rank">' + globalRank + '</span>' +
+            '<span class="nearby-avatar-wrap">' +
+                '<span class="nearby-avatar">' + (f.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
+                '<span class="online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline') + '"></span>' +
+            '</span>' +
+            '<span class="nearby-name">' + (f.displayName || 'Player') +
+                (f.country ? '<span class="country-chip">' + f.country + '</span>' : '') +
+            '</span>' +
+            '<span class="nearby-net ' + ((f.netProfit || 0) > 0 ? 'positive' : (f.netProfit || 0) < 0 ? 'negative' : 'zero') + '">' +
+                ((f.netProfit || 0) >= 0 ? '+' : '') + (f.netProfit || 0) +
+            '</span>';
+
+        bodyEl.appendChild(row);
+    });
 }

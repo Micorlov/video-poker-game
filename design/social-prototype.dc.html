@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet"><style>
+.theme-green{--felt-900:#0a2b1d;--felt-800:#123825;--felt-700:#1a452e;--felt-600:#2a5a3d;--gold-500:#d4af37;--gold-600:#b8952e;--gold-100:#f5e6b8;--win:#4caf7d;--lose:#e6533f;--ig-text:#f3ede0;--ig-sub:#b9c4b6;--ig-grad:linear-gradient(135deg,#d4af37,#b8952e)}
+.theme-blue{--felt-900:#081018;--felt-800:#0f1c2b;--felt-700:#172a3d;--felt-600:#25405a;--gold-500:#d4af37;--gold-600:#b8952e;--gold-100:#f5e6b8;--win:#4caf7d;--lose:#e6533f;--ig-text:#f0f4f8;--ig-sub:#a9b7c4;--ig-grad:linear-gradient(135deg,#d4af37,#b8952e)}
+.theme-crimson{--felt-900:#1a0708;--felt-800:#2b0c0d;--felt-700:#3d1416;--felt-600:#5c1e21;--gold-500:#d4af37;--gold-600:#b8952e;--gold-100:#f5e6b8;--win:#4caf7d;--lose:#ff6b6b;--ig-text:#f3ede0;--ig-sub:#c9b6b6;--ig-grad:linear-gradient(135deg,#d4af37,#b8952e)}
+.app{width:100%;height:100%;display:flex;flex-direction:column;background:var(--felt-900);color:var(--ig-text);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;position:relative;box-sizing:border-box}
+a{color:var(--gold-500)}a:hover{color:var(--gold-600)}
+.scrollarea{flex:1;overflow-y:auto;padding:56px 16px 16px;box-sizing:border-box}
+.brandrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--ig-text);font-family:'Manrope',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tpill{display:flex;align-items:center;gap:6px;background:var(--felt-700);border:1px solid var(--felt-600);padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;color:var(--gold-500);cursor:pointer}
+.texpand{margin-top:6px;background:var(--felt-700);border:1px solid var(--felt-600);border-radius:12px;padding:8px 10px;font-size:12px;color:var(--ig-sub);display:flex;justify-content:space-between}
+.variants{display:flex;gap:8px;margin-top:14px;overflow-x:auto;padding-bottom:2px}
+.vcard{flex:1;min-width:80px;background:var(--felt-700);border:1px solid var(--felt-600);border-radius:12px;padding:10px 6px;text-align:center;position:relative;cursor:pointer;box-sizing:border-box}
+.vcard.active{background:var(--ig-text);border-color:var(--ig-text)}
+.vlabel{font-size:11px;font-weight:700;color:var(--ig-text);line-height:1.25}
+.vcard.active .vlabel{color:var(--felt-900)}
+.vlock{position:absolute;top:5px;right:6px;font-size:9px;opacity:.6;line-height:1}
+.vcard.locked .vlabel{padding-top:9px}
+.rankstrip{display:flex;align-items:center;gap:12px;margin-top:16px;background:var(--felt-700);border:1px solid var(--felt-600);border-radius:14px;padding:14px 16px;cursor:pointer;box-sizing:border-box}
+.rankbadge{width:40px;height:40px;border-radius:50%;background:var(--ig-grad);color:#fff;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rankinfo{flex:1}
+.ranklabel{font-size:11px;color:var(--ig-sub);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.rankgap{font-size:14px;font-weight:700;margin-top:3px;color:var(--ig-text)}
+.rankarrow{color:var(--ig-sub);font-size:20px}
+.vcost{font-size:10px;color:var(--gold-500);font-weight:700;margin-top:4px}
+.lockmsg{margin-top:8px;font-size:12px;color:var(--gold-500);background:var(--gold-100);border:1px solid var(--gold-500);border-radius:10px;padding:8px 10px}
+.segrow{display:flex;gap:6px;margin-top:14px;background:var(--felt-700);border:1px solid var(--felt-600);border-radius:10px;padding:4px}
+.seg{flex:1;text-align:center;padding:8px 0;border-radius:8px;font-size:13px;font-weight:700;color:var(--ig-sub);cursor:pointer}
+.seg.active{background:var(--ig-text);color:var(--felt-900)}
+.panel{margin-top:14px;background:var(--felt-700);border:1px solid var(--felt-600);border-radius:12px;padding:14px;box-sizing:border-box}
+.panelhead{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.ptitle{font-size:12px;font-weight:700;color:var(--ig-text);letter-spacing:.03em;text-transform:uppercase}
+.chev{transition:transform .2s;color:var(--ig-sub);font-size:11px}
+.chev.open{transform:rotate(180deg)}
+.paygrid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;margin-top:10px}
+.payrow{display:flex;justify-content:space-between;padding:7px 4px;border-bottom:1px solid var(--felt-600);font-size:12px}
+.pname{color:var(--ig-sub);font-weight:600}
+.pval{color:var(--ig-text);font-weight:700;font-variant-numeric:tabular-nums}
+.payrow.hit{background:var(--gold-100);border-radius:8px}
+.payrow.hit .pname{color:var(--gold-600)}
+.balrow{display:flex;justify-content:space-between;margin-top:14px}
+.balcol{flex:1}
+.ballabel{font-size:10px;color:var(--ig-sub);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.balval{font-size:20px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;color:var(--ig-text)}
+.balval.gold{color:var(--ig-text)}
+.balval.win{color:var(--win)}
+.betrow{display:flex;gap:8px;margin-top:10px}
+.betchip{flex:1;text-align:center;padding:10px 0;border-radius:10px;background:var(--felt-900);border:1px solid var(--felt-600);font-weight:700;font-size:13px;color:var(--ig-text);cursor:pointer;box-sizing:border-box}
+.betchip.active{background:var(--ig-text);border-color:var(--ig-text);color:var(--felt-900)}
+.betchip.disabled{opacity:.35;pointer-events:none}
+.cardsrow{display:flex;gap:8px;margin-top:16px}
+.cardslot{flex:1;aspect-ratio:2/3;border-radius:10px;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.cardslot.back{background:repeating-linear-gradient(45deg,var(--felt-600),var(--felt-600) 6px,var(--felt-700) 6px,var(--felt-700) 12px);border:1.5px dashed var(--felt-600)}
+.cardslot.front{background:#ffffff;box-shadow:0 1px 3px rgba(0,0,0,.15);border:1px solid var(--felt-600)}
+.cardslot.held{outline:2.5px solid var(--gold-500);outline-offset:2px}
+.cface{display:flex;flex-direction:column;align-items:center;font-weight:800}
+.cface .r{font-size:19px}
+.cface .s{font-size:21px;margin-top:2px}
+.cface.red{color:#ed4956}
+.cface.black{color:#262626}
+.heldtag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--gold-500);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:999px;letter-spacing:.03em}
+.backglyph{font-size:22px;color:var(--ig-sub);opacity:.4}
+.dealhint{font-size:11px;color:var(--ig-sub);text-align:center;margin-top:8px}
+.actrow{display:flex;gap:10px;margin-top:16px}
+.btn{flex:1;padding:13px 0;border-radius:10px;text-align:center;font-size:15px;font-weight:700;cursor:pointer;box-sizing:border-box}
+.btn.deal{background:var(--ig-grad);color:#fff}
+.btn.draw{background:var(--gold-500);color:#fff}
+.btn.disabled{background:var(--felt-600);color:var(--ig-sub);pointer-events:none}
+.hintbtn{width:46px;flex-shrink:0;border-radius:10px;background:var(--felt-700);border:1px solid var(--felt-600);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer}
+.hinttip{margin-top:10px;font-size:12px;color:var(--gold-600);background:var(--gold-100);border:1px solid var(--gold-500);border-radius:10px;padding:9px 11px;line-height:1.4}
+.resultcard{margin-top:14px;border-radius:12px;padding:12px 14px;text-align:center;box-sizing:border-box}
+.resultcard.win{background:var(--gold-100);border:1px solid var(--win)}
+.resultcard.lose{background:var(--felt-700);border:1px solid var(--felt-600)}
+.resultcard.none{background:var(--felt-700);border:1px solid var(--felt-600)}
+.resultname{font-size:15px;font-weight:700;color:var(--ig-text)}
+.resultname.win{color:var(--win)}
+.resultname.lose{color:var(--ig-sub)}
+.resultname.none{color:var(--ig-sub)}
+.resultpay{font-size:12px;color:var(--ig-sub);margin-top:2px}
+.bottomnav{display:flex;flex-shrink:0;padding:8px 8px 26px;gap:4px;border-top:1px solid var(--felt-600);background:var(--felt-800);box-sizing:border-box}
+.navitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;border-radius:10px;cursor:pointer;color:var(--ig-sub)}
+.navitem.active{color:var(--ig-text)}
+.navicon{font-size:19px}
+.navlabel{font-size:10px;font-weight:600}
+.pagetitle{font-size:20px;font-weight:700;margin-bottom:14px;color:var(--ig-text);font-family:'Manrope',sans-serif}
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.statcard{background:var(--felt-700);border:1px solid var(--felt-600);border-radius:12px;padding:14px;box-sizing:border-box}
+.statcard.wide{grid-column:1/-1}
+.statlabel{font-size:10px;color:var(--ig-sub);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.statval{font-size:22px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;color:var(--ig-text)}
+.statval.pos{color:var(--win)}
+.statval.neg{color:var(--lose)}
+.setgroup{margin-top:18px}
+.setgrouplabel{font-size:11px;color:var(--ig-sub);text-transform:uppercase;font-weight:700;letter-spacing:.04em;margin-bottom:6px;padding:0 4px}
+.setrow{display:flex;justify-content:space-between;align-items:center;background:var(--felt-700);border:1px solid var(--felt-600);padding:13px 14px;font-size:14px;font-weight:600;color:var(--ig-text);box-sizing:border-box}
+.setrow.first{border-radius:12px 12px 0 0;border-bottom:none}
+.setrow.mid{border-radius:0;border-bottom:none}
+.setrow.last{border-radius:0 0 12px 12px}
+.setrow.single{border-radius:12px}
+.toggle{width:46px;height:27px;border-radius:999px;background:var(--felt-600);position:relative;cursor:pointer;flex-shrink:0}
+.toggle.on{background:var(--win)}
+.toggleknob{position:absolute;top:2.5px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.toggle.on .toggleknob{left:21px}
+.resetbtn{margin-top:16px;width:100%;padding:13px 0;border-radius:10px;background:var(--felt-700);border:1px solid var(--lose);color:var(--lose);font-weight:700;font-size:13px;text-align:center;cursor:pointer;box-sizing:border-box}
+.aboutrow{font-size:12px;color:var(--ig-sub);text-align:center;margin-top:18px}
+.btn.ghost{background:var(--felt-700);color:var(--ig-text);border:1px solid var(--felt-600)}
+.friendrow{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--felt-600)}
+.friendrow.me{background:var(--gold-100);border-radius:10px}
+.franks{width:20px;font-size:12px;font-weight:700;color:var(--ig-sub);text-align:center}
+.favatar{width:34px;height:34px;border-radius:50%;background:var(--ig-grad);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.fname{flex:1;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;color:var(--ig-text)}
+.fyou{font-size:9px;font-weight:700;color:#fff;background:var(--gold-500);padding:2px 6px;border-radius:999px}
+.fstreak{font-size:12px;color:var(--ig-sub);width:38px;text-align:right}
+.fnet{font-size:13px;font-weight:700;width:58px;text-align:right;font-variant-numeric:tabular-nums}
+.fnet.pos{color:var(--win)}
+.fnet.neg{color:var(--lose)}
+.roomlist{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.roomcard{background:var(--felt-700);border:1px solid var(--felt-600);border-radius:12px;padding:12px 14px;box-sizing:border-box}
+.roomhead{display:flex;justify-content:space-between;align-items:center}
+.roomname{font-size:14px;font-weight:700;color:var(--ig-text)}
+.roomstatus{font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase}
+.roomstatus.open{background:var(--gold-100);color:var(--win)}
+.roomstatus.playing{background:var(--gold-100);color:var(--gold-500)}
+.roommeta{font-size:12px;color:var(--ig-sub);margin-top:4px}
+.roomjoin{margin-top:10px;text-align:center;padding:9px 0;border-radius:8px;background:var(--gold-500);color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+.createroombtn{margin-top:14px;text-align:center;padding:12px 0;border-radius:10px;border:1.5px dashed var(--felt-600);color:var(--gold-500);font-weight:700;font-size:13px;cursor:pointer}
+.roominput{width:100%;box-sizing:border-box;padding:11px 12px;border-radius:8px;background:var(--felt-900);border:1px solid var(--felt-600);color:var(--ig-text);font-size:13px;margin-top:10px;font-family:-apple-system,sans-serif}
+.seeall{font-size:11px;font-weight:700;color:var(--gold-500);cursor:pointer}
+.miniroom{display:flex;justify-content:space-between;align-items:center;background:var(--felt-900);border:1px solid var(--felt-600);border-radius:10px;padding:10px 12px;margin-top:10px;box-sizing:border-box}
+.mrname{font-size:13px;font-weight:700;color:var(--ig-text)}
+.mrmeta{font-size:11px;color:var(--ig-sub);margin-top:2px}
+.mrjoin{font-size:12px;font-weight:700;color:#fff;background:var(--gold-500);padding:6px 12px;border-radius:999px;cursor:pointer;flex-shrink:0}
+.addfriendbtn{margin-top:12px;text-align:center;padding:11px 0;border-radius:10px;border:1.5px dashed var(--felt-600);color:var(--gold-500);font-weight:700;font-size:12px;cursor:pointer;box-sizing:border-box}
+.friendshead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.invitebtn{font-size:13px;font-weight:700;color:#fff;background:var(--gold-500);padding:8px 14px;border-radius:999px;cursor:pointer}
+.modaloverlay{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;z-index:20}
+.modalsheet{width:100%;background:var(--felt-800);border-radius:20px 20px 0 0;padding:20px 18px 28px;box-sizing:border-box;box-shadow:0 -4px 20px rgba(0,0,0,.4)}
+.modalhead{display:flex;justify-content:space-between;align-items:center}
+.modaltitle{font-size:17px;font-weight:700;color:var(--ig-text);font-family:'Manrope',sans-serif}
+.modalclose{color:var(--ig-sub);font-size:16px;cursor:pointer;padding:4px}
+.invitelinkrow{display:flex;gap:8px;margin-top:16px;align-items:center}
+.invitelink{flex:1;background:var(--felt-900);border:1px solid var(--felt-600);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--ig-sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.invitecopybtn{font-size:12px;font-weight:700;color:var(--gold-500);border:1px solid var(--gold-500);padding:9px 12px;border-radius:10px;cursor:pointer;flex-shrink:0}
+.invitesharerow{margin-top:10px}
+.sharebtn{text-align:center;padding:13px 0;border-radius:10px;background:var(--ig-grad);color:#fff;font-weight:700;font-size:14px;cursor:pointer}
+.invitesectionlabel{font-size:11px;color:var(--ig-sub);text-transform:uppercase;font-weight:700;letter-spacing:.04em;margin-top:20px;margin-bottom:6px}
+.invitelist{display:flex;flex-direction:column}
+.inviterow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--felt-600)}
+.inviterow:last-child{border-bottom:none}
+.invitesendbtn{font-size:12px;font-weight:700;color:var(--gold-500);border:1px solid var(--gold-500);padding:7px 14px;border-radius:999px;cursor:pointer}
+.invitesentbtn{font-size:12px;font-weight:700;color:var(--ig-sub);border:1px solid var(--felt-600);padding:7px 14px;border-radius:999px}
+.storiesrow{display:flex;gap:14px;margin-top:16px;overflow-x:auto;padding-bottom:2px}
+.storyitem{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;width:56px}
+.storyring{width:56px;height:56px;border-radius:50%;background:var(--ig-grad);display:flex;align-items:center;justify-content:center;padding:2.5px;box-sizing:border-box}
+.storyring.seen{background:var(--felt-600)}
+.storyavatar{width:100%;height:100%;border-radius:50%;background:var(--felt-800);color:var(--ig-text);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;border:2px solid var(--felt-900)}
+.storyavatar.big{width:34px;height:34px;font-size:13px;border:none;background:var(--felt-700)}
+.storyname{font-size:10px;color:var(--ig-sub);font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.storycard{width:100%;height:100%;background:linear-gradient(180deg,var(--felt-800),var(--felt-900));border-radius:20px 20px 0 0;position:relative;box-sizing:border-box;padding:14px 16px 26px;display:flex;flex-direction:column;overflow:hidden}
+.storyprogress{display:flex;gap:4px}
+.storybar{flex:1;height:3px;background:rgba(255,255,255,.25);border-radius:2px;overflow:hidden}
+.storybarfill{width:0%;height:100%;background:#fff}
+.storybarfill.done{width:100%}
+.storyheader{display:flex;align-items:center;gap:8px;margin-top:10px}
+.storyheadname{flex:1;font-size:13px;font-weight:700;color:var(--ig-text)}
+.storyclose{color:var(--ig-text);opacity:.8;font-size:16px;cursor:pointer;padding:4px}
+.storytapzone{position:absolute;top:60px;bottom:0;width:35%}
+.storytapzone.left{left:0}
+.storytapzone.right{right:0}
+.storybody{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.storyhandname{font-size:22px;font-weight:800;color:var(--gold-500);font-family:'Manrope',sans-serif}
+.storycards{display:flex;gap:6px}
+.storycards .cardslot{width:52px;flex:none}
+.storypayout{font-size:15px;font-weight:700;color:var(--ig-text)}
+.nearbylist{display:flex;flex-direction:column;margin-top:10px}
+.nearbyrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--felt-600)}
+.nearbyrow:last-child{border-bottom:none}
+.nearbyrow.me{background:var(--gold-100);border-radius:10px;padding:8px 8px;margin:2px 0}
+.favatarwrap{position:relative;flex-shrink:0}
+.onlinedot{position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;border-radius:50%;background:var(--felt-600);border:2px solid var(--felt-700)}
+.onlinedot.on{background:var(--win)}
+.fcountry{font-size:10px;color:var(--ig-sub);font-weight:700;background:var(--felt-900);padding:2px 6px;border-radius:6px}
+.favatar.champ{background:var(--ig-grad)}
+.roominvitesub{font-size:13px;color:var(--ig-sub);margin-top:6px}
+.shareoptions{display:flex;gap:10px;margin-top:14px}
+.sharechip{flex:1;text-align:center;padding:12px 0;border-radius:10px;font-weight:700;font-size:13px;color:#fff;cursor:pointer}
+.sharechip.whatsapp{background:#25D366}
+.sharechip.telegram{background:#229ED9}
+</style></helmet><template id="__bundler_thumbnail"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="#0c2419"/><text x="50" y="64" font-size="46" text-anchor="middle" fill="#e8b93f" font-family="sans-serif">♠</text></svg></template><x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{true}}" hint-size="402,874"><div class="app theme-{{tableTheme}}"><div class="scrollarea"><sc-if value="{{isPlay}}" hint-placeholder-val="{{true}}"><div class="brandrow"><div class="brand">Video Poker</div><div class="tpill" onClick="{{toggleTournament}}">⏱ #1 · {{tournamentA}}<span>{{tourChev}}</span></div></div><sc-if value="{{tournamentExpanded}}"><div class="texpand"><span>🏆 Tournament #2</span><span>{{tournamentB}}</span></div></sc-if><div class="storiesrow"><sc-for list="{{storiesView}}" as="st" hint-placeholder-count="5"><div class="storyitem" onClick="{{st.onClick}}"><div class="storyring {{st.ringClass}}"><div class="storyavatar">{{st.initial}}</div></div><div class="storyname">{{st.name}}</div></div></sc-for></div><div class="panel"><div class="balrow"><div class="balcol"><div class="ballabel">Balance</div><div class="balval gold">{{balanceDisplay}}</div></div><div class="balcol"><div class="ballabel">Total Bet</div><div class="balval win">{{totalBetDisplay}}</div></div></div><div class="betrow"><sc-for list="{{betOptionsView}}" as="b" hint-placeholder-count="4"><div class="betchip {{b.stateClass}}" onClick="{{b.onClick}}">{{b.value}}</div></sc-for></div></div><div class="cardsrow"><sc-for list="{{cardsView}}" as="c" hint-placeholder-count="5"><div class="cardslot {{c.faceClass}} {{c.heldClass}}" onClick="{{c.onClick}}"><sc-if value="{{c.isFront}}"><sc-if value="{{c.held}}"><div class="heldtag">HELD</div></sc-if><div class="cface {{c.colorClass}}"><div class="r">{{c.rankLabel}}</div><div class="s">{{c.suit}}</div></div></sc-if><sc-if value="{{c.isBack}}"><div class="backglyph">🂠</div></sc-if></div></sc-for></div><sc-if value="{{showDealHint}}"><div class="dealhint">Tap a card or Deal to start the hand</div></sc-if><div class="actrow"><div class="btn deal {{dealClass}}" onClick="{{deal}}">Deal</div><div class="btn draw {{drawClass}}" onClick="{{draw}}">Draw</div><sc-if value="{{hintEnabled}}"><div class="hintbtn" onClick="{{toggleHint}}">💡</div></sc-if></div><div class="panel"><div class="panelhead" onClick="{{goFriends}}"><div class="ptitle">Friends Leaderboard</div><div class="seeall">#{{myRank}} · {{rankGapText}}</div></div><div class="nearbylist"><sc-for list="{{nearbyView}}" as="nb" hint-placeholder-count="5"><div class="nearbyrow {{nb.meClass}}"><div class="franks">{{nb.rank}}</div><div class="favatarwrap"><div class="favatar">{{nb.initial}}</div><div class="onlinedot {{nb.onlineClass}}"></div></div><div class="fname">{{nb.name}}<span class="fcountry">{{nb.country}}</span></div><div class="fnet {{nb.netClass}}">{{nb.netDisplay}}</div></div></sc-for></div></div><div class="panel"><div class="panelhead"><div class="ptitle">⏱ Hourly Champions</div><div class="seeall">{{champTimer}}</div></div><div class="nearbylist"><sc-for list="{{champView}}" as="ch" hint-placeholder-count="5"><div class="nearbyrow"><div class="franks">{{ch.rank}}</div><div class="favatarwrap"><div class="favatar champ">{{ch.initial}}</div><div class="onlinedot {{ch.onlineClass}}"></div></div><div class="fname">{{ch.name}}<span class="fcountry">{{ch.country}}</span></div><div class="fnet pos">{{ch.pointsDisplay}}</div></div></sc-for></div></div><div class="panel"><div class="panelhead"><div class="ptitle">Play With Friends</div><div class="seeall" onClick="{{goFriends}}">See All ›</div></div><sc-for list="{{roomsPreview}}" as="r" hint-placeholder-count="2"><div class="miniroom"><div><div class="mrname">{{r.name}}</div><div class="mrmeta">{{r.members}} · Stake {{r.stake}}</div></div><div class="mrjoin" onClick="{{r.onClick}}">{{r.actionLabel}}</div></div></sc-for><div class="addfriendbtn" onClick="{{openCreateRoom}}">+ Create a Poker Room with Friends</div></div><sc-if value="{{hintOpen}}"><div class="hinttip">{{hintTip}}</div></sc-if><div class="resultcard {{resultKind}}"><div class="resultname {{resultKind}}">{{resultTitle}}</div><sc-if value="{{hasResultSub}}"><div class="resultpay">{{resultSub}}</div></sc-if></div></sc-if><sc-if value="{{isStats}}"><div class="pagetitle">Statistics</div><div class="segrow"><div class="seg {{todayActiveClass}}" onClick="{{showToday}}">Today</div><div class="seg {{allTimeActiveClass}}" onClick="{{showAllTime}}">All-Time</div></div><div class="statgrid"><div class="statcard wide"><div class="statlabel">Net</div><div class="statval {{netClass}}">{{netDisplay}}</div></div><div class="statcard"><div class="statlabel">Won</div><div class="statval pos">{{wonDisplay}}</div></div><div class="statcard"><div class="statlabel">Lost</div><div class="statval neg">{{lostDisplay}}</div></div><div class="statcard"><div class="statlabel">Hands Played</div><div class="statval">{{handsDisplay}}</div></div><div class="statcard"><div class="statlabel">Best Streak</div><div class="statval">{{streakDisplay}}</div></div></div></sc-if><sc-if value="{{isFriends}}"><div class="friendshead"><div class="pagetitle" style="margin-bottom:0">Friends</div><div class="invitebtn" onClick="{{toggleInvite}}">+ Invite</div></div><div class="segrow"><div class="seg {{leaderboardActiveClass}}" onClick="{{showLeaderboard}}">Leaderboard</div><div class="seg {{roomsActiveClass}}" onClick="{{showRooms}}">Poker Rooms</div></div><sc-if value="{{isLeaderboardView}}"><div class="panel"><sc-for list="{{friendsView}}" as="f" hint-placeholder-count="6"><div class="friendrow {{f.meClass}}"><div class="franks">{{f.rank}}</div><div class="favatar">{{f.initial}}</div><div class="fname">{{f.name}}<sc-if value="{{f.isMe}}"><span class="fyou">You</span></sc-if></div><div class="fstreak">🔥{{f.streak}}</div><div class="fnet {{f.netClass}}">{{f.netDisplay}}</div></div></sc-for></div></sc-if><sc-if value="{{isRoomsView}}"><div class="roomlist"><sc-for list="{{roomsView}}" as="r" hint-placeholder-count="2"><div class="roomcard"><div class="roomhead"><div class="roomname">{{r.name}}</div><div class="roomstatus {{r.statusClass}}">{{r.status}}</div></div><div class="roommeta">{{r.members}} · Stake {{r.stake}}</div><div class="roomjoin" onClick="{{r.onClick}}">{{r.actionLabel}}</div></div></sc-for></div><sc-if value="{{newRoomClosed}}"><div class="createroombtn" onClick="{{toggleNewRoom}}">+ Create Room with Friends</div></sc-if><sc-if value="{{newRoomOpen}}"><div class="panel"><div class="ptitle">New Room</div><input class="roominput" placeholder="Room name" value="{{newRoomName}}" onChange="{{onRoomNameChange}}"/><div class="betrow"><sc-for list="{{roomStakeView}}" as="st" hint-placeholder-count="4"><div class="betchip {{st.stateClass}}" onClick="{{st.onClick}}">{{st.value}}</div></sc-for></div><div class="actrow"><div class="btn draw" onClick="{{createRoom}}">Create & Invite</div><div class="btn ghost" onClick="{{toggleNewRoom}}">Cancel</div></div></div></sc-if><sc-if value="{{roomInviteOpen}}"><div class="modaloverlay" onClick="{{closeRoomInvite}}"><div class="modalsheet" onClick="{{stopProp}}"><div class="modalhead"><div class="modaltitle">Room Created 🎉</div><div class="modalclose" onClick="{{closeRoomInvite}}">✕</div></div><div class="roominvitesub">Invite friends to "{{roomInviteData.name}}"</div><div class="invitelinkrow"><div class="invitelink">{{roomInviteLink}}</div><div class="invitecopybtn" onClick="{{copyRoomInviteLink}}">{{roomCopyLabel}}</div></div><div class="shareoptions"><div class="sharechip whatsapp" onClick="{{shareRoomWhatsapp}}">WhatsApp</div><div class="sharechip telegram" onClick="{{shareRoomTelegram}}">Telegram</div></div><div class="btn ghost" onClick="{{closeRoomInvite}}" style="margin-top:14px">Done</div></div></div></sc-if></sc-if></sc-if><sc-if value="{{storyOpen}}"><div class="modaloverlay" onClick="{{closeStory}}"><div class="storycard" onClick="{{stopProp}}"><div class="storyprogress"><sc-for list="{{storyProgressView}}" as="sp" hint-placeholder-count="5"><div class="storybar"><div class="storybarfill {{sp.fillClass}}"></div></div></sc-for></div><div class="storyheader"><div class="storyavatar big">{{activeStory.initial}}</div><div class="storyheadname">{{activeStory.name}}</div><div class="storyclose" onClick="{{closeStory}}">✕</div></div><div class="storytapzone left" onClick="{{prevStory}}"></div><div class="storytapzone right" onClick="{{nextStory}}"></div><div class="storybody"><div class="storyhandname">{{activeStory.handName}}</div><div class="storycards"><sc-for list="{{activeStory.cards}}" as="c" hint-placeholder-count="5"><div class="cardslot front"><div class="cface {{c.colorClass}}"><div class="r">{{c.rankLabel}}</div><div class="s">{{c.suit}}</div></div></div></sc-for></div><div class="storypayout">+{{activeStory.payout}} credits · {{activeStory.mult}}×</div></div></div></div></sc-if><sc-if value="{{inviteOpen}}"><div class="modaloverlay" onClick="{{toggleInvite}}"><div class="modalsheet" onClick="{{stopProp}}"><div class="modalhead"><div class="modaltitle">Invite Friends</div><div class="modalclose" onClick="{{toggleInvite}}">✕</div></div><div class="invitelinkrow"><div class="invitelink">{{inviteLink}}</div><div class="invitecopybtn" onClick="{{copyInviteLink}}">{{copyLabel}}</div></div><div class="invitesharerow"><div class="sharebtn" onClick="{{shareInvite}}">Share Invite Link</div></div><div class="invitesectionlabel">Suggested Contacts</div><div class="invitelist"><sc-for list="{{contactsView}}" as="ct" hint-placeholder-count="4"><div class="inviterow"><div class="favatar">{{ct.initial}}</div><div class="fname">{{ct.name}}</div><div class="{{ct.btnClass}}" onClick="{{ct.onClick}}">{{ct.label}}</div></div></sc-for></div></div></div></sc-if><sc-if value="{{isSettings}}"><div class="pagetitle">Settings</div><div class="setgroup"><div class="setgrouplabel">Gameplay</div><div class="setrow first"><span>Sound Effects</span><div class="toggle {{soundOnClass}}" onClick="{{toggleSound}}"><div class="toggleknob"></div></div></div><div class="setrow last"><span>Haptic Feedback</span><div class="toggle {{hapticOnClass}}" onClick="{{toggleHaptic}}"><div class="toggleknob"></div></div></div></div><div class="setgroup"><div class="setgrouplabel">Default Bet</div><div class="betrow"><sc-for list="{{defaultBetView}}" as="d" hint-placeholder-count="4"><div class="betchip {{d.stateClass}}" onClick="{{d.onClick}}">{{d.value}}</div></sc-for></div></div><div class="setgroup"><div class="setgrouplabel">Support</div><div class="setrow single" onClick="{{openPaytable}}"><span>View Paytable</span><span>›</span></div></div><div class="resetbtn" onClick="{{resetStats}}">Reset Statistics</div><div class="aboutrow">Video Poker · v2.0</div></sc-if></div><div class="bottomnav"><sc-for list="{{navItems}}" as="n" hint-placeholder-count="3"><div class="navitem {{n.activeClass}}" onClick="{{n.onClick}}"><div class="navicon">{{n.icon}}</div><div class="navlabel">{{n.label}}</div></div></sc-for></div></div></x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:420,&quot;height&quot;:900},&quot;startingBalance&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:500,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:50,&quot;max&quot;:5000,&quot;step&quot;:50,&quot;section&quot;:&quot;Gameplay&quot;},&quot;tableTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;green&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;green&quot;,&quot;blue&quot;,&quot;crimson&quot;],&quot;section&quot;:&quot;Appearance&quot;},&quot;hintEnabled&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Gameplay&quot;}}">
+const VARIANTS=[{id:'jacks',label:'Jacks or Better',locked:false,cost:0},{id:'deuces',label:'Deuces Wild',locked:true,cost:3},{id:'bonus',label:'Bonus Poker',locked:true,cost:8},{id:'double',label:'Double Bonus',locked:true,cost:15}];
+const PAYTABLE=[{name:'Royal Flush',mult:255},{name:'Straight Flush',mult:55},{name:'Four of a Kind',mult:25},{name:'Full House',mult:12},{name:'Flush',mult:10},{name:'Straight',mult:9},{name:'Three of a Kind',mult:8},{name:'Two Pair',mult:7},{name:'Jacks or Better',mult:6},{name:'Nothing',mult:0}];
+const BET_OPTIONS=[5,10,20,50];
+const SUIT_SYMBOL={S:'♠',H:'♥',D:'♦',C:'♣'};
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.state={
+      screen:'play',variant:'jacks',handsMult:1,bet:props.startingBalance?Math.min(10,props.startingBalance):10,
+      balance:props.startingBalance??500,phase:'idle',hand:null,deck:[],deckPos:0,result:null,
+      tournamentExpanded:false,lockMsg:'',hintOpen:false,paytableOpen:true,statsView:'today',
+      today:{won:0,lost:0,hands:0,streak:0,bestStreak:0},
+      allTime:{won:1240,lost:1570,hands:842,bestStreak:7},
+      settings:{sound:true,haptic:true},
+      friendsTab:'leaderboard',
+      friends:[{id:'me',name:'You',streak:0,isMe:true,country:'US',online:true},
+        {id:1,name:'Maya K.',net:820,streak:5,country:'CA',online:true},
+        {id:2,name:'Ari T.',net:1050,streak:8,country:'IL',online:true},
+        {id:3,name:'Dan R.',net:410,streak:3,country:'IL',online:false},
+        {id:4,name:'Noah S.',net:-120,streak:0,country:'UK',online:true},
+        {id:5,name:'Liora B.',net:-340,streak:1,country:'FR',online:false}],
+      globalChampions:[
+        {name:'Kenji O.',country:'JP',online:true,points:12840},
+        {name:'Sofia R.',country:'BR',online:true,points:11920},
+        {name:'Ari T.',country:'IL',online:true,points:10450},
+        {name:'Lukas M.',country:'DE',online:false,points:9870},
+        {name:'Priya N.',country:'IN',online:true,points:9210}
+      ],
+      rooms:[{id:1,name:'Friday Night',members:'4/6 friends',stake:10,status:'open'},
+        {id:2,name:'High Rollers',members:'2/4 friends',stake:50,status:'playing'}],
+      newRoomOpen:false,newRoomName:'',newRoomStake:10,
+      inviteOpen:false,copyLabel:'Copy',invitedIds:[],
+      contacts:[{id:1,name:'Jonah P.'},{id:2,name:'Sara M.'},{id:3,name:'Ben C.'},{id:4,name:'Tal G.'}],
+      personalBest:null,storyOpen:false,storyIndex:0,
+      friendHands:[
+        {name:'Ari T.',handName:'Royal Flush',mult:255,payout:5100,cards:[{r:14,s:'S'},{r:13,s:'S'},{r:12,s:'S'},{r:11,s:'S'},{r:10,s:'S'}]},
+        {name:'Maya K.',handName:'Full House',mult:12,payout:240,cards:[{r:9,s:'H'},{r:9,s:'D'},{r:9,s:'C'},{r:4,s:'S'},{r:4,s:'H'}]},
+        {name:'Dan R.',handName:'Flush',mult:10,payout:150,cards:[{r:2,s:'H'},{r:6,s:'H'},{r:9,s:'H'},{r:11,s:'H'},{r:13,s:'H'}]},
+        {name:'Liora B.',handName:'Straight',mult:9,payout:90,cards:[{r:5,s:'S'},{r:6,s:'H'},{r:7,s:'D'},{r:8,s:'C'},{r:9,s:'S'}]}
+      ]
+    };
+  }
+  makeDeck(){
+    const d=[];
+    for(const s of ['S','H','D','C']) for(let r=2;r<=14;r++) d.push({r,s});
+    for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}
+    return d;
+  }
+  evaluate(hand){
+    const counts={};
+    hand.forEach(c=>counts[c.r]=(counts[c.r]||0)+1);
+    const countVals=Object.values(counts).sort((a,b)=>b-a);
+    const ranksSorted=hand.map(c=>c.r).sort((a,b)=>a-b);
+    const isFlush=hand.every(c=>c.s===hand[0].s);
+    const isStraight=new Set(ranksSorted).size===5 && ranksSorted[4]-ranksSorted[0]===4;
+    if(isStraight&&isFlush) return ranksSorted[0]===10?{name:'Royal Flush',mult:255}:{name:'Straight Flush',mult:55};
+    if(countVals[0]===4) return {name:'Four of a Kind',mult:25};
+    if(countVals[0]===3&&countVals[1]===2) return {name:'Full House',mult:12};
+    if(isFlush) return {name:'Flush',mult:10};
+    if(isStraight) return {name:'Straight',mult:9};
+    if(countVals[0]===3) return {name:'Three of a Kind',mult:8};
+    if(countVals[0]===2&&countVals[1]===2) return {name:'Two Pair',mult:7};
+    if(countVals[0]===2){
+      const pairRank=Number(Object.keys(counts).find(k=>counts[k]===2));
+      if(pairRank>=11) return {name:'Jacks or Better',mult:6};
+    }
+    return {name:'Nothing',mult:0};
+  }
+  deal(){
+    if(this.state.phase!=='idle') return;
+    const totalBet=this.state.bet*this.state.handsMult;
+    if(this.state.balance<totalBet){this.setState({result:{name:'Insufficient Balance',win:false,payout:0,sub:'Add credits to continue'}});return;}
+    const deck=this.makeDeck();
+    const hand=deck.slice(0,5).map(c=>({...c,held:false}));
+    this.setState({deck,deckPos:5,hand,phase:'dealt',result:null,balance:this.state.balance-totalBet});
+  }
+  toggleHold(i){
+    if(this.state.phase!=='dealt') return;
+    const hand=this.state.hand.map((c,idx)=>idx===i?{...c,held:!c.held}:c);
+    this.setState({hand});
+  }
+  draw(){
+    if(this.state.phase!=='dealt') return;
+    const {deck,hand}=this.state;
+    let pos=this.state.deckPos;
+    const newHand=hand.map(c=>{
+      if(c.held) return c;
+      const nc=deck[pos]; pos++; return {...nc,held:false};
+    });
+    const ev=this.evaluate(newHand);
+    const totalBet=this.state.bet*this.state.handsMult;
+    const payout=ev.mult*totalBet;
+    const win=payout>0;
+    const today={...this.state.today};
+    today.hands+=1;
+    if(win){today.won+=payout;today.streak+=1;today.bestStreak=Math.max(today.bestStreak,today.streak);}
+    else{today.lost+=totalBet;today.streak=0;}
+    let personalBest=this.state.personalBest;
+    if(win&&(!personalBest||payout>personalBest.payout)){
+      personalBest={name:'You',handName:ev.name,mult:ev.mult,payout,cards:newHand.map(c=>({r:c.r,s:c.s}))};
+    }
+    this.setState({hand:newHand,deckPos:pos,phase:'idle',result:{name:ev.name,win,payout,sub:win?`+${payout} credits`:'Better luck next hand!'},balance:this.state.balance+payout,today,personalBest});
+  }
+  selectVariant(id){
+    const v=VARIANTS.find(v=>v.id===id);
+    if(v.locked){this.setState({lockMsg:`Unlock ${v.label} for ${v.cost} coins`});return;}
+    this.setState({variant:id,lockMsg:''});
+  }
+  setBet(v){if(this.state.phase==='dealt')return;this.setState({bet:v});}
+  setHandsMult(n){if(this.state.phase==='dealt')return;this.setState({handsMult:n});}
+  togglePaytable(){this.setState({paytableOpen:!this.state.paytableOpen});}
+  toggleHint(){this.setState({hintOpen:!this.state.hintOpen});}
+  toggleTournament(){this.setState({tournamentExpanded:!this.state.tournamentExpanded});}
+  setScreen(s){this.setState({screen:s});}
+  openPaytable(){this.setState({screen:'play',paytableOpen:true});}
+  showToday(){this.setState({statsView:'today'});}
+  showAllTime(){this.setState({statsView:'alltime'});}
+  toggleSound(){this.setState({settings:{...this.state.settings,sound:!this.state.settings.sound}});}
+  toggleHaptic(){this.setState({settings:{...this.state.settings,haptic:!this.state.settings.haptic}});}
+  resetStats(){this.setState({today:{won:0,lost:0,hands:0,streak:0,bestStreak:0}});}
+  setFriendsTab(t){this.setState({friendsTab:t});}
+  toggleNewRoom(){this.setState({newRoomOpen:!this.state.newRoomOpen,newRoomName:''});}
+  onRoomNameChange(e){this.setState({newRoomName:e.target.value});}
+  setRoomStake(v){this.setState({newRoomStake:v});}
+  createRoom(){
+    const name=this.state.newRoomName.trim()||'New Room';
+    const id=Date.now();
+    const room={id,name,members:'1/6 friends',stake:this.state.newRoomStake,status:'open'};
+    this.setState({rooms:[room,...this.state.rooms],newRoomOpen:false,newRoomName:'',friendsTab:'rooms',roomInviteOpen:true,roomInviteData:{name,code:String(id).slice(-5)},roomCopyLabel:'Copy'});
+  }
+  closeRoomInvite(){this.setState({roomInviteOpen:false});}
+  copyRoomInviteLink(){this.setState({roomCopyLabel:'Copied!'});}
+  shareRoomWhatsapp(){
+    const d=this.state.roomInviteData;
+    const text=encodeURIComponent(`Join my poker room "${d.name}" on Video Poker! pokerfriends.app/room/${d.code}`);
+    window.open(`https://wa.me/?text=${text}`,'_blank');
+  }
+  shareRoomTelegram(){
+    const d=this.state.roomInviteData;
+    const url=encodeURIComponent(`pokerfriends.app/room/${d.code}`);
+    const text=encodeURIComponent(`Join my poker room "${d.name}" on Video Poker!`);
+    window.open(`https://t.me/share/url?url=${url}&text=${text}`,'_blank');
+  }
+  joinRoom(id){
+    this.setState({rooms:this.state.rooms.map(r=>r.id===id?{...r,status:'playing'}:r)});
+  }
+  openCreateRoom(){this.setState({screen:'friends',friendsTab:'rooms',newRoomOpen:true});}
+  toggleInvite(){this.setState({inviteOpen:!this.state.inviteOpen,copyLabel:'Copy'});}
+  copyInviteLink(){this.setState({copyLabel:'Copied!'});}
+  shareInvite(){this.setState({copyLabel:'Copied!'});}
+  inviteContact(id){this.setState({invitedIds:[...this.state.invitedIds,id]});}
+  openStory(i){this.setState({storyOpen:true,storyIndex:i});}
+  closeStory(){this.setState({storyOpen:false});}
+  nextStory(){const stories=this.getStories();this.setState({storyIndex:Math.min(this.state.storyIndex+1,stories.length-1)});}
+  prevStory(){this.setState({storyIndex:Math.max(this.state.storyIndex-1,0)});}
+  getStories(){
+    const rankLabel=r=>({11:'J',12:'Q',13:'K',14:'A'}[r]||String(r));
+    const toCards=cards=>cards.map(c=>({rankLabel:rankLabel(c.r),suit:{S:'♠',H:'♥',D:'♦',C:'♣'}[c.s],colorClass:(c.s==='H'||c.s==='D')?'red':'black'}));
+    const list=[];
+    if(this.state.personalBest){
+      const pb=this.state.personalBest;
+      list.push({name:'You',initial:'Y',handName:pb.handName,mult:pb.mult,payout:pb.payout,cards:toCards(pb.cards)});
+    }
+    this.state.friendHands.forEach(f=>list.push({name:f.name,initial:f.name.charAt(0),handName:f.handName,mult:f.mult,payout:f.payout,cards:toCards(f.cards)}));
+    return list;
+  }
+  renderVals(){
+    const s=this.state;
+    const rankLabel=r=>({11:'J',12:'Q',13:'K',14:'A'}[r]||String(r));
+    const variantsView=VARIANTS.map(v=>({label:v.label,locked:v.locked,cost:v.cost,activeClass:v.id===s.variant?'active':'',lockedClass:v.locked?'locked':'',onClick:()=>this.selectVariant(v.id)}));
+    const betOptionsView=BET_OPTIONS.map(v=>({value:v,stateClass:[v===s.bet?'active':'',s.phase==='dealt'?'disabled':''].join(' '),onClick:()=>this.setBet(v)}));
+    const defaultBetView=BET_OPTIONS.map(v=>({value:v,stateClass:v===s.bet?'active':'',onClick:()=>{this.setBet(v);}}));
+    const handsOptionsView=[1,3,5].map(n=>({label:n===1?'1 Hand':n+'× Hands',activeClass:n===s.handsMult?'active':'',onClick:()=>this.setHandsMult(n)}));
+    const paytableView=PAYTABLE.map(row=>({name:row.name,mult:row.mult,hitClass:s.result&&s.result.name===row.name?'hit':''}));
+    const hand=s.hand;
+    const cardsView=hand?hand.map((c,i)=>({isFront:true,isBack:false,faceClass:'front',heldClass:c.held?'held':'',rankLabel:rankLabel(c.r),suit:SUIT_SYMBOL[c.s],colorClass:(c.s==='H'||c.s==='D')?'red':'black',held:c.held,onClick:()=>this.toggleHold(i)})):[0,1,2,3,4].map(()=>({isFront:false,isBack:true,faceClass:'back',heldClass:'',onClick:()=>this.deal()}));
+    const totalBet=s.bet*s.handsMult;
+    const result=s.result;
+    const resultKind=!result?'none':(result.win?'win':'lose');
+    const combinedAllTime={won:s.allTime.won+s.today.won,lost:s.allTime.lost+s.today.lost,hands:s.allTime.hands+s.today.hands,bestStreak:Math.max(s.allTime.bestStreak,s.today.bestStreak)};
+    const statsData=s.statsView==='today'?s.today:combinedAllTime;
+    const net=statsData.won-statsData.lost;
+    const navItems=[
+      {icon:'♠',label:'Play',activeClass:s.screen==='play'?'active':'',onClick:()=>this.setScreen('play')},
+      {icon:'▤',label:'Stats',activeClass:s.screen==='stats'?'active':'',onClick:()=>this.setScreen('stats')},
+      {icon:'👥',label:'Friends',activeClass:s.screen==='friends'?'active':'',onClick:()=>this.setScreen('friends')},
+      {icon:'⚙',label:'Settings',activeClass:s.screen==='settings'?'active':'',onClick:()=>this.setScreen('settings')}
+    ];
+    const meNet=combinedAllTime.won-combinedAllTime.lost;
+    const friendsRanked=s.friends.map(f=>f.isMe?{...f,net:meNet}:f).sort((a,b)=>b.net-a.net).map((f,i)=>({
+      rank:i+1,initial:f.name.charAt(0),name:f.name,isMe:!!f.isMe,meClass:f.isMe?'me':'',
+      streak:f.streak,net:f.net,netClass:f.net>=0?'pos':'neg',netDisplay:(f.net>=0?'+':'')+f.net
+    }));
+    const roomsView=s.rooms.map(r=>({
+      name:r.name,members:r.members,stake:r.stake,
+      status:r.status==='open'?'Open':'In Progress',statusClass:r.status,
+      actionLabel:r.status==='open'?'Join Table':'Enter Table',onClick:()=>this.joinRoom(r.id)
+    }));
+    const roomStakeView=BET_OPTIONS.map(v=>({value:v,stateClass:v===s.newRoomStake?'active':'',onClick:()=>this.setRoomStake(v)}));
+    const myRank=friendsRanked.findIndex(f=>f.isMe)+1;
+    const me=friendsRanked.find(f=>f.isMe);
+    const leader=friendsRanked[0];
+    let rankGapText;
+    if(myRank===1){
+      const second=friendsRanked[1];
+      rankGapText=second?`Leading by ${me.net-second.net}`:'Leading the pack';
+    } else {
+      rankGapText=`${leader.name} leads by ${leader.net-me.net}`;
+    }
+    return {
+      tableTheme:this.props.tableTheme??'green',
+      hintEnabled:this.props.hintEnabled??true,
+      isPlay:s.screen==='play',isStats:s.screen==='stats',isSettings:s.screen==='settings',
+      tournamentExpanded:s.tournamentExpanded,toggleTournament:()=>this.toggleTournament(),
+      tourChev:s.tournamentExpanded?' ▴':' ▾',tournamentA:'26:55',tournamentB:'09:26:55',
+      variantsView,hasLockMsg:!!s.lockMsg,lockMsg:s.lockMsg,
+      handsOptionsView,
+      paytableOpen:s.paytableOpen,togglePaytable:()=>this.togglePaytable(),paytableChevClass:s.paytableOpen?'open':'',paytableView,
+      balanceDisplay:s.balance,totalBetDisplay:totalBet,betOptionsView,
+      cardsView,showDealHint:!hand,
+      dealClass:s.phase==='idle'?'':'disabled',drawClass:s.phase==='dealt'?'':'disabled',
+      deal:()=>this.deal(),draw:()=>this.draw(),
+      hintOpen:s.hintOpen,toggleHint:()=>this.toggleHint(),
+      hintTip:'Hold a made hand (pair of Jacks or better) or four cards to a flush/straight. Discard the rest and draw fresh cards.',
+      resultKind,resultTitle:result?result.name:'Place your bet and deal to play',hasResultSub:!!result,resultSub:result?result.sub:'',
+      todayActiveClass:s.statsView==='today'?'active':'',allTimeActiveClass:s.statsView==='alltime'?'active':'',
+      showToday:()=>this.showToday(),showAllTime:()=>this.showAllTime(),
+      netClass:net>=0?'pos':'neg',netDisplay:(net>=0?'+':'')+net,
+      wonDisplay:statsData.won,lostDisplay:statsData.lost,handsDisplay:statsData.hands,streakDisplay:statsData.bestStreak,
+      soundOnClass:s.settings.sound?'on':'',hapticOnClass:s.settings.haptic?'on':'',
+      toggleSound:()=>this.toggleSound(),toggleHaptic:()=>this.toggleHaptic(),
+      defaultBetView,openPaytable:()=>this.openPaytable(),resetStats:()=>this.resetStats(),
+      navItems,
+      isFriends:s.screen==='friends',
+      leaderboardActiveClass:s.friendsTab==='leaderboard'?'active':'',roomsActiveClass:s.friendsTab==='rooms'?'active':'',
+      isLeaderboardView:s.friendsTab==='leaderboard',isRoomsView:s.friendsTab==='rooms',
+      showLeaderboard:()=>this.setFriendsTab('leaderboard'),showRooms:()=>this.setFriendsTab('rooms'),
+      friendsView:friendsRanked,roomsView,
+      newRoomOpen:s.newRoomOpen,newRoomClosed:!s.newRoomOpen,toggleNewRoom:()=>this.toggleNewRoom(),
+      newRoomName:s.newRoomName,onRoomNameChange:e=>this.onRoomNameChange(e),
+      roomStakeView,createRoom:()=>this.createRoom(),
+      myRank,rankGapText,goFriends:()=>this.setScreen('friends'),
+      nearbyView:friendsRanked.slice(0,Math.max(myRank,6)).filter(f=>f.rank<=myRank).slice(-5).map(f=>{
+        const src=s.friends.find(x=>x.name===f.name)||{};
+        return {rank:f.rank,initial:f.initial,name:f.name,meClass:f.isMe?'me':'',country:src.country||'',onlineClass:src.online?'on':'',netClass:f.netClass,netDisplay:f.netDisplay};
+      }),
+      champTimer:'Resets in 42m',
+      roomInviteOpen:!!s.roomInviteOpen,closeRoomInvite:()=>this.closeRoomInvite(),
+      roomInviteData:s.roomInviteData||{name:''},roomInviteLink:s.roomInviteData?`pokerfriends.app/room/${s.roomInviteData.code}`:'',
+      roomCopyLabel:s.roomCopyLabel,copyRoomInviteLink:()=>this.copyRoomInviteLink(),
+      shareRoomWhatsapp:()=>this.shareRoomWhatsapp(),shareRoomTelegram:()=>this.shareRoomTelegram(),
+      champView:s.globalChampions.map((c,i)=>({rank:i+1,initial:c.name.charAt(0),name:c.name,country:c.country,onlineClass:c.online?'on':'',pointsDisplay:c.points.toLocaleString()})),
+      roomsPreview:roomsView.slice(0,2),openCreateRoom:()=>this.openCreateRoom(),
+      inviteOpen:s.inviteOpen,toggleInvite:()=>this.toggleInvite(),stopProp:e=>e.stopPropagation(),
+      inviteLink:'pokerfriends.app/join/8XQ2K',copyLabel:s.copyLabel,copyInviteLink:()=>this.copyInviteLink(),shareInvite:()=>this.shareInvite(),
+      contactsView:s.contacts.map(c=>({initial:c.name.charAt(0),name:c.name,btnClass:s.invitedIds.includes(c.id)?'invitesentbtn':'invitesendbtn',label:s.invitedIds.includes(c.id)?'Sent':'Invite',onClick:()=>this.inviteContact(c.id)})),
+      storiesView:this.getStories().map((st,i)=>({initial:st.initial,name:st.name,ringClass:'',onClick:()=>this.openStory(i)})),
+      storyOpen:s.storyOpen,closeStory:()=>this.closeStory(),nextStory:()=>this.nextStory(),prevStory:()=>this.prevStory(),
+      activeStory:this.getStories()[s.storyIndex]||{cards:[]},
+      storyProgressView:this.getStories().map((_,i)=>({fillClass:i<=s.storyIndex?'done':''}))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

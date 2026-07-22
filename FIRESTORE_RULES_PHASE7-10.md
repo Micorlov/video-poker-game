@@ -52,6 +52,34 @@ match /hall_of_fame/{recordId} {
 }
 ```
 
+## Phase 2 (Social Layer) additions — July 2026
+
+```
+// Users: new fields — owner can write, friends can read
+// Merge into the existing users/{uid} rule:
+//   allow read: if request.auth != null;
+//   allow write: if request.auth != null && request.auth.uid == uid;
+// bestHand, country, lastSeen are set by the owner's client.
+
+// Hourly Champions (serverless — clients write points)
+match /hourly/{hourKey} {
+  allow read: if request.auth != null;
+  match /entries/{uid} {
+    allow read: if request.auth != null;
+    allow create, update: if request.auth != null
+      && request.auth.uid == uid
+      && request.resource.data.points >= 0;
+    allow delete: if false;
+  }
+}
+
+// Rooms: member writes for bestStreak field (Phase 2 addition)
+// Merge into existing rooms/{roomId}/members/{memberUid} rules:
+//   allow write: if request.auth != null
+//     && request.auth.uid == memberUid
+//     && request.resource.data.keys().hasOnly(['displayName', 'netProfit', 'bestStreak']);
+```
+
 ## Other requirements
 
 - **Composite indexes** — `gifts (toUid ==, claimed ==)` and
