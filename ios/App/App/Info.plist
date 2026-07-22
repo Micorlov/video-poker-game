@@ -53,6 +53,38 @@
 				<string>com.googleusercontent.apps.53702406091-61cqj0v5tp1htmv6mi9j78hbc1uca1ki</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb958984593824379</string>
+			</array>
+		</dict>
+	</array>
+	<key>FacebookAppID</key>
+	<string>958984593824379</string>
+	<key>FacebookClientToken</key>
+	<string>400b8a3413070c7ecf8120393247fe99</string>
+	<key>FacebookDisplayName</key>
+	<string>Video Poker</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This identifier will be used to request permission to track the user's activity.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fbapi20130214</string>
+		<string>fbapi20130410</string>
+		<string>fbapi20130702</string>
+		<string>fbapi20131010</string>
+		<string>fbapi20131219</string>
+		<string>fbapi20140410</string>
+		<string>fbapi20140116</string>
+		<string>fbapi20150313</string>
+		<string>fbapi20150629</string>
+		<string>fbapi20160328</string>
+		<string>fbauth</string>
+		<string>fb-messenger-share-api</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
 	</array>
 </dict>
 </plist>

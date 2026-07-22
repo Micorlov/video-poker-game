@@ -4,4 +4,7 @@
     <string name="title_activity_main">Video Poker</string>
     <string name="package_name">com.micorlov.videopoker</string>
     <string name="custom_url_scheme">com.micorlov.videopoker</string>
+    <string name="facebook_app_id">958984593824379</string>
+    <string name="fb_login_protocol_scheme">fb958984593824379</string>
+    <string name="facebook_client_token">400b8a3413070c7ecf8120393247fe99</string>
 </resources>
