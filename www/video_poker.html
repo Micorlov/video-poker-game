@@ -2543,10 +2543,140 @@ body.screen-shake {
 }
 
 
+/* --- styles/onboarding.css --- */
+/* --- First-launch onboarding overlay --- */
+.onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom) 60%);
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.onboarding-card {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--panel-solid);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: 44px 20px 20px;
+}
+
+.onboarding-skip {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.onboarding-step {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.onboarding-step.active {
+    display: flex;
+}
+
+.onboarding-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+.onboarding-title {
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.onboarding-text {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 4px;
+}
+
+.onboarding-list {
+    list-style: none;
+    text-align: left;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.onboarding-list li {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    padding: 8px 0;
+}
+
+.onboarding-list li + li {
+    border-top: 1px solid var(--border);
+}
+
+.onboarding-list li strong {
+    color: var(--text);
+}
+
+.onboarding-pref-list {
+    width: 100%;
+    margin-top: 6px;
+}
+
+.onboarding-next-btn {
+    width: 100%;
+    margin-top: 18px;
+}
+
+.onboarding-secondary-link {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 12px;
+    padding: 4px;
+}
+
+.onboarding-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 18px;
+}
+
+.onboarding-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border-strong);
+}
+
+.onboarding-dot.active {
+    background: var(--gold);
+}
+
+
 </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 </head>
 <body>
     <div class="app">
@@ -2812,6 +2942,32 @@ body.screen-shake {
                 </div>
             </div>
 
+            <div class="hidden" id="settings-notifications-panel">
+                <div class="section-label">Notifications</div>
+                <div class="panel">
+                    <div class="settings-row">
+                        <span class="settings-row-label">Friend activity</span>
+                        <input type="checkbox" class="toggle-switch" id="settings-notif-social">
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">Leaderboard updates</span>
+                        <input type="checkbox" class="toggle-switch" id="settings-notif-leaderboard">
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">Daily bonus reminder</span>
+                        <input type="checkbox" class="toggle-switch" id="settings-notif-dailyReminder">
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">Friends' best hands</span>
+                        <input type="checkbox" class="toggle-switch" id="settings-notif-bestHand">
+                    </div>
+                    <div class="settings-row" id="settings-notifications-enable" style="cursor:pointer;">
+                        <span class="settings-row-label">Enable Notifications</span>
+                        <span class="settings-chevron">›</span>
+                    </div>
+                </div>
+            </div>
+
             <button class="btn-danger" id="settings-reset-stats">Reset Statistics</button>
 
             <div class="settings-footer">Video Poker · v3.0</div>
@@ -2935,6 +3091,87 @@ body.screen-shake {
                 <span class="allin-slider-label">Slide to confirm</span>
                 <div class="allin-slider-thumb" id="allin-slider-thumb">»</div>
             </div>
+        </div>
+    </div>
+
+    <!-- First-launch onboarding: welcome / how-to-play / features / sign-in / push priming -->
+    <div class="onboarding-overlay hidden" id="onboarding-overlay">
+        <div class="onboarding-card">
+            <button class="onboarding-skip" onclick="skipOnboarding()">Skip</button>
+
+            <div class="onboarding-step" id="onboarding-step-welcome">
+                <div class="onboarding-icon">🎴</div>
+                <div class="onboarding-title">Welcome to Video Poker</div>
+                <div class="onboarding-text">Classic Jacks or Better poker, a daily ALL IN bet, and leaderboards you can share with friends.</div>
+                <button class="btn-primary onboarding-next-btn" onclick="advanceOnboarding()">Next</button>
+            </div>
+
+            <div class="onboarding-step" id="onboarding-step-howtoplay">
+                <div class="onboarding-icon">🃏</div>
+                <div class="onboarding-title">How to Play</div>
+                <ul class="onboarding-list">
+                    <li><strong>Bet</strong> — pick a stake, then tap Deal.</li>
+                    <li><strong>Hold</strong> — tap the cards you want to keep.</li>
+                    <li><strong>Draw</strong> — tap Deal again to replace the rest.</li>
+                    <li><strong>Win</strong> — a pair of Jacks or better pays out; bigger hands pay more. The full Payout Table is always in Settings.</li>
+                </ul>
+                <button class="btn-primary onboarding-next-btn" onclick="advanceOnboarding()">Next</button>
+            </div>
+
+            <div class="onboarding-step" id="onboarding-step-features">
+                <div class="onboarding-icon">🏆</div>
+                <div class="onboarding-title">More Than Solo Play</div>
+                <ul class="onboarding-list">
+                    <li><strong>Friends &amp; Rooms</strong> — add friends and create poker rooms to compare scores.</li>
+                    <li><strong>Leaderboards &amp; Champions</strong> — climb the hourly and daily boards.</li>
+                    <li><strong>ALL IN</strong> — once a day, bet your whole balance for a shot at a big win.</li>
+                </ul>
+                <button class="btn-primary onboarding-next-btn" onclick="advanceOnboarding()">Next</button>
+            </div>
+
+            <div class="onboarding-step" id="onboarding-step-signin">
+                <div class="onboarding-icon">👥</div>
+                <div class="onboarding-title">Save Your Progress</div>
+                <div class="onboarding-text">Sign in to play with friends and keep your stats across devices. You can always do this later from Settings.</div>
+                <button class="google-btn" onclick="onboardingSignIn('google')">
+                    <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
+                    <span>Continue with Google</span>
+                </button>
+                <button class="facebook-btn" onclick="onboardingSignIn('facebook')">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    <span>Continue with Facebook</span>
+                </button>
+                <div class="modal-error hidden" id="onboarding-signin-error"></div>
+                <button class="onboarding-secondary-link" onclick="advanceOnboarding()">Skip for now</button>
+            </div>
+
+            <div class="onboarding-step" id="onboarding-step-push">
+                <div class="onboarding-icon">🔔</div>
+                <div class="onboarding-title">Stay in the Loop</div>
+                <div class="onboarding-text">Get notified about the things that matter — turn any of these off anytime in Settings.</div>
+                <div class="onboarding-pref-list">
+                    <div class="settings-row">
+                        <span class="settings-row-label">Friend activity</span>
+                        <input type="checkbox" class="toggle-switch" id="onboarding-pref-social" checked>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">Leaderboard updates</span>
+                        <input type="checkbox" class="toggle-switch" id="onboarding-pref-leaderboard" checked>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">Daily bonus reminder</span>
+                        <input type="checkbox" class="toggle-switch" id="onboarding-pref-dailyReminder" checked>
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">Friends' best hands</span>
+                        <input type="checkbox" class="toggle-switch" id="onboarding-pref-bestHand" checked>
+                    </div>
+                </div>
+                <button class="btn-primary onboarding-next-btn" onclick="onboardingEnableNotifications()">Enable Notifications</button>
+                <button class="onboarding-secondary-link" onclick="advanceOnboarding()">Not now</button>
+            </div>
+
+            <div class="onboarding-dots" id="onboarding-dots"></div>
         </div>
     </div>
 
@@ -3479,9 +3716,26 @@ function isNativeApp() {
     return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 }
 
+// Sign-in can be triggered from the #signin-modal or from the onboarding
+// overlay's sign-in step (js/onboarding.js) — surface errors in whichever one
+// is actually visible, since only #signin-modal existed before onboarding.js
+// was added and a failure there would otherwise be silent during onboarding.
+function clearSignInErrors() {
+    ['signin-error', 'onboarding-signin-error'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+}
+
+function showSignInError(message) {
+    ['signin-error', 'onboarding-signin-error'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = message; el.classList.remove('hidden'); }
+    });
+}
+
 function signInWithGoogle() {
-    const el = document.getElementById('signin-error');
-    if (el) el.classList.add('hidden');
+    clearSignInErrors();
 
     if (isNativeApp()) {
         // Firebase's web popup/redirect auth doesn't work inside a native WebView
@@ -3494,7 +3748,7 @@ function signInWithGoogle() {
             const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
             return auth.signInWithCredential(credential);
         }).catch(function(err) {
-            if (el) { el.textContent = err.message || String(err); el.classList.remove('hidden'); }
+            showSignInError(err.message || String(err));
         });
         return;
     }
@@ -3504,18 +3758,16 @@ function signInWithGoogle() {
     auth.signInWithPopup(provider).catch(function(popupErr) {
         if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
             auth.signInWithRedirect(provider).catch(function(redirectErr) {
-                if (el) { el.textContent = redirectErr.message; el.classList.remove('hidden'); }
+                showSignInError(redirectErr.message);
             });
-        } else if (el) {
-            el.textContent = popupErr.message;
-            el.classList.remove('hidden');
+        } else {
+            showSignInError(popupErr.message);
         }
     });
 }
 
 function signInWithFacebook() {
-    const el = document.getElementById('signin-error');
-    if (el) el.classList.add('hidden');
+    clearSignInErrors();
 
     if (isNativeApp()) {
         window.Capacitor.Plugins.FirebaseAuthentication.signInWithFacebook().then(function(result) {
@@ -3524,7 +3776,7 @@ function signInWithFacebook() {
             const credential = firebase.auth.FacebookAuthProvider.credential(accessToken);
             return auth.signInWithCredential(credential);
         }).catch(function(err) {
-            if (el) { el.textContent = err.message || String(err); el.classList.remove('hidden'); }
+            showSignInError(err.message || String(err));
         });
         return;
     }
@@ -3533,11 +3785,10 @@ function signInWithFacebook() {
     auth.signInWithPopup(provider).catch(function(popupErr) {
         if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
             auth.signInWithRedirect(provider).catch(function(redirectErr) {
-                if (el) { el.textContent = redirectErr.message; el.classList.remove('hidden'); }
+                showSignInError(redirectErr.message);
             });
-        } else if (el) {
-            el.textContent = popupErr.message;
-            el.classList.remove('hidden');
+        } else {
+            showSignInError(popupErr.message);
         }
     });
 }
@@ -3580,15 +3831,27 @@ function logUserToFirestore(user) {
     });
 }
 
+let _wasSignedIn = false;
+
 if (auth) {
     auth.onAuthStateChanged(function(user) {
         window.egUser = user || null;
         if (window.closeSignInModal) closeSignInModal();
         if (window.updateAccountUI) updateAccountUI();
         if (user) {
+            _wasSignedIn = true;
             firebaseSafe(function() { return logUserToFirestore(user); });
             firebaseSafe(function() { return pushNetProfit(); });
-            firebaseSafe(function() { return registerForPushNotifications(); });
+            try { if (window.onboardingSignInSucceeded) onboardingSignInSucceeded(); } catch (e) { console.warn('onboardingSignInSucceeded failed:', e); }
+            // Fallback only: onboarding's priming screen (js/onboarding.js) is the
+            // primary path for this ask. If the user never saw that screen (e.g.
+            // signed in later from Settings/Friends without going through
+            // onboarding), still ask once here.
+            var pushAlreadyAsked = false;
+            try { pushAlreadyAsked = localStorage.getItem('vp_push_permission_asked') === '1'; } catch (e) {}
+            if (!pushAlreadyAsked) {
+                firebaseSafe(function() { return registerForPushNotifications(); });
+            }
             if (window.egFeatures.friendsRooms) {
                 if (window.loadFriends) loadFriends();
                 if (window.loadMyRooms) loadMyRooms();
@@ -3628,6 +3891,13 @@ if (auth) {
             if (window.cleanupBracelets) cleanupBracelets();
             if (window.renderFriendsScreen) renderFriendsScreen();
             if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
+            // On native: if this is a real sign-out (not just the initial
+            // unauthenticated state on cold start), show the sign-in step of
+            // onboarding so the user can log back in without restarting the app.
+            if (_wasSignedIn && isNativeApp() && window.showOnboardingForReauth) {
+                _wasSignedIn = false;
+                showOnboardingForReauth();
+            }
         }
     });
 }
@@ -3646,30 +3916,37 @@ if (auth) {
 // social, leaderboard, dailyReminder, bestHand.
 
 function registerForPushNotifications() {
-    if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) {
-        return; // Web builds: no native push in this pass.
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        const PushNotifications = window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
+        if (!PushNotifications) return;
+        PushNotifications.requestPermissions().then(function(result) {
+            if (result && result.receive === 'granted') PushNotifications.register();
+        }).catch(function(err) { console.warn('Push permission request failed:', err); });
+        return;
     }
-    const PushNotifications = window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
-    if (!PushNotifications) return;
-
-    PushNotifications.requestPermissions().then(function(result) {
-        if (result && result.receive === 'granted') {
-            PushNotifications.register();
-        }
-    }).catch(function(err) {
-        console.warn('Push permission request failed:', err);
-    });
+    if (typeof firebase === 'undefined' || !firebase.messaging) return;
+    Notification.requestPermission().then(function(permission) {
+        if (permission !== 'granted') return;
+        return navigator.serviceWorker.ready.then(function(swReg) {
+            return firebase.messaging().getToken({
+                vapidKey: 'BFWkeDVJWLUt7RD9WDghTKnckjE5EwrRgZEVxyXMz4ujyfpnaAO6m_BbsbLc6AGzDZ88vl9rrgtXfrYPU4FeqeI',
+                serviceWorkerRegistration: swReg
+            });
+        }).then(function(token) {
+            if (token) saveFcmToken(token, 'web');
+        });
+    }).catch(function(err) { console.warn('Web push registration failed:', err); });
 }
 
-function saveFcmToken(token) {
+function saveFcmToken(token, platform) {
     if (!window.egUser || typeof db === 'undefined') return;
-    const platform = window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'unknown';
+    var p = platform || (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web');
     firebaseSafe(function() {
         return db.collection('users').doc(window.egUser.uid)
             .collection('fcmTokens').doc(token)
             .set({
                 token: token,
-                platform: platform,
+                platform: p,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
     });
@@ -6227,7 +6504,17 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         };
         cardEl.dataset.suit = card.suit;
 
-        const winBadgeText = isResult ? getWinBadgeText(i, lastHandType) : '';
+        let winBadgeText = '';
+        if (isResult) {
+            const isPairHand = lastHandType === 'Two Pair' || lastHandType === 'Jacks or Better';
+            if (isPairHand) {
+                if (i === winningIndices[0] || i === secondPairIndices[0]) {
+                    winBadgeText = getWinBadgeText(i, lastHandType);
+                }
+            } else {
+                winBadgeText = getWinBadgeText(i, lastHandType);
+            }
+        }
 
         cardEl.innerHTML = `
             <div class="held-badge">HELD</div>
@@ -6665,6 +6952,145 @@ window.updateHintButtonUI = function() {
 };
 
 
+/* --- js/onboarding.js --- */
+// First-launch onboarding: welcome + how-to-play + features, then optional
+// sign-in, then optional push-notification priming (native only). Shown once
+// per device via vp_onboarding_seen; js/tabs.js calls initOnboarding() instead
+// of showScreen('play') directly on cold start.
+//
+// Depends on: signInWithGoogle()/signInWithFacebook() (js/firebase.js),
+// registerForPushNotifications()/setNotificationPref() (js/push.js).
+
+const ONBOARDING_STEPS = ['welcome', 'howtoplay', 'features', 'signin', 'push'];
+const ONBOARDING_PREF_CATEGORIES = ['social', 'leaderboard', 'dailyReminder', 'bestHand'];
+let onboardingIndex = 0;
+
+function onboardingSeen() {
+    try { return localStorage.getItem('vp_onboarding_seen') === '1'; } catch (e) { return true; }
+}
+
+function markOnboardingSeen() {
+    try { localStorage.setItem('vp_onboarding_seen', '1'); } catch (e) {}
+}
+
+function markPushPermissionAsked() {
+    try { localStorage.setItem('vp_push_permission_asked', '1'); } catch (e) {}
+}
+
+function onboardingIsNative() {
+    return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+}
+
+function initOnboarding() {
+    if (onboardingSeen()) {
+        showScreen('play');
+        return;
+    }
+    const overlay = document.getElementById('onboarding-overlay');
+    if (!overlay) {
+        showScreen('play');
+        return;
+    }
+    showOnboardingStep(0);
+    overlay.classList.remove('hidden');
+}
+
+function renderOnboardingDots() {
+    const dots = document.getElementById('onboarding-dots');
+    if (!dots) return;
+    dots.innerHTML = '';
+    ONBOARDING_STEPS.forEach(function(_, i) {
+        const dot = document.createElement('span');
+        dot.className = 'onboarding-dot' + (i === onboardingIndex ? ' active' : '');
+        dots.appendChild(dot);
+    });
+}
+
+function showOnboardingStep(index) {
+    ONBOARDING_STEPS.forEach(function(step, i) {
+        const el = document.getElementById('onboarding-step-' + step);
+        if (el) el.classList.toggle('active', i === index);
+    });
+    onboardingIndex = index;
+    // Mark as soon as the priming screen is shown (not only on "Enable") so the
+    // js/firebase.js fallback prompt never fires a second, uninformed ask.
+    if (ONBOARDING_STEPS[index] === 'push') markPushPermissionAsked();
+    renderOnboardingDots();
+}
+
+function advanceOnboarding() {
+    let next = onboardingIndex + 1;
+    if (ONBOARDING_STEPS[next] === 'push' && !onboardingIsNative()) {
+        next++; // Web builds: push priming has nothing to prime, skip it.
+    }
+    if (next >= ONBOARDING_STEPS.length) {
+        finishOnboarding();
+        return;
+    }
+    showOnboardingStep(next);
+}
+
+function skipOnboarding() {
+    finishOnboarding();
+}
+
+function finishOnboarding() {
+    markOnboardingSeen();
+    const overlay = document.getElementById('onboarding-overlay');
+    if (overlay) overlay.classList.add('hidden');
+    showScreen('play');
+}
+
+function onboardingSignIn(provider) {
+    const fn = provider === 'facebook' ? window.signInWithFacebook : window.signInWithGoogle;
+    if (typeof fn === 'function') fn();
+    // Advancing on success is handled by onboardingSignInSucceeded(), called from
+    // js/firebase.js's auth.onAuthStateChanged — the "Skip for now" link covers
+    // the failed/abandoned case.
+}
+
+// Called from js/firebase.js when a user signs in, so onboarding can move past
+// its sign-in step without polling for auth state.
+function onboardingSignInSucceeded() {
+    if (ONBOARDING_STEPS[onboardingIndex] !== 'signin') return;
+    const overlay = document.getElementById('onboarding-overlay');
+    if (!overlay || overlay.classList.contains('hidden')) return;
+    advanceOnboarding();
+}
+
+function onboardingEnableNotifications() {
+    if (window.registerForPushNotifications) registerForPushNotifications();
+    if (window.egUser && window.setNotificationPref) {
+        ONBOARDING_PREF_CATEGORIES.forEach(function(category) {
+            const toggle = document.getElementById('onboarding-pref-' + category);
+            setNotificationPref(category, toggle ? toggle.checked : true);
+        });
+    }
+    advanceOnboarding();
+}
+
+// Called from js/firebase.js when the user signs out on a native app so they
+// can re-authenticate without restarting the app. Shows only the sign-in step;
+// the welcome/how-to-play/features steps are skipped since the user has already
+// seen them. Clears the seen flag so a future cold-start also prompts sign-in.
+function showOnboardingForReauth() {
+    const overlay = document.getElementById('onboarding-overlay');
+    if (!overlay) return;
+    try { localStorage.removeItem('vp_onboarding_seen'); } catch (e) {}
+    const signinIndex = ONBOARDING_STEPS.indexOf('signin');
+    showOnboardingStep(signinIndex < 0 ? 0 : signinIndex);
+    overlay.classList.remove('hidden');
+}
+
+window.initOnboarding = initOnboarding;
+window.advanceOnboarding = advanceOnboarding;
+window.skipOnboarding = skipOnboarding;
+window.onboardingSignIn = onboardingSignIn;
+window.onboardingSignInSucceeded = onboardingSignInSucceeded;
+window.onboardingEnableNotifications = onboardingEnableNotifications;
+window.showOnboardingForReauth = showOnboardingForReauth;
+
+
 /* --- js/tabs.js --- */
 // Bottom-nav screen switching + Stats/Settings screen rendering.
 
@@ -6760,6 +7186,35 @@ function initSettingsScreen() {
     updateDefaultBetUI();
 
     document.getElementById('settings-reset-stats').onclick = resetStatistics;
+
+    initNotificationSettings();
+}
+
+const NOTIFICATION_PREF_CATEGORIES = ['social', 'leaderboard', 'dailyReminder', 'bestHand'];
+
+function initNotificationSettings() {
+    const panel = document.getElementById('settings-notifications-panel');
+    if (!panel) return;
+    const isNative = window.isNativeApp && isNativeApp();
+    panel.classList.toggle('hidden', !isNative);
+    if (!isNative) return;
+
+    const enableBtn = document.getElementById('settings-notifications-enable');
+    if (enableBtn) {
+        enableBtn.onclick = function() {
+            if (window.registerForPushNotifications) registerForPushNotifications();
+        };
+    }
+
+    const prefs = (window.egUserDoc && window.egUserDoc.notificationPrefs) || {};
+    NOTIFICATION_PREF_CATEGORIES.forEach(function(category) {
+        const toggle = document.getElementById('settings-notif-' + category);
+        if (!toggle) return;
+        toggle.checked = prefs[category] !== false;
+        toggle.onchange = function() {
+            if (window.setNotificationPref) setNotificationPref(category, toggle.checked);
+        };
+    });
 }
 
 function toggleTournamentPill() {
@@ -6855,7 +7310,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderPlayFriendsWidgets();
     if (window.applyLeaderboardPlatformUI) applyLeaderboardPlatformUI();
     if (window.isNativeApp && isNativeApp() && window.setLeaderboardTab) setLeaderboardTab('friends');
-    showScreen('play');
+    if (window.initOnboarding) initOnboarding(); else showScreen('play');
     initPwa();
     // Handle deep-link invite (?ref=CODE)
     if (window.handleIncomingInvite) handleIncomingInvite();
