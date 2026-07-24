@@ -10,6 +10,7 @@
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		AA000001GOOGLE001 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AA000001GOOGLE000 /* GoogleService-Info.plist */; };
+		AA000002ASSETS001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
 		A00000030001 /* CapApp-SPM/Sources/CapApp-SPM/CapApp-SPM.swift in Sources */ = {isa = PBXBuildFile; fileRef = A000000B0001 /* CapApp-SPM/Sources/CapApp-SPM/CapApp-SPM.swift */; };
@@ -160,6 +161,7 @@
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
 				AA000001GOOGLE001 /* GoogleService-Info.plist in Resources */,
+				AA000002ASSETS001 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
