@@ -197,6 +197,20 @@ if (auth) {
     });
 }
 
+// Every referral code owns a "link group" doc — the list of everyone who has
+// ever joined via that code. Joining via a code friends the joiner with the
+// whole group (see connectToLinkGroup in friends.js), not just the sharer.
+function ensureReferralGroup(uid, code) {
+    return db.collection('referralGroups').doc(code).get().then(function(groupDoc) {
+        if (groupDoc.exists) return;
+        return db.collection('referralGroups').doc(code).set({
+            ownerUid: uid,
+            memberUids: [uid],
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    });
+}
+
 function logUserToFirestore(user) {
     return db.collection('users').doc(user.uid).set({
         uid: user.uid,
@@ -212,10 +226,12 @@ function logUserToFirestore(user) {
             return db.collection('users').doc(user.uid).update({ referralCode: code }).then(function() {
                 window.egUserDoc = Object.assign({}, data, { referralCode: code });
                 if (window.renderFriendsScreen) renderFriendsScreen();
+                return ensureReferralGroup(user.uid, code);
             });
         }
         window.egUserDoc = data;
         if (window.renderFriendsScreen) renderFriendsScreen();
+        return ensureReferralGroup(user.uid, data.referralCode);
     });
 }
 

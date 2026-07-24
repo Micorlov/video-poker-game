@@ -12,9 +12,14 @@ match /users/{uid} {
   allow read: if request.auth != null;
   allow write: if request.auth != null && request.auth.uid == uid;
 
-  // Friends — mutual relationship, each side writes its own doc.
+  // Friends — mutual relationship. A player manages their own list, and may
+  // also add themselves into someone else's list — that's what a mutual
+  // add-by-code/link does: the joiner writes both users/{me}/friends/{them}
+  // and users/{them}/friends/{me} from a single client in one batch.
   match /friends/{friendUid} {
-    allow read, write: if request.auth != null && request.auth.uid == uid;
+    allow read: if request.auth != null;
+    allow write: if request.auth != null
+                 && (request.auth.uid == uid || request.auth.uid == friendUid);
   }
 }
 
@@ -36,6 +41,23 @@ match /rooms/{roomId} {
     allow read: if request.auth != null;
     allow write: if request.auth != null && request.auth.uid == uid;
   }
+}
+
+// Referral link groups (July 2026) — everyone who has ever joined via a given
+// referral code, so a fresh joiner can be mutually friended with the whole
+// group, not just the code's original owner. Doc id is the referral code
+// itself. Read is open to any signed-in user (needed to resolve an incoming
+// ?ref=CODE link). Only the code's owner may create the group; joining may
+// only append the joiner's own uid to memberUids (same append-only pattern
+// as rooms above).
+match /referralGroups/{code} {
+  allow read: if request.auth != null;
+  allow create: if request.auth != null
+                && request.resource.data.ownerUid == request.auth.uid
+                && request.resource.data.memberUids == [request.auth.uid];
+  allow update: if request.auth != null
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids'])
+                && request.resource.data.memberUids == resource.data.memberUids.concat([request.auth.uid]);
 }
 ```
 
