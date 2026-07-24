@@ -104,6 +104,26 @@ match /bracelets/{docId} {
 }
 ```
 
+## Referral groups — July 2026
+
+```
+// referralGroups/{code} — everyone who joined via the same invite link
+// (link owner's referralCode) becomes mutual friends with everyone else in
+// the group, not just with the link owner. `members` is an append-only
+// array of uids; js/friends.js writes the friend-edge docs first, then
+// appends its own uid here. Read is open to any signed-in user (needed to
+// look up existing members before joining); writes may only append the
+// requester's own uid to the end.
+match /referralGroups/{code} {
+  allow read: if request.auth != null;
+  allow create: if request.auth != null
+                && request.resource.data.members == [request.auth.uid];
+  allow update: if request.auth != null
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
+                && request.resource.data.members == resource.data.members.concat([request.auth.uid]);
+}
+```
+
 ## Collection-group indexes for push polling — July 2026
 
 The push-notification poller (`scripts/push/`, run by GitHub Actions instead of

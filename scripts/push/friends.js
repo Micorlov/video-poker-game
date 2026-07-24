@@ -14,6 +14,24 @@ async function checkNewFriends(since) {
     // Doc path is users/{uid}/friends/{friendUid}.
     const uid = doc.ref.parent.parent.id;
     const friendUid = doc.id;
+    const viaCode = doc.get('viaCode');
+
+    // Joins made via an invite link create a friend doc on every existing
+    // circle member's side, not just the link owner's — only the owner
+    // should be notified, so look up who that is and skip everyone else.
+    if (viaCode) {
+      const ownerSnap = await db.collection('users').where('referralCode', '==', viaCode).limit(1).get();
+      const ownerUid = ownerSnap.empty ? null : ownerSnap.docs[0].id;
+      if (uid !== ownerUid) return;
+
+      const joinerSnap = await db.doc(`users/${friendUid}`).get();
+      const joinerName = joinerSnap.get('displayName') || 'Someone';
+      await sendPushToUser(uid, 'social', {
+        title: 'New friend',
+        body: `${joinerName} joined using your invite link!`,
+      });
+      return;
+    }
 
     const adderSnap = await db.doc(`users/${friendUid}`).get();
     const adderName = adderSnap.get('displayName') || 'Someone';

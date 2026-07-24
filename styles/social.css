@@ -404,6 +404,12 @@
     flex-shrink: 0;
 }
 
+.link-chip {
+    font-size: 10px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
 .nearby-net {
     font-size: 13px;
     font-weight: 700;

@@ -22,7 +22,11 @@ function loadFriends() {
     friendsListUnsubscribe = db.collection('users').doc(user.uid).collection('friends')
         .onSnapshot(function(snap) {
             const uids = [];
-            snap.forEach(function(d) { uids.push(d.id); });
+            const viaLinkMap = {};
+            snap.forEach(function(d) {
+                uids.push(d.id);
+                if (d.data().viaCode) viaLinkMap[d.id] = true;
+            });
             if (!uids.length) {
                 friendScoreUnsubscribers.forEach(function(fn) { fn(); });
                 friendScoreUnsubscribers = [];
@@ -31,11 +35,11 @@ function loadFriends() {
                 renderPlayFriendsWidgets();
                 return;
             }
-            setupFriendScoreListeners(uids);
+            setupFriendScoreListeners(uids, viaLinkMap);
         }, function() { /* silently ignore Firestore errors */ });
 }
 
-function setupFriendScoreListeners(uids) {
+function setupFriendScoreListeners(uids, viaLinkMap) {
     // Tear down old per-friend listeners
     friendScoreUnsubscribers.forEach(function(fn) { fn(); });
     friendScoreUnsubscribers = [];
@@ -49,6 +53,7 @@ function setupFriendScoreListeners(uids) {
                 } else {
                     const data = doc.data();
                     data.uid = uid;
+                    data.viaLink = !!(viaLinkMap && viaLinkMap[uid]);
                     scoreMap[uid] = data;
                 }
                 friendsList = Object.values(scoreMap)
@@ -138,6 +143,13 @@ function renderFriendsScreen() {
             chip.className = 'country-chip';
             chip.textContent = f.country;
             nameEl.appendChild(chip);
+        }
+        if (f.viaLink) {
+            const linkChip = document.createElement('span');
+            linkChip.className = 'link-chip';
+            linkChip.textContent = '🔗';
+            linkChip.title = 'Connected via invite link';
+            nameEl.appendChild(linkChip);
         }
         if (f.self) {
             const youTag = document.createElement('span');
@@ -260,17 +272,35 @@ function addFriendByInviteCode(code) {
     firebaseSafe(function() {
         return db.collection('users').where('referralCode', '==', code).limit(1).get().then(function(snap) {
             if (snap.empty) { showToast('No player found with that invite link.'); return; }
-            var friendDoc = snap.docs[0];
-            if (friendDoc.id === user.uid) { showToast('That\'s your own invite link!'); return; }
-            var friendRef = db.collection('users').doc(user.uid).collection('friends').doc(friendDoc.id);
-            return friendRef.get().then(function(existing) {
-                if (existing.exists) { showToast('Already in your friends list.'); return; }
-                return Promise.all([
-                    friendRef.set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() }),
-                    db.collection('users').doc(friendDoc.id).collection('friends').doc(user.uid)
-                        .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() })
-                ]).then(function() {
-                    showToast('Friend added!');
+            var ownerUid = snap.docs[0].id;
+            if (ownerUid === user.uid) { showToast('That\'s your own invite link!'); return; }
+
+            // Every joiner via the same link is added to that link's group, so
+            // the group becomes one fully-connected friend circle — not just
+            // spokes back to the link owner.
+            var groupRef = db.collection('referralGroups').doc(code);
+            return groupRef.get().then(function(groupDoc) {
+                var members = groupDoc.exists ? (groupDoc.data().members || [ownerUid]) : [ownerUid];
+                if (members.indexOf(user.uid) !== -1) { showToast('Already connected via this link.'); return; }
+
+                var newFriendUids = members.filter(function(uid) { return uid !== user.uid; });
+                return Promise.all(newFriendUids.map(function(friendUid) {
+                    return db.collection('users').doc(user.uid).collection('friends').doc(friendUid).get()
+                        .then(function(existing) {
+                            if (existing.exists) return null;
+                            return Promise.all([
+                                db.collection('users').doc(user.uid).collection('friends').doc(friendUid)
+                                    .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp(), viaCode: code }),
+                                db.collection('users').doc(friendUid).collection('friends').doc(user.uid)
+                                    .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp(), viaCode: code })
+                            ]);
+                        });
+                })).then(function() {
+                    return groupRef.set({ members: members.concat([user.uid]) }, { merge: true });
+                }).then(function() {
+                    showToast(newFriendUids.length > 1
+                        ? 'Connected with ' + newFriendUids.length + ' friends via this link!'
+                        : 'Friend added!');
                     loadFriends();
                 });
             });
@@ -345,6 +375,7 @@ function renderNearbyPanel(user) {
             '</span>' +
             '<span class="nearby-name">' + (f.displayName || 'Player') +
                 (f.country ? '<span class="country-chip">' + f.country + '</span>' : '') +
+                (f.viaLink ? '<span class="link-chip" title="Connected via invite link">🔗</span>' : '') +
             '</span>' +
             '<span class="nearby-net ' + ((f.netProfit || 0) > 0 ? 'positive' : (f.netProfit || 0) < 0 ? 'negative' : 'zero') + '">' +
                 ((f.netProfit || 0) >= 0 ? '+' : '') + (f.netProfit || 0) +
