@@ -63,7 +63,7 @@ function maybeShowInstallBar() {
     let visits = 0;
     try { visits = (JSON.parse(localStorage.getItem('vp_visits')) || {}).count || 0; } catch (e) {}
     if (visits < INSTALL_PROMPT_AFTER_VISITS) return;
-    pwaShowBar('pwa-install-bar', 'Install Video Poker for quick access', 'Install', function() {
+    pwaShowBar('pwa-install-bar', t('pwa.installBar'), t('pwa.install'), function() {
         pwaDeferredInstall.prompt();
         pwaDeferredInstall = null;
     });

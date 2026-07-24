@@ -70,7 +70,7 @@ function renderChampionsTimer() {
     if (!el) return;
     const now = new Date();
     const minsLeft = 59 - now.getUTCMinutes();
-    el.textContent = 'Resets in ' + minsLeft + 'm';
+    el.textContent = t('common.resetsInM', { m: minsLeft });
 }
 
 function renderChampionsPanel() {
@@ -93,7 +93,7 @@ function renderChampionsPanel() {
     if (!championsList.length) {
         const row = document.createElement('div');
         row.className = 'nearby-row';
-        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">No champions yet this hour — be the first!</span>';
+        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">' + t('champ.noChampionsYet') + '</span>';
         bodyEl.appendChild(row);
         return;
     }
@@ -110,7 +110,7 @@ function renderChampionsPanel() {
                 '<span class="nearby-avatar champ">' + (ch.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
                 '<span class="online-dot"></span>' +
             '</span>' +
-            '<span class="nearby-name">' + (ch.displayName || 'Player') +
+            '<span class="nearby-name">' + (ch.displayName || t('common.player')) +
                 (ch.country ? '<span class="country-flag">' + countryToFlag(ch.country) + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net positive">' + (ch.points || 0) + ' pts</span>';

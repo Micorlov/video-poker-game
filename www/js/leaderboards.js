@@ -29,11 +29,11 @@ function applyLeaderboardPlatformUI() {
     }
 }
 
-const LEADERBOARD_TAB_TITLES = {
-    friends: 'Friends · Today',
-    hourly: '⏱ Hourly Champions',
-    daily: '📅 Daily Champions'
-};
+function leaderboardTabTitle(tab) {
+    if (tab === 'hourly') return t('lb.hourlyChampions');
+    if (tab === 'daily') return t('lb.dailyChampions');
+    return t('lb.friendsToday');
+}
 
 let leaderboardTab = 'friends';
 let leaderboardExpanded = false;
@@ -173,7 +173,7 @@ function effectiveDailyNetProfit(entry, todayKey) {
 function rankedFriendsDaily() {
     const todayKey = getDayKey();
     const self = {
-        displayName: 'You', self: true, lastSeen: Date.now(),
+        displayName: t('common.you'), self: true, lastSeen: Date.now(),
         country: (typeof getCountry === 'function' ? getCountry() : '--'),
         dailyNetProfit: ownDailyNetProfit(), dailyDateKey: todayKey
     };
@@ -210,7 +210,7 @@ function renderFriendsDailyBody(bodyEl, limit) {
                 '<span class="nearby-avatar">' + (f.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
                 '<span class="online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline') + '"></span>' +
             '</span>' +
-            '<span class="nearby-name">' + (f.displayName || 'Player') +
+            '<span class="nearby-name">' + (f.displayName || t('common.player')) +
                 (f.country ? '<span class="country-chip">' + f.country + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net ' + ((f.netProfit || 0) > 0 ? 'positive' : (f.netProfit || 0) < 0 ? 'negative' : 'zero') + '">' +
@@ -226,7 +226,7 @@ function renderGlobalBody(bodyEl, list, limit, valueField, valueSuffix, allowNeg
     if (!slice.length) {
         const row = document.createElement('div');
         row.className = 'nearby-row';
-        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">No scores yet — be the first!</span>';
+        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">' + t('common.noScoresYet') + '</span>';
         bodyEl.appendChild(row);
         return;
     }
@@ -242,7 +242,7 @@ function renderGlobalBody(bodyEl, list, limit, valueField, valueSuffix, allowNeg
             '<span class="nearby-avatar-wrap">' +
                 '<span class="nearby-avatar champ">' + (entry.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
             '</span>' +
-            '<span class="nearby-name">' + (entry.displayName || 'Player') +
+            '<span class="nearby-name">' + (entry.displayName || t('common.player')) +
                 (entry.country ? '<span class="country-flag">' + countryToFlag(entry.country) + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net ' + cls + '">' + text + '</span>';
@@ -255,13 +255,13 @@ function renderLeaderboardTimer() {
     if (!subEl) return;
     if (leaderboardTab === 'hourly') {
         const now = new Date();
-        subEl.textContent = 'Resets in ' + (59 - now.getUTCMinutes()) + 'm';
+        subEl.textContent = t('common.resetsInM', { m: 59 - now.getUTCMinutes() });
     } else if (leaderboardTab === 'daily') {
         const now = new Date();
         const msLeft = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
         const hrs = Math.floor(msLeft / 3600000);
         const mins = Math.floor((msLeft % 3600000) / 60000);
-        subEl.textContent = 'Resets in ' + hrs + 'h ' + mins + 'm';
+        subEl.textContent = t('common.resetsInHM', { h: hrs, m: mins });
     }
 }
 
@@ -273,7 +273,7 @@ function renderLeaderboardPanel() {
     const expandLink = document.getElementById('lb-expand-link');
     if (!bodyEl) return;
 
-    if (titleEl) titleEl.textContent = LEADERBOARD_TAB_TITLES[leaderboardTab];
+    if (titleEl) titleEl.textContent = leaderboardTabTitle(leaderboardTab);
 
     const user = window.egUser;
     if (!user) {
@@ -298,10 +298,10 @@ function renderLeaderboardPanel() {
             if (!leader) {
                 subEl.textContent = '#— · —';
             } else if (leader.self) {
-                subEl.textContent = '#' + ownRank + ' · You\'re #1!';
+                subEl.textContent = t('common.rankYouAreFirst', { rank: ownRank });
             } else {
                 const gap = (leader.netProfit || 0) - ownDailyNetProfit();
-                subEl.textContent = '#' + ownRank + ' · ' + (leader.displayName || 'Leader') + ' leads by ' + gap;
+                subEl.textContent = t('common.rankLeadsBy', { rank: ownRank, name: leader.displayName || t('common.leader'), gap: gap });
             }
         }
         renderFriendsDailyBody(bodyEl, limit);
@@ -317,6 +317,6 @@ function renderLeaderboardPanel() {
 
     if (expandLink) {
         expandLink.classList.toggle('hidden', totalCount <= 5);
-        expandLink.textContent = leaderboardExpanded ? 'Show Top 5 ▴' : 'Show Top 20 ▾';
+        expandLink.textContent = leaderboardExpanded ? t('lb.showTop5') : t('lb.showTop20');
     }
 }

@@ -1,0 +1,43 @@
+/* RTL overrides — applied when <html dir="rtl"> (Hebrew). Everything here
+   mirrors a physical left/right value that couldn't be swapped for a
+   logical one (a few text-align rules were converted to start/end directly
+   in their own stylesheets instead of duplicated here). */
+
+[dir="rtl"] .allin-badge {
+    right: auto;
+    left: -7px;
+}
+
+[dir="rtl"] .mh-win,
+[dir="rtl"] .mh-lose {
+    margin-left: 0;
+    margin-right: 4px;
+}
+
+[dir="rtl"] .modal-close {
+    right: auto;
+    left: 12px;
+}
+
+[dir="rtl"] .modal-title {
+    padding-right: 0;
+    padding-left: 20px;
+}
+
+[dir="rtl"] .bracelet-badge {
+    right: auto;
+    left: -2px;
+}
+
+[dir="rtl"] .ob-allin-badge {
+    right: auto;
+    left: -3px;
+}
+
+/* Pure directional glyphs — flipping them visually swaps the arrowhead so
+   "back"/"next" and the settings chevron still point the natural way. */
+[dir="rtl"] .onboarding-nav-arrow,
+[dir="rtl"] .settings-chevron {
+    display: inline-block;
+    transform: scaleX(-1);
+}

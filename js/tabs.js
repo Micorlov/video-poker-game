@@ -145,7 +145,7 @@ function updateAccountUI() {
     if (!signedOut || !signedIn) return;
     signedOut.classList.toggle('hidden', !!user);
     signedIn.classList.toggle('hidden', !user);
-    if (user) document.getElementById('account-display-name').textContent = user.displayName || 'Signed in';
+    if (user) document.getElementById('account-display-name').textContent = user.displayName || t('settings.signedIn');
 }
 
 function setDefaultBet(v) {
@@ -173,7 +173,7 @@ function resetStatistics() {
     saveGameState();
     updateStreakUI(false);
     renderStatsScreen();
-    showToast('Statistics reset');
+    showToast(t('toast.statsReset'));
 }
 
 // Handle videopoker://open?ref=CODE / ?join=CODE while running inside the

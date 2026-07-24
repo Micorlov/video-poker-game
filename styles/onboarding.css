@@ -337,7 +337,7 @@
 }
 
 .ob-mockup-stat--right {
-    text-align: right;
+    text-align: end;
 }
 
 .ob-mockup-cards {
@@ -588,7 +588,7 @@
     list-style: none;
     width: 100%;
     max-width: 280px;
-    text-align: left;
+    text-align: start;
     margin-bottom: 28px;
     display: flex;
     flex-direction: column;

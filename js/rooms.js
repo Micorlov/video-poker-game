@@ -69,11 +69,11 @@ function renderRoomsList() {
 
         row.innerHTML =
             '<div>' +
-                '<div class="mr-name">' + (room.name || 'Room') + '</div>' +
-                '<div class="mr-meta">' + memberCount + '/' + capacity + ' friends · Stake ' + (room.stake || 10) + '</div>' +
+                '<div class="mr-name">' + (room.name || t('room.defaultName')) + '</div>' +
+                '<div class="mr-meta">' + t('room.membersMeta', { count: memberCount, capacity: capacity, stake: (room.stake || 10) }) + '</div>' +
             '</div>' +
-            '<span class="mr-status ' + status + '">' + (status === 'open' ? 'Open' : 'In Progress') + '</span>' +
-            '<button class="mr-join" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? 'Join Table' : 'Enter Table') + '</button>';
+            '<span class="mr-status ' + status + '">' + (status === 'open' ? t('room.open') : t('room.inProgress')) + '</span>' +
+            '<button class="mr-join" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? t('room.joinTable') : t('room.enterTable')) + '</button>';
 
         listEl.appendChild(row);
     });
@@ -97,11 +97,11 @@ function renderFriendsRoomsList() {
 
         card.innerHTML =
             '<div class="room-head">' +
-                '<span class="roomname">' + (room.name || 'Room') + '</span>' +
-                '<span class="roomstatus ' + status + '">' + (status === 'open' ? 'Open' : 'In Progress') + '</span>' +
+                '<span class="roomname">' + (room.name || t('room.defaultName')) + '</span>' +
+                '<span class="roomstatus ' + status + '">' + (status === 'open' ? t('room.open') : t('room.inProgress')) + '</span>' +
             '</div>' +
-            '<div class="roommeta">' + memberCount + '/' + capacity + ' friends · Stake ' + (room.stake || 10) + '</div>' +
-            '<div class="roomjoin" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? 'Join Table' : 'Enter Table') + '</div>';
+            '<div class="roommeta">' + t('room.membersMeta', { count: memberCount, capacity: capacity, stake: (room.stake || 10) }) + '</div>' +
+            '<div class="roomjoin" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? t('room.joinTable') : t('room.enterTable')) + '</div>';
 
         listEl.appendChild(card);
     });
@@ -114,12 +114,12 @@ function createRoom() {
     const stakeInput = document.getElementById('room-stake-input');
     const name = (nameInput.value || '').trim();
     const stake = parseInt(stakeInput.value, 10) || 10;
-    if (!name) { showToast('Give your room a name.'); return; }
+    if (!name) { showToast(t('toast.giveName')); return; }
 
     _doCreateRoom(name, stake, function(code) {
         nameInput.value = '';
         closeRoomModal();
-        showToast('Room created — code: ' + code);
+        showToast(t('toast.roomCreated', { code: code }));
         loadMyRooms();
     });
 }
@@ -148,7 +148,7 @@ function _doCreateRoom(name, stake, callback) {
                 if (window.openRoomCreatedSheet) openRoomCreatedSheet(name, code);
             });
         });
-    }, function() { showToast('Could not create room — try again.'); });
+    }, function() { showToast(t('toast.couldNotCreateRoom')); });
 }
 
 // --- Inline room creation (Friends tab) ---
@@ -174,12 +174,12 @@ function createRoomInline() {
     if (!user) { openSignInModal(); return; }
     const nameInput = document.getElementById('inline-room-name');
     const name = (nameInput.value || '').trim();
-    if (!name) { showToast('Give your room a name.'); return; }
+    if (!name) { showToast(t('toast.giveName')); return; }
 
     _doCreateRoom(name, inlineStake, function(code) {
         nameInput.value = '';
         toggleInlineRoomForm();
-        showToast('Room created — code: ' + code);
+        showToast(t('toast.roomCreated', { code: code }));
         loadMyRooms();
     });
 }
@@ -193,7 +193,7 @@ function joinRoomByCode() {
 
     firebaseSafe(function() {
         return db.collection('rooms').where('code', '==', code).limit(1).get().then(function(snap) {
-            if (snap.empty) { showToast('No room found with that code.'); return; }
+            if (snap.empty) { showToast(t('toast.noRoomFound')); return; }
             const roomDoc = snap.docs[0];
             return db.collection('rooms').doc(roomDoc.id).update({
                 memberUids: firebase.firestore.FieldValue.arrayUnion(user.uid),
@@ -206,18 +206,18 @@ function joinRoomByCode() {
             }).then(function() {
                 input.value = '';
                 closeRoomModal();
-                showToast('Joined ' + (roomDoc.data().name || 'the room') + '!');
+                showToast(t('toast.joinedRoom', { name: roomDoc.data().name || t('room.defaultName') }));
                 loadMyRooms();
             });
         });
-    }, function() { showToast('Could not join room — try again.'); });
+    }, function() { showToast(t('toast.couldNotJoinRoom')); });
 }
 
 function openRoomDetail(roomId) {
     activeRoomId = roomId;
     const room = myRooms.find(function(r) { return r.id === roomId; });
     if (!room) return;
-    document.getElementById('room-detail-name').textContent = room.name || 'Room';
+    document.getElementById('room-detail-name').textContent = room.name || t('room.defaultName');
     document.getElementById('room-detail-code').textContent = room.code || '';
     const bodyEl = document.getElementById('room-detail-members');
     bodyEl.innerHTML = '';
@@ -235,7 +235,7 @@ function openRoomDetail(roomId) {
                 row.className = 'friend-row';
                 const nameEl = document.createElement('span');
                 nameEl.className = 'friend-name';
-                nameEl.textContent = m.displayName || 'Player';
+                nameEl.textContent = m.displayName || t('common.player');
                 const scoreEl = document.createElement('span');
                 scoreEl.className = 'friend-score';
                 const np = m.netProfit || 0;

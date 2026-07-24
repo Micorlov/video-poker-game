@@ -19,7 +19,8 @@ const cssFiles = [
     'styles/cards.css',
     'styles/social.css',
     'styles/animations.css',
-    'styles/onboarding.css'
+    'styles/onboarding.css',
+    'styles/rtl.css'
 ];
 
 let combinedCss = '';
@@ -29,6 +30,7 @@ cssFiles.forEach(file => {
 
 // Combine JS files in dependency order
 const jsFiles = [
+    'js/i18n.js',
     'js/audio.js',
     'js/ui.js',
     'js/progress.js',

@@ -134,7 +134,7 @@ function multiHandUnlocked() {
 function setGameVariant(v) {
     if (!PAYTABLES[v] || gameState !== 'bet' || v === gameVariant) return;
     if (!variantUnlocked(v)) {
-        showToast('🔒 Unlocks at level ' + VARIANT_MIN_LEVEL[v]);
+        showToast(t('toast.unlockLevel', { level: VARIANT_MIN_LEVEL[v] }));
         return;
     }
     gameVariant = v;
@@ -154,7 +154,7 @@ function updateVariantUI() {
         btn.classList.toggle('locked', locked);
         const lockEl = btn.querySelector('.variant-lock');
         if (lockEl) {
-            lockEl.textContent = locked ? 'Unlock · ' + VARIANT_MIN_LEVEL[v] : '';
+            lockEl.textContent = locked ? t('play.unlockAt', { level: VARIANT_MIN_LEVEL[v] }) : '';
             lockEl.style.display = locked ? '' : 'none';
         }
     });
@@ -245,7 +245,7 @@ function doRebuy() {
     balance = 500;
     document.getElementById('balance').textContent = balance;
     saveGameState();
-    showToast('♻ +500 credits');
+    showToast(t('toast.rebuy'));
     if (window.pushDailyRebuy) pushDailyRebuy();
 }
 
@@ -256,7 +256,7 @@ function renderPayouts() {
     handOrder.forEach(handType => {
         const row = document.createElement('div');
         row.className = 'payout-row';
-        row.innerHTML = `<div class="payout-hand">${handType}</div><div class="payout-value">${currentPayouts[handType]}</div>`;
+        row.innerHTML = `<div class="payout-hand">${vpHandLabel(handType)}</div><div class="payout-value">${currentPayouts[handType]}</div>`;
         payoutsEl.appendChild(row);
     });
 }
@@ -327,7 +327,7 @@ let allInDragging = false;
 
 function openAllInSheet() {
     if (getAllInRemaining() <= 0) {
-        showToast('⛔ No ALL INs left — back tomorrow!');
+        showToast(t('toast.noAllInLeft'));
         return;
     }
     if (balance <= 0) {
@@ -336,10 +336,23 @@ function openAllInSheet() {
     }
     const hands = multiHandCount || 1;
     allInPendingAmount = Math.max(1, Math.floor(balance / hands));
-    const amountEl = document.getElementById('allin-sheet-amount');
-    if (amountEl) amountEl.textContent = allInPendingAmount * hands;
+    renderAllInSheetSub(allInPendingAmount * hands);
     resetAllInSlider();
     openSheet('allin-sheet');
+}
+
+function renderAllInSheetSub(amount) {
+    const subEl = document.getElementById('allin-sheet-sub');
+    if (!subEl) return;
+    subEl.innerHTML = '';
+    const sentinel = ' ';
+    const parts = t('sheet.allInSub', { amount: sentinel }).split(sentinel);
+    subEl.appendChild(document.createTextNode(parts[0] || ''));
+    const amountEl = document.createElement('strong');
+    amountEl.id = 'allin-sheet-amount';
+    amountEl.textContent = amount;
+    subEl.appendChild(amountEl);
+    subEl.appendChild(document.createTextNode(parts[1] || ''));
 }
 
 function closeAllInSheet() {
@@ -364,7 +377,7 @@ function confirmAllIn() {
     saveAllInUsage();
     updateAllInUI();
     closeSheet('allin-sheet');
-    showToast('🔥 ALL IN — good luck!');
+    showToast(t('toast.allInGoodLuck'));
 }
 
 function initAllInSlider() {
@@ -527,7 +540,7 @@ try {
 function setMultiHand(n) {
     if (![1, 3, 5].includes(n) || gameState !== 'bet') return;
     if (n > 1 && !multiHandUnlocked()) {
-        showToast('🔒 Multi-hand unlocks at level ' + MULTI_HAND_MIN_LEVEL);
+        showToast(t('toast.multiHandUnlock', { level: MULTI_HAND_MIN_LEVEL }));
         return;
     }
     multiHandCount = n;
@@ -558,7 +571,7 @@ function renderMultiHands(extraResults) {
             return '<span class="mini-card' + (red ? ' red' : '') + '">' + c.rank + c.suit + '</span>';
         }).join('');
         const label = r.win > 0
-            ? '<span class="mh-win">' + r.type + ' +' + r.win + '</span>'
+            ? '<span class="mh-win">' + vpHandLabel(r.type) + ' +' + r.win + '</span>'
             : '<span class="mh-lose">—</span>';
         row.innerHTML = cards + label;
         wrap.appendChild(row);
@@ -569,8 +582,8 @@ function updateMainButton() {
     const btn = document.getElementById('main-btn');
     const isDraw = gameState === 'hold';
     btn.innerHTML = isDraw
-        ? '<span class="main-btn-icon">🔄</span>Draw'
-        : '<span class="main-btn-icon">🎴</span>Deal';
+        ? '<span class="main-btn-icon">🔄</span>' + t('play.draw')
+        : '<span class="main-btn-icon">🎴</span>' + t('play.deal');
     btn.className = isDraw ? 'btn-secondary' : 'btn-primary';
 }
 
@@ -619,7 +632,7 @@ function deal() {
     lastHandType = null;
     const resultEl = document.getElementById('result');
     resultEl.className = 'result-panel';
-    resultEl.textContent = 'Place your bet and deal to play';
+    resultEl.textContent = t('play.resultDefault');
     document.getElementById('explanation').innerHTML = '';
     if (window.vpRenderHints) vpRenderHints();
     triggerHaptic('MEDIUM');
@@ -722,12 +735,12 @@ function draw() {
 
     if (win > 0) {
         resultEl.className = 'result-panel';
-        resultEl.innerHTML = `<span class="win">🎉 ${handType}! +${win} credits! 🎉</span>`;
-        document.getElementById('explanation').textContent = EXPLANATIONS[handType] || '';
+        resultEl.innerHTML = `<span class="win">${t('play.winResult', { hand: vpHandLabel(handType), win: win })}</span>`;
+        document.getElementById('explanation').textContent = vpHandExplanation(handType);
     } else {
         resultEl.className = 'result-panel';
-        resultEl.innerHTML = `<span>Nothing — ${hand.map(c => c.rank + c.suit).join(' ')}</span>`;
-        document.getElementById('explanation').textContent = EXPLANATIONS[handType] || '';
+        resultEl.innerHTML = `<span>${t('play.nothingResult', { cards: hand.map(c => c.rank + c.suit).join(' ') })}</span>`;
+        document.getElementById('explanation').textContent = vpHandExplanation(handType);
     }
 
     renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
@@ -753,24 +766,24 @@ function getWinBadgeText(cardIndex, handType) {
     const rankLabel = card.rank;
 
     if (handType === 'Jacks or Better' || handType === 'Two Pair') {
-        return WIN_LABELS.pair + ' ' + rankLabel;
+        return t('win.pair') + ' ' + rankLabel;
     }
     if (handType === 'Three of a Kind') {
-        return WIN_LABELS.threeOfKind;
+        return t('win.threeOfKind');
     }
     if (handType === 'Full House') {
         const count = rankCounts[card.rank] || 0;
-        if (count === 3) return WIN_LABELS.threeOfKind;
-        if (count === 2) return WIN_LABELS.pair + ' ' + rankLabel;
+        if (count === 3) return t('win.threeOfKind');
+        if (count === 2) return t('win.pair') + ' ' + rankLabel;
     }
     if (handType === 'Four of a Kind' || handType === 'Four Aces' ||
         handType === 'Four 2s-4s' || handType === 'Four 5s-Ks') {
-        return WIN_LABELS.fourOfKind;
+        return t('win.fourOfKind');
     }
-    if (handType === 'Straight') return WIN_LABELS.straight;
-    if (handType === 'Flush') return WIN_LABELS.flush;
-    if (handType === 'Straight Flush') return WIN_LABELS.straightFlush;
-    if (handType === 'Royal Flush') return WIN_LABELS.royalFlush;
+    if (handType === 'Straight') return t('win.straight');
+    if (handType === 'Flush') return t('win.flush');
+    if (handType === 'Straight Flush') return t('win.straightFlush');
+    if (handType === 'Royal Flush') return t('win.royalFlush');
     return '';
 }
 
@@ -795,13 +808,15 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
 
         cardEl.className = classes.trim();
         cardEl.onclick = () => toggleHold(i);
-        const SUIT_NAMES = { '♠': 'Spades', '♥': 'Hearts', '♦': 'Diamonds', '♣': 'Clubs' };
-        const RANK_NAMES = { 'A': 'Ace', 'J': 'Jack', 'Q': 'Queen', 'K': 'King' };
+        const SUIT_KEYS = { '♠': 'suit.spades', '♥': 'suit.hearts', '♦': 'suit.diamonds', '♣': 'suit.clubs' };
+        const RANK_KEYS = { 'A': 'rank.ace', 'J': 'rank.jack', 'Q': 'rank.queen', 'K': 'rank.king' };
+        const rankLabel = RANK_KEYS[card.rank] ? t(RANK_KEYS[card.rank]) : card.rank;
+        const suitLabel = t(SUIT_KEYS[card.suit]);
         cardEl.setAttribute('role', 'button');
         cardEl.setAttribute('tabindex', '0');
         cardEl.setAttribute('aria-pressed', held[i] ? 'true' : 'false');
         cardEl.setAttribute('aria-label',
-            (RANK_NAMES[card.rank] || card.rank) + ' of ' + SUIT_NAMES[card.suit] + (held[i] ? ', held' : ''));
+            t(held[i] ? 'aria.cardOfHeld' : 'aria.cardOf', { rank: rankLabel, suit: suitLabel }));
         cardEl.onkeydown = (e) => {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleHold(i); }
         };
@@ -1052,6 +1067,21 @@ function initGame() {
     renderPayouts();
     // Greet the player with an already-dealt hand, as if Deal was just pressed
     deal();
+}
+
+// Re-render the bits of the Play/Settings screens that were built from
+// translated strings, so a language switch mid-session updates them live.
+if (window.vpOnLanguageChange) {
+    vpOnLanguageChange(function() {
+        renderPayouts();
+        updateVariantUI();
+        updateMultiHandUI();
+        updateMainButton();
+        const resultEl = document.getElementById('result');
+        if (resultEl && gameState === 'bet' && !lastHandType) {
+            resultEl.textContent = t('play.resultDefault');
+        }
+    });
 }
 
 document.addEventListener('keydown', function(e) {

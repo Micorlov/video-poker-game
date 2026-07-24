@@ -66,7 +66,7 @@ function buildStoriesList() {
     const myBest = getBestHand();
     stories.push({
         id: 'me',
-        name: 'You',
+        name: t('common.you'),
         initial: user ? (user.displayName || 'Y').charAt(0).toUpperCase() : 'Y',
         bestHand: myBest,
         bracelet: (user && typeof latestBraceletForUid === 'function') ? latestBraceletForUid(user.uid) : null,
@@ -80,7 +80,7 @@ function buildStoriesList() {
             if ((f.bestHand && f.bestHand.handName) || bracelet) {
                 stories.push({
                     id: f.uid,
-                    name: f.displayName || 'Player',
+                    name: f.displayName || t('common.player'),
                     initial: (f.displayName || 'P').charAt(0).toUpperCase(),
                     bestHand: f.bestHand,
                     bracelet: bracelet,
@@ -117,14 +117,14 @@ function renderStoriesRow() {
         if (s.bracelet) {
             const badge = document.createElement('span');
             badge.className = 'bracelet-badge';
-            badge.title = s.name + ' — ' + (s.bracelet.type === 'daily' ? 'Daily' : 'Hourly') + ' Bracelet';
+            badge.title = s.name + ' — ' + t(s.bracelet.type === 'daily' ? 'champ.braceletDaily' : 'champ.braceletHourly');
             badge.textContent = '💍';
             ring.appendChild(badge);
         }
 
         const name = document.createElement('div');
         name.className = 'story-name' + (s.isMe ? ' you' : '');
-        name.textContent = s.isMe ? 'You' : s.name;
+        name.textContent = s.isMe ? t('common.you') : s.name;
 
         item.appendChild(ring);
         item.appendChild(name);
@@ -205,7 +205,7 @@ function renderStoryViewer() {
     // Body
     let bodyHtml = '<div class="story-viewer-body">';
     if (story.bestHand) {
-        bodyHtml += '<div class="story-hand-name">' + story.bestHand.handName + '</div>';
+        bodyHtml += '<div class="story-hand-name">' + vpHandLabel(story.bestHand.handName) + '</div>';
         bodyHtml += '<div class="story-cards">';
         story.bestHand.cards.forEach(function(c) {
             var red = c.suit === '♥' || c.suit === '♦';
@@ -215,15 +215,17 @@ function renderStoryViewer() {
             bodyHtml += '</div>';
         });
         bodyHtml += '</div>';
-        bodyHtml += '<div class="story-payout">+' + story.bestHand.payout + ' credits · ' + story.bestHand.mult + '×</div>';
+        bodyHtml += '<div class="story-payout">' + t('story.creditsMult', { payout: story.bestHand.payout, mult: story.bestHand.mult }) + '</div>';
     } else {
-        bodyHtml += '<div class="story-hand-name" style="color:var(--text-muted)">No winning hands yet</div>';
-        bodyHtml += '<div style="color:var(--text-faint);font-size:13px">Win a hand to create your story</div>';
+        bodyHtml += '<div class="story-hand-name" style="color:var(--text-muted)">' + t('story.noWinningHands') + '</div>';
+        bodyHtml += '<div style="color:var(--text-faint);font-size:13px">' + t('story.winAHand') + '</div>';
     }
     if (story.bracelet) {
-        bodyHtml += '<div class="story-bracelet-strip">💍 ' +
-            (story.bracelet.type === 'daily' ? 'Daily' : 'Hourly') + ' Bracelet — ' + story.bracelet.handType +
-            ' for +' + story.bracelet.winAmount + ' credits</div>';
+        bodyHtml += '<div class="story-bracelet-strip">' + t('story.braceletStrip', {
+            type: t(story.bracelet.type === 'daily' ? 'champ.braceletDaily' : 'champ.braceletHourly'),
+            hand: vpHandLabel(story.bracelet.handType),
+            amount: story.bracelet.winAmount
+        }) + '</div>';
     }
     bodyHtml += '</div>';
 

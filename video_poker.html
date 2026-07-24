@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Video Poker</title>
     <script>
+    // Set lang/dir before the stylesheet paints so Hebrew/RTL users (by
+    // saved preference, or browser language when none is saved yet) never
+    // see a flash of the LTR layout. js/i18n.js re-does this properly (and
+    // translates the DOM text) once it loads; this is just the early flag.
+    (function () {
+        try {
+            var lang = localStorage.getItem('vp_lang');
+            if (lang !== 'en' && lang !== 'he') {
+                var langs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
+                lang = langs.some(function (l) { return /^he/i.test(l); }) ? 'he' : 'en';
+            }
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+        } catch (e) { /* best-effort — defaults to en/ltr */ }
+    })();
+    </script>
+    <script>
     // If this page was opened outside the app (e.g. a link tapped in WhatsApp)
     // and carries an invite/join code, try to hand off to the installed app
     // via its custom URL scheme before falling back to the web experience.
@@ -1404,14 +1421,14 @@ button, input, select {
     font-size: 12px;
     color: var(--text-muted);
     width: 34px;
-    text-align: right;
+    text-align: end;
     flex: 0 0 auto;
 }
 
 .friend-score {
     font-weight: 800;
     width: 56px;
-    text-align: right;
+    text-align: end;
     flex: 0 0 auto;
 }
 
@@ -2010,7 +2027,7 @@ button, input, select {
     font-size: 13px;
     font-weight: 700;
     width: 58px;
-    text-align: right;
+    text-align: end;
     font-variant-numeric: tabular-nums;
     flex-shrink: 0;
 }
@@ -2407,7 +2424,7 @@ button, input, select {
     font-size: 12px;
     color: var(--text-muted);
     width: 38px;
-    text-align: right;
+    text-align: end;
     flex-shrink: 0;
 }
 
@@ -2415,7 +2432,7 @@ button, input, select {
     font-size: 13px;
     font-weight: 700;
     width: 58px;
-    text-align: right;
+    text-align: end;
     font-variant-numeric: tabular-nums;
     flex-shrink: 0;
 }
@@ -2889,7 +2906,7 @@ body.screen-shake {
 }
 
 .ob-mockup-stat--right {
-    text-align: right;
+    text-align: end;
 }
 
 .ob-mockup-cards {
@@ -3140,7 +3157,7 @@ body.screen-shake {
     list-style: none;
     width: 100%;
     max-width: 280px;
-    text-align: left;
+    text-align: start;
     margin-bottom: 28px;
     display: flex;
     flex-direction: column;
@@ -3258,6 +3275,52 @@ body.screen-shake {
 }
 
 
+/* --- styles/rtl.css --- */
+/* RTL overrides — applied when <html dir="rtl"> (Hebrew). Everything here
+   mirrors a physical left/right value that couldn't be swapped for a
+   logical one (a few text-align rules were converted to start/end directly
+   in their own stylesheets instead of duplicated here). */
+
+[dir="rtl"] .allin-badge {
+    right: auto;
+    left: -7px;
+}
+
+[dir="rtl"] .mh-win,
+[dir="rtl"] .mh-lose {
+    margin-left: 0;
+    margin-right: 4px;
+}
+
+[dir="rtl"] .modal-close {
+    right: auto;
+    left: 12px;
+}
+
+[dir="rtl"] .modal-title {
+    padding-right: 0;
+    padding-left: 20px;
+}
+
+[dir="rtl"] .bracelet-badge {
+    right: auto;
+    left: -2px;
+}
+
+[dir="rtl"] .ob-allin-badge {
+    right: auto;
+    left: -3px;
+}
+
+/* Pure directional glyphs — flipping them visually swaps the arrowhead so
+   "back"/"next" and the settings chevron still point the natural way. */
+[dir="rtl"] .onboarding-nav-arrow,
+[dir="rtl"] .settings-chevron {
+    display: inline-block;
+    transform: scaleX(-1);
+}
+
+
 </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -3267,14 +3330,14 @@ body.screen-shake {
     <div class="app">
         <section id="screen-play" class="screen active">
             <div class="brandrow">
-                <div class="app-title">Video Poker</div>
+                <div class="app-title" data-i18n="app.brandTitle">Video Poker</div>
                 <div class="tpill" id="tournament-pill" onclick="toggleTournamentPill()">
                     <span>⏱ #1 · 26:55</span>
                     <span class="tour-chev" id="tour-chev">▾</span>
                 </div>
             </div>
             <div class="texpand hidden" id="tournament-expand">
-                <span>🏆 Tournament #2</span>
+                <span>🏆 <span data-i18n="common.tournament">Tournament</span> #2</span>
                 <span>09:26:55</span>
             </div>
 
@@ -3284,11 +3347,11 @@ body.screen-shake {
             <div class="panel balance-panel">
                 <div class="balance-row">
                     <div>
-                        <div class="section-label">Balance</div>
+                        <div class="section-label" data-i18n="play.balance">Balance</div>
                         <div class="balance-value" id="balance">500</div>
                     </div>
                     <div>
-                        <div class="section-label">Total Bet</div>
+                        <div class="section-label" data-i18n="play.totalBet">Total Bet</div>
                         <div class="bet-value" id="bet-display">10</div>
                     </div>
                 </div>
@@ -3297,22 +3360,22 @@ body.screen-shake {
                     <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
                     <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
                     <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
-                    <button class="bet-btn bet-btn-allin" onclick="openAllInSheet()" id="bet-allin">ALL IN<span class="allin-badge" id="allin-badge">1</span></button>
+                    <button class="bet-btn bet-btn-allin" onclick="openAllInSheet()" id="bet-allin"><span data-i18n="play.allIn">ALL IN</span><span class="allin-badge" id="allin-badge">1</span></button>
                 </div>
             </div>
 
             <div id="multi-hands"></div>
             <div class="hand" id="hand"></div>
-            <div class="hand-placeholder-text" id="hand-placeholder-text">Tap a card or Deal to start the hand</div>
+            <div class="hand-placeholder-text" id="hand-placeholder-text" data-i18n="play.handPlaceholder">Tap a card or Deal to start the hand</div>
 
             <div class="action-row">
-                <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">🎴</span>Deal</button>
-                <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
+                <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">🎴</span><span data-i18n="play.deal">Deal</span></button>
+                <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints" data-i18n-title="play.hintTitle">💡</button>
             </div>
 
             <div class="streak-bar" id="streak-bar">
                 <span>🔥</span>
-                <span>Win Streak</span>
+                <span data-i18n="play.winStreak">Win Streak</span>
                 <span class="streak-count" id="streak-count">0</span>
                 <span class="streak-bonus-tag hidden" id="streak-bonus-tag"></span>
             </div>
@@ -3320,76 +3383,76 @@ body.screen-shake {
             <!-- Web: original Phase 2 panels (untouched) -->
             <div class="panel nearby-panel" id="nearby-panel">
                 <div class="panel-head" onclick="showScreen('friends')">
-                    <span class="panel-title">Friends Leaderboard</span>
+                    <span class="panel-title" data-i18n="play.friendsLeaderboard">Friends Leaderboard</span>
                     <span class="panel-sub" id="nearby-panel-header">#— · —</span>
                 </div>
                 <div id="nearby-body"></div>
-                <div class="social-signin-prompt hidden" id="nearby-signin-prompt" onclick="openSignInModal()">Sign in to see your friends</div>
+                <div class="social-signin-prompt hidden" id="nearby-signin-prompt" onclick="openSignInModal()" data-i18n="play.signInFriends">Sign in to see your friends</div>
             </div>
 
             <div class="panel nearby-panel" id="champions-panel">
                 <div class="panel-head">
-                    <span class="panel-title">⏱ Hourly Champions</span>
-                    <span class="champ-countdown" id="champ-countdown">Resets in —m</span>
+                    <span class="panel-title" data-i18n="play.hourlyChampions">⏱ Hourly Champions</span>
+                    <span class="champ-countdown" id="champ-countdown" data-i18n="champ.resetsPlaceholder">Resets in —m</span>
                 </div>
                 <div id="champions-body"></div>
-                <div class="social-signin-prompt hidden" id="champions-signin-prompt" onclick="openSignInModal()">Sign in to compete for the hourly crown</div>
+                <div class="social-signin-prompt hidden" id="champions-signin-prompt" onclick="openSignInModal()" data-i18n="play.signInCompete">Sign in to compete for the hourly crown</div>
             </div>
 
             <!-- Native apps (Android/iOS) only: unified Leaderboards panel — Friends (daily) -> Global Hourly -> Global Daily -->
             <div class="panel nearby-panel leaderboard-panel hidden" id="leaderboard-panel">
                 <div class="lb-tabs">
-                    <button class="lb-tab selected" id="lb-tab-friends" onclick="setLeaderboardTab('friends')">Friends</button>
-                    <button class="lb-tab" id="lb-tab-hourly" onclick="setLeaderboardTab('hourly')">Hourly</button>
-                    <button class="lb-tab" id="lb-tab-daily" onclick="setLeaderboardTab('daily')">Daily</button>
+                    <button class="lb-tab selected" id="lb-tab-friends" onclick="setLeaderboardTab('friends')" data-i18n="play.lbFriends">Friends</button>
+                    <button class="lb-tab" id="lb-tab-hourly" onclick="setLeaderboardTab('hourly')" data-i18n="play.lbHourly">Hourly</button>
+                    <button class="lb-tab" id="lb-tab-daily" onclick="setLeaderboardTab('daily')" data-i18n="play.lbDaily">Daily</button>
                 </div>
                 <div class="panel-head" id="lb-panel-head">
-                    <span class="panel-title" id="lb-title">Friends · Today</span>
+                    <span class="panel-title" id="lb-title" data-i18n="lb.friendsToday">Friends · Today</span>
                     <span class="panel-sub" id="lb-sub">#— · —</span>
                 </div>
                 <div id="lb-body"></div>
-                <div class="social-signin-prompt hidden" id="lb-signin-prompt" onclick="openSignInModal()">Sign in to see leaderboards</div>
-                <button class="lb-expand-link hidden" id="lb-expand-link" onclick="toggleLeaderboardExpand()">Show Top 20 ▾</button>
+                <div class="social-signin-prompt hidden" id="lb-signin-prompt" onclick="openSignInModal()" data-i18n="play.signInLeaderboards">Sign in to see leaderboards</div>
+                <button class="lb-expand-link hidden" id="lb-expand-link" onclick="toggleLeaderboardExpand()" data-i18n="lb.showTop20">Show Top 20 ▾</button>
             </div>
 
             <div class="panel pwf-panel" id="pwf-panel">
                 <div class="play-rooms-header">
-                    <span class="section-label">Play With Friends</span>
-                    <span class="see-all-link" onclick="showScreen('friends')">See All ›</span>
+                    <span class="section-label" data-i18n="play.playWithFriends">Play With Friends</span>
+                    <span class="see-all-link" onclick="showScreen('friends')" data-i18n="play.seeAll">See All ›</span>
                 </div>
                 <div id="play-rooms-list"></div>
-                <button class="create-room-link" onclick="openRoomModal()">+ Create a Poker Room with Friends</button>
+                <button class="create-room-link" onclick="openRoomModal()" data-i18n="play.createRoomLong">+ Create a Poker Room with Friends</button>
             </div>
 
-            <div class="result-panel" id="result">Place your bet and deal to play</div>
+            <div class="result-panel" id="result" data-i18n="play.resultDefault">Place your bet and deal to play</div>
             <div class="explanation" id="explanation"></div>
         </section>
 
         <section id="screen-stats" class="screen">
-            <h1 class="screen-title">Statistics</h1>
+            <h1 class="screen-title" data-i18n="stats.title">Statistics</h1>
             <div class="stats-toggle">
-                <button class="stats-toggle-btn selected" id="stats-tab-today" onclick="setStatsTab('today')">Today</button>
-                <button class="stats-toggle-btn" id="stats-tab-alltime" onclick="setStatsTab('alltime')">All-Time</button>
+                <button class="stats-toggle-btn selected" id="stats-tab-today" onclick="setStatsTab('today')" data-i18n="stats.today">Today</button>
+                <button class="stats-toggle-btn" id="stats-tab-alltime" onclick="setStatsTab('alltime')" data-i18n="stats.allTime">All-Time</button>
             </div>
             <div class="panel stats-net-panel">
-                <div class="section-label">Net</div>
+                <div class="section-label" data-i18n="stats.net">Net</div>
                 <div class="stats-net-value zero" id="stats-net-value">+0</div>
             </div>
             <div class="stats-grid">
                 <div class="panel">
-                    <div class="section-label">Won</div>
+                    <div class="section-label" data-i18n="stats.won">Won</div>
                     <div class="stat-tile-value won" id="stats-won-value">+0</div>
                 </div>
                 <div class="panel">
-                    <div class="section-label">Lost</div>
+                    <div class="section-label" data-i18n="stats.lost">Lost</div>
                     <div class="stat-tile-value lost" id="stats-lost-value">-0</div>
                 </div>
                 <div class="panel">
-                    <div class="section-label">Hands Played</div>
+                    <div class="section-label" data-i18n="stats.handsPlayed">Hands Played</div>
                     <div class="stat-tile-value" id="stats-hands-value">0</div>
                 </div>
                 <div class="panel">
-                    <div class="section-label">Best Streak</div>
+                    <div class="section-label" data-i18n="stats.bestStreak">Best Streak</div>
                     <div class="stat-tile-value" id="stats-streak-value">0</div>
                 </div>
             </div>
@@ -3397,55 +3460,55 @@ body.screen-shake {
 
         <section id="screen-friends" class="screen">
             <div class="friends-header">
-                <h1 class="screen-title">Friends</h1>
-                <button class="invite-pill" onclick="openInviteSheet()">+ Invite</button>
+                <h1 class="screen-title" data-i18n="friends.title">Friends</h1>
+                <button class="invite-pill" onclick="openInviteSheet()" data-i18n="friends.invite">+ Invite</button>
             </div>
 
             <div class="panel friends-signin-prompt" id="friends-signed-out" onclick="openSignInModal()">
-                <span class="settings-row-label">Sign in to add friends</span>
+                <span class="settings-row-label" data-i18n="friends.signInAdd">Sign in to add friends</span>
                 <span class="settings-chevron">›</span>
             </div>
 
             <div id="friends-signed-in-wrap" class="hidden">
-                <div class="section-label">Your Code</div>
+                <div class="section-label" data-i18n="friends.yourCode">Your Code</div>
                 <div class="panel own-code-panel" id="own-referral-code">—</div>
 
-                <div class="section-label">Invite Friends</div>
+                <div class="section-label" data-i18n="friends.inviteFriends">Invite Friends</div>
                 <div class="invite-row">
                     <button class="invite-btn" onclick="copyInviteLink()" id="invite-copy-btn">
                         <span class="invite-icon">📋</span>
-                        <span>Copy Invite Link</span>
+                        <span data-i18n="friends.copyInviteLink">Copy Invite Link</span>
                     </button>
                     <button class="invite-btn whatsapp" onclick="shareViaWhatsApp()" id="invite-whatsapp-btn">
                         <span class="invite-icon">💬</span>
-                        <span>WhatsApp</span>
+                        <span data-i18n="friends.whatsapp">WhatsApp</span>
                     </button>
                 </div>
 
-                <div class="section-label">Add a Friend</div>
+                <div class="section-label" data-i18n="friends.addFriend">Add a Friend</div>
                 <div class="panel add-friend-row">
-                    <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
-                    <button class="btn-primary add-friend-btn" onclick="addFriendByCode()">Add</button>
+                    <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" data-i18n-placeholder="friends.friendCodePlaceholder" autocomplete="off">
+                    <button class="btn-primary add-friend-btn" onclick="addFriendByCode()" data-i18n="friends.add">Add</button>
                 </div>
 
                 <div class="stats-toggle">
-                    <button class="stats-toggle-btn selected" id="friends-tab-leaderboard" onclick="setFriendsTab('leaderboard')">Leaderboard</button>
-                    <button class="stats-toggle-btn" id="friends-tab-rooms" onclick="setFriendsTab('rooms')">Poker Rooms</button>
+                    <button class="stats-toggle-btn selected" id="friends-tab-leaderboard" onclick="setFriendsTab('leaderboard')" data-i18n="friends.leaderboard">Leaderboard</button>
+                    <button class="stats-toggle-btn" id="friends-tab-rooms" onclick="setFriendsTab('rooms')" data-i18n="friends.pokerRooms">Poker Rooms</button>
                 </div>
 
                 <div id="friends-leaderboard-view">
                     <div class="panel">
-                        <div class="rooms-empty hidden" id="friends-empty">Add friends by their code to compare scores.</div>
+                        <div class="rooms-empty hidden" id="friends-empty" data-i18n="friends.addByCode">Add friends by their code to compare scores.</div>
                         <div id="friends-list"></div>
                     </div>
                 </div>
 
                 <div id="friends-rooms-view" class="hidden">
-                    <div class="rooms-empty hidden" id="friends-rooms-empty">No rooms yet — create one below.</div>
+                    <div class="rooms-empty hidden" id="friends-rooms-empty" data-i18n="friends.noRoomsYet">No rooms yet — create one below.</div>
                     <div id="friends-rooms-list"></div>
-                    <button class="create-room-link create-room-dashed" id="friends-create-room-btn" onclick="toggleInlineRoomForm()">+ Create a Poker Room with Friends</button>
+                    <button class="create-room-link create-room-dashed" id="friends-create-room-btn" onclick="toggleInlineRoomForm()" data-i18n="room.createShort">+ Create a Poker Room with Friends</button>
                     <div class="inline-room-form hidden" id="inline-room-form">
-                        <input class="room-form-input" id="inline-room-name" maxlength="24" placeholder="Room name…">
+                        <input class="room-form-input" id="inline-room-name" maxlength="24" placeholder="Room name…" data-i18n-placeholder="friends.roomNamePlaceholder">
                         <div class="room-form-stakes" id="inline-room-stakes">
                             <button class="room-form-stake selected" onclick="selectInlineStake(5)">5</button>
                             <button class="room-form-stake" onclick="selectInlineStake(10)">10</button>
@@ -3453,8 +3516,8 @@ body.screen-shake {
                             <button class="room-form-stake" onclick="selectInlineStake(50)">50</button>
                         </div>
                         <div class="room-form-actions">
-                            <button class="room-form-create-btn" onclick="createRoomInline()">Create &amp; Invite</button>
-                            <button class="room-form-cancel-btn" onclick="toggleInlineRoomForm()">Cancel</button>
+                            <button class="room-form-create-btn" onclick="createRoomInline()" data-i18n="friends.createAndInvite">Create &amp; Invite</button>
+                            <button class="room-form-cancel-btn" onclick="toggleInlineRoomForm()" data-i18n="common.cancel">Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -3462,28 +3525,34 @@ body.screen-shake {
         </section>
 
         <section id="screen-settings" class="screen">
-            <h1 class="screen-title">Settings</h1>
+            <h1 class="screen-title" data-i18n="settings.title">Settings</h1>
 
-            <div class="section-label">Gameplay</div>
+            <div class="section-label" data-i18n="settings.language">Language</div>
+            <div class="theme-picker">
+                <button class="theme-btn" id="settings-lang-en">English</button>
+                <button class="theme-btn selected" id="settings-lang-he">עברית</button>
+            </div>
+
+            <div class="section-label" data-i18n="settings.gameplay">Gameplay</div>
             <div class="panel">
                 <div class="settings-row">
-                    <span class="settings-row-label">Sound Effects</span>
+                    <span class="settings-row-label" data-i18n="settings.soundEffects">Sound Effects</span>
                     <input type="checkbox" class="toggle-switch" id="settings-sound-toggle">
                 </div>
                 <div class="settings-row">
-                    <span class="settings-row-label">Haptic Feedback</span>
+                    <span class="settings-row-label" data-i18n="settings.hapticFeedback">Haptic Feedback</span>
                     <input type="checkbox" class="toggle-switch" id="settings-haptics-toggle">
                 </div>
             </div>
 
-            <div class="section-label">Theme</div>
+            <div class="section-label" data-i18n="settings.theme">Theme</div>
             <div class="theme-picker">
-                <button class="theme-btn selected" id="theme-green" onclick="setTheme('green')">🟢 Green</button>
-                <button class="theme-btn" id="theme-blue" onclick="setTheme('blue')">🔵 Blue</button>
-                <button class="theme-btn" id="theme-crimson" onclick="setTheme('crimson')">🔴 Crimson</button>
+                <button class="theme-btn selected" id="theme-green" onclick="setTheme('green')" data-i18n="settings.themeGreen">🟢 Green</button>
+                <button class="theme-btn" id="theme-blue" onclick="setTheme('blue')" data-i18n="settings.themeBlue">🔵 Blue</button>
+                <button class="theme-btn" id="theme-crimson" onclick="setTheme('crimson')" data-i18n="settings.themeCrimson">🔴 Crimson</button>
             </div>
 
-            <div class="section-label">Default Bet</div>
+            <div class="section-label" data-i18n="settings.defaultBet">Default Bet</div>
             <div class="panel default-bet-row">
                 <button class="bet-btn" id="settings-defaultbet-5">5</button>
                 <button class="bet-btn" id="settings-defaultbet-10">10</button>
@@ -3491,71 +3560,71 @@ body.screen-shake {
                 <button class="bet-btn" id="settings-defaultbet-50">50</button>
             </div>
 
-            <div class="section-label">Game Variant</div>
+            <div class="section-label" data-i18n="settings.gameVariant">Game Variant</div>
             <div class="variant-picker">
-                <button class="variant-btn selected" id="variant-jacks" onclick="setGameVariant('jacks')">Jacks or Better<span class="variant-lock"></span></button>
-                <button class="variant-btn" id="variant-deuces" onclick="setGameVariant('deuces')">Deuces Wild<span class="variant-lock"></span></button>
-                <button class="variant-btn" id="variant-bonus" onclick="setGameVariant('bonus')">Bonus Poker<span class="variant-lock"></span></button>
-                <button class="variant-btn" id="variant-doubleBonus" onclick="setGameVariant('doubleBonus')">Double Bonus<span class="variant-lock"></span></button>
+                <button class="variant-btn selected" id="variant-jacks" onclick="setGameVariant('jacks')"><span data-i18n="variant.jacks">Jacks or Better</span><span class="variant-lock"></span></button>
+                <button class="variant-btn" id="variant-deuces" onclick="setGameVariant('deuces')"><span data-i18n="variant.deuces">Deuces Wild</span><span class="variant-lock"></span></button>
+                <button class="variant-btn" id="variant-bonus" onclick="setGameVariant('bonus')"><span data-i18n="variant.bonus">Bonus Poker</span><span class="variant-lock"></span></button>
+                <button class="variant-btn" id="variant-doubleBonus" onclick="setGameVariant('doubleBonus')"><span data-i18n="variant.doubleBonus">Double Bonus</span><span class="variant-lock"></span></button>
             </div>
 
-            <div class="section-label">Hands per Deal</div>
+            <div class="section-label" data-i18n="settings.handsPerDeal">Hands per Deal</div>
             <div class="multi-picker">
-                <button class="multi-btn selected" id="multi-1" onclick="setMultiHand(1)">1 Hand</button>
-                <button class="multi-btn" id="multi-3" onclick="setMultiHand(3)">3× Hands</button>
-                <button class="multi-btn" id="multi-5" onclick="setMultiHand(5)">5× Hands</button>
+                <button class="multi-btn selected" id="multi-1" onclick="setMultiHand(1)" data-i18n="settings.oneHand">1 Hand</button>
+                <button class="multi-btn" id="multi-3" onclick="setMultiHand(3)" data-i18n="settings.threeHands">3× Hands</button>
+                <button class="multi-btn" id="multi-5" onclick="setMultiHand(5)" data-i18n="settings.fiveHands">5× Hands</button>
             </div>
 
-            <div class="section-label">Support</div>
+            <div class="section-label" data-i18n="settings.support">Support</div>
             <div class="panel payout-panel collapsed" id="payout-panel">
                 <button class="payout-header" onclick="document.getElementById('payout-panel').classList.toggle('collapsed')" id="settings-view-paytable">
-                    <span class="payout-header-label">Payout Table</span>
+                    <span class="payout-header-label" data-i18n="settings.payoutTable">Payout Table</span>
                     <span class="payout-caret">▲</span>
                 </button>
                 <div class="payouts" id="payouts"></div>
             </div>
 
-            <div class="section-label">Account</div>
+            <div class="section-label" data-i18n="settings.account">Account</div>
             <div class="panel">
                 <div class="settings-row" id="account-signed-out" onclick="openSignInModal()" style="cursor:pointer;">
-                    <span class="settings-row-label">Sign in with Google</span>
+                    <span class="settings-row-label" data-i18n="settings.signInGoogle">Sign in with Google</span>
                     <span class="settings-chevron">›</span>
                 </div>
                 <div class="settings-row hidden" id="account-signed-in">
                     <span class="settings-row-label" id="account-display-name">Signed in</span>
-                    <button class="btn-danger account-signout-btn" onclick="signOutUser()">Sign Out</button>
+                    <button class="btn-danger account-signout-btn" onclick="signOutUser()" data-i18n="settings.signOut">Sign Out</button>
                 </div>
             </div>
 
             <div class="hidden" id="settings-notifications-panel">
-                <div class="section-label">Notifications</div>
+                <div class="section-label" data-i18n="settings.notifications">Notifications</div>
                 <div class="panel">
                     <div class="settings-row">
-                        <span class="settings-row-label">Friend activity</span>
+                        <span class="settings-row-label" data-i18n="settings.friendActivity">Friend activity</span>
                         <input type="checkbox" class="toggle-switch" id="settings-notif-social">
                     </div>
                     <div class="settings-row">
-                        <span class="settings-row-label">Leaderboard updates</span>
+                        <span class="settings-row-label" data-i18n="settings.leaderboardUpdates">Leaderboard updates</span>
                         <input type="checkbox" class="toggle-switch" id="settings-notif-leaderboard">
                     </div>
                     <div class="settings-row">
-                        <span class="settings-row-label">Daily bonus reminder</span>
+                        <span class="settings-row-label" data-i18n="settings.dailyBonusReminder">Daily bonus reminder</span>
                         <input type="checkbox" class="toggle-switch" id="settings-notif-dailyReminder">
                     </div>
                     <div class="settings-row">
-                        <span class="settings-row-label">Friends' best hands</span>
+                        <span class="settings-row-label" data-i18n="settings.friendsBestHands">Friends' best hands</span>
                         <input type="checkbox" class="toggle-switch" id="settings-notif-bestHand">
                     </div>
                     <div class="settings-row" id="settings-notifications-enable" style="cursor:pointer;">
-                        <span class="settings-row-label">Enable Notifications</span>
+                        <span class="settings-row-label" data-i18n="settings.enableNotifications">Enable Notifications</span>
                         <span class="settings-chevron">›</span>
                     </div>
                 </div>
             </div>
 
-            <button class="btn-danger" id="settings-reset-stats">Reset Statistics</button>
+            <button class="btn-danger" id="settings-reset-stats" data-i18n="settings.resetStats">Reset Statistics</button>
 
-            <div class="settings-footer">Video Poker · v3.0</div>
+            <div class="settings-footer" data-i18n="settings.footer">Video Poker · v3.0</div>
         </section>
     </div>
 
@@ -3563,19 +3632,19 @@ body.screen-shake {
         <div class="bottom-nav-inner">
             <button class="nav-btn active" id="nav-play" onclick="showScreen('play')">
                 <span class="nav-icon">♠</span>
-                <span>Play</span>
+                <span data-i18n="nav.play">Play</span>
             </button>
             <button class="nav-btn" id="nav-stats" onclick="showScreen('stats')">
                 <span class="nav-icon">▤</span>
-                <span>Stats</span>
+                <span data-i18n="nav.stats">Stats</span>
             </button>
             <button class="nav-btn" id="nav-friends" onclick="showScreen('friends')">
                 <span class="nav-icon">👥</span>
-                <span>Friends</span>
+                <span data-i18n="nav.friends">Friends</span>
             </button>
             <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
                 <span class="nav-icon">⚙</span>
-                <span>Settings</span>
+                <span data-i18n="nav.settings">Settings</span>
             </button>
         </div>
     </nav>
@@ -3583,15 +3652,15 @@ body.screen-shake {
     <div class="modal-backdrop hidden" id="signin-modal">
         <div class="modal-box">
             <button class="modal-close" onclick="closeSignInModal()">✕</button>
-            <div class="modal-title">Sign in to play with friends</div>
-            <div class="modal-sub">Add friends, join rooms, and compare scores.</div>
+            <div class="modal-title" data-i18n="modal.signInTitle">Sign in to play with friends</div>
+            <div class="modal-sub" data-i18n="modal.signInSub">Add friends, join rooms, and compare scores.</div>
             <button class="google-btn" onclick="signInWithGoogle()">
                 <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
-                <span>Continue with Google</span>
+                <span data-i18n="modal.continueGoogle">Continue with Google</span>
             </button>
             <button class="facebook-btn" onclick="signInWithFacebook()">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                <span>Continue with Facebook</span>
+                <span data-i18n="modal.continueFacebook">Continue with Facebook</span>
             </button>
             <div class="modal-error hidden" id="signin-error"></div>
         </div>
@@ -3600,21 +3669,21 @@ body.screen-shake {
     <div class="modal-backdrop hidden" id="room-modal">
         <div class="modal-box">
             <button class="modal-close" onclick="closeRoomModal()">✕</button>
-            <div class="modal-title">Create a Poker Room</div>
-            <input class="friend-code-input" id="room-name-input" maxlength="24" placeholder="Room name…">
+            <div class="modal-title" data-i18n="modal.createRoom">Create a Poker Room</div>
+            <input class="friend-code-input" id="room-name-input" maxlength="24" placeholder="Room name…" data-i18n-placeholder="modal.roomNamePlaceholder">
             <div class="default-bet-row" style="margin: 10px 0;">
                 <select class="room-stake-select" id="room-stake-input">
-                    <option value="5">Stake 5</option>
-                    <option value="10" selected>Stake 10</option>
-                    <option value="20">Stake 20</option>
-                    <option value="50">Stake 50</option>
+                    <option value="5" data-i18n="modal.stake5">Stake 5</option>
+                    <option value="10" selected data-i18n="modal.stake10">Stake 10</option>
+                    <option value="20" data-i18n="modal.stake20">Stake 20</option>
+                    <option value="50" data-i18n="modal.stake50">Stake 50</option>
                 </select>
             </div>
-            <button class="btn-primary" style="width:100%;" onclick="createRoom()">Create Room</button>
-            <div class="modal-sub" style="margin-top:16px;">Got a code from a friend?</div>
+            <button class="btn-primary" style="width:100%;" onclick="createRoom()" data-i18n="modal.createRoomBtn">Create Room</button>
+            <div class="modal-sub" style="margin-top:16px;" data-i18n="modal.gotCode">Got a code from a friend?</div>
             <div class="add-friend-row">
-                <input class="friend-code-input" id="room-code-input" maxlength="6" placeholder="Room code…" autocomplete="off">
-                <button class="btn-secondary" onclick="joinRoomByCode()">Join</button>
+                <input class="friend-code-input" id="room-code-input" maxlength="6" placeholder="Room code…" data-i18n-placeholder="modal.roomCodePlaceholder" autocomplete="off">
+                <button class="btn-secondary" onclick="joinRoomByCode()" data-i18n="modal.join">Join</button>
             </div>
         </div>
     </div>
@@ -3622,8 +3691,8 @@ body.screen-shake {
     <div class="modal-backdrop hidden" id="room-detail-modal">
         <div class="modal-box">
             <button class="modal-close" onclick="closeRoomDetail()">✕</button>
-            <div class="modal-title" id="room-detail-name">Room</div>
-            <div class="modal-sub">Code: <span id="room-detail-code"></span></div>
+            <div class="modal-title" id="room-detail-name" data-i18n="modal.room">Room</div>
+            <div class="modal-sub"><span data-i18n="modal.code">Code:</span> <span id="room-detail-code"></span></div>
             <div id="room-detail-members" style="margin-top:12px;"></div>
         </div>
     </div>
@@ -3632,14 +3701,14 @@ body.screen-shake {
     <div class="sheet-backdrop hidden" id="invite-sheet" onclick="if(event.target===this)closeSheet('invite-sheet')">
         <div class="sheet">
             <div class="sheet-header">
-                <span class="sheet-title">Invite Friends</span>
+                <span class="sheet-title" data-i18n="sheet.inviteFriends">Invite Friends</span>
                 <button class="sheet-close" onclick="closeSheet('invite-sheet')">✕</button>
             </div>
             <div class="sheet-link-row">
                 <span class="sheet-link-text" id="invite-sheet-link">—</span>
-                <button class="sheet-copy-btn" id="invite-sheet-copy" onclick="copyInviteSheetLink()">Copy</button>
+                <button class="sheet-copy-btn" id="invite-sheet-copy" onclick="copyInviteSheetLink()" data-i18n="sheet.copy">Copy</button>
             </div>
-            <button class="sheet-share-btn" onclick="shareInviteLink()">Share Invite Link</button>
+            <button class="sheet-share-btn" onclick="shareInviteLink()" data-i18n="sheet.shareInviteLink">Share Invite Link</button>
         </div>
     </div>
 
@@ -3647,19 +3716,19 @@ body.screen-shake {
     <div class="sheet-backdrop hidden" id="room-created-sheet" onclick="if(event.target===this)closeSheet('room-created-sheet')">
         <div class="sheet">
             <div class="sheet-header">
-                <span class="sheet-title">Room Created 🎉</span>
+                <span class="sheet-title" data-i18n="sheet.roomCreated">Room Created 🎉</span>
                 <button class="sheet-close" onclick="closeSheet('room-created-sheet')">✕</button>
             </div>
-            <div class="sheet-sub">Invite friends to "<span id="room-created-name">—</span>"</div>
+            <div class="sheet-sub" id="room-created-sub">Invite friends to "<span id="room-created-name">—</span>"</div>
             <div class="sheet-link-row">
                 <span class="sheet-link-text" id="room-created-link">—</span>
-                <button class="sheet-copy-btn" id="room-created-copy" onclick="copyRoomLink()">Copy</button>
+                <button class="sheet-copy-btn" id="room-created-copy" onclick="copyRoomLink()" data-i18n="sheet.copy">Copy</button>
             </div>
             <div class="share-chips-row">
-                <button class="share-chip whatsapp" onclick="shareRoomViaWhatsApp()">WhatsApp</button>
-                <button class="share-chip telegram" onclick="shareRoomViaTelegram()">Telegram</button>
+                <button class="share-chip whatsapp" onclick="shareRoomViaWhatsApp()" data-i18n="friends.whatsapp">WhatsApp</button>
+                <button class="share-chip telegram" onclick="shareRoomViaTelegram()" data-i18n="sheet.telegram">Telegram</button>
             </div>
-            <button class="sheet-done-btn" onclick="closeSheet('room-created-sheet')">Done</button>
+            <button class="sheet-done-btn" onclick="closeSheet('room-created-sheet')" data-i18n="sheet.done">Done</button>
         </div>
     </div>
 
@@ -3667,13 +3736,13 @@ body.screen-shake {
     <div class="sheet-backdrop hidden" id="allin-sheet" onclick="if(event.target===this)closeAllInSheet()">
         <div class="sheet">
             <div class="sheet-header">
-                <span class="sheet-title">🔥 Go All In</span>
+                <span class="sheet-title" data-i18n="sheet.goAllIn">🔥 Go All In</span>
                 <button class="sheet-close" onclick="closeAllInSheet()">✕</button>
             </div>
-            <div class="sheet-sub">You can use ALL IN once a day. This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on the next hand. Slide to confirm.</div>
+            <div class="sheet-sub" id="allin-sheet-sub">You can use ALL IN once a day. This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on the next hand. Slide to confirm.</div>
             <div class="allin-slider-track" id="allin-slider-track">
                 <div class="allin-slider-fill" id="allin-slider-fill"></div>
-                <span class="allin-slider-label">Slide to confirm</span>
+                <span class="allin-slider-label" data-i18n="sheet.slideToConfirm">Slide to confirm</span>
                 <div class="allin-slider-thumb" id="allin-slider-thumb">»</div>
             </div>
         </div>
@@ -3699,13 +3768,13 @@ body.screen-shake {
                             <span>Q</span><span class="ob-fan-suit">♠</span>
                         </div>
                     </div>
-                    <div class="ob-welcome-eyebrow">Social Casino</div>
-                    <div class="ob-welcome-title">Royal Video Poker</div>
-                    <div class="ob-welcome-subtitle">Five cards. One decision. Play with free chips — no real money, all the thrill.</div>
+                    <div class="ob-welcome-eyebrow" data-i18n="ob.eyebrow">Social Casino</div>
+                    <div class="ob-welcome-title" data-i18n="ob.welcomeTitle">Royal Video Poker</div>
+                    <div class="ob-welcome-subtitle" data-i18n="ob.welcomeSubtitle">Five cards. One decision. Play with free chips — no real money, all the thrill.</div>
                     <div class="ob-welcome-pills">
-                        <span class="ob-pill ob-pill--gold">5-Card Draw</span>
-                        <span class="ob-pill ob-pill--teal">Free Chips Daily</span>
-                        <span class="ob-pill">No Real Money</span>
+                        <span class="ob-pill ob-pill--gold" data-i18n="ob.pill5card">5-Card Draw</span>
+                        <span class="ob-pill ob-pill--teal" data-i18n="ob.pillFreeChips">Free Chips Daily</span>
+                        <span class="ob-pill" data-i18n="ob.pillNoRealMoney">No Real Money</span>
                     </div>
                 </div>
             </div>
@@ -3713,8 +3782,8 @@ body.screen-shake {
             <!-- Step 2: Know Your Hands -->
             <div class="onboarding-step" id="onboarding-step-hands">
                 <div class="ob-screen">
-                    <div class="ob-screen-title">Know Your Hands</div>
-                    <div class="ob-screen-subtitle">Bigger hands pay bigger multipliers.</div>
+                    <div class="ob-screen-title" data-i18n="ob.knowYourHands">Know Your Hands</div>
+                    <div class="ob-screen-subtitle" data-i18n="ob.biggerHands">Bigger hands pay bigger multipliers.</div>
                     <div class="ob-hands-list">
                         <div class="ob-hand-row ob-hand-row--highlight">
                             <div class="ob-hand-cards">
@@ -3725,7 +3794,7 @@ body.screen-shake {
                                 <div class="ob-mini-card">A<br>♠</div>
                             </div>
                             <div class="ob-hand-info">
-                                <span class="ob-hand-name">Royal Flush</span>
+                                <span class="ob-hand-name" data-i18n="hand.royalFlush">Royal Flush</span>
                                 <span class="ob-hand-payout">250x</span>
                             </div>
                         </div>
@@ -3738,7 +3807,7 @@ body.screen-shake {
                                 <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
                             </div>
                             <div class="ob-hand-info">
-                                <span class="ob-hand-name">Straight Flush</span>
+                                <span class="ob-hand-name" data-i18n="hand.straightFlush">Straight Flush</span>
                                 <span class="ob-hand-payout">50x</span>
                             </div>
                         </div>
@@ -3751,7 +3820,7 @@ body.screen-shake {
                                 <div class="ob-mini-card">4<br>♣</div>
                             </div>
                             <div class="ob-hand-info">
-                                <span class="ob-hand-name">Four of a Kind</span>
+                                <span class="ob-hand-name" data-i18n="hand.fourOfKind">Four of a Kind</span>
                                 <span class="ob-hand-payout">25x</span>
                             </div>
                         </div>
@@ -3764,7 +3833,7 @@ body.screen-shake {
                                 <div class="ob-mini-card">3<br>♠</div>
                             </div>
                             <div class="ob-hand-info">
-                                <span class="ob-hand-name">Full House</span>
+                                <span class="ob-hand-name" data-i18n="hand.fullHouse">Full House</span>
                                 <span class="ob-hand-payout">9x</span>
                             </div>
                         </div>
@@ -3777,79 +3846,79 @@ body.screen-shake {
                                 <div class="ob-mini-card">2<br>♠</div>
                             </div>
                             <div class="ob-hand-info">
-                                <span class="ob-hand-name">Jacks or Better</span>
+                                <span class="ob-hand-name" data-i18n="hand.jacksOrBetter">Jacks or Better</span>
                                 <span class="ob-hand-payout">1x</span>
                             </div>
                         </div>
                     </div>
-                    <div class="ob-screen-note">Plus Flush, Straight, Three of a Kind, and Two Pair — nine winning hands in total.</div>
+                    <div class="ob-screen-note" data-i18n="ob.plusNote">Plus Flush, Straight, Three of a Kind, and Two Pair — nine winning hands in total.</div>
                 </div>
             </div>
 
             <!-- Step 3: Bet After You Decide -->
             <div class="onboarding-step" id="onboarding-step-gameplay">
                 <div class="ob-screen">
-                    <div class="ob-screen-title">Bet After You Decide</div>
-                    <div class="ob-screen-subtitle">See your cards, hold what you want, then set your bet before the draw.</div>
+                    <div class="ob-screen-title" data-i18n="ob.betAfterDecide">Bet After You Decide</div>
+                    <div class="ob-screen-subtitle" data-i18n="ob.seeCards">See your cards, hold what you want, then set your bet before the draw.</div>
                     <div class="ob-game-mockup">
                         <div class="ob-mockup-stats">
                             <div class="ob-mockup-stat">
-                                <span class="ob-mockup-stat-label">Balance</span>
+                                <span class="ob-mockup-stat-label" data-i18n="play.balance">Balance</span>
                                 <span class="ob-mockup-stat-value">3,770</span>
                             </div>
                             <div class="ob-mockup-stat ob-mockup-stat--right">
-                                <span class="ob-mockup-stat-label">Total Bet</span>
+                                <span class="ob-mockup-stat-label" data-i18n="play.totalBet">Total Bet</span>
                                 <span class="ob-mockup-stat-value">20</span>
                             </div>
                         </div>
                         <div class="ob-mockup-cards">
                             <div class="ob-mockup-card">
-                                <div class="ob-held-badge">HELD</div>
+                                <div class="ob-held-badge" data-i18n="ob.held">HELD</div>
                                 A♠
                             </div>
                             <div class="ob-mockup-card">
-                                <div class="ob-held-badge">HELD</div>
+                                <div class="ob-held-badge" data-i18n="ob.held">HELD</div>
                                 K♠
                             </div>
                             <div class="ob-mockup-card ob-mockup-card--red">7♦</div>
                             <div class="ob-mockup-card">2♣</div>
                             <div class="ob-mockup-card ob-mockup-card--red">9♥</div>
                         </div>
-                        <div class="ob-mockup-draw-btn">↻ Draw</div>
+                        <div class="ob-mockup-draw-btn">↻ <span data-i18n="play.draw">Draw</span></div>
                         <div class="ob-mockup-bets">
                             <div class="ob-mockup-bet">5</div>
                             <div class="ob-mockup-bet">10</div>
                             <div class="ob-mockup-bet ob-mockup-bet--active">20</div>
                             <div class="ob-mockup-bet">50</div>
                             <div class="ob-mockup-bet ob-mockup-bet--allin" style="position:relative;">
-                                ALL IN
+                                <span data-i18n="play.allIn">ALL IN</span>
                                 <span class="ob-allin-badge">5</span>
                             </div>
                         </div>
                     </div>
-                    <div class="ob-screen-note">One free All-In per day — invite a friend to unlock another.</div>
+                    <div class="ob-screen-note" data-i18n="ob.oneFreeAllIn">One free All-In per day — invite a friend to unlock another.</div>
                 </div>
             </div>
 
             <!-- Step 4: Compete & Climb -->
             <div class="onboarding-step" id="onboarding-step-leaderboard">
                 <div class="ob-screen">
-                    <div class="ob-screen-title">Compete &amp; Climb</div>
-                    <div class="ob-screen-subtitle">Race Friends, Hourly, and Daily leaderboards for bonus chips.</div>
+                    <div class="ob-screen-title" data-i18n="ob.competeClimb">Compete &amp; Climb</div>
+                    <div class="ob-screen-subtitle" data-i18n="ob.raceLeaderboards">Race Friends, Hourly, and Daily leaderboards for bonus chips.</div>
                     <div class="ob-lb-tabs">
-                        <div class="ob-lb-tab ob-lb-tab--active">Friends</div>
-                        <div class="ob-lb-tab">Hourly</div>
-                        <div class="ob-lb-tab">Daily</div>
+                        <div class="ob-lb-tab ob-lb-tab--active" data-i18n="play.lbFriends">Friends</div>
+                        <div class="ob-lb-tab" data-i18n="play.lbHourly">Hourly</div>
+                        <div class="ob-lb-tab" data-i18n="play.lbDaily">Daily</div>
                     </div>
                     <div class="ob-lb-header">
-                        <span>Friends · Today</span>
-                        <span class="ob-lb-you-badge">#1 · You're #1!</span>
+                        <span data-i18n="ob.friendsToday">Friends · Today</span>
+                        <span class="ob-lb-you-badge" data-i18n="ob.youre1">#1 · You're #1!</span>
                     </div>
                     <div class="ob-lb-list">
                         <div class="ob-lb-row ob-lb-row--you">
                             <span class="ob-lb-rank">1</span>
                             <div class="ob-lb-avatar">Y</div>
-                            <span class="ob-lb-name">You</span>
+                            <span class="ob-lb-name" data-i18n="common.you">You</span>
                             <span class="ob-lb-score">+100</span>
                         </div>
                         <div class="ob-lb-row">
@@ -3877,7 +3946,7 @@ body.screen-shake {
                             <span class="ob-lb-score">+9</span>
                         </div>
                     </div>
-                    <div class="ob-screen-note">Also live: hourly and daily tournaments against every player in the app.</div>
+                    <div class="ob-screen-note" data-i18n="ob.alsoLive">Also live: hourly and daily tournaments against every player in the app.</div>
                 </div>
             </div>
 
@@ -3885,34 +3954,34 @@ body.screen-shake {
             <div class="onboarding-step" id="onboarding-step-push">
                 <div class="ob-push">
                     <div class="ob-bell-circle">🔔</div>
-                    <div class="ob-push-title">Never Miss a Win</div>
-                    <div class="ob-push-subtitle">Get notified about tournament results, friend challenges, and daily bonuses.</div>
+                    <div class="ob-push-title" data-i18n="ob.neverMissWin">Never Miss a Win</div>
+                    <div class="ob-push-subtitle" data-i18n="ob.getNotified">Get notified about tournament results, friend challenges, and daily bonuses.</div>
                     <ul class="ob-checklist">
-                        <li><span class="ob-check-icon">✓</span> Daily bonus reminders</li>
-                        <li><span class="ob-check-icon">✓</span> Friend challenge alerts</li>
-                        <li><span class="ob-check-icon">✓</span> Tournament results</li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.dailyBonusReminders">Daily bonus reminders</span></li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.friendChallengeAlerts">Friend challenge alerts</span></li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.tournamentResults">Tournament results</span></li>
                     </ul>
-                    <button class="ob-enable-btn" onclick="onboardingEnableNotifications()">Enable Notifications</button>
-                    <button class="ob-not-now" onclick="advanceOnboarding()">Not Now</button>
+                    <button class="ob-enable-btn" onclick="onboardingEnableNotifications()" data-i18n="ob.enableNotifications">Enable Notifications</button>
+                    <button class="ob-not-now" onclick="advanceOnboarding()" data-i18n="ob.notNow">Not Now</button>
                 </div>
             </div>
 
             <!-- Step 6: Save Your Progress (sign-in) -->
             <div class="onboarding-step" id="onboarding-step-signin">
                 <div class="ob-signin">
-                    <div class="ob-signin-title">Save Your Progress</div>
-                    <div class="ob-signin-subtitle">Sign in to sync your chips and compete with friends.</div>
+                    <div class="ob-signin-title" data-i18n="ob.saveProgress">Save Your Progress</div>
+                    <div class="ob-signin-subtitle" data-i18n="ob.signInSync">Sign in to sync your chips and compete with friends.</div>
                     <ul class="ob-checklist">
-                        <li><span class="ob-check-icon">✓</span> Never lose your chips or progress</li>
-                        <li><span class="ob-check-icon">✓</span> Play across your phone and tablet</li>
-                        <li><span class="ob-check-icon">✓</span> Find friends by name automatically</li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.neverLose">Never lose your chips or progress</span></li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.playAcross">Play across your phone and tablet</span></li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.findFriends">Find friends by name automatically</span></li>
                     </ul>
                     <div class="ob-signin-error hidden" id="onboarding-signin-error"></div>
                     <button class="ob-google-btn" onclick="onboardingSignIn('google')">
                         <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
-                        Continue with Google
+                        <span data-i18n="ob.continueGoogle">Continue with Google</span>
                     </button>
-                    <button class="ob-guest-link" onclick="finishOnboarding()">Continue as Guest</button>
+                    <button class="ob-guest-link" onclick="finishOnboarding()" data-i18n="ob.continueGuest">Continue as Guest</button>
                 </div>
             </div>
 
@@ -3920,15 +3989,717 @@ body.screen-shake {
 
         <!-- Bottom navigation -->
         <div class="onboarding-nav">
-            <button class="onboarding-nav-arrow ob-hidden" id="onboarding-back" onclick="goBackOnboarding()" aria-label="Back">←</button>
+            <button class="onboarding-nav-arrow ob-hidden" id="onboarding-back" onclick="goBackOnboarding()" aria-label="Back" data-i18n-aria-label="ob.back">←</button>
             <div class="onboarding-dots" id="onboarding-dots"></div>
-            <button class="onboarding-nav-arrow onboarding-nav-arrow--next" id="onboarding-next" onclick="advanceOnboarding()" aria-label="Next">→</button>
+            <button class="onboarding-nav-arrow onboarding-nav-arrow--next" id="onboarding-next" onclick="advanceOnboarding()" aria-label="Next" data-i18n-aria-label="ob.next">→</button>
         </div>
 
     </div>
 
     <script>
  
+/* --- js/i18n.js --- */
+// i18n — language detection (auto: Israel/Hebrew browsers get Hebrew + RTL by
+// default) plus a manual Settings toggle. Translates static DOM text via
+// [data-i18n] attributes and exposes t()/vpHandLabel()/vpHandExplanation()
+// for the dynamic strings built in JS.
+
+const TRANSLATIONS = {
+    en: {
+        'app.title': 'Video Poker',
+        'app.brandTitle': 'Video Poker',
+
+        'nav.play': 'Play',
+        'nav.stats': 'Stats',
+        'nav.friends': 'Friends',
+        'nav.settings': 'Settings',
+
+        'play.balance': 'Balance',
+        'play.totalBet': 'Total Bet',
+        'play.allIn': 'ALL IN',
+        'play.handPlaceholder': 'Tap a card or Deal to start the hand',
+        'play.deal': 'Deal',
+        'play.draw': 'Draw',
+        'play.hintTitle': 'Strategy hints',
+        'play.winStreak': 'Win Streak',
+        'play.friendsLeaderboard': 'Friends Leaderboard',
+        'play.signInFriends': 'Sign in to see your friends',
+        'play.hourlyChampions': '⏱ Hourly Champions',
+        'play.signInCompete': 'Sign in to compete for the hourly crown',
+        'play.lbFriends': 'Friends',
+        'play.lbHourly': 'Hourly',
+        'play.lbDaily': 'Daily',
+        'play.signInLeaderboards': 'Sign in to see leaderboards',
+        'play.playWithFriends': 'Play With Friends',
+        'play.seeAll': 'See All ›',
+        'play.createRoomLong': '+ Create a Poker Room with Friends',
+        'play.resultDefault': 'Place your bet and deal to play',
+        'play.winResult': '🎉 {{hand}}! +{{win}} credits! 🎉',
+        'play.nothingResult': 'Nothing — {{cards}}',
+        'play.unlockAt': 'Unlock · {{level}}',
+
+        'stats.title': 'Statistics',
+        'stats.today': 'Today',
+        'stats.allTime': 'All-Time',
+        'stats.net': 'Net',
+        'stats.won': 'Won',
+        'stats.lost': 'Lost',
+        'stats.handsPlayed': 'Hands Played',
+        'stats.bestStreak': 'Best Streak',
+
+        'friends.title': 'Friends',
+        'friends.invite': '+ Invite',
+        'friends.signInAdd': 'Sign in to add friends',
+        'friends.yourCode': 'Your Code',
+        'friends.inviteFriends': 'Invite Friends',
+        'friends.copyInviteLink': 'Copy Invite Link',
+        'friends.whatsapp': 'WhatsApp',
+        'friends.addFriend': 'Add a Friend',
+        'friends.friendCodePlaceholder': 'Friend code…',
+        'friends.add': 'Add',
+        'friends.leaderboard': 'Leaderboard',
+        'friends.pokerRooms': 'Poker Rooms',
+        'friends.addByCode': 'Add friends by their code to compare scores.',
+        'friends.noRoomsYet': 'No rooms yet — create one below.',
+        'friends.roomNamePlaceholder': 'Room name…',
+        'friends.createAndInvite': 'Create & Invite',
+
+        'settings.title': 'Settings',
+        'settings.language': 'Language',
+        'settings.langEnglish': 'English',
+        'settings.langHebrew': 'עברית',
+        'settings.gameplay': 'Gameplay',
+        'settings.soundEffects': 'Sound Effects',
+        'settings.hapticFeedback': 'Haptic Feedback',
+        'settings.theme': 'Theme',
+        'settings.themeGreen': '🟢 Green',
+        'settings.themeBlue': '🔵 Blue',
+        'settings.themeCrimson': '🔴 Crimson',
+        'settings.defaultBet': 'Default Bet',
+        'settings.gameVariant': 'Game Variant',
+        'settings.handsPerDeal': 'Hands per Deal',
+        'settings.oneHand': '1 Hand',
+        'settings.threeHands': '3× Hands',
+        'settings.fiveHands': '5× Hands',
+        'settings.support': 'Support',
+        'settings.payoutTable': 'Payout Table',
+        'settings.account': 'Account',
+        'settings.signInGoogle': 'Sign in with Google',
+        'settings.signedIn': 'Signed in',
+        'settings.signOut': 'Sign Out',
+        'settings.notifications': 'Notifications',
+        'settings.friendActivity': 'Friend activity',
+        'settings.leaderboardUpdates': 'Leaderboard updates',
+        'settings.dailyBonusReminder': 'Daily bonus reminder',
+        'settings.friendsBestHands': "Friends' best hands",
+        'settings.enableNotifications': 'Enable Notifications',
+        'settings.resetStats': 'Reset Statistics',
+        'settings.footer': 'Video Poker · v3.0',
+
+        'variant.jacks': 'Jacks or Better',
+        'variant.deuces': 'Deuces Wild',
+        'variant.bonus': 'Bonus Poker',
+        'variant.doubleBonus': 'Double Bonus',
+
+        'modal.signInTitle': 'Sign in to play with friends',
+        'modal.signInSub': 'Add friends, join rooms, and compare scores.',
+        'modal.continueGoogle': 'Continue with Google',
+        'modal.continueFacebook': 'Continue with Facebook',
+        'modal.createRoom': 'Create a Poker Room',
+        'modal.roomNamePlaceholder': 'Room name…',
+        'modal.stake5': 'Stake 5',
+        'modal.stake10': 'Stake 10',
+        'modal.stake20': 'Stake 20',
+        'modal.stake50': 'Stake 50',
+        'modal.createRoomBtn': 'Create Room',
+        'modal.gotCode': 'Got a code from a friend?',
+        'modal.roomCodePlaceholder': 'Room code…',
+        'modal.join': 'Join',
+        'modal.room': 'Room',
+        'modal.code': 'Code:',
+
+        'sheet.inviteFriends': 'Invite Friends',
+        'sheet.copy': 'Copy',
+        'sheet.shareInviteLink': 'Share Invite Link',
+        'sheet.roomCreated': 'Room Created 🎉',
+        'sheet.inviteToRoom': 'Invite friends to "{{name}}"',
+        'sheet.telegram': 'Telegram',
+        'sheet.done': 'Done',
+        'sheet.goAllIn': '🔥 Go All In',
+        'sheet.allInSub': 'You can use ALL IN once a day. This bets your entire balance — {{amount}} credits — on the next hand. Slide to confirm.',
+        'sheet.slideToConfirm': 'Slide to confirm',
+
+        'ob.eyebrow': 'Social Casino',
+        'ob.welcomeTitle': 'Royal Video Poker',
+        'ob.welcomeSubtitle': 'Five cards. One decision. Play with free chips — no real money, all the thrill.',
+        'ob.pill5card': '5-Card Draw',
+        'ob.pillFreeChips': 'Free Chips Daily',
+        'ob.pillNoRealMoney': 'No Real Money',
+        'ob.knowYourHands': 'Know Your Hands',
+        'ob.biggerHands': 'Bigger hands pay bigger multipliers.',
+        'ob.plusNote': 'Plus Flush, Straight, Three of a Kind, and Two Pair — nine winning hands in total.',
+        'ob.betAfterDecide': 'Bet After You Decide',
+        'ob.seeCards': 'See your cards, hold what you want, then set your bet before the draw.',
+        'ob.oneFreeAllIn': 'One free All-In per day — invite a friend to unlock another.',
+        'ob.competeClimb': 'Compete & Climb',
+        'ob.raceLeaderboards': 'Race Friends, Hourly, and Daily leaderboards for bonus chips.',
+        'ob.friendsToday': 'Friends · Today',
+        'ob.youre1': "#1 · You're #1!",
+        'ob.alsoLive': 'Also live: hourly and daily tournaments against every player in the app.',
+        'ob.neverMissWin': 'Never Miss a Win',
+        'ob.getNotified': 'Get notified about tournament results, friend challenges, and daily bonuses.',
+        'ob.dailyBonusReminders': 'Daily bonus reminders',
+        'ob.friendChallengeAlerts': 'Friend challenge alerts',
+        'ob.tournamentResults': 'Tournament results',
+        'ob.enableNotifications': 'Enable Notifications',
+        'ob.notNow': 'Not Now',
+        'ob.saveProgress': 'Save Your Progress',
+        'ob.signInSync': 'Sign in to sync your chips and compete with friends.',
+        'ob.neverLose': 'Never lose your chips or progress',
+        'ob.playAcross': 'Play across your phone and tablet',
+        'ob.findFriends': 'Find friends by name automatically',
+        'ob.continueGoogle': 'Continue with Google',
+        'ob.continueGuest': 'Continue as Guest',
+        'ob.back': 'Back',
+        'ob.next': 'Next',
+        'ob.held': 'HELD',
+
+        'hand.royalFlush': 'Royal Flush',
+        'hand.straightFlush': 'Straight Flush',
+        'hand.fourOfKind': 'Four of a Kind',
+        'hand.fourAces': 'Four Aces',
+        'hand.four2s4s': 'Four 2s-4s',
+        'hand.four5sKs': 'Four 5s-Ks',
+        'hand.fourDeuces': 'Four Deuces',
+        'hand.wildRoyalFlush': 'Wild Royal Flush',
+        'hand.fiveOfKind': 'Five of a Kind',
+        'hand.fullHouse': 'Full House',
+        'hand.flush': 'Flush',
+        'hand.straight': 'Straight',
+        'hand.threeOfKind': 'Three of a Kind',
+        'hand.twoPair': 'Two Pair',
+        'hand.jacksOrBetter': 'Jacks or Better',
+        'hand.nothing': 'Nothing',
+
+        'exp.royalFlush': 'A, K, Q, J, 10 — all the same suit. The best hand in the game.',
+        'exp.straightFlush': 'Five cards in a row, all the same suit.',
+        'exp.fourOfKind': 'Four cards of the same rank.',
+        'exp.fourAces': 'Four Aces — the biggest quad bonus.',
+        'exp.four2s4s': 'Four of a kind, rank 2 through 4.',
+        'exp.four5sKs': 'Four of a kind, rank 5 through King.',
+        'exp.fourDeuces': 'Four wild deuces — an automatic top-tier win.',
+        'exp.wildRoyalFlush': 'A Royal Flush made using at least one wild deuce.',
+        'exp.fiveOfKind': 'Five cards of the same rank, using wild deuces.',
+        'exp.fullHouse': 'Three of a kind plus a pair.',
+        'exp.flush': 'Five cards of the same suit, not in sequence.',
+        'exp.straight': 'Five cards in sequence, mixed suits.',
+        'exp.threeOfKind': 'Three cards of the same rank.',
+        'exp.twoPair': 'Two separate pairs.',
+        'exp.jacksOrBetter': 'A pair of Jacks, Queens, Kings, or Aces.',
+        'exp.nothing': 'No paying hand — better luck next deal.',
+
+        'win.pair': 'Pair',
+        'win.threeOfKind': '3 of a Kind',
+        'win.fourOfKind': '4 of a Kind',
+        'win.straight': 'Straight',
+        'win.flush': 'Flush',
+        'win.straightFlush': 'Str. Flush',
+        'win.royalFlush': 'Royal Flush',
+
+        'suit.spades': 'Spades',
+        'suit.hearts': 'Hearts',
+        'suit.diamonds': 'Diamonds',
+        'suit.clubs': 'Clubs',
+        'rank.ace': 'Ace',
+        'rank.jack': 'Jack',
+        'rank.queen': 'Queen',
+        'rank.king': 'King',
+        'aria.cardOf': '{{rank}} of {{suit}}',
+        'aria.cardOfHeld': '{{rank}} of {{suit}}, held',
+
+        'common.you': 'You',
+        'common.player': 'Player',
+        'common.leader': 'Leader',
+        'common.copy': 'Copy',
+        'common.copied': 'Copied!',
+        'common.cancel': 'Cancel',
+        'common.rankYouAreFirst': "#{{rank}} · You're #1!",
+        'common.rankLeadsBy': '#{{rank}} · {{name}} leads by {{gap}}',
+        'common.noScoresYet': 'No scores yet — be the first!',
+        'common.resetsInM': 'Resets in {{m}}m',
+        'common.resetsInHM': 'Resets in {{h}}h {{m}}m',
+        'common.tournament': 'Tournament',
+
+        'toast.unlockLevel': '🔒 Unlocks at level {{level}}',
+        'toast.multiHandUnlock': '🔒 Multi-hand unlocks at level {{level}}',
+        'toast.rebuy': '♻ +500 credits',
+        'toast.noAllInLeft': '⛔ No ALL INs left — back tomorrow!',
+        'toast.allInGoodLuck': '🔥 ALL IN — good luck!',
+        'toast.statsReset': 'Statistics reset',
+        'toast.hintsOn': '💡 Hints on — suggested holds glow blue',
+        'toast.noPlayerFound': 'No player found with that code.',
+        'toast.ownCode': 'That is your own code!',
+        'toast.alreadyFriends': 'Already in your friends list.',
+        'toast.friendAdded': 'Friend added!',
+        'toast.couldNotAddFriend': 'Could not add friend — try again.',
+        'toast.couldNotGenerateLink': 'Could not generate invite link.',
+        'toast.linkCopied': 'Invite link copied!',
+        'toast.couldNotCopy': 'Could not copy — tap and hold the link.',
+        'toast.couldNotOpenWhatsApp': 'Could not open WhatsApp.',
+        'toast.signInConnect': 'Sign in to connect with your friend!',
+        'toast.noPlayerInviteLink': 'No player found with that invite link.',
+        'toast.ownInviteLink': "That's your own invite link!",
+        'toast.giveName': 'Give your room a name.',
+        'toast.roomCreated': 'Room created — code: {{code}}',
+        'toast.couldNotCreateRoom': 'Could not create room — try again.',
+        'toast.noRoomFound': 'No room found with that code.',
+        'toast.joinedRoom': 'Joined {{name}}!',
+        'toast.couldNotJoinRoom': 'Could not join room — try again.',
+        'toast.linkCopiedShare': 'Link copied — share it with friends!',
+        'toast.signInJoinRoom': 'Sign in to join the poker room!',
+
+        'room.defaultName': 'Room',
+        'room.open': 'Open',
+        'room.inProgress': 'In Progress',
+        'room.joinTable': 'Join Table',
+        'room.enterTable': 'Enter Table',
+        'room.membersMeta': '{{count}}/{{capacity}} friends · Stake {{stake}}',
+        'room.createShort': '+ Create a Poker Room with Friends',
+
+        'lb.friendsToday': 'Friends · Today',
+        'lb.hourlyChampions': '⏱ Hourly Champions',
+        'lb.dailyChampions': '📅 Daily Champions',
+        'lb.showTop20': 'Show Top 20 ▾',
+        'lb.showTop5': 'Show Top 5 ▴',
+
+        'champ.resetsPlaceholder': 'Resets in —m',
+        'champ.noChampionsYet': 'No champions yet this hour — be the first!',
+        'champ.braceletDaily': 'Daily Bracelet',
+        'champ.braceletHourly': 'Hourly Bracelet',
+
+        'story.noWinningHands': 'No winning hands yet',
+        'story.winAHand': 'Win a hand to create your story',
+        'story.creditsMult': '+{{payout}} credits · {{mult}}×',
+        'story.braceletStrip': '💍 {{type}} — {{hand}} for +{{amount}} credits',
+
+        'pwa.installBar': 'Install Video Poker for quick access',
+        'pwa.install': 'Install',
+        'pwa.dismiss': '✕',
+
+        'share.appName': 'Video Poker',
+        'share.inviteText': '{{name}} wants to play Video Poker with you! Join with this link:\n{{link}}',
+        'share.inviteTextShort': '{{name}} wants to play Video Poker with you! Join here: {{link}}',
+        'share.roomText': 'Join my poker room "{{name}}" in Video Poker!\n{{link}}'
+    },
+    he: {
+        'app.title': 'וידאו פוקר',
+        'app.brandTitle': 'וידאו פוקר',
+
+        'nav.play': 'משחק',
+        'nav.stats': 'סטטיסטיקה',
+        'nav.friends': 'חברים',
+        'nav.settings': 'הגדרות',
+
+        'play.balance': 'יתרה',
+        'play.totalBet': 'הימור כולל',
+        'play.allIn': 'כל הקופה',
+        'play.handPlaceholder': 'הקש על קלף או על "חלק" כדי להתחיל יד',
+        'play.deal': 'חלק',
+        'play.draw': 'משוך',
+        'play.hintTitle': 'רמזי אסטרטגיה',
+        'play.winStreak': 'רצף ניצחונות',
+        'play.friendsLeaderboard': 'טבלת דירוג חברים',
+        'play.signInFriends': 'התחבר כדי לראות את החברים שלך',
+        'play.hourlyChampions': '⏱ אלופי השעה',
+        'play.signInCompete': 'התחבר כדי להתחרות על כתר השעה',
+        'play.lbFriends': 'חברים',
+        'play.lbHourly': 'שעתי',
+        'play.lbDaily': 'יומי',
+        'play.signInLeaderboards': 'התחבר כדי לראות טבלאות דירוג',
+        'play.playWithFriends': 'שחק עם חברים',
+        'play.seeAll': 'הצג הכל ‹',
+        'play.createRoomLong': '+ צור חדר פוקר עם חברים',
+        'play.resultDefault': 'הנח הימור ולחץ "חלק" כדי לשחק',
+        'play.winResult': '🎉 {{hand}}! +{{win}} קרדיטים! 🎉',
+        'play.nothingResult': 'כלום — {{cards}}',
+        'play.unlockAt': 'פתיחה · {{level}}',
+
+        'stats.title': 'סטטיסטיקה',
+        'stats.today': 'היום',
+        'stats.allTime': 'כל הזמנים',
+        'stats.net': 'נטו',
+        'stats.won': 'זכיות',
+        'stats.lost': 'הפסדים',
+        'stats.handsPlayed': 'ידיים ששוחקו',
+        'stats.bestStreak': 'הרצף הטוב ביותר',
+
+        'friends.title': 'חברים',
+        'friends.invite': '+ הזמן',
+        'friends.signInAdd': 'התחבר כדי להוסיף חברים',
+        'friends.yourCode': 'הקוד שלך',
+        'friends.inviteFriends': 'הזמן חברים',
+        'friends.copyInviteLink': 'העתק קישור הזמנה',
+        'friends.whatsapp': 'וואטסאפ',
+        'friends.addFriend': 'הוסף חבר',
+        'friends.friendCodePlaceholder': 'קוד חבר…',
+        'friends.add': 'הוסף',
+        'friends.leaderboard': 'טבלת דירוג',
+        'friends.pokerRooms': 'חדרי פוקר',
+        'friends.addByCode': 'הוסף חברים לפי הקוד שלהם כדי להשוות תוצאות.',
+        'friends.noRoomsYet': 'אין עדיין חדרים — צור אחד למטה.',
+        'friends.roomNamePlaceholder': 'שם חדר…',
+        'friends.createAndInvite': 'צור והזמן',
+
+        'settings.title': 'הגדרות',
+        'settings.language': 'שפה',
+        'settings.langEnglish': 'English',
+        'settings.langHebrew': 'עברית',
+        'settings.gameplay': 'משחק',
+        'settings.soundEffects': 'אפקטים קוליים',
+        'settings.hapticFeedback': 'משוב מגע',
+        'settings.theme': 'ערכת נושא',
+        'settings.themeGreen': '🟢 ירוק',
+        'settings.themeBlue': '🔵 כחול',
+        'settings.themeCrimson': '🔴 אדום',
+        'settings.defaultBet': 'הימור ברירת מחדל',
+        'settings.gameVariant': 'וריאנט משחק',
+        'settings.handsPerDeal': 'ידיים לחלוקה',
+        'settings.oneHand': 'יד אחת',
+        'settings.threeHands': '3× ידיים',
+        'settings.fiveHands': '5× ידיים',
+        'settings.support': 'תמיכה',
+        'settings.payoutTable': 'טבלת תשלומים',
+        'settings.account': 'חשבון',
+        'settings.signInGoogle': 'התחבר עם Google',
+        'settings.signedIn': 'מחובר',
+        'settings.signOut': 'התנתק',
+        'settings.notifications': 'התראות',
+        'settings.friendActivity': 'פעילות חברים',
+        'settings.leaderboardUpdates': 'עדכוני טבלת דירוג',
+        'settings.dailyBonusReminder': 'תזכורת בונוס יומי',
+        'settings.friendsBestHands': 'הידיים הטובות ביותר של חברים',
+        'settings.enableNotifications': 'הפעל התראות',
+        'settings.resetStats': 'אפס סטטיסטיקה',
+        'settings.footer': 'וידאו פוקר · v3.0',
+
+        'variant.jacks': 'נסיכים ומעלה',
+        'variant.deuces': 'שתיים פרועות',
+        'variant.bonus': 'בונוס פוקר',
+        'variant.doubleBonus': 'דאבל בונוס',
+
+        'modal.signInTitle': 'התחבר כדי לשחק עם חברים',
+        'modal.signInSub': 'הוסף חברים, הצטרף לחדרים והשווה תוצאות.',
+        'modal.continueGoogle': 'המשך עם Google',
+        'modal.continueFacebook': 'המשך עם Facebook',
+        'modal.createRoom': 'צור חדר פוקר',
+        'modal.roomNamePlaceholder': 'שם חדר…',
+        'modal.stake5': 'הימור 5',
+        'modal.stake10': 'הימור 10',
+        'modal.stake20': 'הימור 20',
+        'modal.stake50': 'הימור 50',
+        'modal.createRoomBtn': 'צור חדר',
+        'modal.gotCode': 'קיבלת קוד מחבר?',
+        'modal.roomCodePlaceholder': 'קוד חדר…',
+        'modal.join': 'הצטרף',
+        'modal.room': 'חדר',
+        'modal.code': 'קוד:',
+
+        'sheet.inviteFriends': 'הזמן חברים',
+        'sheet.copy': 'העתק',
+        'sheet.shareInviteLink': 'שתף קישור הזמנה',
+        'sheet.roomCreated': 'החדר נוצר 🎉',
+        'sheet.inviteToRoom': 'הזמן חברים אל "{{name}}"',
+        'sheet.telegram': 'טלגרם',
+        'sheet.done': 'סיום',
+        'sheet.goAllIn': '🔥 כל הקופה',
+        'sheet.allInSub': 'ניתן להשתמש ב"כל הקופה" פעם ביום. הפעולה מהמרת את כל היתרה שלך — {{amount}} קרדיטים — על היד הבאה. החלק כדי לאשר.',
+        'sheet.slideToConfirm': 'החלק כדי לאשר',
+
+        'ob.eyebrow': 'קזינו חברתי',
+        'ob.welcomeTitle': 'וידאו פוקר רויאל',
+        'ob.welcomeSubtitle': 'חמישה קלפים. החלטה אחת. שחק עם ז\'יטונים חינם — בלי כסף אמיתי, כל הריגוש.',
+        'ob.pill5card': 'חמישה קלפים',
+        'ob.pillFreeChips': "ז'יטונים חינם מדי יום",
+        'ob.pillNoRealMoney': 'ללא כסף אמיתי',
+        'ob.knowYourHands': 'הכר את הידיים שלך',
+        'ob.biggerHands': 'ידיים גדולות יותר משלמות מכפילים גדולים יותר.',
+        'ob.plusNote': 'בנוסף פלאש, סטרייט, שלישייה וזוג זוגות — תשע ידיים מנצחות בסך הכל.',
+        'ob.betAfterDecide': 'הימר אחרי שהחלטת',
+        'ob.seeCards': 'ראה את הקלפים שלך, החזק את מה שתרצה, ואז קבע את ההימור לפני המשיכה.',
+        'ob.oneFreeAllIn': 'כל הקופה חינם פעם ביום — הזמן חבר כדי לפתוח עוד אחת.',
+        'ob.competeClimb': 'התחרה וטפס',
+        'ob.raceLeaderboards': "התחרה בטבלאות דירוג חברים, שעתיות ויומיות על ז'יטוני בונוס.",
+        'ob.friendsToday': 'חברים · היום',
+        'ob.youre1': '#1 · אתה במקום הראשון!',
+        'ob.alsoLive': 'גם בשידור חי: טורנירים שעתיים ויומיים מול כל שחקן באפליקציה.',
+        'ob.neverMissWin': 'אל תפספס אף ניצחון',
+        'ob.getNotified': 'קבל התראות על תוצאות טורנירים, אתגרי חברים ובונוסים יומיים.',
+        'ob.dailyBonusReminders': 'תזכורות בונוס יומי',
+        'ob.friendChallengeAlerts': 'התראות אתגרי חברים',
+        'ob.tournamentResults': 'תוצאות טורנירים',
+        'ob.enableNotifications': 'הפעל התראות',
+        'ob.notNow': 'לא עכשיו',
+        'ob.saveProgress': 'שמור את ההתקדמות שלך',
+        'ob.signInSync': "התחבר כדי לסנכרן את הז'יטונים שלך ולהתחרות עם חברים.",
+        'ob.neverLose': "לעולם אל תאבד את הז'יטונים או ההתקדמות שלך",
+        'ob.playAcross': 'שחק בטלפון ובטאבלט',
+        'ob.findFriends': 'מצא חברים לפי שם אוטומטית',
+        'ob.continueGoogle': 'המשך עם Google',
+        'ob.continueGuest': 'המשך כאורח',
+        'ob.back': 'אחורה',
+        'ob.next': 'הבא',
+        'ob.held': 'מוחזק',
+
+        'hand.royalFlush': 'רויאל פלאש',
+        'hand.straightFlush': 'סטרייט פלאש',
+        'hand.fourOfKind': 'רביעייה',
+        'hand.fourAces': 'ארבעה אסים',
+        'hand.four2s4s': 'רביעייה 2 עד 4',
+        'hand.four5sKs': 'רביעייה 5 עד מלך',
+        'hand.fourDeuces': 'ארבע שתיים',
+        'hand.wildRoyalFlush': 'רויאל פלאש פרוע',
+        'hand.fiveOfKind': 'חמישייה',
+        'hand.fullHouse': 'פול האוס',
+        'hand.flush': 'פלאש',
+        'hand.straight': 'סטרייט',
+        'hand.threeOfKind': 'שלישייה',
+        'hand.twoPair': 'שני זוגות',
+        'hand.jacksOrBetter': 'נסיכים ומעלה',
+        'hand.nothing': 'כלום',
+
+        'exp.royalFlush': 'A, K, Q, J, 10 — כולם באותה סדרה. היד הטובה ביותר במשחק.',
+        'exp.straightFlush': 'חמישה קלפים ברצף, כולם באותה סדרה.',
+        'exp.fourOfKind': 'ארבעה קלפים באותו ערך.',
+        'exp.fourAces': 'ארבעה אסים — בונוס הרביעייה הגדול ביותר.',
+        'exp.four2s4s': 'רביעייה בערך שבין 2 ל-4.',
+        'exp.four5sKs': 'רביעייה בערך שבין 5 למלך.',
+        'exp.fourDeuces': 'ארבע שתיים פרועות — ניצחון עליון אוטומטי.',
+        'exp.wildRoyalFlush': 'רויאל פלאש שהושג באמצעות לפחות שתיים פרועה אחת.',
+        'exp.fiveOfKind': 'חמישה קלפים באותו ערך, באמצעות שתיים פרועות.',
+        'exp.fullHouse': 'שלישייה ועוד זוג.',
+        'exp.flush': 'חמישה קלפים באותה סדרה, שלא ברצף.',
+        'exp.straight': 'חמישה קלפים ברצף, בסדרות מעורבות.',
+        'exp.threeOfKind': 'שלושה קלפים באותו ערך.',
+        'exp.twoPair': 'שני זוגות נפרדים.',
+        'exp.jacksOrBetter': 'זוג נסיכים, מלכות, מלכים או אסים.',
+        'exp.nothing': 'אין יד משלמת — בהצלחה בחלוקה הבאה.',
+
+        'win.pair': 'זוג',
+        'win.threeOfKind': 'שלישייה',
+        'win.fourOfKind': 'רביעייה',
+        'win.straight': 'סטרייט',
+        'win.flush': 'פלאש',
+        'win.straightFlush': 'סטר. פלאש',
+        'win.royalFlush': 'רויאל פלאש',
+
+        'suit.spades': 'עלה',
+        'suit.hearts': 'לב',
+        'suit.diamonds': 'יהלום',
+        'suit.clubs': 'תלתן',
+        'rank.ace': 'אס',
+        'rank.jack': 'נסיך',
+        'rank.queen': 'מלכה',
+        'rank.king': 'מלך',
+        'aria.cardOf': '{{rank}} {{suit}}',
+        'aria.cardOfHeld': '{{rank}} {{suit}}, מוחזק',
+
+        'common.you': 'אתה',
+        'common.player': 'שחקן',
+        'common.leader': 'מוביל',
+        'common.copy': 'העתק',
+        'common.copied': 'הועתק!',
+        'common.cancel': 'ביטול',
+        'common.rankYouAreFirst': '#{{rank}} · אתה במקום הראשון!',
+        'common.rankLeadsBy': '#{{rank}} · {{name}} מוביל/ה ב-{{gap}}',
+        'common.noScoresYet': 'אין עדיין תוצאות — היה הראשון!',
+        'common.resetsInM': 'מתאפס בעוד {{m}} ד\'',
+        'common.resetsInHM': 'מתאפס בעוד {{h}} ש\' {{m}} ד\'',
+        'common.tournament': 'טורניר',
+
+        'toast.unlockLevel': '🔒 נפתח ברמה {{level}}',
+        'toast.multiHandUnlock': '🔒 מצב רב-ידני נפתח ברמה {{level}}',
+        'toast.rebuy': '♻ +500 קרדיטים',
+        'toast.noAllInLeft': '⛔ לא נשארו "כל הקופה" — חזור מחר!',
+        'toast.allInGoodLuck': '🔥 כל הקופה — בהצלחה!',
+        'toast.statsReset': 'הסטטיסטיקה אופסה',
+        'toast.hintsOn': '💡 רמזים פעילים — החזקות מומלצות זוהרות בכחול',
+        'toast.noPlayerFound': 'לא נמצא שחקן עם קוד זה.',
+        'toast.ownCode': 'זהו הקוד שלך!',
+        'toast.alreadyFriends': 'כבר ברשימת החברים שלך.',
+        'toast.friendAdded': 'חבר נוסף!',
+        'toast.couldNotAddFriend': 'לא ניתן להוסיף חבר — נסה שוב.',
+        'toast.couldNotGenerateLink': 'לא ניתן ליצור קישור הזמנה.',
+        'toast.linkCopied': 'קישור ההזמנה הועתק!',
+        'toast.couldNotCopy': 'לא ניתן להעתיק — הקש והחזק על הקישור.',
+        'toast.couldNotOpenWhatsApp': 'לא ניתן לפתוח את וואטסאפ.',
+        'toast.signInConnect': 'התחבר כדי להתחבר עם החבר שלך!',
+        'toast.noPlayerInviteLink': 'לא נמצא שחקן עם קישור הזמנה זה.',
+        'toast.ownInviteLink': 'זהו קישור ההזמנה שלך!',
+        'toast.giveName': 'תן שם לחדר שלך.',
+        'toast.roomCreated': 'החדר נוצר — קוד: {{code}}',
+        'toast.couldNotCreateRoom': 'לא ניתן ליצור חדר — נסה שוב.',
+        'toast.noRoomFound': 'לא נמצא חדר עם קוד זה.',
+        'toast.joinedRoom': 'הצטרפת אל {{name}}!',
+        'toast.couldNotJoinRoom': 'לא ניתן להצטרף לחדר — נסה שוב.',
+        'toast.linkCopiedShare': 'הקישור הועתק — שתף אותו עם חברים!',
+        'toast.signInJoinRoom': 'התחבר כדי להצטרף לחדר הפוקר!',
+
+        'room.defaultName': 'חדר',
+        'room.open': 'פתוח',
+        'room.inProgress': 'במשחק',
+        'room.joinTable': 'הצטרף לשולחן',
+        'room.enterTable': 'כניסה לשולחן',
+        'room.membersMeta': '{{count}}/{{capacity}} חברים · הימור {{stake}}',
+        'room.createShort': '+ צור חדר פוקר עם חברים',
+
+        'lb.friendsToday': 'חברים · היום',
+        'lb.hourlyChampions': '⏱ אלופי השעה',
+        'lb.dailyChampions': '📅 אלופי היום',
+        'lb.showTop20': 'הצג 20 המובילים ▾',
+        'lb.showTop5': 'הצג 5 המובילים ▴',
+
+        'champ.resetsPlaceholder': 'מתאפס בעוד —ד\'',
+        'champ.noChampionsYet': 'אין עדיין אלופים השעה — היה הראשון!',
+        'champ.braceletDaily': 'צמיד יומי',
+        'champ.braceletHourly': 'צמיד שעתי',
+
+        'story.noWinningHands': 'אין עדיין ידיים מנצחות',
+        'story.winAHand': 'נצח ביד כדי ליצור את הסיפור שלך',
+        'story.creditsMult': '+{{payout}} קרדיטים · {{mult}}×',
+        'story.braceletStrip': '💍 {{type}} — {{hand}} עבור +{{amount}} קרדיטים',
+
+        'pwa.installBar': 'התקן את וידאו פוקר לגישה מהירה',
+        'pwa.install': 'התקן',
+        'pwa.dismiss': '✕',
+
+        'share.appName': 'וידאו פוקר',
+        'share.inviteText': '{{name}} רוצה לשחק איתך וידאו פוקר! הצטרף עם הקישור הזה:\n{{link}}',
+        'share.inviteTextShort': '{{name}} רוצה לשחק איתך וידאו פוקר! הצטרף כאן: {{link}}',
+        'share.roomText': 'הצטרף לחדר הפוקר שלי "{{name}}" בוידאו פוקר!\n{{link}}'
+    }
+};
+
+// Internal hand-type strings (used throughout game.js as object keys and
+// state) stay in English — only their *display* is translated via this
+// suffix map, shared between the hand.* and exp.* namespaces.
+const HAND_I18N_SUFFIX = {
+    'Royal Flush': 'royalFlush',
+    'Straight Flush': 'straightFlush',
+    'Four of a Kind': 'fourOfKind',
+    'Four Aces': 'fourAces',
+    'Four 2s-4s': 'four2s4s',
+    'Four 5s-Ks': 'four5sKs',
+    'Four Deuces': 'fourDeuces',
+    'Wild Royal Flush': 'wildRoyalFlush',
+    'Five of a Kind': 'fiveOfKind',
+    'Full House': 'fullHouse',
+    'Flush': 'flush',
+    'Straight': 'straight',
+    'Three of a Kind': 'threeOfKind',
+    'Two Pair': 'twoPair',
+    'Jacks or Better': 'jacksOrBetter',
+    'Nothing': 'nothing'
+};
+
+const LANG_STORAGE_KEY = 'vp_lang';
+let currentLang = 'en';
+
+function detectLanguage() {
+    try {
+        const stored = localStorage.getItem(LANG_STORAGE_KEY);
+        if (stored === 'en' || stored === 'he') return stored;
+    } catch (e) {}
+    try {
+        const langs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
+        if (langs.some(function(l) { return /^he/i.test(l); })) return 'he';
+    } catch (e) {}
+    return 'en';
+}
+
+function t(key, vars) {
+    const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+    let str = (Object.prototype.hasOwnProperty.call(dict, key) ? dict[key] : TRANSLATIONS.en[key]) || key;
+    if (vars) {
+        Object.keys(vars).forEach(function(k) {
+            str = str.replace(new RegExp('\\{\\{' + k + '\\}\\}', 'g'), vars[k]);
+        });
+    }
+    return str;
+}
+
+function vpHandLabel(handType) {
+    const suffix = HAND_I18N_SUFFIX[handType];
+    return suffix ? t('hand.' + suffix) : handType;
+}
+
+function vpHandExplanation(handType) {
+    const suffix = HAND_I18N_SUFFIX[handType];
+    return suffix ? t('exp.' + suffix) : '';
+}
+
+const I18N_REFRESHERS = [];
+function vpOnLanguageChange(fn) {
+    I18N_REFRESHERS.push(fn);
+}
+
+function translateDom(root) {
+    (root || document).querySelectorAll('[data-i18n]').forEach(function(el) {
+        el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    (root || document).querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+        el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+    });
+    (root || document).querySelectorAll('[data-i18n-title]').forEach(function(el) {
+        el.setAttribute('title', t(el.getAttribute('data-i18n-title')));
+    });
+    (root || document).querySelectorAll('[data-i18n-aria-label]').forEach(function(el) {
+        el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria-label')));
+    });
+}
+
+function updateLanguageToggleUI() {
+    const enBtn = document.getElementById('settings-lang-en');
+    const heBtn = document.getElementById('settings-lang-he');
+    if (enBtn) enBtn.classList.toggle('selected', currentLang === 'en');
+    if (heBtn) heBtn.classList.toggle('selected', currentLang === 'he');
+}
+
+function applyLanguage(lang, opts) {
+    currentLang = (lang === 'he') ? 'he' : 'en';
+    document.documentElement.lang = currentLang;
+    document.documentElement.dir = currentLang === 'he' ? 'rtl' : 'ltr';
+    document.title = t('app.title');
+    translateDom(document);
+    updateLanguageToggleUI();
+    I18N_REFRESHERS.forEach(function(fn) {
+        try { fn(); } catch (e) { /* a refresher shouldn't be able to break the switch */ }
+    });
+    if (!opts || !opts.silent) {
+        try { localStorage.setItem(LANG_STORAGE_KEY, currentLang); } catch (e) {}
+    }
+}
+
+function vpSetLanguage(lang) {
+    applyLanguage(lang);
+}
+
+currentLang = detectLanguage();
+document.addEventListener('DOMContentLoaded', function() {
+    applyLanguage(currentLang, { silent: true });
+    const enBtn = document.getElementById('settings-lang-en');
+    const heBtn = document.getElementById('settings-lang-he');
+    if (enBtn) enBtn.onclick = function() { vpSetLanguage('en'); };
+    if (heBtn) heBtn.onclick = function() { vpSetLanguage('he'); };
+});
+
+window.t = t;
+window.vpHandLabel = vpHandLabel;
+window.vpHandExplanation = vpHandExplanation;
+window.vpSetLanguage = vpSetLanguage;
+window.vpOnLanguageChange = vpOnLanguageChange;
+window.vpTranslateDom = translateDom;
+
+
 /* --- js/audio.js --- */
 var audioCtx = null;
     var audioBuffers = {};
@@ -4896,24 +5667,24 @@ function addFriendByCode() {
 
     firebaseSafe(function() {
         return db.collection('users').where('referralCode', '==', code).limit(1).get().then(function(snap) {
-            if (snap.empty) { showToast('No player found with that code.'); return; }
+            if (snap.empty) { showToast(t('toast.noPlayerFound')); return; }
             const friendDoc = snap.docs[0];
-            if (friendDoc.id === user.uid) { showToast('That is your own code!'); return; }
+            if (friendDoc.id === user.uid) { showToast(t('toast.ownCode')); return; }
             const friendRef = db.collection('users').doc(user.uid).collection('friends').doc(friendDoc.id);
             return friendRef.get().then(function(existing) {
-                if (existing.exists) { showToast('Already in your friends list.'); return; }
+                if (existing.exists) { showToast(t('toast.alreadyFriends')); return; }
                 return Promise.all([
                     friendRef.set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() }),
                     db.collection('users').doc(friendDoc.id).collection('friends').doc(user.uid)
                         .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() })
                 ]).then(function() {
                     input.value = '';
-                    showToast('Friend added!');
+                    showToast(t('toast.friendAdded'));
                     loadFriends();
                 });
             });
         });
-    }, function() { showToast('Could not add friend — try again.'); });
+    }, function() { showToast(t('toast.couldNotAddFriend')); });
 }
 
 function ownNetProfit() {
@@ -4936,7 +5707,7 @@ function renderFriendsScreen() {
     if (typeof friendsTab !== 'undefined' && friendsTab === 'rooms') renderFriendsRoomsList();
 
     listEl.innerHTML = '';
-    const ranked = friendsList.concat([{ displayName: 'You', netProfit: ownNetProfit(), bestStreak: bestStreak, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
+    const ranked = friendsList.concat([{ displayName: t('common.you'), netProfit: ownNetProfit(), bestStreak: bestStreak, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
         .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
     if (emptyEl) emptyEl.classList.toggle('hidden', friendsList.length > 0);
     ranked.forEach(function(f, i) {
@@ -4959,7 +5730,7 @@ function renderFriendsScreen() {
 
         const nameEl = document.createElement('span');
         nameEl.className = 'friend-lb-name';
-        nameEl.textContent = f.displayName || 'Player';
+        nameEl.textContent = f.displayName || t('common.player');
         if (f.country) {
             const chip = document.createElement('span');
             chip.className = 'country-chip';
@@ -4969,7 +5740,7 @@ function renderFriendsScreen() {
         if (f.self) {
             const youTag = document.createElement('span');
             youTag.className = 'friend-you-tag';
-            youTag.textContent = 'You';
+            youTag.textContent = t('common.you');
             nameEl.appendChild(youTag);
         }
 
@@ -5008,11 +5779,11 @@ function copyInviteLink() {
     const user = window.egUser;
     if (!user) { openSignInModal(); return; }
     const link = getInviteLink();
-    if (!link) { showToast('Could not generate invite link.'); return; }
+    if (!link) { showToast(t('toast.couldNotGenerateLink')); return; }
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(link).then(function() {
-            showToast('Invite link copied!');
+            showToast(t('toast.linkCopied'));
         }).catch(function() {
             // Fallback
             fallbackCopy(link);
@@ -5029,7 +5800,7 @@ function fallbackCopy(text) {
     ta.style.left = '-9999px';
     document.body.appendChild(ta);
     ta.select();
-    try { document.execCommand('copy'); showToast('Invite link copied!'); } catch (e) { showToast('Could not copy — tap and hold the link.'); }
+    try { document.execCommand('copy'); showToast(t('toast.linkCopied')); } catch (e) { showToast(t('toast.couldNotCopy')); }
     document.body.removeChild(ta);
 }
 
@@ -5037,17 +5808,17 @@ function shareViaWhatsApp() {
     var user = window.egUser;
     if (!user) { openSignInModal(); return; }
     var link = getInviteLink();
-    if (!link) { showToast('Could not generate invite link.'); return; }
+    if (!link) { showToast(t('toast.couldNotGenerateLink')); return; }
 
-    var name = (user.displayName || 'A friend');
-    var text = encodeURIComponent(name + ' wants to play Video Poker with you! Join with this link:\n' + link);
+    var name = (user.displayName || t('common.player'));
+    var text = encodeURIComponent(t('share.inviteText', { name: name, link: link }));
     var waUrl = 'https://wa.me/?text=' + text;
 
     // Try to open WhatsApp; fall back gracefully
     try {
         window.open(waUrl, '_blank');
     } catch (e) {
-        showToast('Could not open WhatsApp.');
+        showToast(t('toast.couldNotOpenWhatsApp'));
     }
 }
 
@@ -5076,7 +5847,7 @@ function handleIncomingInvite() {
         } else {
             // Prompt sign-in; the auth state listener will pick up _pendingInviteCode
             openSignInModal();
-            showToast('Sign in to connect with your friend!');
+            showToast(t('toast.signInConnect'));
         }
     } catch (e) { /* ignore — URL parsing shouldn't break the app */ }
 }
@@ -5086,23 +5857,23 @@ function addFriendByInviteCode(code) {
     if (!user) return;
     firebaseSafe(function() {
         return db.collection('users').where('referralCode', '==', code).limit(1).get().then(function(snap) {
-            if (snap.empty) { showToast('No player found with that invite link.'); return; }
+            if (snap.empty) { showToast(t('toast.noPlayerInviteLink')); return; }
             var friendDoc = snap.docs[0];
-            if (friendDoc.id === user.uid) { showToast('That\'s your own invite link!'); return; }
+            if (friendDoc.id === user.uid) { showToast(t('toast.ownInviteLink')); return; }
             var friendRef = db.collection('users').doc(user.uid).collection('friends').doc(friendDoc.id);
             return friendRef.get().then(function(existing) {
-                if (existing.exists) { showToast('Already in your friends list.'); return; }
+                if (existing.exists) { showToast(t('toast.alreadyFriends')); return; }
                 return Promise.all([
                     friendRef.set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() }),
                     db.collection('users').doc(friendDoc.id).collection('friends').doc(user.uid)
                         .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() })
                 ]).then(function() {
-                    showToast('Friend added!');
+                    showToast(t('toast.friendAdded'));
                     loadFriends();
                 });
             });
         });
-    }, function() { showToast('Could not add friend — try again.'); });
+    }, function() { showToast(t('toast.couldNotAddFriend')); });
 }
 
 function renderPlayFriendsWidgets() {
@@ -5140,17 +5911,17 @@ function renderNearbyPanel(user) {
     }
 
     const own = ownNetProfit();
-    const ranked = friendsList.concat([{ displayName: 'You', netProfit: own, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
+    const ranked = friendsList.concat([{ displayName: t('common.you'), netProfit: own, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
         .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
     const ownRank = ranked.findIndex(function(p) { return p.self; }) + 1;
     const leader = ranked[0];
 
     // Header: "#myRank · leader leads by X"
     if (leader.self) {
-        headerEl.textContent = '#' + ownRank + ' · You\'re #1!';
+        headerEl.textContent = t('common.rankYouAreFirst', { rank: ownRank });
     } else {
         const gap = (leader.netProfit || 0) - own;
-        headerEl.textContent = '#' + ownRank + ' · ' + (leader.displayName || 'Leader') + ' leads by ' + gap;
+        headerEl.textContent = t('common.rankLeadsBy', { rank: ownRank, name: leader.displayName || t('common.leader'), gap: gap });
     }
 
     // Body: show user's row + up to 4 surrounding friends (5 rows total)
@@ -5170,7 +5941,7 @@ function renderNearbyPanel(user) {
                 '<span class="nearby-avatar">' + (f.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
                 '<span class="online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline') + '"></span>' +
             '</span>' +
-            '<span class="nearby-name">' + (f.displayName || 'Player') +
+            '<span class="nearby-name">' + (f.displayName || t('common.player')) +
                 (f.country ? '<span class="country-chip">' + f.country + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net ' + ((f.netProfit || 0) > 0 ? 'positive' : (f.netProfit || 0) < 0 ? 'negative' : 'zero') + '">' +
@@ -5254,11 +6025,11 @@ function renderRoomsList() {
 
         row.innerHTML =
             '<div>' +
-                '<div class="mr-name">' + (room.name || 'Room') + '</div>' +
-                '<div class="mr-meta">' + memberCount + '/' + capacity + ' friends · Stake ' + (room.stake || 10) + '</div>' +
+                '<div class="mr-name">' + (room.name || t('room.defaultName')) + '</div>' +
+                '<div class="mr-meta">' + t('room.membersMeta', { count: memberCount, capacity: capacity, stake: (room.stake || 10) }) + '</div>' +
             '</div>' +
-            '<span class="mr-status ' + status + '">' + (status === 'open' ? 'Open' : 'In Progress') + '</span>' +
-            '<button class="mr-join" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? 'Join Table' : 'Enter Table') + '</button>';
+            '<span class="mr-status ' + status + '">' + (status === 'open' ? t('room.open') : t('room.inProgress')) + '</span>' +
+            '<button class="mr-join" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? t('room.joinTable') : t('room.enterTable')) + '</button>';
 
         listEl.appendChild(row);
     });
@@ -5282,11 +6053,11 @@ function renderFriendsRoomsList() {
 
         card.innerHTML =
             '<div class="room-head">' +
-                '<span class="roomname">' + (room.name || 'Room') + '</span>' +
-                '<span class="roomstatus ' + status + '">' + (status === 'open' ? 'Open' : 'In Progress') + '</span>' +
+                '<span class="roomname">' + (room.name || t('room.defaultName')) + '</span>' +
+                '<span class="roomstatus ' + status + '">' + (status === 'open' ? t('room.open') : t('room.inProgress')) + '</span>' +
             '</div>' +
-            '<div class="roommeta">' + memberCount + '/' + capacity + ' friends · Stake ' + (room.stake || 10) + '</div>' +
-            '<div class="roomjoin" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? 'Join Table' : 'Enter Table') + '</div>';
+            '<div class="roommeta">' + t('room.membersMeta', { count: memberCount, capacity: capacity, stake: (room.stake || 10) }) + '</div>' +
+            '<div class="roomjoin" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? t('room.joinTable') : t('room.enterTable')) + '</div>';
 
         listEl.appendChild(card);
     });
@@ -5299,12 +6070,12 @@ function createRoom() {
     const stakeInput = document.getElementById('room-stake-input');
     const name = (nameInput.value || '').trim();
     const stake = parseInt(stakeInput.value, 10) || 10;
-    if (!name) { showToast('Give your room a name.'); return; }
+    if (!name) { showToast(t('toast.giveName')); return; }
 
     _doCreateRoom(name, stake, function(code) {
         nameInput.value = '';
         closeRoomModal();
-        showToast('Room created — code: ' + code);
+        showToast(t('toast.roomCreated', { code: code }));
         loadMyRooms();
     });
 }
@@ -5333,7 +6104,7 @@ function _doCreateRoom(name, stake, callback) {
                 if (window.openRoomCreatedSheet) openRoomCreatedSheet(name, code);
             });
         });
-    }, function() { showToast('Could not create room — try again.'); });
+    }, function() { showToast(t('toast.couldNotCreateRoom')); });
 }
 
 // --- Inline room creation (Friends tab) ---
@@ -5359,12 +6130,12 @@ function createRoomInline() {
     if (!user) { openSignInModal(); return; }
     const nameInput = document.getElementById('inline-room-name');
     const name = (nameInput.value || '').trim();
-    if (!name) { showToast('Give your room a name.'); return; }
+    if (!name) { showToast(t('toast.giveName')); return; }
 
     _doCreateRoom(name, inlineStake, function(code) {
         nameInput.value = '';
         toggleInlineRoomForm();
-        showToast('Room created — code: ' + code);
+        showToast(t('toast.roomCreated', { code: code }));
         loadMyRooms();
     });
 }
@@ -5378,7 +6149,7 @@ function joinRoomByCode() {
 
     firebaseSafe(function() {
         return db.collection('rooms').where('code', '==', code).limit(1).get().then(function(snap) {
-            if (snap.empty) { showToast('No room found with that code.'); return; }
+            if (snap.empty) { showToast(t('toast.noRoomFound')); return; }
             const roomDoc = snap.docs[0];
             return db.collection('rooms').doc(roomDoc.id).update({
                 memberUids: firebase.firestore.FieldValue.arrayUnion(user.uid),
@@ -5391,18 +6162,18 @@ function joinRoomByCode() {
             }).then(function() {
                 input.value = '';
                 closeRoomModal();
-                showToast('Joined ' + (roomDoc.data().name || 'the room') + '!');
+                showToast(t('toast.joinedRoom', { name: roomDoc.data().name || t('room.defaultName') }));
                 loadMyRooms();
             });
         });
-    }, function() { showToast('Could not join room — try again.'); });
+    }, function() { showToast(t('toast.couldNotJoinRoom')); });
 }
 
 function openRoomDetail(roomId) {
     activeRoomId = roomId;
     const room = myRooms.find(function(r) { return r.id === roomId; });
     if (!room) return;
-    document.getElementById('room-detail-name').textContent = room.name || 'Room';
+    document.getElementById('room-detail-name').textContent = room.name || t('room.defaultName');
     document.getElementById('room-detail-code').textContent = room.code || '';
     const bodyEl = document.getElementById('room-detail-members');
     bodyEl.innerHTML = '';
@@ -5420,7 +6191,7 @@ function openRoomDetail(roomId) {
                 row.className = 'friend-row';
                 const nameEl = document.createElement('span');
                 nameEl.className = 'friend-name';
-                nameEl.textContent = m.displayName || 'Player';
+                nameEl.textContent = m.displayName || t('common.player');
                 const scoreEl = document.createElement('span');
                 scoreEl.className = 'friend-score';
                 const np = m.netProfit || 0;
@@ -5524,7 +6295,7 @@ function buildStoriesList() {
     const myBest = getBestHand();
     stories.push({
         id: 'me',
-        name: 'You',
+        name: t('common.you'),
         initial: user ? (user.displayName || 'Y').charAt(0).toUpperCase() : 'Y',
         bestHand: myBest,
         bracelet: (user && typeof latestBraceletForUid === 'function') ? latestBraceletForUid(user.uid) : null,
@@ -5538,7 +6309,7 @@ function buildStoriesList() {
             if ((f.bestHand && f.bestHand.handName) || bracelet) {
                 stories.push({
                     id: f.uid,
-                    name: f.displayName || 'Player',
+                    name: f.displayName || t('common.player'),
                     initial: (f.displayName || 'P').charAt(0).toUpperCase(),
                     bestHand: f.bestHand,
                     bracelet: bracelet,
@@ -5575,14 +6346,14 @@ function renderStoriesRow() {
         if (s.bracelet) {
             const badge = document.createElement('span');
             badge.className = 'bracelet-badge';
-            badge.title = s.name + ' — ' + (s.bracelet.type === 'daily' ? 'Daily' : 'Hourly') + ' Bracelet';
+            badge.title = s.name + ' — ' + t(s.bracelet.type === 'daily' ? 'champ.braceletDaily' : 'champ.braceletHourly');
             badge.textContent = '💍';
             ring.appendChild(badge);
         }
 
         const name = document.createElement('div');
         name.className = 'story-name' + (s.isMe ? ' you' : '');
-        name.textContent = s.isMe ? 'You' : s.name;
+        name.textContent = s.isMe ? t('common.you') : s.name;
 
         item.appendChild(ring);
         item.appendChild(name);
@@ -5663,7 +6434,7 @@ function renderStoryViewer() {
     // Body
     let bodyHtml = '<div class="story-viewer-body">';
     if (story.bestHand) {
-        bodyHtml += '<div class="story-hand-name">' + story.bestHand.handName + '</div>';
+        bodyHtml += '<div class="story-hand-name">' + vpHandLabel(story.bestHand.handName) + '</div>';
         bodyHtml += '<div class="story-cards">';
         story.bestHand.cards.forEach(function(c) {
             var red = c.suit === '♥' || c.suit === '♦';
@@ -5673,15 +6444,17 @@ function renderStoryViewer() {
             bodyHtml += '</div>';
         });
         bodyHtml += '</div>';
-        bodyHtml += '<div class="story-payout">+' + story.bestHand.payout + ' credits · ' + story.bestHand.mult + '×</div>';
+        bodyHtml += '<div class="story-payout">' + t('story.creditsMult', { payout: story.bestHand.payout, mult: story.bestHand.mult }) + '</div>';
     } else {
-        bodyHtml += '<div class="story-hand-name" style="color:var(--text-muted)">No winning hands yet</div>';
-        bodyHtml += '<div style="color:var(--text-faint);font-size:13px">Win a hand to create your story</div>';
+        bodyHtml += '<div class="story-hand-name" style="color:var(--text-muted)">' + t('story.noWinningHands') + '</div>';
+        bodyHtml += '<div style="color:var(--text-faint);font-size:13px">' + t('story.winAHand') + '</div>';
     }
     if (story.bracelet) {
-        bodyHtml += '<div class="story-bracelet-strip">💍 ' +
-            (story.bracelet.type === 'daily' ? 'Daily' : 'Hourly') + ' Bracelet — ' + story.bracelet.handType +
-            ' for +' + story.bracelet.winAmount + ' credits</div>';
+        bodyHtml += '<div class="story-bracelet-strip">' + t('story.braceletStrip', {
+            type: t(story.bracelet.type === 'daily' ? 'champ.braceletDaily' : 'champ.braceletHourly'),
+            hand: vpHandLabel(story.bracelet.handType),
+            amount: story.bracelet.winAmount
+        }) + '</div>';
     }
     bodyHtml += '</div>';
 
@@ -5792,7 +6565,7 @@ function renderChampionsTimer() {
     if (!el) return;
     const now = new Date();
     const minsLeft = 59 - now.getUTCMinutes();
-    el.textContent = 'Resets in ' + minsLeft + 'm';
+    el.textContent = t('common.resetsInM', { m: minsLeft });
 }
 
 function renderChampionsPanel() {
@@ -5815,7 +6588,7 @@ function renderChampionsPanel() {
     if (!championsList.length) {
         const row = document.createElement('div');
         row.className = 'nearby-row';
-        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">No champions yet this hour — be the first!</span>';
+        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">' + t('champ.noChampionsYet') + '</span>';
         bodyEl.appendChild(row);
         return;
     }
@@ -5832,7 +6605,7 @@ function renderChampionsPanel() {
                 '<span class="nearby-avatar champ">' + (ch.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
                 '<span class="online-dot"></span>' +
             '</span>' +
-            '<span class="nearby-name">' + (ch.displayName || 'Player') +
+            '<span class="nearby-name">' + (ch.displayName || t('common.player')) +
                 (ch.country ? '<span class="country-flag">' + countryToFlag(ch.country) + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net positive">' + (ch.points || 0) + ' pts</span>';
@@ -5961,11 +6734,11 @@ function applyLeaderboardPlatformUI() {
     }
 }
 
-const LEADERBOARD_TAB_TITLES = {
-    friends: 'Friends · Today',
-    hourly: '⏱ Hourly Champions',
-    daily: '📅 Daily Champions'
-};
+function leaderboardTabTitle(tab) {
+    if (tab === 'hourly') return t('lb.hourlyChampions');
+    if (tab === 'daily') return t('lb.dailyChampions');
+    return t('lb.friendsToday');
+}
 
 let leaderboardTab = 'friends';
 let leaderboardExpanded = false;
@@ -6105,7 +6878,7 @@ function effectiveDailyNetProfit(entry, todayKey) {
 function rankedFriendsDaily() {
     const todayKey = getDayKey();
     const self = {
-        displayName: 'You', self: true, lastSeen: Date.now(),
+        displayName: t('common.you'), self: true, lastSeen: Date.now(),
         country: (typeof getCountry === 'function' ? getCountry() : '--'),
         dailyNetProfit: ownDailyNetProfit(), dailyDateKey: todayKey
     };
@@ -6142,7 +6915,7 @@ function renderFriendsDailyBody(bodyEl, limit) {
                 '<span class="nearby-avatar">' + (f.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
                 '<span class="online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline') + '"></span>' +
             '</span>' +
-            '<span class="nearby-name">' + (f.displayName || 'Player') +
+            '<span class="nearby-name">' + (f.displayName || t('common.player')) +
                 (f.country ? '<span class="country-chip">' + f.country + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net ' + ((f.netProfit || 0) > 0 ? 'positive' : (f.netProfit || 0) < 0 ? 'negative' : 'zero') + '">' +
@@ -6158,7 +6931,7 @@ function renderGlobalBody(bodyEl, list, limit, valueField, valueSuffix, allowNeg
     if (!slice.length) {
         const row = document.createElement('div');
         row.className = 'nearby-row';
-        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">No scores yet — be the first!</span>';
+        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">' + t('common.noScoresYet') + '</span>';
         bodyEl.appendChild(row);
         return;
     }
@@ -6174,7 +6947,7 @@ function renderGlobalBody(bodyEl, list, limit, valueField, valueSuffix, allowNeg
             '<span class="nearby-avatar-wrap">' +
                 '<span class="nearby-avatar champ">' + (entry.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
             '</span>' +
-            '<span class="nearby-name">' + (entry.displayName || 'Player') +
+            '<span class="nearby-name">' + (entry.displayName || t('common.player')) +
                 (entry.country ? '<span class="country-flag">' + countryToFlag(entry.country) + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net ' + cls + '">' + text + '</span>';
@@ -6187,13 +6960,13 @@ function renderLeaderboardTimer() {
     if (!subEl) return;
     if (leaderboardTab === 'hourly') {
         const now = new Date();
-        subEl.textContent = 'Resets in ' + (59 - now.getUTCMinutes()) + 'm';
+        subEl.textContent = t('common.resetsInM', { m: 59 - now.getUTCMinutes() });
     } else if (leaderboardTab === 'daily') {
         const now = new Date();
         const msLeft = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
         const hrs = Math.floor(msLeft / 3600000);
         const mins = Math.floor((msLeft % 3600000) / 60000);
-        subEl.textContent = 'Resets in ' + hrs + 'h ' + mins + 'm';
+        subEl.textContent = t('common.resetsInHM', { h: hrs, m: mins });
     }
 }
 
@@ -6205,7 +6978,7 @@ function renderLeaderboardPanel() {
     const expandLink = document.getElementById('lb-expand-link');
     if (!bodyEl) return;
 
-    if (titleEl) titleEl.textContent = LEADERBOARD_TAB_TITLES[leaderboardTab];
+    if (titleEl) titleEl.textContent = leaderboardTabTitle(leaderboardTab);
 
     const user = window.egUser;
     if (!user) {
@@ -6230,10 +7003,10 @@ function renderLeaderboardPanel() {
             if (!leader) {
                 subEl.textContent = '#— · —';
             } else if (leader.self) {
-                subEl.textContent = '#' + ownRank + ' · You\'re #1!';
+                subEl.textContent = t('common.rankYouAreFirst', { rank: ownRank });
             } else {
                 const gap = (leader.netProfit || 0) - ownDailyNetProfit();
-                subEl.textContent = '#' + ownRank + ' · ' + (leader.displayName || 'Leader') + ' leads by ' + gap;
+                subEl.textContent = t('common.rankLeadsBy', { rank: ownRank, name: leader.displayName || t('common.leader'), gap: gap });
             }
         }
         renderFriendsDailyBody(bodyEl, limit);
@@ -6249,7 +7022,7 @@ function renderLeaderboardPanel() {
 
     if (expandLink) {
         expandLink.classList.toggle('hidden', totalCount <= 5);
-        expandLink.textContent = leaderboardExpanded ? 'Show Top 5 ▴' : 'Show Top 20 ▾';
+        expandLink.textContent = leaderboardExpanded ? t('lb.showTop5') : t('lb.showTop20');
     }
 }
 
@@ -6272,12 +7045,12 @@ function openInviteSheet() {
     const user = window.egUser;
     if (!user) { openSignInModal(); return; }
     const link = getInviteLink();
-    if (!link) { showToast('Could not generate invite link.'); return; }
+    if (!link) { showToast(t('toast.couldNotGenerateLink')); return; }
     document.getElementById('invite-sheet-link').textContent = link;
     document.getElementById('invite-sheet-link').setAttribute('data-link', link);
     // Reset copy button state
     const copyBtn = document.getElementById('invite-sheet-copy');
-    copyBtn.textContent = 'Copy';
+    copyBtn.textContent = t('sheet.copy');
     copyBtn.classList.remove('copied');
     openSheet('invite-sheet');
 }
@@ -6289,10 +7062,10 @@ function copyInviteSheetLink() {
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(link).then(function() {
-            copyBtn.textContent = 'Copied!';
+            copyBtn.textContent = t('common.copied');
             copyBtn.classList.add('copied');
             setTimeout(function() {
-                copyBtn.textContent = 'Copy';
+                copyBtn.textContent = t('sheet.copy');
                 copyBtn.classList.remove('copied');
             }, 2000);
         }).catch(function() { fallbackCopySheet(link, copyBtn); });
@@ -6310,11 +7083,11 @@ function fallbackCopySheet(text, btn) {
     ta.select();
     try {
         document.execCommand('copy');
-        btn.textContent = 'Copied!';
+        btn.textContent = t('common.copied');
         btn.classList.add('copied');
-        setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        setTimeout(function() { btn.textContent = t('sheet.copy'); btn.classList.remove('copied'); }, 2000);
     } catch (e) {
-        showToast('Could not copy — tap and hold the link.');
+        showToast(t('toast.couldNotCopy'));
     }
     document.body.removeChild(ta);
 }
@@ -6323,19 +7096,20 @@ function shareInviteLink() {
     const linkEl = document.getElementById('invite-sheet-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const user = window.egUser;
-    const name = user ? (user.displayName || 'A friend') : 'A friend';
-    const text = name + ' wants to play Video Poker with you! Join here: ' + link;
+    const name = user ? (user.displayName || t('common.player')) : t('common.player');
+    const text = t('share.inviteTextShort', { name: name, link: link });
+    const appName = t('share.appName');
 
     // Try native share first
     if (navigator.share) {
-        navigator.share({ title: 'Video Poker', text: text, url: link }).catch(function() {});
+        navigator.share({ title: appName, text: text, url: link }).catch(function() {});
     } else if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
-        window.Capacitor.Plugins.Share.share({ title: 'Video Poker', text: text, url: link }).catch(function() {});
+        window.Capacitor.Plugins.Share.share({ title: appName, text: text, url: link }).catch(function() {});
     } else {
         // Fallback: copy to clipboard
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(link).then(function() {
-                showToast('Link copied — share it with friends!');
+                showToast(t('toast.linkCopiedShare'));
             });
         }
     }
@@ -6345,13 +7119,22 @@ function shareInviteLink() {
 function openRoomCreatedSheet(roomName, roomCode) {
     const base = getShareBaseUrl();
     const link = base + '?join=' + encodeURIComponent(roomCode);
-    document.getElementById('room-created-name').textContent = roomName;
+    const subEl = document.getElementById('room-created-sub');
+    subEl.innerHTML = '';
+    const sentinel = ' ';
+    const parts = t('sheet.inviteToRoom', { name: sentinel }).split(sentinel);
+    subEl.appendChild(document.createTextNode(parts[0] || ''));
+    const nameSpan = document.createElement('span');
+    nameSpan.id = 'room-created-name';
+    nameSpan.textContent = roomName;
+    subEl.appendChild(nameSpan);
+    subEl.appendChild(document.createTextNode(parts[1] || ''));
     document.getElementById('room-created-link').textContent = link;
     document.getElementById('room-created-link').setAttribute('data-link', link);
     document.getElementById('room-created-link').setAttribute('data-code', roomCode);
     // Reset copy button
     const copyBtn = document.getElementById('room-created-copy');
-    copyBtn.textContent = 'Copy';
+    copyBtn.textContent = t('sheet.copy');
     copyBtn.classList.remove('copied');
     openSheet('room-created-sheet');
 }
@@ -6362,9 +7145,9 @@ function copyRoomLink() {
     const copyBtn = document.getElementById('room-created-copy');
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(link).then(function() {
-            copyBtn.textContent = 'Copied!';
+            copyBtn.textContent = t('common.copied');
             copyBtn.classList.add('copied');
-            setTimeout(function() { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
+            setTimeout(function() { copyBtn.textContent = t('sheet.copy'); copyBtn.classList.remove('copied'); }, 2000);
         }).catch(function() { fallbackCopySheet(link, copyBtn); });
     } else {
         fallbackCopySheet(link, copyBtn);
@@ -6375,7 +7158,7 @@ function shareRoomViaWhatsApp() {
     const linkEl = document.getElementById('room-created-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const name = document.getElementById('room-created-name').textContent;
-    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
+    const text = encodeURIComponent(t('share.roomText', { name: name, link: link }));
     window.open('https://wa.me/?text=' + text, '_blank');
 }
 
@@ -6383,7 +7166,7 @@ function shareRoomViaTelegram() {
     const linkEl = document.getElementById('room-created-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const name = document.getElementById('room-created-name').textContent;
-    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
+    const text = encodeURIComponent(t('share.roomText', { name: name, link: link }));
     window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
 }
 
@@ -6410,7 +7193,7 @@ function handleJoinDeepLink() {
             joinRoomByDeepLink(joinCode);
         } else {
             openSignInModal();
-            showToast('Sign in to join the poker room!');
+            showToast(t('toast.signInJoinRoom'));
         }
     } catch (e) {}
 }
@@ -6565,7 +7348,7 @@ function multiHandUnlocked() {
 function setGameVariant(v) {
     if (!PAYTABLES[v] || gameState !== 'bet' || v === gameVariant) return;
     if (!variantUnlocked(v)) {
-        showToast('🔒 Unlocks at level ' + VARIANT_MIN_LEVEL[v]);
+        showToast(t('toast.unlockLevel', { level: VARIANT_MIN_LEVEL[v] }));
         return;
     }
     gameVariant = v;
@@ -6585,7 +7368,7 @@ function updateVariantUI() {
         btn.classList.toggle('locked', locked);
         const lockEl = btn.querySelector('.variant-lock');
         if (lockEl) {
-            lockEl.textContent = locked ? 'Unlock · ' + VARIANT_MIN_LEVEL[v] : '';
+            lockEl.textContent = locked ? t('play.unlockAt', { level: VARIANT_MIN_LEVEL[v] }) : '';
             lockEl.style.display = locked ? '' : 'none';
         }
     });
@@ -6676,7 +7459,7 @@ function doRebuy() {
     balance = 500;
     document.getElementById('balance').textContent = balance;
     saveGameState();
-    showToast('♻ +500 credits');
+    showToast(t('toast.rebuy'));
     if (window.pushDailyRebuy) pushDailyRebuy();
 }
 
@@ -6687,7 +7470,7 @@ function renderPayouts() {
     handOrder.forEach(handType => {
         const row = document.createElement('div');
         row.className = 'payout-row';
-        row.innerHTML = `<div class="payout-hand">${handType}</div><div class="payout-value">${currentPayouts[handType]}</div>`;
+        row.innerHTML = `<div class="payout-hand">${vpHandLabel(handType)}</div><div class="payout-value">${currentPayouts[handType]}</div>`;
         payoutsEl.appendChild(row);
     });
 }
@@ -6758,7 +7541,7 @@ let allInDragging = false;
 
 function openAllInSheet() {
     if (getAllInRemaining() <= 0) {
-        showToast('⛔ No ALL INs left — back tomorrow!');
+        showToast(t('toast.noAllInLeft'));
         return;
     }
     if (balance <= 0) {
@@ -6767,10 +7550,23 @@ function openAllInSheet() {
     }
     const hands = multiHandCount || 1;
     allInPendingAmount = Math.max(1, Math.floor(balance / hands));
-    const amountEl = document.getElementById('allin-sheet-amount');
-    if (amountEl) amountEl.textContent = allInPendingAmount * hands;
+    renderAllInSheetSub(allInPendingAmount * hands);
     resetAllInSlider();
     openSheet('allin-sheet');
+}
+
+function renderAllInSheetSub(amount) {
+    const subEl = document.getElementById('allin-sheet-sub');
+    if (!subEl) return;
+    subEl.innerHTML = '';
+    const sentinel = ' ';
+    const parts = t('sheet.allInSub', { amount: sentinel }).split(sentinel);
+    subEl.appendChild(document.createTextNode(parts[0] || ''));
+    const amountEl = document.createElement('strong');
+    amountEl.id = 'allin-sheet-amount';
+    amountEl.textContent = amount;
+    subEl.appendChild(amountEl);
+    subEl.appendChild(document.createTextNode(parts[1] || ''));
 }
 
 function closeAllInSheet() {
@@ -6795,7 +7591,7 @@ function confirmAllIn() {
     saveAllInUsage();
     updateAllInUI();
     closeSheet('allin-sheet');
-    showToast('🔥 ALL IN — good luck!');
+    showToast(t('toast.allInGoodLuck'));
 }
 
 function initAllInSlider() {
@@ -6958,7 +7754,7 @@ try {
 function setMultiHand(n) {
     if (![1, 3, 5].includes(n) || gameState !== 'bet') return;
     if (n > 1 && !multiHandUnlocked()) {
-        showToast('🔒 Multi-hand unlocks at level ' + MULTI_HAND_MIN_LEVEL);
+        showToast(t('toast.multiHandUnlock', { level: MULTI_HAND_MIN_LEVEL }));
         return;
     }
     multiHandCount = n;
@@ -6989,7 +7785,7 @@ function renderMultiHands(extraResults) {
             return '<span class="mini-card' + (red ? ' red' : '') + '">' + c.rank + c.suit + '</span>';
         }).join('');
         const label = r.win > 0
-            ? '<span class="mh-win">' + r.type + ' +' + r.win + '</span>'
+            ? '<span class="mh-win">' + vpHandLabel(r.type) + ' +' + r.win + '</span>'
             : '<span class="mh-lose">—</span>';
         row.innerHTML = cards + label;
         wrap.appendChild(row);
@@ -7000,8 +7796,8 @@ function updateMainButton() {
     const btn = document.getElementById('main-btn');
     const isDraw = gameState === 'hold';
     btn.innerHTML = isDraw
-        ? '<span class="main-btn-icon">🔄</span>Draw'
-        : '<span class="main-btn-icon">🎴</span>Deal';
+        ? '<span class="main-btn-icon">🔄</span>' + t('play.draw')
+        : '<span class="main-btn-icon">🎴</span>' + t('play.deal');
     btn.className = isDraw ? 'btn-secondary' : 'btn-primary';
 }
 
@@ -7050,7 +7846,7 @@ function deal() {
     lastHandType = null;
     const resultEl = document.getElementById('result');
     resultEl.className = 'result-panel';
-    resultEl.textContent = 'Place your bet and deal to play';
+    resultEl.textContent = t('play.resultDefault');
     document.getElementById('explanation').innerHTML = '';
     if (window.vpRenderHints) vpRenderHints();
     triggerHaptic('MEDIUM');
@@ -7153,12 +7949,12 @@ function draw() {
 
     if (win > 0) {
         resultEl.className = 'result-panel';
-        resultEl.innerHTML = `<span class="win">🎉 ${handType}! +${win} credits! 🎉</span>`;
-        document.getElementById('explanation').textContent = EXPLANATIONS[handType] || '';
+        resultEl.innerHTML = `<span class="win">${t('play.winResult', { hand: vpHandLabel(handType), win: win })}</span>`;
+        document.getElementById('explanation').textContent = vpHandExplanation(handType);
     } else {
         resultEl.className = 'result-panel';
-        resultEl.innerHTML = `<span>Nothing — ${hand.map(c => c.rank + c.suit).join(' ')}</span>`;
-        document.getElementById('explanation').textContent = EXPLANATIONS[handType] || '';
+        resultEl.innerHTML = `<span>${t('play.nothingResult', { cards: hand.map(c => c.rank + c.suit).join(' ') })}</span>`;
+        document.getElementById('explanation').textContent = vpHandExplanation(handType);
     }
 
     renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
@@ -7184,24 +7980,24 @@ function getWinBadgeText(cardIndex, handType) {
     const rankLabel = card.rank;
 
     if (handType === 'Jacks or Better' || handType === 'Two Pair') {
-        return WIN_LABELS.pair + ' ' + rankLabel;
+        return t('win.pair') + ' ' + rankLabel;
     }
     if (handType === 'Three of a Kind') {
-        return WIN_LABELS.threeOfKind;
+        return t('win.threeOfKind');
     }
     if (handType === 'Full House') {
         const count = rankCounts[card.rank] || 0;
-        if (count === 3) return WIN_LABELS.threeOfKind;
-        if (count === 2) return WIN_LABELS.pair + ' ' + rankLabel;
+        if (count === 3) return t('win.threeOfKind');
+        if (count === 2) return t('win.pair') + ' ' + rankLabel;
     }
     if (handType === 'Four of a Kind' || handType === 'Four Aces' ||
         handType === 'Four 2s-4s' || handType === 'Four 5s-Ks') {
-        return WIN_LABELS.fourOfKind;
+        return t('win.fourOfKind');
     }
-    if (handType === 'Straight') return WIN_LABELS.straight;
-    if (handType === 'Flush') return WIN_LABELS.flush;
-    if (handType === 'Straight Flush') return WIN_LABELS.straightFlush;
-    if (handType === 'Royal Flush') return WIN_LABELS.royalFlush;
+    if (handType === 'Straight') return t('win.straight');
+    if (handType === 'Flush') return t('win.flush');
+    if (handType === 'Straight Flush') return t('win.straightFlush');
+    if (handType === 'Royal Flush') return t('win.royalFlush');
     return '';
 }
 
@@ -7226,13 +8022,15 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
 
         cardEl.className = classes.trim();
         cardEl.onclick = () => toggleHold(i);
-        const SUIT_NAMES = { '♠': 'Spades', '♥': 'Hearts', '♦': 'Diamonds', '♣': 'Clubs' };
-        const RANK_NAMES = { 'A': 'Ace', 'J': 'Jack', 'Q': 'Queen', 'K': 'King' };
+        const SUIT_KEYS = { '♠': 'suit.spades', '♥': 'suit.hearts', '♦': 'suit.diamonds', '♣': 'suit.clubs' };
+        const RANK_KEYS = { 'A': 'rank.ace', 'J': 'rank.jack', 'Q': 'rank.queen', 'K': 'rank.king' };
+        const rankLabel = RANK_KEYS[card.rank] ? t(RANK_KEYS[card.rank]) : card.rank;
+        const suitLabel = t(SUIT_KEYS[card.suit]);
         cardEl.setAttribute('role', 'button');
         cardEl.setAttribute('tabindex', '0');
         cardEl.setAttribute('aria-pressed', held[i] ? 'true' : 'false');
         cardEl.setAttribute('aria-label',
-            (RANK_NAMES[card.rank] || card.rank) + ' of ' + SUIT_NAMES[card.suit] + (held[i] ? ', held' : ''));
+            t(held[i] ? 'aria.cardOfHeld' : 'aria.cardOf', { rank: rankLabel, suit: suitLabel }));
         cardEl.onkeydown = (e) => {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleHold(i); }
         };
@@ -7485,6 +8283,21 @@ function initGame() {
     deal();
 }
 
+// Re-render the bits of the Play/Settings screens that were built from
+// translated strings, so a language switch mid-session updates them live.
+if (window.vpOnLanguageChange) {
+    vpOnLanguageChange(function() {
+        renderPayouts();
+        updateVariantUI();
+        updateMultiHandUI();
+        updateMainButton();
+        const resultEl = document.getElementById('result');
+        if (resultEl && gameState === 'bet' && !lastHandType) {
+            resultEl.textContent = t('play.resultDefault');
+        }
+    });
+}
+
 document.addEventListener('keydown', function(e) {
     if (e.target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
     if (gameState === 'hold' && ['1', '2', '3', '4', '5'].includes(e.key)) {
@@ -7677,7 +8490,7 @@ window.toggleHints = function() {
     try { localStorage.setItem('vp_hints', vpHintsOn ? '1' : '0'); } catch (e) {}
     updateHintButtonUI();
     vpApplyHintClasses();
-    if (vpHintsOn) showToast('💡 Hints on — suggested holds glow blue');
+    if (vpHintsOn) showToast(t('toast.hintsOn'));
 };
 
 window.updateHintButtonUI = function() {
@@ -8023,7 +8836,7 @@ function updateAccountUI() {
     if (!signedOut || !signedIn) return;
     signedOut.classList.toggle('hidden', !!user);
     signedIn.classList.toggle('hidden', !user);
-    if (user) document.getElementById('account-display-name').textContent = user.displayName || 'Signed in';
+    if (user) document.getElementById('account-display-name').textContent = user.displayName || t('settings.signedIn');
 }
 
 function setDefaultBet(v) {
@@ -8051,7 +8864,7 @@ function resetStatistics() {
     saveGameState();
     updateStreakUI(false);
     renderStatsScreen();
-    showToast('Statistics reset');
+    showToast(t('toast.statsReset'));
 }
 
 // Handle videopoker://open?ref=CODE / ?join=CODE while running inside the
@@ -8168,7 +8981,7 @@ function maybeShowInstallBar() {
     let visits = 0;
     try { visits = (JSON.parse(localStorage.getItem('vp_visits')) || {}).count || 0; } catch (e) {}
     if (visits < INSTALL_PROMPT_AFTER_VISITS) return;
-    pwaShowBar('pwa-install-bar', 'Install Video Poker for quick access', 'Install', function() {
+    pwaShowBar('pwa-install-bar', t('pwa.installBar'), t('pwa.install'), function() {
         pwaDeferredInstall.prompt();
         pwaDeferredInstall = null;
     });

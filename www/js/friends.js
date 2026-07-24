@@ -69,24 +69,24 @@ function addFriendByCode() {
 
     firebaseSafe(function() {
         return db.collection('users').where('referralCode', '==', code).limit(1).get().then(function(snap) {
-            if (snap.empty) { showToast('No player found with that code.'); return; }
+            if (snap.empty) { showToast(t('toast.noPlayerFound')); return; }
             const friendDoc = snap.docs[0];
-            if (friendDoc.id === user.uid) { showToast('That is your own code!'); return; }
+            if (friendDoc.id === user.uid) { showToast(t('toast.ownCode')); return; }
             const friendRef = db.collection('users').doc(user.uid).collection('friends').doc(friendDoc.id);
             return friendRef.get().then(function(existing) {
-                if (existing.exists) { showToast('Already in your friends list.'); return; }
+                if (existing.exists) { showToast(t('toast.alreadyFriends')); return; }
                 return Promise.all([
                     friendRef.set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() }),
                     db.collection('users').doc(friendDoc.id).collection('friends').doc(user.uid)
                         .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() })
                 ]).then(function() {
                     input.value = '';
-                    showToast('Friend added!');
+                    showToast(t('toast.friendAdded'));
                     loadFriends();
                 });
             });
         });
-    }, function() { showToast('Could not add friend — try again.'); });
+    }, function() { showToast(t('toast.couldNotAddFriend')); });
 }
 
 function ownNetProfit() {
@@ -109,7 +109,7 @@ function renderFriendsScreen() {
     if (typeof friendsTab !== 'undefined' && friendsTab === 'rooms') renderFriendsRoomsList();
 
     listEl.innerHTML = '';
-    const ranked = friendsList.concat([{ displayName: 'You', netProfit: ownNetProfit(), bestStreak: bestStreak, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
+    const ranked = friendsList.concat([{ displayName: t('common.you'), netProfit: ownNetProfit(), bestStreak: bestStreak, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
         .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
     if (emptyEl) emptyEl.classList.toggle('hidden', friendsList.length > 0);
     ranked.forEach(function(f, i) {
@@ -132,7 +132,7 @@ function renderFriendsScreen() {
 
         const nameEl = document.createElement('span');
         nameEl.className = 'friend-lb-name';
-        nameEl.textContent = f.displayName || 'Player';
+        nameEl.textContent = f.displayName || t('common.player');
         if (f.country) {
             const chip = document.createElement('span');
             chip.className = 'country-chip';
@@ -142,7 +142,7 @@ function renderFriendsScreen() {
         if (f.self) {
             const youTag = document.createElement('span');
             youTag.className = 'friend-you-tag';
-            youTag.textContent = 'You';
+            youTag.textContent = t('common.you');
             nameEl.appendChild(youTag);
         }
 
@@ -181,11 +181,11 @@ function copyInviteLink() {
     const user = window.egUser;
     if (!user) { openSignInModal(); return; }
     const link = getInviteLink();
-    if (!link) { showToast('Could not generate invite link.'); return; }
+    if (!link) { showToast(t('toast.couldNotGenerateLink')); return; }
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(link).then(function() {
-            showToast('Invite link copied!');
+            showToast(t('toast.linkCopied'));
         }).catch(function() {
             // Fallback
             fallbackCopy(link);
@@ -202,7 +202,7 @@ function fallbackCopy(text) {
     ta.style.left = '-9999px';
     document.body.appendChild(ta);
     ta.select();
-    try { document.execCommand('copy'); showToast('Invite link copied!'); } catch (e) { showToast('Could not copy — tap and hold the link.'); }
+    try { document.execCommand('copy'); showToast(t('toast.linkCopied')); } catch (e) { showToast(t('toast.couldNotCopy')); }
     document.body.removeChild(ta);
 }
 
@@ -210,17 +210,17 @@ function shareViaWhatsApp() {
     var user = window.egUser;
     if (!user) { openSignInModal(); return; }
     var link = getInviteLink();
-    if (!link) { showToast('Could not generate invite link.'); return; }
+    if (!link) { showToast(t('toast.couldNotGenerateLink')); return; }
 
-    var name = (user.displayName || 'A friend');
-    var text = encodeURIComponent(name + ' wants to play Video Poker with you! Join with this link:\n' + link);
+    var name = (user.displayName || t('common.player'));
+    var text = encodeURIComponent(t('share.inviteText', { name: name, link: link }));
     var waUrl = 'https://wa.me/?text=' + text;
 
     // Try to open WhatsApp; fall back gracefully
     try {
         window.open(waUrl, '_blank');
     } catch (e) {
-        showToast('Could not open WhatsApp.');
+        showToast(t('toast.couldNotOpenWhatsApp'));
     }
 }
 
@@ -249,7 +249,7 @@ function handleIncomingInvite() {
         } else {
             // Prompt sign-in; the auth state listener will pick up _pendingInviteCode
             openSignInModal();
-            showToast('Sign in to connect with your friend!');
+            showToast(t('toast.signInConnect'));
         }
     } catch (e) { /* ignore — URL parsing shouldn't break the app */ }
 }
@@ -259,23 +259,23 @@ function addFriendByInviteCode(code) {
     if (!user) return;
     firebaseSafe(function() {
         return db.collection('users').where('referralCode', '==', code).limit(1).get().then(function(snap) {
-            if (snap.empty) { showToast('No player found with that invite link.'); return; }
+            if (snap.empty) { showToast(t('toast.noPlayerInviteLink')); return; }
             var friendDoc = snap.docs[0];
-            if (friendDoc.id === user.uid) { showToast('That\'s your own invite link!'); return; }
+            if (friendDoc.id === user.uid) { showToast(t('toast.ownInviteLink')); return; }
             var friendRef = db.collection('users').doc(user.uid).collection('friends').doc(friendDoc.id);
             return friendRef.get().then(function(existing) {
-                if (existing.exists) { showToast('Already in your friends list.'); return; }
+                if (existing.exists) { showToast(t('toast.alreadyFriends')); return; }
                 return Promise.all([
                     friendRef.set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() }),
                     db.collection('users').doc(friendDoc.id).collection('friends').doc(user.uid)
                         .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() })
                 ]).then(function() {
-                    showToast('Friend added!');
+                    showToast(t('toast.friendAdded'));
                     loadFriends();
                 });
             });
         });
-    }, function() { showToast('Could not add friend — try again.'); });
+    }, function() { showToast(t('toast.couldNotAddFriend')); });
 }
 
 function renderPlayFriendsWidgets() {
@@ -313,17 +313,17 @@ function renderNearbyPanel(user) {
     }
 
     const own = ownNetProfit();
-    const ranked = friendsList.concat([{ displayName: 'You', netProfit: own, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
+    const ranked = friendsList.concat([{ displayName: t('common.you'), netProfit: own, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
         .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
     const ownRank = ranked.findIndex(function(p) { return p.self; }) + 1;
     const leader = ranked[0];
 
     // Header: "#myRank · leader leads by X"
     if (leader.self) {
-        headerEl.textContent = '#' + ownRank + ' · You\'re #1!';
+        headerEl.textContent = t('common.rankYouAreFirst', { rank: ownRank });
     } else {
         const gap = (leader.netProfit || 0) - own;
-        headerEl.textContent = '#' + ownRank + ' · ' + (leader.displayName || 'Leader') + ' leads by ' + gap;
+        headerEl.textContent = t('common.rankLeadsBy', { rank: ownRank, name: leader.displayName || t('common.leader'), gap: gap });
     }
 
     // Body: show user's row + up to 4 surrounding friends (5 rows total)
@@ -343,7 +343,7 @@ function renderNearbyPanel(user) {
                 '<span class="nearby-avatar">' + (f.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
                 '<span class="online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline') + '"></span>' +
             '</span>' +
-            '<span class="nearby-name">' + (f.displayName || 'Player') +
+            '<span class="nearby-name">' + (f.displayName || t('common.player')) +
                 (f.country ? '<span class="country-chip">' + f.country + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net ' + ((f.netProfit || 0) > 0 ? 'positive' : (f.netProfit || 0) < 0 ? 'negative' : 'zero') + '">' +
