@@ -326,12 +326,11 @@ function renderNearbyPanel(user) {
         headerEl.textContent = '#' + ownRank + ' · ' + (leader.displayName || 'Leader') + ' leads by ' + gap;
     }
 
-    // Body: show user's own row + friends ranked immediately above (up to 5 rows including self)
+    // Body: show user's row + up to 4 surrounding friends (5 rows total)
     bodyEl.innerHTML = '';
     const ownIdx = ranked.findIndex(function(p) { return p.self; });
-    // Show up to 4 rows above plus self (max 5 total)
     const startIdx = Math.max(0, ownIdx - 4);
-    const visible = ranked.slice(startIdx, ownIdx + 1);
+    const visible = ranked.slice(startIdx, Math.min(ranked.length, startIdx + 5));
 
     visible.forEach(function(f, vi) {
         const globalRank = startIdx + vi + 1;

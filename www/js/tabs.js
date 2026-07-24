@@ -185,6 +185,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updateAccountUI();
     renderFriendsScreen();
     renderPlayFriendsWidgets();
+    if (window.applyLeaderboardPlatformUI) applyLeaderboardPlatformUI();
+    if (window.isNativeApp && isNativeApp() && window.setLeaderboardTab) setLeaderboardTab('friends');
     showScreen('play');
     initPwa();
     // Handle deep-link invite (?ref=CODE)

@@ -111,7 +111,7 @@ function renderChampionsPanel() {
                 '<span class="online-dot"></span>' +
             '</span>' +
             '<span class="nearby-name">' + (ch.displayName || 'Player') +
-                (ch.country ? '<span class="country-flag" title="' + ch.country + '">' + countryToFlag(ch.country) + '</span>' : '') +
+                (ch.country ? '<span class="country-flag">' + countryToFlag(ch.country) + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net positive">' + (ch.points || 0) + ' pts</span>';
 

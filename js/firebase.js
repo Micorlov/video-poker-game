@@ -24,6 +24,46 @@ try {
     console.warn('Firebase unavailable, continuing in offline mode:', e);
 }
 
+// --- Remote feature flags (admin-controlled via config/features doc) ---
+const DEFAULT_FEATURES = {
+    facebookSignIn: true,
+    champions: true,
+    stories: true,
+    bracelets: true,
+    friendsRooms: true,
+    allInDailyLimit: 1
+};
+window.egFeatures = Object.assign({}, DEFAULT_FEATURES);
+
+function applyFeatureFlags() {
+    const f = window.egFeatures;
+    document.querySelectorAll('.facebook-btn').forEach(function(el) { el.classList.toggle('hidden', !f.facebookSignIn); });
+    const stories = document.getElementById('stories-row');
+    if (stories) stories.classList.toggle('hidden', !f.stories);
+    // Legacy web panels (nearby-panel/champions-panel) vs the native-only unified
+    // leaderboard panel are toggled together, since both platform + flags decide visibility.
+    if (window.applyLeaderboardPlatformUI) applyLeaderboardPlatformUI();
+    const pwfPanel = document.getElementById('pwf-panel');
+    if (pwfPanel) pwfPanel.classList.toggle('hidden', !f.friendsRooms);
+    const navFriends = document.getElementById('nav-friends');
+    if (navFriends) navFriends.classList.toggle('hidden', !f.friendsRooms);
+    if (window.updateAllInUI) updateAllInUI();
+}
+
+function loadFeatureConfig() {
+    applyFeatureFlags();
+    if (!db) return;
+    firebaseSafe(function() {
+        return db.collection('config').doc('features').get().then(function(doc) {
+            if (doc.exists) {
+                window.egFeatures = Object.assign({}, DEFAULT_FEATURES, doc.data());
+            }
+            applyFeatureFlags();
+        });
+    });
+}
+loadFeatureConfig();
+
 const SHARE_BASE_URL = 'https://micorlov.github.io/video-poker-game/video_poker.html';
 
 function getShareBaseUrl() {
@@ -173,12 +213,22 @@ if (auth) {
         if (user) {
             firebaseSafe(function() { return logUserToFirestore(user); });
             firebaseSafe(function() { return pushNetProfit(); });
-            if (window.loadFriends) loadFriends();
-            if (window.loadMyRooms) loadMyRooms();
-            // Phase 2: start presence heartbeat
-            if (window.startPresence) startPresence();
-            // Phase 2: subscribe champions
-            if (window.subscribeChampions) subscribeChampions();
+            firebaseSafe(function() { return registerForPushNotifications(); });
+            if (window.egFeatures.friendsRooms) {
+                if (window.loadFriends) loadFriends();
+                if (window.loadMyRooms) loadMyRooms();
+                // Phase 2: start presence heartbeat
+                if (window.startPresence) startPresence();
+            }
+            // Native apps get the unified Friends/Hourly/Daily panel; web keeps the
+            // original Hourly Champions panel only (see applyLeaderboardPlatformUI).
+            if (isNativeApp()) {
+                if (window.egFeatures.champions && window.subscribeHourlyBoard) subscribeHourlyBoard();
+                if (window.egFeatures.champions && window.subscribeDailyBoard) subscribeDailyBoard();
+            } else {
+                if (window.egFeatures.champions && window.subscribeChampions) subscribeChampions();
+            }
+            if (window.egFeatures.bracelets && window.subscribeBracelets) subscribeBracelets();
             // Handle pending invite from deep link
             if (window._pendingInviteCode && window.addFriendByInviteCode) {
                 var code = window._pendingInviteCode;
@@ -194,7 +244,13 @@ if (auth) {
         } else {
             if (window.cleanupFriendsListeners) cleanupFriendsListeners();
             if (window.stopPresence) stopPresence();
-            if (window.cleanupChampions) cleanupChampions();
+            if (isNativeApp()) {
+                if (window.cleanupLeaderboards) cleanupLeaderboards();
+                if (window.renderLeaderboardPanel) renderLeaderboardPanel();
+            } else {
+                if (window.cleanupChampions) cleanupChampions();
+            }
+            if (window.cleanupBracelets) cleanupBracelets();
             if (window.renderFriendsScreen) renderFriendsScreen();
             if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
         }

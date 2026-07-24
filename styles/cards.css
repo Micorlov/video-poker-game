@@ -246,8 +246,8 @@
 
 .bet-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
 }
 
 .bet-btn {
@@ -255,7 +255,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text);
-    padding: 12px 4px;
+    padding: 12px 2px;
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
@@ -265,6 +265,109 @@
     background: var(--green);
     border-color: var(--green);
     color: #0a1a10;
+}
+
+.bet-btn-allin {
+    position: relative;
+    background: linear-gradient(135deg, var(--gold-600), var(--gold));
+    border-color: var(--gold);
+    color: #2a1c02;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+}
+
+.allin-badge {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 3px;
+    border-radius: 999px;
+    background: var(--red);
+    border: 1.5px solid var(--panel-solid, #0c2419);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 16px;
+    text-align: center;
+}
+
+.bet-btn-allin.selected {
+    background: linear-gradient(135deg, var(--red), var(--gold));
+    border-color: var(--gold);
+    color: #2a0902;
+}
+
+.bet-btn-allin.depleted {
+    background: rgba(0, 0, 0, 0.25);
+    border-color: var(--border);
+    color: var(--text-faint);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* --- All In slide-to-confirm --- */
+.allin-slider-track {
+    position: relative;
+    height: 52px;
+    margin-top: 18px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: none;
+}
+
+.allin-slider-fill {
+    position: absolute;
+    inset: 0;
+    width: 0;
+    background: linear-gradient(135deg, var(--gold-600), var(--gold));
+}
+
+.allin-slider-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    pointer-events: none;
+}
+
+.allin-slider-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--panel-solid);
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-weight: 800;
+    font-size: 18px;
+    cursor: grab;
+    touch-action: none;
+    transition: left 0.25s ease;
+}
+
+.allin-slider-thumb.dragging {
+    transition: none;
+    cursor: grabbing;
+}
+
+.allin-slider-track.confirmed .allin-slider-label {
+    color: #2a1c02;
 }
 
 /* --- Hand / cards --- */
@@ -316,14 +419,14 @@
 }
 
 .card-front {
-    background: #fbfaf6;
-    color: #1a1a1a;
+    background: var(--card-face-bg);
+    color: var(--card-black);
     padding: 6%;
-    justify-content: space-between;
+    justify-content: center;
 }
 
 .card.red .card-front {
-    color: var(--red);
+    color: var(--card-red);
 }
 
 .card-back {
@@ -349,47 +452,27 @@
     box-shadow: 0 0 0 2px var(--green), 0 0 16px rgba(90, 156, 111, 0.6);
 }
 
-.card-index { line-height: 1; text-align: center; }
-.card-index-rank { font-size: clamp(11px, 3.4vw, 16px); font-weight: 800; }
-.card-index-suit { font-size: clamp(10px, 2.9vw, 13px); }
-.card-index.bottom-right { transform: rotate(180deg); align-self: flex-end; }
-
-.card-suit-large {
+.card-face {
     flex: 1;
     min-height: 0;
+    width: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: clamp(20px, 5.5vw, 30px);
+    gap: 4%;
 }
 
-.card-royalty-center {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.card-face-rank {
     font-size: clamp(20px, 5.8vw, 30px);
-    border-radius: 6px;
-    margin: 10% 12%;
+    font-weight: 800;
+    line-height: 1;
 }
 
-.card-royalty-center.rank-J { background: linear-gradient(135deg, #1e40af, #3b82f6); }
-.card-royalty-center.rank-Q { background: linear-gradient(135deg, #6b21a8, #a855f7); }
-.card-royalty-center.rank-K { background: linear-gradient(135deg, #991b1b, #ef4444); }
-
-.pip-grid {
-    flex: 1;
-    min-height: 0;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(5, minmax(0, 1fr));
-    gap: 1px;
-    margin: 6% 4%;
+.card-face-suit {
+    font-size: clamp(18px, 5vw, 26px);
+    line-height: 1;
 }
-
-.pip { display: flex; align-items: center; justify-content: center; font-size: clamp(8px, 2.1vw, 11px); opacity: 0; }
-.pip.active { opacity: 1; }
 
 .held-badge, .win-badge {
     position: absolute;
@@ -486,6 +569,15 @@
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.main-btn-icon {
+    font-size: 18px;
+    line-height: 1;
 }
 
 .btn-primary {
@@ -593,6 +685,52 @@
     border-color: var(--gold);
     color: #1c1608;
 }
+
+/* --- Unified leaderboard panel (Play tab): Friends / Hourly / Daily --- */
+.lb-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.lb-tabs.hidden { display: none; }
+
+.lb-tab {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text);
+    padding: 7px 4px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.lb-tab.hidden { display: none; }
+
+.lb-tab.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #1c1608;
+}
+
+.lb-expand-link {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+    padding-top: 10px;
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+}
+
+.lb-expand-link.hidden { display: none; }
 
 .stats-net-panel {
     margin-bottom: 12px;
@@ -1168,6 +1306,23 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
+}
+
+.facebook-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #1877F2;
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
 }
 
 .room-stake-select {

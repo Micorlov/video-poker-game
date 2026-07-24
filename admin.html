@@ -164,6 +164,30 @@
             border-color: #f87171;
         }
 
+        .feature-list { padding: 6px 20px; }
+        .feature-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 0; border-bottom: 1px solid rgba(30,41,59,0.5);
+        }
+        .feature-row:last-child { border-bottom: none; }
+        .feature-row-label { font-size: 14px; color: #e2e8f0; font-weight: 500; }
+        .feature-row-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+        .feature-config-row {
+            display: flex; align-items: center; gap: 10px; padding: 16px 20px;
+        }
+        .feature-switch { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+        .feature-switch input { opacity: 0; width: 0; height: 0; }
+        .feature-switch-track {
+            position: absolute; cursor: pointer; inset: 0; background: #334155;
+            border-radius: 24px; transition: 0.2s;
+        }
+        .feature-switch-track::before {
+            content: ""; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px;
+            background: #e2e8f0; border-radius: 50%; transition: 0.2s;
+        }
+        .feature-switch input:checked + .feature-switch-track { background: #16a34a; }
+        .feature-switch input:checked + .feature-switch-track::before { transform: translateX(18px); }
+
         @media (max-width: 700px) {
             .content { padding: 14px; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -198,6 +222,7 @@
                 <button class="tab active" onclick="switchTab('overview')">Overview</button>
                 <button class="tab" onclick="switchTab('users')">Users</button>
                 <button class="tab" onclick="switchTab('competitions')">Competitions</button>
+                <button class="tab" onclick="switchTab('features')">Features</button>
             </div>
 
             <!-- OVERVIEW -->
@@ -313,6 +338,27 @@
                     </table>
                 </div>
             </div>
+
+            <!-- FEATURES -->
+            <div class="tab-content" id="tab-features">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Feature Toggles</h2>
+                        <span class="badge" id="features-status">—</span>
+                    </div>
+                    <div class="feature-list" id="feature-toggle-list"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>ALL IN Daily Limit</h2>
+                    </div>
+                    <div class="feature-config-row">
+                        <span class="settings-row-label">Uses allowed per day</span>
+                        <input type="number" id="feat-allin-limit" min="1" max="99" style="width:70px; padding:6px 10px;">
+                        <button onclick="saveAllInLimit()" style="padding:6px 14px; cursor:pointer;">Save</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -337,6 +383,21 @@
     var adminOverviewTab = 'hourly';
     var adminCompTab = 'hourly';
 
+    var DEFAULT_FEATURES = {
+        facebookSignIn: true,
+        champions: true,
+        stories: true,
+        friendsRooms: true,
+        allInDailyLimit: 5
+    };
+    var FEATURE_TOGGLES = [
+        { key: 'facebookSignIn', label: 'Facebook Sign-In', sub: 'Show "Continue with Facebook" on the sign-in modal' },
+        { key: 'champions', label: 'Hourly Champions', sub: 'Hourly crown leaderboard panel on the Play screen' },
+        { key: 'stories', label: 'Stories Row', sub: 'Recent-activity stories strip on the Play screen' },
+        { key: 'friendsRooms', label: 'Friends & Rooms', sub: 'Friends tab, invites, poker rooms, and presence' }
+    ];
+    var currentFeatures = Object.assign({}, DEFAULT_FEATURES);
+
     function doSignIn() {
         auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
     }
@@ -360,6 +421,58 @@
         loadAllUsers();
         loadCompetition(0);
         loadEvents();
+        loadFeatures();
+    }
+
+    // --- feature flags management ---
+    function loadFeatures() {
+        db.collection('config').doc('features').get().then(function(doc) {
+            currentFeatures = Object.assign({}, DEFAULT_FEATURES, doc.exists ? doc.data() : {});
+            document.getElementById('features-status').textContent = doc.exists ? 'Configured' : 'Using defaults';
+            renderFeatureToggles();
+        }).catch(function(err) {
+            console.error('loadFeatures:', err);
+            document.getElementById('features-status').textContent = 'Error loading';
+        });
+    }
+
+    function renderFeatureToggles() {
+        var list = document.getElementById('feature-toggle-list');
+        list.innerHTML = '';
+        FEATURE_TOGGLES.forEach(function(f) {
+            var row = document.createElement('div');
+            row.className = 'feature-row';
+            var checked = currentFeatures[f.key] !== false;
+            row.innerHTML =
+                '<div><div class="feature-row-label">' + f.label + '</div><div class="feature-row-sub">' + f.sub + '</div></div>' +
+                '<label class="feature-switch">' +
+                '<input type="checkbox" ' + (checked ? 'checked' : '') + ' onchange="toggleFeature(\'' + f.key + '\', this.checked)">' +
+                '<span class="feature-switch-track"></span>' +
+                '</label>';
+            list.appendChild(row);
+        });
+        var limitInput = document.getElementById('feat-allin-limit');
+        limitInput.value = currentFeatures.allInDailyLimit || DEFAULT_FEATURES.allInDailyLimit;
+    }
+
+    function toggleFeature(key, value) {
+        currentFeatures[key] = value;
+        db.collection('config').doc('features').set(currentFeatures, { merge: true }).then(function() {
+            document.getElementById('features-status').textContent = 'Configured';
+        }).catch(function(err) {
+            alert('Failed to save: ' + err.message);
+            loadFeatures();
+        });
+    }
+
+    function saveAllInLimit() {
+        var val = parseInt(document.getElementById('feat-allin-limit').value, 10);
+        if (!val || val < 1 || val > 99) { alert('Enter a limit between 1 and 99'); return; }
+        currentFeatures.allInDailyLimit = val;
+        db.collection('config').doc('features').set(currentFeatures, { merge: true }).then(function() {
+            document.getElementById('features-status').textContent = 'Configured';
+            alert('ALL IN daily limit saved: ' + val);
+        }).catch(function(err) { alert('Failed to save: ' + err.message); });
     }
 
     // --- limited-time events management ---
@@ -703,6 +816,7 @@
         if (name === 'users') loadAllUsers();
         if (name === 'competitions') loadCompetition(compHourOffset);
         if (name === 'overview') { loadCurrentHour(); loadRecentLogins(); }
+        if (name === 'features') loadFeatures();
     }
 
     setInterval(loadCurrentHour, 15000);

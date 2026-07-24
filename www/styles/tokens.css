@@ -22,6 +22,9 @@
     --text: #f3ede0;
     --text-muted: #b9c4b6;
     --text-faint: rgba(185, 196, 182, 0.6);
+    --card-face-bg: #fdfdfb;
+    --card-black: #111111;
+    --card-red: #c41e3a;
     --radius-lg: 16px;
     --radius-md: 14px;
     --radius-sm: 12px;

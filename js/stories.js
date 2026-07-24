@@ -27,7 +27,12 @@ function pushBestHandToFirestore(handData) {
                 payout: handData.payout,
                 cards: handData.cards,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }
+            },
+            // Top-level sibling field (nested map fields can't be queried with
+            // a range filter) so scripts/push/bestHand.js can poll for changes
+            // via where('bestHandAt', '>', cursor) instead of a Cloud Functions
+            // onUpdate trigger.
+            bestHandAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
     });
 }
@@ -64,18 +69,21 @@ function buildStoriesList() {
         name: 'You',
         initial: user ? (user.displayName || 'Y').charAt(0).toUpperCase() : 'Y',
         bestHand: myBest,
+        bracelet: (user && typeof latestBraceletForUid === 'function') ? latestBraceletForUid(user.uid) : null,
         isMe: true
     });
 
     // Add friends' best hands (only if signed in and we have friend data)
     if (user && typeof friendsList !== 'undefined' && friendsList.length) {
         friendsList.forEach(function(f) {
-            if (f.bestHand && f.bestHand.handName) {
+            const bracelet = typeof latestBraceletForUid === 'function' ? latestBraceletForUid(f.uid) : null;
+            if ((f.bestHand && f.bestHand.handName) || bracelet) {
                 stories.push({
                     id: f.uid,
                     name: f.displayName || 'Player',
                     initial: (f.displayName || 'P').charAt(0).toUpperCase(),
                     bestHand: f.bestHand,
+                    bracelet: bracelet,
                     isMe: false
                 });
             }
@@ -98,13 +106,21 @@ function renderStoriesRow() {
         item.onclick = function() { openStoryViewer(i); };
 
         const ring = document.createElement('div');
-        ring.className = 'story-ring' + (s.bestHand ? '' : ' empty');
+        ring.className = 'story-ring' + ((s.bestHand || s.bracelet) ? '' : ' empty');
 
         const avatar = document.createElement('div');
         avatar.className = 'story-avatar';
         avatar.textContent = s.initial;
 
         ring.appendChild(avatar);
+
+        if (s.bracelet) {
+            const badge = document.createElement('span');
+            badge.className = 'bracelet-badge';
+            badge.title = s.name + ' — ' + (s.bracelet.type === 'daily' ? 'Daily' : 'Hourly') + ' Bracelet';
+            badge.textContent = '💍';
+            ring.appendChild(badge);
+        }
 
         const name = document.createElement('div');
         name.className = 'story-name' + (s.isMe ? ' you' : '');
@@ -203,6 +219,11 @@ function renderStoryViewer() {
     } else {
         bodyHtml += '<div class="story-hand-name" style="color:var(--text-muted)">No winning hands yet</div>';
         bodyHtml += '<div style="color:var(--text-faint);font-size:13px">Win a hand to create your story</div>';
+    }
+    if (story.bracelet) {
+        bodyHtml += '<div class="story-bracelet-strip">💍 ' +
+            (story.bracelet.type === 'daily' ? 'Daily' : 'Hourly') + ' Bracelet — ' + story.bracelet.handType +
+            ' for +' + story.bracelet.winAmount + ' credits</div>';
     }
     bodyHtml += '</div>';
 

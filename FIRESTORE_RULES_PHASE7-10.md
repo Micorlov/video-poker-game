@@ -80,6 +80,25 @@ match /hourly/{hourKey} {
 //     && request.resource.data.keys().hasOnly(['displayName', 'netProfit', 'bestStreak']);
 ```
 
+## Play tab Leaderboard redesign — July 2026
+
+```
+// Users: two new daily-reset fields — same owner-writes rule as netProfit/bestStreak above.
+//   dailyNetProfit (number), dailyDateKey (string, e.g. "2026-07-24") — no rule change needed,
+//   they're covered by the existing users/{uid} write rule.
+
+// Global Daily leaderboard — flat collection, doc id "{dayKey}_{uid}", matches the schema
+// admin.html already reads/resets/deletes from (Overview + Competition tabs, Daily sub-tab).
+match /daily_scores/{docId} {
+  allow read: if request.auth != null;
+  allow create, update: if request.auth != null
+    && request.resource.data.uid == request.auth.uid;
+  // admin.html's Reset/Delete buttons run as the admin's own signed-in session
+  allow update, delete: if request.auth != null
+    && request.auth.token.email == 'micorlov@gmail.com';
+}
+```
+
 ## Other requirements
 
 - **Composite indexes** — `gifts (toUid ==, claimed ==)` and
@@ -90,6 +109,11 @@ match /hourly/{hourKey} {
 - **Online-players count** (ticker) uses an aggregate `count()` on
   `users where lastActiveDate > now-5m`. The existing `users` read rule must
   allow list queries for signed-in users (it already does if the leaderboards work).
+- **`daily_scores (dayKey ==, orderBy score desc)`** needs a composite index —
+  Firestore will reject the query until one exists. Firebase surfaces a direct
+  "create index" link in the console the first time this query runs; alternatively
+  create it manually under Firestore → Indexes: collection `daily_scores`,
+  fields `dayKey` (Ascending) + `score` (Descending).
 - **Push for anti-churn (Phase 9.5)** — the in-app nudges work now; real
   closed-app push still needs the FCM VAPID key in `js/pwa.js` plus a scheduled
   sender (e.g. Cloud Function cron) that reads `users.lastActiveDate` and

@@ -17,11 +17,15 @@ function pushNetProfit() {
     const user = window.egUser;
     if (!user) return;
     const netProfit = balance - 500;
+    const dailyNetProfit = window.ownDailyNetProfit ? ownDailyNetProfit() : 0;
+    const dailyDateKey = window.getDayKey ? getDayKey() : null;
     firebaseSafe(function() {
         const writes = [
             db.collection('users').doc(user.uid).set({
                 displayName: user.displayName || '',
                 netProfit: netProfit,
+                dailyNetProfit: dailyNetProfit,
+                dailyDateKey: dailyDateKey,
                 bestStreak: bestStreak,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true })
@@ -30,7 +34,8 @@ function pushNetProfit() {
             writes.push(db.collection('rooms').doc(room.id).collection('members').doc(user.uid).set({
                 displayName: user.displayName || '',
                 netProfit: netProfit,
-                bestStreak: bestStreak
+                bestStreak: bestStreak,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true }));
         });
         return Promise.all(writes);
@@ -191,7 +196,8 @@ function joinRoomByCode() {
             if (snap.empty) { showToast('No room found with that code.'); return; }
             const roomDoc = snap.docs[0];
             return db.collection('rooms').doc(roomDoc.id).update({
-                memberUids: firebase.firestore.FieldValue.arrayUnion(user.uid)
+                memberUids: firebase.firestore.FieldValue.arrayUnion(user.uid),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then(function() {
                 return db.collection('rooms').doc(roomDoc.id).collection('members').doc(user.uid).set({
                     displayName: user.displayName || '',

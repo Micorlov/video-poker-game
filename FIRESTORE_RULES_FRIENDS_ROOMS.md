@@ -39,8 +39,94 @@ match /rooms/{roomId} {
 }
 ```
 
+## Feature flags (admin panel) — July 2026
+
+```
+// config/features — remote feature toggles read by every client on load
+// (including signed-out players, so read must stay public). Only the admin
+// account may write, matching admin.html's client-side gate.
+match /config/{docId} {
+  allow read: if true;
+  allow write: if request.auth != null
+               && request.auth.token.email == 'micorlov@gmail.com';
+}
+```
+
+## Push notifications — July 2026
+
+```
+// users/{uid}/fcmTokens — one doc per registered device token, owner-only.
+// notificationPrefs and lastPlayedDate are just fields on the existing
+// users/{uid} doc, already covered by the rule above (owner write).
+// lastDailyReminderSent is written only by the Cloud Functions Admin SDK,
+// which bypasses these rules entirely, so it needs no client-facing rule.
+match /users/{uid} {
+  match /fcmTokens/{token} {
+    allow read, write: if request.auth != null && request.auth.uid == uid;
+  }
+}
+```
+
+## Bracelets — July 2026
+
+```
+// hourly/{hourKey}/entries/{uid} — existing collection (js/champions.js owns the
+// points field); bracelets adds maxWin/maxWinHandType to the same doc. Read is
+// open to any signed-in user (leaderboard display), write is owner-only.
+match /hourly/{hourKey} {
+  allow read: if request.auth != null;
+  match /entries/{uid} {
+    allow read: if request.auth != null;
+    allow write: if request.auth != null && request.auth.uid == uid;
+  }
+}
+
+// dailyMaxWin/{dayKey}/entries/{uid} — new collection, same shape/rule as hourly
+// above. Deliberately distinct from the existing daily_scores collection
+// (js/leaderboards.js), which is local-time-keyed and tracks a different,
+// cumulative score metric.
+match /dailyMaxWin/{dayKey} {
+  allow read: if request.auth != null;
+  match /entries/{uid} {
+    allow read: if request.auth != null;
+    allow write: if request.auth != null && request.auth.uid == uid;
+  }
+}
+
+// bracelets/{docId} — permanent award records, one per awarded hour/day
+// (docId = "hourly_" + hourKey or "daily_" + dayKey). Written only by the
+// Admin SDK (scripts/bracelets/award.js, run by the GitHub Actions poller —
+// see the push-polling section below), which bypasses these rules entirely —
+// clients only ever read.
+match /bracelets/{docId} {
+  allow read: if request.auth != null;
+  allow write: if false;
+}
+```
+
+## Collection-group indexes for push polling — July 2026
+
+The push-notification poller (`scripts/push/`, run by GitHub Actions instead of
+Cloud Functions — see no `functions/` directory in this repo) queries two
+subcollections across all their parent documents at once, which requires an
+explicit **collection-group** index — same-collection single-field indexes
+are automatic, but collection-group scope is not. Create both of these in
+Firebase Console → Firestore Database → Indexes → **Collection Group** tab.
+No Blaze plan needed — collection-group indexes are free on the Spark plan.
+
+1. Collection group: `friends` — Field: `addedAt` — Order: Ascending
+   (powers `scripts/push/friends.js`'s
+   `collectionGroup('friends').where('addedAt', '>', since)`)
+2. Collection group: `members` — Field: `updatedAt` — Order: Ascending
+   (powers `scripts/push/rooms.js`'s
+   `collectionGroup('members').where('updatedAt', '>', since)`)
+
 ## Other requirements
 
 - **Composite index**: `rooms` queried with `where('memberUids', 'array-contains', uid)` is a
   single-field array-contains query — no composite index needed. The join-by-code query
   (`where('code', '==', code).limit(1)`) is also single-field — no index needed either.
+- micorlov@gmail.com is the sole admin account (full read/write across `events`,
+  `config`, and score-management actions in admin.html) — use the email-based
+  check above (`request.auth.token.email`) rather than a UID placeholder, since
+  Firebase Auth tokens carry email directly and it's easier to keep in sync.

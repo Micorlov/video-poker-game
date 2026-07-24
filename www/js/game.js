@@ -246,6 +246,7 @@ function doRebuy() {
     document.getElementById('balance').textContent = balance;
     saveGameState();
     showToast('♻ +500 credits');
+    if (window.pushDailyRebuy) pushDailyRebuy();
 }
 
 function renderPayouts() {
@@ -268,6 +269,162 @@ function setBet(amount) {
     });
     const btn = document.getElementById('bet-' + amount);
     if (btn) btn.classList.add('selected');
+}
+
+// --- All In: limited daily uses ---
+const ALLIN_DAILY_LIMIT_DEFAULT = 1;
+let allInUsesToday = 0;
+
+function getAllInDailyLimit() {
+    const configured = window.egFeatures && window.egFeatures.allInDailyLimit;
+    return (typeof configured === 'number' && configured > 0) ? configured : ALLIN_DAILY_LIMIT_DEFAULT;
+}
+
+function loadAllInUsage() {
+    try {
+        const raw = JSON.parse(localStorage.getItem('vp_allin_usage'));
+        allInUsesToday = (raw && raw.date === new Date().toDateString()) ? (raw.count || 0) : 0;
+    } catch (e) {
+        allInUsesToday = 0;
+    }
+    syncLastPlayedDate();
+}
+
+function syncLastPlayedDate() {
+    if (!window.egUser || typeof db === 'undefined') return;
+    const today = new Date().toISOString().slice(0, 10);
+    firebaseSafe(function() {
+        return db.collection('users').doc(window.egUser.uid).set({ lastPlayedDate: today }, { merge: true });
+    });
+}
+
+function saveAllInUsage() {
+    try {
+        localStorage.setItem('vp_allin_usage', JSON.stringify({ date: new Date().toDateString(), count: allInUsesToday }));
+    } catch (e) { /* localStorage unavailable, silently fail */ }
+}
+
+function getAllInRemaining() {
+    try {
+        return Math.max(0, getAllInDailyLimit() - allInUsesToday);
+    } catch (e) {
+        // Called before this script's own state has initialized — try again later.
+        return getAllInDailyLimit();
+    }
+}
+
+function updateAllInUI() {
+    const remaining = getAllInRemaining();
+    const badge = document.getElementById('allin-badge');
+    if (badge) badge.textContent = remaining;
+    const btn = document.getElementById('bet-allin');
+    if (btn) btn.classList.toggle('depleted', remaining === 0);
+}
+
+// --- All In confirmation sheet (slide-to-confirm) ---
+let allInPendingAmount = 0;
+let allInDragging = false;
+
+function openAllInSheet() {
+    if (getAllInRemaining() <= 0) {
+        showToast('⛔ No ALL INs left — back tomorrow!');
+        return;
+    }
+    if (balance <= 0) {
+        doRebuy();
+        return;
+    }
+    const hands = multiHandCount || 1;
+    allInPendingAmount = Math.max(1, Math.floor(balance / hands));
+    const amountEl = document.getElementById('allin-sheet-amount');
+    if (amountEl) amountEl.textContent = allInPendingAmount * hands;
+    resetAllInSlider();
+    openSheet('allin-sheet');
+}
+
+function closeAllInSheet() {
+    closeSheet('allin-sheet');
+    resetAllInSlider();
+}
+
+function resetAllInSlider() {
+    const track = document.getElementById('allin-slider-track');
+    const thumb = document.getElementById('allin-slider-thumb');
+    const fill = document.getElementById('allin-slider-fill');
+    if (thumb) thumb.style.left = '3px';
+    if (fill) fill.style.width = '0px';
+    if (track) track.classList.remove('confirmed');
+}
+
+function confirmAllIn() {
+    setBet(allInPendingAmount);
+    const btn = document.getElementById('bet-allin');
+    if (btn) btn.classList.add('selected');
+    allInUsesToday++;
+    saveAllInUsage();
+    updateAllInUI();
+    closeSheet('allin-sheet');
+    showToast('🔥 ALL IN — good luck!');
+}
+
+function initAllInSlider() {
+    const track = document.getElementById('allin-slider-track');
+    const thumb = document.getElementById('allin-slider-thumb');
+    const fill = document.getElementById('allin-slider-fill');
+    if (!track || !thumb || !fill) return;
+
+    const CONFIRM_THRESHOLD = 0.85;
+    let startX = 0;
+    let thumbStartLeft = 3;
+    let maxLeft = 0;
+
+    function pointerX(e) {
+        return e.touches ? e.touches[0].clientX : e.clientX;
+    }
+
+    function pointerMove(e) {
+        if (!allInDragging) return;
+        e.preventDefault();
+        let left = thumbStartLeft + (pointerX(e) - startX);
+        left = Math.max(3, Math.min(maxLeft, left));
+        thumb.style.left = left + 'px';
+        fill.style.width = (left + thumb.offsetWidth) + 'px';
+    }
+
+    function pointerUp() {
+        if (!allInDragging) return;
+        allInDragging = false;
+        thumb.classList.remove('dragging');
+        document.removeEventListener('mousemove', pointerMove);
+        document.removeEventListener('mouseup', pointerUp);
+        document.removeEventListener('touchmove', pointerMove);
+        document.removeEventListener('touchend', pointerUp);
+
+        const pct = maxLeft > 0 ? (thumb.offsetLeft - 3) / maxLeft : 0;
+        if (pct >= CONFIRM_THRESHOLD) {
+            thumb.style.left = maxLeft + 'px';
+            fill.style.width = (maxLeft + thumb.offsetWidth) + 'px';
+            track.classList.add('confirmed');
+            confirmAllIn();
+        } else {
+            resetAllInSlider();
+        }
+    }
+
+    function pointerDown(e) {
+        allInDragging = true;
+        thumb.classList.add('dragging');
+        startX = pointerX(e);
+        thumbStartLeft = thumb.offsetLeft;
+        maxLeft = track.clientWidth - thumb.offsetWidth - 3;
+        document.addEventListener('mousemove', pointerMove);
+        document.addEventListener('mouseup', pointerUp);
+        document.addEventListener('touchmove', pointerMove, { passive: false });
+        document.addEventListener('touchend', pointerUp);
+    }
+
+    thumb.addEventListener('mousedown', pointerDown);
+    thumb.addEventListener('touchstart', pointerDown, { passive: true });
 }
 
 function updateTotalBetDisplay() {
@@ -410,8 +567,11 @@ function renderMultiHands(extraResults) {
 
 function updateMainButton() {
     const btn = document.getElementById('main-btn');
-    btn.textContent = gameState === 'hold' ? 'Draw' : 'Deal';
-    btn.className = 'btn-primary';
+    const isDraw = gameState === 'hold';
+    btn.innerHTML = isDraw
+        ? '<span class="main-btn-icon">🔄</span>Draw'
+        : '<span class="main-btn-icon">🎴</span>Deal';
+    btn.className = isDraw ? 'btn-secondary' : 'btn-primary';
 }
 
 function mainAction() {
@@ -531,6 +691,8 @@ function draw() {
         if (window.checkAndUpdateBestHand) checkAndUpdateBestHand(bestType, win, hand);
         // Phase 2: push hourly champion points
         if (window.pushChampionPoints) pushChampionPoints(bestType, win);
+        // Bracelets: track this player's max single win for the current hour/day
+        if (window.pushBraceletProgress) pushBraceletProgress(bestType, win);
     } else {
         totalLost += totalBet;
         lossStreak++;
@@ -538,6 +700,7 @@ function draw() {
             if (key !== 'Nothing') currentPayouts[key]++;
         }
     }
+    if (window.pushDailyScore) pushDailyScore(bestType, win, totalBet);
     renderMultiHands(extraResults);
     updateStats();
     renderPayouts();
@@ -616,18 +779,6 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
     handEl.innerHTML = '';
     const anyHeld = held.some(h => h);
 
-    const PIP_MAPS = {
-        '2': [1, 13],
-        '3': [1, 7, 13],
-        '4': [0, 2, 12, 14],
-        '5': [0, 2, 7, 12, 14],
-        '6': [0, 2, 6, 8, 12, 14],
-        '7': [0, 2, 6, 8, 12, 14, 4],
-        '8': [0, 2, 6, 8, 12, 14, 4, 10],
-        '9': [0, 2, 3, 5, 9, 11, 12, 14, 7],
-        '10': [0, 2, 3, 5, 9, 11, 12, 14, 4, 10]
-    };
-
     hand.forEach((card, i) => {
         const cardEl = document.createElement('div');
         const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || secondPairIndices.length > 0;
@@ -658,35 +809,14 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
 
         const winBadgeText = isResult ? getWinBadgeText(i, lastHandType) : '';
 
-        let centerContent = '';
-        if (card.rank === 'A') {
-            centerContent = `<div class="card-suit-large">${card.suit}</div>`;
-        } else if (['J', 'Q', 'K'].includes(card.rank)) {
-            centerContent = `<div class="card-royalty-center rank-${card.rank}">${card.rank === 'J' ? '⚔️' : card.rank === 'Q' ? '👑' : '🛡️'}</div>`;
-        } else {
-            const pips = PIP_MAPS[card.rank] || [];
-            let gridHtml = '<div class="pip-grid">';
-            for (let cell = 0; cell < 15; cell++) {
-                const isActive = pips.includes(cell);
-                gridHtml += `<div class="pip ${isActive ? 'active' : ''}">${card.suit}</div>`;
-            }
-            gridHtml += '</div>';
-            centerContent = gridHtml;
-        }
-
         cardEl.innerHTML = `
             <div class="held-badge">HELD</div>
             <div class="win-badge">${winBadgeText}</div>
             <div class="card-inner">
                 <div class="card-front">
-                    <div class="card-index top-left">
-                        <div class="card-index-rank">${card.rank}</div>
-                        <div class="card-index-suit">${card.suit}</div>
-                    </div>
-                    ${centerContent}
-                    <div class="card-index bottom-right">
-                        <div class="card-index-rank">${card.rank}</div>
-                        <div class="card-index-suit">${card.suit}</div>
+                    <div class="card-face">
+                        <div class="card-face-rank">${card.rank}</div>
+                        <div class="card-face-suit">${card.suit}</div>
                     </div>
                 </div>
                 <div class="card-back"></div>
@@ -906,6 +1036,9 @@ function initGame() {
     setBet(bet);
     updateVariantUI();
     updateMultiHandUI();
+    loadAllInUsage();
+    updateAllInUI();
+    initAllInSlider();
     renderPayouts();
     // Greet the player with an already-dealt hand, as if Deal was just pressed
     deal();
