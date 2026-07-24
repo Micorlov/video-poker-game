@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Video Poker</title>
+    <script>
+    // If this page was opened outside the app (e.g. a link tapped in WhatsApp)
+    // and carries an invite/join code, try to hand off to the installed app
+    // via its custom URL scheme before falling back to the web experience.
+    (function () {
+        try {
+            var runningInApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+            if (runningInApp) return;
+
+            var params = new URLSearchParams(window.location.search);
+            if (!params.get('ref') && !params.get('join')) return;
+
+            window.location.href = 'videopoker://open?' + params.toString();
+        } catch (e) { /* best-effort — the web fallback below still works */ }
+    })();
+    </script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0c2419">
     <link rel="icon" href="icon.svg" type="image/svg+xml">

@@ -59,6 +59,12 @@
 				<string>fb958984593824379</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>videopoker</string>
+			</array>
+		</dict>
 	</array>
 	<key>FacebookAppID</key>
 	<string>958984593824379</string>

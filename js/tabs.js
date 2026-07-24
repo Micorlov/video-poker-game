@@ -147,6 +147,35 @@ function resetStatistics() {
     showToast('Statistics reset');
 }
 
+// Handle videopoker://open?ref=CODE / ?join=CODE while running inside the
+// native (Capacitor) app — merges the scheme URL's query params into the
+// page URL, then reuses the same handlers the web version already uses.
+function applyNativeDeepLinkUrl(rawUrl) {
+    try {
+        var incoming = new URL(rawUrl);
+        var target = new URL(window.location.href);
+        incoming.searchParams.forEach(function(value, key) {
+            target.searchParams.set(key, value);
+        });
+        window.history.replaceState({}, '', target);
+        if (window.handleIncomingInvite) handleIncomingInvite();
+        if (window.handleJoinDeepLink) handleJoinDeepLink();
+    } catch (e) {}
+}
+
+function initNativeDeepLinkHandling() {
+    var CapApp = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+    if (!CapApp) return;
+    // Cold start: app was launched directly via the custom scheme.
+    CapApp.getLaunchUrl().then(function(result) {
+        if (result && result.url) applyNativeDeepLinkUrl(result.url);
+    }).catch(function() {});
+    // Warm start: app was already running when the scheme URL was opened.
+    CapApp.addListener('appUrlOpen', function(data) {
+        applyNativeDeepLinkUrl(data.url);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     applyTheme();
     initSound();
@@ -160,4 +189,5 @@ document.addEventListener('DOMContentLoaded', function() {
     initPwa();
     // Handle deep-link invite (?ref=CODE)
     if (window.handleIncomingInvite) handleIncomingInvite();
+    initNativeDeepLinkHandling();
 });
