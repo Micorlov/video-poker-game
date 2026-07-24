@@ -734,14 +734,17 @@ button, input, select {
 .held-badge, .win-badge {
     position: absolute;
     top: -9px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 2px;
+    right: 2px;
+    text-align: center;
     font-size: 9px;
     font-weight: 800;
-    letter-spacing: 0.04em;
-    padding: 2px 7px;
+    letter-spacing: 0.02em;
+    padding: 2px 4px;
     border-radius: 999px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
     z-index: 2;
     opacity: 0;
 }
