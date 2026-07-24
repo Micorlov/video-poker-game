@@ -4,7 +4,7 @@
 // already exists), so it's safe and cheap to attempt every poll run rather
 // than needing exact-time cron scheduling — one extra doc read per type per
 // run (~576/day total, negligible on the Spark plan's free quota).
-const { getFirestore, admin } = require('../lib/firebaseAdmin');
+const { getFirestore, FieldValue } = require('../lib/firebaseAdmin');
 
 function hourKeyOf(d) {
   return d.getUTCFullYear() + String(d.getUTCMonth() + 1).padStart(2, '0') +
@@ -46,7 +46,7 @@ async function awardBracelet(type, periodKey, collectionName) {
     displayName: top.get('displayName') || 'Player',
     handType: top.get('maxWinHandType') || '',
     winAmount: top.get('maxWin') || 0,
-    awardedAt: admin.firestore.FieldValue.serverTimestamp(),
+    awardedAt: FieldValue.serverTimestamp(),
   });
 }
 

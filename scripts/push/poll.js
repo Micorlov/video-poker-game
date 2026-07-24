@@ -8,7 +8,6 @@ const { checkRoomActivity } = require('./rooms');
 const { checkHourlyLeaderboard } = require('./leaderboard');
 const { checkBestHand } = require('./bestHand');
 const { checkBracelets } = require('../bracelets/award');
-
 async function poll() {
   const since = await getCursor();
   const pollStartedAt = new Date();

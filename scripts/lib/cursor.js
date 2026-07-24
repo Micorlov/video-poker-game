@@ -1,7 +1,7 @@
 // Tracks the polling cursor in a single Firestore doc (system/pushCursor),
 // since a standalone poller — unlike a Cloud Functions trigger — has no
 // automatic "since last event" context and has to persist it itself.
-const { getFirestore, admin } = require('./firebaseAdmin');
+const { getFirestore, Timestamp } = require('./firebaseAdmin');
 
 const CURSOR_DOC_PATH = 'system/pushCursor';
 const DEFAULT_LOOKBACK_MS = 60 * 60 * 1000; // 1 hour, used only on first-ever run
@@ -19,7 +19,7 @@ async function getCursor() {
 async function setCursor(date) {
   const db = getFirestore();
   await db.doc(CURSOR_DOC_PATH).set(
-    { lastCheckedAt: admin.firestore.Timestamp.fromDate(date) },
+    { lastCheckedAt: Timestamp.fromDate(date) },
     { merge: true }
   );
 }

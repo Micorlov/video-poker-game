@@ -223,6 +223,7 @@
                 <button class="tab" onclick="switchTab('users')">Users</button>
                 <button class="tab" onclick="switchTab('competitions')">Competitions</button>
                 <button class="tab" onclick="switchTab('features')">Features</button>
+                <button class="tab" onclick="switchTab('push')">Push</button>
             </div>
 
             <!-- OVERVIEW -->
@@ -356,6 +357,74 @@
                         <span class="settings-row-label">Uses allowed per day</span>
                         <input type="number" id="feat-allin-limit" min="1" max="99" style="width:70px; padding:6px 10px;">
                         <button onclick="saveAllInLimit()" style="padding:6px 14px; cursor:pointer;">Save</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PUSH NOTIFICATIONS -->
+            <div class="tab-content" id="tab-push">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>FCM Server Key</h2>
+                        <span class="badge" id="push-key-status">—</span>
+                    </div>
+                    <div style="padding:14px 20px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <input id="push-server-key" type="password" placeholder="Paste Legacy server key — Firebase Console → Project Settings → Cloud Messaging → Cloud Messaging API (Legacy)"
+                            style="flex:1; min-width:300px; padding:8px 10px; background:#0f172a; border:1px solid #1e293b; border-radius:6px; color:#e2e8f0; font-size:13px;">
+                        <button onclick="savePushServerKey()" style="padding:8px 16px; cursor:pointer;">Save</button>
+                        <button onclick="clearPushServerKey()" style="padding:8px 16px; cursor:pointer; color:#f87171; border-color:rgba(248,113,113,0.4);">Clear</button>
+                    </div>
+                    <div style="padding:0 20px 14px; font-size:12px; color:#475569;">Stored in browser localStorage only — never sent to any server.</div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><span class="live-dot"></span> Poll Status</h2>
+                        <button onclick="loadPushTab()">↻ Refresh</button>
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:16px; padding:16px 20px;">
+                        <div class="stat-card" style="min-width:220px;">
+                            <div class="label">Last Poll</div>
+                            <div class="value" style="font-size:16px;" id="push-last-poll">—</div>
+                            <div class="sub">from system/pushCursor</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header"><h2>Send Test Notification</h2></div>
+                    <div style="padding:16px 20px;">
+                        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                            <div style="flex:1; min-width:200px;">
+                                <div style="font-size:12px; color:#64748b; margin-bottom:6px;">Target User</div>
+                                <select id="push-target-uid" style="width:100%; padding:8px 10px; background:#0f172a; border:1px solid #1e293b; border-radius:6px; color:#e2e8f0; font-size:13px;">
+                                    <option value="">— select user —</option>
+                                </select>
+                            </div>
+                            <div style="min-width:180px;">
+                                <div style="font-size:12px; color:#64748b; margin-bottom:6px;">Category</div>
+                                <select id="push-category" onchange="fillTestDefaults()" style="width:100%; padding:8px 10px; background:#0f172a; border:1px solid #1e293b; border-radius:6px; color:#e2e8f0; font-size:13px;">
+                                    <option value="social">social</option>
+                                    <option value="leaderboard">leaderboard</option>
+                                    <option value="dailyReminder">dailyReminder</option>
+                                    <option value="bestHand">bestHand</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+                            <div style="flex:1; min-width:200px;">
+                                <div style="font-size:12px; color:#64748b; margin-bottom:6px;">Title</div>
+                                <input id="push-title" type="text" style="width:100%; padding:8px 10px; background:#0f172a; border:1px solid #1e293b; border-radius:6px; color:#e2e8f0; font-size:13px;">
+                            </div>
+                            <div style="flex:2; min-width:260px;">
+                                <div style="font-size:12px; color:#64748b; margin-bottom:6px;">Body</div>
+                                <input id="push-body" type="text" style="width:100%; padding:8px 10px; background:#0f172a; border:1px solid #1e293b; border-radius:6px; color:#e2e8f0; font-size:13px;">
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <button onclick="sendNow()" style="padding:8px 20px; cursor:pointer; background:#16a34a; border:none; border-radius:6px; color:#fff; font-size:13px; font-weight:600;">Send Now</button>
+                            <span id="push-send-status" style="font-size:13px; color:#64748b;"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -817,6 +886,124 @@
         if (name === 'competitions') loadCompetition(compHourOffset);
         if (name === 'overview') { loadCurrentHour(); loadRecentLogins(); }
         if (name === 'features') loadFeatures();
+        if (name === 'push') loadPushTab();
+    }
+
+    // --- push notification testing ---
+    var PUSH_DEFAULTS = {
+        social:        { title: 'New Friend', body: 'Someone added you as a friend!' },
+        leaderboard:   { title: 'Leaderboard Update', body: 'Check the current standings!' },
+        dailyReminder: { title: 'Come Back!', body: 'Your ALL IN reset is ready — time to play!' },
+        bestHand:      { title: 'Amazing Hand!', body: 'A friend just landed an incredible poker hand!' }
+    };
+
+    function fillTestDefaults() {
+        var cat = document.getElementById('push-category').value;
+        var d = PUSH_DEFAULTS[cat] || {};
+        document.getElementById('push-title').value = d.title || '';
+        document.getElementById('push-body').value = d.body || '';
+    }
+
+    function populatePushUserSelect() {
+        var sel = document.getElementById('push-target-uid');
+        sel.innerHTML = '<option value="">— select user —</option>';
+        allUsersData.forEach(function(u) {
+            var opt = document.createElement('option');
+            opt.value = u.uid || '';
+            opt.textContent = (u.displayName || u.email || '?') + ' (' + (u.uid || '').slice(0, 8) + '…)';
+            sel.appendChild(opt);
+        });
+    }
+
+    function loadPushTab() {
+        loadPollStatus();
+        fillTestDefaults();
+        var saved = localStorage.getItem('adminFcmServerKey');
+        document.getElementById('push-key-status').textContent = saved ? 'Key saved' : 'No key';
+        document.getElementById('push-key-status').style.color = saved ? '#4ade80' : '#f87171';
+        if (allUsersData.length) {
+            populatePushUserSelect();
+        } else {
+            db.collection('users').get().then(function(snap) {
+                allUsersData = [];
+                snap.forEach(function(doc) { allUsersData.push(doc.data()); });
+                populatePushUserSelect();
+            });
+        }
+    }
+
+    function loadPollStatus() {
+        db.doc('system/pushCursor').get().then(function(doc) {
+            var ts = doc.exists && doc.get('lastCheckedAt');
+            document.getElementById('push-last-poll').textContent = ts ? ts.toDate().toLocaleString() : 'Never';
+        }).catch(function() {
+            document.getElementById('push-last-poll').textContent = 'Error';
+        });
+    }
+
+    function savePushServerKey() {
+        var key = document.getElementById('push-server-key').value.trim();
+        if (!key) { alert('Paste a key first.'); return; }
+        localStorage.setItem('adminFcmServerKey', key);
+        document.getElementById('push-server-key').value = '';
+        document.getElementById('push-key-status').textContent = 'Key saved';
+        document.getElementById('push-key-status').style.color = '#4ade80';
+    }
+
+    function clearPushServerKey() {
+        localStorage.removeItem('adminFcmServerKey');
+        document.getElementById('push-key-status').textContent = 'No key';
+        document.getElementById('push-key-status').style.color = '#f87171';
+    }
+
+    async function sendNow() {
+        var uid = document.getElementById('push-target-uid').value;
+        var title = document.getElementById('push-title').value.trim();
+        var body = document.getElementById('push-body').value.trim();
+        var serverKey = localStorage.getItem('adminFcmServerKey') || '';
+        var statusEl = document.getElementById('push-send-status');
+
+        if (!serverKey) { statusEl.textContent = 'No FCM server key saved — paste it above first.'; statusEl.style.color = '#f87171'; return; }
+        if (!uid) { statusEl.textContent = 'Select a target user.'; statusEl.style.color = '#f87171'; return; }
+        if (!title || !body) { statusEl.textContent = 'Title and body are required.'; statusEl.style.color = '#f87171'; return; }
+
+        statusEl.textContent = 'Fetching device tokens…'; statusEl.style.color = '#fbbf24';
+        try {
+            var tokensSnap = await db.collection('users/' + uid + '/fcmTokens').get();
+            if (tokensSnap.empty) {
+                statusEl.textContent = 'No registered device tokens for this user.';
+                statusEl.style.color = '#f87171';
+                return;
+            }
+            var tokens = tokensSnap.docs.map(function(d) { return d.id; });
+            statusEl.textContent = 'Sending to ' + tokens.length + ' device(s)…';
+
+            var resp = await fetch('https://fcm.googleapis.com/fcm/send', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'key=' + serverKey,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ registration_ids: tokens, notification: { title: title, body: body } })
+            });
+            var result = await resp.json();
+
+            if (!resp.ok) {
+                statusEl.textContent = 'FCM error ' + resp.status + ': ' + (result.error || JSON.stringify(result));
+                statusEl.style.color = '#f87171';
+                return;
+            }
+            if (result.failure === 0) {
+                statusEl.textContent = 'Sent to ' + result.success + ' device(s). ✓';
+                statusEl.style.color = '#4ade80';
+            } else {
+                statusEl.textContent = 'Sent: ' + result.success + ', Failed: ' + result.failure;
+                statusEl.style.color = result.success > 0 ? '#fbbf24' : '#f87171';
+            }
+        } catch (err) {
+            statusEl.textContent = 'Error: ' + err.message;
+            statusEl.style.color = '#f87171';
+        }
     }
 
     setInterval(loadCurrentHour, 15000);
