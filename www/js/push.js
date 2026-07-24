@@ -1,42 +1,28 @@
-// Push notifications — native (Android/iOS via Capacitor) + web (Firebase Messaging + VAPID).
+// Native push notifications (Android + iOS via Capacitor).
 // Depends on: firebaseSafe()/db from js/firebase.js, window.egUser from auth.onAuthStateChanged.
 // Firestore schema: users/{uid}/fcmTokens/{token} = { token, platform, updatedAt }
 // and users/{uid}.notificationPrefs.<category>, categories: social, leaderboard, dailyReminder, bestHand.
 
 function registerForPushNotifications() {
-    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-        // Native path (Android / iOS via Capacitor)
-        const PushNotifications = window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
-        if (!PushNotifications) return;
-        PushNotifications.requestPermissions().then(function(result) {
-            if (result && result.receive === 'granted') PushNotifications.register();
-        }).catch(function(err) { console.warn('Push permission request failed:', err); });
+    if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) {
         return;
     }
-    // Web path — Firebase Messaging + VAPID
-    if (typeof firebase === 'undefined' || !firebase.messaging) return;
-    Notification.requestPermission().then(function(permission) {
-        if (permission !== 'granted') return;
-        return navigator.serviceWorker.ready.then(function(swReg) {
-            return firebase.messaging().getToken({
-                vapidKey: 'BFWkeDVJWLUt7RD9WDghTKnckjE5EwrRgZEVxyXMz4ujyfpnaAO6m_BbsbLc6AGzDZ88vl9rrgtXfrYPU4FeqeI',
-                serviceWorkerRegistration: swReg
-            });
-        }).then(function(token) {
-            if (token) saveFcmToken(token, 'web');
-        });
-    }).catch(function(err) { console.warn('Web push registration failed:', err); });
+    const PushNotifications = window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
+    if (!PushNotifications) return;
+    PushNotifications.requestPermissions().then(function(result) {
+        if (result && result.receive === 'granted') PushNotifications.register();
+    }).catch(function(err) { console.warn('Push permission request failed:', err); });
 }
 
-function saveFcmToken(token, platform) {
+function saveFcmToken(token) {
     if (!window.egUser || typeof db === 'undefined') return;
-    var p = platform || (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web');
+    const platform = window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'unknown';
     firebaseSafe(function() {
         return db.collection('users').doc(window.egUser.uid)
             .collection('fcmTokens').doc(token)
             .set({
                 token: token,
-                platform: p,
+                platform: platform,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
     });
