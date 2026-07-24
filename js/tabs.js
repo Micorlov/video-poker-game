@@ -92,6 +92,35 @@ function initSettingsScreen() {
     updateDefaultBetUI();
 
     document.getElementById('settings-reset-stats').onclick = resetStatistics;
+
+    initNotificationSettings();
+}
+
+const NOTIFICATION_PREF_CATEGORIES = ['social', 'leaderboard', 'dailyReminder', 'bestHand'];
+
+function initNotificationSettings() {
+    const panel = document.getElementById('settings-notifications-panel');
+    if (!panel) return;
+    const isNative = window.isNativeApp && isNativeApp();
+    panel.classList.toggle('hidden', !isNative);
+    if (!isNative) return;
+
+    const enableBtn = document.getElementById('settings-notifications-enable');
+    if (enableBtn) {
+        enableBtn.onclick = function() {
+            if (window.registerForPushNotifications) registerForPushNotifications();
+        };
+    }
+
+    const prefs = (window.egUserDoc && window.egUserDoc.notificationPrefs) || {};
+    NOTIFICATION_PREF_CATEGORIES.forEach(function(category) {
+        const toggle = document.getElementById('settings-notif-' + category);
+        if (!toggle) return;
+        toggle.checked = prefs[category] !== false;
+        toggle.onchange = function() {
+            if (window.setNotificationPref) setNotificationPref(category, toggle.checked);
+        };
+    });
 }
 
 function toggleTournamentPill() {
@@ -187,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderPlayFriendsWidgets();
     if (window.applyLeaderboardPlatformUI) applyLeaderboardPlatformUI();
     if (window.isNativeApp && isNativeApp() && window.setLeaderboardTab) setLeaderboardTab('friends');
-    showScreen('play');
+    if (window.initOnboarding) initOnboarding(); else showScreen('play');
     initPwa();
     // Handle deep-link invite (?ref=CODE)
     if (window.handleIncomingInvite) handleIncomingInvite();

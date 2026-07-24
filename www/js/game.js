@@ -807,7 +807,17 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         };
         cardEl.dataset.suit = card.suit;
 
-        const winBadgeText = isResult ? getWinBadgeText(i, lastHandType) : '';
+        let winBadgeText = '';
+        if (isResult) {
+            const isPairHand = lastHandType === 'Two Pair' || lastHandType === 'Jacks or Better';
+            if (isPairHand) {
+                if (i === winningIndices[0] || i === secondPairIndices[0]) {
+                    winBadgeText = getWinBadgeText(i, lastHandType);
+                }
+            } else {
+                winBadgeText = getWinBadgeText(i, lastHandType);
+            }
+        }
 
         cardEl.innerHTML = `
             <div class="held-badge">HELD</div>

@@ -8,6 +8,10 @@
     // If this page was opened outside the app (e.g. a link tapped in WhatsApp)
     // and carries an invite/join code, try to hand off to the installed app
     // via its custom URL scheme before falling back to the web experience.
+    // Deferred until after load: firing window.location.href to an
+    // unregistered custom scheme *before* the page has painted leaves some
+    // mobile browsers on a permanent blank/white page instead of resuming
+    // the current document once the scheme hand-off fails (no app installed).
     (function () {
         try {
             var runningInApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
@@ -16,7 +20,9 @@
             var params = new URLSearchParams(window.location.search);
             if (!params.get('ref') && !params.get('join')) return;
 
-            window.location.href = 'videopoker://open?' + params.toString();
+            window.addEventListener('load', function () {
+                window.location.href = 'videopoker://open?' + params.toString();
+            });
         } catch (e) { /* best-effort — the web fallback below still works */ }
     })();
     </script>
@@ -297,6 +303,32 @@
                 </div>
             </div>
 
+            <div class="hidden" id="settings-notifications-panel">
+                <div class="section-label">Notifications</div>
+                <div class="panel">
+                    <div class="settings-row">
+                        <span class="settings-row-label">Friend activity</span>
+                        <input type="checkbox" class="toggle-switch" id="settings-notif-social">
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">Leaderboard updates</span>
+                        <input type="checkbox" class="toggle-switch" id="settings-notif-leaderboard">
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">Daily bonus reminder</span>
+                        <input type="checkbox" class="toggle-switch" id="settings-notif-dailyReminder">
+                    </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">Friends' best hands</span>
+                        <input type="checkbox" class="toggle-switch" id="settings-notif-bestHand">
+                    </div>
+                    <div class="settings-row" id="settings-notifications-enable" style="cursor:pointer;">
+                        <span class="settings-row-label">Enable Notifications</span>
+                        <span class="settings-chevron">›</span>
+                    </div>
+                </div>
+            </div>
+
             <button class="btn-danger" id="settings-reset-stats">Reset Statistics</button>
 
             <div class="settings-footer">Video Poker · v3.0</div>
@@ -421,6 +453,254 @@
                 <div class="allin-slider-thumb" id="allin-slider-thumb">»</div>
             </div>
         </div>
+    </div>
+
+    <!-- First-launch onboarding: welcome → hands → gameplay → leaderboard → push → signin -->
+    <div class="onboarding-overlay hidden" id="onboarding-overlay">
+
+        <!-- Scrollable step content -->
+        <div class="onboarding-content">
+
+            <!-- Step 1: Welcome -->
+            <div class="onboarding-step" id="onboarding-step-welcome">
+                <div class="ob-welcome">
+                    <div class="ob-card-fan">
+                        <div class="ob-fan-card ob-fan-card--left">
+                            <span>K</span><span class="ob-fan-suit">♠</span>
+                        </div>
+                        <div class="ob-fan-card ob-fan-card--center">
+                            <span>A</span><span class="ob-fan-suit">♠</span>
+                        </div>
+                        <div class="ob-fan-card ob-fan-card--right">
+                            <span>Q</span><span class="ob-fan-suit">♠</span>
+                        </div>
+                    </div>
+                    <div class="ob-welcome-eyebrow">Social Casino</div>
+                    <div class="ob-welcome-title">Royal Video Poker</div>
+                    <div class="ob-welcome-subtitle">Five cards. One decision. Play with free chips — no real money, all the thrill.</div>
+                    <div class="ob-welcome-pills">
+                        <span class="ob-pill ob-pill--gold">5-Card Draw</span>
+                        <span class="ob-pill ob-pill--teal">Free Chips Daily</span>
+                        <span class="ob-pill">No Real Money</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Know Your Hands -->
+            <div class="onboarding-step" id="onboarding-step-hands">
+                <div class="ob-screen">
+                    <div class="ob-screen-title">Know Your Hands</div>
+                    <div class="ob-screen-subtitle">Bigger hands pay bigger multipliers.</div>
+                    <div class="ob-hands-list">
+                        <div class="ob-hand-row ob-hand-row--highlight">
+                            <div class="ob-hand-cards">
+                                <div class="ob-mini-card">10<br>♠</div>
+                                <div class="ob-mini-card">J<br>♠</div>
+                                <div class="ob-mini-card">Q<br>♠</div>
+                                <div class="ob-mini-card">K<br>♠</div>
+                                <div class="ob-mini-card">A<br>♠</div>
+                            </div>
+                            <div class="ob-hand-info">
+                                <span class="ob-hand-name">Royal Flush</span>
+                                <span class="ob-hand-payout">250x</span>
+                            </div>
+                        </div>
+                        <div class="ob-hand-row">
+                            <div class="ob-hand-cards">
+                                <div class="ob-mini-card ob-mini-card--red">5<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">6<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">7<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">8<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
+                            </div>
+                            <div class="ob-hand-info">
+                                <span class="ob-hand-name">Straight Flush</span>
+                                <span class="ob-hand-payout">50x</span>
+                            </div>
+                        </div>
+                        <div class="ob-hand-row">
+                            <div class="ob-hand-cards">
+                                <div class="ob-mini-card">9<br>♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">9<br>♦</div>
+                                <div class="ob-mini-card">9<br>♣</div>
+                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
+                                <div class="ob-mini-card">4<br>♣</div>
+                            </div>
+                            <div class="ob-hand-info">
+                                <span class="ob-hand-name">Four of a Kind</span>
+                                <span class="ob-hand-payout">25x</span>
+                            </div>
+                        </div>
+                        <div class="ob-hand-row">
+                            <div class="ob-hand-cards">
+                                <div class="ob-mini-card">K<br>♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">K<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">K<br>♦</div>
+                                <div class="ob-mini-card">3<br>♣</div>
+                                <div class="ob-mini-card">3<br>♠</div>
+                            </div>
+                            <div class="ob-hand-info">
+                                <span class="ob-hand-name">Full House</span>
+                                <span class="ob-hand-payout">9x</span>
+                            </div>
+                        </div>
+                        <div class="ob-hand-row">
+                            <div class="ob-hand-cards">
+                                <div class="ob-mini-card">J<br>♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">J<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">4<br>♦</div>
+                                <div class="ob-mini-card">8<br>♣</div>
+                                <div class="ob-mini-card">2<br>♠</div>
+                            </div>
+                            <div class="ob-hand-info">
+                                <span class="ob-hand-name">Jacks or Better</span>
+                                <span class="ob-hand-payout">1x</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ob-screen-note">Plus Flush, Straight, Three of a Kind, and Two Pair — nine winning hands in total.</div>
+                </div>
+            </div>
+
+            <!-- Step 3: Bet After You Decide -->
+            <div class="onboarding-step" id="onboarding-step-gameplay">
+                <div class="ob-screen">
+                    <div class="ob-screen-title">Bet After You Decide</div>
+                    <div class="ob-screen-subtitle">See your cards, hold what you want, then set your bet before the draw.</div>
+                    <div class="ob-game-mockup">
+                        <div class="ob-mockup-stats">
+                            <div class="ob-mockup-stat">
+                                <span class="ob-mockup-stat-label">Balance</span>
+                                <span class="ob-mockup-stat-value">3,770</span>
+                            </div>
+                            <div class="ob-mockup-stat ob-mockup-stat--right">
+                                <span class="ob-mockup-stat-label">Total Bet</span>
+                                <span class="ob-mockup-stat-value">20</span>
+                            </div>
+                        </div>
+                        <div class="ob-mockup-cards">
+                            <div class="ob-mockup-card">
+                                <div class="ob-held-badge">HELD</div>
+                                A♠
+                            </div>
+                            <div class="ob-mockup-card">
+                                <div class="ob-held-badge">HELD</div>
+                                K♠
+                            </div>
+                            <div class="ob-mockup-card ob-mockup-card--red">7♦</div>
+                            <div class="ob-mockup-card">2♣</div>
+                            <div class="ob-mockup-card ob-mockup-card--red">9♥</div>
+                        </div>
+                        <div class="ob-mockup-draw-btn">↻ Draw</div>
+                        <div class="ob-mockup-bets">
+                            <div class="ob-mockup-bet">5</div>
+                            <div class="ob-mockup-bet">10</div>
+                            <div class="ob-mockup-bet ob-mockup-bet--active">20</div>
+                            <div class="ob-mockup-bet">50</div>
+                            <div class="ob-mockup-bet ob-mockup-bet--allin" style="position:relative;">
+                                ALL IN
+                                <span class="ob-allin-badge">5</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ob-screen-note">One free All-In per day — invite a friend to unlock another.</div>
+                </div>
+            </div>
+
+            <!-- Step 4: Compete & Climb -->
+            <div class="onboarding-step" id="onboarding-step-leaderboard">
+                <div class="ob-screen">
+                    <div class="ob-screen-title">Compete &amp; Climb</div>
+                    <div class="ob-screen-subtitle">Race Friends, Hourly, and Daily leaderboards for bonus chips.</div>
+                    <div class="ob-lb-tabs">
+                        <div class="ob-lb-tab ob-lb-tab--active">Friends</div>
+                        <div class="ob-lb-tab">Hourly</div>
+                        <div class="ob-lb-tab">Daily</div>
+                    </div>
+                    <div class="ob-lb-header">
+                        <span>Friends · Today</span>
+                        <span class="ob-lb-you-badge">#1 · You're #1!</span>
+                    </div>
+                    <div class="ob-lb-list">
+                        <div class="ob-lb-row ob-lb-row--you">
+                            <span class="ob-lb-rank">1</span>
+                            <div class="ob-lb-avatar">Y</div>
+                            <span class="ob-lb-name">You</span>
+                            <span class="ob-lb-score">+100</span>
+                        </div>
+                        <div class="ob-lb-row">
+                            <span class="ob-lb-rank">2</span>
+                            <div class="ob-lb-avatar ob-lb-avatar--dim">J</div>
+                            <span class="ob-lb-name">Jake</span>
+                            <span class="ob-lb-score">+45</span>
+                        </div>
+                        <div class="ob-lb-row">
+                            <span class="ob-lb-rank">3</span>
+                            <div class="ob-lb-avatar ob-lb-avatar--dim">E</div>
+                            <span class="ob-lb-name">Emily</span>
+                            <span class="ob-lb-score">+30</span>
+                        </div>
+                        <div class="ob-lb-row">
+                            <span class="ob-lb-rank">4</span>
+                            <div class="ob-lb-avatar ob-lb-avatar--dim">C</div>
+                            <span class="ob-lb-name">Chris</span>
+                            <span class="ob-lb-score">+18</span>
+                        </div>
+                        <div class="ob-lb-row">
+                            <span class="ob-lb-rank">5</span>
+                            <div class="ob-lb-avatar ob-lb-avatar--dim">S</div>
+                            <span class="ob-lb-name">Sarah</span>
+                            <span class="ob-lb-score">+9</span>
+                        </div>
+                    </div>
+                    <div class="ob-screen-note">Also live: hourly and daily tournaments against every player in the app.</div>
+                </div>
+            </div>
+
+            <!-- Step 5: Never Miss a Win (push — native only) -->
+            <div class="onboarding-step" id="onboarding-step-push">
+                <div class="ob-push">
+                    <div class="ob-bell-circle">🔔</div>
+                    <div class="ob-push-title">Never Miss a Win</div>
+                    <div class="ob-push-subtitle">Get notified about tournament results, friend challenges, and daily bonuses.</div>
+                    <ul class="ob-checklist">
+                        <li><span class="ob-check-icon">✓</span> Daily bonus reminders</li>
+                        <li><span class="ob-check-icon">✓</span> Friend challenge alerts</li>
+                        <li><span class="ob-check-icon">✓</span> Tournament results</li>
+                    </ul>
+                    <button class="ob-enable-btn" onclick="onboardingEnableNotifications()">Enable Notifications</button>
+                    <button class="ob-not-now" onclick="advanceOnboarding()">Not Now</button>
+                </div>
+            </div>
+
+            <!-- Step 6: Save Your Progress (sign-in) -->
+            <div class="onboarding-step" id="onboarding-step-signin">
+                <div class="ob-signin">
+                    <div class="ob-signin-title">Save Your Progress</div>
+                    <div class="ob-signin-subtitle">Sign in to sync your chips and compete with friends.</div>
+                    <ul class="ob-checklist">
+                        <li><span class="ob-check-icon">✓</span> Never lose your chips or progress</li>
+                        <li><span class="ob-check-icon">✓</span> Play across your phone and tablet</li>
+                        <li><span class="ob-check-icon">✓</span> Find friends by name automatically</li>
+                    </ul>
+                    <div class="ob-signin-error hidden" id="onboarding-signin-error"></div>
+                    <button class="ob-google-btn" onclick="onboardingSignIn('google')">
+                        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
+                        Continue with Google
+                    </button>
+                    <button class="ob-guest-link" onclick="finishOnboarding()">Continue as Guest</button>
+                </div>
+            </div>
+
+        </div><!-- /onboarding-content -->
+
+        <!-- Bottom navigation -->
+        <div class="onboarding-nav">
+            <button class="onboarding-nav-arrow ob-hidden" id="onboarding-back" onclick="goBackOnboarding()" aria-label="Back">←</button>
+            <div class="onboarding-dots" id="onboarding-dots"></div>
+            <button class="onboarding-nav-arrow onboarding-nav-arrow--next" id="onboarding-next" onclick="advanceOnboarding()" aria-label="Next">→</button>
+        </div>
+
     </div>
 
     <script>

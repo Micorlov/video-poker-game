@@ -8,6 +8,10 @@
     // If this page was opened outside the app (e.g. a link tapped in WhatsApp)
     // and carries an invite/join code, try to hand off to the installed app
     // via its custom URL scheme before falling back to the web experience.
+    // Deferred until after load: firing window.location.href to an
+    // unregistered custom scheme *before* the page has painted leaves some
+    // mobile browsers on a permanent blank/white page instead of resuming
+    // the current document once the scheme hand-off fails (no app installed).
     (function () {
         try {
             var runningInApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
@@ -16,7 +20,9 @@
             var params = new URLSearchParams(window.location.search);
             if (!params.get('ref') && !params.get('join')) return;
 
-            window.location.href = 'videopoker://open?' + params.toString();
+            window.addEventListener('load', function () {
+                window.location.href = 'videopoker://open?' + params.toString();
+            });
         } catch (e) { /* best-effort — the web fallback below still works */ }
     })();
     </script>
@@ -2544,131 +2550,711 @@ body.screen-shake {
 
 
 /* --- styles/onboarding.css --- */
-/* --- First-launch onboarding overlay --- */
+/* === First-launch onboarding overlay === */
+
 .onboarding-overlay {
     position: fixed;
     inset: 0;
-    background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom) 60%);
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
     z-index: 400;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-.onboarding-card {
-    position: relative;
-    width: 100%;
-    max-width: 360px;
-    max-height: 90vh;
+/* Scrollable content area */
+.onboarding-content {
+    flex: 1;
     overflow-y: auto;
-    background: var(--panel-solid);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-lg);
-    padding: 44px 20px 20px;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
 }
 
-.onboarding-skip {
-    position: absolute;
-    top: 14px;
-    right: 16px;
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
+/* Each step fills the content area */
 .onboarding-step {
     display: none;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    flex: 1;
+    min-height: 100%;
 }
 
 .onboarding-step.active {
     display: flex;
 }
 
-.onboarding-icon {
-    font-size: 40px;
-    margin-bottom: 12px;
+/* ── Navigation bar ── */
+.onboarding-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px max(env(safe-area-inset-bottom, 0px), 24px);
+    flex-shrink: 0;
 }
 
-.onboarding-title {
-    font-size: 19px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.onboarding-text {
-    font-size: 13.5px;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin-bottom: 4px;
-}
-
-.onboarding-list {
-    list-style: none;
-    text-align: left;
-    width: 100%;
-    margin-top: 4px;
-}
-
-.onboarding-list li {
-    font-size: 13.5px;
-    color: var(--text-muted);
-    line-height: 1.5;
-    padding: 8px 0;
-}
-
-.onboarding-list li + li {
-    border-top: 1px solid var(--border);
-}
-
-.onboarding-list li strong {
-    color: var(--text);
-}
-
-.onboarding-pref-list {
-    width: 100%;
-    margin-top: 6px;
-}
-
-.onboarding-next-btn {
-    width: 100%;
-    margin-top: 18px;
-}
-
-.onboarding-secondary-link {
+.onboarding-nav-arrow {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
     background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: underline;
+    color: var(--text);
+    font-size: 20px;
     cursor: pointer;
-    margin-top: 12px;
-    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+
+.onboarding-nav-arrow.ob-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.onboarding-nav-arrow--next {
+    background: #3EC6A0;
+    border-color: #3EC6A0;
+    color: #0a2b1d;
+    font-weight: 700;
 }
 
 .onboarding-dots {
     display: flex;
-    justify-content: center;
     gap: 6px;
-    margin-top: 18px;
+    align-items: center;
 }
 
 .onboarding-dot {
     width: 6px;
     height: 6px;
-    border-radius: 50%;
+    border-radius: 999px;
     background: var(--border-strong);
+    transition: width 0.25s ease, background 0.25s ease;
 }
 
 .onboarding-dot.active {
+    width: 20px;
     background: var(--gold);
+}
+
+/* ── Welcome screen ── */
+.ob-welcome {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px 20px;
+    text-align: center;
+}
+
+.ob-card-fan {
+    position: relative;
+    width: 180px;
+    height: 140px;
+    margin: 0 auto 28px;
+}
+
+.ob-fan-card {
+    position: absolute;
+    width: 88px;
+    height: 120px;
+    background: var(--card-face-bg);
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--card-black);
+    line-height: 1;
+    gap: 2px;
+}
+
+.ob-fan-card--left {
+    transform: rotate(-18deg);
+    left: 0;
+    top: 18px;
+    z-index: 1;
+}
+
+.ob-fan-card--center {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    z-index: 3;
+}
+
+.ob-fan-card--right {
+    transform: rotate(18deg);
+    right: 0;
+    top: 18px;
+    z-index: 2;
+}
+
+.ob-fan-suit {
+    font-size: 16px;
+}
+
+.ob-welcome-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.ob-welcome-title {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 14px;
+}
+
+.ob-welcome-subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin-bottom: 24px;
+    max-width: 280px;
+}
+
+.ob-welcome-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.ob-pill {
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid var(--border-strong);
+    color: var(--text-muted);
+    background: none;
+}
+
+.ob-pill--gold {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.ob-pill--teal {
+    border-color: #3EC6A0;
+    color: #3EC6A0;
+}
+
+/* ── Content screens (hands / gameplay / leaderboard) ── */
+.ob-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 48px 20px 16px;
+    overflow-y: auto;
+}
+
+.ob-screen-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.ob-screen-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.ob-screen-note {
+    font-size: 13px;
+    color: var(--text-faint);
+    line-height: 1.5;
+    padding: 12px 14px;
+    background: var(--panel);
+    border-radius: var(--radius-sm);
+    margin-top: 12px;
+}
+
+/* ── Hand rankings (screen 2) ── */
+.ob-hands-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ob-hand-row {
+    display: flex;
+    align-items: center;
+    background: var(--panel);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    gap: 10px;
+    border: 1.5px solid transparent;
+}
+
+.ob-hand-row--highlight {
+    border-color: var(--gold);
+    background: rgba(212, 175, 55, 0.08);
+}
+
+.ob-hand-cards {
+    display: flex;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.ob-mini-card {
+    width: 26px;
+    height: 34px;
+    background: var(--card-face-bg);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--card-black);
+    line-height: 1;
+    gap: 1px;
+    flex-shrink: 0;
+}
+
+.ob-mini-card--red {
+    color: var(--card-red);
+}
+
+.ob-hand-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ob-hand-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.ob-hand-payout {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+/* ── Gameplay mockup (screen 3) ── */
+.ob-game-mockup {
+    background: var(--panel);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    border: 1px solid var(--border);
+}
+
+.ob-mockup-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.ob-mockup-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ob-mockup-stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.ob-mockup-stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--gold);
+}
+
+.ob-mockup-stat--right {
+    text-align: right;
+}
+
+.ob-mockup-cards {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.ob-mockup-card {
+    flex: 1;
+    max-width: 54px;
+    aspect-ratio: 2/3;
+    background: var(--card-face-bg);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--card-black);
+    position: relative;
+    padding-top: 6px;
+}
+
+.ob-mockup-card--red {
+    color: var(--card-red);
+}
+
+.ob-held-badge {
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: #0a2b1d;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 2px 5px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.ob-mockup-draw-btn {
+    width: 100%;
+    padding: 11px;
+    background: #3EC6A0;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #0a2b1d;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    cursor: default;
+    pointer-events: none;
+}
+
+.ob-mockup-bets {
+    display: flex;
+    gap: 5px;
+}
+
+.ob-mockup-bet {
+    flex: 1;
+    padding: 7px 2px;
+    background: var(--felt-600);
+    border: none;
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: default;
+    pointer-events: none;
+}
+
+.ob-mockup-bet--active {
+    background: #3EC6A0;
+    color: #0a2b1d;
+}
+
+.ob-mockup-bet--allin {
+    background: var(--gold);
+    color: #0a2b1d;
+    position: relative;
+}
+
+.ob-allin-badge {
+    position: absolute;
+    top: -6px;
+    right: -3px;
+    background: var(--red);
+    color: white;
+    font-size: 8px;
+    font-weight: 800;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Leaderboard mockup (screen 4) ── */
+.ob-lb-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.ob-lb-tab {
+    padding: 7px 16px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border-strong);
+    background: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: default;
+    pointer-events: none;
+}
+
+.ob-lb-tab--active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #0a2b1d;
+}
+
+.ob-lb-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.ob-lb-you-badge {
+    color: #3EC6A0;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 12px;
+}
+
+.ob-lb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ob-lb-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.ob-lb-row--you {
+    background: rgba(62, 198, 160, 0.1);
+    border: 1px solid rgba(62, 198, 160, 0.25);
+}
+
+.ob-lb-rank {
+    font-size: 13px;
+    color: var(--text-muted);
+    width: 14px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.ob-lb-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: #0a2b1d;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ob-lb-avatar--dim {
+    background: var(--felt-600);
+    color: var(--text-muted);
+}
+
+.ob-lb-name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.ob-lb-score {
+    font-size: 14px;
+    font-weight: 700;
+    color: #3EC6A0;
+}
+
+/* ── Push screen ── */
+.ob-push {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px 20px;
+    text-align: center;
+}
+
+.ob-bell-circle {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 1px solid var(--border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 46px;
+    margin-bottom: 24px;
+}
+
+.ob-push-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.ob-push-subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin-bottom: 24px;
+    max-width: 280px;
+}
+
+.ob-checklist {
+    list-style: none;
+    width: 100%;
+    max-width: 280px;
+    text-align: left;
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ob-checklist li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 500;
+}
+
+.ob-check-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #3EC6A0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0a2b1d;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.ob-enable-btn {
+    width: 100%;
+    max-width: 300px;
+    padding: 16px;
+    background: #3EC6A0;
+    border: none;
+    border-radius: 999px;
+    color: #0a2b1d;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 14px;
+}
+
+.ob-not-now {
+    background: none;
+    border: none;
+    color: var(--gold);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px;
+}
+
+/* ── Sign-in screen ── */
+.ob-signin {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px 20px;
+    text-align: center;
+}
+
+.ob-signin-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.ob-signin-subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin-bottom: 24px;
+    max-width: 280px;
+}
+
+.ob-google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 300px;
+    padding: 16px;
+    background: white;
+    border: none;
+    border-radius: 999px;
+    color: #111;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 14px;
+}
+
+.ob-guest-link {
+    background: none;
+    border: none;
+    color: var(--gold);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.ob-signin-error {
+    color: var(--red);
+    font-size: 13px;
+    margin-bottom: 10px;
+    min-height: 18px;
 }
 
 
@@ -3093,85 +3679,252 @@ body.screen-shake {
         </div>
     </div>
 
-    <!-- First-launch onboarding: welcome / how-to-play / features / sign-in / push priming -->
+    <!-- First-launch onboarding: welcome → hands → gameplay → leaderboard → push → signin -->
     <div class="onboarding-overlay hidden" id="onboarding-overlay">
-        <div class="onboarding-card">
-            <button class="onboarding-skip" onclick="skipOnboarding()">Skip</button>
 
+        <!-- Scrollable step content -->
+        <div class="onboarding-content">
+
+            <!-- Step 1: Welcome -->
             <div class="onboarding-step" id="onboarding-step-welcome">
-                <div class="onboarding-icon">🎴</div>
-                <div class="onboarding-title">Welcome to Video Poker</div>
-                <div class="onboarding-text">Classic Jacks or Better poker, a daily ALL IN bet, and leaderboards you can share with friends.</div>
-                <button class="btn-primary onboarding-next-btn" onclick="advanceOnboarding()">Next</button>
-            </div>
-
-            <div class="onboarding-step" id="onboarding-step-howtoplay">
-                <div class="onboarding-icon">🃏</div>
-                <div class="onboarding-title">How to Play</div>
-                <ul class="onboarding-list">
-                    <li><strong>Bet</strong> — pick a stake, then tap Deal.</li>
-                    <li><strong>Hold</strong> — tap the cards you want to keep.</li>
-                    <li><strong>Draw</strong> — tap Deal again to replace the rest.</li>
-                    <li><strong>Win</strong> — a pair of Jacks or better pays out; bigger hands pay more. The full Payout Table is always in Settings.</li>
-                </ul>
-                <button class="btn-primary onboarding-next-btn" onclick="advanceOnboarding()">Next</button>
-            </div>
-
-            <div class="onboarding-step" id="onboarding-step-features">
-                <div class="onboarding-icon">🏆</div>
-                <div class="onboarding-title">More Than Solo Play</div>
-                <ul class="onboarding-list">
-                    <li><strong>Friends &amp; Rooms</strong> — add friends and create poker rooms to compare scores.</li>
-                    <li><strong>Leaderboards &amp; Champions</strong> — climb the hourly and daily boards.</li>
-                    <li><strong>ALL IN</strong> — once a day, bet your whole balance for a shot at a big win.</li>
-                </ul>
-                <button class="btn-primary onboarding-next-btn" onclick="advanceOnboarding()">Next</button>
-            </div>
-
-            <div class="onboarding-step" id="onboarding-step-signin">
-                <div class="onboarding-icon">👥</div>
-                <div class="onboarding-title">Save Your Progress</div>
-                <div class="onboarding-text">Sign in to play with friends and keep your stats across devices. You can always do this later from Settings.</div>
-                <button class="google-btn" onclick="onboardingSignIn('google')">
-                    <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
-                    <span>Continue with Google</span>
-                </button>
-                <button class="facebook-btn" onclick="onboardingSignIn('facebook')">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    <span>Continue with Facebook</span>
-                </button>
-                <div class="modal-error hidden" id="onboarding-signin-error"></div>
-                <button class="onboarding-secondary-link" onclick="advanceOnboarding()">Skip for now</button>
-            </div>
-
-            <div class="onboarding-step" id="onboarding-step-push">
-                <div class="onboarding-icon">🔔</div>
-                <div class="onboarding-title">Stay in the Loop</div>
-                <div class="onboarding-text">Get notified about the things that matter — turn any of these off anytime in Settings.</div>
-                <div class="onboarding-pref-list">
-                    <div class="settings-row">
-                        <span class="settings-row-label">Friend activity</span>
-                        <input type="checkbox" class="toggle-switch" id="onboarding-pref-social" checked>
+                <div class="ob-welcome">
+                    <div class="ob-card-fan">
+                        <div class="ob-fan-card ob-fan-card--left">
+                            <span>K</span><span class="ob-fan-suit">♠</span>
+                        </div>
+                        <div class="ob-fan-card ob-fan-card--center">
+                            <span>A</span><span class="ob-fan-suit">♠</span>
+                        </div>
+                        <div class="ob-fan-card ob-fan-card--right">
+                            <span>Q</span><span class="ob-fan-suit">♠</span>
+                        </div>
                     </div>
-                    <div class="settings-row">
-                        <span class="settings-row-label">Leaderboard updates</span>
-                        <input type="checkbox" class="toggle-switch" id="onboarding-pref-leaderboard" checked>
-                    </div>
-                    <div class="settings-row">
-                        <span class="settings-row-label">Daily bonus reminder</span>
-                        <input type="checkbox" class="toggle-switch" id="onboarding-pref-dailyReminder" checked>
-                    </div>
-                    <div class="settings-row">
-                        <span class="settings-row-label">Friends' best hands</span>
-                        <input type="checkbox" class="toggle-switch" id="onboarding-pref-bestHand" checked>
+                    <div class="ob-welcome-eyebrow">Social Casino</div>
+                    <div class="ob-welcome-title">Royal Video Poker</div>
+                    <div class="ob-welcome-subtitle">Five cards. One decision. Play with free chips — no real money, all the thrill.</div>
+                    <div class="ob-welcome-pills">
+                        <span class="ob-pill ob-pill--gold">5-Card Draw</span>
+                        <span class="ob-pill ob-pill--teal">Free Chips Daily</span>
+                        <span class="ob-pill">No Real Money</span>
                     </div>
                 </div>
-                <button class="btn-primary onboarding-next-btn" onclick="onboardingEnableNotifications()">Enable Notifications</button>
-                <button class="onboarding-secondary-link" onclick="advanceOnboarding()">Not now</button>
             </div>
 
+            <!-- Step 2: Know Your Hands -->
+            <div class="onboarding-step" id="onboarding-step-hands">
+                <div class="ob-screen">
+                    <div class="ob-screen-title">Know Your Hands</div>
+                    <div class="ob-screen-subtitle">Bigger hands pay bigger multipliers.</div>
+                    <div class="ob-hands-list">
+                        <div class="ob-hand-row ob-hand-row--highlight">
+                            <div class="ob-hand-cards">
+                                <div class="ob-mini-card">10<br>♠</div>
+                                <div class="ob-mini-card">J<br>♠</div>
+                                <div class="ob-mini-card">Q<br>♠</div>
+                                <div class="ob-mini-card">K<br>♠</div>
+                                <div class="ob-mini-card">A<br>♠</div>
+                            </div>
+                            <div class="ob-hand-info">
+                                <span class="ob-hand-name">Royal Flush</span>
+                                <span class="ob-hand-payout">250x</span>
+                            </div>
+                        </div>
+                        <div class="ob-hand-row">
+                            <div class="ob-hand-cards">
+                                <div class="ob-mini-card ob-mini-card--red">5<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">6<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">7<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">8<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
+                            </div>
+                            <div class="ob-hand-info">
+                                <span class="ob-hand-name">Straight Flush</span>
+                                <span class="ob-hand-payout">50x</span>
+                            </div>
+                        </div>
+                        <div class="ob-hand-row">
+                            <div class="ob-hand-cards">
+                                <div class="ob-mini-card">9<br>♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">9<br>♦</div>
+                                <div class="ob-mini-card">9<br>♣</div>
+                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
+                                <div class="ob-mini-card">4<br>♣</div>
+                            </div>
+                            <div class="ob-hand-info">
+                                <span class="ob-hand-name">Four of a Kind</span>
+                                <span class="ob-hand-payout">25x</span>
+                            </div>
+                        </div>
+                        <div class="ob-hand-row">
+                            <div class="ob-hand-cards">
+                                <div class="ob-mini-card">K<br>♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">K<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">K<br>♦</div>
+                                <div class="ob-mini-card">3<br>♣</div>
+                                <div class="ob-mini-card">3<br>♠</div>
+                            </div>
+                            <div class="ob-hand-info">
+                                <span class="ob-hand-name">Full House</span>
+                                <span class="ob-hand-payout">9x</span>
+                            </div>
+                        </div>
+                        <div class="ob-hand-row">
+                            <div class="ob-hand-cards">
+                                <div class="ob-mini-card">J<br>♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">J<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">4<br>♦</div>
+                                <div class="ob-mini-card">8<br>♣</div>
+                                <div class="ob-mini-card">2<br>♠</div>
+                            </div>
+                            <div class="ob-hand-info">
+                                <span class="ob-hand-name">Jacks or Better</span>
+                                <span class="ob-hand-payout">1x</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ob-screen-note">Plus Flush, Straight, Three of a Kind, and Two Pair — nine winning hands in total.</div>
+                </div>
+            </div>
+
+            <!-- Step 3: Bet After You Decide -->
+            <div class="onboarding-step" id="onboarding-step-gameplay">
+                <div class="ob-screen">
+                    <div class="ob-screen-title">Bet After You Decide</div>
+                    <div class="ob-screen-subtitle">See your cards, hold what you want, then set your bet before the draw.</div>
+                    <div class="ob-game-mockup">
+                        <div class="ob-mockup-stats">
+                            <div class="ob-mockup-stat">
+                                <span class="ob-mockup-stat-label">Balance</span>
+                                <span class="ob-mockup-stat-value">3,770</span>
+                            </div>
+                            <div class="ob-mockup-stat ob-mockup-stat--right">
+                                <span class="ob-mockup-stat-label">Total Bet</span>
+                                <span class="ob-mockup-stat-value">20</span>
+                            </div>
+                        </div>
+                        <div class="ob-mockup-cards">
+                            <div class="ob-mockup-card">
+                                <div class="ob-held-badge">HELD</div>
+                                A♠
+                            </div>
+                            <div class="ob-mockup-card">
+                                <div class="ob-held-badge">HELD</div>
+                                K♠
+                            </div>
+                            <div class="ob-mockup-card ob-mockup-card--red">7♦</div>
+                            <div class="ob-mockup-card">2♣</div>
+                            <div class="ob-mockup-card ob-mockup-card--red">9♥</div>
+                        </div>
+                        <div class="ob-mockup-draw-btn">↻ Draw</div>
+                        <div class="ob-mockup-bets">
+                            <div class="ob-mockup-bet">5</div>
+                            <div class="ob-mockup-bet">10</div>
+                            <div class="ob-mockup-bet ob-mockup-bet--active">20</div>
+                            <div class="ob-mockup-bet">50</div>
+                            <div class="ob-mockup-bet ob-mockup-bet--allin" style="position:relative;">
+                                ALL IN
+                                <span class="ob-allin-badge">5</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ob-screen-note">One free All-In per day — invite a friend to unlock another.</div>
+                </div>
+            </div>
+
+            <!-- Step 4: Compete & Climb -->
+            <div class="onboarding-step" id="onboarding-step-leaderboard">
+                <div class="ob-screen">
+                    <div class="ob-screen-title">Compete &amp; Climb</div>
+                    <div class="ob-screen-subtitle">Race Friends, Hourly, and Daily leaderboards for bonus chips.</div>
+                    <div class="ob-lb-tabs">
+                        <div class="ob-lb-tab ob-lb-tab--active">Friends</div>
+                        <div class="ob-lb-tab">Hourly</div>
+                        <div class="ob-lb-tab">Daily</div>
+                    </div>
+                    <div class="ob-lb-header">
+                        <span>Friends · Today</span>
+                        <span class="ob-lb-you-badge">#1 · You're #1!</span>
+                    </div>
+                    <div class="ob-lb-list">
+                        <div class="ob-lb-row ob-lb-row--you">
+                            <span class="ob-lb-rank">1</span>
+                            <div class="ob-lb-avatar">Y</div>
+                            <span class="ob-lb-name">You</span>
+                            <span class="ob-lb-score">+100</span>
+                        </div>
+                        <div class="ob-lb-row">
+                            <span class="ob-lb-rank">2</span>
+                            <div class="ob-lb-avatar ob-lb-avatar--dim">J</div>
+                            <span class="ob-lb-name">Jake</span>
+                            <span class="ob-lb-score">+45</span>
+                        </div>
+                        <div class="ob-lb-row">
+                            <span class="ob-lb-rank">3</span>
+                            <div class="ob-lb-avatar ob-lb-avatar--dim">E</div>
+                            <span class="ob-lb-name">Emily</span>
+                            <span class="ob-lb-score">+30</span>
+                        </div>
+                        <div class="ob-lb-row">
+                            <span class="ob-lb-rank">4</span>
+                            <div class="ob-lb-avatar ob-lb-avatar--dim">C</div>
+                            <span class="ob-lb-name">Chris</span>
+                            <span class="ob-lb-score">+18</span>
+                        </div>
+                        <div class="ob-lb-row">
+                            <span class="ob-lb-rank">5</span>
+                            <div class="ob-lb-avatar ob-lb-avatar--dim">S</div>
+                            <span class="ob-lb-name">Sarah</span>
+                            <span class="ob-lb-score">+9</span>
+                        </div>
+                    </div>
+                    <div class="ob-screen-note">Also live: hourly and daily tournaments against every player in the app.</div>
+                </div>
+            </div>
+
+            <!-- Step 5: Never Miss a Win (push — native only) -->
+            <div class="onboarding-step" id="onboarding-step-push">
+                <div class="ob-push">
+                    <div class="ob-bell-circle">🔔</div>
+                    <div class="ob-push-title">Never Miss a Win</div>
+                    <div class="ob-push-subtitle">Get notified about tournament results, friend challenges, and daily bonuses.</div>
+                    <ul class="ob-checklist">
+                        <li><span class="ob-check-icon">✓</span> Daily bonus reminders</li>
+                        <li><span class="ob-check-icon">✓</span> Friend challenge alerts</li>
+                        <li><span class="ob-check-icon">✓</span> Tournament results</li>
+                    </ul>
+                    <button class="ob-enable-btn" onclick="onboardingEnableNotifications()">Enable Notifications</button>
+                    <button class="ob-not-now" onclick="advanceOnboarding()">Not Now</button>
+                </div>
+            </div>
+
+            <!-- Step 6: Save Your Progress (sign-in) -->
+            <div class="onboarding-step" id="onboarding-step-signin">
+                <div class="ob-signin">
+                    <div class="ob-signin-title">Save Your Progress</div>
+                    <div class="ob-signin-subtitle">Sign in to sync your chips and compete with friends.</div>
+                    <ul class="ob-checklist">
+                        <li><span class="ob-check-icon">✓</span> Never lose your chips or progress</li>
+                        <li><span class="ob-check-icon">✓</span> Play across your phone and tablet</li>
+                        <li><span class="ob-check-icon">✓</span> Find friends by name automatically</li>
+                    </ul>
+                    <div class="ob-signin-error hidden" id="onboarding-signin-error"></div>
+                    <button class="ob-google-btn" onclick="onboardingSignIn('google')">
+                        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
+                        Continue with Google
+                    </button>
+                    <button class="ob-guest-link" onclick="finishOnboarding()">Continue as Guest</button>
+                </div>
+            </div>
+
+        </div><!-- /onboarding-content -->
+
+        <!-- Bottom navigation -->
+        <div class="onboarding-nav">
+            <button class="onboarding-nav-arrow ob-hidden" id="onboarding-back" onclick="goBackOnboarding()" aria-label="Back">←</button>
             <div class="onboarding-dots" id="onboarding-dots"></div>
+            <button class="onboarding-nav-arrow onboarding-nav-arrow--next" id="onboarding-next" onclick="advanceOnboarding()" aria-label="Next">→</button>
         </div>
+
     </div>
 
     <script>
@@ -3903,16 +4656,10 @@ if (auth) {
 
 
 /* --- js/push.js --- */
-// Native push notifications (Android + iOS only — web has no push in this pass).
-// Uses the Capacitor PushNotifications plugin the same way js/firebase.js calls
-// other Capacitor plugins (window.Capacitor.Plugins.<Plugin>).
-//
-// Depends on: firebaseSafe()/db from js/firebase.js (must load after firebase.js),
-// window.egUser set by auth.onAuthStateChanged in js/firebase.js.
-//
-// Firestore schema written here: users/{uid}/fcmTokens/{token} = { token, platform, updatedAt }
-// and users/{uid}.notificationPrefs.<category> (merge-set), categories:
-// social, leaderboard, dailyReminder, bestHand.
+// Native push notifications (Android + iOS via Capacitor).
+// Depends on: firebaseSafe()/db from js/firebase.js, window.egUser from auth.onAuthStateChanged.
+// Firestore schema: users/{uid}/fcmTokens/{token} = { token, platform, updatedAt }
+// and users/{uid}.notificationPrefs.<category>, categories: social, leaderboard, dailyReminder, bestHand.
 
 function registerForPushNotifications() {
     if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) {
@@ -6940,16 +7687,14 @@ window.updateHintButtonUI = function() {
 
 
 /* --- js/onboarding.js --- */
-// First-launch onboarding: welcome + how-to-play + features, then optional
-// sign-in, then optional push-notification priming (native only). Shown once
-// per device via vp_onboarding_seen; js/tabs.js calls initOnboarding() instead
-// of showScreen('play') directly on cold start.
+// First-launch onboarding: welcome → hands → gameplay → leaderboard → push → signin.
+// Shown once per device via vp_onboarding_seen; js/tabs.js calls initOnboarding()
+// instead of showScreen('play') directly on cold start.
 //
-// Depends on: signInWithGoogle()/signInWithFacebook() (js/firebase.js),
+// Depends on: signInWithGoogle() (js/firebase.js),
 // registerForPushNotifications()/setNotificationPref() (js/push.js).
 
-const ONBOARDING_STEPS = ['welcome', 'howtoplay', 'features', 'signin', 'push'];
-const ONBOARDING_PREF_CATEGORIES = ['social', 'leaderboard', 'dailyReminder', 'bestHand'];
+const ONBOARDING_STEPS = ['welcome', 'hands', 'gameplay', 'leaderboard', 'push', 'signin'];
 let onboardingIndex = 0;
 
 function onboardingSeen() {
@@ -6978,8 +7723,51 @@ function initOnboarding() {
         showScreen('play');
         return;
     }
+    // Web must sign in with Google to finish onboarding — no guest skip.
+    // Native keeps the guest option.
+    if (!onboardingIsNative()) {
+        const guestLink = document.querySelector('.ob-guest-link');
+        if (guestLink) guestLink.classList.add('hidden');
+    }
     showOnboardingStep(0);
     overlay.classList.remove('hidden');
+    attachOnboardingSwipe(overlay);
+}
+
+// ── Swipe navigation ──
+const ONBOARDING_SWIPE_THRESHOLD = 50;
+let onboardingSwipeStartX = 0;
+let onboardingSwipeStartY = 0;
+let onboardingSwipeTracking = false;
+let onboardingSwipeAttached = false;
+
+function attachOnboardingSwipe(overlay) {
+    if (onboardingSwipeAttached) return;
+    onboardingSwipeAttached = true;
+    overlay.addEventListener('touchstart', onboardingTouchStart, { passive: true });
+    overlay.addEventListener('touchend', onboardingTouchEnd, { passive: true });
+}
+
+function onboardingTouchStart(e) {
+    if (!e.touches || e.touches.length !== 1) return;
+    onboardingSwipeStartX = e.touches[0].clientX;
+    onboardingSwipeStartY = e.touches[0].clientY;
+    onboardingSwipeTracking = true;
+}
+
+function onboardingTouchEnd(e) {
+    if (!onboardingSwipeTracking) return;
+    onboardingSwipeTracking = false;
+    const touch = e.changedTouches && e.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - onboardingSwipeStartX;
+    const dy = touch.clientY - onboardingSwipeStartY;
+    if (Math.abs(dx) < ONBOARDING_SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < 0) {
+        if (onboardingIndex < ONBOARDING_STEPS.length - 1) advanceOnboarding();
+    } else if (onboardingIndex > 0) {
+        goBackOnboarding();
+    }
 }
 
 function renderOnboardingDots() {
@@ -6993,22 +7781,34 @@ function renderOnboardingDots() {
     });
 }
 
+function updateOnboardingNav() {
+    const backBtn = document.getElementById('onboarding-back');
+    const nextBtn = document.getElementById('onboarding-next');
+    if (!backBtn || !nextBtn) return;
+
+    // Back: hidden on first screen
+    backBtn.classList.toggle('ob-hidden', onboardingIndex === 0);
+
+    // Next: hidden on last screen (sign-in CTAs take over)
+    nextBtn.classList.toggle('ob-hidden', onboardingIndex === ONBOARDING_STEPS.length - 1);
+}
+
 function showOnboardingStep(index) {
     ONBOARDING_STEPS.forEach(function(step, i) {
         const el = document.getElementById('onboarding-step-' + step);
         if (el) el.classList.toggle('active', i === index);
     });
     onboardingIndex = index;
-    // Mark as soon as the priming screen is shown (not only on "Enable") so the
-    // js/firebase.js fallback prompt never fires a second, uninformed ask.
     if (ONBOARDING_STEPS[index] === 'push') markPushPermissionAsked();
     renderOnboardingDots();
+    updateOnboardingNav();
 }
 
 function advanceOnboarding() {
-    let next = onboardingIndex + 1;
+    var next = onboardingIndex + 1;
+    // Skip push step on web — native platforms only
     if (ONBOARDING_STEPS[next] === 'push' && !onboardingIsNative()) {
-        next++; // Web builds: push priming has nothing to prime, skip it.
+        next++;
     }
     if (next >= ONBOARDING_STEPS.length) {
         finishOnboarding();
@@ -7017,8 +7817,14 @@ function advanceOnboarding() {
     showOnboardingStep(next);
 }
 
-function skipOnboarding() {
-    finishOnboarding();
+function goBackOnboarding() {
+    var prev = onboardingIndex - 1;
+    // Skip push step on web when going back
+    if (ONBOARDING_STEPS[prev] === 'push' && !onboardingIsNative()) {
+        prev--;
+    }
+    if (prev < 0) return;
+    showOnboardingStep(prev);
 }
 
 function finishOnboarding() {
@@ -7029,49 +7835,40 @@ function finishOnboarding() {
 }
 
 function onboardingSignIn(provider) {
-    const fn = provider === 'facebook' ? window.signInWithFacebook : window.signInWithGoogle;
+    const fn = provider === 'google' ? window.signInWithGoogle : null;
     if (typeof fn === 'function') fn();
-    // Advancing on success is handled by onboardingSignInSucceeded(), called from
-    // js/firebase.js's auth.onAuthStateChanged — the "Skip for now" link covers
-    // the failed/abandoned case.
 }
 
-// Called from js/firebase.js when a user signs in, so onboarding can move past
-// its sign-in step without polling for auth state.
+// Called from js/firebase.js when sign-in succeeds during onboarding
 function onboardingSignInSucceeded() {
     if (ONBOARDING_STEPS[onboardingIndex] !== 'signin') return;
     const overlay = document.getElementById('onboarding-overlay');
     if (!overlay || overlay.classList.contains('hidden')) return;
-    advanceOnboarding();
+    finishOnboarding();
 }
 
 function onboardingEnableNotifications() {
     if (window.registerForPushNotifications) registerForPushNotifications();
     if (window.egUser && window.setNotificationPref) {
-        ONBOARDING_PREF_CATEGORIES.forEach(function(category) {
-            const toggle = document.getElementById('onboarding-pref-' + category);
-            setNotificationPref(category, toggle ? toggle.checked : true);
+        ['social', 'leaderboard', 'dailyReminder', 'bestHand'].forEach(function(cat) {
+            if (typeof setNotificationPref === 'function') setNotificationPref(cat, true);
         });
     }
     advanceOnboarding();
 }
 
-// Called from js/firebase.js when the user signs out on a native app so they
-// can re-authenticate without restarting the app. Shows only the sign-in step;
-// the welcome/how-to-play/features steps are skipped since the user has already
-// seen them. Clears the seen flag so a future cold-start also prompts sign-in.
+// Called from js/firebase.js when user signs out so they restart the full onboarding.
 function showOnboardingForReauth() {
     const overlay = document.getElementById('onboarding-overlay');
     if (!overlay) return;
     try { localStorage.removeItem('vp_onboarding_seen'); } catch (e) {}
-    const signinIndex = ONBOARDING_STEPS.indexOf('signin');
-    showOnboardingStep(signinIndex < 0 ? 0 : signinIndex);
+    showOnboardingStep(0);
     overlay.classList.remove('hidden');
 }
 
 window.initOnboarding = initOnboarding;
 window.advanceOnboarding = advanceOnboarding;
-window.skipOnboarding = skipOnboarding;
+window.goBackOnboarding = goBackOnboarding;
 window.onboardingSignIn = onboardingSignIn;
 window.onboardingSignInSucceeded = onboardingSignInSucceeded;
 window.onboardingEnableNotifications = onboardingEnableNotifications;

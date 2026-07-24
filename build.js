@@ -18,7 +18,8 @@ const cssFiles = [
     'styles/layout.css',
     'styles/cards.css',
     'styles/social.css',
-    'styles/animations.css'
+    'styles/animations.css',
+    'styles/onboarding.css'
 ];
 
 let combinedCss = '';
@@ -43,6 +44,7 @@ const jsFiles = [
     'js/invite.js',
     'js/game.js',
     'js/hints.js',
+    'js/onboarding.js',
     'js/tabs.js',
     'js/pwa.js'
 ];

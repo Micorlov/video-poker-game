@@ -104,9 +104,26 @@ function isNativeApp() {
     return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 }
 
+// Sign-in can be triggered from the #signin-modal or from the onboarding
+// overlay's sign-in step (js/onboarding.js) — surface errors in whichever one
+// is actually visible, since only #signin-modal existed before onboarding.js
+// was added and a failure there would otherwise be silent during onboarding.
+function clearSignInErrors() {
+    ['signin-error', 'onboarding-signin-error'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+}
+
+function showSignInError(message) {
+    ['signin-error', 'onboarding-signin-error'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = message; el.classList.remove('hidden'); }
+    });
+}
+
 function signInWithGoogle() {
-    const el = document.getElementById('signin-error');
-    if (el) el.classList.add('hidden');
+    clearSignInErrors();
 
     if (isNativeApp()) {
         // Firebase's web popup/redirect auth doesn't work inside a native WebView
@@ -119,7 +136,7 @@ function signInWithGoogle() {
             const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
             return auth.signInWithCredential(credential);
         }).catch(function(err) {
-            if (el) { el.textContent = err.message || String(err); el.classList.remove('hidden'); }
+            showSignInError(err.message || String(err));
         });
         return;
     }
@@ -129,18 +146,16 @@ function signInWithGoogle() {
     auth.signInWithPopup(provider).catch(function(popupErr) {
         if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
             auth.signInWithRedirect(provider).catch(function(redirectErr) {
-                if (el) { el.textContent = redirectErr.message; el.classList.remove('hidden'); }
+                showSignInError(redirectErr.message);
             });
-        } else if (el) {
-            el.textContent = popupErr.message;
-            el.classList.remove('hidden');
+        } else {
+            showSignInError(popupErr.message);
         }
     });
 }
 
 function signInWithFacebook() {
-    const el = document.getElementById('signin-error');
-    if (el) el.classList.add('hidden');
+    clearSignInErrors();
 
     if (isNativeApp()) {
         window.Capacitor.Plugins.FirebaseAuthentication.signInWithFacebook().then(function(result) {
@@ -149,7 +164,7 @@ function signInWithFacebook() {
             const credential = firebase.auth.FacebookAuthProvider.credential(accessToken);
             return auth.signInWithCredential(credential);
         }).catch(function(err) {
-            if (el) { el.textContent = err.message || String(err); el.classList.remove('hidden'); }
+            showSignInError(err.message || String(err));
         });
         return;
     }
@@ -158,11 +173,10 @@ function signInWithFacebook() {
     auth.signInWithPopup(provider).catch(function(popupErr) {
         if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/popup-closed-by-user') {
             auth.signInWithRedirect(provider).catch(function(redirectErr) {
-                if (el) { el.textContent = redirectErr.message; el.classList.remove('hidden'); }
+                showSignInError(redirectErr.message);
             });
-        } else if (el) {
-            el.textContent = popupErr.message;
-            el.classList.remove('hidden');
+        } else {
+            showSignInError(popupErr.message);
         }
     });
 }
@@ -205,15 +219,27 @@ function logUserToFirestore(user) {
     });
 }
 
+let _wasSignedIn = false;
+
 if (auth) {
     auth.onAuthStateChanged(function(user) {
         window.egUser = user || null;
         if (window.closeSignInModal) closeSignInModal();
         if (window.updateAccountUI) updateAccountUI();
         if (user) {
+            _wasSignedIn = true;
             firebaseSafe(function() { return logUserToFirestore(user); });
             firebaseSafe(function() { return pushNetProfit(); });
-            firebaseSafe(function() { return registerForPushNotifications(); });
+            try { if (window.onboardingSignInSucceeded) onboardingSignInSucceeded(); } catch (e) { console.warn('onboardingSignInSucceeded failed:', e); }
+            // Fallback only: onboarding's priming screen (js/onboarding.js) is the
+            // primary path for this ask. If the user never saw that screen (e.g.
+            // signed in later from Settings/Friends without going through
+            // onboarding), still ask once here.
+            var pushAlreadyAsked = false;
+            try { pushAlreadyAsked = localStorage.getItem('vp_push_permission_asked') === '1'; } catch (e) {}
+            if (!pushAlreadyAsked) {
+                firebaseSafe(function() { return registerForPushNotifications(); });
+            }
             if (window.egFeatures.friendsRooms) {
                 if (window.loadFriends) loadFriends();
                 if (window.loadMyRooms) loadMyRooms();
@@ -253,6 +279,13 @@ if (auth) {
             if (window.cleanupBracelets) cleanupBracelets();
             if (window.renderFriendsScreen) renderFriendsScreen();
             if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
+            // On native: if this is a real sign-out (not just the initial
+            // unauthenticated state on cold start), show the sign-in step of
+            // onboarding so the user can log back in without restarting the app.
+            if (_wasSignedIn && isNativeApp() && window.showOnboardingForReauth) {
+                _wasSignedIn = false;
+                showOnboardingForReauth();
+            }
         }
     });
 }
