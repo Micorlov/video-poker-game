@@ -67,6 +67,27 @@ match /users/{uid} {
 }
 ```
 
+## Push delivery log — July 2026
+
+```
+// pushLogs/{logId} — one doc per recipient per notification, written by
+// scripts/lib/pushLog.js (Admin SDK, bypasses these rules) and by admin.html's
+// "Send Now" test sender (client-side, so it needs an explicit create rule).
+// Read is admin-only: entries carry display names and notification bodies for
+// every user, which no player should be able to enumerate. Nothing edits or
+// deletes log entries — the collection is append-only.
+match /pushLogs/{logId} {
+  allow read, create: if request.auth != null
+                      && request.auth.token.email == 'micorlov@gmail.com';
+  allow update, delete: if false;
+}
+```
+
+The Delivery Log panel queries `orderBy('sentAt', 'desc').limit(200)` — a
+single-field descending order, which Firestore indexes automatically. Category
+and status filtering happens client-side on that page precisely so no composite
+index is required.
+
 ## Bracelets — July 2026
 
 ```
