@@ -65,33 +65,53 @@ function setupFriendScoreListeners(uids, viaLinkMap) {
     });
 }
 
-function addFriendByCode() {
+// Pure: takes the code directly and returns a Promise<boolean success>, so it
+// can be shared by any input field — the Friends screen's own field and the
+// Invite Friends sheet's field below both delegate to this.
+function addFriendByCode(code) {
     const user = window.egUser;
-    if (!user) { openSignInModal(); return; }
-    const input = document.getElementById('friend-code-input');
-    const code = (input.value || '').trim().toUpperCase();
-    if (!code) return;
+    if (!user) { openSignInModal(); return Promise.resolve(false); }
+    code = (code || '').trim().toUpperCase();
+    if (!code) return Promise.resolve(false);
 
-    firebaseSafe(function() {
+    return firebaseSafe(function() {
         return db.collection('users').where('referralCode', '==', code).limit(1).get().then(function(snap) {
-            if (snap.empty) { showToast('No player found with that code.'); return; }
+            if (snap.empty) { showToast('No player found with that code.'); return false; }
             const friendDoc = snap.docs[0];
-            if (friendDoc.id === user.uid) { showToast('That is your own code!'); return; }
+            if (friendDoc.id === user.uid) { showToast('That is your own code!'); return false; }
             const friendRef = db.collection('users').doc(user.uid).collection('friends').doc(friendDoc.id);
             return friendRef.get().then(function(existing) {
-                if (existing.exists) { showToast('Already in your friends list.'); return; }
+                if (existing.exists) { showToast('Already in your friends list.'); return false; }
                 return Promise.all([
                     friendRef.set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() }),
                     db.collection('users').doc(friendDoc.id).collection('friends').doc(user.uid)
                         .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() })
                 ]).then(function() {
-                    input.value = '';
                     showToast('Friend added!');
                     loadFriends();
+                    return true;
                 });
             });
         });
-    }, function() { showToast('Could not add friend — try again.'); });
+    }, function() { showToast('Could not add friend — try again.'); }) || Promise.resolve(false);
+}
+
+// DOM entry point for the Friends screen's own "Friend code…" field.
+function submitFriendCodeInput() {
+    const input = document.getElementById('friend-code-input');
+    if (!input) return;
+    const code = (input.value || '').trim().toUpperCase();
+    if (!code) return;
+    addFriendByCode(code).then(function(ok) { if (ok) input.value = ''; });
+}
+
+// DOM entry point for the Invite Friends sheet's "Got a code from a friend?" field.
+function submitInviteSheetFriendCode() {
+    const input = document.getElementById('invite-sheet-code-input');
+    if (!input) return;
+    const code = (input.value || '').trim().toUpperCase();
+    if (!code) return;
+    addFriendByCode(code).then(function(ok) { if (ok) input.value = ''; });
 }
 
 function ownNetProfit() {
@@ -140,8 +160,8 @@ function renderFriendsScreen() {
         nameEl.textContent = f.displayName || 'Player';
         if (f.country) {
             const chip = document.createElement('span');
-            chip.className = 'country-chip';
-            chip.textContent = f.country;
+            chip.className = 'country-flag';
+            chip.textContent = countryToFlag(f.country);
             nameEl.appendChild(chip);
         }
         if (f.viaLink) {
@@ -187,53 +207,6 @@ function getInviteLink() {
     // Use the Firebase hosting URL as the canonical base
     const base = getShareBaseUrl();
     return base + '?ref=' + encodeURIComponent(code);
-}
-
-function copyInviteLink() {
-    const user = window.egUser;
-    if (!user) { openSignInModal(); return; }
-    const link = getInviteLink();
-    if (!link) { showToast('Could not generate invite link.'); return; }
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function() {
-            showToast('Invite link copied!');
-        }).catch(function() {
-            // Fallback
-            fallbackCopy(link);
-        });
-    } else {
-        fallbackCopy(link);
-    }
-}
-
-function fallbackCopy(text) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.left = '-9999px';
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); showToast('Invite link copied!'); } catch (e) { showToast('Could not copy — tap and hold the link.'); }
-    document.body.removeChild(ta);
-}
-
-function shareViaWhatsApp() {
-    var user = window.egUser;
-    if (!user) { openSignInModal(); return; }
-    var link = getInviteLink();
-    if (!link) { showToast('Could not generate invite link.'); return; }
-
-    var name = (user.displayName || 'A friend');
-    var text = encodeURIComponent(name + ' wants to play Video Poker with you! Join with this link:\n' + link);
-    var waUrl = 'https://wa.me/?text=' + text;
-
-    // Try to open WhatsApp; fall back gracefully
-    try {
-        window.open(waUrl, '_blank');
-    } catch (e) {
-        showToast('Could not open WhatsApp.');
-    }
 }
 
 function handleIncomingInvite() {
@@ -288,11 +261,18 @@ function addFriendByInviteCode(code) {
                     return db.collection('users').doc(user.uid).collection('friends').doc(friendUid).get()
                         .then(function(existing) {
                             if (existing.exists) return null;
+                            // joinerUid marks which side of the edge is the NEW
+                            // circle member, so scripts/push/friends.js can notify
+                            // every existing member about the joiner without also
+                            // notifying the joiner about each of them.
+                            var edge = {
+                                addedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                viaCode: code,
+                                joinerUid: user.uid
+                            };
                             return Promise.all([
-                                db.collection('users').doc(user.uid).collection('friends').doc(friendUid)
-                                    .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp(), viaCode: code }),
-                                db.collection('users').doc(friendUid).collection('friends').doc(user.uid)
-                                    .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp(), viaCode: code })
+                                db.collection('users').doc(user.uid).collection('friends').doc(friendUid).set(edge),
+                                db.collection('users').doc(friendUid).collection('friends').doc(user.uid).set(edge)
                             ]);
                         });
                 })).then(function() {
@@ -374,7 +354,7 @@ function renderNearbyPanel(user) {
                 '<span class="online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline') + '"></span>' +
             '</span>' +
             '<span class="nearby-name">' + (f.displayName || 'Player') +
-                (f.country ? '<span class="country-chip">' + f.country + '</span>' : '') +
+                (f.country ? '<span class="country-flag">' + countryToFlag(f.country) + '</span>' : '') +
                 (f.viaLink ? '<span class="link-chip" title="Connected via invite link">🔗</span>' : '') +
             '</span>' +
             '<span class="nearby-net ' + ((f.netProfit || 0) > 0 ? 'positive' : (f.netProfit || 0) < 0 ? 'negative' : 'zero') + '">' +

@@ -223,6 +223,11 @@ let _wasSignedIn = false;
 
 if (auth) {
     auth.onAuthStateChanged(function(user) {
+        // Signals that Firebase has settled the session. Before this fires,
+        // window.egUser is null even for a signed-in returning user — so a
+        // deep link arriving at DOMContentLoaded must NOT treat "no user" as
+        // "signed out" and pop the sign-in modal. See handleJoinDeepLink().
+        window._authResolved = true;
         window.egUser = user || null;
         if (window.closeSignInModal) closeSignInModal();
         if (window.updateAccountUI) updateAccountUI();
@@ -251,6 +256,7 @@ if (auth) {
             if (isNativeApp()) {
                 if (window.egFeatures.champions && window.subscribeHourlyBoard) subscribeHourlyBoard();
                 if (window.egFeatures.champions && window.subscribeDailyBoard) subscribeDailyBoard();
+                if (window.patchOwnCountry) patchOwnCountry();
             } else {
                 if (window.egFeatures.champions && window.subscribeChampions) subscribeChampions();
             }
@@ -262,14 +268,22 @@ if (auth) {
                 addFriendByInviteCode(code);
             }
             // Phase 2: handle pending room join from deep link
-            if (window._pendingJoinCode && window.joinRoomByDeepLink) {
+            if (window._pendingJoinCode && window.joinRoomByCode) {
                 var joinCode = window._pendingJoinCode;
                 window._pendingJoinCode = null;
-                joinRoomByDeepLink(joinCode);
+                joinRoomByCode(joinCode);
             }
         } else {
             if (window.cleanupFriendsListeners) cleanupFriendsListeners();
+            if (window.cleanupRooms) cleanupRooms();
             if (window.stopPresence) stopPresence();
+            // A room link that landed before auth settled: now that we know the
+            // visitor is genuinely signed out, ask them to sign in. The code
+            // stays parked in _pendingJoinCode and is replayed above on success.
+            if (window._pendingJoinCode) {
+                if (window.openSignInModal) openSignInModal();
+                if (window.showToast) showToast('Sign in to join the daily game!');
+            }
             if (isNativeApp()) {
                 if (window.cleanupLeaderboards) cleanupLeaderboards();
                 if (window.renderLeaderboardPanel) renderLeaderboardPanel();

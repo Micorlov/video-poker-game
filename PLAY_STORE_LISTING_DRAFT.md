@@ -1,0 +1,142 @@
+# Play Console Setup — Draft Content for Review
+
+Draft only — nothing here has been submitted to Play Console. Review and edit, then tell me which sections to paste in.
+
+---
+
+## 1. Store Listing
+
+**App name:** Royal Video Poker
+
+**Short description** (max 80 chars):
+```
+Free video poker with friends — 5-card draw, no real money, all the thrill.
+```
+(78 chars)
+
+**Full description** (max 4000 chars):
+```
+Royal Video Poker — Social Casino, Free Chips Only
+
+Five cards. One decision. Play classic video poker the way it was meant to be played — fast, sharp, and with zero risk to your wallet.
+
+FREE CHIPS, NO REAL MONEY
+Every hand is played with free virtual chips. No purchases, no real-money wagering, no risk — just the thrill of the draw.
+
+MULTIPLE GAME VARIANTS
+Choose from Jacks or Better and other classic variants, across different hand-count modes, so you can play fast or go deep.
+
+COMPETE WITH FRIENDS
+Sign in with Google or Facebook to sync your progress, add friends, and see how you stack up on hourly and daily leaderboards.
+
+DAILY FREE CHIPS
+Come back every day for free chips, streak bonuses, and level progression.
+
+ROOMS & MULTIPLAYER TABLES
+Create or join rooms to play alongside friends and climb the leaderboard together.
+
+Royal Video Poker is a social casino game intended for entertainment purposes only. It does not offer real money gambling or an opportunity to win real money or prizes. Practice or success in this game does not imply future success at real money gambling.
+```
+
+**Category:** Casino (or Card, depending on how you want it classified)
+
+**Contact details:** (your support email — needs to be a real monitored address)
+```
+micorlov@gmail.com
+```
+
+**Graphics needed** (I can't generate final store-ready art, but can help produce simple placeholders if you want):
+- App icon (512x512 PNG)
+- Feature graphic (1024x500 PNG)
+- At least 2 phone screenshots (recommend 4-6) — I can capture these from the running app on your phone/emulator if you want.
+
+---
+
+## 2. Privacy Policy (draft — needs to be hosted at a public URL, e.g. a GitHub Pages page)
+
+```
+Privacy Policy for Royal Video Poker
+
+Last updated: [DATE]
+
+Royal Video Poker ("we", "us") is a free social casino game. This policy explains what data we collect and how we use it.
+
+Information We Collect
+- Account information: if you sign in with Google, Facebook, or Apple, we receive your display name, profile photo, and a unique account identifier.
+- Gameplay data: your chip balance, hand history, levels, streaks, and progression are stored to sync your progress across devices.
+- Friends and social features: if you add friends, we store the connection between accounts to show leaderboards and shared rooms.
+- Push notification token: if you enable notifications, we store a device token to send you gameplay-related alerts (e.g., a friend overtaking you on the leaderboard).
+
+What We Don't Collect
+- We do not process real-money payments or financial account information.
+- We do not collect precise location data.
+- We do not serve third-party advertising.
+
+How We Use Data
+Data is used solely to operate gameplay features: saving progress, showing leaderboards, enabling friends/rooms, and sending optional push notifications.
+
+Data Sharing
+We do not sell your data. Data is stored using Google Firebase (Authentication, Firestore, Cloud Messaging) as our backend infrastructure provider.
+
+Data Deletion
+You can request deletion of your account data by contacting micorlov@gmail.com.
+
+No Real Money Gambling
+This game is intended for entertainment purposes only. It does not offer real money gambling or the ability to win real money or prizes.
+
+Children's Privacy
+This app is not directed at children and is not intended for users under 13 (or applicable local age of digital consent).
+
+Contact
+micorlov@gmail.com
+```
+
+⚠️ You need to host this somewhere public (e.g. a page on your existing GitHub Pages site) and put that URL into Play Console's "Privacy policy" field — Google requires a live URL, not just text.
+
+---
+
+## 3. Data Safety form — draft answers
+
+Based on what's actually in the code (`js/firebase.js`, Capacitor plugins in `package.json`, `AndroidManifest.xml`):
+
+| Question | Answer |
+|---|---|
+| Does your app collect or share user data? | Yes |
+| Data types collected | Personal info: Name, Email address, Profile photo (via Google/Facebook/Apple sign-in) · App activity: In-app actions (gameplay/progress) · App info and performance: Crash logs (if Firebase Crashlytics is enabled — confirm) |
+| Is data encrypted in transit? | Yes (Firebase uses HTTPS/TLS) |
+| Can users request data deletion? | Yes |
+| Is data shared with third parties? | No (Firebase is your backend processor, not a third-party data recipient in Play's sense) |
+| Is the app's target audience children? | No — see Target Audience section below |
+
+⚠️ I did not find an ads SDK or analytics SDK in `package.json`/manifest — if you've added Firebase Analytics or any ad network since, that changes these answers. Double-check before submitting.
+
+---
+
+## 4. Content Rating Questionnaire — important flag
+
+This app uses **simulated gambling mechanics** (betting virtual chips, video poker hands) with **no real money**. Google Play's content rating questionnaire has a specific "Simulated Gambling" category for exactly this. Answering it accurately matters because:
+- It affects the age rating (usually pushes to Teen/16+ or higher depending on region, even with no real money).
+- Some countries restrict or outright block simulated-gambling apps regardless of rating.
+
+Suggested answers to the relevant questionnaire prompts:
+- "Does the app contain simulated gambling?" → **Yes**
+- "Can users wager or bet virtual currency/chips that were purchased with real money?" → answer based on whether chips can ever be bought with real money in your app (per FEATURES.md, currently free-chips-only, no purchases) → **No**, if that's still accurate.
+
+I'm flagging this rather than answering it silently because it's a real compliance decision — please confirm the "no real-money purchases" fact is still true before I help fill this in.
+
+---
+
+## 5. Target Audience
+
+Given the simulated gambling content, target audience should exclude children:
+- Suggested minimum target age: **18+** (many jurisdictions require this for simulated gambling apps regardless of "no real money" framing)
+- Do NOT select "designed for children" or include child-appeal elements.
+
+---
+
+## Next steps
+
+Tell me which of the above you want me to actually paste into Play Console (I'll do it section by section and show you before hitting any Save/Submit), and let me know:
+1. Where you want the privacy policy hosted (I can add it to your existing GitHub Pages site).
+2. Whether Firebase Analytics/Crashlytics or any ad SDK is enabled that I missed.
+3. Confirm the "no real-money chip purchases" fact for the content rating section.

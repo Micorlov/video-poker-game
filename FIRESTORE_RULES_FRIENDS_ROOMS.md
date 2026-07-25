@@ -12,9 +12,19 @@ match /users/{uid} {
   allow read: if request.auth != null;
   allow write: if request.auth != null && request.auth.uid == uid;
 
-  // Friends — mutual relationship, each side writes its own doc.
+  // Friends — mutual relationship. Both add-by-code and invite-link joins write
+  // BOTH sides of the edge in one go (js/friends.js), so a player must be able
+  // to write into another player's friends subcollection — but only the single
+  // doc keyed to their own uid, which is exactly the reciprocal edge. Reads stay
+  // private to the owner.
+  //
+  // Trade-off: this lets anyone who knows your referral code add themselves to
+  // your friends list unprompted. That is already the intended product
+  // behaviour here (friend circles are joined by link, with no accept step).
   match /friends/{friendUid} {
-    allow read, write: if request.auth != null && request.auth.uid == uid;
+    allow read: if request.auth != null && request.auth.uid == uid;
+    allow write: if request.auth != null
+                 && (request.auth.uid == uid || request.auth.uid == friendUid);
   }
 }
 
@@ -27,9 +37,17 @@ match /rooms/{roomId} {
   allow create: if request.auth != null
                 && request.resource.data.ownerUid == request.auth.uid
                 && request.resource.data.memberUids == [request.auth.uid];
+  // Join. The previous version allowed hasOnly(['memberUids']) while the client
+  // wrote memberUids AND updatedAt, so every join was denied as written — yet
+  // scripts/push/rooms.js queries on updatedAt and requires it. updatedAt is now
+  // permitted explicitly. The !(uid in memberUids) clause matters: concat()
+  // would duplicate the uid, so js/rooms.js must skip this write entirely for a
+  // player who is already a member (re-clicking their own invite link).
   allow update: if request.auth != null
-                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids'])
-                && request.resource.data.memberUids == resource.data.memberUids.concat([request.auth.uid]);
+                && request.resource.data.diff(resource.data).affectedKeys()
+                     .hasOnly(['memberUids', 'updatedAt'])
+                && request.resource.data.memberUids == resource.data.memberUids.concat([request.auth.uid])
+                && !(request.auth.uid in resource.data.memberUids);
 
   // Members subcollection — each player writes only their own leaderboard entry.
   match /members/{uid} {
@@ -161,6 +179,23 @@ No Blaze plan needed — collection-group indexes are free on the Spark plan.
 2. Collection group: `members` — Field: `updatedAt` — Order: Ascending
    (powers `scripts/push/rooms.js`'s
    `collectionGroup('members').where('updatedAt', '>', since)`)
+
+## Fields written by the poller — do not hand-edit
+
+`scripts/push/` caches "what did this look like last poll?" directly on the
+documents it watches, because a poller — unlike a Cloud Functions trigger — gets
+no before/after snapshot. All are underscore-prefixed and safe to delete (the
+next poll re-seeds them silently, notifying nobody):
+
+- `users/{uid}._prevFriendNetProfit` — last seen netProfit, for overtake detection
+- `users/{uid}._prevFriendLeaderUid` — last seen #1 of that user's friend circle
+- `rooms/{roomId}._prevMemberUids`, `rooms/{roomId}/members/{uid}._prevNetProfit`
+- `hourly/{hourKey}.topFive`
+
+`users/{uid}/friends/{friendUid}.joinerUid` is written by the client
+(`js/friends.js`) on invite-link joins and marks which side of the edge is the
+new member, so `scripts/push/friends.js` notifies the existing circle about the
+joiner rather than the other way round.
 
 ## Other requirements
 

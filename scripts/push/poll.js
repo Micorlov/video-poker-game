@@ -7,7 +7,7 @@ const { checkNewFriends } = require('./friends');
 const { checkRoomActivity } = require('./rooms');
 const { checkHourlyLeaderboard } = require('./leaderboard');
 const { checkBestHand } = require('./bestHand');
-const { checkFriendLeaderboardOvertakes } = require('./friendRank');
+const { checkFriendRanks } = require('./friendRank');
 const { checkBracelets } = require('../bracelets/award');
 async function poll() {
   const since = await getCursor();
@@ -18,7 +18,7 @@ async function poll() {
     checkRoomActivity(since),
     checkHourlyLeaderboard(),
     checkBestHand(since),
-    checkFriendLeaderboardOvertakes(since),
+    checkFriendRanks(since),
     checkBracelets(),
   ]);
 

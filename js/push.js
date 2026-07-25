@@ -29,6 +29,18 @@ function registerForPushNotifications() {
     }).catch(function(err) { console.warn('Web push registration failed:', err); });
 }
 
+// Native always supports push; on web it depends on the browser (Safari only
+// exposes it to installed PWAs, and firebase.messaging bails out entirely in
+// unsupported ones). js/tabs.js uses this to decide whether the Settings
+// notification panel is worth showing at all.
+function isPushSupported() {
+    if (window.isNativeApp && isNativeApp()) return true;
+    return !!(window.Notification && navigator.serviceWorker &&
+        typeof firebase !== 'undefined' && firebase.messaging &&
+        firebase.messaging.isSupported && firebase.messaging.isSupported());
+}
+window.isPushSupported = isPushSupported;
+
 function saveFcmToken(token, platform) {
     if (!window.egUser || typeof db === 'undefined') return;
     var p = platform || (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web');

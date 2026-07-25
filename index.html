@@ -187,22 +187,10 @@
                 <div class="section-label">Your Code</div>
                 <div class="panel own-code-panel" id="own-referral-code">—</div>
 
-                <div class="section-label">Invite Friends</div>
-                <div class="invite-row">
-                    <button class="invite-btn" onclick="copyInviteLink()" id="invite-copy-btn">
-                        <span class="invite-icon">📋</span>
-                        <span>Copy Invite Link</span>
-                    </button>
-                    <button class="invite-btn whatsapp" onclick="shareViaWhatsApp()" id="invite-whatsapp-btn">
-                        <span class="invite-icon">💬</span>
-                        <span>WhatsApp</span>
-                    </button>
-                </div>
-
                 <div class="section-label">Add a Friend</div>
                 <div class="panel add-friend-row">
                     <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
-                    <button class="btn-primary add-friend-btn" onclick="addFriendByCode()">Add</button>
+                    <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()">Add</button>
                 </div>
 
                 <div class="stats-toggle">
@@ -379,19 +367,19 @@
             <button class="modal-close" onclick="closeRoomModal()">✕</button>
             <div class="modal-title">Create a Poker Room</div>
             <input class="friend-code-input" id="room-name-input" maxlength="24" placeholder="Room name…">
-            <div class="default-bet-row" style="margin: 10px 0;">
+            <div class="room-stake-row">
                 <select class="room-stake-select" id="room-stake-input">
-                    <option value="5">Stake 5</option>
-                    <option value="10" selected>Stake 10</option>
-                    <option value="20">Stake 20</option>
-                    <option value="50">Stake 50</option>
+                    <option value="5">Buy-in 5</option>
+                    <option value="10" selected>Buy-in 10</option>
+                    <option value="20">Buy-in 20</option>
+                    <option value="50">Buy-in 50</option>
                 </select>
             </div>
             <button class="btn-primary" style="width:100%;" onclick="createRoom()">Create Room</button>
             <div class="modal-sub" style="margin-top:16px;">Got a code from a friend?</div>
             <div class="add-friend-row">
                 <input class="friend-code-input" id="room-code-input" maxlength="6" placeholder="Room code…" autocomplete="off">
-                <button class="btn-secondary" onclick="joinRoomByCode()">Join</button>
+                <button class="btn-secondary" onclick="submitRoomCodeInput()">Join</button>
             </div>
         </div>
     </div>
@@ -416,7 +404,16 @@
                 <span class="sheet-link-text" id="invite-sheet-link">—</span>
                 <button class="sheet-copy-btn" id="invite-sheet-copy" onclick="copyInviteSheetLink()">Copy</button>
             </div>
-            <button class="sheet-share-btn" onclick="shareInviteLink()">Share Invite Link</button>
+            <div class="share-chips-row">
+                <button class="share-chip whatsapp" onclick="shareFriendInviteViaWhatsApp()">WhatsApp</button>
+                <button class="share-chip telegram" onclick="shareFriendInviteViaTelegram()">Telegram</button>
+            </div>
+            <div class="modal-sub" style="margin-top:16px;">Got a code from a friend?</div>
+            <div class="add-friend-row">
+                <input class="friend-code-input" id="invite-sheet-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
+                <button class="btn-primary add-friend-btn" onclick="submitInviteSheetFriendCode()">Add</button>
+            </div>
+            <button class="sheet-done-btn" onclick="closeSheet('invite-sheet')">Done</button>
         </div>
     </div>
 

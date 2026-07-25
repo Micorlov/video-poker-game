@@ -5,7 +5,7 @@
 function countryToFlag(code) {
     if (!code || !/^[A-Z]{2}$/i.test(code)) return '';
     return code.toUpperCase().replace(/[A-Z]/g, function(c) {
-        return String.fromCodePoint(0x1F1E0 + c.charCodeAt(0) - 65);
+        return String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65);
     });
 }
 

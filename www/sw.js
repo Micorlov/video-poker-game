@@ -2,7 +2,7 @@
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'vp-cache-v6';
+const CACHE_NAME = 'vp-cache-v7';
 const ASSETS = [
   'video_poker.html',
   'manifest.json',
@@ -20,12 +20,16 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Background push notifications via FCM
-messaging.onBackgroundMessage(event => {
-  const data = event.data || {};
-  const title = data.title || 'Video Poker';
+// Background push notifications via FCM.
+// scripts/lib/sendPush.js sends a `notification` payload (title/body), which
+// FCM delivers on payload.notification — reading only payload.data made every
+// web push fall back to the generic copy below and drop the friend's name.
+messaging.onBackgroundMessage(payload => {
+  const data = payload.data || {};
+  const notification = payload.notification || {};
+  const title = notification.title || data.title || 'Video Poker';
   const options = {
-    body: data.body || 'You have a new notification!',
+    body: notification.body || data.body || 'You have a new notification!',
     icon: 'icon.svg',
     badge: 'icon.svg',
     vibrate: [100, 50, 100],

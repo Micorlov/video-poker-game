@@ -20,17 +20,23 @@ function getCountry() {
     return userCountry || _countryFromLanguage();
 }
 
+function _fetchCountryFrom(url, jsonField) {
+    return fetch(url, { cache: 'no-cache' })
+        .then(function(r) { return r.ok ? (jsonField ? r.json() : r.text()) : Promise.reject(); })
+        .then(function(data) {
+            var code = ((jsonField ? data[jsonField] : data) || '').trim().toUpperCase();
+            if (/^[A-Z]{2}$/.test(code)) return code;
+            return Promise.reject();
+        });
+}
+
 function resolveCountryFromIP() {
     if (countryResolved) return Promise.resolve(userCountry);
-    return fetch('https://ipapi.co/country_code/', { cache: 'force-cache' })
-        .then(function(r) { return r.ok ? r.text() : null; })
-        .then(function(code) {
-            if (code) {
-                code = code.trim().toUpperCase();
-                if (/^[A-Z]{2}$/.test(code)) userCountry = code;
-            }
-        })
-        .catch(function() { /* fall through to language fallback */ })
+    return _fetchCountryFrom('https://ipapi.co/country_code/')
+        .catch(function() { return _fetchCountryFrom('https://api.country.is/', 'country'); })
+        .catch(function() { return _fetchCountryFrom('https://ipwho.is/?fields=country_code', 'country_code'); })
+        .then(function(code) { userCountry = code; })
+        .catch(function() {})
         .finally(function() {
             if (!userCountry) userCountry = _countryFromLanguage();
             countryResolved = true;

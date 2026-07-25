@@ -101,9 +101,14 @@ const NOTIFICATION_PREF_CATEGORIES = ['social', 'leaderboard', 'dailyReminder', 
 function initNotificationSettings() {
     const panel = document.getElementById('settings-notifications-panel');
     if (!panel) return;
-    const isNative = window.isNativeApp && isNativeApp();
-    panel.classList.toggle('hidden', !isNative);
-    if (!isNative) return;
+    // Web push works too (Firebase Messaging + VAPID, see js/push.js), so the
+    // panel is gated on push support rather than on being a native app —
+    // otherwise browser players could never enable or mute notifications.
+    const supported = window.isPushSupported
+        ? isPushSupported()
+        : !!(window.isNativeApp && isNativeApp());
+    panel.classList.toggle('hidden', !supported);
+    if (!supported) return;
 
     const enableBtn = document.getElementById('settings-notifications-enable');
     if (enableBtn) {
@@ -218,7 +223,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.isNativeApp && isNativeApp() && window.setLeaderboardTab) setLeaderboardTab('friends');
     if (window.initOnboarding) initOnboarding(); else showScreen('play');
     initPwa();
-    // Handle deep-link invite (?ref=CODE)
+    // Handle deep links: ?ref=CODE (add friend) and ?join=ROOMCODE (daily game).
+    // The room one was previously wired only into applyNativeDeepLinkUrl(), so
+    // every shared room link was silently ignored on web/PWA.
     if (window.handleIncomingInvite) handleIncomingInvite();
+    if (window.handleJoinDeepLink) handleJoinDeepLink();
     initNativeDeepLinkHandling();
 });

@@ -413,9 +413,10 @@
 .nearby-net {
     font-size: 13px;
     font-weight: 700;
-    width: 58px;
+    min-width: 58px;
     text-align: right;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
     flex-shrink: 0;
 }
 
@@ -618,21 +619,6 @@
     background: var(--green);
     border-color: var(--green);
     color: #fff;
-}
-
-.sheet-share-btn {
-    text-align: center;
-    padding: 13px 0;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-600));
-    color: #fff;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    border: none;
-    font-family: inherit;
-    width: 100%;
-    margin-top: 10px;
 }
 
 /* Share chips (WhatsApp / Telegram) */

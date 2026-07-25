@@ -86,6 +86,7 @@ function pushDailyScore(handType, win, totalBet) {
         uid: user.uid,
         displayName: user.displayName || 'Player',
         photoURL: user.photoURL || null,
+        country: (typeof getCountry === 'function' ? getCountry() : null),
         dayKey: dayKey,
         score: firebase.firestore.FieldValue.increment(win - totalBet),
         hands: firebase.firestore.FieldValue.increment(1),
@@ -153,6 +154,27 @@ function subscribeDailyBoard() {
     startLeaderboardTimer();
 }
 
+function patchOwnCountry() {
+    const user = window.egUser;
+    if (!user || typeof getCountry !== 'function') return;
+    resolveCountryFromIP().then(function() {
+        var country = getCountry();
+        if (!country || country.length !== 2) return;
+        var dayKey = getDayKey();
+        firebaseSafe(function() {
+            return db.collection('daily_scores').doc(dayKey + '_' + user.uid)
+                .set({ country: country }, { merge: true });
+        });
+        var hourKey = typeof getHourKey === 'function' ? getHourKey() : null;
+        if (hourKey) {
+            firebaseSafe(function() {
+                return db.collection('hourly').doc(hourKey).collection('entries').doc(user.uid)
+                    .set({ country: country }, { merge: true });
+            });
+        }
+    });
+}
+
 function startLeaderboardTimer() {
     if (!lbTimerInterval) lbTimerInterval = setInterval(renderLeaderboardTimer, 30000);
 }
@@ -211,10 +233,10 @@ function renderFriendsDailyBody(bodyEl, limit) {
                 '<span class="online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline') + '"></span>' +
             '</span>' +
             '<span class="nearby-name">' + (f.displayName || 'Player') +
-                (f.country ? '<span class="country-chip">' + f.country + '</span>' : '') +
+                (f.country ? '<span class="country-flag">' + countryToFlag(f.country) + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net ' + ((f.netProfit || 0) > 0 ? 'positive' : (f.netProfit || 0) < 0 ? 'negative' : 'zero') + '">' +
-                ((f.netProfit || 0) >= 0 ? '+' : '') + (f.netProfit || 0) +
+                ((f.netProfit || 0) >= 0 ? '+' : '') + (f.netProfit || 0).toLocaleString() +
             '</span>';
         bodyEl.appendChild(row);
     });
@@ -236,7 +258,7 @@ function renderGlobalBody(bodyEl, list, limit, valueField, valueSuffix, allowNeg
         row.className = 'nearby-row' + (isMe ? ' me' : '');
         const val = entry[valueField] || 0;
         const cls = !allowNegative ? 'positive' : (val > 0 ? 'positive' : val < 0 ? 'negative' : 'zero');
-        const text = allowNegative ? ((val >= 0 ? '+' : '') + val) : (val + valueSuffix);
+        const text = allowNegative ? ((val >= 0 ? '+' : '') + val.toLocaleString()) : (val.toLocaleString() + valueSuffix);
         row.innerHTML =
             '<span class="nearby-rank">' + (i + 1) + '</span>' +
             '<span class="nearby-avatar-wrap">' +
@@ -318,5 +340,42 @@ function renderLeaderboardPanel() {
     if (expandLink) {
         expandLink.classList.toggle('hidden', totalCount <= 5);
         expandLink.textContent = leaderboardExpanded ? 'Show Top 5 ▴' : 'Show Top 20 ▾';
+    }
+}
+
+// --- Share leaderboard ---
+function shareLeaderboard() {
+    const SHARE_TITLES = {
+        friends: 'Friends · Today',
+        hourly: 'Hourly Champions',
+        daily: 'Daily Champions'
+    };
+    var title = SHARE_TITLES[leaderboardTab] || 'Leaderboard';
+    var limit = leaderboardExpanded ? 20 : 5;
+    var lines = [];
+
+    if (leaderboardTab === 'friends') {
+        rankedFriendsDaily().slice(0, limit).forEach(function(f, i) {
+            var val = f.netProfit || 0;
+            lines.push((i + 1) + '. ' + (f.self ? 'You' : (f.displayName || 'Player')) +
+                '  ' + (val >= 0 ? '+' : '') + val.toLocaleString());
+        });
+    } else if (leaderboardTab === 'hourly') {
+        hourlyBoardList.slice(0, limit).forEach(function(e, i) {
+            lines.push((i + 1) + '. ' + (e.displayName || 'Player') + '  ' + (e.points || 0).toLocaleString() + ' pts');
+        });
+    } else {
+        dailyBoardList.slice(0, limit).forEach(function(e, i) {
+            var val = e.score || 0;
+            lines.push((i + 1) + '. ' + (e.displayName || 'Player') + '  ' + (val >= 0 ? '+' : '') + val.toLocaleString());
+        });
+    }
+
+    var text = '🃏 ' + title + '\n' + lines.join('\n');
+
+    if (navigator.share) {
+        navigator.share({ title: title, text: text }).catch(function() {});
+    } else {
+        navigator.clipboard && navigator.clipboard.writeText(text);
     }
 }

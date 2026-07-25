@@ -62,26 +62,22 @@ function fallbackCopySheet(text, btn) {
     document.body.removeChild(ta);
 }
 
-function shareInviteLink() {
+function shareFriendInviteViaWhatsApp() {
     const linkEl = document.getElementById('invite-sheet-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const user = window.egUser;
     const name = user ? (user.displayName || 'A friend') : 'A friend';
-    const text = name + ' wants to play Video Poker with you! Join here: ' + link;
+    const text = encodeURIComponent(name + ' wants to play Video Poker with you! Join here: ' + link);
+    window.open('https://wa.me/?text=' + text, '_blank');
+}
 
-    // Try native share first
-    if (navigator.share) {
-        navigator.share({ title: 'Video Poker', text: text, url: link }).catch(function() {});
-    } else if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
-        window.Capacitor.Plugins.Share.share({ title: 'Video Poker', text: text, url: link }).catch(function() {});
-    } else {
-        // Fallback: copy to clipboard
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(link).then(function() {
-                showToast('Link copied — share it with friends!');
-            });
-        }
-    }
+function shareFriendInviteViaTelegram() {
+    const linkEl = document.getElementById('invite-sheet-link');
+    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+    const user = window.egUser;
+    const name = user ? (user.displayName || 'A friend') : 'A friend';
+    const text = encodeURIComponent(name + ' wants to play Video Poker with you! Join here: ' + link);
+    window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
 }
 
 // --- Room Created bottom sheet ---
@@ -146,26 +142,20 @@ function handleJoinDeepLink() {
             window.history.replaceState({}, '', url);
         }
 
-        // Store for after sign-in
+        // Park the code. Consumed either directly below, or — if auth hasn't
+        // settled yet — by the onAuthStateChanged handler in js/firebase.js.
         window._pendingJoinCode = joinCode;
 
         if (window.egUser) {
-            joinRoomByDeepLink(joinCode);
-        } else {
+            window._pendingJoinCode = null;
+            joinRoomByCode(joinCode);
+        } else if (window._authResolved) {
+            // Auth has settled and there is genuinely no user.
             openSignInModal();
-            showToast('Sign in to join the poker room!');
+            showToast('Sign in to join the daily game!');
         }
+        // Otherwise: auth is still resolving. Do nothing — firing the sign-in
+        // modal here would ambush every already-signed-in user who clicks a
+        // link, since egUser is null until onAuthStateChanged fires.
     } catch (e) {}
 }
-
-function joinRoomByDeepLink(code) {
-    var user = window.egUser;
-    if (!user) return;
-    var input = document.getElementById('room-code-input');
-    if (input) input.value = code;
-    joinRoomByCode(); // reuses existing join logic after setting the input
-}
-
-// Hook into auth state change to handle pending join
-// (Add to the existing firebase.js onAuthStateChanged handler)
-var _origAuthHandler = null; // will be set by build order

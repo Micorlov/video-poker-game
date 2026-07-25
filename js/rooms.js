@@ -44,15 +44,44 @@ function pushNetProfit() {
 
 function loadMyRooms() {
     const user = window.egUser;
-    if (!user) { myRooms = []; renderRoomsList(); return; }
-    firebaseSafe(function() {
+    if (!user) { myRooms = []; renderRoomsList(); return Promise.resolve(); }
+    // Returns a Promise so callers can act once myRooms actually reflects the
+    // change (e.g. joinRoomByCode opening the detail view for a just-joined room).
+    return firebaseSafe(function() {
         return db.collection('rooms').where('memberUids', 'array-contains', user.uid).get().then(function(snap) {
             myRooms = [];
             snap.forEach(function(d) { myRooms.push(Object.assign({ id: d.id }, d.data())); });
             renderRoomsList();
             pushNetProfit();
         });
-    });
+    }) || Promise.resolve();
+}
+
+// Sign-out teardown. This did not exist, so myRooms and the room-detail
+// listener leaked across account switches.
+function cleanupRooms() {
+    if (roomDetailUnsubscribe) { roomDetailUnsubscribe(); roomDetailUnsubscribe = null; }
+    myRooms = [];
+    activeRoomId = null;
+    const modal = document.getElementById('room-detail-modal');
+    if (modal) modal.classList.add('hidden');
+    renderRoomsList();
+}
+
+// Room names are arbitrary user input, so every renderer below builds DOM with
+// createElement + textContent and binds handlers as properties. Interpolating
+// them into innerHTML (and room.id into an inline onclick) was an injection hole.
+function roomEl(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+}
+
+function roomMetaLine(room) {
+    const memberCount = (room.memberUids || []).length;
+    const capacity = room.capacity || 6;
+    return memberCount + '/' + capacity + ' friends · Buy-in ' + (room.stake || 10);
 }
 
 function renderRoomsList() {
@@ -61,20 +90,20 @@ function renderRoomsList() {
     listEl.innerHTML = '';
     const previews = myRooms.slice(0, 2); // Play screen: max 2 preview
     previews.forEach(function(room) {
-        const row = document.createElement('div');
-        row.className = 'mini-room';
         const status = getRoomStatus(room);
-        const memberCount = (room.memberUids || []).length;
-        const capacity = room.capacity || 6;
+        const row = roomEl('div', 'mini-room');
 
-        row.innerHTML =
-            '<div>' +
-                '<div class="mr-name">' + (room.name || 'Room') + '</div>' +
-                '<div class="mr-meta">' + memberCount + '/' + capacity + ' friends · Stake ' + (room.stake || 10) + '</div>' +
-            '</div>' +
-            '<span class="mr-status ' + status + '">' + (status === 'open' ? 'Open' : 'In Progress') + '</span>' +
-            '<button class="mr-join" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? 'Join Table' : 'Enter Table') + '</button>';
+        const textCol = roomEl('div');
+        textCol.appendChild(roomEl('div', 'mr-name', room.name || 'Room'));
+        textCol.appendChild(roomEl('div', 'mr-meta', roomMetaLine(room)));
 
+        const badge = roomEl('span', 'mr-status ' + status, status === 'open' ? 'Open' : 'In Progress');
+        const btn = roomEl('button', 'mr-join', status === 'open' ? 'Join Table' : 'Enter Table');
+        btn.onclick = function() { openRoomDetail(room.id); };
+
+        row.appendChild(textCol);
+        row.appendChild(badge);
+        row.appendChild(btn);
         listEl.appendChild(row);
     });
     // Also render the friends-tab rooms list
@@ -84,25 +113,23 @@ function renderRoomsList() {
 function renderFriendsRoomsList() {
     const listEl = document.getElementById('friends-rooms-list');
     const emptyEl = document.getElementById('friends-rooms-empty');
-    const btn = document.getElementById('friends-create-room-btn');
     if (!listEl) return;
     listEl.innerHTML = '';
     if (emptyEl) emptyEl.classList.toggle('hidden', myRooms.length > 0);
     myRooms.forEach(function(room) {
-        const card = document.createElement('div');
-        card.className = 'room-card';
         const status = getRoomStatus(room);
-        const memberCount = (room.memberUids || []).length;
-        const capacity = room.capacity || 6;
+        const card = roomEl('div', 'room-card');
 
-        card.innerHTML =
-            '<div class="room-head">' +
-                '<span class="roomname">' + (room.name || 'Room') + '</span>' +
-                '<span class="roomstatus ' + status + '">' + (status === 'open' ? 'Open' : 'In Progress') + '</span>' +
-            '</div>' +
-            '<div class="roommeta">' + memberCount + '/' + capacity + ' friends · Stake ' + (room.stake || 10) + '</div>' +
-            '<div class="roomjoin" onclick="openRoomDetail(\'' + room.id + '\')">' + (status === 'open' ? 'Join Table' : 'Enter Table') + '</div>';
+        const head = roomEl('div', 'room-head');
+        head.appendChild(roomEl('span', 'roomname', room.name || 'Room'));
+        head.appendChild(roomEl('span', 'roomstatus ' + status, status === 'open' ? 'Open' : 'In Progress'));
 
+        const join = roomEl('div', 'roomjoin', status === 'open' ? 'Join Table' : 'Enter Table');
+        join.onclick = function() { openRoomDetail(room.id); };
+
+        card.appendChild(head);
+        card.appendChild(roomEl('div', 'roommeta', roomMetaLine(room)));
+        card.appendChild(join);
         listEl.appendChild(card);
     });
 }
@@ -184,33 +211,63 @@ function createRoomInline() {
     });
 }
 
-function joinRoomByCode() {
+// Pure join: takes the code as an argument and returns a Promise. Previously
+// this read #room-code-input directly, which forced the deep-link path to stuff
+// the code into a hidden DOM node before calling it — and silently lost the
+// code whenever that input wasn't in the DOM.
+function joinRoomByCode(code) {
     const user = window.egUser;
-    if (!user) { openSignInModal(); return; }
-    const input = document.getElementById('room-code-input');
-    const code = (input.value || '').trim().toUpperCase();
-    if (!code) return;
+    if (!user) { openSignInModal(); return Promise.resolve(false); }
+    code = (code || '').trim().toUpperCase();
+    if (!code) return Promise.resolve(false);
 
-    firebaseSafe(function() {
+    return firebaseSafe(function() {
         return db.collection('rooms').where('code', '==', code).limit(1).get().then(function(snap) {
-            if (snap.empty) { showToast('No room found with that code.'); return; }
+            if (snap.empty) {
+                showToast('That invite link is no longer valid.');
+                return false;
+            }
             const roomDoc = snap.docs[0];
-            return db.collection('rooms').doc(roomDoc.id).update({
-                memberUids: firebase.firestore.FieldValue.arrayUnion(user.uid),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(function() {
-                return db.collection('rooms').doc(roomDoc.id).collection('members').doc(user.uid).set({
-                    displayName: user.displayName || '',
-                    netProfit: balance - 500
+            const roomName = roomDoc.data().name || 'the room';
+            const alreadyMember = (roomDoc.data().memberUids || []).indexOf(user.uid) !== -1;
+
+            // Re-clicking your own link must not re-append: the security rule
+            // requires memberUids == existing.concat([uid]), so a duplicate
+            // append is rejected outright.
+            const roster = alreadyMember ? Promise.resolve() :
+                db.collection('rooms').doc(roomDoc.id).update({
+                    memberUids: firebase.firestore.FieldValue.arrayUnion(user.uid),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(function() {
+                    return db.collection('rooms').doc(roomDoc.id).collection('members').doc(user.uid).set({
+                        displayName: user.displayName || '',
+                        netProfit: balance - 500,
+                        bestStreak: bestStreak,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
                 });
-            }).then(function() {
-                input.value = '';
+
+            return roster.then(function() {
                 closeRoomModal();
-                showToast('Joined ' + (roomDoc.data().name || 'the room') + '!');
-                loadMyRooms();
+                if (!alreadyMember) showToast('Joined ' + roomName + '!');
+                return loadMyRooms().then(function() {
+                    openRoomDetail(roomDoc.id);
+                    return true;
+                });
             });
         });
-    }, function() { showToast('Could not join room — try again.'); });
+    // firebaseSafe returns null if the operation throws synchronously, so
+    // normalise to a Promise — callers chain .then() on this.
+    }, function() { showToast('Could not join room — try again.'); }) || Promise.resolve(false);
+}
+
+// DOM entry point for the "Got a code from a friend?" field.
+function submitRoomCodeInput() {
+    const input = document.getElementById('room-code-input');
+    if (!input) return;
+    const code = (input.value || '').trim().toUpperCase();
+    if (!code) return;
+    joinRoomByCode(code).then(function(ok) { if (ok) input.value = ''; });
 }
 
 function openRoomDetail(roomId) {

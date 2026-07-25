@@ -500,7 +500,9 @@
 }
 
 .card.held .held-badge,
-.card.winning .win-badge {
+.card.winning .win-badge,
+.card.second-pair .win-badge,
+.card.third-match .win-badge {
     opacity: 1;
 }
 
@@ -1015,43 +1017,6 @@
     color: var(--gold);
 }
 
-/* --- Invite friends --- */
-.invite-row {
-    display: flex;
-    gap: 8px;
-}
-
-.invite-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    padding: 12px 8px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s ease;
-}
-
-.invite-btn:active {
-    background: var(--felt-600);
-}
-
-.invite-btn.whatsapp {
-    background: rgba(37, 211, 102, 0.12);
-    border-color: rgba(37, 211, 102, 0.35);
-    color: #25d366;
-}
-
-.invite-btn.whatsapp:active {
-    background: rgba(37, 211, 102, 0.22);
-}
-
 .invite-icon {
     font-size: 16px;
     line-height: 1;
@@ -1323,6 +1288,10 @@
     font-weight: 600;
     cursor: pointer;
     margin-top: 10px;
+}
+
+.room-stake-row {
+    margin: 10px 0;
 }
 
 .room-stake-select {
