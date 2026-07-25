@@ -9,6 +9,9 @@ on:
       body:
         description: Notification body
         required: true
+      platform:
+        description: Platform filter (ios / android / web, blank = all)
+        required: false
 
 jobs:
   broadcast:
@@ -33,4 +36,5 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
           BROADCAST_TITLE: ${{ inputs.title }}
           BROADCAST_BODY: ${{ inputs.body }}
+          BROADCAST_PLATFORM: ${{ inputs.platform }}
         run: node scripts/push/broadcastAll.js
