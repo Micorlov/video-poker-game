@@ -134,9 +134,30 @@ Given the simulated gambling content, target audience should exclude children:
 
 ---
 
-## Next steps
+## 6. Sign-in details
 
-Tell me which of the above you want me to actually paste into Play Console (I'll do it section by section and show you before hitting any Save/Submit), and let me know:
-1. Where you want the privacy policy hosted (I can add it to your existing GitHub Pages site).
-2. Whether Firebase Analytics/Crashlytics or any ad SDK is enabled that I missed.
-3. Confirm the "no real-money chip purchases" fact for the content rating section.
+- Is login required to access the app? **No** — core gameplay is fully playable without signing in (native apps have a "Continue as Guest" option; only the web build requires Google sign-in to finish onboarding).
+- Does the app have restricted access requiring credentials? **No.**
+- If Play Console still requests reviewer credentials: sign in with any Google account via the in-app "Sign in with Google" button — no special test account is needed since there's no gated content.
+
+## 7. Ads
+
+Does your app contain ads? **No** — confirmed, no ad SDK (AdMob or otherwise) anywhere in the codebase.
+
+## 8. Financial features
+
+Does your app include purchases of digital goods or facilitate real-money transactions? **No** — confirmed, no billing/IAP SDK present. Chips are free and cannot be purchased with real money.
+
+## 9. Government apps
+
+Is this a government app? **No.**
+
+## 10. Health
+
+Does your app provide health-related services or content? **No.**
+
+## Status
+
+- ✅ Privacy policy hosted live at https://micorlov.github.io/video-poker-game/privacy-policy.html
+- ✅ Confirmed via codebase: no ads SDK, no analytics/Crashlytics, no IAP/billing SDK, sign-in is Google + Facebook only (Apple Sign-In package is an unused dependency — removed the misleading Apple mention from the privacy policy).
+- ⏳ Everything above still needs to be pasted into Play Console by you — Google sign-in for Play Console itself requires your credentials, which this session won't handle.
