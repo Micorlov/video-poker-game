@@ -12,3 +12,4 @@ android/local.properties
 android/keystore.properties
 android/app/*.jks
 android/app/google-services.json
+android/app/google-services.json.bak
