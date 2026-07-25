@@ -61,6 +61,14 @@ async function broadcastAll(title, body, platform) {
 
   if (entries.length === 0) {
     console.log(`No registered device tokens found${platform ? ` for platform "${platform}"` : ''}.`);
+    if (platform) {
+      const allSnap = await db.collectionGroup('fcmTokens').get();
+      const counts = tokenEntries(allSnap).reduce((acc, entry) => {
+        acc[entry.platform] = (acc[entry.platform] || 0) + 1;
+        return acc;
+      }, {});
+      console.log('Actual platform breakdown of all registered tokens:', JSON.stringify(counts));
+    }
     return;
   }
 
