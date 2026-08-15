@@ -262,6 +262,9 @@ function renderPayouts() {
 }
 
 function setBet(amount) {
+    // The stake is charged at deal time but the payout is computed at draw
+    // time, so it must stay locked for the duration of the hand.
+    if (gameState !== 'bet') return;
     bet = amount;
     updateTotalBetDisplay();
     document.querySelectorAll('.bet-row .bet-btn').forEach(btn => {
@@ -326,6 +329,9 @@ let allInPendingAmount = 0;
 let allInDragging = false;
 
 function openAllInSheet() {
+    // Blocked mid-hand for the same reason as setBet(). Checked before the
+    // remaining-uses test so a blocked attempt never spends a daily use.
+    if (gameState !== 'bet') return;
     if (getAllInRemaining() <= 0) {
         showToast('⛔ No ALL INs left — back tomorrow!');
         return;
@@ -357,6 +363,9 @@ function resetAllInSlider() {
 }
 
 function confirmAllIn() {
+    // openAllInSheet() already blocks mid-hand; guard the mutation itself too
+    // so a stale open sheet can never raise the stake or spend a daily use.
+    if (gameState !== 'bet') return;
     setBet(allInPendingAmount);
     const btn = document.getElementById('bet-allin');
     if (btn) btn.classList.add('selected');
