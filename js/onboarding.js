@@ -92,6 +92,12 @@ function renderOnboardingDots() {
     });
 }
 
+// The first screen names the reward rather than the direction — it is the
+// only place the chip grant is promised, so it earns the full-width label.
+const ONBOARDING_NEXT_LABELS = {
+    welcome: 'Start with 1,000 chips'
+};
+
 function updateOnboardingNav() {
     const backBtn = document.getElementById('onboarding-back');
     const nextBtn = document.getElementById('onboarding-next');
@@ -102,6 +108,8 @@ function updateOnboardingNav() {
 
     // Next: hidden on last screen (sign-in CTAs take over)
     nextBtn.classList.toggle('ob-hidden', onboardingIndex === ONBOARDING_STEPS.length - 1);
+
+    nextBtn.textContent = ONBOARDING_NEXT_LABELS[ONBOARDING_STEPS[onboardingIndex]] || 'Next';
 }
 
 function showOnboardingStep(index) {

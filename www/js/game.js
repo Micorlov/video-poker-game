@@ -249,6 +249,48 @@ function doRebuy() {
     if (window.pushDailyRebuy) pushDailyRebuy();
 }
 
+// Short labels for the always-visible ticker. The full names live in the
+// payout table, so this row only needs enough to be recognisable at a glance.
+const TICKER_LABELS = {
+    'Royal Flush': 'ROYAL',
+    'Straight Flush': 'S. FLUSH',
+    'Wild Royal Flush': 'W. ROYAL',
+    'Four Deuces': '4 DEUCES',
+    'Five of a Kind': 'FIVE',
+    'Four of a Kind': 'QUADS',
+    'Four Aces': '4 ACES',
+    'Four 2s-4s': 'QUADS 2-4',
+    'Four 5s-Ks': 'QUADS 5-K',
+    'Full House': 'HOUSE',
+    'Flush': 'FLUSH',
+    'Straight': 'STRAIGHT',
+    'Three of a Kind': 'TRIPS',
+    'Two Pair': 'TWO PAIR',
+    'Jacks or Better': 'JACKS+'
+};
+
+const TICKER_HAND_COUNT = 4;
+
+function renderPaytableTicker() {
+    const el = document.getElementById('paytable-ticker');
+    if (!el) return;
+    el.innerHTML = '';
+    HAND_ORDERS[gameVariant]
+        .filter(handType => currentPayouts[handType] > 0)
+        .slice(0, TICKER_HAND_COUNT)
+        .forEach(handType => {
+            const item = document.createElement('span');
+            item.className = 'paytable-ticker-item';
+            item.textContent = (TICKER_LABELS[handType] || handType.toUpperCase()) + ' ' + currentPayouts[handType] + '×';
+            el.appendChild(item);
+        });
+}
+
+function renderVariantLabel() {
+    const el = document.getElementById('variant-display');
+    if (el) el.textContent = VARIANT_LABELS[gameVariant];
+}
+
 function renderPayouts() {
     const payoutsEl = document.getElementById('payouts');
     payoutsEl.innerHTML = '';
@@ -259,6 +301,8 @@ function renderPayouts() {
         row.innerHTML = `<div class="payout-hand">${handType}</div><div class="payout-value">${currentPayouts[handType]}</div>`;
         payoutsEl.appendChild(row);
     });
+    renderPaytableTicker();
+    renderVariantLabel();
 }
 
 function setBet(amount) {
@@ -342,8 +386,16 @@ function openAllInSheet() {
     }
     const hands = multiHandCount || 1;
     allInPendingAmount = Math.max(1, Math.floor(balance / hands));
+    const stake = allInPendingAmount * hands;
     const amountEl = document.getElementById('allin-sheet-amount');
-    if (amountEl) amountEl.textContent = allInPendingAmount * hands;
+    if (amountEl) amountEl.textContent = stake.toLocaleString();
+
+    // A mid-table hand makes the upside concrete without promising a royal.
+    const potentialEl = document.getElementById('allin-sheet-potential');
+    if (potentialEl) {
+        const multiplier = currentPayouts['Full House'] || 0;
+        potentialEl.textContent = (allInPendingAmount * multiplier * hands).toLocaleString();
+    }
     resetAllInSlider();
     openSheet('allin-sheet');
 }
@@ -577,9 +629,11 @@ function renderMultiHands(extraResults) {
 function updateMainButton() {
     const btn = document.getElementById('main-btn');
     const isDraw = gameState === 'hold';
+    // Monochrome glyphs, not emoji — colour on this button belongs to the
+    // green surface alone.
     btn.innerHTML = isDraw
-        ? '<span class="main-btn-icon">🔄</span>Draw'
-        : '<span class="main-btn-icon">🎴</span>Deal';
+        ? '<span class="main-btn-icon">↻</span>Draw'
+        : '<span class="main-btn-icon">♠</span>Deal';
     btn.className = isDraw ? 'btn-secondary' : 'btn-primary';
 }
 
@@ -730,8 +784,15 @@ function draw() {
     const resultEl = document.getElementById('result');
 
     if (win > 0) {
-        resultEl.className = 'result-panel';
-        resultEl.innerHTML = `<span class="win">🎉 ${handType}! +${win} credits! 🎉</span>`;
+        resultEl.className = 'result-panel result-panel-win';
+        // Hand name, then the payout at display scale with its multiplier
+        // alongside — the number is the news, the multiplier is the context.
+        resultEl.innerHTML =
+            `<span class="result-hand">${handType}</span>` +
+            `<span class="result-amount">` +
+            `<span class="win">+${win.toLocaleString()}</span>` +
+            `<span class="result-mult">${currentPayouts[handType]}×</span>` +
+            `</span>`;
         document.getElementById('explanation').textContent = EXPLANATIONS[handType] || '';
     } else {
         resultEl.className = 'result-panel';

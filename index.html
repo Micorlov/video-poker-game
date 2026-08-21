@@ -27,11 +27,11 @@
     })();
     </script>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0c2419">
+    <meta name="theme-color" content="#04100C">
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
 <!-- BUILD_CSS_PLACEHOLDER -->
 </style>
@@ -44,10 +44,14 @@
     <div class="app">
         <section id="screen-play" class="screen active">
             <div class="brandrow">
-                <div class="app-title">Video Poker</div>
                 <div class="tpill" id="tournament-pill" onclick="toggleTournamentPill()">
-                    <span>⏱ #1 · 26:55</span>
+                    <span>Tournament 2</span>
+                    <span class="tour-time">26:55</span>
                     <span class="tour-chev" id="tour-chev">▾</span>
+                </div>
+                <div class="streak-pill" id="streak-pill">
+                    <span>Streak</span>
+                    <span class="streak-pill-value streak-count" id="streak-count">0</span>
                 </div>
             </div>
             <div class="texpand hidden" id="tournament-expand">
@@ -58,39 +62,30 @@
             <!-- Phase 2: Stories row -->
             <div class="stories-row" id="stories-row"></div>
 
-            <div class="panel balance-panel">
-                <div class="balance-row">
-                    <div>
-                        <div class="section-label">Balance</div>
-                        <div class="balance-value" id="balance">500</div>
-                    </div>
-                    <div>
-                        <div class="section-label">Total Bet</div>
-                        <div class="bet-value" id="bet-display">10</div>
-                    </div>
+            <div class="balance-head">
+                <div class="balance-head-main">
+                    <div class="section-label">Balance</div>
+                    <div class="balance-value" id="balance">500</div>
                 </div>
-                <div class="bet-row">
-                    <button class="bet-btn" onclick="setBet(5)" id="bet-5">5</button>
-                    <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
-                    <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
-                    <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
-                    <button class="bet-btn bet-btn-allin" onclick="openAllInSheet()" id="bet-allin">ALL IN<span class="allin-badge" id="allin-badge">1</span></button>
+                <div class="balance-head-side">
+                    <div class="section-label">Variant</div>
+                    <div class="variant-value" id="variant-display">Jacks or Better</div>
                 </div>
             </div>
+
+            <!-- Top payouts for the active variant, at a glance -->
+            <div class="paytable-ticker" id="paytable-ticker"></div>
 
             <div id="multi-hands"></div>
             <div class="hand" id="hand"></div>
-            <div class="hand-placeholder-text" id="hand-placeholder-text">Tap a card or Deal to start the hand</div>
+            <div class="hand-placeholder-text" id="hand-placeholder-text">Hold what you want, then set your bet before the draw.</div>
 
-            <div class="action-row">
-                <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">🎴</span>Deal</button>
-                <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
-            </div>
+            <div class="result-panel" id="result">Place your bet and deal to play</div>
+            <div class="explanation" id="explanation"></div>
 
             <div class="streak-bar" id="streak-bar">
                 <span>🔥</span>
                 <span>Win Streak</span>
-                <span class="streak-count" id="streak-count">0</span>
                 <span class="streak-bonus-tag hidden" id="streak-bonus-tag"></span>
             </div>
 
@@ -129,6 +124,29 @@
                 <button class="lb-expand-link hidden" id="lb-expand-link" onclick="toggleLeaderboardExpand()">Show Top 20 ▾</button>
             </div>
 
+            <!-- Stake, then draw. The bet sits next to the button that spends
+                 it so the last thing you decide is the last thing you touch. -->
+            <div class="bet-dock">
+                <div class="total-bet-row">
+                    <span class="section-label">Total bet</span>
+                    <span class="total-bet-value" id="bet-display">10</span>
+                </div>
+                <div class="bet-row">
+                    <button class="bet-btn" onclick="setBet(5)" id="bet-5">5</button>
+                    <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
+                    <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
+                    <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
+                    <button class="bet-btn bet-btn-allin" onclick="openAllInSheet()" id="bet-allin">
+                        <span class="allin-label">ALL IN</span>
+                        <span class="allin-badge" id="allin-badge">1</span>
+                    </button>
+                </div>
+                <div class="action-row">
+                    <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">↻</span>Deal</button>
+                    <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
+                </div>
+            </div>
+
             <div class="panel pwf-panel" id="pwf-panel">
                 <div class="play-rooms-header">
                     <span class="section-label">Play With Friends</span>
@@ -138,8 +156,6 @@
                 <button class="create-room-link" onclick="openRoomModal()">+ Create a Poker Room with Friends</button>
             </div>
 
-            <div class="result-panel" id="result">Place your bet and deal to play</div>
-            <div class="explanation" id="explanation"></div>
         </section>
 
         <section id="screen-stats" class="screen">
@@ -335,7 +351,7 @@
                 <span>Stats</span>
             </button>
             <button class="nav-btn" id="nav-friends" onclick="showScreen('friends')">
-                <span class="nav-icon">👥</span>
+                <span class="nav-icon">◍</span>
                 <span>Friends</span>
             </button>
             <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
@@ -440,16 +456,26 @@
     <!-- All In confirmation bottom sheet -->
     <div class="sheet-backdrop hidden" id="allin-sheet" onclick="if(event.target===this)closeAllInSheet()">
         <div class="sheet">
+            <div class="sheet-grabber"></div>
             <div class="sheet-header">
-                <span class="sheet-title">🔥 Go All In</span>
+                <span class="sheet-mark">♠</span>
+                <span class="sheet-heading">
+                    <span class="sheet-title">Go All In</span>
+                    <span class="sheet-eyebrow">Once per day</span>
+                </span>
                 <button class="sheet-close" onclick="closeAllInSheet()">✕</button>
             </div>
-            <div class="sheet-sub">You can use ALL IN once a day. This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on the next hand. Slide to confirm.</div>
+            <div class="sheet-sub">This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on the next hand.</div>
+            <div class="sheet-stat">
+                <span class="sheet-stat-label">Potential on Full House</span>
+                <span class="sheet-stat-value" id="allin-sheet-potential">0</span>
+            </div>
             <div class="allin-slider-track" id="allin-slider-track">
                 <div class="allin-slider-fill" id="allin-slider-fill"></div>
                 <span class="allin-slider-label">Slide to confirm</span>
                 <div class="allin-slider-thumb" id="allin-slider-thumb">»</div>
             </div>
+            <button class="sheet-dismiss" onclick="closeAllInSheet()">Not now</button>
         </div>
     </div>
 
@@ -492,11 +518,11 @@
                     <div class="ob-hands-list">
                         <div class="ob-hand-row ob-hand-row--highlight">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">10<br>♠</div>
-                                <div class="ob-mini-card">J<br>♠</div>
-                                <div class="ob-mini-card">Q<br>♠</div>
-                                <div class="ob-mini-card">K<br>♠</div>
-                                <div class="ob-mini-card">A<br>♠</div>
+                                <div class="ob-mini-card">10♠</div>
+                                <div class="ob-mini-card">J♠</div>
+                                <div class="ob-mini-card">Q♠</div>
+                                <div class="ob-mini-card">K♠</div>
+                                <div class="ob-mini-card">A♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Royal Flush</span>
@@ -505,11 +531,11 @@
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card ob-mini-card--red">5<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">6<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">7<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">8<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">5♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">6♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">7♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">8♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♥</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Straight Flush</span>
@@ -518,11 +544,11 @@
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">9<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♦</div>
-                                <div class="ob-mini-card">9<br>♣</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
-                                <div class="ob-mini-card">4<br>♣</div>
+                                <div class="ob-mini-card">9♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♦</div>
+                                <div class="ob-mini-card">9♣</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♥</div>
+                                <div class="ob-mini-card">4♣</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Four of a Kind</span>
@@ -531,11 +557,11 @@
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">K<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">K<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">K<br>♦</div>
-                                <div class="ob-mini-card">3<br>♣</div>
-                                <div class="ob-mini-card">3<br>♠</div>
+                                <div class="ob-mini-card">K♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">K♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">K♦</div>
+                                <div class="ob-mini-card">3♣</div>
+                                <div class="ob-mini-card">3♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Full House</span>
@@ -544,11 +570,11 @@
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">J<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">J<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">4<br>♦</div>
-                                <div class="ob-mini-card">8<br>♣</div>
-                                <div class="ob-mini-card">2<br>♠</div>
+                                <div class="ob-mini-card">J♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">J♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">4♦</div>
+                                <div class="ob-mini-card">8♣</div>
+                                <div class="ob-mini-card">2♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Jacks or Better</span>
@@ -589,17 +615,17 @@
                             <div class="ob-mockup-card">2♣</div>
                             <div class="ob-mockup-card ob-mockup-card--red">9♥</div>
                         </div>
-                        <div class="ob-mockup-draw-btn">↻ Draw</div>
                         <div class="ob-mockup-bets">
                             <div class="ob-mockup-bet">5</div>
                             <div class="ob-mockup-bet">10</div>
                             <div class="ob-mockup-bet ob-mockup-bet--active">20</div>
                             <div class="ob-mockup-bet">50</div>
-                            <div class="ob-mockup-bet ob-mockup-bet--allin" style="position:relative;">
+                            <div class="ob-mockup-bet ob-mockup-bet--allin">
                                 ALL IN
-                                <span class="ob-allin-badge">5</span>
+                                <span class="ob-allin-badge">1 left</span>
                             </div>
                         </div>
+                        <div class="ob-mockup-draw-btn">↻ Draw</div>
                     </div>
                     <div class="ob-screen-note">One free All-In per day — invite a friend to unlock another.</div>
                 </div>

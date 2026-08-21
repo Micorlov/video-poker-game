@@ -1,70 +1,115 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* =========================================================================
+   Royal Video Poker — 2026 "night glass" system.
+
+   One felt-green action colour, tabular numerals for money, and playing
+   cards as the only bright surface on screen. Everything else is dark
+   glass: low-alpha white fills over a deep green-black ground.
+   ========================================================================= */
+
 :root {
-    --felt-900: #0a2b1d;
-    --felt-800: #123825;
-    --felt-700: #1a452e;
-    --felt-600: #2a5a3d;
-    --bg-top: var(--felt-800);
-    --bg-bottom: var(--felt-900);
-    --panel: var(--felt-700);
-    --panel-solid: var(--felt-700);
-    --border: var(--felt-600);
-    --border-strong: var(--felt-600);
-    --gold: #d4af37;
-    --gold-600: #b8952e;
-    --gold-100: #f5e6b8;
-    --gold-dim: rgba(212, 175, 55, 0.1);
-    --green: #4caf7d;
-    --green-dim: rgba(76, 175, 125, 0.15);
-    --red: #e6533f;
-    --red-dim: rgba(230, 83, 63, 0.12);
-    --text: #f3ede0;
-    --text-muted: #b9c4b6;
-    --text-faint: rgba(185, 196, 182, 0.6);
-    --card-face-bg: #fdfdfb;
-    --card-black: #111111;
-    --card-red: #c41e3a;
-    --radius-lg: 16px;
-    --radius-md: 14px;
-    --radius-sm: 12px;
-    --nav-height: 64px;
+    /* Ground — the casino floor at night, lit from the top of the screen. */
+    --bg-base: #04100C;
+    --bg-mid: #071612;
+    --bg-glow: #123326;
+    --app-bg: radial-gradient(120% 60% at 50% 0%, var(--bg-glow) 0%, var(--bg-mid) 58%, var(--bg-base) 100%);
+
+    /* Action colour — the only saturated hue in the chrome. */
+    --green: #16C172;
+    --green-hover: #2FD886;
+    --green-light: #58E39B;
+    --green-ink: #04170E;
+    --green-dim: rgba(22, 193, 114, 0.12);
+    --green-line: rgba(22, 193, 114, 0.32);
+    --green-wash: rgba(207, 245, 225, 0.65);
+    --green-glow: 0 18px 40px -14px rgba(22, 193, 114, 0.85);
+
+    /* Reserved for time pressure and scarcity only (timers, entry fees). */
+    --gold: #E9C46A;
+    --gold-600: #D8AE47;
+    --gold-100: #F6E4B8;
+    --gold-dim: rgba(233, 196, 106, 0.1);
+    --gold-line: rgba(233, 196, 106, 0.28);
+
+    --red: #FF6BAA;
+    --red-dim: rgba(255, 107, 170, 0.12);
+
+    /* Glass surfaces — alpha over the ground, never an opaque panel. */
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-raised: rgba(255, 255, 255, 0.055);
+    --surface-hover: rgba(255, 255, 255, 0.09);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.1);
+
+    /* The floating navigation bar reads as frosted glass over the felt. */
+    --nav-glass: rgba(8, 26, 20, 0.84);
+    --nav-border: rgba(255, 255, 255, 0.09);
+
+    /* Legacy aliases — older rules still reach for these names. */
+    --panel: var(--surface);
+    --panel-solid: #0E2019;
+    --felt-900: var(--bg-base);
+    --felt-800: var(--bg-mid);
+    --felt-700: var(--bg-glow);
+    --felt-600: var(--border-strong);
+
+    --text: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.58);
+    --text-faint: rgba(255, 255, 255, 0.4);
+    --text-ghost: rgba(255, 255, 255, 0.32);
+
+    /* Cards are the one bright surface — paper white, never tinted. */
+    --card-face-bg: linear-gradient(180deg, #FFFFFF 0%, #EDEFF6 100%);
+    --card-black: #101322;
+    --card-red: #E01B44;
+
+    --radius-xl: 26px;
+    --radius-lg: 22px;
+    --radius-md: 20px;
+    --radius-sm: 14px;
+    --radius-xs: 12px;
+    --radius-card: 15px;
+
+    --nav-height: 78px;
+    --nav-gap: 30px;
+
+    --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+    --font-body: 'Instrument Sans', system-ui, 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
-/* --- Blue theme --- */
+/* --- Blue theme: same night glass, cooler action colour --- */
 body.theme-blue {
-    --felt-900: #081018;
-    --felt-800: #0f1c2b;
-    --felt-700: #172a3d;
-    --felt-600: #25405a;
-    --bg-top: var(--felt-800);
-    --bg-bottom: var(--felt-900);
-    --panel: var(--felt-700);
-    --panel-solid: var(--felt-700);
-    --border: var(--felt-600);
-    --border-strong: var(--felt-600);
-    --text: #f0f4f8;
-    --text-muted: #a9b7c4;
-    --text-faint: rgba(169, 183, 196, 0.6);
+    --bg-base: #040C14;
+    --bg-mid: #07131F;
+    --bg-glow: #12293F;
+    --green: #2E9BF0;
+    --green-hover: #55B4FA;
+    --green-light: #7FCBFF;
+    --green-ink: #04121E;
+    --green-dim: rgba(46, 155, 240, 0.12);
+    --green-line: rgba(46, 155, 240, 0.32);
+    --green-wash: rgba(207, 231, 245, 0.65);
+    --green-glow: 0 18px 40px -14px rgba(46, 155, 240, 0.85);
+    --nav-glass: rgba(8, 20, 32, 0.84);
+    --panel-solid: #0E1A26;
 }
 
-/* --- Crimson theme --- */
+/* --- Crimson theme: same night glass, warmer action colour --- */
 body.theme-crimson {
-    --felt-900: #1a0708;
-    --felt-800: #2b0c0d;
-    --felt-700: #3d1416;
-    --felt-600: #5c1e21;
-    --bg-top: var(--felt-800);
-    --bg-bottom: var(--felt-900);
-    --panel: var(--felt-700);
-    --panel-solid: var(--felt-700);
-    --border: var(--felt-600);
-    --border-strong: var(--felt-600);
-    --text: #f3ede0;
-    --text-muted: #c9b6b6;
-    --text-faint: rgba(201, 182, 182, 0.6);
-    --red: #ff6b6b;
-    --red-dim: rgba(255, 107, 107, 0.12);
+    --bg-base: #140406;
+    --bg-mid: #1D080B;
+    --bg-glow: #3A1218;
+    --green: #E8456A;
+    --green-hover: #F26A88;
+    --green-light: #FF93A9;
+    --green-ink: #1D0409;
+    --green-dim: rgba(232, 69, 106, 0.12);
+    --green-line: rgba(232, 69, 106, 0.32);
+    --green-wash: rgba(245, 214, 221, 0.65);
+    --green-glow: 0 18px 40px -14px rgba(232, 69, 106, 0.85);
+    --nav-glass: rgba(28, 8, 12, 0.84);
+    --panel-solid: #22090D;
 }
 
 html, body {
@@ -72,18 +117,42 @@ html, body {
 }
 
 body {
-    font-family: 'Manrope', 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom) 60%);
+    font-family: var(--font-body);
+    background: var(--bg-base);
     min-height: 100vh;
     color: var(--text);
     touch-action: manipulation;
     -webkit-user-select: none;
     user-select: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* The glow is painted behind the scrolling content so it stays anchored to
+   the top of the viewport rather than sliding away with the page. */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: var(--app-bg);
+    z-index: -1;
+    pointer-events: none;
 }
 
 button, input, select {
     font-family: inherit;
     color: inherit;
+}
+
+/* Money is compared column-to-column — never let digits reflow. */
+.balance-value,
+.bet-value,
+.stats-net-value,
+.stat-tile-value,
+.payout-value,
+.nearby-net,
+.friend-lb-net,
+.total-bet-value {
+    font-variant-numeric: tabular-nums;
 }
 
 .hidden { display: none !important; }

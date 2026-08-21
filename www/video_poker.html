@@ -27,81 +27,126 @@
     })();
     </script>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0c2419">
+    <meta name="theme-color" content="#04100C">
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
 
 /* --- styles/tokens.css --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* =========================================================================
+   Royal Video Poker — 2026 "night glass" system.
+
+   One felt-green action colour, tabular numerals for money, and playing
+   cards as the only bright surface on screen. Everything else is dark
+   glass: low-alpha white fills over a deep green-black ground.
+   ========================================================================= */
+
 :root {
-    --felt-900: #0a2b1d;
-    --felt-800: #123825;
-    --felt-700: #1a452e;
-    --felt-600: #2a5a3d;
-    --bg-top: var(--felt-800);
-    --bg-bottom: var(--felt-900);
-    --panel: var(--felt-700);
-    --panel-solid: var(--felt-700);
-    --border: var(--felt-600);
-    --border-strong: var(--felt-600);
-    --gold: #d4af37;
-    --gold-600: #b8952e;
-    --gold-100: #f5e6b8;
-    --gold-dim: rgba(212, 175, 55, 0.1);
-    --green: #4caf7d;
-    --green-dim: rgba(76, 175, 125, 0.15);
-    --red: #e6533f;
-    --red-dim: rgba(230, 83, 63, 0.12);
-    --text: #f3ede0;
-    --text-muted: #b9c4b6;
-    --text-faint: rgba(185, 196, 182, 0.6);
-    --card-face-bg: #fdfdfb;
-    --card-black: #111111;
-    --card-red: #c41e3a;
-    --radius-lg: 16px;
-    --radius-md: 14px;
-    --radius-sm: 12px;
-    --nav-height: 64px;
+    /* Ground — the casino floor at night, lit from the top of the screen. */
+    --bg-base: #04100C;
+    --bg-mid: #071612;
+    --bg-glow: #123326;
+    --app-bg: radial-gradient(120% 60% at 50% 0%, var(--bg-glow) 0%, var(--bg-mid) 58%, var(--bg-base) 100%);
+
+    /* Action colour — the only saturated hue in the chrome. */
+    --green: #16C172;
+    --green-hover: #2FD886;
+    --green-light: #58E39B;
+    --green-ink: #04170E;
+    --green-dim: rgba(22, 193, 114, 0.12);
+    --green-line: rgba(22, 193, 114, 0.32);
+    --green-wash: rgba(207, 245, 225, 0.65);
+    --green-glow: 0 18px 40px -14px rgba(22, 193, 114, 0.85);
+
+    /* Reserved for time pressure and scarcity only (timers, entry fees). */
+    --gold: #E9C46A;
+    --gold-600: #D8AE47;
+    --gold-100: #F6E4B8;
+    --gold-dim: rgba(233, 196, 106, 0.1);
+    --gold-line: rgba(233, 196, 106, 0.28);
+
+    --red: #FF6BAA;
+    --red-dim: rgba(255, 107, 170, 0.12);
+
+    /* Glass surfaces — alpha over the ground, never an opaque panel. */
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-raised: rgba(255, 255, 255, 0.055);
+    --surface-hover: rgba(255, 255, 255, 0.09);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.1);
+
+    /* The floating navigation bar reads as frosted glass over the felt. */
+    --nav-glass: rgba(8, 26, 20, 0.84);
+    --nav-border: rgba(255, 255, 255, 0.09);
+
+    /* Legacy aliases — older rules still reach for these names. */
+    --panel: var(--surface);
+    --panel-solid: #0E2019;
+    --felt-900: var(--bg-base);
+    --felt-800: var(--bg-mid);
+    --felt-700: var(--bg-glow);
+    --felt-600: var(--border-strong);
+
+    --text: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.58);
+    --text-faint: rgba(255, 255, 255, 0.4);
+    --text-ghost: rgba(255, 255, 255, 0.32);
+
+    /* Cards are the one bright surface — paper white, never tinted. */
+    --card-face-bg: linear-gradient(180deg, #FFFFFF 0%, #EDEFF6 100%);
+    --card-black: #101322;
+    --card-red: #E01B44;
+
+    --radius-xl: 26px;
+    --radius-lg: 22px;
+    --radius-md: 20px;
+    --radius-sm: 14px;
+    --radius-xs: 12px;
+    --radius-card: 15px;
+
+    --nav-height: 78px;
+    --nav-gap: 30px;
+
+    --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+    --font-body: 'Instrument Sans', system-ui, 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
-/* --- Blue theme --- */
+/* --- Blue theme: same night glass, cooler action colour --- */
 body.theme-blue {
-    --felt-900: #081018;
-    --felt-800: #0f1c2b;
-    --felt-700: #172a3d;
-    --felt-600: #25405a;
-    --bg-top: var(--felt-800);
-    --bg-bottom: var(--felt-900);
-    --panel: var(--felt-700);
-    --panel-solid: var(--felt-700);
-    --border: var(--felt-600);
-    --border-strong: var(--felt-600);
-    --text: #f0f4f8;
-    --text-muted: #a9b7c4;
-    --text-faint: rgba(169, 183, 196, 0.6);
+    --bg-base: #040C14;
+    --bg-mid: #07131F;
+    --bg-glow: #12293F;
+    --green: #2E9BF0;
+    --green-hover: #55B4FA;
+    --green-light: #7FCBFF;
+    --green-ink: #04121E;
+    --green-dim: rgba(46, 155, 240, 0.12);
+    --green-line: rgba(46, 155, 240, 0.32);
+    --green-wash: rgba(207, 231, 245, 0.65);
+    --green-glow: 0 18px 40px -14px rgba(46, 155, 240, 0.85);
+    --nav-glass: rgba(8, 20, 32, 0.84);
+    --panel-solid: #0E1A26;
 }
 
-/* --- Crimson theme --- */
+/* --- Crimson theme: same night glass, warmer action colour --- */
 body.theme-crimson {
-    --felt-900: #1a0708;
-    --felt-800: #2b0c0d;
-    --felt-700: #3d1416;
-    --felt-600: #5c1e21;
-    --bg-top: var(--felt-800);
-    --bg-bottom: var(--felt-900);
-    --panel: var(--felt-700);
-    --panel-solid: var(--felt-700);
-    --border: var(--felt-600);
-    --border-strong: var(--felt-600);
-    --text: #f3ede0;
-    --text-muted: #c9b6b6;
-    --text-faint: rgba(201, 182, 182, 0.6);
-    --red: #ff6b6b;
-    --red-dim: rgba(255, 107, 107, 0.12);
+    --bg-base: #140406;
+    --bg-mid: #1D080B;
+    --bg-glow: #3A1218;
+    --green: #E8456A;
+    --green-hover: #F26A88;
+    --green-light: #FF93A9;
+    --green-ink: #1D0409;
+    --green-dim: rgba(232, 69, 106, 0.12);
+    --green-line: rgba(232, 69, 106, 0.32);
+    --green-wash: rgba(245, 214, 221, 0.65);
+    --green-glow: 0 18px 40px -14px rgba(232, 69, 106, 0.85);
+    --nav-glass: rgba(28, 8, 12, 0.84);
+    --panel-solid: #22090D;
 }
 
 html, body {
@@ -109,18 +154,42 @@ html, body {
 }
 
 body {
-    font-family: 'Manrope', 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom) 60%);
+    font-family: var(--font-body);
+    background: var(--bg-base);
     min-height: 100vh;
     color: var(--text);
     touch-action: manipulation;
     -webkit-user-select: none;
     user-select: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* The glow is painted behind the scrolling content so it stays anchored to
+   the top of the viewport rather than sliding away with the page. */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: var(--app-bg);
+    z-index: -1;
+    pointer-events: none;
 }
 
 button, input, select {
     font-family: inherit;
     color: inherit;
+}
+
+/* Money is compared column-to-column — never let digits reflow. */
+.balance-value,
+.bet-value,
+.stats-net-value,
+.stat-tile-value,
+.payout-value,
+.nearby-net,
+.friend-lb-net,
+.total-bet-value {
+    font-variant-numeric: tabular-nums;
 }
 
 .hidden { display: none !important; }
@@ -131,43 +200,95 @@ button, input, select {
     max-width: 460px;
     min-height: 100vh;
     margin: 0 auto;
-    padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) calc(var(--nav-height) + 24px) max(16px, env(safe-area-inset-left));
+    padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(var(--nav-height) + var(--nav-gap) + 40px) max(20px, env(safe-area-inset-left));
     position: relative;
 }
 
+/* --- Top status row: tournament timer on the left, streak on the right --- */
 .brandrow {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
+    gap: 10px;
+    margin-bottom: 18px;
 }
 
 .app-title {
-    font-size: 24px;
+    font-family: var(--font-display);
+    font-size: 22px;
     font-weight: 800;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.03em;
+}
+
+/* Status chips read as etched glass, not buttons — they carry state, and
+   only the countdown itself is allowed to use the scarcity gold. */
+.tpill,
+.streak-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
 }
 
 .tpill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--border-strong);
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 12px;
+    padding-left: 10px;
+}
+
+.tpill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px 2px rgba(22, 193, 114, 0.7);
+    flex-shrink: 0;
+}
+
+.tpill .tour-time {
+    font-size: 13px;
     font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
     color: var(--gold);
-    cursor: pointer;
+}
+
+.tour-chev {
+    font-size: 9px;
+    color: var(--text-faint);
+}
+
+.streak-pill {
+    cursor: default;
+}
+
+.streak-pill .streak-pill-value {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
 }
 
 .texpand {
     margin-bottom: 16px;
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 12px;
-    padding: 8px 10px;
-    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
     color: var(--text-muted);
     display: flex;
     justify-content: space-between;
@@ -182,13 +303,16 @@ button, input, select {
 }
 
 .screen-title {
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 16px;
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+    margin-bottom: 18px;
 }
 
 .panel {
-    background: var(--panel);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 16px;
@@ -199,19 +323,19 @@ button, input, select {
 }
 
 .section-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--text-muted);
-    margin: 20px 2px 8px;
+    color: var(--text-faint);
+    margin: 22px 2px 9px;
 }
 
 .section-label:first-child {
     margin-top: 0;
 }
 
-/* --- Bottom nav --- */
+/* --- Bottom nav: a floating glass pill, inset from every edge --- */
 .bottom-nav {
     position: fixed;
     left: 0;
@@ -220,43 +344,55 @@ button, input, select {
     z-index: 50;
     display: flex;
     justify-content: center;
-    gap: 0;
-    background: color-mix(in srgb, var(--felt-800) 92%, transparent);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-top: 1px solid var(--border);
-    padding: 8px max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    padding: 0 max(16px, env(safe-area-inset-right)) calc(var(--nav-gap) + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    pointer-events: none;
 }
 
 .bottom-nav-inner {
     width: 100%;
-    max-width: 460px;
+    max-width: 428px;
+    height: var(--nav-height);
     display: flex;
+    align-items: center;
+    padding: 0 8px;
+    border-radius: var(--radius-xl);
+    background: var(--nav-glass);
+    border: 1px solid var(--nav-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.9);
+    pointer-events: auto;
 }
 
 .nav-btn {
     flex: 1;
+    height: 66px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    justify-content: center;
+    gap: 6px;
     background: none;
     border: none;
-    padding: 6px 4px;
+    border-radius: var(--radius-md);
     color: var(--text-faint);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
+    letter-spacing: 0.05em;
     cursor: pointer;
+    transition: color 0.16s, background 0.16s;
     -webkit-tap-highlight-color: transparent;
 }
 
 .nav-btn .nav-icon {
-    font-size: 20px;
+    font-size: 22px;
     line-height: 1;
 }
 
 .nav-btn.active {
-    color: var(--gold);
+    color: var(--green);
+    background: var(--green-dim);
+    font-weight: 700;
 }
 
 
@@ -283,9 +419,9 @@ button, input, select {
 }
 
 .variant-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 .variant-btn.locked {
@@ -322,9 +458,9 @@ button, input, select {
 }
 
 .theme-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 /* --- Multi-hand picker --- */
@@ -347,9 +483,9 @@ button, input, select {
 }
 
 .multi-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 .multi-btn.locked {
@@ -443,7 +579,7 @@ button, input, select {
 }
 
 .payout-help-toggle.open {
-    color: var(--gold);
+    color: var(--green);
 }
 
 .payout-help {
@@ -484,86 +620,166 @@ button, input, select {
 }
 
 /* --- Balance / bet panel --- */
-.balance-panel {
-    margin-bottom: 12px;
-}
-
-.balance-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+.balance-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: 14px;
 }
 
-.balance-value {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--gold);
+.balance-head .section-label {
+    margin: 0 0 4px;
 }
 
-.bet-value {
-    font-size: 26px;
+.balance-head-side {
+    text-align: right;
+    padding-bottom: 6px;
+}
+
+/* The balance is the largest number on the screen — it anchors every other
+   figure, so it stays white rather than competing with the action colour. */
+.balance-value {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    color: var(--text);
+}
+
+.variant-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+/* --- Paytable ticker: the top few multipliers, always in view --- */
+.paytable-ticker {
+    display: flex;
+    gap: 18px;
+    padding: 9px 14px;
+    margin-bottom: 6px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.paytable-ticker::-webkit-scrollbar { display: none; }
+
+.paytable-ticker-item {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--text-ghost);
+    white-space: nowrap;
+}
+
+/* --- Bet dock: stake and draw, grouped at the end of the decision ---
+   The mock pins these to the bottom of a screen that fits in one viewport.
+   Here the page scrolls, so the dock sticks just above the nav instead —
+   the Draw button is never more than a thumb away, whatever is on screen. */
+.bet-dock {
+    position: sticky;
+    bottom: calc(var(--nav-height) + var(--nav-gap) + env(safe-area-inset-bottom) + 10px);
+    z-index: 40;
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: var(--radius-xl);
+    background: var(--nav-glass);
+    border: 1px solid var(--nav-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.9);
+}
+
+.total-bet-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.total-bet-row .section-label {
+    margin: 0;
+}
+
+.total-bet-value {
+    font-size: 15px;
     font-weight: 700;
-    color: var(--green);
 }
 
 .bet-row {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(4, 1fr) 1.15fr;
+    gap: 8px;
 }
 
 .bet-btn {
-    background: rgba(0, 0, 0, 0.25);
-    border: 1px solid var(--border);
+    height: 48px;
+    padding: 0 2px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
     border-radius: var(--radius-sm);
-    color: var(--text);
-    padding: 12px 2px;
-    font-size: 15px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 16px;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
     cursor: pointer;
+    transition: background 0.16s, color 0.16s, box-shadow 0.16s;
 }
 
+.bet-btn:hover {
+    background: var(--surface-hover);
+}
+
+/* Selection is a ring plus a wash, not a solid fill — the chips stay a row
+   of equals and only the Draw button carries a full green surface. */
 .bet-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: #0a1a10;
+    background: rgba(22, 193, 114, 0.22);
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    color: var(--text);
 }
 
 .bet-btn-allin {
-    position: relative;
-    background: linear-gradient(135deg, var(--gold-600), var(--gold));
-    border-color: var(--gold);
-    color: #2a1c02;
-    font-size: 11px;
-    letter-spacing: 0.3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    background: var(--green-dim);
+    border: 1px solid rgba(22, 193, 114, 0.45);
+    color: var(--green-light);
+}
+
+.allin-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
 }
 
 .allin-badge {
-    position: absolute;
-    top: -7px;
-    right: -7px;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 3px;
-    border-radius: 999px;
-    background: var(--red);
-    border: 1.5px solid var(--panel-solid, #0c2419);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 800;
-    line-height: 16px;
-    text-align: center;
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(255, 107, 170, 0.65);
+}
+
+.allin-badge::after {
+    content: ' left';
 }
 
 .bet-btn-allin.selected {
-    background: linear-gradient(135deg, var(--red), var(--gold));
-    border-color: var(--gold);
-    color: #2a0902;
+    background: rgba(22, 193, 114, 0.22);
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    color: var(--text);
 }
 
 .bet-btn-allin.depleted {
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--surface);
     border-color: var(--border);
     color: var(--text-faint);
     cursor: not-allowed;
@@ -573,11 +789,11 @@ button, input, select {
 /* --- All In slide-to-confirm --- */
 .allin-slider-track {
     position: relative;
-    height: 52px;
-    margin-top: 18px;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid var(--border);
+    height: 64px;
+    margin-top: 20px;
+    border-radius: var(--radius-md);
+    background: var(--green-dim);
+    border: 1px solid rgba(22, 193, 114, 0.35);
     overflow: hidden;
     -webkit-user-select: none;
     user-select: none;
@@ -588,7 +804,7 @@ button, input, select {
     position: absolute;
     inset: 0;
     width: 0;
-    background: linear-gradient(135deg, var(--gold-600), var(--gold));
+    background: linear-gradient(90deg, rgba(22, 193, 114, 0.35), rgba(22, 193, 114, 0));
 }
 
 .allin-slider-label {
@@ -597,10 +813,11 @@ button, input, select {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 700;
-    color: var(--text-muted);
-    letter-spacing: 0.02em;
+    color: var(--green-wash);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     pointer-events: none;
 }
 
@@ -608,17 +825,18 @@ button, input, select {
     position: absolute;
     top: 3px;
     left: 3px;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: var(--panel-solid);
-    border: 2px solid var(--gold);
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--green);
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--gold);
+    color: var(--green-ink);
     font-weight: 800;
-    font-size: 18px;
+    font-size: 20px;
+    box-shadow: 0 10px 26px -8px rgba(22, 193, 114, 0.9);
     cursor: grab;
     touch-action: none;
     transition: left 0.25s ease;
@@ -630,29 +848,28 @@ button, input, select {
 }
 
 .allin-slider-track.confirmed .allin-slider-label {
-    color: #2a1c02;
+    color: var(--green-ink);
 }
 
 /* --- Hand / cards --- */
 .hand {
     display: flex;
-    gap: 6px;
-    justify-content: center;
-    padding: 16px 0 8px;
+    gap: 9px;
+    justify-content: space-between;
+    padding: 20px 0 0;
 }
 
 .hand-placeholder-text {
     text-align: center;
     font-size: 12.5px;
     color: var(--text-faint);
-    margin-bottom: 4px;
+    margin-top: 10px;
 }
 
 .card {
     position: relative;
     flex: 1;
-    max-width: 78px;
-    aspect-ratio: 2 / 3;
+    aspect-ratio: 0.68;
     cursor: pointer;
     perspective: 600px;
     -webkit-tap-highlight-color: transparent;
@@ -675,17 +892,20 @@ button, input, select {
     position: absolute;
     inset: 0;
     backface-visibility: hidden;
-    border-radius: 12px;
+    border-radius: var(--radius-card);
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
+/* Cards are the only bright surface in the app. The face is paper, lifted
+   off the felt by a long shadow rather than a border. */
 .card-front {
     background: var(--card-face-bg);
     color: var(--card-black);
-    padding: 6%;
+    padding: 7px 8px;
     justify-content: center;
+    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85);
 }
 
 .card.red .card-front {
@@ -699,12 +919,10 @@ button, input, select {
     transform: rotateY(180deg);
 }
 
-.card.held {
-    transform: translateY(-6px);
-}
-
 .card.held .card-front {
-    box-shadow: 0 0 0 2px var(--gold);
+    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85),
+                0 0 0 2px var(--green),
+                0 0 22px -2px rgba(22, 193, 114, 0.8);
 }
 
 .card.unheld {
@@ -712,28 +930,31 @@ button, input, select {
 }
 
 .card.winning .card-front {
-    box-shadow: 0 0 0 2px var(--green), 0 0 16px rgba(90, 156, 111, 0.6);
+    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85), 0 0 0 2px var(--green);
 }
 
+/* Rank top-left, suit bottom-right: the diagonal reads as a real card even
+   at thumbnail size, where a stacked centre block turns to mush. */
 .card-face {
     flex: 1;
     min-height: 0;
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4%;
+    justify-content: space-between;
 }
 
 .card-face-rank {
-    font-size: clamp(20px, 5.8vw, 30px);
-    font-weight: 800;
+    font-family: var(--font-display);
+    font-size: clamp(22px, 7.4vw, 34px);
+    font-weight: 700;
     line-height: 1;
+    letter-spacing: -0.04em;
 }
 
 .card-face-suit {
-    font-size: clamp(18px, 5vw, 26px);
+    align-self: flex-end;
+    font-size: clamp(20px, 6.6vw, 30px);
     line-height: 1;
 }
 
@@ -743,23 +964,18 @@ button, input, select {
     left: 50%;
     transform: translateX(-50%);
     font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    padding: 2px 7px;
-    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 3px 8px;
+    border-radius: 6px;
     white-space: nowrap;
     z-index: 2;
     opacity: 0;
 }
 
-.held-badge {
-    background: var(--gold);
-    color: #1c1608;
-}
-
-.win-badge {
+.held-badge, .win-badge {
     background: var(--green);
-    color: #0a1a10;
+    color: var(--green-ink);
 }
 
 .card.held .held-badge,
@@ -823,61 +1039,67 @@ button, input, select {
 .action-row {
     display: flex;
     gap: 10px;
-    margin: 16px 0 4px;
+    margin-top: 14px;
 }
 
+/* The single green surface on the screen. Everything else is glass, so the
+   button that spends chips is impossible to mistake for anything else. */
 .btn-primary, .btn-secondary {
     flex: 1;
-    padding: 14px;
-    border-radius: var(--radius-sm);
+    height: 62px;
+    padding: 0 16px;
+    border-radius: var(--radius-md);
     border: none;
-    font-size: 15px;
+    font-family: var(--font-display);
+    font-size: 20px;
     font-weight: 700;
+    letter-spacing: -0.01em;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
+    transition: background 0.16s;
 }
 
 .main-btn-icon {
-    font-size: 18px;
+    font-size: 19px;
     line-height: 1;
 }
 
-.btn-primary {
-    background: var(--gold);
-    color: #1c1608;
-}
-
-.btn-primary:disabled {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-faint);
-}
-
-.btn-secondary {
+.btn-primary, .btn-secondary {
     background: var(--green);
-    color: #0a1a10;
+    color: var(--green-ink);
+    box-shadow: var(--green-glow);
 }
 
-.btn-secondary:disabled {
+.btn-primary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled) {
+    background: var(--green-hover);
+}
+
+.btn-primary:disabled, .btn-secondary:disabled {
     background: rgba(255, 255, 255, 0.08);
     color: var(--text-faint);
+    box-shadow: none;
 }
 
 .hint-btn {
-    flex: 0 0 48px;
-    background: var(--panel-solid);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: 18px;
+    flex: 0 0 62px;
+    height: 62px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.75);
     cursor: pointer;
-    opacity: 0.45;
+    opacity: 0.6;
+    transition: opacity 0.16s, box-shadow 0.16s;
 }
 
 .hint-btn.on {
     opacity: 1;
-    box-shadow: 0 0 0 2px var(--gold);
+    box-shadow: 0 0 0 2px var(--green);
 }
 
 .card.hint-suggest .card-front {
@@ -887,14 +1109,17 @@ button, input, select {
 .result-panel {
     min-height: 20px;
     text-align: center;
-    font-size: 13.5px;
-    color: var(--text-muted);
-    padding: 12px 4px 4px;
+    font-size: 15px;
+    color: var(--text-faint);
+    padding: 14px 4px 2px;
 }
 
 .result-panel .win {
-    color: var(--gold);
-    font-weight: 700;
+    color: var(--green);
+    font-weight: 800;
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: -0.03em;
 }
 
 .explanation {
@@ -909,12 +1134,14 @@ button, input, select {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-top: 12px;
-    padding: 8px;
-    border-radius: var(--radius-sm);
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: var(--radius-md);
     background: var(--gold-dim);
+    border: 1px solid var(--gold-line);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .streak-bar.active {
@@ -930,54 +1157,65 @@ button, input, select {
 .stats-toggle {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    gap: 4px;
+    padding: 4px;
     margin-bottom: 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
 }
 
 .stats-toggle-btn {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    color: var(--text);
-    padding: 9px 4px;
+    background: none;
+    border: none;
+    border-radius: 11px;
+    height: 36px;
+    color: rgba(255, 255, 255, 0.5);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
+    transition: background 0.16s, color 0.16s;
 }
 
 .stats-toggle-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    color: var(--green-ink);
+    font-weight: 700;
 }
 
 /* --- Unified leaderboard panel (Play tab): Friends / Hourly / Daily --- */
 .lb-tabs {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    gap: 3px;
+    padding: 3px;
     margin-bottom: 12px;
+    border-radius: var(--radius-xs);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .lb-tabs.hidden { display: none; }
 
 .lb-tab {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    color: var(--text);
-    padding: 7px 4px;
-    font-size: 12px;
-    font-weight: 700;
+    background: none;
+    border: none;
+    border-radius: 9px;
+    height: 26px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     cursor: pointer;
+    transition: background 0.16s, color 0.16s;
 }
 
 .lb-tab.hidden { display: none; }
 
 .lb-tab.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    color: var(--green-ink);
+    font-weight: 700;
 }
 
 .lb-expand-link {
@@ -988,7 +1226,7 @@ button, input, select {
     border-top: 1px solid var(--border);
     margin-top: 4px;
     padding-top: 10px;
-    color: var(--gold);
+    color: var(--text-faint);
     font-size: 12px;
     font-weight: 700;
     text-align: center;
@@ -1150,8 +1388,8 @@ button, input, select {
 .pwa-bar span { flex: 1; }
 
 .pwa-bar-yes, .pwa-bar-no {
-    background: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    color: var(--green-ink);
     border: none;
     border-radius: 8px;
     padding: 6px 10px;
@@ -1179,7 +1417,7 @@ button, input, select {
     align-items: center;
     gap: 12px;
     margin-top: 12px;
-    border: 1px solid var(--gold);
+    border: 1px solid var(--green-line);
     cursor: pointer;
 }
 
@@ -1188,8 +1426,8 @@ button, input, select {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--gold-dim);
-    color: var(--gold);
+    background: var(--green-dim);
+    color: var(--green-light);
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -1225,7 +1463,7 @@ button, input, select {
 .see-all-link {
     font-size: 12.5px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--text-faint);
     cursor: pointer;
 }
 
@@ -1263,7 +1501,7 @@ button, input, select {
     background: none;
     border: 1px dashed var(--border-strong);
     border-radius: var(--radius-sm);
-    color: var(--gold);
+    color: rgba(255, 255, 255, 0.72);
     font-size: 13.5px;
     font-weight: 700;
     padding: 12px;
@@ -1277,7 +1515,7 @@ button, input, select {
     font-size: 22px;
     font-weight: 800;
     letter-spacing: 0.2em;
-    color: var(--gold);
+    color: var(--green);
 }
 
 .invite-icon {
@@ -1319,7 +1557,7 @@ button, input, select {
 }
 
 .friend-row.me {
-    background: var(--gold-dim);
+    background: var(--green-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -1359,8 +1597,8 @@ button, input, select {
 .friend-you-tag {
     font-size: 9px;
     font-weight: 800;
-    color: #231a04;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -1447,8 +1685,8 @@ button, input, select {
     text-align: center;
     padding: 9px 0;
     border-radius: 8px;
-    background: var(--gold);
-    color: #fff;
+    background: var(--green);
+    color: var(--green-ink);
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
@@ -1567,6 +1805,52 @@ button, input, select {
     font-size: 14px;
 }
 
+/* --- Win result: the hand, then the payout at display scale --- */
+.result-panel-win {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-top: 18px;
+}
+
+.result-hand {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    color: var(--text);
+}
+
+.result-amount {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.result-panel-win .win {
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+}
+
+.result-mult {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-faint);
+}
+
+/* Long hand names would otherwise run past the card into its neighbour. */
+.win-badge {
+    max-width: 132%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 8.5px;
+    letter-spacing: 0.04em;
+}
+
 
 /* --- styles/social.css --- */
 /* ========================================================================
@@ -1602,7 +1886,7 @@ button, input, select {
     width: 56px;
     height: 56px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    background: linear-gradient(135deg, var(--green), var(--green-light));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1634,14 +1918,14 @@ button, input, select {
     width: 100%;
     height: 100%;
     border-radius: 10px;
-    background: var(--bg-top);
+    background: var(--bg-glow);
     color: var(--text);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
     font-size: 15px;
-    border: 2px solid var(--bg-bottom);
+    border: 2px solid var(--bg-base);
     overflow: hidden;
 }
 
@@ -1789,11 +2073,12 @@ button, input, select {
 }
 
 .story-hand-name {
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 800;
-    color: var(--gold);
+    letter-spacing: -0.03em;
+    color: var(--text);
     text-align: center;
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-display);
 }
 
 .story-cards {
@@ -1836,7 +2121,7 @@ button, input, select {
 .story-payout {
     font-size: 14px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--green);
     text-align: center;
 }
 
@@ -1861,17 +2146,22 @@ button, input, select {
 }
 
 .nearby-panel .panel-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: 0.03em;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-faint);
+    letter-spacing: 0.18em;
     text-transform: uppercase;
 }
 
 .nearby-panel .panel-sub {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--green-light);
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(22, 193, 114, 0.16);
+    border: 1px solid var(--green-line);
 }
 
 .champ-countdown {
@@ -1893,7 +2183,7 @@ button, input, select {
 }
 
 .nearby-row.me {
-    background: var(--gold-dim);
+    background: var(--green-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -1916,7 +2206,7 @@ button, input, select {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    background: var(--surface-hover);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2000,7 +2290,7 @@ button, input, select {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px 12px;
@@ -2043,8 +2333,8 @@ button, input, select {
 .mr-join {
     font-size: 12px;
     font-weight: 700;
-    color: #fff;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 6px 12px;
     border-radius: 999px;
     cursor: pointer;
@@ -2059,7 +2349,7 @@ button, input, select {
     padding: 11px 0;
     border-radius: 10px;
     border: 1.5px dashed var(--border);
-    color: var(--gold);
+    color: rgba(255, 255, 255, 0.72);
     font-weight: 700;
     font-size: 12px;
     cursor: pointer;
@@ -2072,7 +2362,7 @@ button, input, select {
 .see-all-link {
     font-size: 11px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--text-faint);
     cursor: pointer;
 }
 
@@ -2091,8 +2381,8 @@ button, input, select {
 .invite-pill {
     font-size: 13px;
     font-weight: 700;
-    color: #fff;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 8px 14px;
     border-radius: 999px;
     cursor: pointer;
@@ -2112,27 +2402,31 @@ button, input, select {
 
 .sheet {
     width: 100%;
-    background: var(--panel-solid);
-    border-radius: 20px 20px 0 0;
+    background: linear-gradient(180deg, #0E2019 0%, #08130F 100%);
+    border-radius: 32px 32px 0 0;
     padding: 20px 18px max(28px, env(safe-area-inset-bottom));
     box-sizing: border-box;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    box-shadow: 0 -30px 60px -20px rgba(22, 193, 114, 0.35);
     max-width: 460px;
     margin: 0 auto;
+    border-top: 1px solid rgba(22, 193, 114, 0.28);
 }
 
 .sheet-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 16px;
+    gap: 12px;
 }
 
 .sheet-title {
-    font-size: 17px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: 800;
     color: var(--text);
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-display);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
 }
 
 .sheet-close {
@@ -2146,9 +2440,10 @@ button, input, select {
 }
 
 .sheet-sub {
-    font-size: 13px;
-    color: var(--text-muted);
+    font-size: 14.5px;
+    color: rgba(255, 255, 255, 0.62);
     margin-bottom: 16px;
+    line-height: 1.55;
 }
 
 .sheet-link-row {
@@ -2159,7 +2454,7 @@ button, input, select {
 
 .sheet-link-text {
     flex: 1;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px 12px;
@@ -2174,8 +2469,8 @@ button, input, select {
 .sheet-copy-btn {
     font-size: 12px;
     font-weight: 700;
-    color: var(--gold);
-    border: 1px solid var(--gold);
+    color: var(--green);
+    border: 1px solid var(--green-line);
     padding: 9px 12px;
     border-radius: 10px;
     cursor: pointer;
@@ -2189,7 +2484,7 @@ button, input, select {
 .sheet-copy-btn.copied {
     background: var(--green);
     border-color: var(--green);
-    color: #fff;
+    color: var(--green-ink);
 }
 
 /* Share chips (WhatsApp / Telegram) */
@@ -2243,7 +2538,7 @@ button, input, select {
     box-sizing: border-box;
     padding: 11px 12px;
     border-radius: 8px;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     color: var(--text);
     font-size: 13px;
@@ -2265,7 +2560,7 @@ button, input, select {
     text-align: center;
     padding: 10px 0;
     border-radius: 10px;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     font-weight: 700;
     font-size: 13px;
@@ -2275,9 +2570,9 @@ button, input, select {
 }
 
 .inline-room-form .room-form-stake.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 .inline-room-form .room-form-actions {
@@ -2297,8 +2592,8 @@ button, input, select {
 }
 
 .room-form-create-btn {
-    background: var(--gold);
-    color: #fff;
+    background: var(--green);
+    color: var(--green-ink);
 }
 
 .room-form-cancel-btn {
@@ -2321,7 +2616,7 @@ button, input, select {
 }
 
 .friend-leaderboard-row.me {
-    background: var(--gold-dim);
+    background: var(--green-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -2344,7 +2639,7 @@ button, input, select {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    background: var(--surface-hover);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2389,8 +2684,8 @@ button, input, select {
 .friend-you-tag {
     font-size: 9px;
     font-weight: 700;
-    color: #fff;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -2405,6 +2700,94 @@ button, input, select {
     border: 1px dashed var(--border);
     border-radius: 10px;
     margin-top: 6px;
+}
+
+/* Only you are marked in the action colour — every other player stays glass,
+   so your own row is findable without reading a single name. */
+.nearby-row.me .nearby-avatar,
+.friend-leaderboard-row.me .friend-lb-avatar {
+    background: var(--green);
+    color: var(--green-ink);
+}
+
+.stories-row:not(:empty) {
+    margin-bottom: 16px;
+}
+
+/* --- All In sheet: a considered decision, not a quick tap --- */
+.sheet-grabber {
+    width: 44px;
+    height: 4px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 auto 26px;
+}
+
+.sheet-mark {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    background: rgba(22, 193, 114, 0.14);
+    border: 1px solid var(--green-line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    color: var(--green-light);
+}
+
+.sheet-heading {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sheet-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+}
+
+/* The number that makes the stake concrete — the only gold in the sheet. */
+.sheet-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 22px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.sheet-stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.sheet-stat-value {
+    font-size: 17px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--gold);
+}
+
+.sheet-dismiss {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    padding: 4px;
+    background: none;
+    border: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-faint);
+    cursor: pointer;
 }
 
 
@@ -2516,7 +2899,7 @@ body.screen-shake {
 .onboarding-overlay {
     position: fixed;
     inset: 0;
-    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    background: var(--app-bg);
     z-index: 400;
     display: flex;
     flex-direction: column;
@@ -2546,21 +2929,24 @@ body.screen-shake {
 }
 
 /* ── Navigation bar ── */
+/* Dots ride above a full-width primary action, matching the deal screen's
+   button rhythm. When Back is hidden the CTA simply takes the whole row. */
 .onboarding-nav {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    padding: 16px 24px max(env(safe-area-inset-bottom, 0px), 24px);
+    gap: 14px 10px;
+    padding: 16px 24px max(env(safe-area-inset-bottom, 0px), 28px);
     flex-shrink: 0;
 }
 
 .onboarding-nav-arrow {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    border: 2px solid var(--border-strong);
-    background: none;
-    color: var(--text);
+    width: 62px;
+    height: 62px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-strong);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.75);
     font-size: 20px;
     cursor: pointer;
     display: flex;
@@ -2571,15 +2957,27 @@ body.screen-shake {
 }
 
 .onboarding-nav-arrow.ob-hidden {
-    opacity: 0;
-    pointer-events: none;
+    display: none;
+}
+
+.onboarding-dots {
+    order: -1;
+    width: 100%;
+    justify-content: center;
 }
 
 .onboarding-nav-arrow--next {
-    background: #3EC6A0;
-    border-color: #3EC6A0;
-    color: #0a2b1d;
+    background: var(--green);
+    border-color: transparent;
+    color: var(--green-ink);
     font-weight: 700;
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: -0.01em;
+    box-shadow: var(--green-glow);
+    flex: 1;
+    width: auto;
+    height: 62px;
 }
 
 .onboarding-dots {
@@ -2589,16 +2987,17 @@ body.screen-shake {
 }
 
 .onboarding-dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 999px;
-    background: var(--border-strong);
+    background: rgba(255, 255, 255, 0.2);
     transition: width 0.25s ease, background 0.25s ease;
 }
 
 .onboarding-dot.active {
-    width: 20px;
-    background: var(--gold);
+    width: 22px;
+    background: var(--green);
+    height: 5px;
 }
 
 /* ── Welcome screen ── */
@@ -2614,75 +3013,96 @@ body.screen-shake {
 
 .ob-card-fan {
     position: relative;
-    width: 180px;
-    height: 140px;
+    width: 100%;
+    max-width: 340px;
+    height: 200px;
     margin: 0 auto 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ob-fan-card {
     position: absolute;
-    width: 88px;
-    height: 120px;
+    width: 112px;
+    height: 158px;
     background: var(--card-face-bg);
-    border-radius: 10px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    border-radius: 18px;
+    box-shadow: 0 22px 44px -18px rgba(0, 0, 0, 0.9);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 22px;
+    justify-content: flex-start;
+    padding: 14px 12px;
+    font-weight: 700;
+    font-size: 34px;
+    letter-spacing: -0.04em;
     color: var(--card-black);
     line-height: 1;
-    gap: 2px;
+    gap: 4px;
+    font-family: var(--font-display);
 }
 
+/* Three spades fanned around a highlighted ace — the shape of the hand the
+   whole game is chasing, readable before a single word is read. */
 .ob-fan-card--left {
-    transform: rotate(-18deg);
-    left: 0;
-    top: 18px;
+    transform: rotate(-16deg) translateX(-88px);
+    align-items: flex-start;
     z-index: 1;
 }
 
 .ob-fan-card--center {
-    left: 50%;
-    transform: translateX(-50%);
-    top: 0;
+    width: 118px;
+    height: 168px;
+    justify-content: space-between;
+    align-items: stretch;
+    padding: 13px;
     z-index: 3;
+    box-shadow: 0 26px 50px -18px rgba(0, 0, 0, 0.95), 0 0 0 2px rgba(22, 193, 114, 0.55);
+}
+
+/* The centre card carries the corner layout of a real card face. */
+.ob-fan-card--center {
+    text-align: left;
+}
+
+.ob-fan-card--center .ob-fan-suit {
+    align-self: flex-end;
 }
 
 .ob-fan-card--right {
-    transform: rotate(18deg);
-    right: 0;
-    top: 18px;
+    transform: rotate(16deg) translateX(88px);
+    align-items: flex-end;
     z-index: 2;
 }
 
 .ob-fan-suit {
-    font-size: 16px;
+    font-size: 28px;
+    line-height: 1;
 }
 
 .ob-welcome-eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    color: var(--gold);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--text-faint);
     text-transform: uppercase;
     margin-bottom: 10px;
 }
 
 .ob-welcome-title {
-    font-size: 30px;
+    font-size: 44px;
     font-weight: 800;
     color: var(--text);
-    line-height: 1.1;
+    line-height: 1.02;
     margin-bottom: 14px;
+    font-family: var(--font-display);
+    letter-spacing: -0.035em;
 }
 
 .ob-welcome-subtitle {
-    font-size: 15px;
+    font-size: 18px;
     color: var(--text-muted);
-    line-height: 1.55;
+    line-height: 1.5;
     margin-bottom: 24px;
     max-width: 280px;
 }
@@ -2695,23 +3115,23 @@ body.screen-shake {
 }
 
 .ob-pill {
-    padding: 7px 14px;
+    padding: 7px 12px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 13.5px;
     font-weight: 600;
-    border: 1.5px solid var(--border-strong);
-    color: var(--text-muted);
-    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.62);
+    background: var(--surface-raised);
 }
 
 .ob-pill--gold {
-    border-color: var(--gold);
-    color: var(--gold);
+    border-color: rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.62);
 }
 
 .ob-pill--teal {
-    border-color: #3EC6A0;
-    color: #3EC6A0;
+    border-color: rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.62);
 }
 
 /* ── Content screens (hands / gameplay / leaderboard) ── */
@@ -2724,16 +3144,19 @@ body.screen-shake {
 }
 
 .ob-screen-title {
-    font-size: 24px;
+    font-size: 34px;
     font-weight: 800;
     color: var(--text);
     margin-bottom: 6px;
+    font-family: var(--font-display);
+    line-height: 1.06;
+    letter-spacing: -0.035em;
 }
 
 .ob-screen-subtitle {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-muted);
-    line-height: 1.5;
+    line-height: 1.55;
     margin-bottom: 20px;
 }
 
@@ -2756,40 +3179,44 @@ body.screen-shake {
 
 .ob-hand-row {
     display: flex;
-    align-items: center;
-    background: var(--panel);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    gap: 10px;
-    border: 1.5px solid transparent;
+    align-items: stretch;
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    gap: 12px;
+    border: 1px solid var(--border);
+    flex-direction: column;
 }
 
 .ob-hand-row--highlight {
-    border-color: var(--gold);
-    background: rgba(212, 175, 55, 0.08);
+    border-color: rgba(22, 193, 114, 0.3);
+    background: rgba(22, 193, 114, 0.1);
 }
 
 .ob-hand-cards {
     display: flex;
-    gap: 3px;
+    gap: 6px;
     flex-shrink: 0;
 }
 
 .ob-mini-card {
-    width: 26px;
-    height: 34px;
-    background: var(--card-face-bg);
-    border-radius: 4px;
+    width: auto;
+    height: auto;
+    background: #F3F5FA;
+    border-radius: 9px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    font-size: 9.5px;
+    font-size: 17px;
     font-weight: 700;
     color: var(--card-black);
     line-height: 1;
-    gap: 1px;
+    gap: 0;
     flex-shrink: 0;
+    font-family: var(--font-display);
+    flex: 1;
+    aspect-ratio: 0.7;
 }
 
 .ob-mini-card--red {
@@ -2801,6 +3228,7 @@ body.screen-shake {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
 }
 
 .ob-hand-name {
@@ -2810,9 +3238,10 @@ body.screen-shake {
 }
 
 .ob-hand-payout {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--gold);
+    font-size: 20px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: var(--font-display);
 }
 
 /* ── Gameplay mockup (screen 3) ── */
@@ -2846,7 +3275,8 @@ body.screen-shake {
 .ob-mockup-stat-value {
     font-size: 20px;
     font-weight: 800;
-    color: var(--gold);
+    color: var(--text);
+    font-family: var(--font-display);
 }
 
 .ob-mockup-stat--right {
@@ -2886,8 +3316,8 @@ body.screen-shake {
     top: -9px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--gold);
-    color: #0a2b1d;
+    background: var(--green);
+    color: var(--green-ink);
     font-size: 8px;
     font-weight: 800;
     letter-spacing: 0.06em;
@@ -2899,15 +3329,16 @@ body.screen-shake {
 .ob-mockup-draw-btn {
     width: 100%;
     padding: 11px;
-    background: #3EC6A0;
+    background: var(--green);
     border: none;
     border-radius: var(--radius-sm);
-    color: #0a2b1d;
+    color: var(--green-ink);
     font-size: 15px;
     font-weight: 700;
     margin-bottom: 10px;
     cursor: default;
     pointer-events: none;
+    margin-top: 12px;
 }
 
 .ob-mockup-bets {
@@ -2917,7 +3348,7 @@ body.screen-shake {
 
 .ob-mockup-bet {
     flex: 1;
-    padding: 7px 2px;
+    padding: 0 4px;
     background: var(--felt-600);
     border: none;
     border-radius: 8px;
@@ -2926,58 +3357,88 @@ body.screen-shake {
     font-weight: 600;
     cursor: default;
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 38px;
 }
 
 .ob-mockup-bet--active {
-    background: #3EC6A0;
-    color: #0a2b1d;
+    background: rgba(22, 193, 114, 0.22);
+    color: var(--text);
+    box-shadow: 0 0 0 2px var(--green);
+    border-color: transparent;
 }
 
 .ob-mockup-bet--allin {
-    background: var(--gold);
-    color: #0a2b1d;
+    background: var(--green-dim);
+    color: var(--green-light);
     position: relative;
+    border: 1px solid rgba(22, 193, 114, 0.45);
+    flex-direction: column;
+    gap: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
 }
 
 .ob-allin-badge {
-    position: absolute;
+    position: static;
     top: -6px;
     right: -3px;
-    background: var(--red);
-    color: white;
-    font-size: 8px;
-    font-weight: 800;
+    background: none;
+    color: rgba(255, 107, 170, 0.65);
+    font-size: 9px;
+    font-weight: 600;
     width: 14px;
     height: 14px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
+    padding: 0;
+    letter-spacing: 0;
+    white-space: nowrap;
 }
 
 /* ── Leaderboard mockup (screen 4) ── */
 .ob-lb-tabs {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     margin-bottom: 14px;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
 }
 
 .ob-lb-tab {
-    padding: 7px 16px;
-    border-radius: 999px;
-    border: 1.5px solid var(--border-strong);
+    padding: 0;
+    border-radius: 11px;
+    border: none;
     background: none;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.5);
     font-size: 13px;
     font-weight: 600;
     cursor: default;
     pointer-events: none;
+    flex: 1;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ob-lb-tab--active {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #0a2b1d;
+    background: var(--green);
+    border-color: transparent;
+    color: var(--green-ink);
+    font-weight: 700;
 }
 
 .ob-lb-header {
@@ -3014,7 +3475,7 @@ body.screen-shake {
 }
 
 .ob-lb-row--you {
-    background: rgba(62, 198, 160, 0.1);
+    background: rgba(22, 193, 114, 0.12);
     border: 1px solid rgba(62, 198, 160, 0.25);
 }
 
@@ -3030,8 +3491,8 @@ body.screen-shake {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: var(--gold);
-    color: #0a2b1d;
+    background: var(--green);
+    color: var(--green-ink);
     font-size: 13px;
     font-weight: 800;
     display: flex;
@@ -3041,8 +3502,8 @@ body.screen-shake {
 }
 
 .ob-lb-avatar--dim {
-    background: var(--felt-600);
-    color: var(--text-muted);
+    background: var(--surface-hover);
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .ob-lb-name {
@@ -3083,10 +3544,13 @@ body.screen-shake {
 }
 
 .ob-push-title {
-    font-size: 24px;
+    font-size: 40px;
     font-weight: 800;
     color: var(--text);
     margin-bottom: 10px;
+    font-family: var(--font-display);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
 }
 
 .ob-push-subtitle {
@@ -3120,13 +3584,13 @@ body.screen-shake {
 .ob-check-icon {
     width: 22px;
     height: 22px;
-    border-radius: 50%;
-    background: #3EC6A0;
+    border-radius: 7px;
+    background: rgba(22, 193, 114, 0.18);
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #0a2b1d;
+    color: var(--green-light);
     font-size: 13px;
     font-weight: 800;
 }
@@ -3135,20 +3599,23 @@ body.screen-shake {
     width: 100%;
     max-width: 300px;
     padding: 16px;
-    background: #3EC6A0;
+    background: var(--green);
     border: none;
-    border-radius: 999px;
-    color: #0a2b1d;
-    font-size: 16px;
+    border-radius: var(--radius-md);
+    color: var(--green-ink);
+    font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
+    font-family: var(--font-display);
+    box-shadow: var(--green-glow);
 }
 
+/* A quiet decline — the design never competes with its own primary action. */
 .ob-not-now {
     background: none;
     border: none;
-    color: var(--gold);
+    color: var(--text-faint);
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
@@ -3167,10 +3634,13 @@ body.screen-shake {
 }
 
 .ob-signin-title {
-    font-size: 26px;
+    font-size: 40px;
     font-weight: 800;
     color: var(--text);
     margin-bottom: 10px;
+    font-family: var(--font-display);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
 }
 
 .ob-signin-subtitle {
@@ -3187,28 +3657,41 @@ body.screen-shake {
     justify-content: center;
     gap: 10px;
     width: 100%;
-    max-width: 300px;
-    padding: 16px;
-    background: white;
+    max-width: 340px;
+    padding: 0 16px;
+    background: var(--green);
     border: none;
-    border-radius: 999px;
-    color: #111;
-    font-size: 16px;
+    border-radius: var(--radius-md);
+    color: var(--green-ink);
+    font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
+    font-family: var(--font-display);
+    box-shadow: var(--green-glow);
+    height: 62px;
 }
 
 .ob-guest-link {
-    background: none;
-    border: none;
-    color: var(--gold);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    color: rgba(255, 255, 255, 0.75);
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     padding: 6px;
-    text-decoration: underline;
+    text-decoration: none;
     text-underline-offset: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 56px;
+    margin-top: 12px;
+    border-radius: var(--radius-md);
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .ob-signin-error {
@@ -3216,6 +3699,10 @@ body.screen-shake {
     font-size: 13px;
     margin-bottom: 10px;
     min-height: 18px;
+}
+
+.ob-hand-row--highlight .ob-hand-payout {
+    color: var(--green-light);
 }
 
 
@@ -3229,10 +3716,14 @@ body.screen-shake {
     <div class="app">
         <section id="screen-play" class="screen active">
             <div class="brandrow">
-                <div class="app-title">Video Poker</div>
                 <div class="tpill" id="tournament-pill" onclick="toggleTournamentPill()">
-                    <span>⏱ #1 · 26:55</span>
+                    <span>Tournament 2</span>
+                    <span class="tour-time">26:55</span>
                     <span class="tour-chev" id="tour-chev">▾</span>
+                </div>
+                <div class="streak-pill" id="streak-pill">
+                    <span>Streak</span>
+                    <span class="streak-pill-value streak-count" id="streak-count">0</span>
                 </div>
             </div>
             <div class="texpand hidden" id="tournament-expand">
@@ -3243,39 +3734,30 @@ body.screen-shake {
             <!-- Phase 2: Stories row -->
             <div class="stories-row" id="stories-row"></div>
 
-            <div class="panel balance-panel">
-                <div class="balance-row">
-                    <div>
-                        <div class="section-label">Balance</div>
-                        <div class="balance-value" id="balance">500</div>
-                    </div>
-                    <div>
-                        <div class="section-label">Total Bet</div>
-                        <div class="bet-value" id="bet-display">10</div>
-                    </div>
+            <div class="balance-head">
+                <div class="balance-head-main">
+                    <div class="section-label">Balance</div>
+                    <div class="balance-value" id="balance">500</div>
                 </div>
-                <div class="bet-row">
-                    <button class="bet-btn" onclick="setBet(5)" id="bet-5">5</button>
-                    <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
-                    <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
-                    <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
-                    <button class="bet-btn bet-btn-allin" onclick="openAllInSheet()" id="bet-allin">ALL IN<span class="allin-badge" id="allin-badge">1</span></button>
+                <div class="balance-head-side">
+                    <div class="section-label">Variant</div>
+                    <div class="variant-value" id="variant-display">Jacks or Better</div>
                 </div>
             </div>
+
+            <!-- Top payouts for the active variant, at a glance -->
+            <div class="paytable-ticker" id="paytable-ticker"></div>
 
             <div id="multi-hands"></div>
             <div class="hand" id="hand"></div>
-            <div class="hand-placeholder-text" id="hand-placeholder-text">Tap a card or Deal to start the hand</div>
+            <div class="hand-placeholder-text" id="hand-placeholder-text">Hold what you want, then set your bet before the draw.</div>
 
-            <div class="action-row">
-                <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">🎴</span>Deal</button>
-                <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
-            </div>
+            <div class="result-panel" id="result">Place your bet and deal to play</div>
+            <div class="explanation" id="explanation"></div>
 
             <div class="streak-bar" id="streak-bar">
                 <span>🔥</span>
                 <span>Win Streak</span>
-                <span class="streak-count" id="streak-count">0</span>
                 <span class="streak-bonus-tag hidden" id="streak-bonus-tag"></span>
             </div>
 
@@ -3314,6 +3796,29 @@ body.screen-shake {
                 <button class="lb-expand-link hidden" id="lb-expand-link" onclick="toggleLeaderboardExpand()">Show Top 20 ▾</button>
             </div>
 
+            <!-- Stake, then draw. The bet sits next to the button that spends
+                 it so the last thing you decide is the last thing you touch. -->
+            <div class="bet-dock">
+                <div class="total-bet-row">
+                    <span class="section-label">Total bet</span>
+                    <span class="total-bet-value" id="bet-display">10</span>
+                </div>
+                <div class="bet-row">
+                    <button class="bet-btn" onclick="setBet(5)" id="bet-5">5</button>
+                    <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
+                    <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
+                    <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
+                    <button class="bet-btn bet-btn-allin" onclick="openAllInSheet()" id="bet-allin">
+                        <span class="allin-label">ALL IN</span>
+                        <span class="allin-badge" id="allin-badge">1</span>
+                    </button>
+                </div>
+                <div class="action-row">
+                    <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">↻</span>Deal</button>
+                    <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
+                </div>
+            </div>
+
             <div class="panel pwf-panel" id="pwf-panel">
                 <div class="play-rooms-header">
                     <span class="section-label">Play With Friends</span>
@@ -3323,8 +3828,6 @@ body.screen-shake {
                 <button class="create-room-link" onclick="openRoomModal()">+ Create a Poker Room with Friends</button>
             </div>
 
-            <div class="result-panel" id="result">Place your bet and deal to play</div>
-            <div class="explanation" id="explanation"></div>
         </section>
 
         <section id="screen-stats" class="screen">
@@ -3520,7 +4023,7 @@ body.screen-shake {
                 <span>Stats</span>
             </button>
             <button class="nav-btn" id="nav-friends" onclick="showScreen('friends')">
-                <span class="nav-icon">👥</span>
+                <span class="nav-icon">◍</span>
                 <span>Friends</span>
             </button>
             <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
@@ -3625,16 +4128,26 @@ body.screen-shake {
     <!-- All In confirmation bottom sheet -->
     <div class="sheet-backdrop hidden" id="allin-sheet" onclick="if(event.target===this)closeAllInSheet()">
         <div class="sheet">
+            <div class="sheet-grabber"></div>
             <div class="sheet-header">
-                <span class="sheet-title">🔥 Go All In</span>
+                <span class="sheet-mark">♠</span>
+                <span class="sheet-heading">
+                    <span class="sheet-title">Go All In</span>
+                    <span class="sheet-eyebrow">Once per day</span>
+                </span>
                 <button class="sheet-close" onclick="closeAllInSheet()">✕</button>
             </div>
-            <div class="sheet-sub">You can use ALL IN once a day. This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on the next hand. Slide to confirm.</div>
+            <div class="sheet-sub">This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on the next hand.</div>
+            <div class="sheet-stat">
+                <span class="sheet-stat-label">Potential on Full House</span>
+                <span class="sheet-stat-value" id="allin-sheet-potential">0</span>
+            </div>
             <div class="allin-slider-track" id="allin-slider-track">
                 <div class="allin-slider-fill" id="allin-slider-fill"></div>
                 <span class="allin-slider-label">Slide to confirm</span>
                 <div class="allin-slider-thumb" id="allin-slider-thumb">»</div>
             </div>
+            <button class="sheet-dismiss" onclick="closeAllInSheet()">Not now</button>
         </div>
     </div>
 
@@ -3677,11 +4190,11 @@ body.screen-shake {
                     <div class="ob-hands-list">
                         <div class="ob-hand-row ob-hand-row--highlight">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">10<br>♠</div>
-                                <div class="ob-mini-card">J<br>♠</div>
-                                <div class="ob-mini-card">Q<br>♠</div>
-                                <div class="ob-mini-card">K<br>♠</div>
-                                <div class="ob-mini-card">A<br>♠</div>
+                                <div class="ob-mini-card">10♠</div>
+                                <div class="ob-mini-card">J♠</div>
+                                <div class="ob-mini-card">Q♠</div>
+                                <div class="ob-mini-card">K♠</div>
+                                <div class="ob-mini-card">A♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Royal Flush</span>
@@ -3690,11 +4203,11 @@ body.screen-shake {
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card ob-mini-card--red">5<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">6<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">7<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">8<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">5♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">6♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">7♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">8♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♥</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Straight Flush</span>
@@ -3703,11 +4216,11 @@ body.screen-shake {
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">9<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♦</div>
-                                <div class="ob-mini-card">9<br>♣</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
-                                <div class="ob-mini-card">4<br>♣</div>
+                                <div class="ob-mini-card">9♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♦</div>
+                                <div class="ob-mini-card">9♣</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♥</div>
+                                <div class="ob-mini-card">4♣</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Four of a Kind</span>
@@ -3716,11 +4229,11 @@ body.screen-shake {
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">K<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">K<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">K<br>♦</div>
-                                <div class="ob-mini-card">3<br>♣</div>
-                                <div class="ob-mini-card">3<br>♠</div>
+                                <div class="ob-mini-card">K♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">K♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">K♦</div>
+                                <div class="ob-mini-card">3♣</div>
+                                <div class="ob-mini-card">3♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Full House</span>
@@ -3729,11 +4242,11 @@ body.screen-shake {
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">J<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">J<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">4<br>♦</div>
-                                <div class="ob-mini-card">8<br>♣</div>
-                                <div class="ob-mini-card">2<br>♠</div>
+                                <div class="ob-mini-card">J♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">J♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">4♦</div>
+                                <div class="ob-mini-card">8♣</div>
+                                <div class="ob-mini-card">2♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Jacks or Better</span>
@@ -3774,17 +4287,17 @@ body.screen-shake {
                             <div class="ob-mockup-card">2♣</div>
                             <div class="ob-mockup-card ob-mockup-card--red">9♥</div>
                         </div>
-                        <div class="ob-mockup-draw-btn">↻ Draw</div>
                         <div class="ob-mockup-bets">
                             <div class="ob-mockup-bet">5</div>
                             <div class="ob-mockup-bet">10</div>
                             <div class="ob-mockup-bet ob-mockup-bet--active">20</div>
                             <div class="ob-mockup-bet">50</div>
-                            <div class="ob-mockup-bet ob-mockup-bet--allin" style="position:relative;">
+                            <div class="ob-mockup-bet ob-mockup-bet--allin">
                                 ALL IN
-                                <span class="ob-allin-badge">5</span>
+                                <span class="ob-allin-badge">1 left</span>
                             </div>
                         </div>
+                        <div class="ob-mockup-draw-btn">↻ Draw</div>
                     </div>
                     <div class="ob-screen-note">One free All-In per day — invite a friend to unlock another.</div>
                 </div>
@@ -6803,6 +7316,48 @@ function doRebuy() {
     if (window.pushDailyRebuy) pushDailyRebuy();
 }
 
+// Short labels for the always-visible ticker. The full names live in the
+// payout table, so this row only needs enough to be recognisable at a glance.
+const TICKER_LABELS = {
+    'Royal Flush': 'ROYAL',
+    'Straight Flush': 'S. FLUSH',
+    'Wild Royal Flush': 'W. ROYAL',
+    'Four Deuces': '4 DEUCES',
+    'Five of a Kind': 'FIVE',
+    'Four of a Kind': 'QUADS',
+    'Four Aces': '4 ACES',
+    'Four 2s-4s': 'QUADS 2-4',
+    'Four 5s-Ks': 'QUADS 5-K',
+    'Full House': 'HOUSE',
+    'Flush': 'FLUSH',
+    'Straight': 'STRAIGHT',
+    'Three of a Kind': 'TRIPS',
+    'Two Pair': 'TWO PAIR',
+    'Jacks or Better': 'JACKS+'
+};
+
+const TICKER_HAND_COUNT = 4;
+
+function renderPaytableTicker() {
+    const el = document.getElementById('paytable-ticker');
+    if (!el) return;
+    el.innerHTML = '';
+    HAND_ORDERS[gameVariant]
+        .filter(handType => currentPayouts[handType] > 0)
+        .slice(0, TICKER_HAND_COUNT)
+        .forEach(handType => {
+            const item = document.createElement('span');
+            item.className = 'paytable-ticker-item';
+            item.textContent = (TICKER_LABELS[handType] || handType.toUpperCase()) + ' ' + currentPayouts[handType] + '×';
+            el.appendChild(item);
+        });
+}
+
+function renderVariantLabel() {
+    const el = document.getElementById('variant-display');
+    if (el) el.textContent = VARIANT_LABELS[gameVariant];
+}
+
 function renderPayouts() {
     const payoutsEl = document.getElementById('payouts');
     payoutsEl.innerHTML = '';
@@ -6813,6 +7368,8 @@ function renderPayouts() {
         row.innerHTML = `<div class="payout-hand">${handType}</div><div class="payout-value">${currentPayouts[handType]}</div>`;
         payoutsEl.appendChild(row);
     });
+    renderPaytableTicker();
+    renderVariantLabel();
 }
 
 function setBet(amount) {
@@ -6896,8 +7453,16 @@ function openAllInSheet() {
     }
     const hands = multiHandCount || 1;
     allInPendingAmount = Math.max(1, Math.floor(balance / hands));
+    const stake = allInPendingAmount * hands;
     const amountEl = document.getElementById('allin-sheet-amount');
-    if (amountEl) amountEl.textContent = allInPendingAmount * hands;
+    if (amountEl) amountEl.textContent = stake.toLocaleString();
+
+    // A mid-table hand makes the upside concrete without promising a royal.
+    const potentialEl = document.getElementById('allin-sheet-potential');
+    if (potentialEl) {
+        const multiplier = currentPayouts['Full House'] || 0;
+        potentialEl.textContent = (allInPendingAmount * multiplier * hands).toLocaleString();
+    }
     resetAllInSlider();
     openSheet('allin-sheet');
 }
@@ -7131,9 +7696,11 @@ function renderMultiHands(extraResults) {
 function updateMainButton() {
     const btn = document.getElementById('main-btn');
     const isDraw = gameState === 'hold';
+    // Monochrome glyphs, not emoji — colour on this button belongs to the
+    // green surface alone.
     btn.innerHTML = isDraw
-        ? '<span class="main-btn-icon">🔄</span>Draw'
-        : '<span class="main-btn-icon">🎴</span>Deal';
+        ? '<span class="main-btn-icon">↻</span>Draw'
+        : '<span class="main-btn-icon">♠</span>Deal';
     btn.className = isDraw ? 'btn-secondary' : 'btn-primary';
 }
 
@@ -7284,8 +7851,15 @@ function draw() {
     const resultEl = document.getElementById('result');
 
     if (win > 0) {
-        resultEl.className = 'result-panel';
-        resultEl.innerHTML = `<span class="win">🎉 ${handType}! +${win} credits! 🎉</span>`;
+        resultEl.className = 'result-panel result-panel-win';
+        // Hand name, then the payout at display scale with its multiplier
+        // alongside — the number is the news, the multiplier is the context.
+        resultEl.innerHTML =
+            `<span class="result-hand">${handType}</span>` +
+            `<span class="result-amount">` +
+            `<span class="win">+${win.toLocaleString()}</span>` +
+            `<span class="result-mult">${currentPayouts[handType]}×</span>` +
+            `</span>`;
         document.getElementById('explanation').textContent = EXPLANATIONS[handType] || '';
     } else {
         resultEl.className = 'result-panel';
@@ -7913,6 +8487,12 @@ function renderOnboardingDots() {
     });
 }
 
+// The first screen names the reward rather than the direction — it is the
+// only place the chip grant is promised, so it earns the full-width label.
+const ONBOARDING_NEXT_LABELS = {
+    welcome: 'Start with 1,000 chips'
+};
+
 function updateOnboardingNav() {
     const backBtn = document.getElementById('onboarding-back');
     const nextBtn = document.getElementById('onboarding-next');
@@ -7923,6 +8503,8 @@ function updateOnboardingNav() {
 
     // Next: hidden on last screen (sign-in CTAs take over)
     nextBtn.classList.toggle('ob-hidden', onboardingIndex === ONBOARDING_STEPS.length - 1);
+
+    nextBtn.textContent = ONBOARDING_NEXT_LABELS[ONBOARDING_STEPS[onboardingIndex]] || 'Next';
 }
 
 function showOnboardingStep(index) {
