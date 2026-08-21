@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Debug-only entitlements.
+
+  Free personal development teams cannot provision Sign In with Apple or
+  Push Notifications, so a profile for com.micorlov.videopoker can never be
+  created while App.entitlements requests them — the device build fails at
+  GatherProvisioningInputs before it compiles anything.
+
+  This file deliberately requests neither, so Debug builds sign and install
+  on a personal team. Release still uses App.entitlements, so the App Store
+  build keeps push; nothing here has to be undone before submitting.
+
+  Consequence: push notifications do not work in Debug builds on device.
+  Once the team moves to a paid Apple Developer Program membership, point
+  the Debug configuration back at App.entitlements and delete this file.
+-->
+<plist version="1.0">
+<dict/>
+</plist>
