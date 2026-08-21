@@ -1451,3 +1451,9 @@
     font-size: 8.5px;
     letter-spacing: 0.04em;
 }
+
+/* Pair hands label only the first card of the pair; the other winning
+   cards keep an unlabelled badge element that must not paint. */
+.win-badge:empty {
+    display: none;
+}

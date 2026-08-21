@@ -682,7 +682,7 @@ function deal() {
     lastHandType = null;
     const resultEl = document.getElementById('result');
     resultEl.className = 'result-panel';
-    resultEl.textContent = 'Place your bet and deal to play';
+    resultEl.textContent = 'Hold what you want, then set your bet before the draw.';
     document.getElementById('explanation').innerHTML = '';
     if (window.vpRenderHints) vpRenderHints();
     triggerHaptic('MEDIUM');

@@ -85,9 +85,15 @@ function renderOnboardingDots() {
     const dots = document.getElementById('onboarding-dots');
     if (!dots) return;
     dots.innerHTML = '';
-    ONBOARDING_STEPS.forEach(function(_, i) {
+    // The push step never shows on web, so its dot must not render there —
+    // otherwise the bar shows six dots and skips one on the way through.
+    const visibleSteps = ONBOARDING_STEPS.filter(function(step) {
+        return step !== 'push' || onboardingIsNative();
+    });
+    const activeStep = ONBOARDING_STEPS[onboardingIndex];
+    visibleSteps.forEach(function(step) {
         const dot = document.createElement('span');
-        dot.className = 'onboarding-dot' + (i === onboardingIndex ? ' active' : '');
+        dot.className = 'onboarding-dot' + (step === activeStep ? ' active' : '');
         dots.appendChild(dot);
     });
 }

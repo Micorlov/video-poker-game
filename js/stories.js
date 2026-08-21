@@ -100,6 +100,12 @@ function renderStoriesRow() {
 
     const stories = buildStoriesList();
 
+    // A lone "You" tile with no best hand and no bracelet has nothing to
+    // open — hide the whole strip until there is at least one real story.
+    const hasContent = stories.some(function(s) { return s.bestHand || s.bracelet; });
+    row.classList.toggle('hidden', !hasContent);
+    if (!hasContent) return;
+
     stories.forEach(function(s, i) {
         const item = document.createElement('div');
         item.className = 'story-item';

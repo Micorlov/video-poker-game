@@ -1851,6 +1851,12 @@ button, input, select {
     letter-spacing: 0.04em;
 }
 
+/* Pair hands label only the first card of the pair; the other winning
+   cards keep an unlabelled badge element that must not paint. */
+.win-badge:empty {
+    display: none;
+}
+
 
 /* --- styles/social.css --- */
 /* ========================================================================
@@ -4224,7 +4230,7 @@ body.screen-shake {
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Four of a Kind</span>
-                                <span class="ob-hand-payout">25x</span>
+                                <span class="ob-hand-payout">20x</span>
                             </div>
                         </div>
                         <div class="ob-hand-row">
@@ -4237,7 +4243,7 @@ body.screen-shake {
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Full House</span>
-                                <span class="ob-hand-payout">9x</span>
+                                <span class="ob-hand-payout">7x</span>
                             </div>
                         </div>
                         <div class="ob-hand-row">
@@ -4315,7 +4321,7 @@ body.screen-shake {
                     </div>
                     <div class="ob-lb-header">
                         <span>Friends · Today</span>
-                        <span class="ob-lb-you-badge">#1 · You're #1!</span>
+                        <span class="ob-lb-you-badge">You're #1!</span>
                     </div>
                     <div class="ob-lb-list">
                         <div class="ob-lb-row ob-lb-row--you">
@@ -6145,6 +6151,12 @@ function renderStoriesRow() {
 
     const stories = buildStoriesList();
 
+    // A lone "You" tile with no best hand and no bracelet has nothing to
+    // open — hide the whole strip until there is at least one real story.
+    const hasContent = stories.some(function(s) { return s.bestHand || s.bracelet; });
+    row.classList.toggle('hidden', !hasContent);
+    if (!hasContent) return;
+
     stories.forEach(function(s, i) {
         const item = document.createElement('div');
         item.className = 'story-item';
@@ -7749,7 +7761,7 @@ function deal() {
     lastHandType = null;
     const resultEl = document.getElementById('result');
     resultEl.className = 'result-panel';
-    resultEl.textContent = 'Place your bet and deal to play';
+    resultEl.textContent = 'Hold what you want, then set your bet before the draw.';
     document.getElementById('explanation').innerHTML = '';
     if (window.vpRenderHints) vpRenderHints();
     triggerHaptic('MEDIUM');
@@ -8480,9 +8492,15 @@ function renderOnboardingDots() {
     const dots = document.getElementById('onboarding-dots');
     if (!dots) return;
     dots.innerHTML = '';
-    ONBOARDING_STEPS.forEach(function(_, i) {
+    // The push step never shows on web, so its dot must not render there —
+    // otherwise the bar shows six dots and skips one on the way through.
+    const visibleSteps = ONBOARDING_STEPS.filter(function(step) {
+        return step !== 'push' || onboardingIsNative();
+    });
+    const activeStep = ONBOARDING_STEPS[onboardingIndex];
+    visibleSteps.forEach(function(step) {
         const dot = document.createElement('span');
-        dot.className = 'onboarding-dot' + (i === onboardingIndex ? ' active' : '');
+        dot.className = 'onboarding-dot' + (step === activeStep ? ' active' : '');
         dots.appendChild(dot);
     });
 }
