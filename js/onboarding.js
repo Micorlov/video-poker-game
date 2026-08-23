@@ -174,9 +174,12 @@ function onboardingSignInSucceeded() {
 
 function onboardingEnableNotifications() {
     if (window.registerForPushNotifications) registerForPushNotifications();
-    if (window.egUser && window.setNotificationPref) {
+    // No egUser guard: sign-in is the *next* step, so there is never a user
+    // here. setNotificationPref() buffers until there is one and js/firebase.js
+    // flushes on sign-in — gating on egUser silently threw the opt-in away.
+    if (window.setNotificationPref) {
         ['social', 'leaderboard', 'dailyReminder', 'bestHand'].forEach(function(cat) {
-            if (typeof setNotificationPref === 'function') setNotificationPref(cat, true);
+            setNotificationPref(cat, true);
         });
     }
     advanceOnboarding();
