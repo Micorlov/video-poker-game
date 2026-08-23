@@ -123,6 +123,23 @@ function ownNetProfit() {
     return balance - netProfitBaseline();
 }
 
+// Removes both sides of the friend edge. The live onSnapshot listeners in
+// loadFriends()/setupFriendScoreListeners() pick up the deletion on their
+// own, so no manual re-render is needed here.
+function removeFriend(uid) {
+    const user = window.egUser;
+    if (!user || !uid) return;
+    if (!window.confirm('Remove this friend?')) return;
+    firebaseSafe(function() {
+        return Promise.all([
+            db.collection('users').doc(user.uid).collection('friends').doc(uid).delete(),
+            db.collection('users').doc(uid).collection('friends').doc(user.uid).delete()
+        ]).then(function() {
+            showToast('Friend removed.');
+        });
+    }, function() { showToast('Could not remove friend — try again.'); });
+}
+
 function renderFriendsScreen() {
     const listEl = document.getElementById('friends-list');
     const emptyEl = document.getElementById('friends-empty');
@@ -193,11 +210,30 @@ function renderFriendsScreen() {
         scoreEl.textContent = (np >= 0 ? '+' : '') + np;
         scoreEl.classList.add(np > 0 ? 'positive' : np < 0 ? 'negative' : 'zero');
 
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'friend-lb-remove';
+        removeBtn.textContent = '✕';
+        if (f.self) {
+            // Kept in the DOM (hidden, not removed) so every row reserves the
+            // same width and the columns stay aligned.
+            removeBtn.disabled = true;
+            removeBtn.tabIndex = -1;
+            removeBtn.setAttribute('aria-hidden', 'true');
+        } else {
+            removeBtn.setAttribute('aria-label', 'Remove ' + (f.displayName || 'friend') + ' from friends');
+            removeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                removeFriend(f.uid);
+            });
+        }
+
         row.appendChild(rankEl);
         row.appendChild(avatarWrap);
         row.appendChild(nameEl);
         row.appendChild(streakEl);
         row.appendChild(scoreEl);
+        row.appendChild(removeBtn);
         listEl.appendChild(row);
     });
 }
