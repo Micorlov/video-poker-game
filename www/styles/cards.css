@@ -530,7 +530,9 @@
     opacity: 0.55;
 }
 
-.card.winning .card-front {
+.card.winning .card-front,
+.card.second-pair .card-front,
+.card.third-match .card-front {
     box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85), 0 0 0 2px var(--green);
 }
 
