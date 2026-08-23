@@ -178,6 +178,11 @@ body::before {
 button, input, select {
     font-family: inherit;
     color: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus:not(:focus-visible) {
+    outline: none;
 }
 
 /* Money is compared column-to-column — never let digits reflow. */
@@ -985,7 +990,9 @@ button, input, select {
     opacity: 0.55;
 }
 
-.card.winning .card-front {
+.card.winning .card-front,
+.card.second-pair .card-front,
+.card.third-match .card-front {
     box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85), 0 0 0 2px var(--green);
 }
 
@@ -2741,6 +2748,33 @@ button, input, select {
 .friend-lb-net.positive { color: var(--green); }
 .friend-lb-net.negative { color: var(--red); }
 .friend-lb-net.zero     { color: var(--text-muted); }
+
+.friend-lb-remove {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.friend-lb-remove:hover {
+    background: var(--red-dim);
+    color: var(--red);
+}
+
+.friend-lb-remove[disabled] {
+    visibility: hidden;
+    cursor: default;
+}
 
 /* --- Friend "You" tag --- */
 .friend-you-tag {
@@ -5810,6 +5844,23 @@ function ownNetProfit() {
     return balance - netProfitBaseline();
 }
 
+// Removes both sides of the friend edge. The live onSnapshot listeners in
+// loadFriends()/setupFriendScoreListeners() pick up the deletion on their
+// own, so no manual re-render is needed here.
+function removeFriend(uid) {
+    const user = window.egUser;
+    if (!user || !uid) return;
+    if (!window.confirm('Remove this friend?')) return;
+    firebaseSafe(function() {
+        return Promise.all([
+            db.collection('users').doc(user.uid).collection('friends').doc(uid).delete(),
+            db.collection('users').doc(uid).collection('friends').doc(user.uid).delete()
+        ]).then(function() {
+            showToast('Friend removed.');
+        });
+    }, function() { showToast('Could not remove friend — try again.'); });
+}
+
 function renderFriendsScreen() {
     const listEl = document.getElementById('friends-list');
     const emptyEl = document.getElementById('friends-empty');
@@ -5880,11 +5931,30 @@ function renderFriendsScreen() {
         scoreEl.textContent = (np >= 0 ? '+' : '') + np;
         scoreEl.classList.add(np > 0 ? 'positive' : np < 0 ? 'negative' : 'zero');
 
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'friend-lb-remove';
+        removeBtn.textContent = '✕';
+        if (f.self) {
+            // Kept in the DOM (hidden, not removed) so every row reserves the
+            // same width and the columns stay aligned.
+            removeBtn.disabled = true;
+            removeBtn.tabIndex = -1;
+            removeBtn.setAttribute('aria-hidden', 'true');
+        } else {
+            removeBtn.setAttribute('aria-label', 'Remove ' + (f.displayName || 'friend') + ' from friends');
+            removeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                removeFriend(f.uid);
+            });
+        }
+
         row.appendChild(rankEl);
         row.appendChild(avatarWrap);
         row.appendChild(nameEl);
         row.appendChild(streakEl);
         row.appendChild(scoreEl);
+        row.appendChild(removeBtn);
         listEl.appendChild(row);
     });
 }
