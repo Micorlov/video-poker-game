@@ -376,9 +376,10 @@ let allInPendingAmount = 0;
 let allInDragging = false;
 
 function openAllInSheet() {
-    // Blocked mid-hand for the same reason as setBet(). Checked before the
-    // remaining-uses test so a blocked attempt never spends a daily use.
-    if (gameState !== 'bet') return;
+    // Unlike setBet(), All In is allowed mid-hand: it stakes whatever balance
+    // remains on top of the bet already charged at deal time, so it can't
+    // reproduce the deal-cheap/raise-later exploit that setBet() must block.
+    if (gameState !== 'bet' && gameState !== 'hold') return;
     if (getAllInRemaining() <= 0) {
         showToast('⛔ No ALL INs left — back tomorrow!');
         return;
@@ -392,12 +393,17 @@ function openAllInSheet() {
     const stake = allInPendingAmount * hands;
     const amountEl = document.getElementById('allin-sheet-amount');
     if (amountEl) amountEl.textContent = stake.toLocaleString();
+    const subEl = document.getElementById('allin-sheet-target');
+    if (subEl) subEl.textContent = gameState === 'hold' ? 'this hand' : 'the next hand';
 
     // A mid-table hand makes the upside concrete without promising a royal.
+    // Mid-hand, the payout is computed off the raised total stake, not just
+    // the amount being added on top of the bet already on the table.
     const potentialEl = document.getElementById('allin-sheet-potential');
     if (potentialEl) {
         const multiplier = currentPayouts['Full House'] || 0;
-        potentialEl.textContent = (allInPendingAmount * multiplier * hands).toLocaleString();
+        const newBetPerHand = (gameState === 'hold' ? bet : 0) + allInPendingAmount;
+        potentialEl.textContent = (newBetPerHand * multiplier * hands).toLocaleString();
     }
     resetAllInSlider();
     openSheet('allin-sheet');
@@ -418,10 +424,21 @@ function resetAllInSlider() {
 }
 
 function confirmAllIn() {
-    // openAllInSheet() already blocks mid-hand; guard the mutation itself too
-    // so a stale open sheet can never raise the stake or spend a daily use.
-    if (gameState !== 'bet') return;
-    setBet(allInPendingAmount);
+    // openAllInSheet() already restricts the gameState; guard the mutation
+    // itself too so a stale open sheet can never run from an invalid state.
+    if (gameState !== 'bet' && gameState !== 'hold') return;
+    if (gameState === 'hold') {
+        // The initial stake was already charged in deal(); only the
+        // additional amount is charged now, and it's charged immediately —
+        // never left to be "raised" before draw() computes the payout.
+        const hands = multiHandCount || 1;
+        balance -= allInPendingAmount * hands;
+        bet += allInPendingAmount;
+        document.getElementById('balance').textContent = balance;
+        updateTotalBetDisplay();
+    } else {
+        setBet(allInPendingAmount);
+    }
     const btn = document.getElementById('bet-allin');
     if (btn) btn.classList.add('selected');
     allInUsesToday++;

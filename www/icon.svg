@@ -1,30 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1f5636"/>
-      <stop offset="55%" stop-color="#123825"/>
-      <stop offset="100%" stop-color="#081f15"/>
+      <stop offset="0%" stop-color="#0E3A26"/>
+      <stop offset="55%" stop-color="#0A2A1B"/>
+      <stop offset="100%" stop-color="#04100C"/>
     </linearGradient>
     <radialGradient id="glow" cx="50%" cy="38%" r="55%">
-      <stop offset="0%" stop-color="#ffe9a8" stop-opacity="0.28"/>
-      <stop offset="55%" stop-color="#ffe9a8" stop-opacity="0.06"/>
-      <stop offset="100%" stop-color="#ffe9a8" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#58E39B" stop-opacity="0.30"/>
+      <stop offset="55%" stop-color="#16C172" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#16C172" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="vignette" cx="50%" cy="50%" r="72%">
       <stop offset="60%" stop-color="#000000" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#000000" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
     </radialGradient>
     <linearGradient id="goldStroke" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f6dd8c"/>
-      <stop offset="50%" stop-color="#d4af37"/>
-      <stop offset="100%" stop-color="#a8791f"/>
+      <stop offset="0%" stop-color="#F6E4B8"/>
+      <stop offset="50%" stop-color="#E9C46A"/>
+      <stop offset="100%" stop-color="#D8AE47"/>
     </linearGradient>
     <linearGradient id="cardFace" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#f3f0e6"/>
+      <stop offset="100%" stop-color="#EDEFF6"/>
     </linearGradient>
     <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000000" flood-opacity="0.45"/>
+      <feDropShadow dx="0" dy="20" stdDeviation="26" flood-color="#000000" flood-opacity="0.5"/>
     </filter>
   </defs>
 
@@ -34,44 +34,38 @@
   <rect x="0" y="0" width="1024" height="1024" rx="224" fill="url(#vignette)"/>
 
   <!-- inner gold frame -->
-  <rect x="46" y="46" width="932" height="932" rx="188" fill="none" stroke="url(#goldStroke)" stroke-width="7" opacity="0.55"/>
+  <rect x="40" y="40" width="944" height="944" rx="192" fill="none" stroke="url(#goldStroke)" stroke-width="16" opacity="0.85"/>
 
   <!-- fanned poker hand -->
   <g filter="url(#cardShadow)">
 
     <!-- LEFT card: King of Spades -->
-    <g transform="translate(442,714) rotate(-26)">
+    <g transform="translate(432,712) rotate(-22)">
       <g transform="translate(0,-430)">
-        <rect x="-152" y="0" width="304" height="430" rx="34" fill="url(#cardFace)" stroke="#d9d2bd" stroke-width="3"/>
-        <text x="-120" y="80" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="700" fill="#161616">K</text>
-        <text x="-120" y="150" font-family="Georgia, 'Times New Roman', serif" font-size="62" fill="#161616">&#9824;</text>
-        <text x="120" y="350" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="700" fill="#161616" text-anchor="end" transform="rotate(180 120 350)">K</text>
-        <text x="120" y="280" font-family="Georgia, 'Times New Roman', serif" font-size="62" fill="#161616" text-anchor="end" transform="rotate(180 120 280)">&#9824;</text>
-        <text x="0" y="270" font-family="Georgia, 'Times New Roman', serif" font-size="150" fill="#161616" text-anchor="middle">&#9824;</text>
+        <rect x="-152" y="0" width="304" height="430" rx="34" fill="url(#cardFace)" stroke="#c7bfa4" stroke-width="5"/>
+        <text x="-116" y="92" font-family="Georgia, 'Times New Roman', serif" font-size="92" font-weight="700" fill="#101322">K</text>
+        <text x="-116" y="168" font-family="Georgia, 'Times New Roman', serif" font-size="78" fill="#101322">&#9824;</text>
+        <text x="0" y="278" font-family="Georgia, 'Times New Roman', serif" font-size="190" fill="#101322" text-anchor="middle">&#9824;</text>
       </g>
     </g>
 
     <!-- RIGHT card: King of Hearts -->
-    <g transform="translate(582,714) rotate(26)">
+    <g transform="translate(592,712) rotate(22)">
       <g transform="translate(0,-430)">
-        <rect x="-152" y="0" width="304" height="430" rx="34" fill="url(#cardFace)" stroke="#d9d2bd" stroke-width="3"/>
-        <text x="-120" y="80" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="700" fill="#c41e3a">K</text>
-        <text x="-120" y="150" font-family="Georgia, 'Times New Roman', serif" font-size="62" fill="#c41e3a">&#9829;</text>
-        <text x="120" y="350" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="700" fill="#c41e3a" text-anchor="end" transform="rotate(180 120 350)">K</text>
-        <text x="120" y="280" font-family="Georgia, 'Times New Roman', serif" font-size="62" fill="#c41e3a" text-anchor="end" transform="rotate(180 120 280)">&#9829;</text>
-        <text x="0" y="270" font-family="Georgia, 'Times New Roman', serif" font-size="150" fill="#c41e3a" text-anchor="middle">&#9829;</text>
+        <rect x="-152" y="0" width="304" height="430" rx="34" fill="url(#cardFace)" stroke="#c7bfa4" stroke-width="5"/>
+        <text x="-116" y="92" font-family="Georgia, 'Times New Roman', serif" font-size="92" font-weight="700" fill="#E01B44">K</text>
+        <text x="-116" y="168" font-family="Georgia, 'Times New Roman', serif" font-size="78" fill="#E01B44">&#9829;</text>
+        <text x="0" y="278" font-family="Georgia, 'Times New Roman', serif" font-size="190" fill="#E01B44" text-anchor="middle">&#9829;</text>
       </g>
     </g>
 
     <!-- CENTER card: Ace of Spades (hero) -->
     <g transform="translate(512,690)">
       <g transform="translate(0,-460)">
-        <rect x="-164" y="0" width="328" height="460" rx="36" fill="url(#cardFace)" stroke="#d9d2bd" stroke-width="3"/>
-        <text x="-128" y="86" font-family="Georgia, 'Times New Roman', serif" font-size="82" font-weight="700" fill="#161616">A</text>
-        <text x="-128" y="160" font-family="Georgia, 'Times New Roman', serif" font-size="66" fill="#161616">&#9824;</text>
-        <text x="128" y="374" font-family="Georgia, 'Times New Roman', serif" font-size="82" font-weight="700" fill="#161616" text-anchor="end" transform="rotate(180 128 374)">A</text>
-        <text x="128" y="300" font-family="Georgia, 'Times New Roman', serif" font-size="66" fill="#161616" text-anchor="end" transform="rotate(180 128 300)">&#9824;</text>
-        <text x="0" y="292" font-family="Georgia, 'Times New Roman', serif" font-size="190" fill="#161616" text-anchor="middle">&#9824;</text>
+        <rect x="-160" y="0" width="320" height="460" rx="36" fill="url(#cardFace)" stroke="#c7bfa4" stroke-width="6"/>
+        <text x="-124" y="100" font-family="Georgia, 'Times New Roman', serif" font-size="106" font-weight="700" fill="#101322">A</text>
+        <text x="-124" y="184" font-family="Georgia, 'Times New Roman', serif" font-size="88" fill="#101322">&#9824;</text>
+        <text x="0" y="308" font-family="Georgia, 'Times New Roman', serif" font-size="232" fill="#101322" text-anchor="middle">&#9824;</text>
       </g>
     </g>
 

@@ -85,6 +85,10 @@ function initSettingsScreen() {
     hapticsToggle.checked = hapticsEnabled;
     hapticsToggle.onchange = function() { toggleHaptics(); };
 
+    const voiceToggle = document.getElementById('settings-voice-toggle');
+    voiceToggle.checked = voiceEnabled;
+    voiceToggle.onchange = function() { toggleVoice(); };
+
     [5, 10, 20, 50].forEach(function(v) {
         const btn = document.getElementById('settings-defaultbet-' + v);
         if (btn) btn.onclick = function() { setDefaultBet(v); };
@@ -219,6 +223,7 @@ function initNativeDeepLinkHandling() {
 document.addEventListener('DOMContentLoaded', function() {
     applyTheme();
     initSound();
+    initVoice();
     initGame();
     initSettingsScreen();
     updateHintButtonUI();

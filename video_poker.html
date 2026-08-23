@@ -3879,6 +3879,7 @@ body.screen-shake {
                 <div class="action-row">
                     <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">↻</span>Deal</button>
                     <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
+                    <button id="voice-btn" class="hint-btn" onclick="toggleVoice()" title="Voice announcements">🗣️</button>
                 </div>
             </div>
 
@@ -3989,6 +3990,10 @@ body.screen-shake {
                 <div class="settings-row">
                     <span class="settings-row-label">Haptic Feedback</span>
                     <input type="checkbox" class="toggle-switch" id="settings-haptics-toggle">
+                </div>
+                <div class="settings-row">
+                    <span class="settings-row-label">Voice Announcements</span>
+                    <input type="checkbox" class="toggle-switch" id="settings-voice-toggle">
                 </div>
             </div>
 
@@ -4197,7 +4202,7 @@ body.screen-shake {
                 </span>
                 <button class="sheet-close" onclick="closeAllInSheet()">✕</button>
             </div>
-            <div class="sheet-sub">This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on the next hand.</div>
+            <div class="sheet-sub">This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on <span id="allin-sheet-target">the next hand</span>.</div>
             <div class="sheet-stat">
                 <span class="sheet-stat-label">Potential on Full House</span>
                 <span class="sheet-stat-value" id="allin-sheet-potential">0</span>
@@ -4467,6 +4472,13 @@ body.screen-shake {
 var audioCtx = null;
     var audioBuffers = {};
     var soundEnabled = true;
+    var voiceEnabled = true;
+    // All synthesized sound effects ("music") route through this gain node so
+    // they sit under the voice announcements (which play at full volume via
+    // the separate Web Speech API) instead of competing with them.
+    var sfxGainNode = null;
+    var MUSIC_VOLUME = 0.25;
+    var VOICE_VOLUME = 1.0;
 
     function initSound() {
         try {
@@ -4474,6 +4486,14 @@ var audioCtx = null;
             if (stored !== null) soundEnabled = stored === 'true';
         } catch (e) {}
         updateSoundButtonUI();
+    }
+
+    function initVoice() {
+        try {
+            var stored = localStorage.getItem('vp_voice_enabled');
+            if (stored !== null) voiceEnabled = stored === 'true';
+        } catch (e) {}
+        updateVoiceButtonUI();
     }
 
     // Lazy-init the AudioContext on first use. On mobile, this must happen
@@ -4487,6 +4507,9 @@ var audioCtx = null;
             return;
         }
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        sfxGainNode = audioCtx.createGain();
+        sfxGainNode.gain.value = MUSIC_VOLUME;
+        sfxGainNode.connect(audioCtx.destination);
         generatePreDecodedBuffers();
         // Play a silent buffer immediately to satisfy iOS audio unlock requirements
         try {
@@ -4526,7 +4549,7 @@ var audioCtx = null;
         try {
             var source = audioCtx.createBufferSource();
             source.buffer = buffer;
-            source.connect(audioCtx.destination);
+            source.connect(sfxGainNode);
             source.start(0);
         } catch (e) {}
     }
@@ -4548,6 +4571,49 @@ var audioCtx = null;
         if (btn) {
             btn.textContent = soundEnabled ? '🔊' : '🔇';
         }
+    }
+
+    /* Voice Announcements */
+    // Some paytable hand names read awkwardly out loud (e.g. "Four 2s-4s") —
+    // this maps them to a natural spoken phrase. Anything not listed here is
+    // spoken as-is (e.g. "Two Pair", "Full House" already read naturally).
+    var VOICE_HAND_NAMES = {
+        'Four 2s-4s': 'Four of a kind, twos through fours',
+        'Four 5s-Ks': 'Four of a kind, fives through kings'
+    };
+
+    function speakHandName(handType) {
+        if (!voiceEnabled || !handType || handType === 'Nothing') return;
+        if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+        try {
+            var phrase = VOICE_HAND_NAMES[handType] || handType;
+            window.speechSynthesis.cancel();
+            var utterance = new SpeechSynthesisUtterance(phrase);
+            utterance.volume = VOICE_VOLUME;
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {}
+    }
+
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+        try {
+            localStorage.setItem('vp_voice_enabled', voiceEnabled);
+        } catch (e) {}
+        updateVoiceButtonUI();
+        if (voiceEnabled) {
+            speakHandName('Full House');
+        } else if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    function updateVoiceButtonUI() {
+        var btn = document.getElementById('voice-btn');
+        if (btn) btn.classList.toggle('on', voiceEnabled);
+        var toggle = document.getElementById('settings-voice-toggle');
+        if (toggle) toggle.checked = voiceEnabled;
     }
 
     /* Sound Synthesizer Functions */
@@ -4648,6 +4714,7 @@ var audioCtx = null;
         } else {
             playSound('win');
         }
+        speakHandName(handType);
 
         if (rank <= 2) {
             var resultEl = document.getElementById('result');
@@ -7942,9 +8009,10 @@ let allInPendingAmount = 0;
 let allInDragging = false;
 
 function openAllInSheet() {
-    // Blocked mid-hand for the same reason as setBet(). Checked before the
-    // remaining-uses test so a blocked attempt never spends a daily use.
-    if (gameState !== 'bet') return;
+    // Unlike setBet(), All In is allowed mid-hand: it stakes whatever balance
+    // remains on top of the bet already charged at deal time, so it can't
+    // reproduce the deal-cheap/raise-later exploit that setBet() must block.
+    if (gameState !== 'bet' && gameState !== 'hold') return;
     if (getAllInRemaining() <= 0) {
         showToast('⛔ No ALL INs left — back tomorrow!');
         return;
@@ -7958,12 +8026,17 @@ function openAllInSheet() {
     const stake = allInPendingAmount * hands;
     const amountEl = document.getElementById('allin-sheet-amount');
     if (amountEl) amountEl.textContent = stake.toLocaleString();
+    const subEl = document.getElementById('allin-sheet-target');
+    if (subEl) subEl.textContent = gameState === 'hold' ? 'this hand' : 'the next hand';
 
     // A mid-table hand makes the upside concrete without promising a royal.
+    // Mid-hand, the payout is computed off the raised total stake, not just
+    // the amount being added on top of the bet already on the table.
     const potentialEl = document.getElementById('allin-sheet-potential');
     if (potentialEl) {
         const multiplier = currentPayouts['Full House'] || 0;
-        potentialEl.textContent = (allInPendingAmount * multiplier * hands).toLocaleString();
+        const newBetPerHand = (gameState === 'hold' ? bet : 0) + allInPendingAmount;
+        potentialEl.textContent = (newBetPerHand * multiplier * hands).toLocaleString();
     }
     resetAllInSlider();
     openSheet('allin-sheet');
@@ -7984,10 +8057,21 @@ function resetAllInSlider() {
 }
 
 function confirmAllIn() {
-    // openAllInSheet() already blocks mid-hand; guard the mutation itself too
-    // so a stale open sheet can never raise the stake or spend a daily use.
-    if (gameState !== 'bet') return;
-    setBet(allInPendingAmount);
+    // openAllInSheet() already restricts the gameState; guard the mutation
+    // itself too so a stale open sheet can never run from an invalid state.
+    if (gameState !== 'bet' && gameState !== 'hold') return;
+    if (gameState === 'hold') {
+        // The initial stake was already charged in deal(); only the
+        // additional amount is charged now, and it's charged immediately —
+        // never left to be "raised" before draw() computes the payout.
+        const hands = multiHandCount || 1;
+        balance -= allInPendingAmount * hands;
+        bet += allInPendingAmount;
+        document.getElementById('balance').textContent = balance;
+        updateTotalBetDisplay();
+    } else {
+        setBet(allInPendingAmount);
+    }
     const btn = document.getElementById('bet-allin');
     if (btn) btn.classList.add('selected');
     allInUsesToday++;
@@ -9188,6 +9272,10 @@ function initSettingsScreen() {
     hapticsToggle.checked = hapticsEnabled;
     hapticsToggle.onchange = function() { toggleHaptics(); };
 
+    const voiceToggle = document.getElementById('settings-voice-toggle');
+    voiceToggle.checked = voiceEnabled;
+    voiceToggle.onchange = function() { toggleVoice(); };
+
     [5, 10, 20, 50].forEach(function(v) {
         const btn = document.getElementById('settings-defaultbet-' + v);
         if (btn) btn.onclick = function() { setDefaultBet(v); };
@@ -9322,6 +9410,7 @@ function initNativeDeepLinkHandling() {
 document.addEventListener('DOMContentLoaded', function() {
     applyTheme();
     initSound();
+    initVoice();
     initGame();
     initSettingsScreen();
     updateHintButtonUI();

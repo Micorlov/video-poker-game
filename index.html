@@ -145,6 +145,7 @@
                 <div class="action-row">
                     <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">↻</span>Deal</button>
                     <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
+                    <button id="voice-btn" class="hint-btn" onclick="toggleVoice()" title="Voice announcements">🗣️</button>
                 </div>
             </div>
 
@@ -255,6 +256,10 @@
                 <div class="settings-row">
                     <span class="settings-row-label">Haptic Feedback</span>
                     <input type="checkbox" class="toggle-switch" id="settings-haptics-toggle">
+                </div>
+                <div class="settings-row">
+                    <span class="settings-row-label">Voice Announcements</span>
+                    <input type="checkbox" class="toggle-switch" id="settings-voice-toggle">
                 </div>
             </div>
 
@@ -463,7 +468,7 @@
                 </span>
                 <button class="sheet-close" onclick="closeAllInSheet()">✕</button>
             </div>
-            <div class="sheet-sub">This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on the next hand.</div>
+            <div class="sheet-sub">This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on <span id="allin-sheet-target">the next hand</span>.</div>
             <div class="sheet-stat">
                 <span class="sheet-stat-label">Potential on Full House</span>
                 <span class="sheet-stat-value" id="allin-sheet-potential">0</span>
