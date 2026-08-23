@@ -901,7 +901,7 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         if (isResult) {
             const isPairHand = lastHandType === 'Two Pair' || lastHandType === 'Jacks or Better';
             if (isPairHand) {
-                if (i === winningIndices[0] || i === secondPairIndices[0]) {
+                if (winningIndices.includes(i) || secondPairIndices.includes(i)) {
                     winBadgeText = getWinBadgeText(i, lastHandType);
                 }
             } else {
