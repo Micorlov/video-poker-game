@@ -1,6 +1,7 @@
 package com.micorlov.videopoker;
 
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,6 +37,12 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Without this, the hardware volume rocker targets the ringer/notification
+        // stream (not STREAM_MUSIC) until some app explicitly claims it — so on a
+        // real device the game's WebAudio SFX and TTS voice can be silent with no
+        // way for the player to raise them. Emulators are typically pre-set to max
+        // media volume, which is why this only shows up on physical hardware.
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
         fetchInstallReferrerOnce();
     }
 
