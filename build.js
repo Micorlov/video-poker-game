@@ -40,6 +40,7 @@ const jsFiles = [
     'js/referral.js',
     'js/rooms.js',
     'js/stories.js',
+    'js/leaderboard-bots.js',
     'js/champions.js',
     'js/bracelets.js',
     'js/leaderboards.js',
