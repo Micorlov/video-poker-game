@@ -244,6 +244,9 @@ function restoreGameState() {
 function doRebuy() {
     balance = 500;
     document.getElementById('balance').textContent = balance;
+    // The stack is back to the starting amount, so past referral coins are gone
+    // too — drop them from the net-profit baseline or the board reads negative.
+    if (window.resetReferralBaseline) resetReferralBaseline();
     saveGameState();
     showToast('♻ +500 credits');
     if (window.pushDailyRebuy) pushDailyRebuy();

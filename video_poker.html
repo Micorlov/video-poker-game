@@ -395,6 +395,62 @@ button, input, select {
     font-weight: 700;
 }
 
+/* =========================================================================
+   Desktop: present the phone, don't stretch into the space.
+
+   This is a phone design — a single column, a fixed bottom nav, a sticky bet
+   dock. On a wide screen the honest thing is to show it as what it is rather
+   than strand a 460px column in an empty page.
+
+   The transform on .shell is load-bearing, not decoration: it makes the
+   element a containing block for its position:fixed descendants, so the
+   bottom nav, sheets and onboarding overlay resolve against the frame
+   instead of escaping to the browser viewport.
+   ========================================================================= */
+@media (min-width: 620px) {
+    html {
+        background: #05100D;
+    }
+
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: none;
+    }
+
+    body::before {
+        display: none;
+    }
+
+    .shell {
+        position: relative;
+        width: 412px;
+        height: min(calc(100vh - 48px), 900px);
+        flex: none;
+        overflow: hidden;
+        border-radius: 46px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--app-bg);
+        box-shadow: 0 50px 90px -30px rgba(0, 0, 0, 0.95),
+                    0 0 0 10px rgba(255, 255, 255, 0.03);
+        transform: translateZ(0);
+    }
+
+    /* The frame scrolls its own content; the page itself never does. */
+    .app {
+        height: 100%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: none;
+    }
+
+    .app::-webkit-scrollbar {
+        display: none;
+    }
+}
+
 
 /* --- styles/cards.css --- */
 /* --- Variant picker --- */
@@ -3719,6 +3775,7 @@ body.screen-shake {
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 </head>
 <body>
+<div class="shell">
     <div class="app">
         <section id="screen-play" class="screen active">
             <div class="brandrow">
@@ -4048,10 +4105,6 @@ body.screen-shake {
                 <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
                 <span>Continue with Google</span>
             </button>
-            <button class="facebook-btn" onclick="signInWithFacebook()">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                <span>Continue with Facebook</span>
-            </button>
             <div class="modal-error hidden" id="signin-error"></div>
         </div>
     </div>
@@ -4094,6 +4147,7 @@ body.screen-shake {
                 <span class="sheet-title">Invite Friends</span>
                 <button class="sheet-close" onclick="closeSheet('invite-sheet')">✕</button>
             </div>
+            <div class="sheet-sub" id="invite-reward-line">Get 2000 coins for every friend who joins with Google.</div>
             <div class="sheet-link-row">
                 <span class="sheet-link-text" id="invite-sheet-link">—</span>
                 <button class="sheet-copy-btn" id="invite-sheet-copy" onclick="copyInviteSheetLink()">Copy</button>
@@ -4404,6 +4458,8 @@ body.screen-shake {
         </div>
 
     </div>
+
+</div><!-- /.shell -->
 
     <script>
  
@@ -5078,6 +5134,12 @@ if (auth) {
             firebaseSafe(function() { return logUserToFirestore(user); });
             firebaseSafe(function() { return pushNetProfit(); });
             try { if (window.onboardingSignInSucceeded) onboardingSignInSucceeded(); } catch (e) { console.warn('onboardingSignInSucceeded failed:', e); }
+            // A token that arrived before sign-in is buffered, not written —
+            // during onboarding the push step runs a screen ahead of this, so
+            // that is the normal case rather than the edge one. Flush first,
+            // then re-register so a rotated token replaces a stale one.
+            if (window.flushPendingPushRegistration) flushPendingPushRegistration();
+
             // Fallback only: onboarding's priming screen (js/onboarding.js) is the
             // primary path for this ask. If the user never saw that screen (e.g.
             // signed in later from Settings/Friends without going through
@@ -5086,7 +5148,13 @@ if (auth) {
             try { pushAlreadyAsked = localStorage.getItem('vp_push_permission_asked') === '1'; } catch (e) {}
             if (!pushAlreadyAsked) {
                 firebaseSafe(function() { return registerForPushNotifications(); });
+            } else if (window.refreshPushRegistration) {
+                firebaseSafe(function() { return refreshPushRegistration(); });
             }
+            // Outside the friendsRooms flag on purpose: unclaimed referral coins
+            // are owed to the player, so they must still reconcile if the flag is
+            // switched off after the invites went out.
+            if (window.subscribeReferralRewards) subscribeReferralRewards();
             if (window.egFeatures.friendsRooms) {
                 if (window.loadFriends) loadFriends();
                 if (window.loadMyRooms) loadMyRooms();
@@ -5118,6 +5186,7 @@ if (auth) {
         } else {
             if (window.cleanupFriendsListeners) cleanupFriendsListeners();
             if (window.cleanupRooms) cleanupRooms();
+            if (window.cleanupReferrals) cleanupReferrals();
             if (window.stopPresence) stopPresence();
             // A room link that landed before auth settled: now that we know the
             // visitor is genuinely signed out, ask them to sign in. The code
@@ -5144,6 +5213,139 @@ if (auth) {
             }
         }
     });
+}
+
+
+/* --- js/deeplink.js --- */
+// Smart invite links (Android / Play Store).
+//
+// One https link does all three jobs the invite flow needs:
+//   app installed  → invite.html hands the OS an intent:// URL, Android opens
+//                    the app, and js/tabs.js replays ?ref= / ?join= inside it.
+//   not installed  → the same intent carries browser_fallback_url, so Chrome
+//                    lands on the Play Store listing instead of a dead scheme.
+//   after install  → the Play referrer string carries the code through the
+//                    install, and MainActivity feeds it back in on first launch
+//                    (see __onInstallReferrer below), so the friendship still
+//                    connects even though the original click is long gone.
+//
+// Everything that is not Android (desktop, iOS, in-app browsers we can't
+// detect) falls through to the web build — never to a store page it can't use.
+
+const ANDROID_PACKAGE = 'com.micorlov.videopoker';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=' + ANDROID_PACKAGE;
+
+// Absolute fallbacks, used only when window.location can't produce a shareable
+// base — i.e. inside the native WebView, where the origin is https://localhost.
+const SMART_LINK_URL = 'https://micorlov.github.io/video-poker-game/invite.html';
+
+function _isUnshareableOrigin(origin) {
+    return !origin
+        || origin === 'null'
+        || origin === 'https://localhost'
+        || origin.indexOf('capacitor://') === 0
+        || origin.indexOf('file://') === 0;
+}
+
+// Sibling of the current page rather than a hardcoded host, so a fork, a
+// staging deploy, or a local checkout shares links that point back at itself.
+function getSmartLinkBase() {
+    const origin = window.location.origin || '';
+    if (_isUnshareableOrigin(origin)) return SMART_LINK_URL;
+    return origin + window.location.pathname.replace(/[^/]*$/, '') + 'invite.html';
+}
+
+function buildInviteLink(code) {
+    if (!code) return '';
+    return getSmartLinkBase() + '?ref=' + encodeURIComponent(code);
+}
+
+function buildRoomLink(code) {
+    if (!code) return '';
+    return getSmartLinkBase() + '?join=' + encodeURIComponent(code);
+}
+
+function getPlayStoreLink() {
+    return PLAY_STORE_URL;
+}
+
+// --- Deferred deep link: Play Store install referrer -----------------------
+//
+// The friend who taps an invite without the app installed goes to Play, and the
+// browser context that held their invite code dies there. Play carries the
+// referrer string into the fresh install, MainActivity reads it once via the
+// Install Referrer API, and calls this. Both entry points below are idempotent:
+// the code is parked, then consumed by the auth listener once sign-in settles.
+
+function _parseReferrerPayload(raw) {
+    if (!raw) return null;
+    try {
+        // Play hands back a query-string-shaped blob, e.g. "utm_source=x&ref=AB12CD".
+        const params = new URLSearchParams(String(raw).replace(/^\?/, ''));
+        const ref = params.get('ref');
+        const join = params.get('join');
+        if (ref) return { kind: 'ref', code: ref.trim().toUpperCase() };
+        if (join) return { kind: 'join', code: join.trim().toUpperCase() };
+    } catch (e) { /* malformed referrer — treat as no referrer at all */ }
+    return null;
+}
+
+// A friend who installs from Play often plays a while before signing in, and
+// the install referrer is only ever read once — so an in-memory park would lose
+// the code on the first app restart, and with it the friendship and the
+// inviter's reward. Persist until it has definitively been used.
+const PENDING_INVITE_KEY = 'vp_pending_invite';
+
+function persistPendingInvite(code) {
+    try { localStorage.setItem(PENDING_INVITE_KEY, 'ref=' + code); } catch (e) { /* localStorage unavailable */ }
+}
+
+function clearPendingInvite() {
+    try { localStorage.removeItem(PENDING_INVITE_KEY); } catch (e) { /* localStorage unavailable */ }
+}
+
+function restorePendingInvite() {
+    try {
+        const raw = localStorage.getItem(PENDING_INVITE_KEY);
+        if (raw) applyInstallReferrer(raw);
+    } catch (e) { /* nothing stored — the normal case */ }
+}
+
+function applyInstallReferrer(raw) {
+    const parsed = _parseReferrerPayload(raw);
+    if (!parsed || !parsed.code) return;
+    if (parsed.kind === 'ref') {
+        persistPendingInvite(parsed.code);
+        // Park it the same way a live deep link would, so the auth listener in
+        // js/firebase.js replays it through the one existing code path.
+        if (!window._pendingInviteCode) window._pendingInviteCode = parsed.code;
+        if (window.egUser && window.addFriendByInviteCode) {
+            window._pendingInviteCode = null;
+            addFriendByInviteCode(parsed.code);
+        }
+    } else {
+        if (!window._pendingJoinCode) window._pendingJoinCode = parsed.code;
+        if (window.egUser && window.joinRoomByCode) {
+            window._pendingJoinCode = null;
+            joinRoomByCode(parsed.code);
+        }
+    }
+}
+
+// Push path — MainActivity calls this once the async Play API answers. Defined
+// on window immediately (not inside DOMContentLoaded) because that callback can
+// fire before the page finishes loading.
+window.__onInstallReferrer = function(raw) {
+    try { applyInstallReferrer(raw); } catch (e) { /* never break startup */ }
+};
+
+// Pull path — covers the race where the Play API answered before this script
+// parsed. MainActivity always parks the raw string on window before looking for
+// the handler above, so one of the two paths always wins.
+function readCachedInstallReferrer() {
+    try {
+        if (window.__installReferrerRaw) applyInstallReferrer(window.__installReferrerRaw);
+    } catch (e) { /* nothing parked — the normal case on web */ }
 }
 
 
@@ -5191,9 +5393,29 @@ function isPushSupported() {
 }
 window.isPushSupported = isPushSupported;
 
+// FCM hands over the token as soon as the OS answers, which is routinely
+// before Firebase auth has resolved. Onboarding makes that the normal case:
+// the push step runs a whole screen ahead of sign-in, so at the moment the
+// token arrives there is no uid to file it under. Dropping it there lost it
+// permanently — nothing re-registers afterwards, because showing the push
+// screen already set vp_push_permission_asked. Hold it instead, and write it
+// the moment a user exists.
+let pendingFcmToken = null;
+let pendingFcmPlatform = null;
+let pendingNotificationPrefs = null;
+
+function currentPushPlatform(platform) {
+    return platform || (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web');
+}
+
 function saveFcmToken(token, platform) {
-    if (!window.egUser || typeof db === 'undefined') return;
-    var p = platform || (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web');
+    if (!token) return;
+    var p = currentPushPlatform(platform);
+    if (!window.egUser || typeof db === 'undefined') {
+        pendingFcmToken = token;
+        pendingFcmPlatform = p;
+        return;
+    }
     firebaseSafe(function() {
         return db.collection('users').doc(window.egUser.uid)
             .collection('fcmTokens').doc(token)
@@ -5206,7 +5428,11 @@ function saveFcmToken(token, platform) {
 }
 
 function setNotificationPref(category, enabled) {
-    if (!window.egUser || typeof db === 'undefined') return;
+    if (!window.egUser || typeof db === 'undefined') {
+        pendingNotificationPrefs = pendingNotificationPrefs || {};
+        pendingNotificationPrefs[category] = !!enabled;
+        return;
+    }
     const prefs = {};
     prefs[category] = !!enabled;
     firebaseSafe(function() {
@@ -5215,6 +5441,48 @@ function setNotificationPref(category, enabled) {
     });
 }
 window.setNotificationPref = setNotificationPref;
+
+// Called from js/firebase.js once onAuthStateChanged reports a signed-in user.
+function flushPendingPushRegistration() {
+    if (!window.egUser || typeof db === 'undefined') return;
+
+    if (pendingFcmToken) {
+        var token = pendingFcmToken;
+        var platform = pendingFcmPlatform;
+        pendingFcmToken = null;
+        pendingFcmPlatform = null;
+        saveFcmToken(token, platform);
+    }
+
+    if (pendingNotificationPrefs) {
+        var prefs = pendingNotificationPrefs;
+        pendingNotificationPrefs = null;
+        Object.keys(prefs).forEach(function(category) {
+            setNotificationPref(category, prefs[category]);
+        });
+    }
+}
+window.flushPendingPushRegistration = flushPendingPushRegistration;
+
+// FCM tokens rotate, and a rotated token is only handed over in response to a
+// fresh register() call. Without this a user who granted permission once would
+// keep a stale token in Firestore forever and silently stop receiving pushes.
+function refreshPushRegistration() {
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        const PushNotifications = window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
+        if (!PushNotifications || !PushNotifications.checkPermissions) return;
+        PushNotifications.checkPermissions().then(function(status) {
+            if (status && status.receive === 'granted') PushNotifications.register();
+        }).catch(function(err) { console.warn('Push permission check failed:', err); });
+        return;
+    }
+    // Web re-issues the token through getToken() on every registration call,
+    // and only prompts when permission has not been decided yet.
+    if (window.Notification && Notification.permission === 'granted') {
+        registerForPushNotifications();
+    }
+}
+window.refreshPushRegistration = refreshPushRegistration;
 
 function initPushListeners() {
     if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) {
@@ -5441,6 +5709,11 @@ function addFriendByCode(code) {
                 ]).then(function() {
                     showToast('Friend added!');
                     loadFriends();
+                    // invite.html tells a friend to type this code in when the
+                    // install swallowed the deep link, so the manual path must
+                    // pay out too. The ledger is keyed by the referred uid, so
+                    // a code that also arrived by link still pays only once.
+                    if (window.recordReferralJoin) recordReferralJoin(code, friendDoc.id);
                     return true;
                 });
             });
@@ -5467,7 +5740,7 @@ function submitInviteSheetFriendCode() {
 }
 
 function ownNetProfit() {
-    return balance - 500;
+    return balance - netProfitBaseline();
 }
 
 function renderFriendsScreen() {
@@ -5556,9 +5829,10 @@ function getInviteLink() {
     if (!user) return '';
     const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
     if (!code) return '';
-    // Use the Firebase hosting URL as the canonical base
-    const base = getShareBaseUrl();
-    return base + '?ref=' + encodeURIComponent(code);
+    // Points at invite.html, not straight at the game: that page is what opens
+    // the installed app, falls back to the Play listing, and carries the code
+    // through the install (js/deeplink.js).
+    return buildInviteLink(code);
 }
 
 function handleIncomingInvite() {
@@ -5577,8 +5851,10 @@ function handleIncomingInvite() {
             window.history.replaceState({}, '', url);
         }
 
-        // Store for after sign-in
+        // Store for after sign-in. Persisted as well as parked: the URL has just
+        // been cleaned, so a reload before signing in would otherwise lose it.
         window._pendingInviteCode = refCode;
+        if (window.persistPendingInvite) persistPendingInvite(refCode);
 
         // If already signed in, add immediately
         if (window.egUser) {
@@ -5596,6 +5872,10 @@ function addFriendByInviteCode(code) {
     if (!user) return;
     firebaseSafe(function() {
         return db.collection('users').where('referralCode', '==', code).limit(1).get().then(function(snap) {
+            // Reaching the server at all is a definitive answer — whichever branch
+            // below runs, this code is spent. A network failure rejects instead,
+            // leaving it stored for the next launch.
+            if (window.clearPendingInvite) clearPendingInvite();
             if (snap.empty) { showToast('No player found with that invite link.'); return; }
             var ownerUid = snap.docs[0].id;
             if (ownerUid === user.uid) { showToast('That\'s your own invite link!'); return; }
@@ -5634,6 +5914,10 @@ function addFriendByInviteCode(code) {
                         ? 'Connected with ' + newFriendUids.length + ' friends via this link!'
                         : 'Friend added!');
                     loadFriends();
+                    // Files the reward row for whoever owns this link. Deliberately
+                    // last and unawaited — a failed ledger write must not undo a
+                    // friendship that already succeeded.
+                    if (window.recordReferralJoin) recordReferralJoin(code, ownerUid);
                 });
             });
         });
@@ -5718,6 +6002,188 @@ function renderNearbyPanel(user) {
 }
 
 
+/* --- js/referral.js --- */
+// Referral rewards — the inviter gets REFERRAL_REWARD_COINS for every friend
+// who installs and signs in with Google through their invite link.
+//
+// Ledger shape: one referrals/{referredUid} document, created by the referred
+// player on their first sign-in. Keying it by the *referred* uid rather than
+// storing a counter on the inviter is what makes the payout idempotent — a
+// second invite link, a reinstall, or a replayed Play install referrer all land
+// on the same document id and are rejected as already-present. The inviter then
+// claims each row by stamping claimedAt, which the security rules only permit
+// while it is still null (see FIRESTORE_RULES_REFERRALS.md).
+
+const REFERRAL_REWARD_COINS = 2000;
+const STARTING_BALANCE = 500;
+// A referral only pays out for a genuinely new account, so an existing player
+// can't re-click a friend's link for coins. Firebase reports creationTime on
+// every sign-in path (popup, redirect, and the native plugin's credential
+// hand-off), which the UserCredential.additionalUserInfo flag does not.
+const REFERRAL_SIGNUP_WINDOW_MS = 10 * 60 * 1000;
+
+function loadReferralBonusTotal() {
+    try { return parseInt(localStorage.getItem('vp_referral_bonus'), 10) || 0; } catch (e) { return 0; }
+}
+
+let referralBonusTotal = loadReferralBonusTotal();
+let referralStats = { invited: 0, coinsEarned: 0 };
+let referralUnsubscribe = null;
+const referralClaimsInFlight = {};
+
+function saveReferralBonusTotal() {
+    try { localStorage.setItem('vp_referral_bonus', String(referralBonusTotal)); } catch (e) { /* localStorage unavailable */ }
+}
+
+// Bonus coins are a gift, not winnings. Every leaderboard here ranks on net
+// profit, so the baseline rises with each bonus — otherwise an invite spree
+// would read as a hot streak and outrank people who actually played well.
+function netProfitBaseline() {
+    return STARTING_BALANCE + referralBonusTotal;
+}
+
+// Called by doRebuy(). The rebuy hands the player a fresh STARTING_BALANCE, so
+// every coin gifted before it has been wiped along with the stack — leaving the
+// bonus in the baseline would show them at -referralBonusTotal from a clean start.
+function resetReferralBaseline() {
+    referralBonusTotal = 0;
+    saveReferralBonusTotal();
+}
+
+function _signedInWithGoogle(user) {
+    const providers = ((user && user.providerData) || []).map(function(p) { return p && p.providerId; });
+    return providers.indexOf('google.com') !== -1;
+}
+
+function _isFreshAccount(user) {
+    try {
+        const created = Date.parse(user.metadata && user.metadata.creationTime);
+        if (!created) return false;
+        return (Date.now() - created) < REFERRAL_SIGNUP_WINDOW_MS;
+    } catch (e) { return false; }
+}
+
+function isReferralEligibleSignup(user) {
+    return !!user && _signedInWithGoogle(user) && _isFreshAccount(user);
+}
+
+// Called from addFriendByInviteCode() once the friendship itself is connected,
+// so a link click always makes friends even when it earns nobody any coins.
+function recordReferralJoin(code, inviterUid) {
+    const user = window.egUser;
+    if (!user || !db || !inviterUid || inviterUid === user.uid) return Promise.resolve(false);
+    if (!isReferralEligibleSignup(user)) return Promise.resolve(false);
+
+    const rowRef = db.collection('referrals').doc(user.uid);
+    return firebaseSafe(function() {
+        return rowRef.get().then(function(doc) {
+            if (doc.exists) return false;
+            return rowRef.set({
+                referredUid: user.uid,
+                referredName: user.displayName || 'Player',
+                inviterUid: inviterUid,
+                code: code,
+                provider: 'google.com',
+                rewardCoins: REFERRAL_REWARD_COINS,
+                claimedAt: null,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(function() { return true; });
+        });
+    }, function() { /* the friendship already landed — a lost reward row is not worth a toast */ })
+        || Promise.resolve(false);
+}
+
+// Live subscription rather than a one-shot read, so an inviter watching the
+// Friends screen sees the coins arrive the moment a friend signs in.
+function subscribeReferralRewards() {
+    const user = window.egUser;
+    if (!user || !db) return;
+    if (referralUnsubscribe) referralUnsubscribe();
+    referralUnsubscribe = db.collection('referrals').where('inviterUid', '==', user.uid)
+        .onSnapshot(function(snap) {
+            const pending = [];
+            let invited = 0;
+            let earned = 0;
+            snap.forEach(function(doc) {
+                const data = doc.data();
+                const coins = data.rewardCoins || REFERRAL_REWARD_COINS;
+                invited++;
+                if (data.claimedAt) {
+                    earned += coins;
+                } else if (!referralClaimsInFlight[doc.id]) {
+                    pending.push({ id: doc.id, ref: doc.ref, coins: coins, name: data.referredName || 'A friend' });
+                }
+            });
+            referralStats = { invited: invited, coinsEarned: earned };
+            renderInviteRewardLine();
+            if (pending.length) claimReferralRewards(pending);
+        }, function() { /* ignore Firestore errors — rewards retry on next sign-in */ });
+}
+
+function claimReferralRewards(pending) {
+    pending.forEach(function(item) { referralClaimsInFlight[item.id] = true; });
+    return Promise.all(pending.map(function(item) {
+        // Credit only what the server actually accepted. The rule rejects the
+        // update once claimedAt is set, so a second device replaying the same
+        // reward drops out here instead of paying twice.
+        return item.ref.update({ claimedAt: firebase.firestore.FieldValue.serverTimestamp() })
+            .then(function() { return item; })
+            .catch(function() { return null; });
+    })).then(function(results) {
+        pending.forEach(function(item) { delete referralClaimsInFlight[item.id]; });
+        const claimed = results.filter(Boolean);
+        if (claimed.length) creditReferralCoins(claimed);
+    });
+}
+
+function creditReferralCoins(claimed) {
+    const total = claimed.reduce(function(sum, item) { return sum + item.coins; }, 0);
+    balance += total;
+    referralBonusTotal += total;
+    saveReferralBonusTotal();
+
+    // Today's baseline was captured before the gift arrived, so raise it by the
+    // same amount to keep the daily board honest as well as the all-time one.
+    if (window.ensureDailyBaseline) {
+        ensureDailyBaseline();
+        dailyProgress.baseline += total;
+        saveDailyProgress();
+    }
+
+    const balanceEl = document.getElementById('balance');
+    if (balanceEl) balanceEl.textContent = balance;
+    if (window.saveGameState) saveGameState();
+
+    referralStats.coinsEarned += total;
+    renderInviteRewardLine();
+    if (window.renderFriendsScreen) renderFriendsScreen();
+    if (window.pushNetProfit) pushNetProfit();
+
+    const who = claimed.length === 1
+        ? claimed[0].name + ' joined'
+        : claimed.length + ' friends joined';
+    showToast('🎁 ' + who + ' — +' + total + ' coins!');
+}
+
+function cleanupReferrals() {
+    if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
+    referralStats = { invited: 0, coinsEarned: 0 };
+    renderInviteRewardLine();
+}
+
+function renderInviteRewardLine() {
+    const el = document.getElementById('invite-reward-line');
+    if (!el) return;
+    if (!referralStats.invited) {
+        el.textContent = 'Get ' + REFERRAL_REWARD_COINS + ' coins for every friend who joins with Google.';
+        return;
+    }
+    const n = referralStats.invited;
+    el.textContent = n + ' friend' + (n === 1 ? '' : 's') + ' joined · ' +
+        referralStats.coinsEarned + ' coins earned';
+}
+
+
 /* --- js/rooms.js --- */
 // Simple private poker rooms — a room is just a shared, code-joinable
 // net-profit leaderboard. No chat, no reactions, no reset cadence.
@@ -5737,7 +6203,7 @@ function getRoomStatus(room) {
 function pushNetProfit() {
     const user = window.egUser;
     if (!user) return;
-    const netProfit = balance - 500;
+    const netProfit = balance - netProfitBaseline();
     const dailyNetProfit = window.ownDailyNetProfit ? ownDailyNetProfit() : 0;
     const dailyDateKey = window.getDayKey ? getDayKey() : null;
     firebaseSafe(function() {
@@ -5888,7 +6354,7 @@ function _doCreateRoom(name, stake, callback) {
         }).then(function(ref) {
             return db.collection('rooms').doc(ref.id).collection('members').doc(user.uid).set({
                 displayName: user.displayName || '',
-                netProfit: balance - 500,
+                netProfit: balance - netProfitBaseline(),
                 bestStreak: bestStreak
             }).then(function() {
                 if (callback) callback(code);
@@ -5962,7 +6428,7 @@ function joinRoomByCode(code) {
                 }).then(function() {
                     return db.collection('rooms').doc(roomDoc.id).collection('members').doc(user.uid).set({
                         displayName: user.displayName || '',
-                        netProfit: balance - 500,
+                        netProfit: balance - netProfitBaseline(),
                         bestStreak: bestStreak,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
@@ -6937,6 +7403,7 @@ function openInviteSheet() {
     const copyBtn = document.getElementById('invite-sheet-copy');
     copyBtn.textContent = 'Copy';
     copyBtn.classList.remove('copied');
+    if (window.renderInviteRewardLine) renderInviteRewardLine();
     openSheet('invite-sheet');
 }
 
@@ -6977,28 +7444,49 @@ function fallbackCopySheet(text, btn) {
     document.body.removeChild(ta);
 }
 
-function shareFriendInviteViaWhatsApp() {
-    const linkEl = document.getElementById('invite-sheet-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+// One handoff for every share chip. The wa.me / t.me web endpoints are used on
+// native too: they redirect straight into the installed app, and unlike the
+// whatsapp:// and tg:// schemes they show the friend a real page instead of
+// failing silently when the messenger is missing.
+//
+// Telegram takes the link and the message as separate parameters, so the
+// message passed in here must never already contain the link — otherwise the
+// share preview repeats it.
+function openShareChannel(channel, message, link) {
+    let url;
+    if (channel === 'telegram') {
+        url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
+              '&text=' + encodeURIComponent(message);
+    } else {
+        url = 'https://wa.me/?text=' + encodeURIComponent(message + '\n' + link);
+    }
+    window.open(url, '_blank');
+}
+
+function sheetLink(id) {
+    const el = document.getElementById(id);
+    return el ? (el.getAttribute('data-link') || el.textContent) : '';
+}
+
+function friendInviteMessage() {
     const user = window.egUser;
-    const name = user ? (user.displayName || 'A friend') : 'A friend';
-    const text = encodeURIComponent(name + ' wants to play Video Poker with you! Join here: ' + link);
-    window.open('https://wa.me/?text=' + text, '_blank');
+    const name = (user && user.displayName) || 'A friend';
+    const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
+    return name + ' is playing Royal Video Poker and wants you at the table.' +
+        (code ? '\nFriend code: ' + code : '');
+}
+
+function shareFriendInviteViaWhatsApp() {
+    openShareChannel('whatsapp', friendInviteMessage(), sheetLink('invite-sheet-link'));
 }
 
 function shareFriendInviteViaTelegram() {
-    const linkEl = document.getElementById('invite-sheet-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const user = window.egUser;
-    const name = user ? (user.displayName || 'A friend') : 'A friend';
-    const text = encodeURIComponent(name + ' wants to play Video Poker with you! Join here: ' + link);
-    window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
+    openShareChannel('telegram', friendInviteMessage(), sheetLink('invite-sheet-link'));
 }
 
 // --- Room Created bottom sheet ---
 function openRoomCreatedSheet(roomName, roomCode) {
-    const base = getShareBaseUrl();
-    const link = base + '?join=' + encodeURIComponent(roomCode);
+    const link = buildRoomLink(roomCode);
     document.getElementById('room-created-name').textContent = roomName;
     document.getElementById('room-created-link').textContent = link;
     document.getElementById('room-created-link').setAttribute('data-link', link);
@@ -7025,20 +7513,19 @@ function copyRoomLink() {
     }
 }
 
-function shareRoomViaWhatsApp() {
-    const linkEl = document.getElementById('room-created-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+function roomInviteMessage() {
     const name = document.getElementById('room-created-name').textContent;
-    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
-    window.open('https://wa.me/?text=' + text, '_blank');
+    const code = document.getElementById('room-created-link').getAttribute('data-code') || '';
+    return 'Join my poker room "' + name + '" on Royal Video Poker.' +
+        (code ? '\nRoom code: ' + code : '');
+}
+
+function shareRoomViaWhatsApp() {
+    openShareChannel('whatsapp', roomInviteMessage(), sheetLink('room-created-link'));
 }
 
 function shareRoomViaTelegram() {
-    const linkEl = document.getElementById('room-created-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const name = document.getElementById('room-created-name').textContent;
-    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
-    window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
+    openShareChannel('telegram', roomInviteMessage(), sheetLink('room-created-link'));
 }
 
 // --- Deep-link handling (?join=ROOMCODE) ---
@@ -7323,6 +7810,9 @@ function restoreGameState() {
 function doRebuy() {
     balance = 500;
     document.getElementById('balance').textContent = balance;
+    // The stack is back to the starting amount, so past referral coins are gone
+    // too — drop them from the net-profit baseline or the board reads negative.
+    if (window.resetReferralBaseline) resetReferralBaseline();
     saveGameState();
     showToast('♻ +500 credits');
     if (window.pushDailyRebuy) pushDailyRebuy();
@@ -8581,9 +9071,12 @@ function onboardingSignInSucceeded() {
 
 function onboardingEnableNotifications() {
     if (window.registerForPushNotifications) registerForPushNotifications();
-    if (window.egUser && window.setNotificationPref) {
+    // No egUser guard: sign-in is the *next* step, so there is never a user
+    // here. setNotificationPref() buffers until there is one and js/firebase.js
+    // flushes on sign-in — gating on egUser silently threw the opt-in away.
+    if (window.setNotificationPref) {
         ['social', 'leaderboard', 'dailyReminder', 'bestHand'].forEach(function(cat) {
-            if (typeof setNotificationPref === 'function') setNotificationPref(cat, true);
+            setNotificationPref(cat, true);
         });
     }
     advanceOnboarding();
@@ -8818,6 +9311,12 @@ function initNativeDeepLinkHandling() {
     CapApp.addListener('appUrlOpen', function(data) {
         applyNativeDeepLinkUrl(data.url);
     });
+    // First launch after a Play Store install: the invite click happened in a
+    // browser that no longer exists, so the code arrives via the install
+    // referrer instead. MainActivity also pushes it through
+    // window.__onInstallReferrer; this covers the case where it answered before
+    // this script parsed.
+    if (window.readCachedInstallReferrer) readCachedInstallReferrer();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -8839,6 +9338,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.handleIncomingInvite) handleIncomingInvite();
     if (window.handleJoinDeepLink) handleJoinDeepLink();
     initNativeDeepLinkHandling();
+    // An invite stored by an earlier launch that never got as far as sign-in.
+    if (window.restorePendingInvite) restorePendingInvite();
 });
 
 

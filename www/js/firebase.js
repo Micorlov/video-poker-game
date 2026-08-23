@@ -236,6 +236,12 @@ if (auth) {
             firebaseSafe(function() { return logUserToFirestore(user); });
             firebaseSafe(function() { return pushNetProfit(); });
             try { if (window.onboardingSignInSucceeded) onboardingSignInSucceeded(); } catch (e) { console.warn('onboardingSignInSucceeded failed:', e); }
+            // A token that arrived before sign-in is buffered, not written —
+            // during onboarding the push step runs a screen ahead of this, so
+            // that is the normal case rather than the edge one. Flush first,
+            // then re-register so a rotated token replaces a stale one.
+            if (window.flushPendingPushRegistration) flushPendingPushRegistration();
+
             // Fallback only: onboarding's priming screen (js/onboarding.js) is the
             // primary path for this ask. If the user never saw that screen (e.g.
             // signed in later from Settings/Friends without going through
@@ -244,7 +250,13 @@ if (auth) {
             try { pushAlreadyAsked = localStorage.getItem('vp_push_permission_asked') === '1'; } catch (e) {}
             if (!pushAlreadyAsked) {
                 firebaseSafe(function() { return registerForPushNotifications(); });
+            } else if (window.refreshPushRegistration) {
+                firebaseSafe(function() { return refreshPushRegistration(); });
             }
+            // Outside the friendsRooms flag on purpose: unclaimed referral coins
+            // are owed to the player, so they must still reconcile if the flag is
+            // switched off after the invites went out.
+            if (window.subscribeReferralRewards) subscribeReferralRewards();
             if (window.egFeatures.friendsRooms) {
                 if (window.loadFriends) loadFriends();
                 if (window.loadMyRooms) loadMyRooms();
@@ -276,6 +288,7 @@ if (auth) {
         } else {
             if (window.cleanupFriendsListeners) cleanupFriendsListeners();
             if (window.cleanupRooms) cleanupRooms();
+            if (window.cleanupReferrals) cleanupReferrals();
             if (window.stopPresence) stopPresence();
             // A room link that landed before auth settled: now that we know the
             // visitor is genuinely signed out, ask them to sign in. The code

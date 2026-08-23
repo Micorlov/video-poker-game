@@ -22,6 +22,7 @@ function openInviteSheet() {
     const copyBtn = document.getElementById('invite-sheet-copy');
     copyBtn.textContent = 'Copy';
     copyBtn.classList.remove('copied');
+    if (window.renderInviteRewardLine) renderInviteRewardLine();
     openSheet('invite-sheet');
 }
 
@@ -62,28 +63,49 @@ function fallbackCopySheet(text, btn) {
     document.body.removeChild(ta);
 }
 
-function shareFriendInviteViaWhatsApp() {
-    const linkEl = document.getElementById('invite-sheet-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+// One handoff for every share chip. The wa.me / t.me web endpoints are used on
+// native too: they redirect straight into the installed app, and unlike the
+// whatsapp:// and tg:// schemes they show the friend a real page instead of
+// failing silently when the messenger is missing.
+//
+// Telegram takes the link and the message as separate parameters, so the
+// message passed in here must never already contain the link — otherwise the
+// share preview repeats it.
+function openShareChannel(channel, message, link) {
+    let url;
+    if (channel === 'telegram') {
+        url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
+              '&text=' + encodeURIComponent(message);
+    } else {
+        url = 'https://wa.me/?text=' + encodeURIComponent(message + '\n' + link);
+    }
+    window.open(url, '_blank');
+}
+
+function sheetLink(id) {
+    const el = document.getElementById(id);
+    return el ? (el.getAttribute('data-link') || el.textContent) : '';
+}
+
+function friendInviteMessage() {
     const user = window.egUser;
-    const name = user ? (user.displayName || 'A friend') : 'A friend';
-    const text = encodeURIComponent(name + ' wants to play Video Poker with you! Join here: ' + link);
-    window.open('https://wa.me/?text=' + text, '_blank');
+    const name = (user && user.displayName) || 'A friend';
+    const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
+    return name + ' is playing Royal Video Poker and wants you at the table.' +
+        (code ? '\nFriend code: ' + code : '');
+}
+
+function shareFriendInviteViaWhatsApp() {
+    openShareChannel('whatsapp', friendInviteMessage(), sheetLink('invite-sheet-link'));
 }
 
 function shareFriendInviteViaTelegram() {
-    const linkEl = document.getElementById('invite-sheet-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const user = window.egUser;
-    const name = user ? (user.displayName || 'A friend') : 'A friend';
-    const text = encodeURIComponent(name + ' wants to play Video Poker with you! Join here: ' + link);
-    window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
+    openShareChannel('telegram', friendInviteMessage(), sheetLink('invite-sheet-link'));
 }
 
 // --- Room Created bottom sheet ---
 function openRoomCreatedSheet(roomName, roomCode) {
-    const base = getShareBaseUrl();
-    const link = base + '?join=' + encodeURIComponent(roomCode);
+    const link = buildRoomLink(roomCode);
     document.getElementById('room-created-name').textContent = roomName;
     document.getElementById('room-created-link').textContent = link;
     document.getElementById('room-created-link').setAttribute('data-link', link);
@@ -110,20 +132,19 @@ function copyRoomLink() {
     }
 }
 
-function shareRoomViaWhatsApp() {
-    const linkEl = document.getElementById('room-created-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+function roomInviteMessage() {
     const name = document.getElementById('room-created-name').textContent;
-    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
-    window.open('https://wa.me/?text=' + text, '_blank');
+    const code = document.getElementById('room-created-link').getAttribute('data-code') || '';
+    return 'Join my poker room "' + name + '" on Royal Video Poker.' +
+        (code ? '\nRoom code: ' + code : '');
+}
+
+function shareRoomViaWhatsApp() {
+    openShareChannel('whatsapp', roomInviteMessage(), sheetLink('room-created-link'));
 }
 
 function shareRoomViaTelegram() {
-    const linkEl = document.getElementById('room-created-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const name = document.getElementById('room-created-name').textContent;
-    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
-    window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
+    openShareChannel('telegram', roomInviteMessage(), sheetLink('room-created-link'));
 }
 
 // --- Deep-link handling (?join=ROOMCODE) ---

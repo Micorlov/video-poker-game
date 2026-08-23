@@ -208,6 +208,12 @@ function initNativeDeepLinkHandling() {
     CapApp.addListener('appUrlOpen', function(data) {
         applyNativeDeepLinkUrl(data.url);
     });
+    // First launch after a Play Store install: the invite click happened in a
+    // browser that no longer exists, so the code arrives via the install
+    // referrer instead. MainActivity also pushes it through
+    // window.__onInstallReferrer; this covers the case where it answered before
+    // this script parsed.
+    if (window.readCachedInstallReferrer) readCachedInstallReferrer();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -229,4 +235,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.handleIncomingInvite) handleIncomingInvite();
     if (window.handleJoinDeepLink) handleJoinDeepLink();
     initNativeDeepLinkHandling();
+    // An invite stored by an earlier launch that never got as far as sign-in.
+    if (window.restorePendingInvite) restorePendingInvite();
 });

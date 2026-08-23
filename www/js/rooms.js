@@ -16,7 +16,7 @@ function getRoomStatus(room) {
 function pushNetProfit() {
     const user = window.egUser;
     if (!user) return;
-    const netProfit = balance - 500;
+    const netProfit = balance - netProfitBaseline();
     const dailyNetProfit = window.ownDailyNetProfit ? ownDailyNetProfit() : 0;
     const dailyDateKey = window.getDayKey ? getDayKey() : null;
     firebaseSafe(function() {
@@ -167,7 +167,7 @@ function _doCreateRoom(name, stake, callback) {
         }).then(function(ref) {
             return db.collection('rooms').doc(ref.id).collection('members').doc(user.uid).set({
                 displayName: user.displayName || '',
-                netProfit: balance - 500,
+                netProfit: balance - netProfitBaseline(),
                 bestStreak: bestStreak
             }).then(function() {
                 if (callback) callback(code);
@@ -241,7 +241,7 @@ function joinRoomByCode(code) {
                 }).then(function() {
                     return db.collection('rooms').doc(roomDoc.id).collection('members').doc(user.uid).set({
                         displayName: user.displayName || '',
-                        netProfit: balance - 500,
+                        netProfit: balance - netProfitBaseline(),
                         bestStreak: bestStreak,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
