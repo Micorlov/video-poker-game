@@ -196,3 +196,59 @@
     background: var(--green-dim);
     font-weight: 700;
 }
+
+/* =========================================================================
+   Desktop: present the phone, don't stretch into the space.
+
+   This is a phone design — a single column, a fixed bottom nav, a sticky bet
+   dock. On a wide screen the honest thing is to show it as what it is rather
+   than strand a 460px column in an empty page.
+
+   The transform on .shell is load-bearing, not decoration: it makes the
+   element a containing block for its position:fixed descendants, so the
+   bottom nav, sheets and onboarding overlay resolve against the frame
+   instead of escaping to the browser viewport.
+   ========================================================================= */
+@media (min-width: 620px) {
+    html {
+        background: #05100D;
+    }
+
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: none;
+    }
+
+    body::before {
+        display: none;
+    }
+
+    .shell {
+        position: relative;
+        width: 412px;
+        height: min(calc(100vh - 48px), 900px);
+        flex: none;
+        overflow: hidden;
+        border-radius: 46px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--app-bg);
+        box-shadow: 0 50px 90px -30px rgba(0, 0, 0, 0.95),
+                    0 0 0 10px rgba(255, 255, 255, 0.03);
+        transform: translateZ(0);
+    }
+
+    /* The frame scrolls its own content; the page itself never does. */
+    .app {
+        height: 100%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: none;
+    }
+
+    .app::-webkit-scrollbar {
+        display: none;
+    }
+}
