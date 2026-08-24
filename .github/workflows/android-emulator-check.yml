@@ -1,0 +1,107 @@
+name: Android build + emulator smoke test
+
+# Manual only: builds entirely on GitHub-hosted runners (nothing local), so a
+# teammate without an Android dev setup can produce an installable build and
+# prove it boots. android/app/google-services.json is gitignored and not in
+# this repo, so the Firebase native (google-services) Gradle plugin is
+# skipped here — that only disables native Google Sign-In in this specific
+# build; Firestore/friends/rooms data still runs through the JS SDK in the
+# WebView. This does not touch any developer's local machine.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag, or commit to build'
+        required: true
+        default: '2.0.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      apk-name: ${{ steps.locate.outputs.apk-name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: node build.js
+
+      - run: npx cap sync android
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+
+      - name: Build debug AAB + APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew bundleDebug assembleDebug --no-daemon
+
+      - id: locate
+        run: echo "apk-name=app-debug.apk" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-app-bundle-aab
+          path: android/app/build/outputs/bundle/debug/app-debug.aab
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-app-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+  emulator-smoke-test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: android-app-debug-apk
+          path: apk
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Boot emulator, install, launch, screenshot
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            adb install -r apk/app-debug.apk
+            adb shell am start -n com.micorlov.videopoker/.MainActivity
+            sleep 8
+            PID=$(adb shell pidof com.micorlov.videopoker | tr -d '\r')
+            if [ -z "$PID" ]; then
+              echo "App did not stay running — pidof returned nothing"
+              adb logcat -d -t 300 | tail -200
+              exit 1
+            fi
+            echo "App running with pid $PID"
+            mkdir -p artifacts
+            adb exec-out screencap -p > artifacts/boot-screenshot.png
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: emulator-boot-screenshot
+          path: artifacts/boot-screenshot.png
+          if-no-files-found: error
