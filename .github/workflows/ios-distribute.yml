@@ -1,0 +1,143 @@
+name: iOS app distribution
+
+# Builds a signed IPA on a macOS runner and pushes it to Firebase App
+# Distribution. See IOS_APP_DISTRIBUTION.md for the one-time setup of the
+# certificate, provisioning profile and Firebase service account.
+
+on:
+  workflow_dispatch:
+    inputs:
+      groups:
+        description: 'Firebase tester groups (comma-separated)'
+        required: false
+        default: 'testers'
+      release_notes:
+        description: 'Release notes shown to testers'
+        required: false
+        default: ''
+      export_method:
+        description: 'Xcode export method'
+        required: false
+        default: 'release-testing'
+        type: choice
+        options:
+          - release-testing
+          - app-store-connect
+          - enterprise
+
+concurrency:
+  group: ios-distribute
+  cancel-in-progress: false
+
+jobs:
+  distribute:
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Recorded so a signing or export failure can be matched to the Xcode
+      # version that produced it — the runner default moves over time.
+      - name: Report Xcode version
+        run: xcodebuild -version
+
+      # The signing assets are base64 blobs so they survive GitHub's
+      # single-line secret storage; IOS_APP_DISTRIBUTION.md has the
+      # `base64 -i <file>` commands that produce them.
+      - name: Install signing certificate and provisioning profile
+        env:
+          CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "$CERT_P12_BASE64" ] || [ -z "$PROFILE_BASE64" ]; then
+            echo "::error::IOS_DIST_CERT_P12_BASE64 and IOS_PROVISIONING_PROFILE_BASE64 must be set. See IOS_APP_DISTRIBUTION.md."
+            exit 1
+          fi
+
+          CERT_PATH="$RUNNER_TEMP/dist.p12"
+          PROFILE_PATH="$RUNNER_TEMP/profile.mobileprovision"
+          KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+
+          echo -n "$CERT_P12_BASE64" | base64 --decode > "$CERT_PATH"
+          echo -n "$PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+
+          # A dedicated, unlocked keychain keeps codesign from prompting and
+          # is thrown away with the runner.
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$CERT_PASSWORD" -A \
+            -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >/dev/null
+          security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain-db
+
+          # Read the profile's own name and UUID rather than carrying them as
+          # extra secrets that can drift from the file.
+          PROFILE_PLIST="$RUNNER_TEMP/profile.plist"
+          security cms -D -i "$PROFILE_PATH" > "$PROFILE_PLIST"
+          PROFILE_NAME="$(/usr/libexec/PlistBuddy -c 'Print :Name' "$PROFILE_PLIST")"
+          PROFILE_UUID="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$PROFILE_PLIST")"
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$PROFILE_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+
+          echo "IOS_PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
+          echo "Installed profile '$PROFILE_NAME' ($PROFILE_UUID)"
+
+          # Name the identity actually present, so codesign cannot pick a
+          # stale one from a shared keychain.
+          IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" \
+            | sed -n 's/.*"\(.*\)"$/\1/p' | head -1)"
+          [ -n "$IDENTITY" ] || { echo "::error::No codesigning identity found in the imported .p12"; exit 1; }
+          echo "IOS_SIGNING_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
+          echo "Using signing identity: $IDENTITY"
+
+      - name: Write Firebase service account key
+        run: |
+          set -euo pipefail
+          if [ -z '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' ]; then
+            echo "::error::FIREBASE_SERVICE_ACCOUNT_KEY is not set. See IOS_APP_DISTRIBUTION.md."
+            exit 1
+          fi
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > "$RUNNER_TEMP/firebase-service-account.json"
+
+      - name: Build and distribute
+        id: distribute
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+          IOS_EXPORT_METHOD: ${{ inputs.export_method }}
+          FIREBASE_GROUPS: ${{ inputs.groups }}
+          RELEASE_NOTES: ${{ inputs.release_notes }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: ./scripts/ios/distribute.sh
+
+      - name: Upload IPA artifact
+        if: always() && steps.distribute.outputs.ipa-path != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-poker-ios-${{ github.run_number }}
+          path: ${{ steps.distribute.outputs.ipa-path }}
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Clean up keychain and profiles
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/"*.mobileprovision || true
+          rm -f "$RUNNER_TEMP/firebase-service-account.json" "$RUNNER_TEMP/dist.p12" || true

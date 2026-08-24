@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Release-configuration entitlements (Debug uses AppDebug.entitlements).
+
+  aps-environment is "production" because every build that leaves this
+  machine is signed with a distribution profile — Firebase App Distribution
+  (ad-hoc), TestFlight, and the App Store all provision production APNs.
+  A "development" value here mismatches those profiles: the export step
+  fails outright, or the app registers a sandbox APNs token that the
+  production FCM sender can never deliver to.
+
+  Debug builds on device keep using the sandbox, via Xcode's own
+  development profile, so nothing about local iteration changes.
+-->
 <plist version="1.0">
 <dict>
 	<key>com.apple.developer.applesignin</key>
@@ -7,6 +20,6 @@
 		<string>Default</string>
 	</array>
 	<key>aps-environment</key>
-	<string>development</string>
+	<string>production</string>
 </dict>
 </plist>

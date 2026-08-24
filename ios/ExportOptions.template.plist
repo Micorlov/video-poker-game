@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Template for `xcodebuild -exportArchive`. scripts/ios/distribute.sh fills
+  the __PLACEHOLDERS__ in and writes the result to the build directory; it
+  also drops the provisioningProfiles dict when signing automatically.
+  Edit export knobs here rather than in the shell script.
+-->
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>__METHOD__</string>
+	<key>teamID</key>
+	<string>__TEAM_ID__</string>
+	<key>signingStyle</key>
+	<string>__SIGNING_STYLE__</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>__BUNDLE_ID__</key>
+		<string>__PROFILE_NAME__</string>
+	</dict>
+	<key>destination</key>
+	<string>export</string>
+	<key>compileBitcode</key>
+	<false/>
+	<key>stripSwiftSymbols</key>
+	<true/>
+	<key>uploadSymbols</key>
+	<true/>
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+</dict>
+</plist>
