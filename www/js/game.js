@@ -374,6 +374,10 @@ function updateAllInUI() {
 // --- All In confirmation sheet (slide-to-confirm) ---
 let allInPendingAmount = 0;
 let allInDragging = false;
+// The bet in effect right before ALL IN was confirmed, so the bet buttons
+// can revert to it once the ALL IN hand is done instead of staying stuck
+// on ALL IN for the next hand.
+let betBeforeAllIn = null;
 
 function openAllInSheet() {
     // Unlike setBet(), All In is allowed mid-hand: it stakes whatever balance
@@ -427,6 +431,7 @@ function confirmAllIn() {
     // openAllInSheet() already restricts the gameState; guard the mutation
     // itself too so a stale open sheet can never run from an invalid state.
     if (gameState !== 'bet' && gameState !== 'hold') return;
+    if (betBeforeAllIn === null) betBeforeAllIn = bet;
     if (gameState === 'hold') {
         // The initial stake was already charged in deal(); only the
         // additional amount is charged now, and it's charged immediately —
@@ -823,6 +828,10 @@ function draw() {
     renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
 
     gameState = 'bet';
+    if (betBeforeAllIn !== null) {
+        setBet(betBeforeAllIn);
+        betBeforeAllIn = null;
+    }
     updateMainButton();
 }
 
