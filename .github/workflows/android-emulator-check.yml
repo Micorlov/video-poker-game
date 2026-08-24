@@ -79,6 +79,9 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Boot emulator, install, launch, screenshot
+        # Each line below runs as its OWN separate `sh -c` invocation (that's
+        # how this action's `script` input works) — no multi-line if/then
+        # blocks, no shared shell state across lines.
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -90,18 +93,13 @@ jobs:
             adb install -r apk/app-debug.apk
             adb shell am start -n com.micorlov.videopoker/.MainActivity
             sleep 8
-            PID=$(adb shell pidof com.micorlov.videopoker | tr -d '\r')
-            if [ -z "$PID" ]; then
-              echo "App did not stay running — pidof returned nothing"
-              adb logcat -d -t 300 | tail -200
-              exit 1
-            fi
-            echo "App running with pid $PID"
             mkdir -p artifacts
             adb exec-out screencap -p > artifacts/boot-screenshot.png
+            adb shell pidof com.micorlov.videopoker
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: emulator-boot-screenshot
           path: artifacts/boot-screenshot.png
-          if-no-files-found: error
+          if-no-files-found: warn
