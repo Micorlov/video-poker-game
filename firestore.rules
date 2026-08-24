@@ -33,14 +33,60 @@ service cloud.firestore {
       allow create: if request.auth != null
                     && request.resource.data.ownerUid == request.auth.uid
                     && request.resource.data.memberUids == [request.auth.uid];
+      // joinRoomByCode (js/rooms.js) writes memberUids AND updatedAt — the
+      // timestamp is what the push poller (scripts/push/rooms.js) cursors on,
+      // so it must be allowed alongside the roster append.
       allow update: if request.auth != null
-                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids'])
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'updatedAt'])
                     && request.resource.data.memberUids == resource.data.memberUids.concat([request.auth.uid]);
 
       match /members/{uid} {
         allow read: if request.auth != null;
         allow write: if request.auth != null && request.auth.uid == uid;
       }
+    }
+
+    // Room invites — one doc per invited friend (js/rooms.js). The sender must
+    // be a member of the room they're inviting to; only the recipient may
+    // answer, exactly once, and only by flipping status.
+    match /roomInvites/{inviteId} {
+      allow read: if request.auth != null
+                  && (request.auth.uid == resource.data.toUid
+                      || request.auth.uid == resource.data.fromUid);
+      allow create: if request.auth != null
+                    && request.resource.data.fromUid == request.auth.uid
+                    && request.resource.data.toUid is string
+                    && request.resource.data.toUid != request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    && request.auth.uid in get(/databases/$(database)/documents/rooms/$(request.resource.data.roomId)).data.memberUids;
+      allow update: if request.auth != null
+                    && request.auth.uid == resource.data.toUid
+                    && resource.data.status == 'pending'
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'respondedAt']);
+      allow delete: if false;
+    }
+
+    // Referral ledger — one row per referred player, id = that player's uid.
+    // Keying by the REFERRED uid makes the payout idempotent: a second invite
+    // link, a reinstall, or a replayed install referrer all resolve to the same
+    // doc id and the create is rejected as already present. Full rationale in
+    // FIRESTORE_RULES_REFERRALS.md.
+    match /referrals/{referredUid} {
+      allow read: if request.auth != null
+                  && (request.auth.uid == referredUid
+                      || request.auth.uid == resource.data.inviterUid);
+      allow create: if request.auth != null
+                    && request.auth.uid == referredUid
+                    && request.resource.data.referredUid == referredUid
+                    && request.resource.data.inviterUid != referredUid
+                    && request.resource.data.rewardCoins == 2000
+                    && request.resource.data.claimedAt == null;
+      allow update: if request.auth != null
+                    && request.auth.uid == resource.data.inviterUid
+                    && resource.data.claimedAt == null
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['claimedAt']);
+      allow delete: if false;
     }
 
     // Referral groups — everyone who joins via the same invite link becomes mutual

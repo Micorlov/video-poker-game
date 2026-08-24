@@ -8,7 +8,12 @@ function showScreen(name) {
         if (nav) nav.classList.toggle('active', s === name);
     });
     if (name === 'stats') renderStatsScreen();
-    if (name === 'friends') renderFriendsScreen();
+    if (name === 'friends') {
+        renderFriendsScreen();
+        // Room list is a one-shot .get(); refresh member counts on every visit
+        // so accepted invites show up without a reload.
+        if (window.egUser && window.loadMyRooms) loadMyRooms();
+    }
 }
 
 let friendsTab = 'leaderboard';

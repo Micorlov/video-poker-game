@@ -167,13 +167,19 @@ function cleanupReferrals() {
 }
 
 function renderInviteRewardLine() {
-    const el = document.getElementById('invite-reward-line');
-    if (!el) return;
+    // Same line lives in two places: the invite sheet and the Friends screen
+    // action strip (the OS share sheet can't carry the reward pitch, so it
+    // stays visible on the page itself).
+    let text;
     if (!referralStats.invited) {
-        el.textContent = 'Get ' + REFERRAL_REWARD_COINS + ' coins for every friend who joins with Google.';
-        return;
+        text = 'Get ' + REFERRAL_REWARD_COINS + ' coins for every friend who joins with Google.';
+    } else {
+        const n = referralStats.invited;
+        text = n + ' friend' + (n === 1 ? '' : 's') + ' joined · ' +
+            referralStats.coinsEarned + ' coins earned';
     }
-    const n = referralStats.invited;
-    el.textContent = n + ' friend' + (n === 1 ? '' : 's') + ' joined · ' +
-        referralStats.coinsEarned + ' coins earned';
+    ['invite-reward-line', 'friends-invite-reward'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    });
 }

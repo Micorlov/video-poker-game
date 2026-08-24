@@ -193,7 +193,7 @@
         <section id="screen-friends" class="screen">
             <div class="friends-header">
                 <h1 class="screen-title">Friends</h1>
-                <button class="invite-pill" onclick="openInviteSheet()">+ Invite</button>
+                <button class="invite-pill" onclick="shareInviteNative()">+ Invite</button>
             </div>
 
             <div class="panel friends-signin-prompt" id="friends-signed-out" onclick="openSignInModal()">
@@ -202,18 +202,22 @@
             </div>
 
             <div id="friends-signed-in-wrap" class="hidden">
-                <div class="section-label">Your Code</div>
-                <div class="panel own-code-panel" id="own-referral-code">—</div>
-
-                <div class="section-label">Add a Friend</div>
-                <div class="panel add-friend-row">
-                    <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
-                    <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()">Add</button>
+                <div class="friends-action-strip">
+                    <button class="code-chip" id="own-code-chip" onclick="copyOwnCode()">
+                        <span class="code-chip-label">Your code</span>
+                        <span class="code-chip-value" id="own-referral-code">—</span>
+                        <span class="code-chip-hint" id="own-code-hint">Tap to copy</span>
+                    </button>
+                    <div class="add-friend-inline">
+                        <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
+                        <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()">Add</button>
+                    </div>
                 </div>
+                <div class="friends-reward-line" id="friends-invite-reward">Get 2000 coins for every friend who joins with Google.</div>
 
                 <div class="stats-toggle">
                     <button class="stats-toggle-btn selected" id="friends-tab-leaderboard" onclick="setFriendsTab('leaderboard')">Leaderboard</button>
-                    <button class="stats-toggle-btn" id="friends-tab-rooms" onclick="setFriendsTab('rooms')">Poker Rooms</button>
+                    <button class="stats-toggle-btn" id="friends-tab-rooms" onclick="setFriendsTab('rooms')">Poker Rooms<span class="tab-badge hidden" id="rooms-tab-badge"></span></button>
                 </div>
 
                 <div id="friends-leaderboard-view">
@@ -224,6 +228,7 @@
                 </div>
 
                 <div id="friends-rooms-view" class="hidden">
+                    <div id="friends-room-invites"></div>
                     <div class="rooms-empty hidden" id="friends-rooms-empty">No rooms yet — create one below.</div>
                     <div id="friends-rooms-list"></div>
                     <button class="create-room-link create-room-dashed" id="friends-create-room-btn" onclick="toggleInlineRoomForm()">+ Create a Poker Room with Friends</button>
@@ -359,6 +364,7 @@
             <button class="nav-btn" id="nav-friends" onclick="showScreen('friends')">
                 <span class="nav-icon">◍</span>
                 <span>Friends</span>
+                <span class="nav-badge hidden" id="nav-friends-badge"></span>
             </button>
             <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
                 <span class="nav-icon">⚙</span>
@@ -436,23 +442,28 @@
         </div>
     </div>
 
-    <!-- Phase 2: Room Created bottom sheet -->
-    <div class="sheet-backdrop hidden" id="room-created-sheet" onclick="if(event.target===this)closeSheet('room-created-sheet')">
+    <!-- Room invite sheet: pick friends to invite + share link fallback.
+         Opens right after creating a room, and from the Invite button on room cards. -->
+    <div class="sheet-backdrop hidden" id="room-invite-sheet" onclick="if(event.target===this)closeSheet('room-invite-sheet')">
         <div class="sheet">
             <div class="sheet-header">
-                <span class="sheet-title">Room Created 🎉</span>
-                <button class="sheet-close" onclick="closeSheet('room-created-sheet')">✕</button>
+                <span class="sheet-title" id="room-invite-title">Invite Friends</span>
+                <button class="sheet-close" onclick="closeSheet('room-invite-sheet')">✕</button>
             </div>
-            <div class="sheet-sub">Invite friends to "<span id="room-created-name">—</span>"</div>
+            <div class="sheet-sub">Invite friends to "<span id="room-invite-name">—</span>" — they get a notification with a Join button.</div>
+            <div class="room-invite-friends" id="room-invite-friends"></div>
+            <button class="rip-send-btn hidden" id="room-invite-send" onclick="sendRoomInvites()">Send Invites</button>
+            <div class="rip-divider"><span>or share a link</span></div>
             <div class="sheet-link-row">
-                <span class="sheet-link-text" id="room-created-link">—</span>
-                <button class="sheet-copy-btn" id="room-created-copy" onclick="copyRoomLink()">Copy</button>
+                <span class="sheet-link-text" id="room-invite-link">—</span>
+                <button class="sheet-copy-btn" id="room-invite-copy" onclick="copyRoomLink()">Copy</button>
             </div>
             <div class="share-chips-row">
+                <button class="share-chip native" onclick="shareRoomInviteNative()">Share…</button>
                 <button class="share-chip whatsapp" onclick="shareRoomViaWhatsApp()">WhatsApp</button>
                 <button class="share-chip telegram" onclick="shareRoomViaTelegram()">Telegram</button>
             </div>
-            <button class="sheet-done-btn" onclick="closeSheet('room-created-sheet')">Done</button>
+            <button class="sheet-done-btn" onclick="closeSheet('room-invite-sheet')">Done</button>
         </div>
     </div>
 

@@ -148,9 +148,11 @@ function initPushListeners() {
     });
 
     // Minimal/generic deep-link: all current push categories (social, leaderboard,
-    // bestHand) surface inside the Friends/Leaderboard screen, so just land there.
+    // bestHand) surface inside the Friends/Leaderboard screen, so just land there —
+    // on the rooms sub-tab, where room-invite banners and room activity live.
     PushNotifications.addListener('pushNotificationActionPerformed', function() {
         if (window.showScreen) showScreen('friends');
+        if (window.setFriendsTab) setFriendsTab('rooms');
     });
 }
 initPushListeners();

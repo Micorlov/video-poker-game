@@ -1113,14 +1113,6 @@
 }
 
 /* --- Friends screen --- */
-.own-code-panel {
-    text-align: center;
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 0.2em;
-    color: var(--green);
-}
-
 .invite-icon {
     font-size: 16px;
     line-height: 1;

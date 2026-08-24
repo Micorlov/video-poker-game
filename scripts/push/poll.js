@@ -5,6 +5,7 @@
 const { getCursor, setCursor } = require('../lib/cursor');
 const { checkNewFriends } = require('./friends');
 const { checkRoomActivity } = require('./rooms');
+const { checkRoomInvites } = require('./roomInvites');
 const { checkHourlyLeaderboard } = require('./leaderboard');
 const { checkBestHand } = require('./bestHand');
 const { checkFriendRanks } = require('./friendRank');
@@ -16,6 +17,7 @@ async function poll() {
   await Promise.all([
     checkNewFriends(since),
     checkRoomActivity(since),
+    checkRoomInvites(since),
     checkHourlyLeaderboard(),
     checkBestHand(since),
     checkFriendRanks(since),

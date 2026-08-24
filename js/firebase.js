@@ -260,6 +260,8 @@ if (auth) {
             if (window.egFeatures.friendsRooms) {
                 if (window.loadFriends) loadFriends();
                 if (window.loadMyRooms) loadMyRooms();
+                // Live listener for incoming poker-room invites (js/rooms.js)
+                if (window.initRoomInviteListener) initRoomInviteListener();
                 // Phase 2: start presence heartbeat
                 if (window.startPresence) startPresence();
             }
