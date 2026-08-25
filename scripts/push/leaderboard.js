@@ -7,8 +7,10 @@
 // getHourKey() (also mirrored in js/bracelets.js's braceletHourKeyOf()).
 const { getFirestore } = require('../lib/firebaseAdmin');
 const { sendPushToUser } = require('../lib/sendPush');
+const { triggerConfig } = require('../lib/pushPolicy');
 
 const TOP_N = 5;
+const TRIGGER = 'hourlyTop5';
 
 function currentHourKey() {
   const d = new Date();
@@ -16,7 +18,10 @@ function currentHourKey() {
     String(d.getUTCDate()).padStart(2, '0') + String(d.getUTCHours()).padStart(2, '0');
 }
 
-async function checkHourlyLeaderboard() {
+async function checkHourlyLeaderboard(settings) {
+  const config = triggerConfig(settings, TRIGGER);
+  if (config.enabled === false) return;
+
   const db = getFirestore();
   const hourKey = currentHourKey();
   const hourDocRef = db.doc(`hourly/${hourKey}`);
@@ -35,7 +40,7 @@ async function checkHourlyLeaderboard() {
     sendPushToUser(uid, 'leaderboard', {
       title: 'Hourly leaderboard',
       body: "You've dropped out of this hour's top 5",
-    })
+    }, { trigger: TRIGGER, cooldownHours: config.cooldownHours, settings })
   ));
 
   await hourDocRef.set({ topFive: currentTopFive }, { merge: true });

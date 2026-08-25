@@ -49,7 +49,14 @@ function tokenWrites(writes) {
 }
 
 function prefWrites(writes) {
-    return writes.filter((w) => w.kind === 'prefs');
+    return writes.filter((w) => w.kind === 'prefs' && w.data.notificationPrefs);
+}
+
+// flushPendingPushRegistration also stamps the player's UTC offset onto the
+// same document, so writes to users/{uid} are told apart by payload shape
+// rather than by path.
+function timezoneWrites(writes) {
+    return writes.filter((w) => w.kind === 'prefs' && w.data.timezoneOffset !== undefined);
 }
 
 test('a token arriving before sign-in is kept, not dropped', () => {
@@ -113,6 +120,19 @@ test('a token arriving after sign-in still writes straight through', () => {
     assert.equal(written.length, 1);
     assert.equal(written[0].token, 'TOKEN-XYZ');
     assert.equal(written[0].data.platform, 'web');
+});
+
+test('the timezone offset is stamped on sign-in so quiet hours can be local', () => {
+    const { win, writes } = loadPush();
+
+    win.egUser = { uid: 'user-123' };
+    win.flushPendingPushRegistration();
+
+    // scripts/lib/pushPolicy.js reads this to decide whether "now" falls inside
+    // the player's own quiet-hours window; without it they are treated as UTC.
+    const written = timezoneWrites(writes);
+    assert.equal(written.length, 1);
+    assert.equal(typeof written[0].data.timezoneOffset, 'number');
 });
 
 test('flushing with no user pending is a no-op rather than a throw', () => {

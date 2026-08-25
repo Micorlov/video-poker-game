@@ -90,9 +90,22 @@ function setNotificationPref(category, enabled) {
 }
 window.setNotificationPref = setNotificationPref;
 
+// Quiet hours (scripts/lib/pushPolicy.js) are evaluated in each player's own
+// local time, so the server needs their UTC offset. getTimezoneOffset() returns
+// minutes BEHIND UTC, which is the sign convention pushPolicy.js expects.
+function saveTimezoneOffset() {
+    if (!window.egUser || typeof db === 'undefined') return;
+    firebaseSafe(function() {
+        return db.collection('users').doc(window.egUser.uid)
+            .set({ timezoneOffset: new Date().getTimezoneOffset() }, { merge: true });
+    });
+}
+
 // Called from js/firebase.js once onAuthStateChanged reports a signed-in user.
 function flushPendingPushRegistration() {
     if (!window.egUser || typeof db === 'undefined') return;
+
+    saveTimezoneOffset();
 
     if (pendingFcmToken) {
         var token = pendingFcmToken;
@@ -147,10 +160,16 @@ function initPushListeners() {
         console.warn('Push registration error:', err);
     });
 
-    // Minimal/generic deep-link: all current push categories (social, leaderboard,
-    // bestHand) surface inside the Friends/Leaderboard screen, so just land there —
-    // on the rooms sub-tab, where room-invite banners and room activity live.
-    PushNotifications.addListener('pushNotificationActionPerformed', function() {
+    // Campaigns composed in push-admin.html may name a destination screen in
+    // their data payload. Everything else (social, leaderboard, bestHand)
+    // surfaces inside the Friends/Leaderboard screen, so that stays the
+    // default — on the rooms sub-tab, where invites and room activity live.
+    PushNotifications.addListener('pushNotificationActionPerformed', function(action) {
+        var data = (action && action.notification && action.notification.data) || {};
+        if (data.deepLink && window.showScreen) {
+            showScreen(data.deepLink);
+            return;
+        }
         if (window.showScreen) showScreen('friends');
         if (window.setFriendsTab) setFriendsTab('rooms');
     });

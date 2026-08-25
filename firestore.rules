@@ -156,20 +156,40 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Queued test push sends — Admin SDK only (scripts/push/testQueue.js); no
-    // client currently writes this collection.
-    match /pushTestQueue/{docId} {
-      allow read, write: if false;
+    // Collection-group reads for the admin center's audience preview. The
+    // owner-only rules above still govern every write and every player's own
+    // reads; these add read access for the admin account alone, which is what
+    // lets push-admin.html show "N devices across M users" before a send.
+    // A collection-group query needs its own {path=**} match — the nested
+    // match blocks above only cover direct document access.
+    match /{path=**}/fcmTokens/{token} {
+      allow read: if request.auth != null
+                  && request.auth.token.email == 'micorlov@gmail.com';
     }
 
-    // pushLogs/{logId} — one doc per recipient per notification. Written by
-    // scripts/lib/pushLog.js (Admin SDK, bypasses these rules) and by
-    // admin.html's "Send Now" test sender, so that one needs create access.
+    match /{path=**}/friends/{friendUid} {
+      allow read: if request.auth != null
+                  && request.auth.token.email == 'micorlov@gmail.com';
+    }
+
+    // Push campaigns composed in push-admin.html. The admin page can never hold
+    // a service-account credential, so it writes intent here and the GitHub
+    // Actions poller (scripts/push/campaigns.js, Admin SDK, bypasses these
+    // rules) performs the delivery and writes results back. Admin-only both
+    // ways: a campaign doc names its audience and carries the message body.
+    match /pushCampaigns/{campaignId} {
+      allow read, write: if request.auth != null
+                         && request.auth.token.email == 'micorlov@gmail.com';
+    }
+
+    // pushLogs/{logId} — one doc per recipient per notification. Written only
+    // by scripts/lib/pushLog.js (Admin SDK, bypasses these rules); every send
+    // path now runs server-side, so no client needs create access.
     // Admin-only read: entries carry display names and notification bodies
     // for every user. Append-only — nothing edits or deletes log entries.
     match /pushLogs/{logId} {
-      allow read, create: if request.auth != null && request.auth.token.email == 'micorlov@gmail.com';
-      allow update, delete: if false;
+      allow read: if request.auth != null && request.auth.token.email == 'micorlov@gmail.com';
+      allow write: if false;
     }
   }
 }

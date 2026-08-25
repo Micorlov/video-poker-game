@@ -14,7 +14,7 @@
 const { getFirestore } = require('../lib/firebaseAdmin');
 const { sendPushToUser } = require('../lib/sendPush');
 
-async function checkBestHand(since) {
+async function checkBestHand(since, settings) {
   const db = getFirestore();
   const snap = await db.collection('users').where('bestHandAt', '>', since).get();
   if (snap.empty) return;
@@ -32,7 +32,7 @@ async function checkBestHand(since) {
       sendPushToUser(friendDoc.id, 'bestHand', {
         title: 'New personal best',
         body: `${playerName} just landed a ${bestHand.handName}!`,
-      })
+      }, { settings })
     ));
   }));
 }

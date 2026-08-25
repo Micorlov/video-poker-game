@@ -5,7 +5,7 @@
 const { getFirestore } = require('../lib/firebaseAdmin');
 const { sendPushToUser } = require('../lib/sendPush');
 
-async function checkRoomInvites(since) {
+async function checkRoomInvites(since, settings) {
   const db = getFirestore();
   const snap = await db.collection('roomInvites').where('createdAt', '>', since).get();
   if (snap.empty) return;
@@ -22,7 +22,7 @@ async function checkRoomInvites(since) {
     await sendPushToUser(toUid, 'social', {
       title: 'Poker room invite',
       body: `${fromName} invited you to ${roomName}`,
-    });
+    }, { settings });
   }));
 }
 

@@ -105,7 +105,9 @@ function initSettingsScreen() {
     initNotificationSettings();
 }
 
-const NOTIFICATION_PREF_CATEGORIES = ['social', 'leaderboard', 'dailyReminder', 'bestHand'];
+// 'announcement' covers campaigns composed in push-admin.html — an admin
+// broadcast must be as mutable as any automatic notification.
+const NOTIFICATION_PREF_CATEGORIES = ['social', 'leaderboard', 'dailyReminder', 'bestHand', 'announcement'];
 
 function initNotificationSettings() {
     const panel = document.getElementById('settings-notifications-panel');
