@@ -12,6 +12,7 @@ function countryToFlag(code) {
 let championsUnsubscribe = null;
 let championsList = [];
 let champTimerInterval = null;
+let champLastHourKey = '';
 
 function getHourKey() {
     const d = new Date();
@@ -47,6 +48,7 @@ function subscribeChampions() {
 
     if (championsUnsubscribe) championsUnsubscribe();
     const hourKey = getHourKey();
+    champLastHourKey = hourKey;
 
     championsUnsubscribe = db.collection('hourly').doc(hourKey).collection('entries')
         .orderBy('points', 'desc')
@@ -61,8 +63,15 @@ function subscribeChampions() {
 
     // Start countdown timer
     if (!champTimerInterval) {
-        champTimerInterval = setInterval(renderChampionsTimer, 30000);
+        champTimerInterval = setInterval(championsTick, 30000);
     }
+}
+
+// 30s tick: re-subscribe when the UTC hour rolls over mid-session, then
+// re-render so simulated-rival updates surface without a Firestore event.
+function championsTick() {
+    if (window.egUser && getHourKey() !== champLastHourKey) subscribeChampions();
+    renderChampionsPanel();
 }
 
 function renderChampionsTimer() {
@@ -90,7 +99,14 @@ function renderChampionsPanel() {
     if (promptEl) promptEl.classList.add('hidden');
 
     bodyEl.innerHTML = '';
-    if (!championsList.length) {
+    let displayList = championsList;
+    if (typeof getBotEntries === 'function') {
+        const own = championsList.find(function(e) { return e.uid === user.uid; });
+        const playerScore = own ? (own.points || 0) : 0;
+        displayList = mergeBotEntries(championsList,
+            getBotEntries('hourly', getHourKey(), playerScore, playerScore > 0, 'points'), 'points');
+    }
+    if (!displayList.length) {
         const row = document.createElement('div');
         row.className = 'nearby-row';
         row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">No champions yet this hour — be the first!</span>';
@@ -98,7 +114,7 @@ function renderChampionsPanel() {
         return;
     }
 
-    championsList.forEach(function(ch, i) {
+    displayList.slice(0, 5).forEach(function(ch, i) {
         const row = document.createElement('div');
         row.className = 'nearby-row';
         const isMe = user && ch.uid === user.uid;

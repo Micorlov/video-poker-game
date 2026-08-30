@@ -31,7 +31,7 @@
     width: 56px;
     height: 56px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    background: linear-gradient(135deg, var(--green), var(--green-light));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -63,14 +63,14 @@
     width: 100%;
     height: 100%;
     border-radius: 10px;
-    background: var(--bg-top);
+    background: var(--bg-glow);
     color: var(--text);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
     font-size: 15px;
-    border: 2px solid var(--bg-bottom);
+    border: 2px solid var(--bg-base);
     overflow: hidden;
 }
 
@@ -218,11 +218,12 @@
 }
 
 .story-hand-name {
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 800;
-    color: var(--gold);
+    letter-spacing: -0.03em;
+    color: var(--text);
     text-align: center;
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-display);
 }
 
 .story-cards {
@@ -265,7 +266,7 @@
 .story-payout {
     font-size: 14px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--green);
     text-align: center;
 }
 
@@ -290,17 +291,22 @@
 }
 
 .nearby-panel .panel-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: 0.03em;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-faint);
+    letter-spacing: 0.18em;
     text-transform: uppercase;
 }
 
 .nearby-panel .panel-sub {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--green-light);
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(22, 193, 114, 0.16);
+    border: 1px solid var(--green-line);
 }
 
 .champ-countdown {
@@ -322,7 +328,7 @@
 }
 
 .nearby-row.me {
-    background: var(--gold-dim);
+    background: var(--green-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -345,7 +351,7 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    background: var(--surface-hover);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -429,7 +435,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px 12px;
@@ -472,8 +478,8 @@
 .mr-join {
     font-size: 12px;
     font-weight: 700;
-    color: #fff;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 6px 12px;
     border-radius: 999px;
     cursor: pointer;
@@ -488,7 +494,7 @@
     padding: 11px 0;
     border-radius: 10px;
     border: 1.5px dashed var(--border);
-    color: var(--gold);
+    color: rgba(255, 255, 255, 0.72);
     font-weight: 700;
     font-size: 12px;
     cursor: pointer;
@@ -501,7 +507,7 @@
 .see-all-link {
     font-size: 11px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--text-faint);
     cursor: pointer;
 }
 
@@ -520,8 +526,8 @@
 .invite-pill {
     font-size: 13px;
     font-weight: 700;
-    color: #fff;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 8px 14px;
     border-radius: 999px;
     cursor: pointer;
@@ -541,27 +547,31 @@
 
 .sheet {
     width: 100%;
-    background: var(--panel-solid);
-    border-radius: 20px 20px 0 0;
+    background: linear-gradient(180deg, #0E2019 0%, #08130F 100%);
+    border-radius: 32px 32px 0 0;
     padding: 20px 18px max(28px, env(safe-area-inset-bottom));
     box-sizing: border-box;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    box-shadow: 0 -30px 60px -20px rgba(22, 193, 114, 0.35);
     max-width: 460px;
     margin: 0 auto;
+    border-top: 1px solid rgba(22, 193, 114, 0.28);
 }
 
 .sheet-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 16px;
+    gap: 12px;
 }
 
 .sheet-title {
-    font-size: 17px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: 800;
     color: var(--text);
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-display);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
 }
 
 .sheet-close {
@@ -575,9 +585,10 @@
 }
 
 .sheet-sub {
-    font-size: 13px;
-    color: var(--text-muted);
+    font-size: 14.5px;
+    color: rgba(255, 255, 255, 0.62);
     margin-bottom: 16px;
+    line-height: 1.55;
 }
 
 .sheet-link-row {
@@ -588,7 +599,7 @@
 
 .sheet-link-text {
     flex: 1;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px 12px;
@@ -603,8 +614,8 @@
 .sheet-copy-btn {
     font-size: 12px;
     font-weight: 700;
-    color: var(--gold);
-    border: 1px solid var(--gold);
+    color: var(--green);
+    border: 1px solid var(--green-line);
     padding: 9px 12px;
     border-radius: 10px;
     cursor: pointer;
@@ -618,7 +629,7 @@
 .sheet-copy-btn.copied {
     background: var(--green);
     border-color: var(--green);
-    color: #fff;
+    color: var(--green-ink);
 }
 
 /* Share chips (WhatsApp / Telegram) */
@@ -672,7 +683,7 @@
     box-sizing: border-box;
     padding: 11px 12px;
     border-radius: 8px;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     color: var(--text);
     font-size: 13px;
@@ -694,7 +705,7 @@
     text-align: center;
     padding: 10px 0;
     border-radius: 10px;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     font-weight: 700;
     font-size: 13px;
@@ -704,9 +715,9 @@
 }
 
 .inline-room-form .room-form-stake.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 .inline-room-form .room-form-actions {
@@ -726,8 +737,8 @@
 }
 
 .room-form-create-btn {
-    background: var(--gold);
-    color: #fff;
+    background: var(--green);
+    color: var(--green-ink);
 }
 
 .room-form-cancel-btn {
@@ -750,7 +761,7 @@
 }
 
 .friend-leaderboard-row.me {
-    background: var(--gold-dim);
+    background: var(--green-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -773,7 +784,7 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    background: var(--surface-hover);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -814,12 +825,39 @@
 .friend-lb-net.negative { color: var(--red); }
 .friend-lb-net.zero     { color: var(--text-muted); }
 
+.friend-lb-remove {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.friend-lb-remove:hover {
+    background: var(--red-dim);
+    color: var(--red);
+}
+
+.friend-lb-remove[disabled] {
+    visibility: hidden;
+    cursor: default;
+}
+
 /* --- Friend "You" tag --- */
 .friend-you-tag {
     font-size: 9px;
     font-weight: 700;
-    color: #fff;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -834,4 +872,396 @@
     border: 1px dashed var(--border);
     border-radius: 10px;
     margin-top: 6px;
+}
+
+/* Only you are marked in the action colour — every other player stays glass,
+   so your own row is findable without reading a single name. */
+.nearby-row.me .nearby-avatar,
+.friend-leaderboard-row.me .friend-lb-avatar {
+    background: var(--green);
+    color: var(--green-ink);
+}
+
+.stories-row:not(:empty) {
+    margin-bottom: 16px;
+}
+
+/* --- All In sheet: a considered decision, not a quick tap --- */
+.sheet-grabber {
+    width: 44px;
+    height: 4px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 auto 26px;
+}
+
+.sheet-mark {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    background: rgba(22, 193, 114, 0.14);
+    border: 1px solid var(--green-line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    color: var(--green-light);
+}
+
+.sheet-heading {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sheet-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+}
+
+/* The number that makes the stake concrete — the only gold in the sheet. */
+.sheet-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 22px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.sheet-stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.sheet-stat-value {
+    font-size: 17px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--gold);
+}
+
+.sheet-dismiss {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    padding: 4px;
+    background: none;
+    border: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-faint);
+    cursor: pointer;
+}
+
+/* --- Friends action strip: tap-to-copy code chip + add-by-code, one row --- */
+.friends-action-strip {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    margin-bottom: 6px;
+}
+
+.code-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, 16px);
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: border-color 0.2s, transform 0.1s;
+}
+
+.code-chip:active { transform: scale(0.97); }
+
+.code-chip.copied { border-color: var(--green); }
+
+.code-chip-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.code-chip-value {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+}
+
+.code-chip-hint {
+    font-size: 10.5px;
+    color: var(--text-faint);
+}
+
+.code-chip.copied .code-chip-hint { color: var(--green); }
+
+.add-friend-inline {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    min-width: 0;
+}
+
+.add-friend-inline .friend-code-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.friends-reward-line {
+    font-size: 12px;
+    color: var(--text-faint);
+    margin: 0 2px 14px;
+    line-height: 1.5;
+}
+
+/* --- Invite-count badges (Poker Rooms tab + bottom nav) --- */
+.tab-badge {
+    display: inline-block;
+    min-width: 17px;
+    margin-left: 6px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: var(--green);
+    color: var(--green-ink);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 15px;
+    text-align: center;
+    vertical-align: 1px;
+}
+
+.nav-btn { position: relative; }
+
+.nav-badge {
+    position: absolute;
+    top: 6px;
+    right: 22%;
+    min-width: 16px;
+    padding: 1px 4px;
+    border-radius: 999px;
+    background: var(--green);
+    color: var(--green-ink);
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 14px;
+    text-align: center;
+}
+
+/* --- Incoming room-invite banners (Friends → Poker Rooms) --- */
+.room-invite-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-raised);
+    border: 1px solid var(--green-line);
+    border-left: 3px solid var(--green);
+    border-radius: var(--radius-sm, 16px);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+}
+
+.rib-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.rib-from, .rib-room {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.rib-meta {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    margin-top: 2px;
+}
+
+.rib-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.rib-accept {
+    background: var(--green);
+    color: var(--green-ink);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.rib-decline {
+    background: none;
+    color: var(--text-faint);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* --- Room-invite friend picker (inside #room-invite-sheet) --- */
+.room-invite-friends {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 4px;
+}
+
+.rip-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 6px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.rip-row:active { background: var(--surface-hover); }
+
+.rip-row.invited { cursor: default; opacity: 0.55; }
+
+.rip-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--green-dim);
+    color: var(--green);
+    font-size: 14px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.rip-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rip-check {
+    width: auto;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    color: var(--green-ink);
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.rip-row.selected .rip-check {
+    background: var(--green);
+    border-color: var(--green);
+}
+
+.rip-row.invited .rip-check {
+    border: none;
+    border-radius: 999px;
+    width: auto;
+    height: auto;
+    padding: 2px 8px;
+    background: var(--green-dim);
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.rip-empty {
+    font-size: 13px;
+    color: var(--text-faint);
+    padding: 10px 4px 14px;
+    line-height: 1.5;
+}
+
+.rip-send-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 13px 0;
+    border-radius: 12px;
+    background: var(--green);
+    color: var(--green-ink);
+    border: none;
+    font-size: 14.5px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.rip-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 10px;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.rip-divider::before, .rip-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+/* Native OS share chip alongside WhatsApp/Telegram */
+.share-chip.native {
+    background: var(--surface-hover);
+    border: 1px solid var(--green-line);
+    color: var(--green);
+}
+
+/* Small secondary "+ Invite friends" action on room cards */
+.room-invite-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 9px 0;
+    border-radius: 10px;
+    background: none;
+    border: 1px dashed var(--green-line);
+    color: var(--green);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
 }

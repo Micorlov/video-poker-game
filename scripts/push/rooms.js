@@ -8,7 +8,7 @@
 const { getFirestore } = require('../lib/firebaseAdmin');
 const { sendPushToUser } = require('../lib/sendPush');
 
-async function checkNewRoomJoins(db, since) {
+async function checkNewRoomJoins(db, since, settings) {
   const snap = await db.collection('rooms').where('updatedAt', '>', since).get();
   if (snap.empty) return;
 
@@ -29,7 +29,7 @@ async function checkNewRoomJoins(db, since) {
         await sendPushToUser(ownerUid, 'social', {
           title: 'Room activity',
           body: `${joinerName} joined ${roomName}`,
-        });
+        }, { settings });
       }));
     }
 
@@ -37,7 +37,7 @@ async function checkNewRoomJoins(db, since) {
   }));
 }
 
-async function checkRoomMemberOvertakes(db, since) {
+async function checkRoomMemberOvertakes(db, since, settings) {
   const snap = await db.collectionGroup('members').where('updatedAt', '>', since).get();
   if (snap.empty) return;
 
@@ -64,7 +64,7 @@ async function checkRoomMemberOvertakes(db, since) {
         sendPushToUser(memberDoc.id, 'leaderboard', {
           title: 'Leaderboard update',
           body: `${moverName} just passed you in the room leaderboard`,
-        })
+        }, { settings })
       ));
     }
 
@@ -72,11 +72,11 @@ async function checkRoomMemberOvertakes(db, since) {
   }));
 }
 
-async function checkRoomActivity(since) {
+async function checkRoomActivity(since, settings) {
   const db = getFirestore();
   await Promise.all([
-    checkNewRoomJoins(db, since),
-    checkRoomMemberOvertakes(db, since),
+    checkNewRoomJoins(db, since, settings),
+    checkRoomMemberOvertakes(db, since, settings),
   ]);
 }
 

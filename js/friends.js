@@ -89,6 +89,11 @@ function addFriendByCode(code) {
                 ]).then(function() {
                     showToast('Friend added!');
                     loadFriends();
+                    // invite.html tells a friend to type this code in when the
+                    // install swallowed the deep link, so the manual path must
+                    // pay out too. The ledger is keyed by the referred uid, so
+                    // a code that also arrived by link still pays only once.
+                    if (window.recordReferralJoin) recordReferralJoin(code, friendDoc.id);
                     return true;
                 });
             });
@@ -115,7 +120,24 @@ function submitInviteSheetFriendCode() {
 }
 
 function ownNetProfit() {
-    return balance - 500;
+    return balance - netProfitBaseline();
+}
+
+// Removes both sides of the friend edge. The live onSnapshot listeners in
+// loadFriends()/setupFriendScoreListeners() pick up the deletion on their
+// own, so no manual re-render is needed here.
+function removeFriend(uid) {
+    const user = window.egUser;
+    if (!user || !uid) return;
+    if (!window.confirm('Remove this friend?')) return;
+    firebaseSafe(function() {
+        return Promise.all([
+            db.collection('users').doc(user.uid).collection('friends').doc(uid).delete(),
+            db.collection('users').doc(uid).collection('friends').doc(user.uid).delete()
+        ]).then(function() {
+            showToast('Friend removed.');
+        });
+    }, function() { showToast('Could not remove friend — try again.'); });
 }
 
 function renderFriendsScreen() {
@@ -188,11 +210,30 @@ function renderFriendsScreen() {
         scoreEl.textContent = (np >= 0 ? '+' : '') + np;
         scoreEl.classList.add(np > 0 ? 'positive' : np < 0 ? 'negative' : 'zero');
 
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'friend-lb-remove';
+        removeBtn.textContent = '✕';
+        if (f.self) {
+            // Kept in the DOM (hidden, not removed) so every row reserves the
+            // same width and the columns stay aligned.
+            removeBtn.disabled = true;
+            removeBtn.tabIndex = -1;
+            removeBtn.setAttribute('aria-hidden', 'true');
+        } else {
+            removeBtn.setAttribute('aria-label', 'Remove ' + (f.displayName || 'friend') + ' from friends');
+            removeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                removeFriend(f.uid);
+            });
+        }
+
         row.appendChild(rankEl);
         row.appendChild(avatarWrap);
         row.appendChild(nameEl);
         row.appendChild(streakEl);
         row.appendChild(scoreEl);
+        row.appendChild(removeBtn);
         listEl.appendChild(row);
     });
 }
@@ -204,9 +245,10 @@ function getInviteLink() {
     if (!user) return '';
     const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
     if (!code) return '';
-    // Use the Firebase hosting URL as the canonical base
-    const base = getShareBaseUrl();
-    return base + '?ref=' + encodeURIComponent(code);
+    // Points at invite.html, not straight at the game: that page is what opens
+    // the installed app, falls back to the Play listing, and carries the code
+    // through the install (js/deeplink.js).
+    return buildInviteLink(code);
 }
 
 function handleIncomingInvite() {
@@ -225,8 +267,10 @@ function handleIncomingInvite() {
             window.history.replaceState({}, '', url);
         }
 
-        // Store for after sign-in
+        // Store for after sign-in. Persisted as well as parked: the URL has just
+        // been cleaned, so a reload before signing in would otherwise lose it.
         window._pendingInviteCode = refCode;
+        if (window.persistPendingInvite) persistPendingInvite(refCode);
 
         // If already signed in, add immediately
         if (window.egUser) {
@@ -244,6 +288,10 @@ function addFriendByInviteCode(code) {
     if (!user) return;
     firebaseSafe(function() {
         return db.collection('users').where('referralCode', '==', code).limit(1).get().then(function(snap) {
+            // Reaching the server at all is a definitive answer — whichever branch
+            // below runs, this code is spent. A network failure rejects instead,
+            // leaving it stored for the next launch.
+            if (window.clearPendingInvite) clearPendingInvite();
             if (snap.empty) { showToast('No player found with that invite link.'); return; }
             var ownerUid = snap.docs[0].id;
             if (ownerUid === user.uid) { showToast('That\'s your own invite link!'); return; }
@@ -282,6 +330,10 @@ function addFriendByInviteCode(code) {
                         ? 'Connected with ' + newFriendUids.length + ' friends via this link!'
                         : 'Friend added!');
                     loadFriends();
+                    // Files the reward row for whoever owns this link. Deliberately
+                    // last and unawaited — a failed ledger write must not undo a
+                    // friendship that already succeeded.
+                    if (window.recordReferralJoin) recordReferralJoin(code, ownerUid);
                 });
             });
         });

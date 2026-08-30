@@ -27,81 +27,126 @@
     })();
     </script>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0c2419">
+    <meta name="theme-color" content="#04100C">
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
 
 /* --- styles/tokens.css --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* =========================================================================
+   Royal Video Poker — 2026 "night glass" system.
+
+   One felt-green action colour, tabular numerals for money, and playing
+   cards as the only bright surface on screen. Everything else is dark
+   glass: low-alpha white fills over a deep green-black ground.
+   ========================================================================= */
+
 :root {
-    --felt-900: #0a2b1d;
-    --felt-800: #123825;
-    --felt-700: #1a452e;
-    --felt-600: #2a5a3d;
-    --bg-top: var(--felt-800);
-    --bg-bottom: var(--felt-900);
-    --panel: var(--felt-700);
-    --panel-solid: var(--felt-700);
-    --border: var(--felt-600);
-    --border-strong: var(--felt-600);
-    --gold: #d4af37;
-    --gold-600: #b8952e;
-    --gold-100: #f5e6b8;
-    --gold-dim: rgba(212, 175, 55, 0.1);
-    --green: #4caf7d;
-    --green-dim: rgba(76, 175, 125, 0.15);
-    --red: #e6533f;
-    --red-dim: rgba(230, 83, 63, 0.12);
-    --text: #f3ede0;
-    --text-muted: #b9c4b6;
-    --text-faint: rgba(185, 196, 182, 0.6);
-    --card-face-bg: #fdfdfb;
-    --card-black: #111111;
-    --card-red: #c41e3a;
-    --radius-lg: 16px;
-    --radius-md: 14px;
-    --radius-sm: 12px;
-    --nav-height: 64px;
+    /* Ground — the casino floor at night, lit from the top of the screen. */
+    --bg-base: #04100C;
+    --bg-mid: #071612;
+    --bg-glow: #123326;
+    --app-bg: radial-gradient(120% 60% at 50% 0%, var(--bg-glow) 0%, var(--bg-mid) 58%, var(--bg-base) 100%);
+
+    /* Action colour — the only saturated hue in the chrome. */
+    --green: #16C172;
+    --green-hover: #2FD886;
+    --green-light: #58E39B;
+    --green-ink: #04170E;
+    --green-dim: rgba(22, 193, 114, 0.12);
+    --green-line: rgba(22, 193, 114, 0.32);
+    --green-wash: rgba(207, 245, 225, 0.65);
+    --green-glow: 0 18px 40px -14px rgba(22, 193, 114, 0.85);
+
+    /* Reserved for time pressure and scarcity only (timers, entry fees). */
+    --gold: #E9C46A;
+    --gold-600: #D8AE47;
+    --gold-100: #F6E4B8;
+    --gold-dim: rgba(233, 196, 106, 0.1);
+    --gold-line: rgba(233, 196, 106, 0.28);
+
+    --red: #FF6BAA;
+    --red-dim: rgba(255, 107, 170, 0.12);
+
+    /* Glass surfaces — alpha over the ground, never an opaque panel. */
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-raised: rgba(255, 255, 255, 0.055);
+    --surface-hover: rgba(255, 255, 255, 0.09);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.1);
+
+    /* The floating navigation bar reads as frosted glass over the felt. */
+    --nav-glass: rgba(8, 26, 20, 0.84);
+    --nav-border: rgba(255, 255, 255, 0.09);
+
+    /* Legacy aliases — older rules still reach for these names. */
+    --panel: var(--surface);
+    --panel-solid: #0E2019;
+    --felt-900: var(--bg-base);
+    --felt-800: var(--bg-mid);
+    --felt-700: var(--bg-glow);
+    --felt-600: var(--border-strong);
+
+    --text: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.58);
+    --text-faint: rgba(255, 255, 255, 0.4);
+    --text-ghost: rgba(255, 255, 255, 0.32);
+
+    /* Cards are the one bright surface — paper white, never tinted. */
+    --card-face-bg: linear-gradient(180deg, #FFFFFF 0%, #EDEFF6 100%);
+    --card-black: #101322;
+    --card-red: #E01B44;
+
+    --radius-xl: 26px;
+    --radius-lg: 22px;
+    --radius-md: 20px;
+    --radius-sm: 14px;
+    --radius-xs: 12px;
+    --radius-card: 15px;
+
+    --nav-height: 78px;
+    --nav-gap: 30px;
+
+    --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
+    --font-body: 'Instrument Sans', system-ui, 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
-/* --- Blue theme --- */
+/* --- Blue theme: same night glass, cooler action colour --- */
 body.theme-blue {
-    --felt-900: #081018;
-    --felt-800: #0f1c2b;
-    --felt-700: #172a3d;
-    --felt-600: #25405a;
-    --bg-top: var(--felt-800);
-    --bg-bottom: var(--felt-900);
-    --panel: var(--felt-700);
-    --panel-solid: var(--felt-700);
-    --border: var(--felt-600);
-    --border-strong: var(--felt-600);
-    --text: #f0f4f8;
-    --text-muted: #a9b7c4;
-    --text-faint: rgba(169, 183, 196, 0.6);
+    --bg-base: #040C14;
+    --bg-mid: #07131F;
+    --bg-glow: #12293F;
+    --green: #2E9BF0;
+    --green-hover: #55B4FA;
+    --green-light: #7FCBFF;
+    --green-ink: #04121E;
+    --green-dim: rgba(46, 155, 240, 0.12);
+    --green-line: rgba(46, 155, 240, 0.32);
+    --green-wash: rgba(207, 231, 245, 0.65);
+    --green-glow: 0 18px 40px -14px rgba(46, 155, 240, 0.85);
+    --nav-glass: rgba(8, 20, 32, 0.84);
+    --panel-solid: #0E1A26;
 }
 
-/* --- Crimson theme --- */
+/* --- Crimson theme: same night glass, warmer action colour --- */
 body.theme-crimson {
-    --felt-900: #1a0708;
-    --felt-800: #2b0c0d;
-    --felt-700: #3d1416;
-    --felt-600: #5c1e21;
-    --bg-top: var(--felt-800);
-    --bg-bottom: var(--felt-900);
-    --panel: var(--felt-700);
-    --panel-solid: var(--felt-700);
-    --border: var(--felt-600);
-    --border-strong: var(--felt-600);
-    --text: #f3ede0;
-    --text-muted: #c9b6b6;
-    --text-faint: rgba(201, 182, 182, 0.6);
-    --red: #ff6b6b;
-    --red-dim: rgba(255, 107, 107, 0.12);
+    --bg-base: #140406;
+    --bg-mid: #1D080B;
+    --bg-glow: #3A1218;
+    --green: #E8456A;
+    --green-hover: #F26A88;
+    --green-light: #FF93A9;
+    --green-ink: #1D0409;
+    --green-dim: rgba(232, 69, 106, 0.12);
+    --green-line: rgba(232, 69, 106, 0.32);
+    --green-wash: rgba(245, 214, 221, 0.65);
+    --green-glow: 0 18px 40px -14px rgba(232, 69, 106, 0.85);
+    --nav-glass: rgba(28, 8, 12, 0.84);
+    --panel-solid: #22090D;
 }
 
 html, body {
@@ -109,18 +154,47 @@ html, body {
 }
 
 body {
-    font-family: 'Manrope', 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom) 60%);
+    font-family: var(--font-body);
+    background: var(--bg-base);
     min-height: 100vh;
     color: var(--text);
     touch-action: manipulation;
     -webkit-user-select: none;
     user-select: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* The glow is painted behind the scrolling content so it stays anchored to
+   the top of the viewport rather than sliding away with the page. */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: var(--app-bg);
+    z-index: -1;
+    pointer-events: none;
 }
 
 button, input, select {
     font-family: inherit;
     color: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Money is compared column-to-column — never let digits reflow. */
+.balance-value,
+.bet-value,
+.stats-net-value,
+.stat-tile-value,
+.payout-value,
+.nearby-net,
+.friend-lb-net,
+.total-bet-value {
+    font-variant-numeric: tabular-nums;
 }
 
 .hidden { display: none !important; }
@@ -131,43 +205,95 @@ button, input, select {
     max-width: 460px;
     min-height: 100vh;
     margin: 0 auto;
-    padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) calc(var(--nav-height) + 24px) max(16px, env(safe-area-inset-left));
+    padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(var(--nav-height) + var(--nav-gap) + 40px) max(20px, env(safe-area-inset-left));
     position: relative;
 }
 
+/* --- Top status row: tournament timer on the left, streak on the right --- */
 .brandrow {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
+    gap: 10px;
+    margin-bottom: 18px;
 }
 
 .app-title {
-    font-size: 24px;
+    font-family: var(--font-display);
+    font-size: 22px;
     font-weight: 800;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.03em;
+}
+
+/* Status chips read as etched glass, not buttons — they carry state, and
+   only the countdown itself is allowed to use the scarcity gold. */
+.tpill,
+.streak-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
 }
 
 .tpill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--border-strong);
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 12px;
+    padding-left: 10px;
+}
+
+.tpill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px 2px rgba(22, 193, 114, 0.7);
+    flex-shrink: 0;
+}
+
+.tpill .tour-time {
+    font-size: 13px;
     font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
     color: var(--gold);
-    cursor: pointer;
+}
+
+.tour-chev {
+    font-size: 9px;
+    color: var(--text-faint);
+}
+
+.streak-pill {
+    cursor: default;
+}
+
+.streak-pill .streak-pill-value {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
 }
 
 .texpand {
     margin-bottom: 16px;
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 12px;
-    padding: 8px 10px;
-    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
     color: var(--text-muted);
     display: flex;
     justify-content: space-between;
@@ -182,13 +308,16 @@ button, input, select {
 }
 
 .screen-title {
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 16px;
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+    margin-bottom: 18px;
 }
 
 .panel {
-    background: var(--panel);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 16px;
@@ -199,19 +328,19 @@ button, input, select {
 }
 
 .section-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--text-muted);
-    margin: 20px 2px 8px;
+    color: var(--text-faint);
+    margin: 22px 2px 9px;
 }
 
 .section-label:first-child {
     margin-top: 0;
 }
 
-/* --- Bottom nav --- */
+/* --- Bottom nav: a floating glass pill, inset from every edge --- */
 .bottom-nav {
     position: fixed;
     left: 0;
@@ -220,43 +349,111 @@ button, input, select {
     z-index: 50;
     display: flex;
     justify-content: center;
-    gap: 0;
-    background: color-mix(in srgb, var(--felt-800) 92%, transparent);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-top: 1px solid var(--border);
-    padding: 8px max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    padding: 0 max(16px, env(safe-area-inset-right)) calc(var(--nav-gap) + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    pointer-events: none;
 }
 
 .bottom-nav-inner {
     width: 100%;
-    max-width: 460px;
+    max-width: 428px;
+    height: var(--nav-height);
     display: flex;
+    align-items: center;
+    padding: 0 8px;
+    border-radius: var(--radius-xl);
+    background: var(--nav-glass);
+    border: 1px solid var(--nav-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.9);
+    pointer-events: auto;
 }
 
 .nav-btn {
     flex: 1;
+    height: 66px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    justify-content: center;
+    gap: 6px;
     background: none;
     border: none;
-    padding: 6px 4px;
+    border-radius: var(--radius-md);
     color: var(--text-faint);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
+    letter-spacing: 0.05em;
     cursor: pointer;
+    transition: color 0.16s, background 0.16s;
     -webkit-tap-highlight-color: transparent;
 }
 
 .nav-btn .nav-icon {
-    font-size: 20px;
+    font-size: 22px;
     line-height: 1;
 }
 
 .nav-btn.active {
-    color: var(--gold);
+    color: var(--green);
+    background: var(--green-dim);
+    font-weight: 700;
+}
+
+/* =========================================================================
+   Desktop: present the phone, don't stretch into the space.
+
+   This is a phone design — a single column, a fixed bottom nav, a sticky bet
+   dock. On a wide screen the honest thing is to show it as what it is rather
+   than strand a 460px column in an empty page.
+
+   The transform on .shell is load-bearing, not decoration: it makes the
+   element a containing block for its position:fixed descendants, so the
+   bottom nav, sheets and onboarding overlay resolve against the frame
+   instead of escaping to the browser viewport.
+   ========================================================================= */
+@media (min-width: 620px) {
+    html {
+        background: #05100D;
+    }
+
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: none;
+    }
+
+    body::before {
+        display: none;
+    }
+
+    .shell {
+        position: relative;
+        width: 412px;
+        height: min(calc(100vh - 48px), 900px);
+        flex: none;
+        overflow: hidden;
+        border-radius: 46px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--app-bg);
+        box-shadow: 0 50px 90px -30px rgba(0, 0, 0, 0.95),
+                    0 0 0 10px rgba(255, 255, 255, 0.03);
+        transform: translateZ(0);
+    }
+
+    /* The frame scrolls its own content; the page itself never does. */
+    .app {
+        height: 100%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: none;
+    }
+
+    .app::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 
@@ -283,9 +480,9 @@ button, input, select {
 }
 
 .variant-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 .variant-btn.locked {
@@ -322,9 +519,9 @@ button, input, select {
 }
 
 .theme-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 /* --- Multi-hand picker --- */
@@ -347,9 +544,9 @@ button, input, select {
 }
 
 .multi-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 .multi-btn.locked {
@@ -443,7 +640,7 @@ button, input, select {
 }
 
 .payout-help-toggle.open {
-    color: var(--gold);
+    color: var(--green);
 }
 
 .payout-help {
@@ -484,86 +681,166 @@ button, input, select {
 }
 
 /* --- Balance / bet panel --- */
-.balance-panel {
-    margin-bottom: 12px;
-}
-
-.balance-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+.balance-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: 14px;
 }
 
-.balance-value {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--gold);
+.balance-head .section-label {
+    margin: 0 0 4px;
 }
 
-.bet-value {
-    font-size: 26px;
+.balance-head-side {
+    text-align: right;
+    padding-bottom: 6px;
+}
+
+/* The balance is the largest number on the screen — it anchors every other
+   figure, so it stays white rather than competing with the action colour. */
+.balance-value {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    color: var(--text);
+}
+
+.variant-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+/* --- Paytable ticker: the top few multipliers, always in view --- */
+.paytable-ticker {
+    display: flex;
+    gap: 18px;
+    padding: 9px 14px;
+    margin-bottom: 6px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.paytable-ticker::-webkit-scrollbar { display: none; }
+
+.paytable-ticker-item {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--text-ghost);
+    white-space: nowrap;
+}
+
+/* --- Bet dock: stake and draw, grouped at the end of the decision ---
+   The mock pins these to the bottom of a screen that fits in one viewport.
+   Here the page scrolls, so the dock sticks just above the nav instead —
+   the Draw button is never more than a thumb away, whatever is on screen. */
+.bet-dock {
+    position: sticky;
+    bottom: calc(var(--nav-height) + var(--nav-gap) + env(safe-area-inset-bottom) + 10px);
+    z-index: 40;
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: var(--radius-xl);
+    background: var(--nav-glass);
+    border: 1px solid var(--nav-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.9);
+}
+
+.total-bet-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.total-bet-row .section-label {
+    margin: 0;
+}
+
+.total-bet-value {
+    font-size: 15px;
     font-weight: 700;
-    color: var(--green);
 }
 
 .bet-row {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(4, 1fr) 1.15fr;
+    gap: 8px;
 }
 
 .bet-btn {
-    background: rgba(0, 0, 0, 0.25);
-    border: 1px solid var(--border);
+    height: 48px;
+    padding: 0 2px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
     border-radius: var(--radius-sm);
-    color: var(--text);
-    padding: 12px 2px;
-    font-size: 15px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 16px;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
     cursor: pointer;
+    transition: background 0.16s, color 0.16s, box-shadow 0.16s;
 }
 
+.bet-btn:hover {
+    background: var(--surface-hover);
+}
+
+/* Selection is a ring plus a wash, not a solid fill — the chips stay a row
+   of equals and only the Draw button carries a full green surface. */
 .bet-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: #0a1a10;
+    background: rgba(22, 193, 114, 0.22);
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    color: var(--text);
 }
 
 .bet-btn-allin {
-    position: relative;
-    background: linear-gradient(135deg, var(--gold-600), var(--gold));
-    border-color: var(--gold);
-    color: #2a1c02;
-    font-size: 11px;
-    letter-spacing: 0.3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    background: var(--green-dim);
+    border: 1px solid rgba(22, 193, 114, 0.45);
+    color: var(--green-light);
+}
+
+.allin-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
 }
 
 .allin-badge {
-    position: absolute;
-    top: -7px;
-    right: -7px;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 3px;
-    border-radius: 999px;
-    background: var(--red);
-    border: 1.5px solid var(--panel-solid, #0c2419);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 800;
-    line-height: 16px;
-    text-align: center;
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(255, 107, 170, 0.65);
+}
+
+.allin-badge::after {
+    content: ' left';
 }
 
 .bet-btn-allin.selected {
-    background: linear-gradient(135deg, var(--red), var(--gold));
-    border-color: var(--gold);
-    color: #2a0902;
+    background: rgba(22, 193, 114, 0.22);
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    color: var(--text);
 }
 
 .bet-btn-allin.depleted {
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--surface);
     border-color: var(--border);
     color: var(--text-faint);
     cursor: not-allowed;
@@ -573,11 +850,11 @@ button, input, select {
 /* --- All In slide-to-confirm --- */
 .allin-slider-track {
     position: relative;
-    height: 52px;
-    margin-top: 18px;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid var(--border);
+    height: 64px;
+    margin-top: 20px;
+    border-radius: var(--radius-md);
+    background: var(--green-dim);
+    border: 1px solid rgba(22, 193, 114, 0.35);
     overflow: hidden;
     -webkit-user-select: none;
     user-select: none;
@@ -588,7 +865,7 @@ button, input, select {
     position: absolute;
     inset: 0;
     width: 0;
-    background: linear-gradient(135deg, var(--gold-600), var(--gold));
+    background: linear-gradient(90deg, rgba(22, 193, 114, 0.35), rgba(22, 193, 114, 0));
 }
 
 .allin-slider-label {
@@ -597,10 +874,11 @@ button, input, select {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 700;
-    color: var(--text-muted);
-    letter-spacing: 0.02em;
+    color: var(--green-wash);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     pointer-events: none;
 }
 
@@ -608,17 +886,18 @@ button, input, select {
     position: absolute;
     top: 3px;
     left: 3px;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: var(--panel-solid);
-    border: 2px solid var(--gold);
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--green);
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--gold);
+    color: var(--green-ink);
     font-weight: 800;
-    font-size: 18px;
+    font-size: 20px;
+    box-shadow: 0 10px 26px -8px rgba(22, 193, 114, 0.9);
     cursor: grab;
     touch-action: none;
     transition: left 0.25s ease;
@@ -630,29 +909,28 @@ button, input, select {
 }
 
 .allin-slider-track.confirmed .allin-slider-label {
-    color: #2a1c02;
+    color: var(--green-ink);
 }
 
 /* --- Hand / cards --- */
 .hand {
     display: flex;
-    gap: 6px;
-    justify-content: center;
-    padding: 16px 0 8px;
+    gap: 9px;
+    justify-content: space-between;
+    padding: 20px 0 0;
 }
 
 .hand-placeholder-text {
     text-align: center;
     font-size: 12.5px;
     color: var(--text-faint);
-    margin-bottom: 4px;
+    margin-top: 10px;
 }
 
 .card {
     position: relative;
     flex: 1;
-    max-width: 78px;
-    aspect-ratio: 2 / 3;
+    aspect-ratio: 0.68;
     cursor: pointer;
     perspective: 600px;
     -webkit-tap-highlight-color: transparent;
@@ -675,17 +953,20 @@ button, input, select {
     position: absolute;
     inset: 0;
     backface-visibility: hidden;
-    border-radius: 12px;
+    border-radius: var(--radius-card);
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
+/* Cards are the only bright surface in the app. The face is paper, lifted
+   off the felt by a long shadow rather than a border. */
 .card-front {
     background: var(--card-face-bg);
     color: var(--card-black);
-    padding: 6%;
+    padding: 7px 8px;
     justify-content: center;
+    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85);
 }
 
 .card.red .card-front {
@@ -699,41 +980,44 @@ button, input, select {
     transform: rotateY(180deg);
 }
 
-.card.held {
-    transform: translateY(-6px);
-}
-
 .card.held .card-front {
-    box-shadow: 0 0 0 2px var(--gold);
+    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85),
+                0 0 0 2px var(--green),
+                0 0 22px -2px rgba(22, 193, 114, 0.8);
 }
 
 .card.unheld {
     opacity: 0.55;
 }
 
-.card.winning .card-front {
-    box-shadow: 0 0 0 2px var(--green), 0 0 16px rgba(90, 156, 111, 0.6);
+.card.winning .card-front,
+.card.second-pair .card-front,
+.card.third-match .card-front {
+    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85), 0 0 0 2px var(--green);
 }
 
+/* Rank top-left, suit bottom-right: the diagonal reads as a real card even
+   at thumbnail size, where a stacked centre block turns to mush. */
 .card-face {
     flex: 1;
     min-height: 0;
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4%;
+    justify-content: space-between;
 }
 
 .card-face-rank {
-    font-size: clamp(20px, 5.8vw, 30px);
-    font-weight: 800;
+    font-family: var(--font-display);
+    font-size: clamp(22px, 7.4vw, 34px);
+    font-weight: 700;
     line-height: 1;
+    letter-spacing: -0.04em;
 }
 
 .card-face-suit {
-    font-size: clamp(18px, 5vw, 26px);
+    align-self: flex-end;
+    font-size: clamp(20px, 6.6vw, 30px);
     line-height: 1;
 }
 
@@ -743,23 +1027,18 @@ button, input, select {
     left: 50%;
     transform: translateX(-50%);
     font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    padding: 2px 7px;
-    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 3px 8px;
+    border-radius: 6px;
     white-space: nowrap;
     z-index: 2;
     opacity: 0;
 }
 
-.held-badge {
-    background: var(--gold);
-    color: #1c1608;
-}
-
-.win-badge {
+.held-badge, .win-badge {
     background: var(--green);
-    color: #0a1a10;
+    color: var(--green-ink);
 }
 
 .card.held .held-badge,
@@ -823,61 +1102,67 @@ button, input, select {
 .action-row {
     display: flex;
     gap: 10px;
-    margin: 16px 0 4px;
+    margin-top: 14px;
 }
 
+/* The single green surface on the screen. Everything else is glass, so the
+   button that spends chips is impossible to mistake for anything else. */
 .btn-primary, .btn-secondary {
     flex: 1;
-    padding: 14px;
-    border-radius: var(--radius-sm);
+    height: 62px;
+    padding: 0 16px;
+    border-radius: var(--radius-md);
     border: none;
-    font-size: 15px;
+    font-family: var(--font-display);
+    font-size: 20px;
     font-weight: 700;
+    letter-spacing: -0.01em;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
+    transition: background 0.16s;
 }
 
 .main-btn-icon {
-    font-size: 18px;
+    font-size: 19px;
     line-height: 1;
 }
 
-.btn-primary {
-    background: var(--gold);
-    color: #1c1608;
-}
-
-.btn-primary:disabled {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-faint);
-}
-
-.btn-secondary {
+.btn-primary, .btn-secondary {
     background: var(--green);
-    color: #0a1a10;
+    color: var(--green-ink);
+    box-shadow: var(--green-glow);
 }
 
-.btn-secondary:disabled {
+.btn-primary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled) {
+    background: var(--green-hover);
+}
+
+.btn-primary:disabled, .btn-secondary:disabled {
     background: rgba(255, 255, 255, 0.08);
     color: var(--text-faint);
+    box-shadow: none;
 }
 
 .hint-btn {
-    flex: 0 0 48px;
-    background: var(--panel-solid);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: 18px;
+    flex: 0 0 62px;
+    height: 62px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.75);
     cursor: pointer;
-    opacity: 0.45;
+    opacity: 0.6;
+    transition: opacity 0.16s, box-shadow 0.16s;
 }
 
 .hint-btn.on {
     opacity: 1;
-    box-shadow: 0 0 0 2px var(--gold);
+    box-shadow: 0 0 0 2px var(--green);
 }
 
 .card.hint-suggest .card-front {
@@ -887,14 +1172,17 @@ button, input, select {
 .result-panel {
     min-height: 20px;
     text-align: center;
-    font-size: 13.5px;
-    color: var(--text-muted);
-    padding: 12px 4px 4px;
+    font-size: 15px;
+    color: var(--text-faint);
+    padding: 14px 4px 2px;
 }
 
 .result-panel .win {
-    color: var(--gold);
-    font-weight: 700;
+    color: var(--green);
+    font-weight: 800;
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: -0.03em;
 }
 
 .explanation {
@@ -909,12 +1197,14 @@ button, input, select {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-top: 12px;
-    padding: 8px;
-    border-radius: var(--radius-sm);
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: var(--radius-md);
     background: var(--gold-dim);
+    border: 1px solid var(--gold-line);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .streak-bar.active {
@@ -930,54 +1220,65 @@ button, input, select {
 .stats-toggle {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    gap: 4px;
+    padding: 4px;
     margin-bottom: 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
 }
 
 .stats-toggle-btn {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    color: var(--text);
-    padding: 9px 4px;
+    background: none;
+    border: none;
+    border-radius: 11px;
+    height: 36px;
+    color: rgba(255, 255, 255, 0.5);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
+    transition: background 0.16s, color 0.16s;
 }
 
 .stats-toggle-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    color: var(--green-ink);
+    font-weight: 700;
 }
 
 /* --- Unified leaderboard panel (Play tab): Friends / Hourly / Daily --- */
 .lb-tabs {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    gap: 3px;
+    padding: 3px;
     margin-bottom: 12px;
+    border-radius: var(--radius-xs);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .lb-tabs.hidden { display: none; }
 
 .lb-tab {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    color: var(--text);
-    padding: 7px 4px;
-    font-size: 12px;
-    font-weight: 700;
+    background: none;
+    border: none;
+    border-radius: 9px;
+    height: 26px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     cursor: pointer;
+    transition: background 0.16s, color 0.16s;
 }
 
 .lb-tab.hidden { display: none; }
 
 .lb-tab.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    color: var(--green-ink);
+    font-weight: 700;
 }
 
 .lb-expand-link {
@@ -988,7 +1289,7 @@ button, input, select {
     border-top: 1px solid var(--border);
     margin-top: 4px;
     padding-top: 10px;
-    color: var(--gold);
+    color: var(--text-faint);
     font-size: 12px;
     font-weight: 700;
     text-align: center;
@@ -1150,8 +1451,8 @@ button, input, select {
 .pwa-bar span { flex: 1; }
 
 .pwa-bar-yes, .pwa-bar-no {
-    background: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    color: var(--green-ink);
     border: none;
     border-radius: 8px;
     padding: 6px 10px;
@@ -1179,7 +1480,7 @@ button, input, select {
     align-items: center;
     gap: 12px;
     margin-top: 12px;
-    border: 1px solid var(--gold);
+    border: 1px solid var(--green-line);
     cursor: pointer;
 }
 
@@ -1188,8 +1489,8 @@ button, input, select {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--gold-dim);
-    color: var(--gold);
+    background: var(--green-dim);
+    color: var(--green-light);
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -1225,7 +1526,7 @@ button, input, select {
 .see-all-link {
     font-size: 12.5px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--text-faint);
     cursor: pointer;
 }
 
@@ -1263,7 +1564,7 @@ button, input, select {
     background: none;
     border: 1px dashed var(--border-strong);
     border-radius: var(--radius-sm);
-    color: var(--gold);
+    color: rgba(255, 255, 255, 0.72);
     font-size: 13.5px;
     font-weight: 700;
     padding: 12px;
@@ -1272,14 +1573,6 @@ button, input, select {
 }
 
 /* --- Friends screen --- */
-.own-code-panel {
-    text-align: center;
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 0.2em;
-    color: var(--gold);
-}
-
 .invite-icon {
     font-size: 16px;
     line-height: 1;
@@ -1319,7 +1612,7 @@ button, input, select {
 }
 
 .friend-row.me {
-    background: var(--gold-dim);
+    background: var(--green-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -1359,8 +1652,8 @@ button, input, select {
 .friend-you-tag {
     font-size: 9px;
     font-weight: 800;
-    color: #231a04;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -1447,8 +1740,8 @@ button, input, select {
     text-align: center;
     padding: 9px 0;
     border-radius: 8px;
-    background: var(--gold);
-    color: #fff;
+    background: var(--green);
+    color: var(--green-ink);
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
@@ -1567,6 +1860,58 @@ button, input, select {
     font-size: 14px;
 }
 
+/* --- Win result: the hand, then the payout at display scale --- */
+.result-panel-win {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-top: 18px;
+}
+
+.result-hand {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    color: var(--text);
+}
+
+.result-amount {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.result-panel-win .win {
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+}
+
+.result-mult {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-faint);
+}
+
+/* Long hand names would otherwise run past the card into its neighbour. */
+.win-badge {
+    max-width: 132%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 8.5px;
+    letter-spacing: 0.04em;
+}
+
+/* Pair hands label only the first card of the pair; the other winning
+   cards keep an unlabelled badge element that must not paint. */
+.win-badge:empty {
+    display: none;
+}
+
 
 /* --- styles/social.css --- */
 /* ========================================================================
@@ -1602,7 +1947,7 @@ button, input, select {
     width: 56px;
     height: 56px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    background: linear-gradient(135deg, var(--green), var(--green-light));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1634,14 +1979,14 @@ button, input, select {
     width: 100%;
     height: 100%;
     border-radius: 10px;
-    background: var(--bg-top);
+    background: var(--bg-glow);
     color: var(--text);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
     font-size: 15px;
-    border: 2px solid var(--bg-bottom);
+    border: 2px solid var(--bg-base);
     overflow: hidden;
 }
 
@@ -1789,11 +2134,12 @@ button, input, select {
 }
 
 .story-hand-name {
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 800;
-    color: var(--gold);
+    letter-spacing: -0.03em;
+    color: var(--text);
     text-align: center;
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-display);
 }
 
 .story-cards {
@@ -1836,7 +2182,7 @@ button, input, select {
 .story-payout {
     font-size: 14px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--green);
     text-align: center;
 }
 
@@ -1861,17 +2207,22 @@ button, input, select {
 }
 
 .nearby-panel .panel-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: 0.03em;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-faint);
+    letter-spacing: 0.18em;
     text-transform: uppercase;
 }
 
 .nearby-panel .panel-sub {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--green-light);
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(22, 193, 114, 0.16);
+    border: 1px solid var(--green-line);
 }
 
 .champ-countdown {
@@ -1893,7 +2244,7 @@ button, input, select {
 }
 
 .nearby-row.me {
-    background: var(--gold-dim);
+    background: var(--green-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -1916,7 +2267,7 @@ button, input, select {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    background: var(--surface-hover);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2000,7 +2351,7 @@ button, input, select {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px 12px;
@@ -2043,8 +2394,8 @@ button, input, select {
 .mr-join {
     font-size: 12px;
     font-weight: 700;
-    color: #fff;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 6px 12px;
     border-radius: 999px;
     cursor: pointer;
@@ -2059,7 +2410,7 @@ button, input, select {
     padding: 11px 0;
     border-radius: 10px;
     border: 1.5px dashed var(--border);
-    color: var(--gold);
+    color: rgba(255, 255, 255, 0.72);
     font-weight: 700;
     font-size: 12px;
     cursor: pointer;
@@ -2072,7 +2423,7 @@ button, input, select {
 .see-all-link {
     font-size: 11px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--text-faint);
     cursor: pointer;
 }
 
@@ -2091,8 +2442,8 @@ button, input, select {
 .invite-pill {
     font-size: 13px;
     font-weight: 700;
-    color: #fff;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 8px 14px;
     border-radius: 999px;
     cursor: pointer;
@@ -2112,27 +2463,31 @@ button, input, select {
 
 .sheet {
     width: 100%;
-    background: var(--panel-solid);
-    border-radius: 20px 20px 0 0;
+    background: linear-gradient(180deg, #0E2019 0%, #08130F 100%);
+    border-radius: 32px 32px 0 0;
     padding: 20px 18px max(28px, env(safe-area-inset-bottom));
     box-sizing: border-box;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    box-shadow: 0 -30px 60px -20px rgba(22, 193, 114, 0.35);
     max-width: 460px;
     margin: 0 auto;
+    border-top: 1px solid rgba(22, 193, 114, 0.28);
 }
 
 .sheet-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 16px;
+    gap: 12px;
 }
 
 .sheet-title {
-    font-size: 17px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: 800;
     color: var(--text);
-    font-family: 'Manrope', sans-serif;
+    font-family: var(--font-display);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
 }
 
 .sheet-close {
@@ -2146,9 +2501,10 @@ button, input, select {
 }
 
 .sheet-sub {
-    font-size: 13px;
-    color: var(--text-muted);
+    font-size: 14.5px;
+    color: rgba(255, 255, 255, 0.62);
     margin-bottom: 16px;
+    line-height: 1.55;
 }
 
 .sheet-link-row {
@@ -2159,7 +2515,7 @@ button, input, select {
 
 .sheet-link-text {
     flex: 1;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 10px 12px;
@@ -2174,8 +2530,8 @@ button, input, select {
 .sheet-copy-btn {
     font-size: 12px;
     font-weight: 700;
-    color: var(--gold);
-    border: 1px solid var(--gold);
+    color: var(--green);
+    border: 1px solid var(--green-line);
     padding: 9px 12px;
     border-radius: 10px;
     cursor: pointer;
@@ -2189,7 +2545,7 @@ button, input, select {
 .sheet-copy-btn.copied {
     background: var(--green);
     border-color: var(--green);
-    color: #fff;
+    color: var(--green-ink);
 }
 
 /* Share chips (WhatsApp / Telegram) */
@@ -2243,7 +2599,7 @@ button, input, select {
     box-sizing: border-box;
     padding: 11px 12px;
     border-radius: 8px;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     color: var(--text);
     font-size: 13px;
@@ -2265,7 +2621,7 @@ button, input, select {
     text-align: center;
     padding: 10px 0;
     border-radius: 10px;
-    background: var(--bg-bottom);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
     font-weight: 700;
     font-size: 13px;
@@ -2275,9 +2631,9 @@ button, input, select {
 }
 
 .inline-room-form .room-form-stake.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 .inline-room-form .room-form-actions {
@@ -2297,8 +2653,8 @@ button, input, select {
 }
 
 .room-form-create-btn {
-    background: var(--gold);
-    color: #fff;
+    background: var(--green);
+    color: var(--green-ink);
 }
 
 .room-form-cancel-btn {
@@ -2321,7 +2677,7 @@ button, input, select {
 }
 
 .friend-leaderboard-row.me {
-    background: var(--gold-dim);
+    background: var(--green-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -2344,7 +2700,7 @@ button, input, select {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold), var(--gold-600));
+    background: var(--surface-hover);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2385,12 +2741,39 @@ button, input, select {
 .friend-lb-net.negative { color: var(--red); }
 .friend-lb-net.zero     { color: var(--text-muted); }
 
+.friend-lb-remove {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.friend-lb-remove:hover {
+    background: var(--red-dim);
+    color: var(--red);
+}
+
+.friend-lb-remove[disabled] {
+    visibility: hidden;
+    cursor: default;
+}
+
 /* --- Friend "You" tag --- */
 .friend-you-tag {
     font-size: 9px;
     font-weight: 700;
-    color: #fff;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -2405,6 +2788,398 @@ button, input, select {
     border: 1px dashed var(--border);
     border-radius: 10px;
     margin-top: 6px;
+}
+
+/* Only you are marked in the action colour — every other player stays glass,
+   so your own row is findable without reading a single name. */
+.nearby-row.me .nearby-avatar,
+.friend-leaderboard-row.me .friend-lb-avatar {
+    background: var(--green);
+    color: var(--green-ink);
+}
+
+.stories-row:not(:empty) {
+    margin-bottom: 16px;
+}
+
+/* --- All In sheet: a considered decision, not a quick tap --- */
+.sheet-grabber {
+    width: 44px;
+    height: 4px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 auto 26px;
+}
+
+.sheet-mark {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    background: rgba(22, 193, 114, 0.14);
+    border: 1px solid var(--green-line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    color: var(--green-light);
+}
+
+.sheet-heading {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sheet-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-faint);
+}
+
+/* The number that makes the stake concrete — the only gold in the sheet. */
+.sheet-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 22px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+}
+
+.sheet-stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.sheet-stat-value {
+    font-size: 17px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--gold);
+}
+
+.sheet-dismiss {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    padding: 4px;
+    background: none;
+    border: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-faint);
+    cursor: pointer;
+}
+
+/* --- Friends action strip: tap-to-copy code chip + add-by-code, one row --- */
+.friends-action-strip {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    margin-bottom: 6px;
+}
+
+.code-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, 16px);
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: border-color 0.2s, transform 0.1s;
+}
+
+.code-chip:active { transform: scale(0.97); }
+
+.code-chip.copied { border-color: var(--green); }
+
+.code-chip-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+
+.code-chip-value {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+}
+
+.code-chip-hint {
+    font-size: 10.5px;
+    color: var(--text-faint);
+}
+
+.code-chip.copied .code-chip-hint { color: var(--green); }
+
+.add-friend-inline {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    min-width: 0;
+}
+
+.add-friend-inline .friend-code-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.friends-reward-line {
+    font-size: 12px;
+    color: var(--text-faint);
+    margin: 0 2px 14px;
+    line-height: 1.5;
+}
+
+/* --- Invite-count badges (Poker Rooms tab + bottom nav) --- */
+.tab-badge {
+    display: inline-block;
+    min-width: 17px;
+    margin-left: 6px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: var(--green);
+    color: var(--green-ink);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 15px;
+    text-align: center;
+    vertical-align: 1px;
+}
+
+.nav-btn { position: relative; }
+
+.nav-badge {
+    position: absolute;
+    top: 6px;
+    right: 22%;
+    min-width: 16px;
+    padding: 1px 4px;
+    border-radius: 999px;
+    background: var(--green);
+    color: var(--green-ink);
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 14px;
+    text-align: center;
+}
+
+/* --- Incoming room-invite banners (Friends → Poker Rooms) --- */
+.room-invite-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-raised);
+    border: 1px solid var(--green-line);
+    border-left: 3px solid var(--green);
+    border-radius: var(--radius-sm, 16px);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+}
+
+.rib-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.rib-from, .rib-room {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.rib-meta {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    margin-top: 2px;
+}
+
+.rib-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.rib-accept {
+    background: var(--green);
+    color: var(--green-ink);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.rib-decline {
+    background: none;
+    color: var(--text-faint);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* --- Room-invite friend picker (inside #room-invite-sheet) --- */
+.room-invite-friends {
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 4px;
+}
+
+.rip-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 6px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.rip-row:active { background: var(--surface-hover); }
+
+.rip-row.invited { cursor: default; opacity: 0.55; }
+
+.rip-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--green-dim);
+    color: var(--green);
+    font-size: 14px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.rip-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rip-check {
+    width: auto;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    color: var(--green-ink);
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.rip-row.selected .rip-check {
+    background: var(--green);
+    border-color: var(--green);
+}
+
+.rip-row.invited .rip-check {
+    border: none;
+    border-radius: 999px;
+    width: auto;
+    height: auto;
+    padding: 2px 8px;
+    background: var(--green-dim);
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.rip-empty {
+    font-size: 13px;
+    color: var(--text-faint);
+    padding: 10px 4px 14px;
+    line-height: 1.5;
+}
+
+.rip-send-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 13px 0;
+    border-radius: 12px;
+    background: var(--green);
+    color: var(--green-ink);
+    border: none;
+    font-size: 14.5px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.rip-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 10px;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.rip-divider::before, .rip-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+/* Native OS share chip alongside WhatsApp/Telegram */
+.share-chip.native {
+    background: var(--surface-hover);
+    border: 1px solid var(--green-line);
+    color: var(--green);
+}
+
+/* Small secondary "+ Invite friends" action on room cards */
+.room-invite-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 9px 0;
+    border-radius: 10px;
+    background: none;
+    border: 1px dashed var(--green-line);
+    color: var(--green);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
 }
 
 
@@ -2516,7 +3291,7 @@ body.screen-shake {
 .onboarding-overlay {
     position: fixed;
     inset: 0;
-    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    background: var(--app-bg);
     z-index: 400;
     display: flex;
     flex-direction: column;
@@ -2546,21 +3321,24 @@ body.screen-shake {
 }
 
 /* ── Navigation bar ── */
+/* Dots ride above a full-width primary action, matching the deal screen's
+   button rhythm. When Back is hidden the CTA simply takes the whole row. */
 .onboarding-nav {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    padding: 16px 24px max(env(safe-area-inset-bottom, 0px), 24px);
+    gap: 14px 10px;
+    padding: 16px 24px max(env(safe-area-inset-bottom, 0px), 28px);
     flex-shrink: 0;
 }
 
 .onboarding-nav-arrow {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    border: 2px solid var(--border-strong);
-    background: none;
-    color: var(--text);
+    width: 62px;
+    height: 62px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-strong);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.75);
     font-size: 20px;
     cursor: pointer;
     display: flex;
@@ -2571,15 +3349,27 @@ body.screen-shake {
 }
 
 .onboarding-nav-arrow.ob-hidden {
-    opacity: 0;
-    pointer-events: none;
+    display: none;
+}
+
+.onboarding-dots {
+    order: -1;
+    width: 100%;
+    justify-content: center;
 }
 
 .onboarding-nav-arrow--next {
-    background: #3EC6A0;
-    border-color: #3EC6A0;
-    color: #0a2b1d;
+    background: var(--green);
+    border-color: transparent;
+    color: var(--green-ink);
     font-weight: 700;
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: -0.01em;
+    box-shadow: var(--green-glow);
+    flex: 1;
+    width: auto;
+    height: 62px;
 }
 
 .onboarding-dots {
@@ -2589,16 +3379,17 @@ body.screen-shake {
 }
 
 .onboarding-dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 999px;
-    background: var(--border-strong);
+    background: rgba(255, 255, 255, 0.2);
     transition: width 0.25s ease, background 0.25s ease;
 }
 
 .onboarding-dot.active {
-    width: 20px;
-    background: var(--gold);
+    width: 22px;
+    background: var(--green);
+    height: 5px;
 }
 
 /* ── Welcome screen ── */
@@ -2614,75 +3405,96 @@ body.screen-shake {
 
 .ob-card-fan {
     position: relative;
-    width: 180px;
-    height: 140px;
+    width: 100%;
+    max-width: 340px;
+    height: 200px;
     margin: 0 auto 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ob-fan-card {
     position: absolute;
-    width: 88px;
-    height: 120px;
+    width: 112px;
+    height: 158px;
     background: var(--card-face-bg);
-    border-radius: 10px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    border-radius: 18px;
+    box-shadow: 0 22px 44px -18px rgba(0, 0, 0, 0.9);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 22px;
+    justify-content: flex-start;
+    padding: 14px 12px;
+    font-weight: 700;
+    font-size: 34px;
+    letter-spacing: -0.04em;
     color: var(--card-black);
     line-height: 1;
-    gap: 2px;
+    gap: 4px;
+    font-family: var(--font-display);
 }
 
+/* Three spades fanned around a highlighted ace — the shape of the hand the
+   whole game is chasing, readable before a single word is read. */
 .ob-fan-card--left {
-    transform: rotate(-18deg);
-    left: 0;
-    top: 18px;
+    transform: rotate(-16deg) translateX(-88px);
+    align-items: flex-start;
     z-index: 1;
 }
 
 .ob-fan-card--center {
-    left: 50%;
-    transform: translateX(-50%);
-    top: 0;
+    width: 118px;
+    height: 168px;
+    justify-content: space-between;
+    align-items: stretch;
+    padding: 13px;
     z-index: 3;
+    box-shadow: 0 26px 50px -18px rgba(0, 0, 0, 0.95), 0 0 0 2px rgba(22, 193, 114, 0.55);
+}
+
+/* The centre card carries the corner layout of a real card face. */
+.ob-fan-card--center {
+    text-align: left;
+}
+
+.ob-fan-card--center .ob-fan-suit {
+    align-self: flex-end;
 }
 
 .ob-fan-card--right {
-    transform: rotate(18deg);
-    right: 0;
-    top: 18px;
+    transform: rotate(16deg) translateX(88px);
+    align-items: flex-end;
     z-index: 2;
 }
 
 .ob-fan-suit {
-    font-size: 16px;
+    font-size: 28px;
+    line-height: 1;
 }
 
 .ob-welcome-eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    color: var(--gold);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--text-faint);
     text-transform: uppercase;
     margin-bottom: 10px;
 }
 
 .ob-welcome-title {
-    font-size: 30px;
+    font-size: 44px;
     font-weight: 800;
     color: var(--text);
-    line-height: 1.1;
+    line-height: 1.02;
     margin-bottom: 14px;
+    font-family: var(--font-display);
+    letter-spacing: -0.035em;
 }
 
 .ob-welcome-subtitle {
-    font-size: 15px;
+    font-size: 18px;
     color: var(--text-muted);
-    line-height: 1.55;
+    line-height: 1.5;
     margin-bottom: 24px;
     max-width: 280px;
 }
@@ -2695,23 +3507,23 @@ body.screen-shake {
 }
 
 .ob-pill {
-    padding: 7px 14px;
+    padding: 7px 12px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 13.5px;
     font-weight: 600;
-    border: 1.5px solid var(--border-strong);
-    color: var(--text-muted);
-    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.62);
+    background: var(--surface-raised);
 }
 
 .ob-pill--gold {
-    border-color: var(--gold);
-    color: var(--gold);
+    border-color: rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.62);
 }
 
 .ob-pill--teal {
-    border-color: #3EC6A0;
-    color: #3EC6A0;
+    border-color: rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.62);
 }
 
 /* ── Content screens (hands / gameplay / leaderboard) ── */
@@ -2724,16 +3536,19 @@ body.screen-shake {
 }
 
 .ob-screen-title {
-    font-size: 24px;
+    font-size: 34px;
     font-weight: 800;
     color: var(--text);
     margin-bottom: 6px;
+    font-family: var(--font-display);
+    line-height: 1.06;
+    letter-spacing: -0.035em;
 }
 
 .ob-screen-subtitle {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-muted);
-    line-height: 1.5;
+    line-height: 1.55;
     margin-bottom: 20px;
 }
 
@@ -2756,40 +3571,44 @@ body.screen-shake {
 
 .ob-hand-row {
     display: flex;
-    align-items: center;
-    background: var(--panel);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    gap: 10px;
-    border: 1.5px solid transparent;
+    align-items: stretch;
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    gap: 12px;
+    border: 1px solid var(--border);
+    flex-direction: column;
 }
 
 .ob-hand-row--highlight {
-    border-color: var(--gold);
-    background: rgba(212, 175, 55, 0.08);
+    border-color: rgba(22, 193, 114, 0.3);
+    background: rgba(22, 193, 114, 0.1);
 }
 
 .ob-hand-cards {
     display: flex;
-    gap: 3px;
+    gap: 6px;
     flex-shrink: 0;
 }
 
 .ob-mini-card {
-    width: 26px;
-    height: 34px;
-    background: var(--card-face-bg);
-    border-radius: 4px;
+    width: auto;
+    height: auto;
+    background: #F3F5FA;
+    border-radius: 9px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    font-size: 9.5px;
+    font-size: 17px;
     font-weight: 700;
     color: var(--card-black);
     line-height: 1;
-    gap: 1px;
+    gap: 0;
     flex-shrink: 0;
+    font-family: var(--font-display);
+    flex: 1;
+    aspect-ratio: 0.7;
 }
 
 .ob-mini-card--red {
@@ -2801,6 +3620,7 @@ body.screen-shake {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
 }
 
 .ob-hand-name {
@@ -2810,9 +3630,10 @@ body.screen-shake {
 }
 
 .ob-hand-payout {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--gold);
+    font-size: 20px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: var(--font-display);
 }
 
 /* ── Gameplay mockup (screen 3) ── */
@@ -2846,7 +3667,8 @@ body.screen-shake {
 .ob-mockup-stat-value {
     font-size: 20px;
     font-weight: 800;
-    color: var(--gold);
+    color: var(--text);
+    font-family: var(--font-display);
 }
 
 .ob-mockup-stat--right {
@@ -2886,8 +3708,8 @@ body.screen-shake {
     top: -9px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--gold);
-    color: #0a2b1d;
+    background: var(--green);
+    color: var(--green-ink);
     font-size: 8px;
     font-weight: 800;
     letter-spacing: 0.06em;
@@ -2899,15 +3721,16 @@ body.screen-shake {
 .ob-mockup-draw-btn {
     width: 100%;
     padding: 11px;
-    background: #3EC6A0;
+    background: var(--green);
     border: none;
     border-radius: var(--radius-sm);
-    color: #0a2b1d;
+    color: var(--green-ink);
     font-size: 15px;
     font-weight: 700;
     margin-bottom: 10px;
     cursor: default;
     pointer-events: none;
+    margin-top: 12px;
 }
 
 .ob-mockup-bets {
@@ -2917,7 +3740,7 @@ body.screen-shake {
 
 .ob-mockup-bet {
     flex: 1;
-    padding: 7px 2px;
+    padding: 0 4px;
     background: var(--felt-600);
     border: none;
     border-radius: 8px;
@@ -2926,58 +3749,88 @@ body.screen-shake {
     font-weight: 600;
     cursor: default;
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 38px;
 }
 
 .ob-mockup-bet--active {
-    background: #3EC6A0;
-    color: #0a2b1d;
+    background: rgba(22, 193, 114, 0.22);
+    color: var(--text);
+    box-shadow: 0 0 0 2px var(--green);
+    border-color: transparent;
 }
 
 .ob-mockup-bet--allin {
-    background: var(--gold);
-    color: #0a2b1d;
+    background: var(--green-dim);
+    color: var(--green-light);
     position: relative;
+    border: 1px solid rgba(22, 193, 114, 0.45);
+    flex-direction: column;
+    gap: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
 }
 
 .ob-allin-badge {
-    position: absolute;
+    position: static;
     top: -6px;
     right: -3px;
-    background: var(--red);
-    color: white;
-    font-size: 8px;
-    font-weight: 800;
+    background: none;
+    color: rgba(255, 107, 170, 0.65);
+    font-size: 9px;
+    font-weight: 600;
     width: 14px;
     height: 14px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
+    padding: 0;
+    letter-spacing: 0;
+    white-space: nowrap;
 }
 
 /* ── Leaderboard mockup (screen 4) ── */
 .ob-lb-tabs {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     margin-bottom: 14px;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
 }
 
 .ob-lb-tab {
-    padding: 7px 16px;
-    border-radius: 999px;
-    border: 1.5px solid var(--border-strong);
+    padding: 0;
+    border-radius: 11px;
+    border: none;
     background: none;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.5);
     font-size: 13px;
     font-weight: 600;
     cursor: default;
     pointer-events: none;
+    flex: 1;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ob-lb-tab--active {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #0a2b1d;
+    background: var(--green);
+    border-color: transparent;
+    color: var(--green-ink);
+    font-weight: 700;
 }
 
 .ob-lb-header {
@@ -3014,7 +3867,7 @@ body.screen-shake {
 }
 
 .ob-lb-row--you {
-    background: rgba(62, 198, 160, 0.1);
+    background: rgba(22, 193, 114, 0.12);
     border: 1px solid rgba(62, 198, 160, 0.25);
 }
 
@@ -3030,8 +3883,8 @@ body.screen-shake {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: var(--gold);
-    color: #0a2b1d;
+    background: var(--green);
+    color: var(--green-ink);
     font-size: 13px;
     font-weight: 800;
     display: flex;
@@ -3041,8 +3894,8 @@ body.screen-shake {
 }
 
 .ob-lb-avatar--dim {
-    background: var(--felt-600);
-    color: var(--text-muted);
+    background: var(--surface-hover);
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .ob-lb-name {
@@ -3083,10 +3936,13 @@ body.screen-shake {
 }
 
 .ob-push-title {
-    font-size: 24px;
+    font-size: 40px;
     font-weight: 800;
     color: var(--text);
     margin-bottom: 10px;
+    font-family: var(--font-display);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
 }
 
 .ob-push-subtitle {
@@ -3120,13 +3976,13 @@ body.screen-shake {
 .ob-check-icon {
     width: 22px;
     height: 22px;
-    border-radius: 50%;
-    background: #3EC6A0;
+    border-radius: 7px;
+    background: rgba(22, 193, 114, 0.18);
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #0a2b1d;
+    color: var(--green-light);
     font-size: 13px;
     font-weight: 800;
 }
@@ -3135,20 +3991,23 @@ body.screen-shake {
     width: 100%;
     max-width: 300px;
     padding: 16px;
-    background: #3EC6A0;
+    background: var(--green);
     border: none;
-    border-radius: 999px;
-    color: #0a2b1d;
-    font-size: 16px;
+    border-radius: var(--radius-md);
+    color: var(--green-ink);
+    font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
+    font-family: var(--font-display);
+    box-shadow: var(--green-glow);
 }
 
+/* A quiet decline — the design never competes with its own primary action. */
 .ob-not-now {
     background: none;
     border: none;
-    color: var(--gold);
+    color: var(--text-faint);
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
@@ -3167,10 +4026,13 @@ body.screen-shake {
 }
 
 .ob-signin-title {
-    font-size: 26px;
+    font-size: 40px;
     font-weight: 800;
     color: var(--text);
     margin-bottom: 10px;
+    font-family: var(--font-display);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
 }
 
 .ob-signin-subtitle {
@@ -3187,28 +4049,41 @@ body.screen-shake {
     justify-content: center;
     gap: 10px;
     width: 100%;
-    max-width: 300px;
-    padding: 16px;
-    background: white;
+    max-width: 340px;
+    padding: 0 16px;
+    background: var(--green);
     border: none;
-    border-radius: 999px;
-    color: #111;
-    font-size: 16px;
+    border-radius: var(--radius-md);
+    color: var(--green-ink);
+    font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
+    font-family: var(--font-display);
+    box-shadow: var(--green-glow);
+    height: 62px;
 }
 
 .ob-guest-link {
-    background: none;
-    border: none;
-    color: var(--gold);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    color: rgba(255, 255, 255, 0.75);
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     padding: 6px;
-    text-decoration: underline;
+    text-decoration: none;
     text-underline-offset: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 56px;
+    margin-top: 12px;
+    border-radius: var(--radius-md);
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .ob-signin-error {
@@ -3216,6 +4091,10 @@ body.screen-shake {
     font-size: 13px;
     margin-bottom: 10px;
     min-height: 18px;
+}
+
+.ob-hand-row--highlight .ob-hand-payout {
+    color: var(--green-light);
 }
 
 
@@ -3226,13 +4105,18 @@ body.screen-shake {
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 </head>
 <body>
+<div class="shell">
     <div class="app">
         <section id="screen-play" class="screen active">
             <div class="brandrow">
-                <div class="app-title">Video Poker</div>
                 <div class="tpill" id="tournament-pill" onclick="toggleTournamentPill()">
-                    <span>⏱ #1 · 26:55</span>
+                    <span>Tournament 2</span>
+                    <span class="tour-time">26:55</span>
                     <span class="tour-chev" id="tour-chev">▾</span>
+                </div>
+                <div class="streak-pill" id="streak-pill">
+                    <span>Streak</span>
+                    <span class="streak-pill-value streak-count" id="streak-count">0</span>
                 </div>
             </div>
             <div class="texpand hidden" id="tournament-expand">
@@ -3243,39 +4127,30 @@ body.screen-shake {
             <!-- Phase 2: Stories row -->
             <div class="stories-row" id="stories-row"></div>
 
-            <div class="panel balance-panel">
-                <div class="balance-row">
-                    <div>
-                        <div class="section-label">Balance</div>
-                        <div class="balance-value" id="balance">500</div>
-                    </div>
-                    <div>
-                        <div class="section-label">Total Bet</div>
-                        <div class="bet-value" id="bet-display">10</div>
-                    </div>
+            <div class="balance-head">
+                <div class="balance-head-main">
+                    <div class="section-label">Balance</div>
+                    <div class="balance-value" id="balance">500</div>
                 </div>
-                <div class="bet-row">
-                    <button class="bet-btn" onclick="setBet(5)" id="bet-5">5</button>
-                    <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
-                    <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
-                    <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
-                    <button class="bet-btn bet-btn-allin" onclick="openAllInSheet()" id="bet-allin">ALL IN<span class="allin-badge" id="allin-badge">1</span></button>
+                <div class="balance-head-side">
+                    <div class="section-label">Variant</div>
+                    <div class="variant-value" id="variant-display">Jacks or Better</div>
                 </div>
             </div>
+
+            <!-- Top payouts for the active variant, at a glance -->
+            <div class="paytable-ticker" id="paytable-ticker"></div>
 
             <div id="multi-hands"></div>
             <div class="hand" id="hand"></div>
-            <div class="hand-placeholder-text" id="hand-placeholder-text">Tap a card or Deal to start the hand</div>
+            <div class="hand-placeholder-text" id="hand-placeholder-text">Hold what you want, then set your bet before the draw.</div>
 
-            <div class="action-row">
-                <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">🎴</span>Deal</button>
-                <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
-            </div>
+            <div class="result-panel" id="result">Place your bet and deal to play</div>
+            <div class="explanation" id="explanation"></div>
 
             <div class="streak-bar" id="streak-bar">
                 <span>🔥</span>
                 <span>Win Streak</span>
-                <span class="streak-count" id="streak-count">0</span>
                 <span class="streak-bonus-tag hidden" id="streak-bonus-tag"></span>
             </div>
 
@@ -3314,6 +4189,30 @@ body.screen-shake {
                 <button class="lb-expand-link hidden" id="lb-expand-link" onclick="toggleLeaderboardExpand()">Show Top 20 ▾</button>
             </div>
 
+            <!-- Stake, then draw. The bet sits next to the button that spends
+                 it so the last thing you decide is the last thing you touch. -->
+            <div class="bet-dock">
+                <div class="total-bet-row">
+                    <span class="section-label">Total bet</span>
+                    <span class="total-bet-value" id="bet-display">10</span>
+                </div>
+                <div class="bet-row">
+                    <button class="bet-btn" onclick="setBet(5)" id="bet-5">5</button>
+                    <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
+                    <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
+                    <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
+                    <button class="bet-btn bet-btn-allin" onclick="openAllInSheet()" id="bet-allin">
+                        <span class="allin-label">ALL IN</span>
+                        <span class="allin-badge" id="allin-badge">1</span>
+                    </button>
+                </div>
+                <div class="action-row">
+                    <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">↻</span>Deal</button>
+                    <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
+                    <button id="voice-btn" class="hint-btn" onclick="toggleVoice()" title="Voice announcements">🗣️</button>
+                </div>
+            </div>
+
             <div class="panel pwf-panel" id="pwf-panel">
                 <div class="play-rooms-header">
                     <span class="section-label">Play With Friends</span>
@@ -3323,8 +4222,6 @@ body.screen-shake {
                 <button class="create-room-link" onclick="openRoomModal()">+ Create a Poker Room with Friends</button>
             </div>
 
-            <div class="result-panel" id="result">Place your bet and deal to play</div>
-            <div class="explanation" id="explanation"></div>
         </section>
 
         <section id="screen-stats" class="screen">
@@ -3360,7 +4257,7 @@ body.screen-shake {
         <section id="screen-friends" class="screen">
             <div class="friends-header">
                 <h1 class="screen-title">Friends</h1>
-                <button class="invite-pill" onclick="openInviteSheet()">+ Invite</button>
+                <button class="invite-pill" onclick="shareInviteNative()">+ Invite</button>
             </div>
 
             <div class="panel friends-signin-prompt" id="friends-signed-out" onclick="openSignInModal()">
@@ -3369,18 +4266,22 @@ body.screen-shake {
             </div>
 
             <div id="friends-signed-in-wrap" class="hidden">
-                <div class="section-label">Your Code</div>
-                <div class="panel own-code-panel" id="own-referral-code">—</div>
-
-                <div class="section-label">Add a Friend</div>
-                <div class="panel add-friend-row">
-                    <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
-                    <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()">Add</button>
+                <div class="friends-action-strip">
+                    <button class="code-chip" id="own-code-chip" onclick="copyOwnCode()">
+                        <span class="code-chip-label">Your code</span>
+                        <span class="code-chip-value" id="own-referral-code">—</span>
+                        <span class="code-chip-hint" id="own-code-hint">Tap to copy</span>
+                    </button>
+                    <div class="add-friend-inline">
+                        <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
+                        <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()">Add</button>
+                    </div>
                 </div>
+                <div class="friends-reward-line" id="friends-invite-reward">Get 2000 coins for every friend who joins with Google.</div>
 
                 <div class="stats-toggle">
                     <button class="stats-toggle-btn selected" id="friends-tab-leaderboard" onclick="setFriendsTab('leaderboard')">Leaderboard</button>
-                    <button class="stats-toggle-btn" id="friends-tab-rooms" onclick="setFriendsTab('rooms')">Poker Rooms</button>
+                    <button class="stats-toggle-btn" id="friends-tab-rooms" onclick="setFriendsTab('rooms')">Poker Rooms<span class="tab-badge hidden" id="rooms-tab-badge"></span></button>
                 </div>
 
                 <div id="friends-leaderboard-view">
@@ -3391,6 +4292,7 @@ body.screen-shake {
                 </div>
 
                 <div id="friends-rooms-view" class="hidden">
+                    <div id="friends-room-invites"></div>
                     <div class="rooms-empty hidden" id="friends-rooms-empty">No rooms yet — create one below.</div>
                     <div id="friends-rooms-list"></div>
                     <button class="create-room-link create-room-dashed" id="friends-create-room-btn" onclick="toggleInlineRoomForm()">+ Create a Poker Room with Friends</button>
@@ -3423,6 +4325,10 @@ body.screen-shake {
                 <div class="settings-row">
                     <span class="settings-row-label">Haptic Feedback</span>
                     <input type="checkbox" class="toggle-switch" id="settings-haptics-toggle">
+                </div>
+                <div class="settings-row">
+                    <span class="settings-row-label">Voice Announcements</span>
+                    <input type="checkbox" class="toggle-switch" id="settings-voice-toggle">
                 </div>
             </div>
 
@@ -3496,6 +4402,10 @@ body.screen-shake {
                         <span class="settings-row-label">Friends' best hands</span>
                         <input type="checkbox" class="toggle-switch" id="settings-notif-bestHand">
                     </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">Announcements</span>
+                        <input type="checkbox" class="toggle-switch" id="settings-notif-announcement">
+                    </div>
                     <div class="settings-row" id="settings-notifications-enable" style="cursor:pointer;">
                         <span class="settings-row-label">Enable Notifications</span>
                         <span class="settings-chevron">›</span>
@@ -3520,8 +4430,9 @@ body.screen-shake {
                 <span>Stats</span>
             </button>
             <button class="nav-btn" id="nav-friends" onclick="showScreen('friends')">
-                <span class="nav-icon">👥</span>
+                <span class="nav-icon">◍</span>
                 <span>Friends</span>
+                <span class="nav-badge hidden" id="nav-friends-badge"></span>
             </button>
             <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
                 <span class="nav-icon">⚙</span>
@@ -3538,10 +4449,6 @@ body.screen-shake {
             <button class="google-btn" onclick="signInWithGoogle()">
                 <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
                 <span>Continue with Google</span>
-            </button>
-            <button class="facebook-btn" onclick="signInWithFacebook()">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                <span>Continue with Facebook</span>
             </button>
             <div class="modal-error hidden" id="signin-error"></div>
         </div>
@@ -3585,6 +4492,7 @@ body.screen-shake {
                 <span class="sheet-title">Invite Friends</span>
                 <button class="sheet-close" onclick="closeSheet('invite-sheet')">✕</button>
             </div>
+            <div class="sheet-sub" id="invite-reward-line">Get 2000 coins for every friend who joins with Google.</div>
             <div class="sheet-link-row">
                 <span class="sheet-link-text" id="invite-sheet-link">—</span>
                 <button class="sheet-copy-btn" id="invite-sheet-copy" onclick="copyInviteSheetLink()">Copy</button>
@@ -3602,39 +4510,54 @@ body.screen-shake {
         </div>
     </div>
 
-    <!-- Phase 2: Room Created bottom sheet -->
-    <div class="sheet-backdrop hidden" id="room-created-sheet" onclick="if(event.target===this)closeSheet('room-created-sheet')">
+    <!-- Room invite sheet: pick friends to invite + share link fallback.
+         Opens right after creating a room, and from the Invite button on room cards. -->
+    <div class="sheet-backdrop hidden" id="room-invite-sheet" onclick="if(event.target===this)closeSheet('room-invite-sheet')">
         <div class="sheet">
             <div class="sheet-header">
-                <span class="sheet-title">Room Created 🎉</span>
-                <button class="sheet-close" onclick="closeSheet('room-created-sheet')">✕</button>
+                <span class="sheet-title" id="room-invite-title">Invite Friends</span>
+                <button class="sheet-close" onclick="closeSheet('room-invite-sheet')">✕</button>
             </div>
-            <div class="sheet-sub">Invite friends to "<span id="room-created-name">—</span>"</div>
+            <div class="sheet-sub">Invite friends to "<span id="room-invite-name">—</span>" — they get a notification with a Join button.</div>
+            <div class="room-invite-friends" id="room-invite-friends"></div>
+            <button class="rip-send-btn hidden" id="room-invite-send" onclick="sendRoomInvites()">Send Invites</button>
+            <div class="rip-divider"><span>or share a link</span></div>
             <div class="sheet-link-row">
-                <span class="sheet-link-text" id="room-created-link">—</span>
-                <button class="sheet-copy-btn" id="room-created-copy" onclick="copyRoomLink()">Copy</button>
+                <span class="sheet-link-text" id="room-invite-link">—</span>
+                <button class="sheet-copy-btn" id="room-invite-copy" onclick="copyRoomLink()">Copy</button>
             </div>
             <div class="share-chips-row">
+                <button class="share-chip native" onclick="shareRoomInviteNative()">Share…</button>
                 <button class="share-chip whatsapp" onclick="shareRoomViaWhatsApp()">WhatsApp</button>
                 <button class="share-chip telegram" onclick="shareRoomViaTelegram()">Telegram</button>
             </div>
-            <button class="sheet-done-btn" onclick="closeSheet('room-created-sheet')">Done</button>
+            <button class="sheet-done-btn" onclick="closeSheet('room-invite-sheet')">Done</button>
         </div>
     </div>
 
     <!-- All In confirmation bottom sheet -->
     <div class="sheet-backdrop hidden" id="allin-sheet" onclick="if(event.target===this)closeAllInSheet()">
         <div class="sheet">
+            <div class="sheet-grabber"></div>
             <div class="sheet-header">
-                <span class="sheet-title">🔥 Go All In</span>
+                <span class="sheet-mark">♠</span>
+                <span class="sheet-heading">
+                    <span class="sheet-title">Go All In</span>
+                    <span class="sheet-eyebrow">Once per day</span>
+                </span>
                 <button class="sheet-close" onclick="closeAllInSheet()">✕</button>
             </div>
-            <div class="sheet-sub">You can use ALL IN once a day. This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on the next hand. Slide to confirm.</div>
+            <div class="sheet-sub">This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on <span id="allin-sheet-target">the next hand</span>.</div>
+            <div class="sheet-stat">
+                <span class="sheet-stat-label">Potential on Full House</span>
+                <span class="sheet-stat-value" id="allin-sheet-potential">0</span>
+            </div>
             <div class="allin-slider-track" id="allin-slider-track">
                 <div class="allin-slider-fill" id="allin-slider-fill"></div>
                 <span class="allin-slider-label">Slide to confirm</span>
                 <div class="allin-slider-thumb" id="allin-slider-thumb">»</div>
             </div>
+            <button class="sheet-dismiss" onclick="closeAllInSheet()">Not now</button>
         </div>
     </div>
 
@@ -3677,11 +4600,11 @@ body.screen-shake {
                     <div class="ob-hands-list">
                         <div class="ob-hand-row ob-hand-row--highlight">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">10<br>♠</div>
-                                <div class="ob-mini-card">J<br>♠</div>
-                                <div class="ob-mini-card">Q<br>♠</div>
-                                <div class="ob-mini-card">K<br>♠</div>
-                                <div class="ob-mini-card">A<br>♠</div>
+                                <div class="ob-mini-card">10♠</div>
+                                <div class="ob-mini-card">J♠</div>
+                                <div class="ob-mini-card">Q♠</div>
+                                <div class="ob-mini-card">K♠</div>
+                                <div class="ob-mini-card">A♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Royal Flush</span>
@@ -3690,11 +4613,11 @@ body.screen-shake {
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card ob-mini-card--red">5<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">6<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">7<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">8<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">5♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">6♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">7♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">8♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♥</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Straight Flush</span>
@@ -3703,37 +4626,37 @@ body.screen-shake {
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">9<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♦</div>
-                                <div class="ob-mini-card">9<br>♣</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
-                                <div class="ob-mini-card">4<br>♣</div>
+                                <div class="ob-mini-card">9♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♦</div>
+                                <div class="ob-mini-card">9♣</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♥</div>
+                                <div class="ob-mini-card">4♣</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Four of a Kind</span>
-                                <span class="ob-hand-payout">25x</span>
+                                <span class="ob-hand-payout">20x</span>
                             </div>
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">K<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">K<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">K<br>♦</div>
-                                <div class="ob-mini-card">3<br>♣</div>
-                                <div class="ob-mini-card">3<br>♠</div>
+                                <div class="ob-mini-card">K♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">K♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">K♦</div>
+                                <div class="ob-mini-card">3♣</div>
+                                <div class="ob-mini-card">3♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Full House</span>
-                                <span class="ob-hand-payout">9x</span>
+                                <span class="ob-hand-payout">7x</span>
                             </div>
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">J<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">J<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">4<br>♦</div>
-                                <div class="ob-mini-card">8<br>♣</div>
-                                <div class="ob-mini-card">2<br>♠</div>
+                                <div class="ob-mini-card">J♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">J♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">4♦</div>
+                                <div class="ob-mini-card">8♣</div>
+                                <div class="ob-mini-card">2♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Jacks or Better</span>
@@ -3774,17 +4697,17 @@ body.screen-shake {
                             <div class="ob-mockup-card">2♣</div>
                             <div class="ob-mockup-card ob-mockup-card--red">9♥</div>
                         </div>
-                        <div class="ob-mockup-draw-btn">↻ Draw</div>
                         <div class="ob-mockup-bets">
                             <div class="ob-mockup-bet">5</div>
                             <div class="ob-mockup-bet">10</div>
                             <div class="ob-mockup-bet ob-mockup-bet--active">20</div>
                             <div class="ob-mockup-bet">50</div>
-                            <div class="ob-mockup-bet ob-mockup-bet--allin" style="position:relative;">
+                            <div class="ob-mockup-bet ob-mockup-bet--allin">
                                 ALL IN
-                                <span class="ob-allin-badge">5</span>
+                                <span class="ob-allin-badge">1 left</span>
                             </div>
                         </div>
+                        <div class="ob-mockup-draw-btn">↻ Draw</div>
                     </div>
                     <div class="ob-screen-note">One free All-In per day — invite a friend to unlock another.</div>
                 </div>
@@ -3802,7 +4725,7 @@ body.screen-shake {
                     </div>
                     <div class="ob-lb-header">
                         <span>Friends · Today</span>
-                        <span class="ob-lb-you-badge">#1 · You're #1!</span>
+                        <span class="ob-lb-you-badge">You're #1!</span>
                     </div>
                     <div class="ob-lb-list">
                         <div class="ob-lb-row ob-lb-row--you">
@@ -3886,12 +4809,21 @@ body.screen-shake {
 
     </div>
 
+</div><!-- /.shell -->
+
     <script>
  
 /* --- js/audio.js --- */
 var audioCtx = null;
     var audioBuffers = {};
     var soundEnabled = true;
+    var voiceEnabled = true;
+    // All synthesized sound effects ("music") route through this gain node so
+    // they sit under the voice announcements (which play at full volume via
+    // the separate Web Speech API) instead of competing with them.
+    var sfxGainNode = null;
+    var MUSIC_VOLUME = 0.25;
+    var VOICE_VOLUME = 1.0;
 
     function initSound() {
         try {
@@ -3899,6 +4831,14 @@ var audioCtx = null;
             if (stored !== null) soundEnabled = stored === 'true';
         } catch (e) {}
         updateSoundButtonUI();
+    }
+
+    function initVoice() {
+        try {
+            var stored = localStorage.getItem('vp_voice_enabled');
+            if (stored !== null) voiceEnabled = stored === 'true';
+        } catch (e) {}
+        updateVoiceButtonUI();
     }
 
     // Lazy-init the AudioContext on first use. On mobile, this must happen
@@ -3912,6 +4852,9 @@ var audioCtx = null;
             return;
         }
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        sfxGainNode = audioCtx.createGain();
+        sfxGainNode.gain.value = MUSIC_VOLUME;
+        sfxGainNode.connect(audioCtx.destination);
         generatePreDecodedBuffers();
         // Play a silent buffer immediately to satisfy iOS audio unlock requirements
         try {
@@ -3951,7 +4894,7 @@ var audioCtx = null;
         try {
             var source = audioCtx.createBufferSource();
             source.buffer = buffer;
-            source.connect(audioCtx.destination);
+            source.connect(sfxGainNode);
             source.start(0);
         } catch (e) {}
     }
@@ -3973,6 +4916,49 @@ var audioCtx = null;
         if (btn) {
             btn.textContent = soundEnabled ? '🔊' : '🔇';
         }
+    }
+
+    /* Voice Announcements */
+    // Some paytable hand names read awkwardly out loud (e.g. "Four 2s-4s") —
+    // this maps them to a natural spoken phrase. Anything not listed here is
+    // spoken as-is (e.g. "Two Pair", "Full House" already read naturally).
+    var VOICE_HAND_NAMES = {
+        'Four 2s-4s': 'Four of a kind, twos through fours',
+        'Four 5s-Ks': 'Four of a kind, fives through kings'
+    };
+
+    function speakHandName(handType) {
+        if (!voiceEnabled || !handType || handType === 'Nothing') return;
+        if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+        try {
+            var phrase = VOICE_HAND_NAMES[handType] || handType;
+            window.speechSynthesis.cancel();
+            var utterance = new SpeechSynthesisUtterance(phrase);
+            utterance.volume = VOICE_VOLUME;
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {}
+    }
+
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+        try {
+            localStorage.setItem('vp_voice_enabled', voiceEnabled);
+        } catch (e) {}
+        updateVoiceButtonUI();
+        if (voiceEnabled) {
+            speakHandName('Full House');
+        } else if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    function updateVoiceButtonUI() {
+        var btn = document.getElementById('voice-btn');
+        if (btn) btn.classList.toggle('on', voiceEnabled);
+        var toggle = document.getElementById('settings-voice-toggle');
+        if (toggle) toggle.checked = voiceEnabled;
     }
 
     /* Sound Synthesizer Functions */
@@ -4073,6 +5059,7 @@ var audioCtx = null;
         } else {
             playSound('win');
         }
+        speakHandName(handType);
 
         if (rank <= 2) {
             var resultEl = document.getElementById('result');
@@ -4559,6 +5546,12 @@ if (auth) {
             firebaseSafe(function() { return logUserToFirestore(user); });
             firebaseSafe(function() { return pushNetProfit(); });
             try { if (window.onboardingSignInSucceeded) onboardingSignInSucceeded(); } catch (e) { console.warn('onboardingSignInSucceeded failed:', e); }
+            // A token that arrived before sign-in is buffered, not written —
+            // during onboarding the push step runs a screen ahead of this, so
+            // that is the normal case rather than the edge one. Flush first,
+            // then re-register so a rotated token replaces a stale one.
+            if (window.flushPendingPushRegistration) flushPendingPushRegistration();
+
             // Fallback only: onboarding's priming screen (js/onboarding.js) is the
             // primary path for this ask. If the user never saw that screen (e.g.
             // signed in later from Settings/Friends without going through
@@ -4567,10 +5560,18 @@ if (auth) {
             try { pushAlreadyAsked = localStorage.getItem('vp_push_permission_asked') === '1'; } catch (e) {}
             if (!pushAlreadyAsked) {
                 firebaseSafe(function() { return registerForPushNotifications(); });
+            } else if (window.refreshPushRegistration) {
+                firebaseSafe(function() { return refreshPushRegistration(); });
             }
+            // Outside the friendsRooms flag on purpose: unclaimed referral coins
+            // are owed to the player, so they must still reconcile if the flag is
+            // switched off after the invites went out.
+            if (window.subscribeReferralRewards) subscribeReferralRewards();
             if (window.egFeatures.friendsRooms) {
                 if (window.loadFriends) loadFriends();
                 if (window.loadMyRooms) loadMyRooms();
+                // Live listener for incoming poker-room invites (js/rooms.js)
+                if (window.initRoomInviteListener) initRoomInviteListener();
                 // Phase 2: start presence heartbeat
                 if (window.startPresence) startPresence();
             }
@@ -4599,6 +5600,7 @@ if (auth) {
         } else {
             if (window.cleanupFriendsListeners) cleanupFriendsListeners();
             if (window.cleanupRooms) cleanupRooms();
+            if (window.cleanupReferrals) cleanupReferrals();
             if (window.stopPresence) stopPresence();
             // A room link that landed before auth settled: now that we know the
             // visitor is genuinely signed out, ask them to sign in. The code
@@ -4625,6 +5627,139 @@ if (auth) {
             }
         }
     });
+}
+
+
+/* --- js/deeplink.js --- */
+// Smart invite links (Android / Play Store).
+//
+// One https link does all three jobs the invite flow needs:
+//   app installed  → invite.html hands the OS an intent:// URL, Android opens
+//                    the app, and js/tabs.js replays ?ref= / ?join= inside it.
+//   not installed  → the same intent carries browser_fallback_url, so Chrome
+//                    lands on the Play Store listing instead of a dead scheme.
+//   after install  → the Play referrer string carries the code through the
+//                    install, and MainActivity feeds it back in on first launch
+//                    (see __onInstallReferrer below), so the friendship still
+//                    connects even though the original click is long gone.
+//
+// Everything that is not Android (desktop, iOS, in-app browsers we can't
+// detect) falls through to the web build — never to a store page it can't use.
+
+const ANDROID_PACKAGE = 'com.micorlov.videopoker';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=' + ANDROID_PACKAGE;
+
+// Absolute fallbacks, used only when window.location can't produce a shareable
+// base — i.e. inside the native WebView, where the origin is https://localhost.
+const SMART_LINK_URL = 'https://micorlov.github.io/video-poker-game/invite.html';
+
+function _isUnshareableOrigin(origin) {
+    return !origin
+        || origin === 'null'
+        || origin === 'https://localhost'
+        || origin.indexOf('capacitor://') === 0
+        || origin.indexOf('file://') === 0;
+}
+
+// Sibling of the current page rather than a hardcoded host, so a fork, a
+// staging deploy, or a local checkout shares links that point back at itself.
+function getSmartLinkBase() {
+    const origin = window.location.origin || '';
+    if (_isUnshareableOrigin(origin)) return SMART_LINK_URL;
+    return origin + window.location.pathname.replace(/[^/]*$/, '') + 'invite.html';
+}
+
+function buildInviteLink(code) {
+    if (!code) return '';
+    return getSmartLinkBase() + '?ref=' + encodeURIComponent(code);
+}
+
+function buildRoomLink(code) {
+    if (!code) return '';
+    return getSmartLinkBase() + '?join=' + encodeURIComponent(code);
+}
+
+function getPlayStoreLink() {
+    return PLAY_STORE_URL;
+}
+
+// --- Deferred deep link: Play Store install referrer -----------------------
+//
+// The friend who taps an invite without the app installed goes to Play, and the
+// browser context that held their invite code dies there. Play carries the
+// referrer string into the fresh install, MainActivity reads it once via the
+// Install Referrer API, and calls this. Both entry points below are idempotent:
+// the code is parked, then consumed by the auth listener once sign-in settles.
+
+function _parseReferrerPayload(raw) {
+    if (!raw) return null;
+    try {
+        // Play hands back a query-string-shaped blob, e.g. "utm_source=x&ref=AB12CD".
+        const params = new URLSearchParams(String(raw).replace(/^\?/, ''));
+        const ref = params.get('ref');
+        const join = params.get('join');
+        if (ref) return { kind: 'ref', code: ref.trim().toUpperCase() };
+        if (join) return { kind: 'join', code: join.trim().toUpperCase() };
+    } catch (e) { /* malformed referrer — treat as no referrer at all */ }
+    return null;
+}
+
+// A friend who installs from Play often plays a while before signing in, and
+// the install referrer is only ever read once — so an in-memory park would lose
+// the code on the first app restart, and with it the friendship and the
+// inviter's reward. Persist until it has definitively been used.
+const PENDING_INVITE_KEY = 'vp_pending_invite';
+
+function persistPendingInvite(code) {
+    try { localStorage.setItem(PENDING_INVITE_KEY, 'ref=' + code); } catch (e) { /* localStorage unavailable */ }
+}
+
+function clearPendingInvite() {
+    try { localStorage.removeItem(PENDING_INVITE_KEY); } catch (e) { /* localStorage unavailable */ }
+}
+
+function restorePendingInvite() {
+    try {
+        const raw = localStorage.getItem(PENDING_INVITE_KEY);
+        if (raw) applyInstallReferrer(raw);
+    } catch (e) { /* nothing stored — the normal case */ }
+}
+
+function applyInstallReferrer(raw) {
+    const parsed = _parseReferrerPayload(raw);
+    if (!parsed || !parsed.code) return;
+    if (parsed.kind === 'ref') {
+        persistPendingInvite(parsed.code);
+        // Park it the same way a live deep link would, so the auth listener in
+        // js/firebase.js replays it through the one existing code path.
+        if (!window._pendingInviteCode) window._pendingInviteCode = parsed.code;
+        if (window.egUser && window.addFriendByInviteCode) {
+            window._pendingInviteCode = null;
+            addFriendByInviteCode(parsed.code);
+        }
+    } else {
+        if (!window._pendingJoinCode) window._pendingJoinCode = parsed.code;
+        if (window.egUser && window.joinRoomByCode) {
+            window._pendingJoinCode = null;
+            joinRoomByCode(parsed.code);
+        }
+    }
+}
+
+// Push path — MainActivity calls this once the async Play API answers. Defined
+// on window immediately (not inside DOMContentLoaded) because that callback can
+// fire before the page finishes loading.
+window.__onInstallReferrer = function(raw) {
+    try { applyInstallReferrer(raw); } catch (e) { /* never break startup */ }
+};
+
+// Pull path — covers the race where the Play API answered before this script
+// parsed. MainActivity always parks the raw string on window before looking for
+// the handler above, so one of the two paths always wins.
+function readCachedInstallReferrer() {
+    try {
+        if (window.__installReferrerRaw) applyInstallReferrer(window.__installReferrerRaw);
+    } catch (e) { /* nothing parked — the normal case on web */ }
 }
 
 
@@ -4672,9 +5807,29 @@ function isPushSupported() {
 }
 window.isPushSupported = isPushSupported;
 
+// FCM hands over the token as soon as the OS answers, which is routinely
+// before Firebase auth has resolved. Onboarding makes that the normal case:
+// the push step runs a whole screen ahead of sign-in, so at the moment the
+// token arrives there is no uid to file it under. Dropping it there lost it
+// permanently — nothing re-registers afterwards, because showing the push
+// screen already set vp_push_permission_asked. Hold it instead, and write it
+// the moment a user exists.
+let pendingFcmToken = null;
+let pendingFcmPlatform = null;
+let pendingNotificationPrefs = null;
+
+function currentPushPlatform(platform) {
+    return platform || (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web');
+}
+
 function saveFcmToken(token, platform) {
-    if (!window.egUser || typeof db === 'undefined') return;
-    var p = platform || (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web');
+    if (!token) return;
+    var p = currentPushPlatform(platform);
+    if (!window.egUser || typeof db === 'undefined') {
+        pendingFcmToken = token;
+        pendingFcmPlatform = p;
+        return;
+    }
     firebaseSafe(function() {
         return db.collection('users').doc(window.egUser.uid)
             .collection('fcmTokens').doc(token)
@@ -4687,7 +5842,11 @@ function saveFcmToken(token, platform) {
 }
 
 function setNotificationPref(category, enabled) {
-    if (!window.egUser || typeof db === 'undefined') return;
+    if (!window.egUser || typeof db === 'undefined') {
+        pendingNotificationPrefs = pendingNotificationPrefs || {};
+        pendingNotificationPrefs[category] = !!enabled;
+        return;
+    }
     const prefs = {};
     prefs[category] = !!enabled;
     firebaseSafe(function() {
@@ -4696,6 +5855,61 @@ function setNotificationPref(category, enabled) {
     });
 }
 window.setNotificationPref = setNotificationPref;
+
+// Quiet hours (scripts/lib/pushPolicy.js) are evaluated in each player's own
+// local time, so the server needs their UTC offset. getTimezoneOffset() returns
+// minutes BEHIND UTC, which is the sign convention pushPolicy.js expects.
+function saveTimezoneOffset() {
+    if (!window.egUser || typeof db === 'undefined') return;
+    firebaseSafe(function() {
+        return db.collection('users').doc(window.egUser.uid)
+            .set({ timezoneOffset: new Date().getTimezoneOffset() }, { merge: true });
+    });
+}
+
+// Called from js/firebase.js once onAuthStateChanged reports a signed-in user.
+function flushPendingPushRegistration() {
+    if (!window.egUser || typeof db === 'undefined') return;
+
+    saveTimezoneOffset();
+
+    if (pendingFcmToken) {
+        var token = pendingFcmToken;
+        var platform = pendingFcmPlatform;
+        pendingFcmToken = null;
+        pendingFcmPlatform = null;
+        saveFcmToken(token, platform);
+    }
+
+    if (pendingNotificationPrefs) {
+        var prefs = pendingNotificationPrefs;
+        pendingNotificationPrefs = null;
+        Object.keys(prefs).forEach(function(category) {
+            setNotificationPref(category, prefs[category]);
+        });
+    }
+}
+window.flushPendingPushRegistration = flushPendingPushRegistration;
+
+// FCM tokens rotate, and a rotated token is only handed over in response to a
+// fresh register() call. Without this a user who granted permission once would
+// keep a stale token in Firestore forever and silently stop receiving pushes.
+function refreshPushRegistration() {
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        const PushNotifications = window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
+        if (!PushNotifications || !PushNotifications.checkPermissions) return;
+        PushNotifications.checkPermissions().then(function(status) {
+            if (status && status.receive === 'granted') PushNotifications.register();
+        }).catch(function(err) { console.warn('Push permission check failed:', err); });
+        return;
+    }
+    // Web re-issues the token through getToken() on every registration call,
+    // and only prompts when permission has not been decided yet.
+    if (window.Notification && Notification.permission === 'granted') {
+        registerForPushNotifications();
+    }
+}
+window.refreshPushRegistration = refreshPushRegistration;
 
 function initPushListeners() {
     if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) {
@@ -4712,10 +5926,18 @@ function initPushListeners() {
         console.warn('Push registration error:', err);
     });
 
-    // Minimal/generic deep-link: all current push categories (social, leaderboard,
-    // bestHand) surface inside the Friends/Leaderboard screen, so just land there.
-    PushNotifications.addListener('pushNotificationActionPerformed', function() {
+    // Campaigns composed in push-admin.html may name a destination screen in
+    // their data payload. Everything else (social, leaderboard, bestHand)
+    // surfaces inside the Friends/Leaderboard screen, so that stays the
+    // default — on the rooms sub-tab, where invites and room activity live.
+    PushNotifications.addListener('pushNotificationActionPerformed', function(action) {
+        var data = (action && action.notification && action.notification.data) || {};
+        if (data.deepLink && window.showScreen) {
+            showScreen(data.deepLink);
+            return;
+        }
         if (window.showScreen) showScreen('friends');
+        if (window.setFriendsTab) setFriendsTab('rooms');
     });
 }
 initPushListeners();
@@ -4922,6 +6144,11 @@ function addFriendByCode(code) {
                 ]).then(function() {
                     showToast('Friend added!');
                     loadFriends();
+                    // invite.html tells a friend to type this code in when the
+                    // install swallowed the deep link, so the manual path must
+                    // pay out too. The ledger is keyed by the referred uid, so
+                    // a code that also arrived by link still pays only once.
+                    if (window.recordReferralJoin) recordReferralJoin(code, friendDoc.id);
                     return true;
                 });
             });
@@ -4948,7 +6175,24 @@ function submitInviteSheetFriendCode() {
 }
 
 function ownNetProfit() {
-    return balance - 500;
+    return balance - netProfitBaseline();
+}
+
+// Removes both sides of the friend edge. The live onSnapshot listeners in
+// loadFriends()/setupFriendScoreListeners() pick up the deletion on their
+// own, so no manual re-render is needed here.
+function removeFriend(uid) {
+    const user = window.egUser;
+    if (!user || !uid) return;
+    if (!window.confirm('Remove this friend?')) return;
+    firebaseSafe(function() {
+        return Promise.all([
+            db.collection('users').doc(user.uid).collection('friends').doc(uid).delete(),
+            db.collection('users').doc(uid).collection('friends').doc(user.uid).delete()
+        ]).then(function() {
+            showToast('Friend removed.');
+        });
+    }, function() { showToast('Could not remove friend — try again.'); });
 }
 
 function renderFriendsScreen() {
@@ -5021,11 +6265,30 @@ function renderFriendsScreen() {
         scoreEl.textContent = (np >= 0 ? '+' : '') + np;
         scoreEl.classList.add(np > 0 ? 'positive' : np < 0 ? 'negative' : 'zero');
 
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'friend-lb-remove';
+        removeBtn.textContent = '✕';
+        if (f.self) {
+            // Kept in the DOM (hidden, not removed) so every row reserves the
+            // same width and the columns stay aligned.
+            removeBtn.disabled = true;
+            removeBtn.tabIndex = -1;
+            removeBtn.setAttribute('aria-hidden', 'true');
+        } else {
+            removeBtn.setAttribute('aria-label', 'Remove ' + (f.displayName || 'friend') + ' from friends');
+            removeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                removeFriend(f.uid);
+            });
+        }
+
         row.appendChild(rankEl);
         row.appendChild(avatarWrap);
         row.appendChild(nameEl);
         row.appendChild(streakEl);
         row.appendChild(scoreEl);
+        row.appendChild(removeBtn);
         listEl.appendChild(row);
     });
 }
@@ -5037,9 +6300,10 @@ function getInviteLink() {
     if (!user) return '';
     const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
     if (!code) return '';
-    // Use the Firebase hosting URL as the canonical base
-    const base = getShareBaseUrl();
-    return base + '?ref=' + encodeURIComponent(code);
+    // Points at invite.html, not straight at the game: that page is what opens
+    // the installed app, falls back to the Play listing, and carries the code
+    // through the install (js/deeplink.js).
+    return buildInviteLink(code);
 }
 
 function handleIncomingInvite() {
@@ -5058,8 +6322,10 @@ function handleIncomingInvite() {
             window.history.replaceState({}, '', url);
         }
 
-        // Store for after sign-in
+        // Store for after sign-in. Persisted as well as parked: the URL has just
+        // been cleaned, so a reload before signing in would otherwise lose it.
         window._pendingInviteCode = refCode;
+        if (window.persistPendingInvite) persistPendingInvite(refCode);
 
         // If already signed in, add immediately
         if (window.egUser) {
@@ -5077,6 +6343,10 @@ function addFriendByInviteCode(code) {
     if (!user) return;
     firebaseSafe(function() {
         return db.collection('users').where('referralCode', '==', code).limit(1).get().then(function(snap) {
+            // Reaching the server at all is a definitive answer — whichever branch
+            // below runs, this code is spent. A network failure rejects instead,
+            // leaving it stored for the next launch.
+            if (window.clearPendingInvite) clearPendingInvite();
             if (snap.empty) { showToast('No player found with that invite link.'); return; }
             var ownerUid = snap.docs[0].id;
             if (ownerUid === user.uid) { showToast('That\'s your own invite link!'); return; }
@@ -5115,6 +6385,10 @@ function addFriendByInviteCode(code) {
                         ? 'Connected with ' + newFriendUids.length + ' friends via this link!'
                         : 'Friend added!');
                     loadFriends();
+                    // Files the reward row for whoever owns this link. Deliberately
+                    // last and unawaited — a failed ledger write must not undo a
+                    // friendship that already succeeded.
+                    if (window.recordReferralJoin) recordReferralJoin(code, ownerUid);
                 });
             });
         });
@@ -5199,6 +6473,194 @@ function renderNearbyPanel(user) {
 }
 
 
+/* --- js/referral.js --- */
+// Referral rewards — the inviter gets REFERRAL_REWARD_COINS for every friend
+// who installs and signs in with Google through their invite link.
+//
+// Ledger shape: one referrals/{referredUid} document, created by the referred
+// player on their first sign-in. Keying it by the *referred* uid rather than
+// storing a counter on the inviter is what makes the payout idempotent — a
+// second invite link, a reinstall, or a replayed Play install referrer all land
+// on the same document id and are rejected as already-present. The inviter then
+// claims each row by stamping claimedAt, which the security rules only permit
+// while it is still null (see FIRESTORE_RULES_REFERRALS.md).
+
+const REFERRAL_REWARD_COINS = 2000;
+const STARTING_BALANCE = 500;
+// A referral only pays out for a genuinely new account, so an existing player
+// can't re-click a friend's link for coins. Firebase reports creationTime on
+// every sign-in path (popup, redirect, and the native plugin's credential
+// hand-off), which the UserCredential.additionalUserInfo flag does not.
+const REFERRAL_SIGNUP_WINDOW_MS = 10 * 60 * 1000;
+
+function loadReferralBonusTotal() {
+    try { return parseInt(localStorage.getItem('vp_referral_bonus'), 10) || 0; } catch (e) { return 0; }
+}
+
+let referralBonusTotal = loadReferralBonusTotal();
+let referralStats = { invited: 0, coinsEarned: 0 };
+let referralUnsubscribe = null;
+const referralClaimsInFlight = {};
+
+function saveReferralBonusTotal() {
+    try { localStorage.setItem('vp_referral_bonus', String(referralBonusTotal)); } catch (e) { /* localStorage unavailable */ }
+}
+
+// Bonus coins are a gift, not winnings. Every leaderboard here ranks on net
+// profit, so the baseline rises with each bonus — otherwise an invite spree
+// would read as a hot streak and outrank people who actually played well.
+function netProfitBaseline() {
+    return STARTING_BALANCE + referralBonusTotal;
+}
+
+// Called by doRebuy(). The rebuy hands the player a fresh STARTING_BALANCE, so
+// every coin gifted before it has been wiped along with the stack — leaving the
+// bonus in the baseline would show them at -referralBonusTotal from a clean start.
+function resetReferralBaseline() {
+    referralBonusTotal = 0;
+    saveReferralBonusTotal();
+}
+
+function _signedInWithGoogle(user) {
+    const providers = ((user && user.providerData) || []).map(function(p) { return p && p.providerId; });
+    return providers.indexOf('google.com') !== -1;
+}
+
+function _isFreshAccount(user) {
+    try {
+        const created = Date.parse(user.metadata && user.metadata.creationTime);
+        if (!created) return false;
+        return (Date.now() - created) < REFERRAL_SIGNUP_WINDOW_MS;
+    } catch (e) { return false; }
+}
+
+function isReferralEligibleSignup(user) {
+    return !!user && _signedInWithGoogle(user) && _isFreshAccount(user);
+}
+
+// Called from addFriendByInviteCode() once the friendship itself is connected,
+// so a link click always makes friends even when it earns nobody any coins.
+function recordReferralJoin(code, inviterUid) {
+    const user = window.egUser;
+    if (!user || !db || !inviterUid || inviterUid === user.uid) return Promise.resolve(false);
+    if (!isReferralEligibleSignup(user)) return Promise.resolve(false);
+
+    const rowRef = db.collection('referrals').doc(user.uid);
+    return firebaseSafe(function() {
+        return rowRef.get().then(function(doc) {
+            if (doc.exists) return false;
+            return rowRef.set({
+                referredUid: user.uid,
+                referredName: user.displayName || 'Player',
+                inviterUid: inviterUid,
+                code: code,
+                provider: 'google.com',
+                rewardCoins: REFERRAL_REWARD_COINS,
+                claimedAt: null,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(function() { return true; });
+        });
+    }, function() { /* the friendship already landed — a lost reward row is not worth a toast */ })
+        || Promise.resolve(false);
+}
+
+// Live subscription rather than a one-shot read, so an inviter watching the
+// Friends screen sees the coins arrive the moment a friend signs in.
+function subscribeReferralRewards() {
+    const user = window.egUser;
+    if (!user || !db) return;
+    if (referralUnsubscribe) referralUnsubscribe();
+    referralUnsubscribe = db.collection('referrals').where('inviterUid', '==', user.uid)
+        .onSnapshot(function(snap) {
+            const pending = [];
+            let invited = 0;
+            let earned = 0;
+            snap.forEach(function(doc) {
+                const data = doc.data();
+                const coins = data.rewardCoins || REFERRAL_REWARD_COINS;
+                invited++;
+                if (data.claimedAt) {
+                    earned += coins;
+                } else if (!referralClaimsInFlight[doc.id]) {
+                    pending.push({ id: doc.id, ref: doc.ref, coins: coins, name: data.referredName || 'A friend' });
+                }
+            });
+            referralStats = { invited: invited, coinsEarned: earned };
+            renderInviteRewardLine();
+            if (pending.length) claimReferralRewards(pending);
+        }, function() { /* ignore Firestore errors — rewards retry on next sign-in */ });
+}
+
+function claimReferralRewards(pending) {
+    pending.forEach(function(item) { referralClaimsInFlight[item.id] = true; });
+    return Promise.all(pending.map(function(item) {
+        // Credit only what the server actually accepted. The rule rejects the
+        // update once claimedAt is set, so a second device replaying the same
+        // reward drops out here instead of paying twice.
+        return item.ref.update({ claimedAt: firebase.firestore.FieldValue.serverTimestamp() })
+            .then(function() { return item; })
+            .catch(function() { return null; });
+    })).then(function(results) {
+        pending.forEach(function(item) { delete referralClaimsInFlight[item.id]; });
+        const claimed = results.filter(Boolean);
+        if (claimed.length) creditReferralCoins(claimed);
+    });
+}
+
+function creditReferralCoins(claimed) {
+    const total = claimed.reduce(function(sum, item) { return sum + item.coins; }, 0);
+    balance += total;
+    referralBonusTotal += total;
+    saveReferralBonusTotal();
+
+    // Today's baseline was captured before the gift arrived, so raise it by the
+    // same amount to keep the daily board honest as well as the all-time one.
+    if (window.ensureDailyBaseline) {
+        ensureDailyBaseline();
+        dailyProgress.baseline += total;
+        saveDailyProgress();
+    }
+
+    const balanceEl = document.getElementById('balance');
+    if (balanceEl) balanceEl.textContent = balance;
+    if (window.saveGameState) saveGameState();
+
+    referralStats.coinsEarned += total;
+    renderInviteRewardLine();
+    if (window.renderFriendsScreen) renderFriendsScreen();
+    if (window.pushNetProfit) pushNetProfit();
+
+    const who = claimed.length === 1
+        ? claimed[0].name + ' joined'
+        : claimed.length + ' friends joined';
+    showToast('🎁 ' + who + ' — +' + total + ' coins!');
+}
+
+function cleanupReferrals() {
+    if (referralUnsubscribe) { referralUnsubscribe(); referralUnsubscribe = null; }
+    referralStats = { invited: 0, coinsEarned: 0 };
+    renderInviteRewardLine();
+}
+
+function renderInviteRewardLine() {
+    // Same line lives in two places: the invite sheet and the Friends screen
+    // action strip (the OS share sheet can't carry the reward pitch, so it
+    // stays visible on the page itself).
+    let text;
+    if (!referralStats.invited) {
+        text = 'Get ' + REFERRAL_REWARD_COINS + ' coins for every friend who joins with Google.';
+    } else {
+        const n = referralStats.invited;
+        text = n + ' friend' + (n === 1 ? '' : 's') + ' joined · ' +
+            referralStats.coinsEarned + ' coins earned';
+    }
+    ['invite-reward-line', 'friends-invite-reward'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    });
+}
+
+
 /* --- js/rooms.js --- */
 // Simple private poker rooms — a room is just a shared, code-joinable
 // net-profit leaderboard. No chat, no reactions, no reset cadence.
@@ -5209,6 +6671,14 @@ let activeRoomId = null;
 let roomDetailUnsubscribe = null;
 let inlineStake = 10;
 
+// Room invites (roomInvites collection): picker state on the sender side,
+// live incoming-invite list on the recipient side.
+let roomInvitePickerRoomId = null;
+let roomInviteSelection = {};
+let roomInviteAlreadySent = {};
+let incomingRoomInvites = [];
+let roomInvitesUnsubscribe = null;
+
 function getRoomStatus(room) {
     // A room is "playing" if it has more than 1 member; otherwise "open"
     const count = (room.memberUids || []).length;
@@ -5218,7 +6688,7 @@ function getRoomStatus(room) {
 function pushNetProfit() {
     const user = window.egUser;
     if (!user) return;
-    const netProfit = balance - 500;
+    const netProfit = balance - netProfitBaseline();
     const dailyNetProfit = window.ownDailyNetProfit ? ownDailyNetProfit() : 0;
     const dailyDateKey = window.getDayKey ? getDayKey() : null;
     firebaseSafe(function() {
@@ -5267,6 +6737,7 @@ function cleanupRooms() {
     activeRoomId = null;
     const modal = document.getElementById('room-detail-modal');
     if (modal) modal.classList.add('hidden');
+    cleanupRoomInvites();
     renderRoomsList();
 }
 
@@ -5329,9 +6800,13 @@ function renderFriendsRoomsList() {
         const join = roomEl('div', 'roomjoin', status === 'open' ? 'Join Table' : 'Enter Table');
         join.onclick = function() { openRoomDetail(room.id); };
 
+        const invite = roomEl('button', 'room-invite-btn', '+ Invite friends');
+        invite.onclick = function() { openRoomInvitePicker(room.id); };
+
         card.appendChild(head);
         card.appendChild(roomEl('div', 'roommeta', roomMetaLine(room)));
         card.appendChild(join);
+        card.appendChild(invite);
         listEl.appendChild(card);
     });
 }
@@ -5349,7 +6824,6 @@ function createRoom() {
         nameInput.value = '';
         closeRoomModal();
         showToast('Room created — code: ' + code);
-        loadMyRooms();
     });
 }
 
@@ -5369,12 +6843,15 @@ function _doCreateRoom(name, stake, callback) {
         }).then(function(ref) {
             return db.collection('rooms').doc(ref.id).collection('members').doc(user.uid).set({
                 displayName: user.displayName || '',
-                netProfit: balance - 500,
+                netProfit: balance - netProfitBaseline(),
                 bestStreak: bestStreak
             }).then(function() {
                 if (callback) callback(code);
-                // Open share sheet
-                if (window.openRoomCreatedSheet) openRoomCreatedSheet(name, code);
+                // Refresh myRooms first so the picker can find the new room,
+                // then go straight into inviting friends.
+                return loadMyRooms().then(function() {
+                    if (window.openRoomInvitePicker) openRoomInvitePicker(ref.id);
+                });
             });
         });
     }, function() { showToast('Could not create room — try again.'); });
@@ -5409,7 +6886,6 @@ function createRoomInline() {
         nameInput.value = '';
         toggleInlineRoomForm();
         showToast('Room created — code: ' + code);
-        loadMyRooms();
     });
 }
 
@@ -5443,7 +6919,7 @@ function joinRoomByCode(code) {
                 }).then(function() {
                     return db.collection('rooms').doc(roomDoc.id).collection('members').doc(user.uid).set({
                         displayName: user.displayName || '',
-                        netProfit: balance - 500,
+                        netProfit: balance - netProfitBaseline(),
                         bestStreak: bestStreak,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
@@ -5526,6 +7002,206 @@ function openRoomModal() {
 
 function closeRoomModal() {
     document.getElementById('room-modal').classList.add('hidden');
+}
+
+// --- Room invites: sender side (friend picker) ---
+// Opens the #room-invite-sheet for a room the player is a member of. Friends
+// already in the room are excluded; friends with an unanswered invite from
+// this player show as "Invited" and can't be re-selected.
+function openRoomInvitePicker(roomId) {
+    const user = window.egUser;
+    if (!user) { openSignInModal(); return; }
+    const room = myRooms.find(function(r) { return r.id === roomId; });
+    if (!room) return;
+
+    roomInvitePickerRoomId = roomId;
+    roomInviteSelection = {};
+    roomInviteAlreadySent = {};
+    if (window.setRoomInviteSheetLink) setRoomInviteSheetLink(room.name || 'Room', room.code || '');
+    renderRoomInvitePickerRows(room);
+    openSheet('room-invite-sheet');
+
+    // Mark friends this player already has a pending invite out to.
+    firebaseSafe(function() {
+        return db.collection('roomInvites')
+            .where('fromUid', '==', user.uid)
+            .where('roomId', '==', roomId)
+            .where('status', '==', 'pending')
+            .get().then(function(snap) {
+                snap.forEach(function(d) { roomInviteAlreadySent[d.data().toUid] = true; });
+                renderRoomInvitePickerRows(room);
+            });
+    });
+}
+
+function renderRoomInvitePickerRows(room) {
+    const listEl = document.getElementById('room-invite-friends');
+    const sendBtn = document.getElementById('room-invite-send');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    // friendsList is js/friends.js's top-level `let` — a shared global lexical
+    // binding in the concatenated bundle (NOT window.friendsList).
+    const memberUids = room.memberUids || [];
+    const candidates = friendsList.filter(function(f) {
+        return memberUids.indexOf(f.uid) === -1;
+    });
+
+    if (!candidates.length) {
+        listEl.appendChild(roomEl('div', 'rip-empty',
+            friendsList.length
+                ? 'All your friends are already at this table.'
+                : 'No friends yet — share the link below to invite someone.'));
+        if (sendBtn) sendBtn.classList.add('hidden');
+        return;
+    }
+
+    candidates.forEach(function(f) {
+        const invited = !!roomInviteAlreadySent[f.uid];
+        const row = roomEl('div', 'rip-row' + (roomInviteSelection[f.uid] ? ' selected' : '') + (invited ? ' invited' : ''));
+
+        const avatar = roomEl('span', 'rip-avatar', (f.displayName || '?').charAt(0).toUpperCase());
+        const name = roomEl('span', 'rip-name', f.displayName || 'Player');
+        const check = roomEl('span', 'rip-check', invited ? 'Invited' : (roomInviteSelection[f.uid] ? '✓' : ''));
+
+        if (!invited) {
+            row.onclick = function() {
+                if (roomInviteSelection[f.uid]) delete roomInviteSelection[f.uid];
+                else roomInviteSelection[f.uid] = f.displayName || 'Player';
+                renderRoomInvitePickerRows(room);
+            };
+        }
+
+        row.appendChild(avatar);
+        row.appendChild(name);
+        row.appendChild(check);
+        listEl.appendChild(row);
+    });
+
+    const count = Object.keys(roomInviteSelection).length;
+    if (sendBtn) {
+        sendBtn.classList.toggle('hidden', count === 0);
+        sendBtn.textContent = 'Send Invite' + (count === 1 ? '' : 's') + (count ? ' (' + count + ')' : '');
+    }
+}
+
+function sendRoomInvites() {
+    const user = window.egUser;
+    const roomId = roomInvitePickerRoomId;
+    if (!user || !roomId) return;
+    const room = myRooms.find(function(r) { return r.id === roomId; });
+    const uids = Object.keys(roomInviteSelection);
+    if (!room || !uids.length) return;
+
+    firebaseSafe(function() {
+        return Promise.all(uids.map(function(toUid) {
+            return db.collection('roomInvites').add({
+                roomId: roomId,
+                roomCode: room.code || '',
+                roomName: room.name || 'Room',
+                stake: room.stake || 10,
+                fromUid: user.uid,
+                fromName: user.displayName || 'A friend',
+                toUid: toUid,
+                status: 'pending',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        })).then(function() {
+            showToast(uids.length === 1 ? 'Invite sent!' : uids.length + ' invites sent!');
+            closeSheet('room-invite-sheet');
+            roomInviteSelection = {};
+        });
+    }, function() { showToast('Could not send invites — try again.'); });
+}
+
+// --- Room invites: recipient side (live banners + badges) ---
+function initRoomInviteListener() {
+    const user = window.egUser;
+    if (!user) return;
+    if (roomInvitesUnsubscribe) roomInvitesUnsubscribe();
+    roomInvitesUnsubscribe = db.collection('roomInvites')
+        .where('toUid', '==', user.uid)
+        .where('status', '==', 'pending')
+        .onSnapshot(function(snap) {
+            incomingRoomInvites = [];
+            snap.forEach(function(d) {
+                incomingRoomInvites.push(Object.assign({ id: d.id }, d.data()));
+            });
+            renderRoomInviteBanners();
+            updateRoomInviteBadges();
+        }, function() { /* silently ignore */ });
+}
+
+function cleanupRoomInvites() {
+    if (roomInvitesUnsubscribe) { roomInvitesUnsubscribe(); roomInvitesUnsubscribe = null; }
+    incomingRoomInvites = [];
+    roomInviteSelection = {};
+    roomInvitePickerRoomId = null;
+    const sheet = document.getElementById('room-invite-sheet');
+    if (sheet) sheet.classList.add('hidden');
+    renderRoomInviteBanners();
+    updateRoomInviteBadges();
+}
+
+function renderRoomInviteBanners() {
+    const el = document.getElementById('friends-room-invites');
+    if (!el) return;
+    el.innerHTML = '';
+    incomingRoomInvites.forEach(function(inv) {
+        const banner = roomEl('div', 'room-invite-banner');
+
+        const text = roomEl('div', 'rib-text');
+        text.appendChild(roomEl('span', 'rib-from', inv.fromName || 'A friend'));
+        text.appendChild(document.createTextNode(' invited you to '));
+        text.appendChild(roomEl('span', 'rib-room', inv.roomName || 'a room'));
+        text.appendChild(roomEl('div', 'rib-meta', 'Buy-in ' + (inv.stake || 10)));
+
+        const actions = roomEl('div', 'rib-actions');
+        const accept = roomEl('button', 'rib-accept', 'Join');
+        accept.onclick = function() { acceptRoomInvite(inv.id); };
+        const decline = roomEl('button', 'rib-decline', 'Decline');
+        decline.onclick = function() { declineRoomInvite(inv.id); };
+        actions.appendChild(accept);
+        actions.appendChild(decline);
+
+        banner.appendChild(text);
+        banner.appendChild(actions);
+        el.appendChild(banner);
+    });
+}
+
+function updateRoomInviteBadges() {
+    const count = incomingRoomInvites.length;
+    ['rooms-tab-badge', 'nav-friends-badge'].forEach(function(id) {
+        const badge = document.getElementById(id);
+        if (!badge) return;
+        badge.textContent = String(count);
+        badge.classList.toggle('hidden', count === 0);
+    });
+}
+
+function acceptRoomInvite(inviteId) {
+    const inv = incomingRoomInvites.find(function(i) { return i.id === inviteId; });
+    if (!inv) return;
+    joinRoomByCode(inv.roomCode).then(function(ok) {
+        // If the room is gone, joinRoomByCode already toasted — mark the invite
+        // declined either way so the banner doesn't linger.
+        firebaseSafe(function() {
+            return db.collection('roomInvites').doc(inviteId).update({
+                status: ok ? 'accepted' : 'declined',
+                respondedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+    });
+}
+
+function declineRoomInvite(inviteId) {
+    firebaseSafe(function() {
+        return db.collection('roomInvites').doc(inviteId).update({
+            status: 'declined',
+            respondedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    });
 }
 
 
@@ -5631,6 +7307,12 @@ function renderStoriesRow() {
     row.innerHTML = '';
 
     const stories = buildStoriesList();
+
+    // A lone "You" tile with no best hand and no bracelet has nothing to
+    // open — hide the whole strip until there is at least one real story.
+    const hasContent = stories.some(function(s) { return s.bestHand || s.bracelet; });
+    row.classList.toggle('hidden', !hasContent);
+    if (!hasContent) return;
 
     stories.forEach(function(s, i) {
         const item = document.createElement('div');
@@ -5793,6 +7475,194 @@ document.addEventListener('keydown', function(e) {
 });
 
 
+/* --- js/leaderboard-bots.js --- */
+// Simulated rivals for the Hourly/Daily leaderboards — client-side only.
+// Firestore rules only allow each client to write its own uid, so these entries
+// are generated locally, persisted in localStorage per period, and merged into
+// the real snapshot lists at render time. Each player sees a personalized board:
+// bots trail just below the player's score, and every few minutes one rival
+// bumps itself just above the player so there is always a #1 spot to chase.
+
+const BOT_UID_PREFIX = 'bot_';
+const BOT_COUNT_MIN = 4;
+const BOT_COUNT_MAX = 6;
+const BOT_CYCLE_MS_MIN = 180000;      // 3 min between rival overtakes
+const BOT_CYCLE_MS_MAX = 300000;      // 5 min
+const BOT_OVERTAKE_RETRY_MS = 45000;  // re-check soon while the player is still chasing
+const BOT_OVERTAKE_MARGIN_MIN = 2;    // rival lands just above the player
+const BOT_OVERTAKE_MARGIN_MAX = 12;
+const BOT_TRAIL_FRACTION_MIN = 0.45;  // trailing bots sit at 45–95% of the player's score
+const BOT_TRAIL_FRACTION_MAX = 0.95;
+const BOT_DRIFT_CHANCE = 0.5;         // per tick, chance a trailing bot creeps upward
+const BOT_SEED_HOURLY_MIN = 2;        // fresh-period seed scores (pts)
+const BOT_SEED_HOURLY_MAX = 18;
+const BOT_SEED_DAILY_MIN = -30;       // daily is net profit — may start negative
+const BOT_SEED_DAILY_MAX = 150;
+const BOT_STORAGE_PREFIX = 'vp_bots_'; // + boardType ('hourly' | 'daily')
+
+const BOT_POOL = [
+    { name: 'Omar M.',     country: 'EG' },
+    { name: 'Youssef A.',  country: 'EG' },
+    { name: 'Amira S.',    country: 'EG' },
+    { name: 'Abdullah R.', country: 'SA' },
+    { name: 'Fatima H.',   country: 'SA' },
+    { name: 'Ahmed K.',    country: 'AE' },
+    { name: 'Mariam B.',   country: 'AE' },
+    { name: 'Rania T.',    country: 'JO' },
+    { name: 'Layla N.',    country: 'LB' },
+    { name: 'Dana F.',     country: 'LB' },
+    { name: 'Mehmet Y.',   country: 'TR' },
+    { name: 'Zeynep D.',   country: 'TR' },
+    { name: 'Tariq J.',    country: 'QA' },
+    { name: 'Noor A.',     country: 'KW' },
+    { name: 'Karim E.',    country: 'MA' },
+    { name: 'Yael B.',     country: 'IL' },
+    { name: 'Avi S.',      country: 'IL' },
+    { name: 'Salim W.',    country: 'OM' }
+];
+
+function botHashSeed(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0;
+}
+
+function botMulberry32(seed) {
+    let a = seed >>> 0;
+    return function() {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+function botRandBetween(rand, min, max) {
+    return min + rand() * (max - min);
+}
+
+function botRandInt(rand, min, max) {
+    return Math.floor(botRandBetween(rand, min, max + 1));
+}
+
+function botUidFor(profile) {
+    return BOT_UID_PREFIX +
+        profile.name.toLowerCase().replace(/[^a-z]+/g, '') + '_' +
+        profile.country.toLowerCase();
+}
+
+// Deterministic per-player, per-period roster with seeded personalities.
+function createBotState(boardType, periodKey) {
+    const uid = window.egUser ? window.egUser.uid : '';
+    const rand = botMulberry32(botHashSeed(periodKey + '|' + boardType + '|' + uid));
+    const pool = BOT_POOL.slice();
+    for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        const tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+    }
+    const count = botRandInt(rand, BOT_COUNT_MIN, BOT_COUNT_MAX);
+    const seedMin = boardType === 'daily' ? BOT_SEED_DAILY_MIN : BOT_SEED_HOURLY_MIN;
+    const seedMax = boardType === 'daily' ? BOT_SEED_DAILY_MAX : BOT_SEED_HOURLY_MAX;
+    const bots = pool.slice(0, count).map(function(profile) {
+        return {
+            uid: botUidFor(profile),
+            displayName: profile.name,
+            country: profile.country,
+            score: botRandInt(rand, seedMin, seedMax),
+            trailFraction: botRandBetween(rand, BOT_TRAIL_FRACTION_MIN, BOT_TRAIL_FRACTION_MAX)
+        };
+    });
+    return {
+        periodKey: periodKey,
+        bots: bots,
+        rivalIndex: 0,
+        nextOvertakeAt: Date.now() + botRandBetween(rand, BOT_CYCLE_MS_MIN, BOT_CYCLE_MS_MAX)
+    };
+}
+
+function loadBotState(boardType, periodKey) {
+    try {
+        const raw = JSON.parse(localStorage.getItem(BOT_STORAGE_PREFIX + boardType));
+        if (raw && raw.periodKey === periodKey && Array.isArray(raw.bots) && raw.bots.length) {
+            return raw;
+        }
+    } catch (e) { /* corrupt or unavailable — regenerate below */ }
+    return createBotState(boardType, periodKey);
+}
+
+function saveBotState(boardType, state) {
+    try { localStorage.setItem(BOT_STORAGE_PREFIX + boardType, JSON.stringify(state)); } catch (e) { /* localStorage unavailable */ }
+}
+
+function botMaxScore(bots) {
+    return bots.reduce(function(max, b) { return Math.max(max, b.score); }, -Infinity);
+}
+
+// Advance the simulation one tick and return entries shaped like real Firestore ones.
+// Scores only ever ratchet upward, so ranks never visibly drop mid-period.
+function getBotEntries(boardType, periodKey, playerScore, playerActive, valueField) {
+    const state = loadBotState(boardType, periodKey);
+    const now = Date.now();
+
+    if (!playerActive) {
+        saveBotState(boardType, state);
+        return botEntriesFrom(state.bots, valueField);
+    }
+
+    // Trailing bots creep toward a fixed fraction of the player's score,
+    // capped just below it so only the designated rival ever overtakes.
+    const updatedBots = state.bots.map(function(bot, i) {
+        if (i === state.rivalIndex || Math.random() >= BOT_DRIFT_CHANCE) return bot;
+        const target = Math.min(Math.floor(playerScore * bot.trailFraction), playerScore - 1);
+        return Object.assign({}, bot, { score: Math.max(bot.score, target) });
+    });
+
+    let rivalIndex = state.rivalIndex;
+    let nextOvertakeAt = state.nextOvertakeAt;
+    if (now >= state.nextOvertakeAt) {
+        if (playerScore > botMaxScore(updatedBots)) {
+            rivalIndex = (state.rivalIndex + 1) % updatedBots.length;
+            const rival = updatedBots[rivalIndex];
+            const margin = BOT_OVERTAKE_MARGIN_MIN +
+                Math.floor(Math.random() * (BOT_OVERTAKE_MARGIN_MAX - BOT_OVERTAKE_MARGIN_MIN + 1));
+            updatedBots[rivalIndex] = Object.assign({}, rival, {
+                score: Math.max(rival.score, playerScore + margin)
+            });
+            nextOvertakeAt = now + BOT_CYCLE_MS_MIN +
+                Math.random() * (BOT_CYCLE_MS_MAX - BOT_CYCLE_MS_MIN);
+        } else {
+            nextOvertakeAt = now + BOT_OVERTAKE_RETRY_MS;
+        }
+    }
+
+    saveBotState(boardType, {
+        periodKey: state.periodKey,
+        bots: updatedBots,
+        rivalIndex: rivalIndex,
+        nextOvertakeAt: nextOvertakeAt
+    });
+    return botEntriesFrom(updatedBots, valueField);
+}
+
+function botEntriesFrom(bots, valueField) {
+    return bots.map(function(bot) {
+        const entry = { uid: bot.uid, displayName: bot.displayName, country: bot.country };
+        entry[valueField] = bot.score;
+        return entry;
+    });
+}
+
+// Merge without mutating the Firestore snapshot arrays.
+function mergeBotEntries(realList, botEntries, valueField) {
+    return realList.slice().concat(botEntries).sort(function(a, b) {
+        return (b[valueField] || 0) - (a[valueField] || 0);
+    });
+}
+
+
 /* --- js/champions.js --- */
 // Hourly Champions — global top-5 by points, serverless (Firestore only).
 // Each client writes its own points doc into hourly/{YYYYMMDDHH}/entries/{uid}
@@ -5808,6 +7678,7 @@ function countryToFlag(code) {
 let championsUnsubscribe = null;
 let championsList = [];
 let champTimerInterval = null;
+let champLastHourKey = '';
 
 function getHourKey() {
     const d = new Date();
@@ -5843,6 +7714,7 @@ function subscribeChampions() {
 
     if (championsUnsubscribe) championsUnsubscribe();
     const hourKey = getHourKey();
+    champLastHourKey = hourKey;
 
     championsUnsubscribe = db.collection('hourly').doc(hourKey).collection('entries')
         .orderBy('points', 'desc')
@@ -5857,8 +7729,15 @@ function subscribeChampions() {
 
     // Start countdown timer
     if (!champTimerInterval) {
-        champTimerInterval = setInterval(renderChampionsTimer, 30000);
+        champTimerInterval = setInterval(championsTick, 30000);
     }
+}
+
+// 30s tick: re-subscribe when the UTC hour rolls over mid-session, then
+// re-render so simulated-rival updates surface without a Firestore event.
+function championsTick() {
+    if (window.egUser && getHourKey() !== champLastHourKey) subscribeChampions();
+    renderChampionsPanel();
 }
 
 function renderChampionsTimer() {
@@ -5886,7 +7765,14 @@ function renderChampionsPanel() {
     if (promptEl) promptEl.classList.add('hidden');
 
     bodyEl.innerHTML = '';
-    if (!championsList.length) {
+    let displayList = championsList;
+    if (typeof getBotEntries === 'function') {
+        const own = championsList.find(function(e) { return e.uid === user.uid; });
+        const playerScore = own ? (own.points || 0) : 0;
+        displayList = mergeBotEntries(championsList,
+            getBotEntries('hourly', getHourKey(), playerScore, playerScore > 0, 'points'), 'points');
+    }
+    if (!displayList.length) {
         const row = document.createElement('div');
         row.className = 'nearby-row';
         row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">No champions yet this hour — be the first!</span>';
@@ -5894,7 +7780,7 @@ function renderChampionsPanel() {
         return;
     }
 
-    championsList.forEach(function(ch, i) {
+    displayList.slice(0, 5).forEach(function(ch, i) {
         const row = document.createElement('div');
         row.className = 'nearby-row';
         const isMe = user && ch.uid === user.uid;
@@ -6048,6 +7934,8 @@ let dailyBoardList = [];
 let hourlyBoardUnsubscribe = null;
 let dailyBoardUnsubscribe = null;
 let lbTimerInterval = null;
+let lbLastHourKey = '';
+let lbLastDayKey = '';
 
 function getDayKey(offset) {
     const d = new Date();
@@ -6132,6 +8020,7 @@ function subscribeHourlyBoard() {
     if (!user) { hourlyBoardList = []; renderLeaderboardPanel(); return; }
     if (hourlyBoardUnsubscribe) hourlyBoardUnsubscribe();
     const hourKey = getHourKey();
+    lbLastHourKey = hourKey;
     hourlyBoardUnsubscribe = db.collection('hourly').doc(hourKey).collection('entries')
         .orderBy('points', 'desc')
         .limit(20)
@@ -6148,6 +8037,7 @@ function subscribeDailyBoard() {
     if (!user) { dailyBoardList = []; renderLeaderboardPanel(); return; }
     if (dailyBoardUnsubscribe) dailyBoardUnsubscribe();
     const dayKey = getDayKey();
+    lbLastDayKey = dayKey;
     dailyBoardUnsubscribe = db.collection('daily_scores')
         .where('dayKey', '==', dayKey)
         .orderBy('score', 'desc')
@@ -6182,7 +8072,36 @@ function patchOwnCountry() {
 }
 
 function startLeaderboardTimer() {
-    if (!lbTimerInterval) lbTimerInterval = setInterval(renderLeaderboardTimer, 30000);
+    if (!lbTimerInterval) lbTimerInterval = setInterval(leaderboardTick, 30000);
+}
+
+// 30s tick: re-subscribe when the hour/day rolls over mid-session (the bot state
+// keys off the current period, so stale real entries would look inconsistent),
+// then re-render so bot drift and rival overtakes surface without a Firestore event.
+function leaderboardTick() {
+    const user = window.egUser;
+    if (user) {
+        if (typeof getHourKey === 'function' && getHourKey() !== lbLastHourKey) subscribeHourlyBoard();
+        if (getDayKey() !== lbLastDayKey) subscribeDailyBoard();
+    }
+    renderLeaderboardPanel();
+}
+
+// --- Bot-merged views (see js/leaderboard-bots.js) ---
+function mergedHourlyList() {
+    const user = window.egUser;
+    const own = user ? hourlyBoardList.find(function(e) { return e.uid === user.uid; }) : null;
+    const playerScore = own ? (own.points || 0) : 0;
+    return mergeBotEntries(hourlyBoardList,
+        getBotEntries('hourly', getHourKey(), playerScore, playerScore > 0, 'points'), 'points');
+}
+
+function mergedDailyList() {
+    const user = window.egUser;
+    const own = user ? dailyBoardList.find(function(e) { return e.uid === user.uid; }) : null;
+    const playerScore = own ? (own.score || 0) : ownDailyNetProfit();
+    return mergeBotEntries(dailyBoardList,
+        getBotEntries('daily', getDayKey(), playerScore, !!own, 'score'), 'score');
 }
 
 function cleanupLeaderboards() {
@@ -6334,13 +8253,15 @@ function renderLeaderboardPanel() {
         }
         renderFriendsDailyBody(bodyEl, limit);
     } else if (leaderboardTab === 'hourly') {
-        totalCount = hourlyBoardList.length;
+        const mergedHourly = mergedHourlyList();
+        totalCount = mergedHourly.length;
         renderLeaderboardTimer();
-        renderGlobalBody(bodyEl, hourlyBoardList, limit, 'points', ' pts', false);
+        renderGlobalBody(bodyEl, mergedHourly, limit, 'points', ' pts', false);
     } else {
-        totalCount = dailyBoardList.length;
+        const mergedDaily = mergedDailyList();
+        totalCount = mergedDaily.length;
         renderLeaderboardTimer();
-        renderGlobalBody(bodyEl, dailyBoardList, limit, 'score', '', true);
+        renderGlobalBody(bodyEl, mergedDaily, limit, 'score', '', true);
     }
 
     if (expandLink) {
@@ -6367,11 +8288,11 @@ function shareLeaderboard() {
                 '  ' + (val >= 0 ? '+' : '') + val.toLocaleString());
         });
     } else if (leaderboardTab === 'hourly') {
-        hourlyBoardList.slice(0, limit).forEach(function(e, i) {
+        mergedHourlyList().slice(0, limit).forEach(function(e, i) {
             lines.push((i + 1) + '. ' + (e.displayName || 'Player') + '  ' + (e.points || 0).toLocaleString() + ' pts');
         });
     } else {
-        dailyBoardList.slice(0, limit).forEach(function(e, i) {
+        mergedDailyList().slice(0, limit).forEach(function(e, i) {
             var val = e.score || 0;
             lines.push((i + 1) + '. ' + (e.displayName || 'Player') + '  ' + (val >= 0 ? '+' : '') + val.toLocaleString());
         });
@@ -6388,8 +8309,9 @@ function shareLeaderboard() {
 
 
 /* --- js/invite.js --- */
-// Invites & Sharing — two bottom sheets (invite friends, room created),
-// clipboard copy, OS share sheet, WhatsApp/Telegram intents, deep-link handling.
+// Invites & Sharing — invite-friends sheet, the link half of the room-invite
+// sheet, clipboard copy, native OS share sheet, WhatsApp/Telegram intents,
+// deep-link handling. The room-invite friend picker itself is in js/rooms.js.
 
 // --- Generic sheet helpers ---
 function openSheet(sheetId) {
@@ -6412,29 +8334,85 @@ function openInviteSheet() {
     const copyBtn = document.getElementById('invite-sheet-copy');
     copyBtn.textContent = 'Copy';
     copyBtn.classList.remove('copied');
+    if (window.renderInviteRewardLine) renderInviteRewardLine();
     openSheet('invite-sheet');
+}
+
+// Shared clipboard write with the textarea fallback; the per-surface feedback
+// (button label swap, chip highlight) is the caller's job via onCopied.
+function copyTextToClipboard(text, onCopied) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(onCopied)
+            .catch(function() { fallbackCopySheet(text, onCopied); });
+    } else {
+        fallbackCopySheet(text, onCopied);
+    }
+}
+
+function copyBtnFeedback(copyBtn) {
+    copyBtn.textContent = 'Copied!';
+    copyBtn.classList.add('copied');
+    setTimeout(function() {
+        copyBtn.textContent = 'Copy';
+        copyBtn.classList.remove('copied');
+    }, 2000);
 }
 
 function copyInviteSheetLink() {
     const linkEl = document.getElementById('invite-sheet-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const copyBtn = document.getElementById('invite-sheet-copy');
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function() {
-            copyBtn.textContent = 'Copied!';
-            copyBtn.classList.add('copied');
-            setTimeout(function() {
-                copyBtn.textContent = 'Copy';
-                copyBtn.classList.remove('copied');
-            }, 2000);
-        }).catch(function() { fallbackCopySheet(link, copyBtn); });
-    } else {
-        fallbackCopySheet(link, copyBtn);
-    }
+    copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
 }
 
-function fallbackCopySheet(text, btn) {
+// Tap-to-copy on the Friends screen's "Your code" chip.
+function copyOwnCode() {
+    const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
+    if (!code) { showToast('Sign in to get your friend code.'); return; }
+    const chip = document.getElementById('own-code-chip');
+    const hint = document.getElementById('own-code-hint');
+    copyTextToClipboard(code, function() {
+        if (chip) chip.classList.add('copied');
+        if (hint) hint.textContent = 'Copied ✓';
+        setTimeout(function() {
+            if (chip) chip.classList.remove('copied');
+            if (hint) hint.textContent = 'Tap to copy';
+        }, 2000);
+    });
+}
+
+// --- Native OS share sheet, with the custom bottom sheet as fallback ---
+// Order: Capacitor Share plugin (native app) → navigator.share (mobile web)
+// → the existing invite sheet (desktop / unsupported). A user-cancelled share
+// is not an error and must not trigger the fallback sheet.
+function shareViaNative(title, message, link) {
+    const CapShare = window.Capacitor && window.Capacitor.isNativePlatform &&
+        window.Capacitor.isNativePlatform() &&
+        window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+    if (CapShare) {
+        return CapShare.share({ title: title, text: message, url: link, dialogTitle: title })
+            .then(function() { return true; })
+            .catch(function() { return true; /* user cancelled */ });
+    }
+    if (navigator.share) {
+        return navigator.share({ text: message + '\n' + link })
+            .then(function() { return true; })
+            .catch(function(err) { return !!(err && err.name === 'AbortError'); });
+    }
+    return Promise.resolve(false);
+}
+
+function shareInviteNative() {
+    const user = window.egUser;
+    if (!user) { openSignInModal(); return; }
+    const link = getInviteLink();
+    if (!link) { showToast('Could not generate invite link.'); return; }
+    shareViaNative('Royal Video Poker', friendInviteMessage(), link).then(function(handled) {
+        if (!handled) openInviteSheet();
+    });
+}
+
+function fallbackCopySheet(text, onCopied) {
     var ta = document.createElement('textarea');
     ta.value = text;
     ta.style.position = 'fixed';
@@ -6443,77 +8421,95 @@ function fallbackCopySheet(text, btn) {
     ta.select();
     try {
         document.execCommand('copy');
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        if (onCopied) onCopied();
     } catch (e) {
         showToast('Could not copy — tap and hold the link.');
     }
     document.body.removeChild(ta);
 }
 
-function shareFriendInviteViaWhatsApp() {
-    const linkEl = document.getElementById('invite-sheet-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+// One handoff for every share chip. The wa.me / t.me web endpoints are used on
+// native too: they redirect straight into the installed app, and unlike the
+// whatsapp:// and tg:// schemes they show the friend a real page instead of
+// failing silently when the messenger is missing.
+//
+// Telegram takes the link and the message as separate parameters, so the
+// message passed in here must never already contain the link — otherwise the
+// share preview repeats it.
+function openShareChannel(channel, message, link) {
+    let url;
+    if (channel === 'telegram') {
+        url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
+              '&text=' + encodeURIComponent(message);
+    } else {
+        url = 'https://wa.me/?text=' + encodeURIComponent(message + '\n' + link);
+    }
+    window.open(url, '_blank');
+}
+
+function sheetLink(id) {
+    const el = document.getElementById(id);
+    return el ? (el.getAttribute('data-link') || el.textContent) : '';
+}
+
+function friendInviteMessage() {
     const user = window.egUser;
-    const name = user ? (user.displayName || 'A friend') : 'A friend';
-    const text = encodeURIComponent(name + ' wants to play Video Poker with you! Join here: ' + link);
-    window.open('https://wa.me/?text=' + text, '_blank');
+    const name = (user && user.displayName) || 'A friend';
+    const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
+    return name + ' is playing Royal Video Poker and wants you at the table.' +
+        (code ? '\nFriend code: ' + code : '');
+}
+
+function shareFriendInviteViaWhatsApp() {
+    openShareChannel('whatsapp', friendInviteMessage(), sheetLink('invite-sheet-link'));
 }
 
 function shareFriendInviteViaTelegram() {
-    const linkEl = document.getElementById('invite-sheet-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const user = window.egUser;
-    const name = user ? (user.displayName || 'A friend') : 'A friend';
-    const text = encodeURIComponent(name + ' wants to play Video Poker with you! Join here: ' + link);
-    window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
+    openShareChannel('telegram', friendInviteMessage(), sheetLink('invite-sheet-link'));
 }
 
-// --- Room Created bottom sheet ---
-function openRoomCreatedSheet(roomName, roomCode) {
-    const base = getShareBaseUrl();
-    const link = base + '?join=' + encodeURIComponent(roomCode);
-    document.getElementById('room-created-name').textContent = roomName;
-    document.getElementById('room-created-link').textContent = link;
-    document.getElementById('room-created-link').setAttribute('data-link', link);
-    document.getElementById('room-created-link').setAttribute('data-code', roomCode);
-    // Reset copy button
-    const copyBtn = document.getElementById('room-created-copy');
+// --- Room invite sheet: share-link half ---
+// The friend-picker half lives in js/rooms.js (openRoomInvitePicker); these
+// helpers fill in the link row and share chips of #room-invite-sheet.
+function setRoomInviteSheetLink(roomName, roomCode) {
+    const link = buildRoomLink(roomCode);
+    document.getElementById('room-invite-name').textContent = roomName;
+    const linkEl = document.getElementById('room-invite-link');
+    linkEl.textContent = link;
+    linkEl.setAttribute('data-link', link);
+    linkEl.setAttribute('data-code', roomCode);
+    const copyBtn = document.getElementById('room-invite-copy');
     copyBtn.textContent = 'Copy';
     copyBtn.classList.remove('copied');
-    openSheet('room-created-sheet');
 }
 
 function copyRoomLink() {
-    const linkEl = document.getElementById('room-created-link');
+    const linkEl = document.getElementById('room-invite-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const copyBtn = document.getElementById('room-created-copy');
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function() {
-            copyBtn.textContent = 'Copied!';
-            copyBtn.classList.add('copied');
-            setTimeout(function() { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
-        }).catch(function() { fallbackCopySheet(link, copyBtn); });
-    } else {
-        fallbackCopySheet(link, copyBtn);
-    }
+    const copyBtn = document.getElementById('room-invite-copy');
+    copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
+}
+
+function roomInviteMessage() {
+    const name = document.getElementById('room-invite-name').textContent;
+    const code = document.getElementById('room-invite-link').getAttribute('data-code') || '';
+    return 'Join my poker room "' + name + '" on Royal Video Poker.' +
+        (code ? '\nRoom code: ' + code : '');
+}
+
+function shareRoomInviteNative() {
+    shareViaNative('Royal Video Poker', roomInviteMessage(), sheetLink('room-invite-link'))
+        .then(function(handled) {
+            if (!handled) showToast('Use Copy, WhatsApp or Telegram to share.');
+        });
 }
 
 function shareRoomViaWhatsApp() {
-    const linkEl = document.getElementById('room-created-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const name = document.getElementById('room-created-name').textContent;
-    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
-    window.open('https://wa.me/?text=' + text, '_blank');
+    openShareChannel('whatsapp', roomInviteMessage(), sheetLink('room-invite-link'));
 }
 
 function shareRoomViaTelegram() {
-    const linkEl = document.getElementById('room-created-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const name = document.getElementById('room-created-name').textContent;
-    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
-    window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
+    openShareChannel('telegram', roomInviteMessage(), sheetLink('room-invite-link'));
 }
 
 // --- Deep-link handling (?join=ROOMCODE) ---
@@ -6798,9 +8794,54 @@ function restoreGameState() {
 function doRebuy() {
     balance = 500;
     document.getElementById('balance').textContent = balance;
+    // The stack is back to the starting amount, so past referral coins are gone
+    // too — drop them from the net-profit baseline or the board reads negative.
+    if (window.resetReferralBaseline) resetReferralBaseline();
     saveGameState();
     showToast('♻ +500 credits');
     if (window.pushDailyRebuy) pushDailyRebuy();
+}
+
+// Short labels for the always-visible ticker. The full names live in the
+// payout table, so this row only needs enough to be recognisable at a glance.
+const TICKER_LABELS = {
+    'Royal Flush': 'ROYAL',
+    'Straight Flush': 'S. FLUSH',
+    'Wild Royal Flush': 'W. ROYAL',
+    'Four Deuces': '4 DEUCES',
+    'Five of a Kind': 'FIVE',
+    'Four of a Kind': 'QUADS',
+    'Four Aces': '4 ACES',
+    'Four 2s-4s': 'QUADS 2-4',
+    'Four 5s-Ks': 'QUADS 5-K',
+    'Full House': 'HOUSE',
+    'Flush': 'FLUSH',
+    'Straight': 'STRAIGHT',
+    'Three of a Kind': 'TRIPS',
+    'Two Pair': 'TWO PAIR',
+    'Jacks or Better': 'JACKS+'
+};
+
+const TICKER_HAND_COUNT = 4;
+
+function renderPaytableTicker() {
+    const el = document.getElementById('paytable-ticker');
+    if (!el) return;
+    el.innerHTML = '';
+    HAND_ORDERS[gameVariant]
+        .filter(handType => currentPayouts[handType] > 0)
+        .slice(0, TICKER_HAND_COUNT)
+        .forEach(handType => {
+            const item = document.createElement('span');
+            item.className = 'paytable-ticker-item';
+            item.textContent = (TICKER_LABELS[handType] || handType.toUpperCase()) + ' ' + currentPayouts[handType] + '×';
+            el.appendChild(item);
+        });
+}
+
+function renderVariantLabel() {
+    const el = document.getElementById('variant-display');
+    if (el) el.textContent = VARIANT_LABELS[gameVariant];
 }
 
 function renderPayouts() {
@@ -6813,6 +8854,8 @@ function renderPayouts() {
         row.innerHTML = `<div class="payout-hand">${handType}</div><div class="payout-value">${currentPayouts[handType]}</div>`;
         payoutsEl.appendChild(row);
     });
+    renderPaytableTicker();
+    renderVariantLabel();
 }
 
 function setBet(amount) {
@@ -6881,11 +8924,16 @@ function updateAllInUI() {
 // --- All In confirmation sheet (slide-to-confirm) ---
 let allInPendingAmount = 0;
 let allInDragging = false;
+// The bet in effect right before ALL IN was confirmed, so the bet buttons
+// can revert to it once the ALL IN hand is done instead of staying stuck
+// on ALL IN for the next hand.
+let betBeforeAllIn = null;
 
 function openAllInSheet() {
-    // Blocked mid-hand for the same reason as setBet(). Checked before the
-    // remaining-uses test so a blocked attempt never spends a daily use.
-    if (gameState !== 'bet') return;
+    // Unlike setBet(), All In is allowed mid-hand: it stakes whatever balance
+    // remains on top of the bet already charged at deal time, so it can't
+    // reproduce the deal-cheap/raise-later exploit that setBet() must block.
+    if (gameState !== 'bet' && gameState !== 'hold') return;
     if (getAllInRemaining() <= 0) {
         showToast('⛔ No ALL INs left — back tomorrow!');
         return;
@@ -6896,8 +8944,21 @@ function openAllInSheet() {
     }
     const hands = multiHandCount || 1;
     allInPendingAmount = Math.max(1, Math.floor(balance / hands));
+    const stake = allInPendingAmount * hands;
     const amountEl = document.getElementById('allin-sheet-amount');
-    if (amountEl) amountEl.textContent = allInPendingAmount * hands;
+    if (amountEl) amountEl.textContent = stake.toLocaleString();
+    const subEl = document.getElementById('allin-sheet-target');
+    if (subEl) subEl.textContent = gameState === 'hold' ? 'this hand' : 'the next hand';
+
+    // A mid-table hand makes the upside concrete without promising a royal.
+    // Mid-hand, the payout is computed off the raised total stake, not just
+    // the amount being added on top of the bet already on the table.
+    const potentialEl = document.getElementById('allin-sheet-potential');
+    if (potentialEl) {
+        const multiplier = currentPayouts['Full House'] || 0;
+        const newBetPerHand = (gameState === 'hold' ? bet : 0) + allInPendingAmount;
+        potentialEl.textContent = (newBetPerHand * multiplier * hands).toLocaleString();
+    }
     resetAllInSlider();
     openSheet('allin-sheet');
 }
@@ -6917,10 +8978,22 @@ function resetAllInSlider() {
 }
 
 function confirmAllIn() {
-    // openAllInSheet() already blocks mid-hand; guard the mutation itself too
-    // so a stale open sheet can never raise the stake or spend a daily use.
-    if (gameState !== 'bet') return;
-    setBet(allInPendingAmount);
+    // openAllInSheet() already restricts the gameState; guard the mutation
+    // itself too so a stale open sheet can never run from an invalid state.
+    if (gameState !== 'bet' && gameState !== 'hold') return;
+    if (betBeforeAllIn === null) betBeforeAllIn = bet;
+    if (gameState === 'hold') {
+        // The initial stake was already charged in deal(); only the
+        // additional amount is charged now, and it's charged immediately —
+        // never left to be "raised" before draw() computes the payout.
+        const hands = multiHandCount || 1;
+        balance -= allInPendingAmount * hands;
+        bet += allInPendingAmount;
+        document.getElementById('balance').textContent = balance;
+        updateTotalBetDisplay();
+    } else {
+        setBet(allInPendingAmount);
+    }
     const btn = document.getElementById('bet-allin');
     if (btn) btn.classList.add('selected');
     allInUsesToday++;
@@ -7131,9 +9204,11 @@ function renderMultiHands(extraResults) {
 function updateMainButton() {
     const btn = document.getElementById('main-btn');
     const isDraw = gameState === 'hold';
+    // Monochrome glyphs, not emoji — colour on this button belongs to the
+    // green surface alone.
     btn.innerHTML = isDraw
-        ? '<span class="main-btn-icon">🔄</span>Draw'
-        : '<span class="main-btn-icon">🎴</span>Deal';
+        ? '<span class="main-btn-icon">↻</span>Draw'
+        : '<span class="main-btn-icon">♠</span>Deal';
     btn.className = isDraw ? 'btn-secondary' : 'btn-primary';
 }
 
@@ -7182,7 +9257,7 @@ function deal() {
     lastHandType = null;
     const resultEl = document.getElementById('result');
     resultEl.className = 'result-panel';
-    resultEl.textContent = 'Place your bet and deal to play';
+    resultEl.textContent = 'Hold what you want, then set your bet before the draw.';
     document.getElementById('explanation').innerHTML = '';
     if (window.vpRenderHints) vpRenderHints();
     triggerHaptic('MEDIUM');
@@ -7284,8 +9359,15 @@ function draw() {
     const resultEl = document.getElementById('result');
 
     if (win > 0) {
-        resultEl.className = 'result-panel';
-        resultEl.innerHTML = `<span class="win">🎉 ${handType}! +${win} credits! 🎉</span>`;
+        resultEl.className = 'result-panel result-panel-win';
+        // Hand name, then the payout at display scale with its multiplier
+        // alongside — the number is the news, the multiplier is the context.
+        resultEl.innerHTML =
+            `<span class="result-hand">${handType}</span>` +
+            `<span class="result-amount">` +
+            `<span class="win">+${win.toLocaleString()}</span>` +
+            `<span class="result-mult">${currentPayouts[handType]}×</span>` +
+            `</span>`;
         document.getElementById('explanation').textContent = EXPLANATIONS[handType] || '';
     } else {
         resultEl.className = 'result-panel';
@@ -7296,6 +9378,10 @@ function draw() {
     renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
 
     gameState = 'bet';
+    if (betBeforeAllIn !== null) {
+        setBet(betBeforeAllIn);
+        betBeforeAllIn = null;
+    }
     updateMainButton();
 }
 
@@ -7374,7 +9460,7 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         if (isResult) {
             const isPairHand = lastHandType === 'Two Pair' || lastHandType === 'Jacks or Better';
             if (isPairHand) {
-                if (i === winningIndices[0] || i === secondPairIndices[0]) {
+                if (winningIndices.includes(i) || secondPairIndices.includes(i)) {
                     winBadgeText = getWinBadgeText(i, lastHandType);
                 }
             } else {
@@ -7906,12 +9992,24 @@ function renderOnboardingDots() {
     const dots = document.getElementById('onboarding-dots');
     if (!dots) return;
     dots.innerHTML = '';
-    ONBOARDING_STEPS.forEach(function(_, i) {
+    // The push step never shows on web, so its dot must not render there —
+    // otherwise the bar shows six dots and skips one on the way through.
+    const visibleSteps = ONBOARDING_STEPS.filter(function(step) {
+        return step !== 'push' || onboardingIsNative();
+    });
+    const activeStep = ONBOARDING_STEPS[onboardingIndex];
+    visibleSteps.forEach(function(step) {
         const dot = document.createElement('span');
-        dot.className = 'onboarding-dot' + (i === onboardingIndex ? ' active' : '');
+        dot.className = 'onboarding-dot' + (step === activeStep ? ' active' : '');
         dots.appendChild(dot);
     });
 }
+
+// The first screen names the reward rather than the direction — it is the
+// only place the chip grant is promised, so it earns the full-width label.
+const ONBOARDING_NEXT_LABELS = {
+    welcome: 'Start with 1,000 chips'
+};
 
 function updateOnboardingNav() {
     const backBtn = document.getElementById('onboarding-back');
@@ -7923,6 +10021,8 @@ function updateOnboardingNav() {
 
     // Next: hidden on last screen (sign-in CTAs take over)
     nextBtn.classList.toggle('ob-hidden', onboardingIndex === ONBOARDING_STEPS.length - 1);
+
+    nextBtn.textContent = ONBOARDING_NEXT_LABELS[ONBOARDING_STEPS[onboardingIndex]] || 'Next';
 }
 
 function showOnboardingStep(index) {
@@ -7981,9 +10081,12 @@ function onboardingSignInSucceeded() {
 
 function onboardingEnableNotifications() {
     if (window.registerForPushNotifications) registerForPushNotifications();
-    if (window.egUser && window.setNotificationPref) {
+    // No egUser guard: sign-in is the *next* step, so there is never a user
+    // here. setNotificationPref() buffers until there is one and js/firebase.js
+    // flushes on sign-in — gating on egUser silently threw the opt-in away.
+    if (window.setNotificationPref) {
         ['social', 'leaderboard', 'dailyReminder', 'bestHand'].forEach(function(cat) {
-            if (typeof setNotificationPref === 'function') setNotificationPref(cat, true);
+            setNotificationPref(cat, true);
         });
     }
     advanceOnboarding();
@@ -8018,7 +10121,12 @@ function showScreen(name) {
         if (nav) nav.classList.toggle('active', s === name);
     });
     if (name === 'stats') renderStatsScreen();
-    if (name === 'friends') renderFriendsScreen();
+    if (name === 'friends') {
+        renderFriendsScreen();
+        // Room list is a one-shot .get(); refresh member counts on every visit
+        // so accepted invites show up without a reload.
+        if (window.egUser && window.loadMyRooms) loadMyRooms();
+    }
 }
 
 let friendsTab = 'leaderboard';
@@ -8095,6 +10203,10 @@ function initSettingsScreen() {
     hapticsToggle.checked = hapticsEnabled;
     hapticsToggle.onchange = function() { toggleHaptics(); };
 
+    const voiceToggle = document.getElementById('settings-voice-toggle');
+    voiceToggle.checked = voiceEnabled;
+    voiceToggle.onchange = function() { toggleVoice(); };
+
     [5, 10, 20, 50].forEach(function(v) {
         const btn = document.getElementById('settings-defaultbet-' + v);
         if (btn) btn.onclick = function() { setDefaultBet(v); };
@@ -8106,7 +10218,9 @@ function initSettingsScreen() {
     initNotificationSettings();
 }
 
-const NOTIFICATION_PREF_CATEGORIES = ['social', 'leaderboard', 'dailyReminder', 'bestHand'];
+// 'announcement' covers campaigns composed in push-admin.html — an admin
+// broadcast must be as mutable as any automatic notification.
+const NOTIFICATION_PREF_CATEGORIES = ['social', 'leaderboard', 'dailyReminder', 'bestHand', 'announcement'];
 
 function initNotificationSettings() {
     const panel = document.getElementById('settings-notifications-panel');
@@ -8218,11 +10332,18 @@ function initNativeDeepLinkHandling() {
     CapApp.addListener('appUrlOpen', function(data) {
         applyNativeDeepLinkUrl(data.url);
     });
+    // First launch after a Play Store install: the invite click happened in a
+    // browser that no longer exists, so the code arrives via the install
+    // referrer instead. MainActivity also pushes it through
+    // window.__onInstallReferrer; this covers the case where it answered before
+    // this script parsed.
+    if (window.readCachedInstallReferrer) readCachedInstallReferrer();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     applyTheme();
     initSound();
+    initVoice();
     initGame();
     initSettingsScreen();
     updateHintButtonUI();
@@ -8239,6 +10360,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.handleIncomingInvite) handleIncomingInvite();
     if (window.handleJoinDeepLink) handleJoinDeepLink();
     initNativeDeepLinkHandling();
+    // An invite stored by an earlier launch that never got as far as sign-in.
+    if (window.restorePendingInvite) restorePendingInvite();
 });
 
 

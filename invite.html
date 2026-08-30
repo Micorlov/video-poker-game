@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Join me on Royal Video Poker</title>
+<meta name="theme-color" content="#04100C">
+<meta property="og:title" content="Join me on Royal Video Poker">
+<meta property="og:description" content="Play Jacks or Better against your friends and climb the table.">
+<meta property="og:type" content="website">
+<style>
+/* Standalone page — it must work before the app exists, so the 2026 night-glass
+   tokens are inlined rather than pulled from styles/tokens.css. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+    --bg-base: #04100C;
+    --bg-mid: #071612;
+    --bg-glow: #123326;
+    --green: #16C172;
+    --green-hover: #2FD886;
+    --green-ink: #04170E;
+    --green-line: rgba(22, 193, 114, 0.32);
+    /* Red suits sit on the dark ground, so they use the app's dark-surface
+       red rather than --card-red (which is tuned for a white card face). Never
+       gold here: the design system reserves it for time pressure and scarcity. */
+    --red: #FF6BAA;
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-raised: rgba(255, 255, 255, 0.055);
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.58);
+    --text-faint: rgba(255, 255, 255, 0.4);
+}
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: radial-gradient(120% 60% at 50% 0%, var(--bg-glow) 0%, var(--bg-mid) 58%, var(--bg-base) 100%);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+.card {
+    width: 100%;
+    max-width: 380px;
+    padding: 32px 24px 24px;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    text-align: center;
+}
+.suits { font-size: 30px; letter-spacing: 6px; margin-bottom: 18px; }
+.suits .red { color: var(--red); }
+h1 { font-size: 25px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; }
+.sub { margin-top: 10px; font-size: 15px; line-height: 1.5; color: var(--text-muted); }
+.code-block {
+    margin: 22px 0 6px;
+    padding: 14px;
+    border: 1px solid var(--green-line);
+    border-radius: 14px;
+    background: rgba(22, 193, 114, 0.08);
+}
+.code-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); }
+.code-value {
+    margin-top: 6px;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    font-variant-numeric: tabular-nums;
+    color: var(--green);
+}
+.code-hint { margin-top: 12px; font-size: 12px; line-height: 1.5; color: var(--text-faint); }
+.actions { margin-top: 22px; display: flex; flex-direction: column; gap: 10px; }
+.btn {
+    display: block;
+    width: 100%;
+    padding: 15px 18px;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.btn-primary { background: var(--green); color: var(--green-ink); box-shadow: 0 18px 40px -14px rgba(22, 193, 114, 0.85); }
+.btn-primary:hover { background: var(--green-hover); }
+.btn-ghost { background: var(--surface-raised); border-color: var(--border); color: var(--text); }
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.09); }
+.btn-text { background: none; color: var(--text-faint); font-size: 13px; font-weight: 500; padding: 6px; }
+.btn-text:hover { color: var(--text-muted); }
+.hidden { display: none !important; }
+.status { margin-top: 16px; font-size: 13px; color: var(--text-faint); min-height: 18px; }
+</style>
+</head>
+<body>
+<div class="card">
+    <div class="suits">♠ <span class="red">♥</span> ♣ <span class="red">♦</span></div>
+    <h1 id="headline">A friend invited you</h1>
+    <p class="sub" id="subline">Play Jacks or Better against them and climb the table.</p>
+
+    <div class="code-block hidden" id="code-block">
+        <div class="code-label" id="code-label">Friend code</div>
+        <div class="code-value" id="code-value">—</div>
+    </div>
+    <p class="code-hint hidden" id="code-hint">
+        Already have the app? Open it and enter this code under Friends → Invite.
+    </p>
+
+    <div class="actions">
+        <a class="btn btn-primary" id="open-app" href="#">Open in the app</a>
+        <a class="btn btn-ghost" id="get-app" href="#">Get it on Google Play</a>
+        <a class="btn btn-text" id="play-web" href="#">Play in the browser instead</a>
+    </div>
+    <div class="status" id="status"></div>
+</div>
+
+<script>
+(function() {
+    var ANDROID_PACKAGE = 'com.micorlov.videopoker';
+    var PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=' + ANDROID_PACKAGE;
+    var WEB_GAME = 'video_poker.html';
+    // Long enough that a cold app launch wins the race, short enough that a
+    // friend without the app is not left staring at a dead page.
+    var STORE_FALLBACK_MS = 2500;
+
+    var params = new URLSearchParams(window.location.search);
+    var ref = (params.get('ref') || '').trim().toUpperCase();
+    var join = (params.get('join') || '').trim().toUpperCase();
+    var kind = ref ? 'ref' : (join ? 'join' : '');
+    var code = ref || join;
+    var query = kind ? (kind + '=' + encodeURIComponent(code)) : '';
+
+    var isAndroid = /Android/i.test(navigator.userAgent);
+
+    // Play hands this string to the freshly installed app through the Install
+    // Referrer API, which is the only way the code survives a store detour.
+    var storeUrl = query ? PLAY_STORE_URL + '&referrer=' + encodeURIComponent(query) : PLAY_STORE_URL;
+    var webUrl = query ? WEB_GAME + '?' + query : WEB_GAME;
+    var schemeUrl = 'videopoker://invite' + (query ? '?' + query : '');
+    var intentUrl = 'intent://invite' + (query ? '?' + query : '') +
+        '#Intent;scheme=videopoker;package=' + ANDROID_PACKAGE +
+        ';S.browser_fallback_url=' + encodeURIComponent(storeUrl) + ';end';
+
+    var el = function(id) { return document.getElementById(id); };
+
+    if (kind === 'join') {
+        el('headline').textContent = 'You are invited to a room';
+        el('subline').textContent = 'Join the table and play for the top of the leaderboard.';
+        el('code-label').textContent = 'Room code';
+        el('code-hint').textContent = 'Already have the app? Open it and enter this code under Friends → Rooms.';
+    }
+    if (code) {
+        el('code-value').textContent = code;
+        el('code-block').classList.remove('hidden');
+        el('code-hint').classList.remove('hidden');
+    }
+
+    el('play-web').href = webUrl;
+    el('get-app').href = storeUrl;
+    el('open-app').href = isAndroid ? intentUrl : schemeUrl;
+
+    // Non-Android (desktop, iOS, anything we can't place) has no store build to
+    // send anyone to, so the web game is the destination rather than a fallback.
+    if (!isAndroid) {
+        el('get-app').classList.add('hidden');
+        el('open-app').classList.add('hidden');
+        el('play-web').className = 'btn btn-primary';
+        el('play-web').textContent = 'Play now';
+        el('status').textContent = 'Opening the game…';
+        setTimeout(function() { window.location.replace(webUrl); }, 700);
+        return;
+    }
+
+    // Android: hand the OS an intent. Chrome opens the installed app, or follows
+    // browser_fallback_url to the Play listing when it is missing. In-app
+    // browsers (WhatsApp, Telegram) sometimes swallow intent:// without either,
+    // which is what the timer below is for.
+    var settled = false;
+    function settle() { settled = true; }
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) settle();
+    });
+    window.addEventListener('pagehide', settle);
+    window.addEventListener('blur', settle);
+
+    el('status').textContent = 'Opening the app…';
+    setTimeout(function() { window.location.href = intentUrl; }, 250);
+    setTimeout(function() {
+        if (settled || document.hidden) return;
+        el('status').textContent = 'Taking you to Google Play…';
+        window.location.replace(storeUrl);
+    }, STORE_FALLBACK_MS);
+})();
+</script>
+</body>
+</html>

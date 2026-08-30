@@ -42,6 +42,8 @@ let dailyBoardList = [];
 let hourlyBoardUnsubscribe = null;
 let dailyBoardUnsubscribe = null;
 let lbTimerInterval = null;
+let lbLastHourKey = '';
+let lbLastDayKey = '';
 
 function getDayKey(offset) {
     const d = new Date();
@@ -126,6 +128,7 @@ function subscribeHourlyBoard() {
     if (!user) { hourlyBoardList = []; renderLeaderboardPanel(); return; }
     if (hourlyBoardUnsubscribe) hourlyBoardUnsubscribe();
     const hourKey = getHourKey();
+    lbLastHourKey = hourKey;
     hourlyBoardUnsubscribe = db.collection('hourly').doc(hourKey).collection('entries')
         .orderBy('points', 'desc')
         .limit(20)
@@ -142,6 +145,7 @@ function subscribeDailyBoard() {
     if (!user) { dailyBoardList = []; renderLeaderboardPanel(); return; }
     if (dailyBoardUnsubscribe) dailyBoardUnsubscribe();
     const dayKey = getDayKey();
+    lbLastDayKey = dayKey;
     dailyBoardUnsubscribe = db.collection('daily_scores')
         .where('dayKey', '==', dayKey)
         .orderBy('score', 'desc')
@@ -176,7 +180,36 @@ function patchOwnCountry() {
 }
 
 function startLeaderboardTimer() {
-    if (!lbTimerInterval) lbTimerInterval = setInterval(renderLeaderboardTimer, 30000);
+    if (!lbTimerInterval) lbTimerInterval = setInterval(leaderboardTick, 30000);
+}
+
+// 30s tick: re-subscribe when the hour/day rolls over mid-session (the bot state
+// keys off the current period, so stale real entries would look inconsistent),
+// then re-render so bot drift and rival overtakes surface without a Firestore event.
+function leaderboardTick() {
+    const user = window.egUser;
+    if (user) {
+        if (typeof getHourKey === 'function' && getHourKey() !== lbLastHourKey) subscribeHourlyBoard();
+        if (getDayKey() !== lbLastDayKey) subscribeDailyBoard();
+    }
+    renderLeaderboardPanel();
+}
+
+// --- Bot-merged views (see js/leaderboard-bots.js) ---
+function mergedHourlyList() {
+    const user = window.egUser;
+    const own = user ? hourlyBoardList.find(function(e) { return e.uid === user.uid; }) : null;
+    const playerScore = own ? (own.points || 0) : 0;
+    return mergeBotEntries(hourlyBoardList,
+        getBotEntries('hourly', getHourKey(), playerScore, playerScore > 0, 'points'), 'points');
+}
+
+function mergedDailyList() {
+    const user = window.egUser;
+    const own = user ? dailyBoardList.find(function(e) { return e.uid === user.uid; }) : null;
+    const playerScore = own ? (own.score || 0) : ownDailyNetProfit();
+    return mergeBotEntries(dailyBoardList,
+        getBotEntries('daily', getDayKey(), playerScore, !!own, 'score'), 'score');
 }
 
 function cleanupLeaderboards() {
@@ -328,13 +361,15 @@ function renderLeaderboardPanel() {
         }
         renderFriendsDailyBody(bodyEl, limit);
     } else if (leaderboardTab === 'hourly') {
-        totalCount = hourlyBoardList.length;
+        const mergedHourly = mergedHourlyList();
+        totalCount = mergedHourly.length;
         renderLeaderboardTimer();
-        renderGlobalBody(bodyEl, hourlyBoardList, limit, 'points', ' pts', false);
+        renderGlobalBody(bodyEl, mergedHourly, limit, 'points', ' pts', false);
     } else {
-        totalCount = dailyBoardList.length;
+        const mergedDaily = mergedDailyList();
+        totalCount = mergedDaily.length;
         renderLeaderboardTimer();
-        renderGlobalBody(bodyEl, dailyBoardList, limit, 'score', '', true);
+        renderGlobalBody(bodyEl, mergedDaily, limit, 'score', '', true);
     }
 
     if (expandLink) {
@@ -361,11 +396,11 @@ function shareLeaderboard() {
                 '  ' + (val >= 0 ? '+' : '') + val.toLocaleString());
         });
     } else if (leaderboardTab === 'hourly') {
-        hourlyBoardList.slice(0, limit).forEach(function(e, i) {
+        mergedHourlyList().slice(0, limit).forEach(function(e, i) {
             lines.push((i + 1) + '. ' + (e.displayName || 'Player') + '  ' + (e.points || 0).toLocaleString() + ' pts');
         });
     } else {
-        dailyBoardList.slice(0, limit).forEach(function(e, i) {
+        mergedDailyList().slice(0, limit).forEach(function(e, i) {
             var val = e.score || 0;
             lines.push((i + 1) + '. ' + (e.displayName || 'Player') + '  ' + (val >= 0 ? '+' : '') + val.toLocaleString());
         });

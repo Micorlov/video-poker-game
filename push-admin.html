@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Poker — Push Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0f1a; color: #e2e8f0; min-height: 100vh; }
+
+.auth-gate { display: flex; align-items: center; justify-content: center; min-height: 100vh; flex-direction: column; gap: 20px; }
+.auth-gate h1 { color: #fbbf24; font-size: 1.8em; }
+.auth-gate .denied { color: #f87171; font-size: 16px; display: none; }
+.auth-gate button { background: #fff; color: #333; border: none; border-radius: 40px; padding: 14px 32px; font-size: 16px; font-weight: 600; cursor: pointer; }
+
+.app { display: none; }
+.app.visible { display: block; }
+
+.topbar { background: #111827; border-bottom: 1px solid #1e293b; padding: 14px 30px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 10px; }
+.topbar h1 { font-size: 18px; color: #fbbf24; font-weight: 700; }
+.topbar-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.topbar-right span { font-size: 13px; color: #94a3b8; }
+.topbar-right a, .topbar-right button { color: #94a3b8; text-decoration: none; font-size: 12px; border: 1px solid #334155; background: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; }
+.topbar-right a:hover, .topbar-right button:hover { border-color: #fbbf24; color: #fbbf24; }
+
+.content { max-width: 1180px; margin: 0 auto; padding: 24px; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 24px; background: #111827; border-radius: 10px; padding: 4px; border: 1px solid #1e293b; flex-wrap: wrap; }
+.tab { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; color: #64748b; border: none; background: none; }
+.tab:hover { color: #cbd5e1; }
+.tab.active { background: #1e293b; color: #fbbf24; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.panel { background: #111827; border: 1px solid #1e293b; border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
+.panel-header { padding: 14px 20px; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.panel-header h2 { font-size: 15px; font-weight: 600; }
+.panel-header button { background: none; border: 1px solid #334155; color: #94a3b8; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+.panel-header button:hover { border-color: #fbbf24; color: #fbbf24; }
+.panel-body { padding: 18px 20px; }
+
+.field { margin-bottom: 14px; }
+.field > label { display: block; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+input[type=text], input[type=number], input[type=datetime-local], select, textarea {
+  width: 100%; padding: 9px 11px; background: #0f172a; border: 1px solid #1e293b;
+  border-radius: 6px; color: #e2e8f0; font-size: 13px; font-family: inherit;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: #fbbf24; }
+textarea { resize: vertical; min-height: 68px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.row > .field { flex: 1; min-width: 190px; }
+.hint { font-size: 12px; color: #475569; margin-top: 5px; }
+
+.radios { display: flex; gap: 8px; flex-wrap: wrap; }
+.radios label { display: flex; align-items: center; gap: 6px; padding: 8px 13px; border: 1px solid #1e293b; border-radius: 8px; font-size: 13px; cursor: pointer; background: #0f172a; }
+.radios label:hover { border-color: #334155; }
+.radios input { accent-color: #fbbf24; }
+.radios label.on { border-color: #fbbf24; color: #fbbf24; }
+
+.checkline { display: flex; align-items: center; gap: 9px; font-size: 13px; }
+.checkline input { accent-color: #fbbf24; width: 16px; height: 16px; }
+
+.btn-primary { background: #16a34a; border: none; border-radius: 8px; color: #fff; padding: 11px 26px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn-primary:disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+.btn-ghost { background: none; border: 1px solid #334155; color: #94a3b8; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+.btn-ghost:hover { border-color: #fbbf24; color: #fbbf24; }
+.btn-danger { background: none; border: 1px solid rgba(248,113,113,0.4); color: #f87171; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+
+.estimate { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 13px 16px; font-size: 14px; }
+.estimate strong { color: #fbbf24; font-size: 19px; }
+.estimate .sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+.preview-wrap { display: flex; flex-direction: column; gap: 8px; }
+.preview-label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+.notif { background: #1c2333; border: 1px solid #2a3550; border-radius: 14px; padding: 12px 14px; display: flex; gap: 11px; align-items: flex-start; }
+.notif .ico { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(140deg,#fbbf24,#b45309); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.notif .txt { min-width: 0; flex: 1; }
+.notif .app { font-size: 11px; color: #94a3b8; margin-bottom: 2px; }
+.notif .t { font-size: 14px; font-weight: 600; word-wrap: break-word; }
+.notif .b { font-size: 13px; color: #cbd5e1; word-wrap: break-word; margin-top: 1px; }
+
+.stat-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 15px 18px; min-width: 160px; }
+.stat-card .label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.stat-card .value { font-size: 23px; font-weight: 700; color: #fbbf24; }
+.stat-card .sub { font-size: 11px; color: #475569; margin-top: 3px; }
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 10px 20px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #1e293b; }
+td { padding: 11px 20px; font-size: 13px; border-bottom: 1px solid #151f31; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+.empty-state { color: #475569; text-align: center; padding: 26px 0; }
+.table-scroll { overflow-x: auto; }
+
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; border: 1px solid currentColor; white-space: nowrap; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block; margin-right: 6px; }
+
+.trigger-row { display: flex; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid #151f31; flex-wrap: wrap; }
+.trigger-row:last-child { border-bottom: none; }
+.trigger-row .name { flex: 1; min-width: 190px; }
+.trigger-row .name .title { font-size: 14px; font-weight: 500; }
+.trigger-row .name .desc { font-size: 12px; color: #64748b; margin-top: 2px; }
+.trigger-row .num { width: 92px; }
+.trigger-row .numlabel { font-size: 11px; color: #64748b; margin-bottom: 4px; }
+
+.toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: #16a34a; color: #fff; padding: 11px 22px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 300; }
+.toast.show { opacity: 1; }
+.toast.err { background: #dc2626; }
+</style>
+</head>
+<body>
+
+<div class="auth-gate" id="auth-gate">
+  <h1>🔔 Push Center</h1>
+  <button onclick="doSignIn()">Sign in with Google</button>
+  <div class="denied" id="denied-msg">Access denied — admin only.</div>
+</div>
+
+<div class="app" id="app">
+  <div class="topbar">
+    <h1>🔔 Video Poker — Push Center</h1>
+    <div class="topbar-right">
+      <span id="who">—</span>
+      <a href="admin.html">Admin Panel</a>
+      <a id="actions-link" target="_blank" rel="noopener">Run poll now ↗</a>
+      <button onclick="firebase.auth().signOut()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="panel">
+      <div class="panel-header">
+        <h2><span class="live-dot"></span> Delivery pipeline</h2>
+        <button onclick="loadPollStatus()">↻ Refresh</button>
+      </div>
+      <div class="panel-body" style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
+        <div class="stat-card">
+          <div class="label">Last poll</div>
+          <div class="value" style="font-size:15px;" id="last-poll">—</div>
+          <div class="sub">system/pushCursor</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Registered devices</div>
+          <div class="value" id="device-total">—</div>
+          <div class="sub" id="device-breakdown">across all players</div>
+        </div>
+        <div class="hint" style="flex:1; min-width:250px;">
+          Campaigns are delivered by the <strong>push-poll</strong> GitHub Actions workflow, which runs
+          every 5&nbsp;minutes. The browser can never hold a service-account key, so a queued campaign
+          goes out on the next poll — or immediately, via <em>Run poll now</em> above.
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="compose" onclick="switchTab('compose')">Compose</button>
+      <button class="tab" data-tab="campaigns" onclick="switchTab('campaigns')">Campaigns</button>
+      <button class="tab" data-tab="triggers" onclick="switchTab('triggers')">Triggers &amp; timing</button>
+      <button class="tab" data-tab="log" onclick="switchTab('log')">Delivery log</button>
+    </div>
+
+    <!-- ================= COMPOSE ================= -->
+    <div class="tab-content active" id="tab-compose">
+      <div class="row" style="align-items:flex-start;">
+        <div style="flex:2; min-width:330px;">
+          <div class="panel">
+            <div class="panel-header"><h2>Message</h2></div>
+            <div class="panel-body">
+              <div class="field">
+                <label for="c-title">Title</label>
+                <input type="text" id="c-title" maxlength="60" placeholder="Tournament tonight" oninput="renderPreview()">
+              </div>
+              <div class="field">
+                <label for="c-body">Body</label>
+                <textarea id="c-body" maxlength="180" placeholder="Doors open at 20:00 — 50,000 chips on the line." oninput="renderPreview()"></textarea>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="c-deeplink">Opens screen</label>
+                  <select id="c-deeplink">
+                    <option value="">Default (Friends → Rooms)</option>
+                    <option value="play">Play</option>
+                    <option value="stats">Stats</option>
+                    <option value="friends">Friends</option>
+                    <option value="settings">Settings</option>
+                  </select>
+                  <div class="hint">Where the app lands when the notification is tapped.</div>
+                </div>
+                <div class="field">
+                  <label for="c-category">Category</label>
+                  <select id="c-category">
+                    <option value="announcement">announcement</option>
+                    <option value="social">social</option>
+                    <option value="leaderboard">leaderboard</option>
+                    <option value="dailyReminder">dailyReminder</option>
+                    <option value="bestHand">bestHand</option>
+                  </select>
+                  <div class="hint">Players can mute each category in Settings.</div>
+                </div>
+              </div>
+              <div class="checkline" style="margin-top:4px;">
+                <input type="checkbox" id="c-respect" checked>
+                <label for="c-respect">Respect players who muted this category</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><h2>Audience</h2></div>
+            <div class="panel-body">
+              <div class="radios" id="aud-radios">
+                <label class="on"><input type="radio" name="aud" value="all" checked onchange="onAudienceChange()"> Everyone</label>
+                <label><input type="radio" name="aud" value="platform" onchange="onAudienceChange()"> By platform</label>
+                <label><input type="radio" name="aud" value="user" onchange="onAudienceChange()"> One player</label>
+                <label><input type="radio" name="aud" value="segment" onchange="onAudienceChange()"> Segment</label>
+              </div>
+
+              <div class="field" id="aud-platform-wrap" style="display:none; margin-top:14px;">
+                <label for="aud-platform">Platform</label>
+                <select id="aud-platform" onchange="estimateAudience()">
+                  <option value="android">Android</option>
+                  <option value="ios">iOS</option>
+                  <option value="web">Web</option>
+                </select>
+              </div>
+
+              <div class="field" id="aud-user-wrap" style="display:none; margin-top:14px;">
+                <label for="aud-user">Player</label>
+                <input type="text" id="aud-user-search" placeholder="Filter players…" oninput="renderUserOptions()" style="margin-bottom:8px;">
+                <select id="aud-user" onchange="estimateAudience()"><option value="">— select player —</option></select>
+                <div class="hint" id="aud-user-devices"></div>
+              </div>
+
+              <div class="field" id="aud-segment-wrap" style="display:none; margin-top:14px;">
+                <label for="aud-segment">Segment</label>
+                <select id="aud-segment" onchange="estimateAudience()">
+                  <option value="activeLast7d">Played in the last 7 days</option>
+                  <option value="inactive3d">Inactive 3+ days</option>
+                  <option value="hasFriends">Has at least one friend</option>
+                  <option value="neverPlayed">Never played a hand</option>
+                </select>
+              </div>
+
+              <div class="estimate" id="aud-estimate" style="margin-top:16px;">Loading players…</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><h2>Schedule</h2></div>
+            <div class="panel-body">
+              <div class="radios" id="sched-radios">
+                <label class="on"><input type="radio" name="sched" value="now" checked onchange="onScheduleChange()"> Send now</label>
+                <label><input type="radio" name="sched" value="at" onchange="onScheduleChange()"> At a time</label>
+                <label><input type="radio" name="sched" value="recurring" onchange="onScheduleChange()"> Repeating</label>
+              </div>
+
+              <div class="row" id="sched-at-wrap" style="display:none; margin-top:14px;">
+                <div class="field">
+                  <label for="sched-at">Send at (your local time)</label>
+                  <input type="datetime-local" id="sched-at" onchange="renderNextRun()">
+                </div>
+              </div>
+
+              <div class="row" id="sched-recurring-wrap" style="display:none; margin-top:14px;">
+                <div class="field">
+                  <label for="sched-start">First send (your local time)</label>
+                  <input type="datetime-local" id="sched-start" onchange="renderNextRun()">
+                </div>
+                <div class="field">
+                  <label for="sched-interval">Repeat every (hours)</label>
+                  <input type="number" id="sched-interval" min="1" max="8760" value="24" onchange="renderNextRun()">
+                </div>
+              </div>
+
+              <div class="hint" id="next-run-hint" style="margin-top:12px;">Goes out on the next poll, within 5 minutes.</div>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:26px;">
+            <button class="btn-primary" id="queue-btn" onclick="createCampaign()">Queue campaign</button>
+            <span id="compose-status" style="font-size:13px; color:#64748b;"></span>
+          </div>
+        </div>
+
+        <div style="flex:1; min-width:250px;">
+          <div class="panel">
+            <div class="panel-header"><h2>Preview</h2></div>
+            <div class="panel-body preview-wrap">
+              <div class="preview-label">Lock screen</div>
+              <div class="notif">
+                <div class="ico">🎰</div>
+                <div class="txt">
+                  <div class="app">Video Poker · now</div>
+                  <div class="t" id="pv-title">Your title</div>
+                  <div class="b" id="pv-body">Your message body appears here.</div>
+                </div>
+              </div>
+              <div class="hint">Exact styling varies by device. Android shows roughly two lines of body text collapsed; iOS shows four.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= CAMPAIGNS ================= -->
+    <div class="tab-content" id="tab-campaigns">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Queued &amp; past campaigns</h2>
+          <button onclick="loadCampaigns()">↻ Refresh</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Message</th><th>Audience</th><th>Schedule</th><th>Status</th><th>Result</th><th></th></tr></thead>
+            <tbody id="campaign-rows"><tr><td colspan="6" class="empty-state">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= TRIGGERS ================= -->
+    <div class="tab-content" id="tab-triggers">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>"You lost your place" triggers</h2>
+          <span class="badge" id="triggers-status" style="color:#64748b;">—</span>
+        </div>
+        <div class="panel-body">
+          <div class="hint" style="margin-bottom:10px;">
+            These fire automatically from the 5-minute poll. The cooldown is per player per trigger —
+            it stops a see-sawing leaderboard from notifying the same person all day.
+          </div>
+          <div id="trigger-rows"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Quiet hours</h2></div>
+        <div class="panel-body">
+          <div class="checkline" style="margin-bottom:14px;">
+            <input type="checkbox" id="q-enabled">
+            <label for="q-enabled">Hold back notifications overnight</label>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="q-start">From (hour)</label>
+              <input type="number" id="q-start" min="0" max="23">
+            </div>
+            <div class="field">
+              <label for="q-end">Until (hour)</label>
+              <input type="number" id="q-end" min="0" max="23">
+            </div>
+            <div class="field">
+              <label for="q-mode">Campaigns during quiet hours</label>
+              <select id="q-mode">
+                <option value="hold">Hold until the window ends</option>
+                <option value="drop">Skip entirely</option>
+              </select>
+            </div>
+          </div>
+          <div class="hint">
+            Evaluated in each player's own local time, from the timezone their app reports.
+            Automatic triggers are always dropped rather than held — a rank change is stale by morning.
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:26px;">
+        <button class="btn-primary" onclick="saveSettings()">Save settings</button>
+        <span id="settings-status" style="font-size:13px; color:#64748b;"></span>
+      </div>
+    </div>
+
+    <!-- ================= LOG ================= -->
+    <div class="tab-content" id="tab-log">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Delivery log — users notified</h2>
+          <button onclick="loadPushLogs()">↻ Refresh</button>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:14px; padding:16px 20px 0;">
+          <div class="stat-card"><div class="label">Users reached</div><div class="value" id="log-users">—</div><div class="sub">distinct users</div></div>
+          <div class="stat-card"><div class="label">Notifications sent</div><div class="value" id="log-sent">—</div><div class="sub">delivered to ≥1 device</div></div>
+          <div class="stat-card"><div class="label">Skipped / failed</div><div class="value" id="log-problem">—</div><div class="sub">muted, quiet hours, cooldown, no device, error</div></div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; padding:16px 20px;">
+          <input type="text" id="log-search" placeholder="Filter by user, title, or uid…" oninput="renderPushLogs()" style="flex:1; min-width:200px;">
+          <select id="log-category" onchange="renderPushLogs()" style="width:auto;">
+            <option value="">All categories</option>
+            <option value="announcement">announcement</option>
+            <option value="social">social</option>
+            <option value="leaderboard">leaderboard</option>
+            <option value="dailyReminder">dailyReminder</option>
+            <option value="bestHand">bestHand</option>
+            <option value="broadcast">broadcast</option>
+          </select>
+          <select id="log-status" onchange="renderPushLogs()" style="width:auto;">
+            <option value="">All statuses</option>
+            <option value="sent">sent</option>
+            <option value="skipped">skipped</option>
+            <option value="failed">failed</option>
+          </select>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Time</th><th>User</th><th>Category</th><th>Notification</th><th>Devices</th><th>Result</th><th>Source</th></tr></thead>
+            <tbody id="log-rows"><tr><td colspan="7" class="empty-state">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var firebaseConfig = {
+    apiKey: "AIzaSyB6m0Yis89jxvm06OFBqxs8P_vADjRXk0U",
+    authDomain: "video-poker-6d665.firebaseapp.com",
+    projectId: "video-poker-6d665",
+    storageBucket: "video-poker-6d665.firebasestorage.app",
+    messagingSenderId: "53702406091",
+    appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e"
+};
+firebase.initializeApp(firebaseConfig);
+var auth = firebase.auth();
+var db = firebase.firestore();
+
+var ADMIN_EMAIL = 'micorlov@gmail.com';
+var POLL_WORKFLOW_URL = 'https://github.com/Micorlov/video-poker-game/actions/workflows/push-poll.yml';
+var CAMPAIGNS = 'pushCampaigns';
+var SETTINGS_DOC = 'config/pushSettings';
+
+// Mirrors DEFAULT_SETTINGS in scripts/lib/pushPolicy.js. Kept in sync by hand:
+// the poller falls back to its own copy, so a mismatch shows stale values here
+// rather than changing behaviour.
+var TRIGGER_META = [
+    { key: 'hourlyTop5',  title: 'Hourly top 5',            desc: 'Bumped out of this hour’s top 5 champions.', cooldown: 6 },
+    { key: 'friendRank',  title: 'Friends leaderboard',     desc: 'Passed by a friend, or the #1 spot changed hands.', cooldown: 6 },
+    { key: 'dailyProfit', title: 'Daily net profit',        desc: 'Dropped out of today’s top N by profit.', cooldown: 12, topN: 10 },
+    { key: 'globalRank',  title: 'All-time global rank',    desc: 'Fell out of the all-time top N. Runs hourly, not every poll.', cooldown: 24, topN: 200 }
+];
+var DEFAULT_QUIET = { enabled: false, startHour: 23, endHour: 8, mode: 'drop' };
+
+var allUsers = [];
+var tokenIndex = [];
+var friendOwners = {};
+var settingsData = null;
+var campaignsUnsub = null;
+var pushLogsData = [];
+
+// ---------- auth ----------
+
+function doSignIn() {
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(err) {
+        console.error('sign-in:', err);
+    });
+}
+
+auth.onAuthStateChanged(function(user) {
+    var gate = document.getElementById('auth-gate');
+    var app = document.getElementById('app');
+    if (!user) {
+        gate.style.display = 'flex';
+        app.classList.remove('visible');
+        return;
+    }
+    if (user.email !== ADMIN_EMAIL) {
+        document.getElementById('denied-msg').style.display = 'block';
+        app.classList.remove('visible');
+        auth.signOut();
+        return;
+    }
+    gate.style.display = 'none';
+    app.classList.add('visible');
+    document.getElementById('who').textContent = user.email;
+    document.getElementById('actions-link').href = POLL_WORKFLOW_URL;
+    loadAll();
+});
+
+function loadAll() {
+    loadPollStatus();
+    loadDirectory();
+    loadCampaigns();
+    loadSettings();
+    loadPushLogs();
+    renderPreview();
+}
+
+function toast(message, isError) {
+    var el = document.getElementById('toast');
+    el.textContent = message;
+    el.className = 'toast show' + (isError ? ' err' : '');
+    setTimeout(function() { el.className = 'toast' + (isError ? ' err' : ''); }, 2600);
+}
+
+function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === name); });
+    document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.toggle('active', c.id === 'tab-' + name); });
+}
+
+// Keeps the pill-style radio borders in step with the actual checked input.
+function syncRadioStyles(containerId, groupName) {
+    var checked = document.querySelector('input[name="' + groupName + '"]:checked');
+    document.querySelectorAll('#' + containerId + ' label').forEach(function(label) {
+        label.classList.toggle('on', label.contains(checked));
+    });
+}
+
+// ---------- directory: users, devices, friend edges ----------
+
+// Everything the audience preview needs is read once, so switching audience
+// type re-estimates instantly instead of re-querying Firestore each time.
+function loadDirectory() {
+    var usersP = db.collection('users').get().then(function(snap) {
+        allUsers = snap.docs.map(function(doc) {
+            var d = doc.data();
+            return {
+                uid: doc.id,
+                displayName: d.displayName || d.email || '(no name)',
+                email: d.email || '',
+                lastPlayedDate: d.lastPlayedDate || null,
+                notificationPrefs: d.notificationPrefs || {}
+            };
+        });
+    });
+
+    var tokensP = db.collectionGroup('fcmTokens').get().then(function(snap) {
+        tokenIndex = snap.docs.map(function(doc) {
+            return { uid: doc.ref.parent.parent.id, platform: doc.get('platform') || 'unknown' };
+        });
+    });
+
+    var friendsP = db.collectionGroup('friends').get().then(function(snap) {
+        friendOwners = {};
+        snap.docs.forEach(function(doc) { friendOwners[doc.ref.parent.parent.id] = true; });
+    }).catch(function() { friendOwners = null; });
+
+    return Promise.all([usersP, tokensP, friendsP]).then(function() {
+        renderDeviceTotals();
+        renderUserOptions();
+        estimateAudience();
+    }).catch(function(err) {
+        console.error('loadDirectory:', err);
+        document.getElementById('aud-estimate').textContent = 'Could not read players: ' + err.code;
+    });
+}
+
+function renderDeviceTotals() {
+    var counts = {};
+    tokenIndex.forEach(function(t) { counts[t.platform] = (counts[t.platform] || 0) + 1; });
+    document.getElementById('device-total').textContent = tokenIndex.length;
+    var parts = Object.keys(counts).sort().map(function(p) { return counts[p] + ' ' + p; });
+    document.getElementById('device-breakdown').textContent = parts.length
+        ? parts.join(' · ')
+        : 'no devices registered yet';
+}
+
+function renderUserOptions() {
+    var query = (document.getElementById('aud-user-search').value || '').trim().toLowerCase();
+    var select = document.getElementById('aud-user');
+    var previous = select.value;
+    var withDevices = {};
+    tokenIndex.forEach(function(t) { withDevices[t.uid] = (withDevices[t.uid] || 0) + 1; });
+
+    var matches = allUsers.filter(function(u) {
+        if (!query) return true;
+        return (u.displayName + ' ' + u.email + ' ' + u.uid).toLowerCase().indexOf(query) !== -1;
+    }).sort(function(a, b) { return (withDevices[b.uid] || 0) - (withDevices[a.uid] || 0); });
+
+    select.innerHTML = '<option value="">— select player —</option>';
+    matches.forEach(function(u) {
+        var count = withDevices[u.uid] || 0;
+        var opt = document.createElement('option');
+        opt.value = u.uid;
+        opt.textContent = u.displayName + ' · ' + (count ? count + ' device' + (count > 1 ? 's' : '') : 'no device');
+        select.appendChild(opt);
+    });
+    if (previous) select.value = previous;
+}
+
+// ---------- audience ----------
+
+function selectedAudience() {
+    var type = (document.querySelector('input[name="aud"]:checked') || {}).value || 'all';
+    return {
+        type: type,
+        platform: type === 'platform' ? document.getElementById('aud-platform').value : null,
+        uid: type === 'user' ? document.getElementById('aud-user').value : null,
+        segment: type === 'segment' ? document.getElementById('aud-segment').value : null
+    };
+}
+
+function onAudienceChange() {
+    var type = selectedAudience().type;
+    document.getElementById('aud-platform-wrap').style.display = type === 'platform' ? 'block' : 'none';
+    document.getElementById('aud-user-wrap').style.display = type === 'user' ? 'block' : 'none';
+    document.getElementById('aud-segment-wrap').style.display = type === 'segment' ? 'block' : 'none';
+    syncRadioStyles('aud-radios', 'aud');
+    estimateAudience();
+}
+
+function daysAgoKey(days) {
+    var d = new Date();
+    d.setUTCDate(d.getUTCDate() - days);
+    return d.toISOString().slice(0, 10);
+}
+
+// Mirrors uidsForSegment() in scripts/lib/audience.js. This is a preview only —
+// the runner re-resolves the audience at send time against live data.
+function uidsInSegment(segment) {
+    if (segment === 'activeLast7d') {
+        var since = daysAgoKey(7);
+        return allUsers.filter(function(u) { return u.lastPlayedDate && u.lastPlayedDate >= since; }).map(function(u) { return u.uid; });
+    }
+    if (segment === 'inactive3d') {
+        var cutoff = daysAgoKey(3);
+        return allUsers.filter(function(u) { return u.lastPlayedDate && u.lastPlayedDate < cutoff; }).map(function(u) { return u.uid; });
+    }
+    if (segment === 'neverPlayed') {
+        return allUsers.filter(function(u) { return !u.lastPlayedDate; }).map(function(u) { return u.uid; });
+    }
+    if (segment === 'hasFriends') {
+        if (!friendOwners) return null;
+        return Object.keys(friendOwners);
+    }
+    return [];
+}
+
+function estimateAudience() {
+    var audience = selectedAudience();
+    var box = document.getElementById('aud-estimate');
+    var category = document.getElementById('c-category').value;
+    var respect = document.getElementById('c-respect').checked;
+
+    if (audience.type === 'user') {
+        var devices = tokenIndex.filter(function(t) { return t.uid === audience.uid; });
+        var info = document.getElementById('aud-user-devices');
+        info.textContent = audience.uid
+            ? (devices.length ? devices.length + ' device(s): ' + devices.map(function(d) { return d.platform; }).join(', ') : 'No registered devices')
+            : '';
+        info.style.color = devices.length ? '#4ade80' : '#f87171';
+    }
+
+    var entries;
+    if (audience.type === 'all') {
+        entries = tokenIndex;
+    } else if (audience.type === 'platform') {
+        entries = tokenIndex.filter(function(t) { return t.platform === audience.platform; });
+    } else if (audience.type === 'user') {
+        entries = audience.uid ? tokenIndex.filter(function(t) { return t.uid === audience.uid; }) : [];
+    } else {
+        var uids = uidsInSegment(audience.segment);
+        if (uids === null) {
+            box.innerHTML = '<strong>?</strong> — friend data could not be read; the size is resolved at send time.';
+            return;
+        }
+        var inSegment = {};
+        uids.forEach(function(uid) { inSegment[uid] = true; });
+        entries = tokenIndex.filter(function(t) { return inSegment[t.uid]; });
+    }
+
+    var muted = {};
+    if (respect) {
+        allUsers.forEach(function(u) { if (u.notificationPrefs[category] === false) muted[u.uid] = true; });
+    }
+    var eligible = entries.filter(function(t) { return !muted[t.uid]; });
+    var users = {};
+    eligible.forEach(function(t) { users[t.uid] = true; });
+    var mutedOut = entries.length - eligible.length;
+
+    box.innerHTML = '<strong>' + eligible.length + '</strong> device' + (eligible.length === 1 ? '' : 's') +
+        ' across ' + Object.keys(users).length + ' player' + (Object.keys(users).length === 1 ? '' : 's') +
+        '<div class="sub">' +
+        (mutedOut ? mutedOut + ' device(s) skipped — muted "' + category + '". ' : '') +
+        'Players with no registered device are never counted.</div>';
+}
+
+// ---------- schedule ----------
+
+function selectedScheduleMode() {
+    return (document.querySelector('input[name="sched"]:checked') || {}).value || 'now';
+}
+
+function onScheduleChange() {
+    var mode = selectedScheduleMode();
+    document.getElementById('sched-at-wrap').style.display = mode === 'at' ? 'flex' : 'none';
+    document.getElementById('sched-recurring-wrap').style.display = mode === 'recurring' ? 'flex' : 'none';
+    syncRadioStyles('sched-radios', 'sched');
+    renderNextRun();
+}
+
+// datetime-local yields a string in the browser's local time; new Date() parses
+// it as local, which is what the admin means by "8pm".
+function firstRunDate() {
+    var mode = selectedScheduleMode();
+    if (mode === 'at') {
+        var at = document.getElementById('sched-at').value;
+        return at ? new Date(at) : null;
+    }
+    if (mode === 'recurring') {
+        var start = document.getElementById('sched-start').value;
+        return start ? new Date(start) : new Date();
+    }
+    return new Date();
+}
+
+function renderNextRun() {
+    var mode = selectedScheduleMode();
+    var hint = document.getElementById('next-run-hint');
+    if (mode === 'now') {
+        hint.textContent = 'Goes out on the next poll, within 5 minutes.';
+        return;
+    }
+    var first = firstRunDate();
+    if (!first || isNaN(first.getTime())) {
+        hint.textContent = 'Pick a date and time.';
+        return;
+    }
+    var text = 'First send: ' + first.toLocaleString() + '.';
+    if (mode === 'recurring') {
+        var hours = parseInt(document.getElementById('sched-interval').value, 10) || 24;
+        text += ' Then every ' + hours + ' hour' + (hours === 1 ? '' : 's') + ' until paused.';
+    }
+    hint.textContent = text + ' Delivered on the first poll after that time.';
+}
+
+// ---------- compose ----------
+
+function renderPreview() {
+    var title = document.getElementById('c-title').value.trim();
+    var body = document.getElementById('c-body').value.trim();
+    document.getElementById('pv-title').textContent = title || 'Your title';
+    document.getElementById('pv-body').textContent = body || 'Your message body appears here.';
+    estimateAudience();
+}
+
+function createCampaign() {
+    var title = document.getElementById('c-title').value.trim();
+    var body = document.getElementById('c-body').value.trim();
+    var status = document.getElementById('compose-status');
+    var audience = selectedAudience();
+    var mode = selectedScheduleMode();
+
+    if (!title || !body) { status.textContent = 'Title and body are required.'; status.style.color = '#f87171'; return; }
+    if (audience.type === 'user' && !audience.uid) { status.textContent = 'Pick a player.'; status.style.color = '#f87171'; return; }
+
+    var first = firstRunDate();
+    if (!first || isNaN(first.getTime())) { status.textContent = 'Pick a valid send time.'; status.style.color = '#f87171'; return; }
+
+    var intervalHours = mode === 'recurring' ? (parseInt(document.getElementById('sched-interval').value, 10) || 24) : null;
+
+    var payload = {
+        title: title,
+        body: body,
+        deepLink: document.getElementById('c-deeplink').value || null,
+        category: document.getElementById('c-category').value,
+        audience: audience,
+        schedule: {
+            mode: mode,
+            sendAt: mode === 'at' ? firebase.firestore.Timestamp.fromDate(first) : null,
+            intervalHours: intervalHours,
+            nextRunAt: firebase.firestore.Timestamp.fromDate(first),
+            lastRunAt: null
+        },
+        respectPrefs: document.getElementById('c-respect').checked,
+        status: 'scheduled',
+        stats: { audienceSize: 0, sent: 0, failed: 0, skipped: 0 },
+        createdBy: (auth.currentUser || {}).email || null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        error: null
+    };
+
+    var button = document.getElementById('queue-btn');
+    button.disabled = true;
+    status.textContent = 'Queueing…';
+    status.style.color = '#fbbf24';
+
+    db.collection(CAMPAIGNS).add(payload).then(function() {
+        button.disabled = false;
+        status.textContent = 'Queued — the poller picks it up within 5 minutes.';
+        status.style.color = '#4ade80';
+        document.getElementById('c-title').value = '';
+        document.getElementById('c-body').value = '';
+        renderPreview();
+        toast('Campaign queued');
+        switchTab('campaigns');
+    }).catch(function(err) {
+        button.disabled = false;
+        status.textContent = 'Failed: ' + (err.code || err.message);
+        status.style.color = '#f87171';
+    });
+}
+
+// ---------- campaigns ----------
+
+var STATUS_COLORS = { scheduled: '#fbbf24', sending: '#60a5fa', sent: '#4ade80', paused: '#94a3b8', failed: '#f87171' };
+
+function audienceLabel(audience) {
+    var a = audience || {};
+    if (a.type === 'platform') return 'Platform · ' + a.platform;
+    if (a.type === 'segment') return 'Segment · ' + a.segment;
+    if (a.type === 'user') {
+        var match = allUsers.filter(function(u) { return u.uid === a.uid; })[0];
+        return 'Player · ' + (match ? match.displayName : (a.uid || '').slice(0, 8) + '…');
+    }
+    return 'Everyone';
+}
+
+function scheduleLabel(schedule) {
+    var s = schedule || {};
+    var next = s.nextRunAt && s.nextRunAt.toDate ? s.nextRunAt.toDate().toLocaleString() : '—';
+    if (s.mode === 'recurring') return 'Every ' + s.intervalHours + 'h · next ' + next;
+    if (s.mode === 'at') return 'Once at ' + next;
+    return 'Immediate · queued ' + next;
+}
+
+function cell(text, color) {
+    var td = document.createElement('td');
+    td.textContent = text;
+    if (color) td.style.color = color;
+    return td;
+}
+
+// Live subscription rather than a one-shot read: the whole point of the status
+// column is watching a campaign flip from scheduled to sent when the poll runs.
+function loadCampaigns() {
+    if (campaignsUnsub) campaignsUnsub();
+    var rows = document.getElementById('campaign-rows');
+    campaignsUnsub = db.collection(CAMPAIGNS).orderBy('createdAt', 'desc').limit(100)
+        .onSnapshot(function(snap) {
+            rows.innerHTML = '';
+            if (snap.empty) {
+                rows.innerHTML = '<tr><td colspan="6" class="empty-state">No campaigns yet</td></tr>';
+                return;
+            }
+            snap.docs.forEach(function(doc) {
+                var c = doc.data();
+                var tr = document.createElement('tr');
+
+                var msg = document.createElement('td');
+                msg.innerHTML = '<div style="font-weight:500;"></div><div style="color:#64748b; font-size:12px; margin-top:2px;"></div>';
+                msg.children[0].textContent = c.title || '—';
+                msg.children[1].textContent = c.body || '';
+                tr.appendChild(msg);
+
+                tr.appendChild(cell(audienceLabel(c.audience)));
+                tr.appendChild(cell(scheduleLabel(c.schedule)));
+                tr.appendChild(cell(c.status || '—', STATUS_COLORS[c.status] || '#94a3b8'));
+
+                var stats = c.stats || {};
+                tr.appendChild(cell(
+                    c.status === 'failed' ? (c.error || 'failed')
+                        : (stats.sent || 0) + ' sent'
+                          + (stats.failed ? ', ' + stats.failed + ' failed' : '')
+                          + (stats.skipped ? ', ' + stats.skipped + ' skipped' : ''),
+                    c.status === 'failed' ? '#f87171' : null
+                ));
+
+                var actions = document.createElement('td');
+                if (c.status === 'scheduled') actions.appendChild(actionButton('Pause', 'btn-ghost', function() { setCampaignStatus(doc.id, 'paused'); }));
+                if (c.status === 'paused') actions.appendChild(actionButton('Resume', 'btn-ghost', function() { setCampaignStatus(doc.id, 'scheduled'); }));
+                actions.appendChild(actionButton('Delete', 'btn-danger', function() { deleteCampaign(doc.id, c.title); }));
+                actions.style.whiteSpace = 'nowrap';
+                tr.appendChild(actions);
+
+                rows.appendChild(tr);
+            });
+        }, function(err) {
+            rows.innerHTML = '<tr><td colspan="6" style="color:#f87171;">Error loading campaigns: ' + err.code + '</td></tr>';
+        });
+}
+
+function actionButton(label, className, onClick) {
+    var b = document.createElement('button');
+    b.textContent = label;
+    b.className = className;
+    b.style.marginLeft = '6px';
+    b.onclick = onClick;
+    return b;
+}
+
+function setCampaignStatus(id, status) {
+    db.collection(CAMPAIGNS).doc(id).update({ status: status })
+        .then(function() { toast(status === 'paused' ? 'Campaign paused' : 'Campaign resumed'); })
+        .catch(function(err) { toast('Failed: ' + err.code, true); });
+}
+
+function deleteCampaign(id, title) {
+    if (!confirm('Delete "' + (title || 'this campaign') + '"? Notifications already delivered are not recalled.')) return;
+    db.collection(CAMPAIGNS).doc(id).delete()
+        .then(function() { toast('Campaign deleted'); })
+        .catch(function(err) { toast('Failed: ' + err.code, true); });
+}
+
+// ---------- triggers & quiet hours ----------
+
+function loadSettings() {
+    db.doc(SETTINGS_DOC).get().then(function(doc) {
+        settingsData = doc.exists ? (doc.data() || {}) : {};
+        renderSettings();
+        var badge = document.getElementById('triggers-status');
+        badge.textContent = doc.exists ? 'Saved settings' : 'Using defaults';
+        badge.style.color = doc.exists ? '#4ade80' : '#64748b';
+    }).catch(function(err) {
+        settingsData = {};
+        renderSettings();
+        document.getElementById('triggers-status').textContent = 'Read failed: ' + err.code;
+    });
+}
+
+function renderSettings() {
+    var triggers = settingsData.triggers || {};
+    var container = document.getElementById('trigger-rows');
+    container.innerHTML = '';
+
+    TRIGGER_META.forEach(function(meta) {
+        var stored = triggers[meta.key] || {};
+        var row = document.createElement('div');
+        row.className = 'trigger-row';
+
+        var name = document.createElement('div');
+        name.className = 'name';
+        name.innerHTML = '<div class="title"></div><div class="desc"></div>';
+        name.children[0].textContent = meta.title;
+        name.children[1].textContent = meta.desc;
+        row.appendChild(name);
+
+        if (meta.topN !== undefined) {
+            row.appendChild(numberField('t-topn-' + meta.key, 'Top N', stored.topN !== undefined ? stored.topN : meta.topN, 1, 1000));
+        }
+        row.appendChild(numberField('t-cd-' + meta.key, 'Cooldown (h)', stored.cooldownHours !== undefined ? stored.cooldownHours : meta.cooldown, 0, 720));
+
+        var toggle = document.createElement('div');
+        toggle.className = 'checkline';
+        var input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = 't-on-' + meta.key;
+        input.checked = stored.enabled !== false;
+        var label = document.createElement('label');
+        label.htmlFor = input.id;
+        label.textContent = 'On';
+        toggle.appendChild(input);
+        toggle.appendChild(label);
+        row.appendChild(toggle);
+
+        container.appendChild(row);
+    });
+
+    var quiet = Object.assign({}, DEFAULT_QUIET, settingsData.quietHours || {});
+    document.getElementById('q-enabled').checked = !!quiet.enabled;
+    document.getElementById('q-start').value = quiet.startHour;
+    document.getElementById('q-end').value = quiet.endHour;
+    document.getElementById('q-mode').value = quiet.mode;
+}
+
+function numberField(id, label, value, min, max) {
+    var wrap = document.createElement('div');
+    wrap.className = 'num';
+    var lab = document.createElement('div');
+    lab.className = 'numlabel';
+    lab.textContent = label;
+    var input = document.createElement('input');
+    input.type = 'number';
+    input.id = id;
+    input.value = value;
+    input.min = min;
+    input.max = max;
+    wrap.appendChild(lab);
+    wrap.appendChild(input);
+    return wrap;
+}
+
+function readNumber(id, fallback) {
+    var el = document.getElementById(id);
+    if (!el) return fallback;
+    var value = parseInt(el.value, 10);
+    return isNaN(value) ? fallback : value;
+}
+
+function saveSettings() {
+    var triggers = {};
+    TRIGGER_META.forEach(function(meta) {
+        triggers[meta.key] = {
+            enabled: document.getElementById('t-on-' + meta.key).checked,
+            cooldownHours: readNumber('t-cd-' + meta.key, meta.cooldown)
+        };
+        if (meta.topN !== undefined) triggers[meta.key].topN = readNumber('t-topn-' + meta.key, meta.topN);
+    });
+
+    // globalRank's throttle is not surfaced as a control — it is a cost guard,
+    // not a preference — so the stored value is carried through untouched.
+    var storedGlobal = (settingsData.triggers || {}).globalRank || {};
+    triggers.globalRank.minRunIntervalMinutes = storedGlobal.minRunIntervalMinutes || 60;
+
+    var payload = {
+        triggers: triggers,
+        quietHours: {
+            enabled: document.getElementById('q-enabled').checked,
+            startHour: readNumber('q-start', DEFAULT_QUIET.startHour),
+            endHour: readNumber('q-end', DEFAULT_QUIET.endHour),
+            mode: document.getElementById('q-mode').value
+        }
+    };
+
+    var status = document.getElementById('settings-status');
+    status.textContent = 'Saving…';
+    status.style.color = '#fbbf24';
+    db.doc(SETTINGS_DOC).set(payload, { merge: true }).then(function() {
+        settingsData = payload;
+        status.textContent = 'Saved — applies from the next poll.';
+        status.style.color = '#4ade80';
+        document.getElementById('triggers-status').textContent = 'Saved settings';
+        document.getElementById('triggers-status').style.color = '#4ade80';
+        toast('Settings saved');
+    }).catch(function(err) {
+        status.textContent = 'Failed: ' + (err.code || err.message);
+        status.style.color = '#f87171';
+    });
+}
+
+// ---------- delivery log ----------
+
+var LOG_STATUS_COLORS = { sent: '#4ade80', skipped: '#fbbf24', failed: '#f87171' };
+
+function loadPushLogs() {
+    var rows = document.getElementById('log-rows');
+    rows.innerHTML = '<tr><td colspan="7" class="empty-state">Loading…</td></tr>';
+    db.collection('pushLogs').orderBy('sentAt', 'desc').limit(200).get().then(function(snap) {
+        pushLogsData = snap.docs.map(function(doc) { return doc.data(); });
+        renderPushLogs();
+    }).catch(function(err) {
+        rows.innerHTML = '<tr><td colspan="7" style="color:#f87171;">Error loading log: ' + err.code + '</td></tr>';
+    });
+}
+
+function logMatches(entry, query, category, status) {
+    if (category && entry.category !== category) return false;
+    if (status && entry.status !== status) return false;
+    if (!query) return true;
+    return [entry.displayName, entry.uid, entry.title, entry.body].join(' ').toLowerCase().indexOf(query) !== -1;
+}
+
+function logResultText(entry) {
+    if (entry.status === 'sent') return '✓ ' + (entry.successCount || 0) + ' delivered' + (entry.failureCount ? ', ' + entry.failureCount + ' failed' : '');
+    if (entry.status === 'skipped') return '– ' + (entry.error || 'skipped');
+    return '✕ ' + (entry.error || 'failed');
+}
+
+function renderPushLogs() {
+    var query = (document.getElementById('log-search').value || '').trim().toLowerCase();
+    var category = document.getElementById('log-category').value;
+    var status = document.getElementById('log-status').value;
+    var filtered = pushLogsData.filter(function(e) { return logMatches(e, query, category, status); });
+
+    var users = {};
+    var sent = 0;
+    filtered.forEach(function(e) { if (e.status === 'sent') { sent++; if (e.uid) users[e.uid] = true; } });
+    document.getElementById('log-users').textContent = Object.keys(users).length;
+    document.getElementById('log-sent').textContent = sent;
+    document.getElementById('log-problem').textContent = filtered.length - sent;
+
+    var rows = document.getElementById('log-rows');
+    rows.innerHTML = '';
+    if (!filtered.length) {
+        rows.innerHTML = pushLogsData.length
+            ? '<tr><td colspan="7" class="empty-state">No entries match these filters</td></tr>'
+            : '<tr><td colspan="7" class="empty-state">No push notifications logged yet</td></tr>';
+        return;
+    }
+    filtered.forEach(function(e) {
+        var sentAt = e.sentAt && e.sentAt.toDate ? e.sentAt.toDate() : null;
+        var devices = (e.platforms || []).length ? e.platforms.join(', ') : (e.tokenCount ? e.tokenCount + ' device(s)' : '—');
+        var tr = document.createElement('tr');
+        tr.appendChild(cell(sentAt ? sentAt.toLocaleString() : '—'));
+        tr.appendChild(cell((e.displayName || 'Unknown') + ' (' + (e.uid || '').slice(0, 8) + '…)'));
+        tr.appendChild(cell(e.category || '—'));
+        tr.appendChild(cell(e.title || '—'));
+        tr.appendChild(cell(devices));
+        tr.appendChild(cell(logResultText(e), LOG_STATUS_COLORS[e.status] || '#94a3b8'));
+        tr.appendChild(cell(e.source || '—', '#64748b'));
+        rows.appendChild(tr);
+    });
+}
+
+// ---------- poll status ----------
+
+function loadPollStatus() {
+    db.doc('system/pushCursor').get().then(function(doc) {
+        var ts = doc.exists && doc.get('lastCheckedAt');
+        document.getElementById('last-poll').textContent = ts ? ts.toDate().toLocaleString() : 'Never';
+    }).catch(function() {
+        document.getElementById('last-poll').textContent = 'Error';
+    });
+}
+
+document.getElementById('c-category').addEventListener('change', estimateAudience);
+document.getElementById('c-respect').addEventListener('change', estimateAudience);
+</script>
+</body>
+</html>

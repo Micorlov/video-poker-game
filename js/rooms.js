@@ -7,6 +7,14 @@ let activeRoomId = null;
 let roomDetailUnsubscribe = null;
 let inlineStake = 10;
 
+// Room invites (roomInvites collection): picker state on the sender side,
+// live incoming-invite list on the recipient side.
+let roomInvitePickerRoomId = null;
+let roomInviteSelection = {};
+let roomInviteAlreadySent = {};
+let incomingRoomInvites = [];
+let roomInvitesUnsubscribe = null;
+
 function getRoomStatus(room) {
     // A room is "playing" if it has more than 1 member; otherwise "open"
     const count = (room.memberUids || []).length;
@@ -16,7 +24,7 @@ function getRoomStatus(room) {
 function pushNetProfit() {
     const user = window.egUser;
     if (!user) return;
-    const netProfit = balance - 500;
+    const netProfit = balance - netProfitBaseline();
     const dailyNetProfit = window.ownDailyNetProfit ? ownDailyNetProfit() : 0;
     const dailyDateKey = window.getDayKey ? getDayKey() : null;
     firebaseSafe(function() {
@@ -65,6 +73,7 @@ function cleanupRooms() {
     activeRoomId = null;
     const modal = document.getElementById('room-detail-modal');
     if (modal) modal.classList.add('hidden');
+    cleanupRoomInvites();
     renderRoomsList();
 }
 
@@ -127,9 +136,13 @@ function renderFriendsRoomsList() {
         const join = roomEl('div', 'roomjoin', status === 'open' ? 'Join Table' : 'Enter Table');
         join.onclick = function() { openRoomDetail(room.id); };
 
+        const invite = roomEl('button', 'room-invite-btn', '+ Invite friends');
+        invite.onclick = function() { openRoomInvitePicker(room.id); };
+
         card.appendChild(head);
         card.appendChild(roomEl('div', 'roommeta', roomMetaLine(room)));
         card.appendChild(join);
+        card.appendChild(invite);
         listEl.appendChild(card);
     });
 }
@@ -147,7 +160,6 @@ function createRoom() {
         nameInput.value = '';
         closeRoomModal();
         showToast('Room created — code: ' + code);
-        loadMyRooms();
     });
 }
 
@@ -167,12 +179,15 @@ function _doCreateRoom(name, stake, callback) {
         }).then(function(ref) {
             return db.collection('rooms').doc(ref.id).collection('members').doc(user.uid).set({
                 displayName: user.displayName || '',
-                netProfit: balance - 500,
+                netProfit: balance - netProfitBaseline(),
                 bestStreak: bestStreak
             }).then(function() {
                 if (callback) callback(code);
-                // Open share sheet
-                if (window.openRoomCreatedSheet) openRoomCreatedSheet(name, code);
+                // Refresh myRooms first so the picker can find the new room,
+                // then go straight into inviting friends.
+                return loadMyRooms().then(function() {
+                    if (window.openRoomInvitePicker) openRoomInvitePicker(ref.id);
+                });
             });
         });
     }, function() { showToast('Could not create room — try again.'); });
@@ -207,7 +222,6 @@ function createRoomInline() {
         nameInput.value = '';
         toggleInlineRoomForm();
         showToast('Room created — code: ' + code);
-        loadMyRooms();
     });
 }
 
@@ -241,7 +255,7 @@ function joinRoomByCode(code) {
                 }).then(function() {
                     return db.collection('rooms').doc(roomDoc.id).collection('members').doc(user.uid).set({
                         displayName: user.displayName || '',
-                        netProfit: balance - 500,
+                        netProfit: balance - netProfitBaseline(),
                         bestStreak: bestStreak,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }, { merge: true });
@@ -324,4 +338,204 @@ function openRoomModal() {
 
 function closeRoomModal() {
     document.getElementById('room-modal').classList.add('hidden');
+}
+
+// --- Room invites: sender side (friend picker) ---
+// Opens the #room-invite-sheet for a room the player is a member of. Friends
+// already in the room are excluded; friends with an unanswered invite from
+// this player show as "Invited" and can't be re-selected.
+function openRoomInvitePicker(roomId) {
+    const user = window.egUser;
+    if (!user) { openSignInModal(); return; }
+    const room = myRooms.find(function(r) { return r.id === roomId; });
+    if (!room) return;
+
+    roomInvitePickerRoomId = roomId;
+    roomInviteSelection = {};
+    roomInviteAlreadySent = {};
+    if (window.setRoomInviteSheetLink) setRoomInviteSheetLink(room.name || 'Room', room.code || '');
+    renderRoomInvitePickerRows(room);
+    openSheet('room-invite-sheet');
+
+    // Mark friends this player already has a pending invite out to.
+    firebaseSafe(function() {
+        return db.collection('roomInvites')
+            .where('fromUid', '==', user.uid)
+            .where('roomId', '==', roomId)
+            .where('status', '==', 'pending')
+            .get().then(function(snap) {
+                snap.forEach(function(d) { roomInviteAlreadySent[d.data().toUid] = true; });
+                renderRoomInvitePickerRows(room);
+            });
+    });
+}
+
+function renderRoomInvitePickerRows(room) {
+    const listEl = document.getElementById('room-invite-friends');
+    const sendBtn = document.getElementById('room-invite-send');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    // friendsList is js/friends.js's top-level `let` — a shared global lexical
+    // binding in the concatenated bundle (NOT window.friendsList).
+    const memberUids = room.memberUids || [];
+    const candidates = friendsList.filter(function(f) {
+        return memberUids.indexOf(f.uid) === -1;
+    });
+
+    if (!candidates.length) {
+        listEl.appendChild(roomEl('div', 'rip-empty',
+            friendsList.length
+                ? 'All your friends are already at this table.'
+                : 'No friends yet — share the link below to invite someone.'));
+        if (sendBtn) sendBtn.classList.add('hidden');
+        return;
+    }
+
+    candidates.forEach(function(f) {
+        const invited = !!roomInviteAlreadySent[f.uid];
+        const row = roomEl('div', 'rip-row' + (roomInviteSelection[f.uid] ? ' selected' : '') + (invited ? ' invited' : ''));
+
+        const avatar = roomEl('span', 'rip-avatar', (f.displayName || '?').charAt(0).toUpperCase());
+        const name = roomEl('span', 'rip-name', f.displayName || 'Player');
+        const check = roomEl('span', 'rip-check', invited ? 'Invited' : (roomInviteSelection[f.uid] ? '✓' : ''));
+
+        if (!invited) {
+            row.onclick = function() {
+                if (roomInviteSelection[f.uid]) delete roomInviteSelection[f.uid];
+                else roomInviteSelection[f.uid] = f.displayName || 'Player';
+                renderRoomInvitePickerRows(room);
+            };
+        }
+
+        row.appendChild(avatar);
+        row.appendChild(name);
+        row.appendChild(check);
+        listEl.appendChild(row);
+    });
+
+    const count = Object.keys(roomInviteSelection).length;
+    if (sendBtn) {
+        sendBtn.classList.toggle('hidden', count === 0);
+        sendBtn.textContent = 'Send Invite' + (count === 1 ? '' : 's') + (count ? ' (' + count + ')' : '');
+    }
+}
+
+function sendRoomInvites() {
+    const user = window.egUser;
+    const roomId = roomInvitePickerRoomId;
+    if (!user || !roomId) return;
+    const room = myRooms.find(function(r) { return r.id === roomId; });
+    const uids = Object.keys(roomInviteSelection);
+    if (!room || !uids.length) return;
+
+    firebaseSafe(function() {
+        return Promise.all(uids.map(function(toUid) {
+            return db.collection('roomInvites').add({
+                roomId: roomId,
+                roomCode: room.code || '',
+                roomName: room.name || 'Room',
+                stake: room.stake || 10,
+                fromUid: user.uid,
+                fromName: user.displayName || 'A friend',
+                toUid: toUid,
+                status: 'pending',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        })).then(function() {
+            showToast(uids.length === 1 ? 'Invite sent!' : uids.length + ' invites sent!');
+            closeSheet('room-invite-sheet');
+            roomInviteSelection = {};
+        });
+    }, function() { showToast('Could not send invites — try again.'); });
+}
+
+// --- Room invites: recipient side (live banners + badges) ---
+function initRoomInviteListener() {
+    const user = window.egUser;
+    if (!user) return;
+    if (roomInvitesUnsubscribe) roomInvitesUnsubscribe();
+    roomInvitesUnsubscribe = db.collection('roomInvites')
+        .where('toUid', '==', user.uid)
+        .where('status', '==', 'pending')
+        .onSnapshot(function(snap) {
+            incomingRoomInvites = [];
+            snap.forEach(function(d) {
+                incomingRoomInvites.push(Object.assign({ id: d.id }, d.data()));
+            });
+            renderRoomInviteBanners();
+            updateRoomInviteBadges();
+        }, function() { /* silently ignore */ });
+}
+
+function cleanupRoomInvites() {
+    if (roomInvitesUnsubscribe) { roomInvitesUnsubscribe(); roomInvitesUnsubscribe = null; }
+    incomingRoomInvites = [];
+    roomInviteSelection = {};
+    roomInvitePickerRoomId = null;
+    const sheet = document.getElementById('room-invite-sheet');
+    if (sheet) sheet.classList.add('hidden');
+    renderRoomInviteBanners();
+    updateRoomInviteBadges();
+}
+
+function renderRoomInviteBanners() {
+    const el = document.getElementById('friends-room-invites');
+    if (!el) return;
+    el.innerHTML = '';
+    incomingRoomInvites.forEach(function(inv) {
+        const banner = roomEl('div', 'room-invite-banner');
+
+        const text = roomEl('div', 'rib-text');
+        text.appendChild(roomEl('span', 'rib-from', inv.fromName || 'A friend'));
+        text.appendChild(document.createTextNode(' invited you to '));
+        text.appendChild(roomEl('span', 'rib-room', inv.roomName || 'a room'));
+        text.appendChild(roomEl('div', 'rib-meta', 'Buy-in ' + (inv.stake || 10)));
+
+        const actions = roomEl('div', 'rib-actions');
+        const accept = roomEl('button', 'rib-accept', 'Join');
+        accept.onclick = function() { acceptRoomInvite(inv.id); };
+        const decline = roomEl('button', 'rib-decline', 'Decline');
+        decline.onclick = function() { declineRoomInvite(inv.id); };
+        actions.appendChild(accept);
+        actions.appendChild(decline);
+
+        banner.appendChild(text);
+        banner.appendChild(actions);
+        el.appendChild(banner);
+    });
+}
+
+function updateRoomInviteBadges() {
+    const count = incomingRoomInvites.length;
+    ['rooms-tab-badge', 'nav-friends-badge'].forEach(function(id) {
+        const badge = document.getElementById(id);
+        if (!badge) return;
+        badge.textContent = String(count);
+        badge.classList.toggle('hidden', count === 0);
+    });
+}
+
+function acceptRoomInvite(inviteId) {
+    const inv = incomingRoomInvites.find(function(i) { return i.id === inviteId; });
+    if (!inv) return;
+    joinRoomByCode(inv.roomCode).then(function(ok) {
+        // If the room is gone, joinRoomByCode already toasted — mark the invite
+        // declined either way so the banner doesn't linger.
+        firebaseSafe(function() {
+            return db.collection('roomInvites').doc(inviteId).update({
+                status: ok ? 'accepted' : 'declined',
+                respondedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+    });
+}
+
+function declineRoomInvite(inviteId) {
+    firebaseSafe(function() {
+        return db.collection('roomInvites').doc(inviteId).update({
+            status: 'declined',
+            respondedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    });
 }

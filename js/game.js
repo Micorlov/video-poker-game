@@ -244,9 +244,54 @@ function restoreGameState() {
 function doRebuy() {
     balance = 500;
     document.getElementById('balance').textContent = balance;
+    // The stack is back to the starting amount, so past referral coins are gone
+    // too — drop them from the net-profit baseline or the board reads negative.
+    if (window.resetReferralBaseline) resetReferralBaseline();
     saveGameState();
     showToast('♻ +500 credits');
     if (window.pushDailyRebuy) pushDailyRebuy();
+}
+
+// Short labels for the always-visible ticker. The full names live in the
+// payout table, so this row only needs enough to be recognisable at a glance.
+const TICKER_LABELS = {
+    'Royal Flush': 'ROYAL',
+    'Straight Flush': 'S. FLUSH',
+    'Wild Royal Flush': 'W. ROYAL',
+    'Four Deuces': '4 DEUCES',
+    'Five of a Kind': 'FIVE',
+    'Four of a Kind': 'QUADS',
+    'Four Aces': '4 ACES',
+    'Four 2s-4s': 'QUADS 2-4',
+    'Four 5s-Ks': 'QUADS 5-K',
+    'Full House': 'HOUSE',
+    'Flush': 'FLUSH',
+    'Straight': 'STRAIGHT',
+    'Three of a Kind': 'TRIPS',
+    'Two Pair': 'TWO PAIR',
+    'Jacks or Better': 'JACKS+'
+};
+
+const TICKER_HAND_COUNT = 4;
+
+function renderPaytableTicker() {
+    const el = document.getElementById('paytable-ticker');
+    if (!el) return;
+    el.innerHTML = '';
+    HAND_ORDERS[gameVariant]
+        .filter(handType => currentPayouts[handType] > 0)
+        .slice(0, TICKER_HAND_COUNT)
+        .forEach(handType => {
+            const item = document.createElement('span');
+            item.className = 'paytable-ticker-item';
+            item.textContent = (TICKER_LABELS[handType] || handType.toUpperCase()) + ' ' + currentPayouts[handType] + '×';
+            el.appendChild(item);
+        });
+}
+
+function renderVariantLabel() {
+    const el = document.getElementById('variant-display');
+    if (el) el.textContent = VARIANT_LABELS[gameVariant];
 }
 
 function renderPayouts() {
@@ -259,6 +304,8 @@ function renderPayouts() {
         row.innerHTML = `<div class="payout-hand">${handType}</div><div class="payout-value">${currentPayouts[handType]}</div>`;
         payoutsEl.appendChild(row);
     });
+    renderPaytableTicker();
+    renderVariantLabel();
 }
 
 function setBet(amount) {
@@ -327,11 +374,16 @@ function updateAllInUI() {
 // --- All In confirmation sheet (slide-to-confirm) ---
 let allInPendingAmount = 0;
 let allInDragging = false;
+// The bet in effect right before ALL IN was confirmed, so the bet buttons
+// can revert to it once the ALL IN hand is done instead of staying stuck
+// on ALL IN for the next hand.
+let betBeforeAllIn = null;
 
 function openAllInSheet() {
-    // Blocked mid-hand for the same reason as setBet(). Checked before the
-    // remaining-uses test so a blocked attempt never spends a daily use.
-    if (gameState !== 'bet') return;
+    // Unlike setBet(), All In is allowed mid-hand: it stakes whatever balance
+    // remains on top of the bet already charged at deal time, so it can't
+    // reproduce the deal-cheap/raise-later exploit that setBet() must block.
+    if (gameState !== 'bet' && gameState !== 'hold') return;
     if (getAllInRemaining() <= 0) {
         showToast('⛔ No ALL INs left — back tomorrow!');
         return;
@@ -342,8 +394,21 @@ function openAllInSheet() {
     }
     const hands = multiHandCount || 1;
     allInPendingAmount = Math.max(1, Math.floor(balance / hands));
+    const stake = allInPendingAmount * hands;
     const amountEl = document.getElementById('allin-sheet-amount');
-    if (amountEl) amountEl.textContent = allInPendingAmount * hands;
+    if (amountEl) amountEl.textContent = stake.toLocaleString();
+    const subEl = document.getElementById('allin-sheet-target');
+    if (subEl) subEl.textContent = gameState === 'hold' ? 'this hand' : 'the next hand';
+
+    // A mid-table hand makes the upside concrete without promising a royal.
+    // Mid-hand, the payout is computed off the raised total stake, not just
+    // the amount being added on top of the bet already on the table.
+    const potentialEl = document.getElementById('allin-sheet-potential');
+    if (potentialEl) {
+        const multiplier = currentPayouts['Full House'] || 0;
+        const newBetPerHand = (gameState === 'hold' ? bet : 0) + allInPendingAmount;
+        potentialEl.textContent = (newBetPerHand * multiplier * hands).toLocaleString();
+    }
     resetAllInSlider();
     openSheet('allin-sheet');
 }
@@ -363,10 +428,22 @@ function resetAllInSlider() {
 }
 
 function confirmAllIn() {
-    // openAllInSheet() already blocks mid-hand; guard the mutation itself too
-    // so a stale open sheet can never raise the stake or spend a daily use.
-    if (gameState !== 'bet') return;
-    setBet(allInPendingAmount);
+    // openAllInSheet() already restricts the gameState; guard the mutation
+    // itself too so a stale open sheet can never run from an invalid state.
+    if (gameState !== 'bet' && gameState !== 'hold') return;
+    if (betBeforeAllIn === null) betBeforeAllIn = bet;
+    if (gameState === 'hold') {
+        // The initial stake was already charged in deal(); only the
+        // additional amount is charged now, and it's charged immediately —
+        // never left to be "raised" before draw() computes the payout.
+        const hands = multiHandCount || 1;
+        balance -= allInPendingAmount * hands;
+        bet += allInPendingAmount;
+        document.getElementById('balance').textContent = balance;
+        updateTotalBetDisplay();
+    } else {
+        setBet(allInPendingAmount);
+    }
     const btn = document.getElementById('bet-allin');
     if (btn) btn.classList.add('selected');
     allInUsesToday++;
@@ -577,9 +654,11 @@ function renderMultiHands(extraResults) {
 function updateMainButton() {
     const btn = document.getElementById('main-btn');
     const isDraw = gameState === 'hold';
+    // Monochrome glyphs, not emoji — colour on this button belongs to the
+    // green surface alone.
     btn.innerHTML = isDraw
-        ? '<span class="main-btn-icon">🔄</span>Draw'
-        : '<span class="main-btn-icon">🎴</span>Deal';
+        ? '<span class="main-btn-icon">↻</span>Draw'
+        : '<span class="main-btn-icon">♠</span>Deal';
     btn.className = isDraw ? 'btn-secondary' : 'btn-primary';
 }
 
@@ -628,7 +707,7 @@ function deal() {
     lastHandType = null;
     const resultEl = document.getElementById('result');
     resultEl.className = 'result-panel';
-    resultEl.textContent = 'Place your bet and deal to play';
+    resultEl.textContent = 'Hold what you want, then set your bet before the draw.';
     document.getElementById('explanation').innerHTML = '';
     if (window.vpRenderHints) vpRenderHints();
     triggerHaptic('MEDIUM');
@@ -730,8 +809,15 @@ function draw() {
     const resultEl = document.getElementById('result');
 
     if (win > 0) {
-        resultEl.className = 'result-panel';
-        resultEl.innerHTML = `<span class="win">🎉 ${handType}! +${win} credits! 🎉</span>`;
+        resultEl.className = 'result-panel result-panel-win';
+        // Hand name, then the payout at display scale with its multiplier
+        // alongside — the number is the news, the multiplier is the context.
+        resultEl.innerHTML =
+            `<span class="result-hand">${handType}</span>` +
+            `<span class="result-amount">` +
+            `<span class="win">+${win.toLocaleString()}</span>` +
+            `<span class="result-mult">${currentPayouts[handType]}×</span>` +
+            `</span>`;
         document.getElementById('explanation').textContent = EXPLANATIONS[handType] || '';
     } else {
         resultEl.className = 'result-panel';
@@ -742,6 +828,10 @@ function draw() {
     renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
 
     gameState = 'bet';
+    if (betBeforeAllIn !== null) {
+        setBet(betBeforeAllIn);
+        betBeforeAllIn = null;
+    }
     updateMainButton();
 }
 
@@ -820,7 +910,7 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         if (isResult) {
             const isPairHand = lastHandType === 'Two Pair' || lastHandType === 'Jacks or Better';
             if (isPairHand) {
-                if (i === winningIndices[0] || i === secondPairIndices[0]) {
+                if (winningIndices.includes(i) || secondPairIndices.includes(i)) {
                     winBadgeText = getWinBadgeText(i, lastHandType);
                 }
             } else {

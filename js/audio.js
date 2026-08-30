@@ -1,6 +1,13 @@
 var audioCtx = null;
     var audioBuffers = {};
     var soundEnabled = true;
+    var voiceEnabled = true;
+    // All synthesized sound effects ("music") route through this gain node so
+    // they sit under the voice announcements (which play at full volume via
+    // the separate Web Speech API) instead of competing with them.
+    var sfxGainNode = null;
+    var MUSIC_VOLUME = 0.25;
+    var VOICE_VOLUME = 1.0;
 
     function initSound() {
         try {
@@ -8,6 +15,14 @@ var audioCtx = null;
             if (stored !== null) soundEnabled = stored === 'true';
         } catch (e) {}
         updateSoundButtonUI();
+    }
+
+    function initVoice() {
+        try {
+            var stored = localStorage.getItem('vp_voice_enabled');
+            if (stored !== null) voiceEnabled = stored === 'true';
+        } catch (e) {}
+        updateVoiceButtonUI();
     }
 
     // Lazy-init the AudioContext on first use. On mobile, this must happen
@@ -21,6 +36,9 @@ var audioCtx = null;
             return;
         }
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        sfxGainNode = audioCtx.createGain();
+        sfxGainNode.gain.value = MUSIC_VOLUME;
+        sfxGainNode.connect(audioCtx.destination);
         generatePreDecodedBuffers();
         // Play a silent buffer immediately to satisfy iOS audio unlock requirements
         try {
@@ -60,7 +78,7 @@ var audioCtx = null;
         try {
             var source = audioCtx.createBufferSource();
             source.buffer = buffer;
-            source.connect(audioCtx.destination);
+            source.connect(sfxGainNode);
             source.start(0);
         } catch (e) {}
     }
@@ -82,6 +100,49 @@ var audioCtx = null;
         if (btn) {
             btn.textContent = soundEnabled ? '🔊' : '🔇';
         }
+    }
+
+    /* Voice Announcements */
+    // Some paytable hand names read awkwardly out loud (e.g. "Four 2s-4s") —
+    // this maps them to a natural spoken phrase. Anything not listed here is
+    // spoken as-is (e.g. "Two Pair", "Full House" already read naturally).
+    var VOICE_HAND_NAMES = {
+        'Four 2s-4s': 'Four of a kind, twos through fours',
+        'Four 5s-Ks': 'Four of a kind, fives through kings'
+    };
+
+    function speakHandName(handType) {
+        if (!voiceEnabled || !handType || handType === 'Nothing') return;
+        if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+        try {
+            var phrase = VOICE_HAND_NAMES[handType] || handType;
+            window.speechSynthesis.cancel();
+            var utterance = new SpeechSynthesisUtterance(phrase);
+            utterance.volume = VOICE_VOLUME;
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+        } catch (e) {}
+    }
+
+    function toggleVoice() {
+        voiceEnabled = !voiceEnabled;
+        try {
+            localStorage.setItem('vp_voice_enabled', voiceEnabled);
+        } catch (e) {}
+        updateVoiceButtonUI();
+        if (voiceEnabled) {
+            speakHandName('Full House');
+        } else if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    function updateVoiceButtonUI() {
+        var btn = document.getElementById('voice-btn');
+        if (btn) btn.classList.toggle('on', voiceEnabled);
+        var toggle = document.getElementById('settings-voice-toggle');
+        if (toggle) toggle.checked = voiceEnabled;
     }
 
     /* Sound Synthesizer Functions */
@@ -182,6 +243,7 @@ var audioCtx = null;
         } else {
             playSound('win');
         }
+        speakHandName(handType);
 
         if (rank <= 2) {
             var resultEl = document.getElementById('result');

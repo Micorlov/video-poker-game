@@ -2,12 +2,22 @@
 // with the rest of the Cloud Functions backend) — same token-cleanup-on-
 // invalid-token logic, just requiring the shared scripts/lib/firebaseAdmin.js
 // instead of a bare `require('firebase-admin')` + Cloud-Functions-managed init.
+//
+// Every automatic trigger routes through here, so this is also where delivery
+// policy is enforced: a caller passing `options.trigger` opts that send into
+// the quiet-hours window and the per-user cooldown configured in
+// config/pushSettings (see scripts/lib/pushPolicy.js). Suppressions are logged
+// as status='skipped' with a reason rather than dropped silently, which is
+// what makes them visible in the admin center's delivery log.
 const { getFirestore, getMessaging } = require('./firebaseAdmin');
 const { logPush } = require('./pushLog');
+const { withinCooldown, isQuietHours, cooldownPatch } = require('./pushPolicy');
 
-async function sendPushToUser(uid, category, notification) {
+async function sendPushToUser(uid, category, notification, options = {}) {
+  const { trigger = null, cooldownHours = 0, settings = null } = options;
   const db = getFirestore();
   const userSnap = await db.doc(`users/${uid}`).get();
+  const userData = userSnap.data() || {};
   const displayName = userSnap.get('displayName') || null;
   const prefs = userSnap.get('notificationPrefs') || {};
 
@@ -24,6 +34,19 @@ async function sendPushToUser(uid, category, notification) {
 
   if (prefs[category] === false) {
     await logPush({ ...base, status: 'skipped', error: 'Category muted in notificationPrefs' });
+    return;
+  }
+
+  // Quiet hours apply to every automatic send, not just rank triggers — a 3am
+  // "someone added you as a friend" is no more welcome than a 3am rank alert.
+  // Cooldowns are per-trigger, so they only apply where a trigger was named.
+  const now = new Date();
+  if (isQuietHours(userData, settings, now)) {
+    await logPush({ ...base, status: 'skipped', error: 'Quiet hours in user local time' });
+    return;
+  }
+  if (trigger && withinCooldown(userData, trigger, cooldownHours, now)) {
+    await logPush({ ...base, status: 'skipped', error: `Cooldown active (${cooldownHours}h) for ${trigger}` });
     return;
   }
 
@@ -48,6 +71,13 @@ async function sendPushToUser(uid, category, notification) {
     failureCount: response.failureCount,
     platforms,
   });
+
+  // Only a delivery that actually reached a device starts the cooldown —
+  // otherwise a user with nothing but stale tokens would be muted for hours
+  // on the strength of a send that never arrived.
+  if (trigger && response.successCount > 0) {
+    await db.doc(`users/${uid}`).set(cooldownPatch(trigger, now), { merge: true });
+  }
 
   const staleTokens = [];
   response.responses.forEach((result, index) => {

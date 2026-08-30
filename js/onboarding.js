@@ -85,12 +85,24 @@ function renderOnboardingDots() {
     const dots = document.getElementById('onboarding-dots');
     if (!dots) return;
     dots.innerHTML = '';
-    ONBOARDING_STEPS.forEach(function(_, i) {
+    // The push step never shows on web, so its dot must not render there —
+    // otherwise the bar shows six dots and skips one on the way through.
+    const visibleSteps = ONBOARDING_STEPS.filter(function(step) {
+        return step !== 'push' || onboardingIsNative();
+    });
+    const activeStep = ONBOARDING_STEPS[onboardingIndex];
+    visibleSteps.forEach(function(step) {
         const dot = document.createElement('span');
-        dot.className = 'onboarding-dot' + (i === onboardingIndex ? ' active' : '');
+        dot.className = 'onboarding-dot' + (step === activeStep ? ' active' : '');
         dots.appendChild(dot);
     });
 }
+
+// The first screen names the reward rather than the direction — it is the
+// only place the chip grant is promised, so it earns the full-width label.
+const ONBOARDING_NEXT_LABELS = {
+    welcome: 'Start with 1,000 chips'
+};
 
 function updateOnboardingNav() {
     const backBtn = document.getElementById('onboarding-back');
@@ -102,6 +114,8 @@ function updateOnboardingNav() {
 
     // Next: hidden on last screen (sign-in CTAs take over)
     nextBtn.classList.toggle('ob-hidden', onboardingIndex === ONBOARDING_STEPS.length - 1);
+
+    nextBtn.textContent = ONBOARDING_NEXT_LABELS[ONBOARDING_STEPS[onboardingIndex]] || 'Next';
 }
 
 function showOnboardingStep(index) {
@@ -160,9 +174,12 @@ function onboardingSignInSucceeded() {
 
 function onboardingEnableNotifications() {
     if (window.registerForPushNotifications) registerForPushNotifications();
-    if (window.egUser && window.setNotificationPref) {
+    // No egUser guard: sign-in is the *next* step, so there is never a user
+    // here. setNotificationPref() buffers until there is one and js/firebase.js
+    // flushes on sign-in — gating on egUser silently threw the opt-in away.
+    if (window.setNotificationPref) {
         ['social', 'leaderboard', 'dailyReminder', 'bestHand'].forEach(function(cat) {
-            if (typeof setNotificationPref === 'function') setNotificationPref(cat, true);
+            setNotificationPref(cat, true);
         });
     }
     advanceOnboarding();

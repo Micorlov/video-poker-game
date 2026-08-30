@@ -14,6 +14,7 @@
 // Cloud Function unchanged in logic.
 const { getFirestore } = require('../lib/firebaseAdmin');
 const { sendPushToUser } = require('../lib/sendPush');
+const { loadSettings } = require('../lib/pushPolicy');
 
 function todayString() {
   return new Date().toISOString().slice(0, 10);
@@ -22,6 +23,9 @@ function todayString() {
 async function dailyComebackReminder() {
   const today = todayString();
   const db = getFirestore();
+  // Quiet hours matter most here: this is the one push that goes to players
+  // who are, by definition, not currently in the app.
+  const settings = await loadSettings();
 
   const staleUsersSnap = await db.collection('users').where('lastPlayedDate', '<', today).get();
   const dueUsers = staleUsersSnap.docs.filter((doc) => doc.get('lastDailyReminderSent') !== today);
@@ -30,7 +34,7 @@ async function dailyComebackReminder() {
     await sendPushToUser(doc.id, 'dailyReminder', {
       title: 'Your ALL IN reset is ready',
       body: 'Come back and claim it before it resets again!',
-    });
+    }, { settings });
     await doc.ref.set({ lastDailyReminderSent: today }, { merge: true });
   }));
 }

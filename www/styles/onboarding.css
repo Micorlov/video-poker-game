@@ -3,7 +3,7 @@
 .onboarding-overlay {
     position: fixed;
     inset: 0;
-    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    background: var(--app-bg);
     z-index: 400;
     display: flex;
     flex-direction: column;
@@ -33,21 +33,24 @@
 }
 
 /* ── Navigation bar ── */
+/* Dots ride above a full-width primary action, matching the deal screen's
+   button rhythm. When Back is hidden the CTA simply takes the whole row. */
 .onboarding-nav {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    padding: 16px 24px max(env(safe-area-inset-bottom, 0px), 24px);
+    gap: 14px 10px;
+    padding: 16px 24px max(env(safe-area-inset-bottom, 0px), 28px);
     flex-shrink: 0;
 }
 
 .onboarding-nav-arrow {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    border: 2px solid var(--border-strong);
-    background: none;
-    color: var(--text);
+    width: 62px;
+    height: 62px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-strong);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.75);
     font-size: 20px;
     cursor: pointer;
     display: flex;
@@ -58,15 +61,27 @@
 }
 
 .onboarding-nav-arrow.ob-hidden {
-    opacity: 0;
-    pointer-events: none;
+    display: none;
+}
+
+.onboarding-dots {
+    order: -1;
+    width: 100%;
+    justify-content: center;
 }
 
 .onboarding-nav-arrow--next {
-    background: #3EC6A0;
-    border-color: #3EC6A0;
-    color: #0a2b1d;
+    background: var(--green);
+    border-color: transparent;
+    color: var(--green-ink);
     font-weight: 700;
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: -0.01em;
+    box-shadow: var(--green-glow);
+    flex: 1;
+    width: auto;
+    height: 62px;
 }
 
 .onboarding-dots {
@@ -76,16 +91,17 @@
 }
 
 .onboarding-dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 999px;
-    background: var(--border-strong);
+    background: rgba(255, 255, 255, 0.2);
     transition: width 0.25s ease, background 0.25s ease;
 }
 
 .onboarding-dot.active {
-    width: 20px;
-    background: var(--gold);
+    width: 22px;
+    background: var(--green);
+    height: 5px;
 }
 
 /* ── Welcome screen ── */
@@ -101,75 +117,96 @@
 
 .ob-card-fan {
     position: relative;
-    width: 180px;
-    height: 140px;
+    width: 100%;
+    max-width: 340px;
+    height: 200px;
     margin: 0 auto 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ob-fan-card {
     position: absolute;
-    width: 88px;
-    height: 120px;
+    width: 112px;
+    height: 158px;
     background: var(--card-face-bg);
-    border-radius: 10px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    border-radius: 18px;
+    box-shadow: 0 22px 44px -18px rgba(0, 0, 0, 0.9);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 22px;
+    justify-content: flex-start;
+    padding: 14px 12px;
+    font-weight: 700;
+    font-size: 34px;
+    letter-spacing: -0.04em;
     color: var(--card-black);
     line-height: 1;
-    gap: 2px;
+    gap: 4px;
+    font-family: var(--font-display);
 }
 
+/* Three spades fanned around a highlighted ace — the shape of the hand the
+   whole game is chasing, readable before a single word is read. */
 .ob-fan-card--left {
-    transform: rotate(-18deg);
-    left: 0;
-    top: 18px;
+    transform: rotate(-16deg) translateX(-88px);
+    align-items: flex-start;
     z-index: 1;
 }
 
 .ob-fan-card--center {
-    left: 50%;
-    transform: translateX(-50%);
-    top: 0;
+    width: 118px;
+    height: 168px;
+    justify-content: space-between;
+    align-items: stretch;
+    padding: 13px;
     z-index: 3;
+    box-shadow: 0 26px 50px -18px rgba(0, 0, 0, 0.95), 0 0 0 2px rgba(22, 193, 114, 0.55);
+}
+
+/* The centre card carries the corner layout of a real card face. */
+.ob-fan-card--center {
+    text-align: left;
+}
+
+.ob-fan-card--center .ob-fan-suit {
+    align-self: flex-end;
 }
 
 .ob-fan-card--right {
-    transform: rotate(18deg);
-    right: 0;
-    top: 18px;
+    transform: rotate(16deg) translateX(88px);
+    align-items: flex-end;
     z-index: 2;
 }
 
 .ob-fan-suit {
-    font-size: 16px;
+    font-size: 28px;
+    line-height: 1;
 }
 
 .ob-welcome-eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    color: var(--gold);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--text-faint);
     text-transform: uppercase;
     margin-bottom: 10px;
 }
 
 .ob-welcome-title {
-    font-size: 30px;
+    font-size: 44px;
     font-weight: 800;
     color: var(--text);
-    line-height: 1.1;
+    line-height: 1.02;
     margin-bottom: 14px;
+    font-family: var(--font-display);
+    letter-spacing: -0.035em;
 }
 
 .ob-welcome-subtitle {
-    font-size: 15px;
+    font-size: 18px;
     color: var(--text-muted);
-    line-height: 1.55;
+    line-height: 1.5;
     margin-bottom: 24px;
     max-width: 280px;
 }
@@ -182,23 +219,23 @@
 }
 
 .ob-pill {
-    padding: 7px 14px;
+    padding: 7px 12px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 13.5px;
     font-weight: 600;
-    border: 1.5px solid var(--border-strong);
-    color: var(--text-muted);
-    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.62);
+    background: var(--surface-raised);
 }
 
 .ob-pill--gold {
-    border-color: var(--gold);
-    color: var(--gold);
+    border-color: rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.62);
 }
 
 .ob-pill--teal {
-    border-color: #3EC6A0;
-    color: #3EC6A0;
+    border-color: rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.62);
 }
 
 /* ── Content screens (hands / gameplay / leaderboard) ── */
@@ -211,16 +248,19 @@
 }
 
 .ob-screen-title {
-    font-size: 24px;
+    font-size: 34px;
     font-weight: 800;
     color: var(--text);
     margin-bottom: 6px;
+    font-family: var(--font-display);
+    line-height: 1.06;
+    letter-spacing: -0.035em;
 }
 
 .ob-screen-subtitle {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-muted);
-    line-height: 1.5;
+    line-height: 1.55;
     margin-bottom: 20px;
 }
 
@@ -243,40 +283,44 @@
 
 .ob-hand-row {
     display: flex;
-    align-items: center;
-    background: var(--panel);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    gap: 10px;
-    border: 1.5px solid transparent;
+    align-items: stretch;
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    gap: 12px;
+    border: 1px solid var(--border);
+    flex-direction: column;
 }
 
 .ob-hand-row--highlight {
-    border-color: var(--gold);
-    background: rgba(212, 175, 55, 0.08);
+    border-color: rgba(22, 193, 114, 0.3);
+    background: rgba(22, 193, 114, 0.1);
 }
 
 .ob-hand-cards {
     display: flex;
-    gap: 3px;
+    gap: 6px;
     flex-shrink: 0;
 }
 
 .ob-mini-card {
-    width: 26px;
-    height: 34px;
-    background: var(--card-face-bg);
-    border-radius: 4px;
+    width: auto;
+    height: auto;
+    background: #F3F5FA;
+    border-radius: 9px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    font-size: 9.5px;
+    font-size: 17px;
     font-weight: 700;
     color: var(--card-black);
     line-height: 1;
-    gap: 1px;
+    gap: 0;
     flex-shrink: 0;
+    font-family: var(--font-display);
+    flex: 1;
+    aspect-ratio: 0.7;
 }
 
 .ob-mini-card--red {
@@ -288,6 +332,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
 }
 
 .ob-hand-name {
@@ -297,9 +342,10 @@
 }
 
 .ob-hand-payout {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--gold);
+    font-size: 20px;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: var(--font-display);
 }
 
 /* ── Gameplay mockup (screen 3) ── */
@@ -333,7 +379,8 @@
 .ob-mockup-stat-value {
     font-size: 20px;
     font-weight: 800;
-    color: var(--gold);
+    color: var(--text);
+    font-family: var(--font-display);
 }
 
 .ob-mockup-stat--right {
@@ -373,8 +420,8 @@
     top: -9px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--gold);
-    color: #0a2b1d;
+    background: var(--green);
+    color: var(--green-ink);
     font-size: 8px;
     font-weight: 800;
     letter-spacing: 0.06em;
@@ -386,15 +433,16 @@
 .ob-mockup-draw-btn {
     width: 100%;
     padding: 11px;
-    background: #3EC6A0;
+    background: var(--green);
     border: none;
     border-radius: var(--radius-sm);
-    color: #0a2b1d;
+    color: var(--green-ink);
     font-size: 15px;
     font-weight: 700;
     margin-bottom: 10px;
     cursor: default;
     pointer-events: none;
+    margin-top: 12px;
 }
 
 .ob-mockup-bets {
@@ -404,7 +452,7 @@
 
 .ob-mockup-bet {
     flex: 1;
-    padding: 7px 2px;
+    padding: 0 4px;
     background: var(--felt-600);
     border: none;
     border-radius: 8px;
@@ -413,58 +461,88 @@
     font-weight: 600;
     cursor: default;
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 38px;
 }
 
 .ob-mockup-bet--active {
-    background: #3EC6A0;
-    color: #0a2b1d;
+    background: rgba(22, 193, 114, 0.22);
+    color: var(--text);
+    box-shadow: 0 0 0 2px var(--green);
+    border-color: transparent;
 }
 
 .ob-mockup-bet--allin {
-    background: var(--gold);
-    color: #0a2b1d;
+    background: var(--green-dim);
+    color: var(--green-light);
     position: relative;
+    border: 1px solid rgba(22, 193, 114, 0.45);
+    flex-direction: column;
+    gap: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
 }
 
 .ob-allin-badge {
-    position: absolute;
+    position: static;
     top: -6px;
     right: -3px;
-    background: var(--red);
-    color: white;
-    font-size: 8px;
-    font-weight: 800;
+    background: none;
+    color: rgba(255, 107, 170, 0.65);
+    font-size: 9px;
+    font-weight: 600;
     width: 14px;
     height: 14px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
+    padding: 0;
+    letter-spacing: 0;
+    white-space: nowrap;
 }
 
 /* ── Leaderboard mockup (screen 4) ── */
 .ob-lb-tabs {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     margin-bottom: 14px;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
 }
 
 .ob-lb-tab {
-    padding: 7px 16px;
-    border-radius: 999px;
-    border: 1.5px solid var(--border-strong);
+    padding: 0;
+    border-radius: 11px;
+    border: none;
     background: none;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.5);
     font-size: 13px;
     font-weight: 600;
     cursor: default;
     pointer-events: none;
+    flex: 1;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ob-lb-tab--active {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #0a2b1d;
+    background: var(--green);
+    border-color: transparent;
+    color: var(--green-ink);
+    font-weight: 700;
 }
 
 .ob-lb-header {
@@ -501,7 +579,7 @@
 }
 
 .ob-lb-row--you {
-    background: rgba(62, 198, 160, 0.1);
+    background: rgba(22, 193, 114, 0.12);
     border: 1px solid rgba(62, 198, 160, 0.25);
 }
 
@@ -517,8 +595,8 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: var(--gold);
-    color: #0a2b1d;
+    background: var(--green);
+    color: var(--green-ink);
     font-size: 13px;
     font-weight: 800;
     display: flex;
@@ -528,8 +606,8 @@
 }
 
 .ob-lb-avatar--dim {
-    background: var(--felt-600);
-    color: var(--text-muted);
+    background: var(--surface-hover);
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .ob-lb-name {
@@ -570,10 +648,13 @@
 }
 
 .ob-push-title {
-    font-size: 24px;
+    font-size: 40px;
     font-weight: 800;
     color: var(--text);
     margin-bottom: 10px;
+    font-family: var(--font-display);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
 }
 
 .ob-push-subtitle {
@@ -607,13 +688,13 @@
 .ob-check-icon {
     width: 22px;
     height: 22px;
-    border-radius: 50%;
-    background: #3EC6A0;
+    border-radius: 7px;
+    background: rgba(22, 193, 114, 0.18);
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #0a2b1d;
+    color: var(--green-light);
     font-size: 13px;
     font-weight: 800;
 }
@@ -622,20 +703,23 @@
     width: 100%;
     max-width: 300px;
     padding: 16px;
-    background: #3EC6A0;
+    background: var(--green);
     border: none;
-    border-radius: 999px;
-    color: #0a2b1d;
-    font-size: 16px;
+    border-radius: var(--radius-md);
+    color: var(--green-ink);
+    font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
+    font-family: var(--font-display);
+    box-shadow: var(--green-glow);
 }
 
+/* A quiet decline — the design never competes with its own primary action. */
 .ob-not-now {
     background: none;
     border: none;
-    color: var(--gold);
+    color: var(--text-faint);
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
@@ -654,10 +738,13 @@
 }
 
 .ob-signin-title {
-    font-size: 26px;
+    font-size: 40px;
     font-weight: 800;
     color: var(--text);
     margin-bottom: 10px;
+    font-family: var(--font-display);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
 }
 
 .ob-signin-subtitle {
@@ -674,28 +761,41 @@
     justify-content: center;
     gap: 10px;
     width: 100%;
-    max-width: 300px;
-    padding: 16px;
-    background: white;
+    max-width: 340px;
+    padding: 0 16px;
+    background: var(--green);
     border: none;
-    border-radius: 999px;
-    color: #111;
-    font-size: 16px;
+    border-radius: var(--radius-md);
+    color: var(--green-ink);
+    font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
+    font-family: var(--font-display);
+    box-shadow: var(--green-glow);
+    height: 62px;
 }
 
 .ob-guest-link {
-    background: none;
-    border: none;
-    color: var(--gold);
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    color: rgba(255, 255, 255, 0.75);
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     padding: 6px;
-    text-decoration: underline;
+    text-decoration: none;
     text-underline-offset: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 56px;
+    margin-top: 12px;
+    border-radius: var(--radius-md);
+    max-width: 340px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .ob-signin-error {
@@ -703,4 +803,8 @@
     font-size: 13px;
     margin-bottom: 10px;
     min-height: 18px;
+}
+
+.ob-hand-row--highlight .ob-hand-payout {
+    color: var(--green-light);
 }

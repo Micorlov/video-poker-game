@@ -2,43 +2,95 @@
     max-width: 460px;
     min-height: 100vh;
     margin: 0 auto;
-    padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) calc(var(--nav-height) + 24px) max(16px, env(safe-area-inset-left));
+    padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(var(--nav-height) + var(--nav-gap) + 40px) max(20px, env(safe-area-inset-left));
     position: relative;
 }
 
+/* --- Top status row: tournament timer on the left, streak on the right --- */
 .brandrow {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
+    gap: 10px;
+    margin-bottom: 18px;
 }
 
 .app-title {
-    font-size: 24px;
+    font-family: var(--font-display);
+    font-size: 22px;
     font-weight: 800;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.03em;
+}
+
+/* Status chips read as etched glass, not buttons — they carry state, and
+   only the countdown itself is allowed to use the scarcity gold. */
+.tpill,
+.streak-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
 }
 
 .tpill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--border-strong);
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 12px;
+    padding-left: 10px;
+}
+
+.tpill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px 2px rgba(22, 193, 114, 0.7);
+    flex-shrink: 0;
+}
+
+.tpill .tour-time {
+    font-size: 13px;
     font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
     color: var(--gold);
-    cursor: pointer;
+}
+
+.tour-chev {
+    font-size: 9px;
+    color: var(--text-faint);
+}
+
+.streak-pill {
+    cursor: default;
+}
+
+.streak-pill .streak-pill-value {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
 }
 
 .texpand {
     margin-bottom: 16px;
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 12px;
-    padding: 8px 10px;
-    font-size: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
     color: var(--text-muted);
     display: flex;
     justify-content: space-between;
@@ -53,13 +105,16 @@
 }
 
 .screen-title {
-    font-size: 26px;
-    font-weight: 700;
-    margin-bottom: 16px;
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+    margin-bottom: 18px;
 }
 
 .panel {
-    background: var(--panel);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 16px;
@@ -70,19 +125,19 @@
 }
 
 .section-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--text-muted);
-    margin: 20px 2px 8px;
+    color: var(--text-faint);
+    margin: 22px 2px 9px;
 }
 
 .section-label:first-child {
     margin-top: 0;
 }
 
-/* --- Bottom nav --- */
+/* --- Bottom nav: a floating glass pill, inset from every edge --- */
 .bottom-nav {
     position: fixed;
     left: 0;
@@ -91,41 +146,109 @@
     z-index: 50;
     display: flex;
     justify-content: center;
-    gap: 0;
-    background: color-mix(in srgb, var(--felt-800) 92%, transparent);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-top: 1px solid var(--border);
-    padding: 8px max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    padding: 0 max(16px, env(safe-area-inset-right)) calc(var(--nav-gap) + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    pointer-events: none;
 }
 
 .bottom-nav-inner {
     width: 100%;
-    max-width: 460px;
+    max-width: 428px;
+    height: var(--nav-height);
     display: flex;
+    align-items: center;
+    padding: 0 8px;
+    border-radius: var(--radius-xl);
+    background: var(--nav-glass);
+    border: 1px solid var(--nav-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.9);
+    pointer-events: auto;
 }
 
 .nav-btn {
     flex: 1;
+    height: 66px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    justify-content: center;
+    gap: 6px;
     background: none;
     border: none;
-    padding: 6px 4px;
+    border-radius: var(--radius-md);
     color: var(--text-faint);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
+    letter-spacing: 0.05em;
     cursor: pointer;
+    transition: color 0.16s, background 0.16s;
     -webkit-tap-highlight-color: transparent;
 }
 
 .nav-btn .nav-icon {
-    font-size: 20px;
+    font-size: 22px;
     line-height: 1;
 }
 
 .nav-btn.active {
-    color: var(--gold);
+    color: var(--green);
+    background: var(--green-dim);
+    font-weight: 700;
+}
+
+/* =========================================================================
+   Desktop: present the phone, don't stretch into the space.
+
+   This is a phone design — a single column, a fixed bottom nav, a sticky bet
+   dock. On a wide screen the honest thing is to show it as what it is rather
+   than strand a 460px column in an empty page.
+
+   The transform on .shell is load-bearing, not decoration: it makes the
+   element a containing block for its position:fixed descendants, so the
+   bottom nav, sheets and onboarding overlay resolve against the frame
+   instead of escaping to the browser viewport.
+   ========================================================================= */
+@media (min-width: 620px) {
+    html {
+        background: #05100D;
+    }
+
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: none;
+    }
+
+    body::before {
+        display: none;
+    }
+
+    .shell {
+        position: relative;
+        width: 412px;
+        height: min(calc(100vh - 48px), 900px);
+        flex: none;
+        overflow: hidden;
+        border-radius: 46px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--app-bg);
+        box-shadow: 0 50px 90px -30px rgba(0, 0, 0, 0.95),
+                    0 0 0 10px rgba(255, 255, 255, 0.03);
+        transform: translateZ(0);
+    }
+
+    /* The frame scrolls its own content; the page itself never does. */
+    .app {
+        height: 100%;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: none;
+    }
+
+    .app::-webkit-scrollbar {
+        display: none;
+    }
 }

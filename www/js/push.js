@@ -41,9 +41,29 @@ function isPushSupported() {
 }
 window.isPushSupported = isPushSupported;
 
+// FCM hands over the token as soon as the OS answers, which is routinely
+// before Firebase auth has resolved. Onboarding makes that the normal case:
+// the push step runs a whole screen ahead of sign-in, so at the moment the
+// token arrives there is no uid to file it under. Dropping it there lost it
+// permanently — nothing re-registers afterwards, because showing the push
+// screen already set vp_push_permission_asked. Hold it instead, and write it
+// the moment a user exists.
+let pendingFcmToken = null;
+let pendingFcmPlatform = null;
+let pendingNotificationPrefs = null;
+
+function currentPushPlatform(platform) {
+    return platform || (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web');
+}
+
 function saveFcmToken(token, platform) {
-    if (!window.egUser || typeof db === 'undefined') return;
-    var p = platform || (window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'web');
+    if (!token) return;
+    var p = currentPushPlatform(platform);
+    if (!window.egUser || typeof db === 'undefined') {
+        pendingFcmToken = token;
+        pendingFcmPlatform = p;
+        return;
+    }
     firebaseSafe(function() {
         return db.collection('users').doc(window.egUser.uid)
             .collection('fcmTokens').doc(token)
@@ -56,7 +76,11 @@ function saveFcmToken(token, platform) {
 }
 
 function setNotificationPref(category, enabled) {
-    if (!window.egUser || typeof db === 'undefined') return;
+    if (!window.egUser || typeof db === 'undefined') {
+        pendingNotificationPrefs = pendingNotificationPrefs || {};
+        pendingNotificationPrefs[category] = !!enabled;
+        return;
+    }
     const prefs = {};
     prefs[category] = !!enabled;
     firebaseSafe(function() {
@@ -65,6 +89,61 @@ function setNotificationPref(category, enabled) {
     });
 }
 window.setNotificationPref = setNotificationPref;
+
+// Quiet hours (scripts/lib/pushPolicy.js) are evaluated in each player's own
+// local time, so the server needs their UTC offset. getTimezoneOffset() returns
+// minutes BEHIND UTC, which is the sign convention pushPolicy.js expects.
+function saveTimezoneOffset() {
+    if (!window.egUser || typeof db === 'undefined') return;
+    firebaseSafe(function() {
+        return db.collection('users').doc(window.egUser.uid)
+            .set({ timezoneOffset: new Date().getTimezoneOffset() }, { merge: true });
+    });
+}
+
+// Called from js/firebase.js once onAuthStateChanged reports a signed-in user.
+function flushPendingPushRegistration() {
+    if (!window.egUser || typeof db === 'undefined') return;
+
+    saveTimezoneOffset();
+
+    if (pendingFcmToken) {
+        var token = pendingFcmToken;
+        var platform = pendingFcmPlatform;
+        pendingFcmToken = null;
+        pendingFcmPlatform = null;
+        saveFcmToken(token, platform);
+    }
+
+    if (pendingNotificationPrefs) {
+        var prefs = pendingNotificationPrefs;
+        pendingNotificationPrefs = null;
+        Object.keys(prefs).forEach(function(category) {
+            setNotificationPref(category, prefs[category]);
+        });
+    }
+}
+window.flushPendingPushRegistration = flushPendingPushRegistration;
+
+// FCM tokens rotate, and a rotated token is only handed over in response to a
+// fresh register() call. Without this a user who granted permission once would
+// keep a stale token in Firestore forever and silently stop receiving pushes.
+function refreshPushRegistration() {
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        const PushNotifications = window.Capacitor.Plugins && window.Capacitor.Plugins.PushNotifications;
+        if (!PushNotifications || !PushNotifications.checkPermissions) return;
+        PushNotifications.checkPermissions().then(function(status) {
+            if (status && status.receive === 'granted') PushNotifications.register();
+        }).catch(function(err) { console.warn('Push permission check failed:', err); });
+        return;
+    }
+    // Web re-issues the token through getToken() on every registration call,
+    // and only prompts when permission has not been decided yet.
+    if (window.Notification && Notification.permission === 'granted') {
+        registerForPushNotifications();
+    }
+}
+window.refreshPushRegistration = refreshPushRegistration;
 
 function initPushListeners() {
     if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) {
@@ -81,10 +160,18 @@ function initPushListeners() {
         console.warn('Push registration error:', err);
     });
 
-    // Minimal/generic deep-link: all current push categories (social, leaderboard,
-    // bestHand) surface inside the Friends/Leaderboard screen, so just land there.
-    PushNotifications.addListener('pushNotificationActionPerformed', function() {
+    // Campaigns composed in push-admin.html may name a destination screen in
+    // their data payload. Everything else (social, leaderboard, bestHand)
+    // surfaces inside the Friends/Leaderboard screen, so that stays the
+    // default — on the rooms sub-tab, where invites and room activity live.
+    PushNotifications.addListener('pushNotificationActionPerformed', function(action) {
+        var data = (action && action.notification && action.notification.data) || {};
+        if (data.deepLink && window.showScreen) {
+            showScreen(data.deepLink);
+            return;
+        }
         if (window.showScreen) showScreen('friends');
+        if (window.setFriendsTab) setFriendsTab('rooms');
     });
 }
 initPushListeners();

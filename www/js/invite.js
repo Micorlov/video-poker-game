@@ -1,5 +1,6 @@
-// Invites & Sharing — two bottom sheets (invite friends, room created),
-// clipboard copy, OS share sheet, WhatsApp/Telegram intents, deep-link handling.
+// Invites & Sharing — invite-friends sheet, the link half of the room-invite
+// sheet, clipboard copy, native OS share sheet, WhatsApp/Telegram intents,
+// deep-link handling. The room-invite friend picker itself is in js/rooms.js.
 
 // --- Generic sheet helpers ---
 function openSheet(sheetId) {
@@ -22,29 +23,85 @@ function openInviteSheet() {
     const copyBtn = document.getElementById('invite-sheet-copy');
     copyBtn.textContent = 'Copy';
     copyBtn.classList.remove('copied');
+    if (window.renderInviteRewardLine) renderInviteRewardLine();
     openSheet('invite-sheet');
+}
+
+// Shared clipboard write with the textarea fallback; the per-surface feedback
+// (button label swap, chip highlight) is the caller's job via onCopied.
+function copyTextToClipboard(text, onCopied) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(onCopied)
+            .catch(function() { fallbackCopySheet(text, onCopied); });
+    } else {
+        fallbackCopySheet(text, onCopied);
+    }
+}
+
+function copyBtnFeedback(copyBtn) {
+    copyBtn.textContent = 'Copied!';
+    copyBtn.classList.add('copied');
+    setTimeout(function() {
+        copyBtn.textContent = 'Copy';
+        copyBtn.classList.remove('copied');
+    }, 2000);
 }
 
 function copyInviteSheetLink() {
     const linkEl = document.getElementById('invite-sheet-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const copyBtn = document.getElementById('invite-sheet-copy');
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function() {
-            copyBtn.textContent = 'Copied!';
-            copyBtn.classList.add('copied');
-            setTimeout(function() {
-                copyBtn.textContent = 'Copy';
-                copyBtn.classList.remove('copied');
-            }, 2000);
-        }).catch(function() { fallbackCopySheet(link, copyBtn); });
-    } else {
-        fallbackCopySheet(link, copyBtn);
-    }
+    copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
 }
 
-function fallbackCopySheet(text, btn) {
+// Tap-to-copy on the Friends screen's "Your code" chip.
+function copyOwnCode() {
+    const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
+    if (!code) { showToast('Sign in to get your friend code.'); return; }
+    const chip = document.getElementById('own-code-chip');
+    const hint = document.getElementById('own-code-hint');
+    copyTextToClipboard(code, function() {
+        if (chip) chip.classList.add('copied');
+        if (hint) hint.textContent = 'Copied ✓';
+        setTimeout(function() {
+            if (chip) chip.classList.remove('copied');
+            if (hint) hint.textContent = 'Tap to copy';
+        }, 2000);
+    });
+}
+
+// --- Native OS share sheet, with the custom bottom sheet as fallback ---
+// Order: Capacitor Share plugin (native app) → navigator.share (mobile web)
+// → the existing invite sheet (desktop / unsupported). A user-cancelled share
+// is not an error and must not trigger the fallback sheet.
+function shareViaNative(title, message, link) {
+    const CapShare = window.Capacitor && window.Capacitor.isNativePlatform &&
+        window.Capacitor.isNativePlatform() &&
+        window.Capacitor.Plugins && window.Capacitor.Plugins.Share;
+    if (CapShare) {
+        return CapShare.share({ title: title, text: message, url: link, dialogTitle: title })
+            .then(function() { return true; })
+            .catch(function() { return true; /* user cancelled */ });
+    }
+    if (navigator.share) {
+        return navigator.share({ text: message + '\n' + link })
+            .then(function() { return true; })
+            .catch(function(err) { return !!(err && err.name === 'AbortError'); });
+    }
+    return Promise.resolve(false);
+}
+
+function shareInviteNative() {
+    const user = window.egUser;
+    if (!user) { openSignInModal(); return; }
+    const link = getInviteLink();
+    if (!link) { showToast('Could not generate invite link.'); return; }
+    shareViaNative('Royal Video Poker', friendInviteMessage(), link).then(function(handled) {
+        if (!handled) openInviteSheet();
+    });
+}
+
+function fallbackCopySheet(text, onCopied) {
     var ta = document.createElement('textarea');
     ta.value = text;
     ta.style.position = 'fixed';
@@ -53,77 +110,95 @@ function fallbackCopySheet(text, btn) {
     ta.select();
     try {
         document.execCommand('copy');
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        if (onCopied) onCopied();
     } catch (e) {
         showToast('Could not copy — tap and hold the link.');
     }
     document.body.removeChild(ta);
 }
 
-function shareFriendInviteViaWhatsApp() {
-    const linkEl = document.getElementById('invite-sheet-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
+// One handoff for every share chip. The wa.me / t.me web endpoints are used on
+// native too: they redirect straight into the installed app, and unlike the
+// whatsapp:// and tg:// schemes they show the friend a real page instead of
+// failing silently when the messenger is missing.
+//
+// Telegram takes the link and the message as separate parameters, so the
+// message passed in here must never already contain the link — otherwise the
+// share preview repeats it.
+function openShareChannel(channel, message, link) {
+    let url;
+    if (channel === 'telegram') {
+        url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
+              '&text=' + encodeURIComponent(message);
+    } else {
+        url = 'https://wa.me/?text=' + encodeURIComponent(message + '\n' + link);
+    }
+    window.open(url, '_blank');
+}
+
+function sheetLink(id) {
+    const el = document.getElementById(id);
+    return el ? (el.getAttribute('data-link') || el.textContent) : '';
+}
+
+function friendInviteMessage() {
     const user = window.egUser;
-    const name = user ? (user.displayName || 'A friend') : 'A friend';
-    const text = encodeURIComponent(name + ' wants to play Video Poker with you! Join here: ' + link);
-    window.open('https://wa.me/?text=' + text, '_blank');
+    const name = (user && user.displayName) || 'A friend';
+    const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
+    return name + ' is playing Royal Video Poker and wants you at the table.' +
+        (code ? '\nFriend code: ' + code : '');
+}
+
+function shareFriendInviteViaWhatsApp() {
+    openShareChannel('whatsapp', friendInviteMessage(), sheetLink('invite-sheet-link'));
 }
 
 function shareFriendInviteViaTelegram() {
-    const linkEl = document.getElementById('invite-sheet-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const user = window.egUser;
-    const name = user ? (user.displayName || 'A friend') : 'A friend';
-    const text = encodeURIComponent(name + ' wants to play Video Poker with you! Join here: ' + link);
-    window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
+    openShareChannel('telegram', friendInviteMessage(), sheetLink('invite-sheet-link'));
 }
 
-// --- Room Created bottom sheet ---
-function openRoomCreatedSheet(roomName, roomCode) {
-    const base = getShareBaseUrl();
-    const link = base + '?join=' + encodeURIComponent(roomCode);
-    document.getElementById('room-created-name').textContent = roomName;
-    document.getElementById('room-created-link').textContent = link;
-    document.getElementById('room-created-link').setAttribute('data-link', link);
-    document.getElementById('room-created-link').setAttribute('data-code', roomCode);
-    // Reset copy button
-    const copyBtn = document.getElementById('room-created-copy');
+// --- Room invite sheet: share-link half ---
+// The friend-picker half lives in js/rooms.js (openRoomInvitePicker); these
+// helpers fill in the link row and share chips of #room-invite-sheet.
+function setRoomInviteSheetLink(roomName, roomCode) {
+    const link = buildRoomLink(roomCode);
+    document.getElementById('room-invite-name').textContent = roomName;
+    const linkEl = document.getElementById('room-invite-link');
+    linkEl.textContent = link;
+    linkEl.setAttribute('data-link', link);
+    linkEl.setAttribute('data-code', roomCode);
+    const copyBtn = document.getElementById('room-invite-copy');
     copyBtn.textContent = 'Copy';
     copyBtn.classList.remove('copied');
-    openSheet('room-created-sheet');
 }
 
 function copyRoomLink() {
-    const linkEl = document.getElementById('room-created-link');
+    const linkEl = document.getElementById('room-invite-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const copyBtn = document.getElementById('room-created-copy');
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(function() {
-            copyBtn.textContent = 'Copied!';
-            copyBtn.classList.add('copied');
-            setTimeout(function() { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
-        }).catch(function() { fallbackCopySheet(link, copyBtn); });
-    } else {
-        fallbackCopySheet(link, copyBtn);
-    }
+    const copyBtn = document.getElementById('room-invite-copy');
+    copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
+}
+
+function roomInviteMessage() {
+    const name = document.getElementById('room-invite-name').textContent;
+    const code = document.getElementById('room-invite-link').getAttribute('data-code') || '';
+    return 'Join my poker room "' + name + '" on Royal Video Poker.' +
+        (code ? '\nRoom code: ' + code : '');
+}
+
+function shareRoomInviteNative() {
+    shareViaNative('Royal Video Poker', roomInviteMessage(), sheetLink('room-invite-link'))
+        .then(function(handled) {
+            if (!handled) showToast('Use Copy, WhatsApp or Telegram to share.');
+        });
 }
 
 function shareRoomViaWhatsApp() {
-    const linkEl = document.getElementById('room-created-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const name = document.getElementById('room-created-name').textContent;
-    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
-    window.open('https://wa.me/?text=' + text, '_blank');
+    openShareChannel('whatsapp', roomInviteMessage(), sheetLink('room-invite-link'));
 }
 
 function shareRoomViaTelegram() {
-    const linkEl = document.getElementById('room-created-link');
-    const link = linkEl.getAttribute('data-link') || linkEl.textContent;
-    const name = document.getElementById('room-created-name').textContent;
-    const text = encodeURIComponent('Join my poker room "' + name + '" in Video Poker!\n' + link);
-    window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
+    openShareChannel('telegram', roomInviteMessage(), sheetLink('room-invite-link'));
 }
 
 // --- Deep-link handling (?join=ROOMCODE) ---

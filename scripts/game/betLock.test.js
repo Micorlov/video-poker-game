@@ -108,6 +108,7 @@ const PROBE = `
              multiHandCount: multiHandCount, allInUsesToday: allInUsesToday };
 };
 globalThis.__call = function (name, arg) { return eval(name)(arg); };
+globalThis.__setGameState = function (v) { gameState = v; };
 `;
 
 function loadGame() {
@@ -161,11 +162,12 @@ test('bet is unlocked again once the hand resolves', () => {
     assert.strictEqual(game.__probe().bet, 50, 'next hand may use a new stake');
 });
 
-test('All In mid-hand neither changes the bet nor burns a daily use', () => {
+test('All In mid-hand raises the stake by exactly the remaining balance', () => {
     // Arrange
     const game = loadGame();
     game.__call('setBet', 5);
     game.__call('deal');
+    const balanceMidHand = game.__probe().balance;
     const usesBefore = game.__probe().allInUsesToday;
 
     // Act
@@ -173,7 +175,43 @@ test('All In mid-hand neither changes the bet nor burns a daily use', () => {
     game.__call('confirmAllIn');
 
     // Assert
-    assert.strictEqual(game.__probe().bet, 5, 'All In must not raise the stake mid-hand');
-    assert.strictEqual(game.__probe().allInUsesToday, usesBefore,
-        'a blocked All In must not consume the daily allowance');
+    const after = game.__probe();
+    assert.strictEqual(after.balance, 0, 'the mid-hand raise spends the remaining balance immediately');
+    assert.strictEqual(after.bet, 5 + balanceMidHand,
+        'the stake grows by exactly the balance that was just charged, not an arbitrary amount');
+    assert.strictEqual(after.allInUsesToday, usesBefore + 1,
+        'a successful mid-hand All In consumes the daily allowance');
+});
+
+test('All In mid-hand cannot pay out more than was actually charged', () => {
+    // This is the shape of the pre-07a1b7a exploit — deal cheap, raise the
+    // stake, then draw — but the raise now charges its own delta immediately
+    // instead of mutating `bet` for free before payout is computed.
+    const game = loadGame();
+    game.__call('setBet', 5);
+    game.__call('deal');
+    const balanceMidHand = game.__probe().balance;
+
+    // Act
+    game.__call('openAllInSheet');
+    game.__call('confirmAllIn');
+    const raiseCharged = balanceMidHand - game.__probe().balance;
+
+    // Assert: the stake draw() will pay out on equals exactly what was charged
+    assert.strictEqual(game.__probe().bet, 5 + raiseCharged);
+});
+
+test('All In is blocked outside bet/hold state', () => {
+    // Arrange: simulate a stale sheet calling confirmAllIn from a gameState
+    // that is neither 'bet' nor 'hold'.
+    const game = loadGame();
+    game.__call('setBet', 5);
+    const before = game.__probe();
+    game.__call('__setGameState', 'some-other-state');
+
+    // Act
+    game.__call('confirmAllIn');
+
+    // Assert
+    assert.strictEqual(game.__probe().bet, before.bet, 'confirmAllIn must no-op outside bet/hold');
 });

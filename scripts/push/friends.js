@@ -5,7 +5,7 @@
 const { getFirestore } = require('../lib/firebaseAdmin');
 const { sendPushToUser } = require('../lib/sendPush');
 
-async function checkNewFriends(since) {
+async function checkNewFriends(since, settings) {
   const db = getFirestore();
   const snap = await db.collectionGroup('friends').where('addedAt', '>', since).get();
   if (snap.empty) return;
@@ -41,7 +41,7 @@ async function checkNewFriends(since) {
       await sendPushToUser(uid, 'social', {
         title: 'New friend',
         body: `${joinerName} joined your friends circle via the invite link!`,
-      });
+      }, { settings });
       return;
     }
 
@@ -51,7 +51,7 @@ async function checkNewFriends(since) {
     await sendPushToUser(uid, 'social', {
       title: 'New friend',
       body: `${adderName} added you as a friend`,
-    });
+    }, { settings });
   }));
 }
 

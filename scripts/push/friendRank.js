@@ -13,8 +13,10 @@
 // netProfit change, so only users who actually changed are examined.
 const { getFirestore } = require('../lib/firebaseAdmin');
 const { sendPushToUser } = require('../lib/sendPush');
+const { triggerConfig } = require('../lib/pushPolicy');
 
 const CATEGORY = 'leaderboard';
+const TRIGGER = 'friendRank';
 const TITLE = 'Friends leaderboard';
 
 function profitOf(doc) {
@@ -25,7 +27,7 @@ function profitOf(doc) {
 // Notifies everyone a mover jumped over. Returns the set of uids that were
 // notified, so the new-leader pass can avoid double-pushing the same person
 // about the same move.
-async function notifyOvertakenFriends(db, movers) {
+async function notifyOvertakenFriends(db, movers, options) {
   const notified = new Set();
 
   await Promise.all(movers.docs.map(async (doc) => {
@@ -54,7 +56,7 @@ async function notifyOvertakenFriends(db, movers) {
           return sendPushToUser(friendDoc.id, CATEGORY, {
             title: TITLE,
             body: `${moverName} just passed you on the friends leaderboard`,
-          });
+          }, options);
         }));
       }
     }
@@ -81,7 +83,7 @@ function leaderOf(docs) {
 // Notifies a whole circle when its #1 changes hands. Friendships are mutual, so
 // a mover can only reshuffle the top of their own circle and the circles of
 // their direct friends — no need to re-rank every user in the database.
-async function notifyNewCircleLeaders(db, movers, alreadyNotified) {
+async function notifyNewCircleLeaders(db, movers, alreadyNotified, options) {
   const affected = new Set();
 
   await Promise.all(movers.docs.map(async (doc) => {
@@ -122,23 +124,28 @@ async function notifyNewCircleLeaders(db, movers, alreadyNotified) {
         body: leader.id === uid
           ? "You're now #1 among your friends!"
           : `${leader.get('displayName') || 'A friend'} is now #1 among your friends`,
-      });
+      }, options);
     }
 
     await selfDoc.ref.set({ _prevFriendLeaderUid: leader.id }, { merge: true });
   }));
 }
 
-async function checkFriendRanks(since) {
+async function checkFriendRanks(since, settings) {
+  const config = triggerConfig(settings, TRIGGER);
+  if (config.enabled === false) return;
+
   const db = getFirestore();
   const movers = await db.collection('users').where('updatedAt', '>', since).get();
   if (movers.empty) return;
 
+  const options = { trigger: TRIGGER, cooldownHours: config.cooldownHours, settings };
+
   // Sequential on purpose: a player who was both passed AND lost the top spot
   // to the same move should hear about it once, and the overtake message is
   // the more specific of the two.
-  const notified = await notifyOvertakenFriends(db, movers);
-  await notifyNewCircleLeaders(db, movers, notified);
+  const notified = await notifyOvertakenFriends(db, movers, options);
+  await notifyNewCircleLeaders(db, movers, notified, options);
 }
 
 module.exports = { checkFriendRanks };

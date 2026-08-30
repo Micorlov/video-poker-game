@@ -27,11 +27,11 @@
     })();
     </script>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0c2419">
+    <meta name="theme-color" content="#04100C">
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
 <!-- BUILD_CSS_PLACEHOLDER -->
 </style>
@@ -41,13 +41,18 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 </head>
 <body>
+<div class="shell">
     <div class="app">
         <section id="screen-play" class="screen active">
             <div class="brandrow">
-                <div class="app-title">Video Poker</div>
                 <div class="tpill" id="tournament-pill" onclick="toggleTournamentPill()">
-                    <span>⏱ #1 · 26:55</span>
+                    <span>Tournament 2</span>
+                    <span class="tour-time">26:55</span>
                     <span class="tour-chev" id="tour-chev">▾</span>
+                </div>
+                <div class="streak-pill" id="streak-pill">
+                    <span>Streak</span>
+                    <span class="streak-pill-value streak-count" id="streak-count">0</span>
                 </div>
             </div>
             <div class="texpand hidden" id="tournament-expand">
@@ -58,39 +63,30 @@
             <!-- Phase 2: Stories row -->
             <div class="stories-row" id="stories-row"></div>
 
-            <div class="panel balance-panel">
-                <div class="balance-row">
-                    <div>
-                        <div class="section-label">Balance</div>
-                        <div class="balance-value" id="balance">500</div>
-                    </div>
-                    <div>
-                        <div class="section-label">Total Bet</div>
-                        <div class="bet-value" id="bet-display">10</div>
-                    </div>
+            <div class="balance-head">
+                <div class="balance-head-main">
+                    <div class="section-label">Balance</div>
+                    <div class="balance-value" id="balance">500</div>
                 </div>
-                <div class="bet-row">
-                    <button class="bet-btn" onclick="setBet(5)" id="bet-5">5</button>
-                    <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
-                    <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
-                    <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
-                    <button class="bet-btn bet-btn-allin" onclick="openAllInSheet()" id="bet-allin">ALL IN<span class="allin-badge" id="allin-badge">1</span></button>
+                <div class="balance-head-side">
+                    <div class="section-label">Variant</div>
+                    <div class="variant-value" id="variant-display">Jacks or Better</div>
                 </div>
             </div>
+
+            <!-- Top payouts for the active variant, at a glance -->
+            <div class="paytable-ticker" id="paytable-ticker"></div>
 
             <div id="multi-hands"></div>
             <div class="hand" id="hand"></div>
-            <div class="hand-placeholder-text" id="hand-placeholder-text">Tap a card or Deal to start the hand</div>
+            <div class="hand-placeholder-text" id="hand-placeholder-text">Hold what you want, then set your bet before the draw.</div>
 
-            <div class="action-row">
-                <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">🎴</span>Deal</button>
-                <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
-            </div>
+            <div class="result-panel" id="result">Place your bet and deal to play</div>
+            <div class="explanation" id="explanation"></div>
 
             <div class="streak-bar" id="streak-bar">
                 <span>🔥</span>
                 <span>Win Streak</span>
-                <span class="streak-count" id="streak-count">0</span>
                 <span class="streak-bonus-tag hidden" id="streak-bonus-tag"></span>
             </div>
 
@@ -129,6 +125,30 @@
                 <button class="lb-expand-link hidden" id="lb-expand-link" onclick="toggleLeaderboardExpand()">Show Top 20 ▾</button>
             </div>
 
+            <!-- Stake, then draw. The bet sits next to the button that spends
+                 it so the last thing you decide is the last thing you touch. -->
+            <div class="bet-dock">
+                <div class="total-bet-row">
+                    <span class="section-label">Total bet</span>
+                    <span class="total-bet-value" id="bet-display">10</span>
+                </div>
+                <div class="bet-row">
+                    <button class="bet-btn" onclick="setBet(5)" id="bet-5">5</button>
+                    <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
+                    <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
+                    <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
+                    <button class="bet-btn bet-btn-allin" onclick="openAllInSheet()" id="bet-allin">
+                        <span class="allin-label">ALL IN</span>
+                        <span class="allin-badge" id="allin-badge">1</span>
+                    </button>
+                </div>
+                <div class="action-row">
+                    <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">↻</span>Deal</button>
+                    <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
+                    <button id="voice-btn" class="hint-btn" onclick="toggleVoice()" title="Voice announcements">🗣️</button>
+                </div>
+            </div>
+
             <div class="panel pwf-panel" id="pwf-panel">
                 <div class="play-rooms-header">
                     <span class="section-label">Play With Friends</span>
@@ -138,8 +158,6 @@
                 <button class="create-room-link" onclick="openRoomModal()">+ Create a Poker Room with Friends</button>
             </div>
 
-            <div class="result-panel" id="result">Place your bet and deal to play</div>
-            <div class="explanation" id="explanation"></div>
         </section>
 
         <section id="screen-stats" class="screen">
@@ -175,7 +193,7 @@
         <section id="screen-friends" class="screen">
             <div class="friends-header">
                 <h1 class="screen-title">Friends</h1>
-                <button class="invite-pill" onclick="openInviteSheet()">+ Invite</button>
+                <button class="invite-pill" onclick="shareInviteNative()">+ Invite</button>
             </div>
 
             <div class="panel friends-signin-prompt" id="friends-signed-out" onclick="openSignInModal()">
@@ -184,18 +202,22 @@
             </div>
 
             <div id="friends-signed-in-wrap" class="hidden">
-                <div class="section-label">Your Code</div>
-                <div class="panel own-code-panel" id="own-referral-code">—</div>
-
-                <div class="section-label">Add a Friend</div>
-                <div class="panel add-friend-row">
-                    <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
-                    <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()">Add</button>
+                <div class="friends-action-strip">
+                    <button class="code-chip" id="own-code-chip" onclick="copyOwnCode()">
+                        <span class="code-chip-label">Your code</span>
+                        <span class="code-chip-value" id="own-referral-code">—</span>
+                        <span class="code-chip-hint" id="own-code-hint">Tap to copy</span>
+                    </button>
+                    <div class="add-friend-inline">
+                        <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
+                        <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()">Add</button>
+                    </div>
                 </div>
+                <div class="friends-reward-line" id="friends-invite-reward">Get 2000 coins for every friend who joins with Google.</div>
 
                 <div class="stats-toggle">
                     <button class="stats-toggle-btn selected" id="friends-tab-leaderboard" onclick="setFriendsTab('leaderboard')">Leaderboard</button>
-                    <button class="stats-toggle-btn" id="friends-tab-rooms" onclick="setFriendsTab('rooms')">Poker Rooms</button>
+                    <button class="stats-toggle-btn" id="friends-tab-rooms" onclick="setFriendsTab('rooms')">Poker Rooms<span class="tab-badge hidden" id="rooms-tab-badge"></span></button>
                 </div>
 
                 <div id="friends-leaderboard-view">
@@ -206,6 +228,7 @@
                 </div>
 
                 <div id="friends-rooms-view" class="hidden">
+                    <div id="friends-room-invites"></div>
                     <div class="rooms-empty hidden" id="friends-rooms-empty">No rooms yet — create one below.</div>
                     <div id="friends-rooms-list"></div>
                     <button class="create-room-link create-room-dashed" id="friends-create-room-btn" onclick="toggleInlineRoomForm()">+ Create a Poker Room with Friends</button>
@@ -238,6 +261,10 @@
                 <div class="settings-row">
                     <span class="settings-row-label">Haptic Feedback</span>
                     <input type="checkbox" class="toggle-switch" id="settings-haptics-toggle">
+                </div>
+                <div class="settings-row">
+                    <span class="settings-row-label">Voice Announcements</span>
+                    <input type="checkbox" class="toggle-switch" id="settings-voice-toggle">
                 </div>
             </div>
 
@@ -311,6 +338,10 @@
                         <span class="settings-row-label">Friends' best hands</span>
                         <input type="checkbox" class="toggle-switch" id="settings-notif-bestHand">
                     </div>
+                    <div class="settings-row">
+                        <span class="settings-row-label">Announcements</span>
+                        <input type="checkbox" class="toggle-switch" id="settings-notif-announcement">
+                    </div>
                     <div class="settings-row" id="settings-notifications-enable" style="cursor:pointer;">
                         <span class="settings-row-label">Enable Notifications</span>
                         <span class="settings-chevron">›</span>
@@ -335,8 +366,9 @@
                 <span>Stats</span>
             </button>
             <button class="nav-btn" id="nav-friends" onclick="showScreen('friends')">
-                <span class="nav-icon">👥</span>
+                <span class="nav-icon">◍</span>
                 <span>Friends</span>
+                <span class="nav-badge hidden" id="nav-friends-badge"></span>
             </button>
             <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
                 <span class="nav-icon">⚙</span>
@@ -353,10 +385,6 @@
             <button class="google-btn" onclick="signInWithGoogle()">
                 <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
                 <span>Continue with Google</span>
-            </button>
-            <button class="facebook-btn" onclick="signInWithFacebook()">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                <span>Continue with Facebook</span>
             </button>
             <div class="modal-error hidden" id="signin-error"></div>
         </div>
@@ -400,6 +428,7 @@
                 <span class="sheet-title">Invite Friends</span>
                 <button class="sheet-close" onclick="closeSheet('invite-sheet')">✕</button>
             </div>
+            <div class="sheet-sub" id="invite-reward-line">Get 2000 coins for every friend who joins with Google.</div>
             <div class="sheet-link-row">
                 <span class="sheet-link-text" id="invite-sheet-link">—</span>
                 <button class="sheet-copy-btn" id="invite-sheet-copy" onclick="copyInviteSheetLink()">Copy</button>
@@ -417,39 +446,54 @@
         </div>
     </div>
 
-    <!-- Phase 2: Room Created bottom sheet -->
-    <div class="sheet-backdrop hidden" id="room-created-sheet" onclick="if(event.target===this)closeSheet('room-created-sheet')">
+    <!-- Room invite sheet: pick friends to invite + share link fallback.
+         Opens right after creating a room, and from the Invite button on room cards. -->
+    <div class="sheet-backdrop hidden" id="room-invite-sheet" onclick="if(event.target===this)closeSheet('room-invite-sheet')">
         <div class="sheet">
             <div class="sheet-header">
-                <span class="sheet-title">Room Created 🎉</span>
-                <button class="sheet-close" onclick="closeSheet('room-created-sheet')">✕</button>
+                <span class="sheet-title" id="room-invite-title">Invite Friends</span>
+                <button class="sheet-close" onclick="closeSheet('room-invite-sheet')">✕</button>
             </div>
-            <div class="sheet-sub">Invite friends to "<span id="room-created-name">—</span>"</div>
+            <div class="sheet-sub">Invite friends to "<span id="room-invite-name">—</span>" — they get a notification with a Join button.</div>
+            <div class="room-invite-friends" id="room-invite-friends"></div>
+            <button class="rip-send-btn hidden" id="room-invite-send" onclick="sendRoomInvites()">Send Invites</button>
+            <div class="rip-divider"><span>or share a link</span></div>
             <div class="sheet-link-row">
-                <span class="sheet-link-text" id="room-created-link">—</span>
-                <button class="sheet-copy-btn" id="room-created-copy" onclick="copyRoomLink()">Copy</button>
+                <span class="sheet-link-text" id="room-invite-link">—</span>
+                <button class="sheet-copy-btn" id="room-invite-copy" onclick="copyRoomLink()">Copy</button>
             </div>
             <div class="share-chips-row">
+                <button class="share-chip native" onclick="shareRoomInviteNative()">Share…</button>
                 <button class="share-chip whatsapp" onclick="shareRoomViaWhatsApp()">WhatsApp</button>
                 <button class="share-chip telegram" onclick="shareRoomViaTelegram()">Telegram</button>
             </div>
-            <button class="sheet-done-btn" onclick="closeSheet('room-created-sheet')">Done</button>
+            <button class="sheet-done-btn" onclick="closeSheet('room-invite-sheet')">Done</button>
         </div>
     </div>
 
     <!-- All In confirmation bottom sheet -->
     <div class="sheet-backdrop hidden" id="allin-sheet" onclick="if(event.target===this)closeAllInSheet()">
         <div class="sheet">
+            <div class="sheet-grabber"></div>
             <div class="sheet-header">
-                <span class="sheet-title">🔥 Go All In</span>
+                <span class="sheet-mark">♠</span>
+                <span class="sheet-heading">
+                    <span class="sheet-title">Go All In</span>
+                    <span class="sheet-eyebrow">Once per day</span>
+                </span>
                 <button class="sheet-close" onclick="closeAllInSheet()">✕</button>
             </div>
-            <div class="sheet-sub">You can use ALL IN once a day. This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on the next hand. Slide to confirm.</div>
+            <div class="sheet-sub">This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on <span id="allin-sheet-target">the next hand</span>.</div>
+            <div class="sheet-stat">
+                <span class="sheet-stat-label">Potential on Full House</span>
+                <span class="sheet-stat-value" id="allin-sheet-potential">0</span>
+            </div>
             <div class="allin-slider-track" id="allin-slider-track">
                 <div class="allin-slider-fill" id="allin-slider-fill"></div>
                 <span class="allin-slider-label">Slide to confirm</span>
                 <div class="allin-slider-thumb" id="allin-slider-thumb">»</div>
             </div>
+            <button class="sheet-dismiss" onclick="closeAllInSheet()">Not now</button>
         </div>
     </div>
 
@@ -492,11 +536,11 @@
                     <div class="ob-hands-list">
                         <div class="ob-hand-row ob-hand-row--highlight">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">10<br>♠</div>
-                                <div class="ob-mini-card">J<br>♠</div>
-                                <div class="ob-mini-card">Q<br>♠</div>
-                                <div class="ob-mini-card">K<br>♠</div>
-                                <div class="ob-mini-card">A<br>♠</div>
+                                <div class="ob-mini-card">10♠</div>
+                                <div class="ob-mini-card">J♠</div>
+                                <div class="ob-mini-card">Q♠</div>
+                                <div class="ob-mini-card">K♠</div>
+                                <div class="ob-mini-card">A♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Royal Flush</span>
@@ -505,11 +549,11 @@
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card ob-mini-card--red">5<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">6<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">7<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">8<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">5♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">6♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">7♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">8♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♥</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Straight Flush</span>
@@ -518,37 +562,37 @@
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">9<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♦</div>
-                                <div class="ob-mini-card">9<br>♣</div>
-                                <div class="ob-mini-card ob-mini-card--red">9<br>♥</div>
-                                <div class="ob-mini-card">4<br>♣</div>
+                                <div class="ob-mini-card">9♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♦</div>
+                                <div class="ob-mini-card">9♣</div>
+                                <div class="ob-mini-card ob-mini-card--red">9♥</div>
+                                <div class="ob-mini-card">4♣</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Four of a Kind</span>
-                                <span class="ob-hand-payout">25x</span>
+                                <span class="ob-hand-payout">20x</span>
                             </div>
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">K<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">K<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">K<br>♦</div>
-                                <div class="ob-mini-card">3<br>♣</div>
-                                <div class="ob-mini-card">3<br>♠</div>
+                                <div class="ob-mini-card">K♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">K♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">K♦</div>
+                                <div class="ob-mini-card">3♣</div>
+                                <div class="ob-mini-card">3♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Full House</span>
-                                <span class="ob-hand-payout">9x</span>
+                                <span class="ob-hand-payout">7x</span>
                             </div>
                         </div>
                         <div class="ob-hand-row">
                             <div class="ob-hand-cards">
-                                <div class="ob-mini-card">J<br>♠</div>
-                                <div class="ob-mini-card ob-mini-card--red">J<br>♥</div>
-                                <div class="ob-mini-card ob-mini-card--red">4<br>♦</div>
-                                <div class="ob-mini-card">8<br>♣</div>
-                                <div class="ob-mini-card">2<br>♠</div>
+                                <div class="ob-mini-card">J♠</div>
+                                <div class="ob-mini-card ob-mini-card--red">J♥</div>
+                                <div class="ob-mini-card ob-mini-card--red">4♦</div>
+                                <div class="ob-mini-card">8♣</div>
+                                <div class="ob-mini-card">2♠</div>
                             </div>
                             <div class="ob-hand-info">
                                 <span class="ob-hand-name">Jacks or Better</span>
@@ -589,17 +633,17 @@
                             <div class="ob-mockup-card">2♣</div>
                             <div class="ob-mockup-card ob-mockup-card--red">9♥</div>
                         </div>
-                        <div class="ob-mockup-draw-btn">↻ Draw</div>
                         <div class="ob-mockup-bets">
                             <div class="ob-mockup-bet">5</div>
                             <div class="ob-mockup-bet">10</div>
                             <div class="ob-mockup-bet ob-mockup-bet--active">20</div>
                             <div class="ob-mockup-bet">50</div>
-                            <div class="ob-mockup-bet ob-mockup-bet--allin" style="position:relative;">
+                            <div class="ob-mockup-bet ob-mockup-bet--allin">
                                 ALL IN
-                                <span class="ob-allin-badge">5</span>
+                                <span class="ob-allin-badge">1 left</span>
                             </div>
                         </div>
+                        <div class="ob-mockup-draw-btn">↻ Draw</div>
                     </div>
                     <div class="ob-screen-note">One free All-In per day — invite a friend to unlock another.</div>
                 </div>
@@ -617,7 +661,7 @@
                     </div>
                     <div class="ob-lb-header">
                         <span>Friends · Today</span>
-                        <span class="ob-lb-you-badge">#1 · You're #1!</span>
+                        <span class="ob-lb-you-badge">You're #1!</span>
                     </div>
                     <div class="ob-lb-list">
                         <div class="ob-lb-row ob-lb-row--you">
@@ -700,6 +744,8 @@
         </div>
 
     </div>
+
+</div><!-- /.shell -->
 
     <script>
  <!-- BUILD_JS_PLACEHOLDER -->

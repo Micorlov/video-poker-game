@@ -8,7 +8,12 @@ function showScreen(name) {
         if (nav) nav.classList.toggle('active', s === name);
     });
     if (name === 'stats') renderStatsScreen();
-    if (name === 'friends') renderFriendsScreen();
+    if (name === 'friends') {
+        renderFriendsScreen();
+        // Room list is a one-shot .get(); refresh member counts on every visit
+        // so accepted invites show up without a reload.
+        if (window.egUser && window.loadMyRooms) loadMyRooms();
+    }
 }
 
 let friendsTab = 'leaderboard';
@@ -85,6 +90,10 @@ function initSettingsScreen() {
     hapticsToggle.checked = hapticsEnabled;
     hapticsToggle.onchange = function() { toggleHaptics(); };
 
+    const voiceToggle = document.getElementById('settings-voice-toggle');
+    voiceToggle.checked = voiceEnabled;
+    voiceToggle.onchange = function() { toggleVoice(); };
+
     [5, 10, 20, 50].forEach(function(v) {
         const btn = document.getElementById('settings-defaultbet-' + v);
         if (btn) btn.onclick = function() { setDefaultBet(v); };
@@ -96,7 +105,9 @@ function initSettingsScreen() {
     initNotificationSettings();
 }
 
-const NOTIFICATION_PREF_CATEGORIES = ['social', 'leaderboard', 'dailyReminder', 'bestHand'];
+// 'announcement' covers campaigns composed in push-admin.html — an admin
+// broadcast must be as mutable as any automatic notification.
+const NOTIFICATION_PREF_CATEGORIES = ['social', 'leaderboard', 'dailyReminder', 'bestHand', 'announcement'];
 
 function initNotificationSettings() {
     const panel = document.getElementById('settings-notifications-panel');
@@ -208,11 +219,18 @@ function initNativeDeepLinkHandling() {
     CapApp.addListener('appUrlOpen', function(data) {
         applyNativeDeepLinkUrl(data.url);
     });
+    // First launch after a Play Store install: the invite click happened in a
+    // browser that no longer exists, so the code arrives via the install
+    // referrer instead. MainActivity also pushes it through
+    // window.__onInstallReferrer; this covers the case where it answered before
+    // this script parsed.
+    if (window.readCachedInstallReferrer) readCachedInstallReferrer();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     applyTheme();
     initSound();
+    initVoice();
     initGame();
     initSettingsScreen();
     updateHintButtonUI();
@@ -229,4 +247,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.handleIncomingInvite) handleIncomingInvite();
     if (window.handleJoinDeepLink) handleJoinDeepLink();
     initNativeDeepLinkHandling();
+    // An invite stored by an earlier launch that never got as far as sign-in.
+    if (window.restorePendingInvite) restorePendingInvite();
 });

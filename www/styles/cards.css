@@ -20,9 +20,9 @@
 }
 
 .variant-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 .variant-btn.locked {
@@ -59,9 +59,9 @@
 }
 
 .theme-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 /* --- Multi-hand picker --- */
@@ -84,9 +84,9 @@
 }
 
 .multi-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--green-ink);
 }
 
 .multi-btn.locked {
@@ -180,7 +180,7 @@
 }
 
 .payout-help-toggle.open {
-    color: var(--gold);
+    color: var(--green);
 }
 
 .payout-help {
@@ -221,86 +221,166 @@
 }
 
 /* --- Balance / bet panel --- */
-.balance-panel {
-    margin-bottom: 12px;
-}
-
-.balance-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+.balance-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: 14px;
 }
 
-.balance-value {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--gold);
+.balance-head .section-label {
+    margin: 0 0 4px;
 }
 
-.bet-value {
-    font-size: 26px;
+.balance-head-side {
+    text-align: right;
+    padding-bottom: 6px;
+}
+
+/* The balance is the largest number on the screen — it anchors every other
+   figure, so it stays white rather than competing with the action colour. */
+.balance-value {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    color: var(--text);
+}
+
+.variant-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+/* --- Paytable ticker: the top few multipliers, always in view --- */
+.paytable-ticker {
+    display: flex;
+    gap: 18px;
+    padding: 9px 14px;
+    margin-bottom: 6px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.paytable-ticker::-webkit-scrollbar { display: none; }
+
+.paytable-ticker-item {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--text-ghost);
+    white-space: nowrap;
+}
+
+/* --- Bet dock: stake and draw, grouped at the end of the decision ---
+   The mock pins these to the bottom of a screen that fits in one viewport.
+   Here the page scrolls, so the dock sticks just above the nav instead —
+   the Draw button is never more than a thumb away, whatever is on screen. */
+.bet-dock {
+    position: sticky;
+    bottom: calc(var(--nav-height) + var(--nav-gap) + env(safe-area-inset-bottom) + 10px);
+    z-index: 40;
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: var(--radius-xl);
+    background: var(--nav-glass);
+    border: 1px solid var(--nav-border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.9);
+}
+
+.total-bet-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.total-bet-row .section-label {
+    margin: 0;
+}
+
+.total-bet-value {
+    font-size: 15px;
     font-weight: 700;
-    color: var(--green);
 }
 
 .bet-row {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(4, 1fr) 1.15fr;
+    gap: 8px;
 }
 
 .bet-btn {
-    background: rgba(0, 0, 0, 0.25);
-    border: 1px solid var(--border);
+    height: 48px;
+    padding: 0 2px;
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
     border-radius: var(--radius-sm);
-    color: var(--text);
-    padding: 12px 2px;
-    font-size: 15px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 16px;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
     cursor: pointer;
+    transition: background 0.16s, color 0.16s, box-shadow 0.16s;
 }
 
+.bet-btn:hover {
+    background: var(--surface-hover);
+}
+
+/* Selection is a ring plus a wash, not a solid fill — the chips stay a row
+   of equals and only the Draw button carries a full green surface. */
 .bet-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: #0a1a10;
+    background: rgba(22, 193, 114, 0.22);
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    color: var(--text);
 }
 
 .bet-btn-allin {
-    position: relative;
-    background: linear-gradient(135deg, var(--gold-600), var(--gold));
-    border-color: var(--gold);
-    color: #2a1c02;
-    font-size: 11px;
-    letter-spacing: 0.3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    background: var(--green-dim);
+    border: 1px solid rgba(22, 193, 114, 0.45);
+    color: var(--green-light);
+}
+
+.allin-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
 }
 
 .allin-badge {
-    position: absolute;
-    top: -7px;
-    right: -7px;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 3px;
-    border-radius: 999px;
-    background: var(--red);
-    border: 1.5px solid var(--panel-solid, #0c2419);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 800;
-    line-height: 16px;
-    text-align: center;
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(255, 107, 170, 0.65);
+}
+
+.allin-badge::after {
+    content: ' left';
 }
 
 .bet-btn-allin.selected {
-    background: linear-gradient(135deg, var(--red), var(--gold));
-    border-color: var(--gold);
-    color: #2a0902;
+    background: rgba(22, 193, 114, 0.22);
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    color: var(--text);
 }
 
 .bet-btn-allin.depleted {
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--surface);
     border-color: var(--border);
     color: var(--text-faint);
     cursor: not-allowed;
@@ -310,11 +390,11 @@
 /* --- All In slide-to-confirm --- */
 .allin-slider-track {
     position: relative;
-    height: 52px;
-    margin-top: 18px;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid var(--border);
+    height: 64px;
+    margin-top: 20px;
+    border-radius: var(--radius-md);
+    background: var(--green-dim);
+    border: 1px solid rgba(22, 193, 114, 0.35);
     overflow: hidden;
     -webkit-user-select: none;
     user-select: none;
@@ -325,7 +405,7 @@
     position: absolute;
     inset: 0;
     width: 0;
-    background: linear-gradient(135deg, var(--gold-600), var(--gold));
+    background: linear-gradient(90deg, rgba(22, 193, 114, 0.35), rgba(22, 193, 114, 0));
 }
 
 .allin-slider-label {
@@ -334,10 +414,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 700;
-    color: var(--text-muted);
-    letter-spacing: 0.02em;
+    color: var(--green-wash);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     pointer-events: none;
 }
 
@@ -345,17 +426,18 @@
     position: absolute;
     top: 3px;
     left: 3px;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: var(--panel-solid);
-    border: 2px solid var(--gold);
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--green);
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--gold);
+    color: var(--green-ink);
     font-weight: 800;
-    font-size: 18px;
+    font-size: 20px;
+    box-shadow: 0 10px 26px -8px rgba(22, 193, 114, 0.9);
     cursor: grab;
     touch-action: none;
     transition: left 0.25s ease;
@@ -367,29 +449,28 @@
 }
 
 .allin-slider-track.confirmed .allin-slider-label {
-    color: #2a1c02;
+    color: var(--green-ink);
 }
 
 /* --- Hand / cards --- */
 .hand {
     display: flex;
-    gap: 6px;
-    justify-content: center;
-    padding: 16px 0 8px;
+    gap: 9px;
+    justify-content: space-between;
+    padding: 20px 0 0;
 }
 
 .hand-placeholder-text {
     text-align: center;
     font-size: 12.5px;
     color: var(--text-faint);
-    margin-bottom: 4px;
+    margin-top: 10px;
 }
 
 .card {
     position: relative;
     flex: 1;
-    max-width: 78px;
-    aspect-ratio: 2 / 3;
+    aspect-ratio: 0.68;
     cursor: pointer;
     perspective: 600px;
     -webkit-tap-highlight-color: transparent;
@@ -412,17 +493,20 @@
     position: absolute;
     inset: 0;
     backface-visibility: hidden;
-    border-radius: 12px;
+    border-radius: var(--radius-card);
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
+/* Cards are the only bright surface in the app. The face is paper, lifted
+   off the felt by a long shadow rather than a border. */
 .card-front {
     background: var(--card-face-bg);
     color: var(--card-black);
-    padding: 6%;
+    padding: 7px 8px;
     justify-content: center;
+    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85);
 }
 
 .card.red .card-front {
@@ -436,41 +520,44 @@
     transform: rotateY(180deg);
 }
 
-.card.held {
-    transform: translateY(-6px);
-}
-
 .card.held .card-front {
-    box-shadow: 0 0 0 2px var(--gold);
+    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85),
+                0 0 0 2px var(--green),
+                0 0 22px -2px rgba(22, 193, 114, 0.8);
 }
 
 .card.unheld {
     opacity: 0.55;
 }
 
-.card.winning .card-front {
-    box-shadow: 0 0 0 2px var(--green), 0 0 16px rgba(90, 156, 111, 0.6);
+.card.winning .card-front,
+.card.second-pair .card-front,
+.card.third-match .card-front {
+    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85), 0 0 0 2px var(--green);
 }
 
+/* Rank top-left, suit bottom-right: the diagonal reads as a real card even
+   at thumbnail size, where a stacked centre block turns to mush. */
 .card-face {
     flex: 1;
     min-height: 0;
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4%;
+    justify-content: space-between;
 }
 
 .card-face-rank {
-    font-size: clamp(20px, 5.8vw, 30px);
-    font-weight: 800;
+    font-family: var(--font-display);
+    font-size: clamp(22px, 7.4vw, 34px);
+    font-weight: 700;
     line-height: 1;
+    letter-spacing: -0.04em;
 }
 
 .card-face-suit {
-    font-size: clamp(18px, 5vw, 26px);
+    align-self: flex-end;
+    font-size: clamp(20px, 6.6vw, 30px);
     line-height: 1;
 }
 
@@ -480,23 +567,18 @@
     left: 50%;
     transform: translateX(-50%);
     font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    padding: 2px 7px;
-    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 3px 8px;
+    border-radius: 6px;
     white-space: nowrap;
     z-index: 2;
     opacity: 0;
 }
 
-.held-badge {
-    background: var(--gold);
-    color: #1c1608;
-}
-
-.win-badge {
+.held-badge, .win-badge {
     background: var(--green);
-    color: #0a1a10;
+    color: var(--green-ink);
 }
 
 .card.held .held-badge,
@@ -560,61 +642,67 @@
 .action-row {
     display: flex;
     gap: 10px;
-    margin: 16px 0 4px;
+    margin-top: 14px;
 }
 
+/* The single green surface on the screen. Everything else is glass, so the
+   button that spends chips is impossible to mistake for anything else. */
 .btn-primary, .btn-secondary {
     flex: 1;
-    padding: 14px;
-    border-radius: var(--radius-sm);
+    height: 62px;
+    padding: 0 16px;
+    border-radius: var(--radius-md);
     border: none;
-    font-size: 15px;
+    font-family: var(--font-display);
+    font-size: 20px;
     font-weight: 700;
+    letter-spacing: -0.01em;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
+    transition: background 0.16s;
 }
 
 .main-btn-icon {
-    font-size: 18px;
+    font-size: 19px;
     line-height: 1;
 }
 
-.btn-primary {
-    background: var(--gold);
-    color: #1c1608;
-}
-
-.btn-primary:disabled {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-faint);
-}
-
-.btn-secondary {
+.btn-primary, .btn-secondary {
     background: var(--green);
-    color: #0a1a10;
+    color: var(--green-ink);
+    box-shadow: var(--green-glow);
 }
 
-.btn-secondary:disabled {
+.btn-primary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled) {
+    background: var(--green-hover);
+}
+
+.btn-primary:disabled, .btn-secondary:disabled {
     background: rgba(255, 255, 255, 0.08);
     color: var(--text-faint);
+    box-shadow: none;
 }
 
 .hint-btn {
-    flex: 0 0 48px;
-    background: var(--panel-solid);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: 18px;
+    flex: 0 0 62px;
+    height: 62px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.75);
     cursor: pointer;
-    opacity: 0.45;
+    opacity: 0.6;
+    transition: opacity 0.16s, box-shadow 0.16s;
 }
 
 .hint-btn.on {
     opacity: 1;
-    box-shadow: 0 0 0 2px var(--gold);
+    box-shadow: 0 0 0 2px var(--green);
 }
 
 .card.hint-suggest .card-front {
@@ -624,14 +712,17 @@
 .result-panel {
     min-height: 20px;
     text-align: center;
-    font-size: 13.5px;
-    color: var(--text-muted);
-    padding: 12px 4px 4px;
+    font-size: 15px;
+    color: var(--text-faint);
+    padding: 14px 4px 2px;
 }
 
 .result-panel .win {
-    color: var(--gold);
-    font-weight: 700;
+    color: var(--green);
+    font-weight: 800;
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: -0.03em;
 }
 
 .explanation {
@@ -646,12 +737,14 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-top: 12px;
-    padding: 8px;
-    border-radius: var(--radius-sm);
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: var(--radius-md);
     background: var(--gold-dim);
+    border: 1px solid var(--gold-line);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .streak-bar.active {
@@ -667,54 +760,65 @@
 .stats-toggle {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    gap: 4px;
+    padding: 4px;
     margin-bottom: 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
 }
 
 .stats-toggle-btn {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    color: var(--text);
-    padding: 9px 4px;
+    background: none;
+    border: none;
+    border-radius: 11px;
+    height: 36px;
+    color: rgba(255, 255, 255, 0.5);
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
+    transition: background 0.16s, color 0.16s;
 }
 
 .stats-toggle-btn.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    color: var(--green-ink);
+    font-weight: 700;
 }
 
 /* --- Unified leaderboard panel (Play tab): Friends / Hourly / Daily --- */
 .lb-tabs {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    gap: 3px;
+    padding: 3px;
     margin-bottom: 12px;
+    border-radius: var(--radius-xs);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .lb-tabs.hidden { display: none; }
 
 .lb-tab {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    color: var(--text);
-    padding: 7px 4px;
-    font-size: 12px;
-    font-weight: 700;
+    background: none;
+    border: none;
+    border-radius: 9px;
+    height: 26px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     cursor: pointer;
+    transition: background 0.16s, color 0.16s;
 }
 
 .lb-tab.hidden { display: none; }
 
 .lb-tab.selected {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    color: var(--green-ink);
+    font-weight: 700;
 }
 
 .lb-expand-link {
@@ -725,7 +829,7 @@
     border-top: 1px solid var(--border);
     margin-top: 4px;
     padding-top: 10px;
-    color: var(--gold);
+    color: var(--text-faint);
     font-size: 12px;
     font-weight: 700;
     text-align: center;
@@ -887,8 +991,8 @@
 .pwa-bar span { flex: 1; }
 
 .pwa-bar-yes, .pwa-bar-no {
-    background: var(--gold);
-    color: #1c1608;
+    background: var(--green);
+    color: var(--green-ink);
     border: none;
     border-radius: 8px;
     padding: 6px 10px;
@@ -916,7 +1020,7 @@
     align-items: center;
     gap: 12px;
     margin-top: 12px;
-    border: 1px solid var(--gold);
+    border: 1px solid var(--green-line);
     cursor: pointer;
 }
 
@@ -925,8 +1029,8 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--gold-dim);
-    color: var(--gold);
+    background: var(--green-dim);
+    color: var(--green-light);
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -962,7 +1066,7 @@
 .see-all-link {
     font-size: 12.5px;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--text-faint);
     cursor: pointer;
 }
 
@@ -1000,7 +1104,7 @@
     background: none;
     border: 1px dashed var(--border-strong);
     border-radius: var(--radius-sm);
-    color: var(--gold);
+    color: rgba(255, 255, 255, 0.72);
     font-size: 13.5px;
     font-weight: 700;
     padding: 12px;
@@ -1009,14 +1113,6 @@
 }
 
 /* --- Friends screen --- */
-.own-code-panel {
-    text-align: center;
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 0.2em;
-    color: var(--gold);
-}
-
 .invite-icon {
     font-size: 16px;
     line-height: 1;
@@ -1056,7 +1152,7 @@
 }
 
 .friend-row.me {
-    background: var(--gold-dim);
+    background: var(--green-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -1096,8 +1192,8 @@
 .friend-you-tag {
     font-size: 9px;
     font-weight: 800;
-    color: #231a04;
-    background: var(--gold);
+    color: var(--green-ink);
+    background: var(--green);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -1184,8 +1280,8 @@
     text-align: center;
     padding: 9px 0;
     border-radius: 8px;
-    background: var(--gold);
-    color: #fff;
+    background: var(--green);
+    color: var(--green-ink);
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
@@ -1302,4 +1398,56 @@
     color: var(--text);
     padding: 12px;
     font-size: 14px;
+}
+
+/* --- Win result: the hand, then the payout at display scale --- */
+.result-panel-win {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-top: 18px;
+}
+
+.result-hand {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    color: var(--text);
+}
+
+.result-amount {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.result-panel-win .win {
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+}
+
+.result-mult {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-faint);
+}
+
+/* Long hand names would otherwise run past the card into its neighbour. */
+.win-badge {
+    max-width: 132%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 8.5px;
+    letter-spacing: 0.04em;
+}
+
+/* Pair hands label only the first card of the pair; the other winning
+   cards keep an unlabelled badge element that must not paint. */
+.win-badge:empty {
+    display: none;
 }

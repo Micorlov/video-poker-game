@@ -6,34 +6,37 @@ Draft only — nothing here has been submitted to Play Console. Review and edit,
 
 ## 1. Store Listing
 
-**App name:** Royal Video Poker
+> Updated 2026-08-28 (ASO pass for the "video poker" search term) — this copy is LIVE on the en-US listing, pushed via the Play API. The installed APK label stays "Video Poker" (strings.xml), unchanged on purpose.
+
+**App name (store title, 28/30 chars):** Video Poker: Jacks or Better
 
 **Short description** (max 80 chars):
 ```
-Free video poker with friends — 5-card draw, no real money, all the thrill.
+Free video poker! Jacks or Better & more. Beat your friends & players worldwide
 ```
-(78 chars)
+(79 chars)
 
 **Full description** (max 4000 chars):
 ```
-Royal Video Poker — Social Casino, Free Chips Only
+Royal Video Poker — free multiplayer video poker with Jacks or Better and classic casino variants. Draw five cards, hold the winners, and chase the Royal Flush — against your friends and against every player in the app.
 
-Five cards. One decision. Play classic video poker the way it was meant to be played — fast, sharp, and with zero risk to your wallet.
+PLAY VIDEO POKER FREE
+Every hand of video poker is played with free virtual chips. No real money, no purchases required — just the pure thrill of 5-card draw poker.
 
-FREE CHIPS, NO REAL MONEY
-Every hand is played with free virtual chips. No purchases, no real-money wagering, no risk — just the thrill of the draw.
+JACKS OR BETTER & CLASSIC VARIANTS
+Play Jacks or Better — the classic video poker game — plus more variants and multi-hand modes. Deal one hand at a time or go big with multi-hand video poker.
 
-MULTIPLE GAME VARIANTS
-Choose from Jacks or Better and other classic variants, across different hand-count modes, so you can play fast or go deep.
+COMPETE AGAINST ALL PLAYERS
+This isn't solo video poker. Every hand you win moves you up the hourly and daily leaderboards against every player in the app. Watch your rank live and defend it.
 
-COMPETE WITH FRIENDS
-Sign in with Google or Facebook to sync your progress, add friends, and see how you stack up on hourly and daily leaderboards.
+CHALLENGE YOUR FRIENDS
+Sign in with Google or Facebook, add friends, and see exactly who's the best video poker player in your crew. Create or join rooms to play at the same table and climb the leaderboard together.
 
-DAILY FREE CHIPS
-Come back every day for free chips, streak bonuses, and level progression.
+DAILY FREE CHIPS & REWARDS
+Come back every day for free bonus chips, streak bonuses, and level progression.
 
-ROOMS & MULTIPLAYER TABLES
-Create or join rooms to play alongside friends and climb the leaderboard together.
+INVITE FRIENDS, EARN CHIPS
+Invite a friend to play and you both earn bonus chips when they join.
 
 Royal Video Poker is a social casino game intended for entertainment purposes only. It does not offer real money gambling or an opportunity to win real money or prizes. Practice or success in this game does not imply future success at real money gambling.
 ```
