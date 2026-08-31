@@ -10,12 +10,28 @@
 // while it is still null (see FIRESTORE_RULES_REFERRALS.md).
 
 const REFERRAL_REWARD_COINS = 2000;
-const STARTING_BALANCE = 500;
+// Two-sided: the invitee gets a welcome gift too. The invitee's reward is what
+// motivates the inviter — it turns the ask into gift-giving. Pinned in
+// firestore.rules alongside rewardCoins.
+const REFERRAL_INVITEE_COINS = 1000;
+// Single source of truth for the opening stack — onboarding promises
+// "Start with 1,000 chips", so every grant site must agree with it.
+const STARTING_BALANCE = 1000;
 // A referral only pays out for a genuinely new account, so an existing player
 // can't re-click a friend's link for coins. Firebase reports creationTime on
 // every sign-in path (popup, redirect, and the native plugin's credential
 // hand-off), which the UserCredential.additionalUserInfo flag does not.
 const REFERRAL_SIGNUP_WINDOW_MS = 10 * 60 * 1000;
+
+const REFERRAL_INVITED_KEY = 'vp_referral_invited';
+
+// How many friends this player has referred — powers the All-In unlock
+// (js/game.js getAllInDailyLimit). Reads the persisted copy so it works at
+// cold start and offline; subscribeReferralRewards() keeps it current.
+function getReferralInvitedCount() {
+    try { return parseInt(localStorage.getItem(REFERRAL_INVITED_KEY), 10) || 0; } catch (e) { return 0; }
+}
+window.getReferralInvitedCount = getReferralInvitedCount;
 
 function loadReferralBonusTotal() {
     try { return parseInt(localStorage.getItem('vp_referral_bonus'), 10) || 0; } catch (e) { return 0; }
@@ -80,12 +96,38 @@ function recordReferralJoin(code, inviterUid) {
                 code: code,
                 provider: 'google.com',
                 rewardCoins: REFERRAL_REWARD_COINS,
+                inviteeCoins: REFERRAL_INVITEE_COINS,
                 claimedAt: null,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(function() { return true; });
+            }).then(function() {
+                if (window.logVpEvent) logVpEvent('referral_joined');
+                // The ledger row landed exactly once (doc is keyed by this
+                // uid), so the welcome gift credits exactly once too.
+                creditInviteeWelcomeCoins();
+                return true;
+            });
         });
     }, function() { /* the friendship already landed — a lost reward row is not worth a toast */ })
         || Promise.resolve(false);
+}
+
+// The invitee's side of the two-sided reward. Local credit, same bookkeeping
+// as the inviter's: the gift raises the net-profit baselines so it never
+// reads as winnings on any leaderboard.
+function creditInviteeWelcomeCoins() {
+    balance += REFERRAL_INVITEE_COINS;
+    referralBonusTotal += REFERRAL_INVITEE_COINS;
+    saveReferralBonusTotal();
+    if (window.ensureDailyBaseline) {
+        ensureDailyBaseline();
+        dailyProgress.baseline += REFERRAL_INVITEE_COINS;
+        saveDailyProgress();
+    }
+    const balanceEl = document.getElementById('balance');
+    if (balanceEl) balanceEl.textContent = balance;
+    if (window.saveGameState) saveGameState();
+    if (window.pushNetProfit) pushNetProfit();
+    showToast('🎁 Your friend sent you ' + REFERRAL_INVITEE_COINS.toLocaleString() + ' coins — welcome to the table!');
 }
 
 // Live subscription rather than a one-shot read, so an inviter watching the
@@ -110,6 +152,10 @@ function subscribeReferralRewards() {
                 }
             });
             referralStats = { invited: invited, coinsEarned: earned };
+            // Persisted so getAllInDailyLimit() (js/game.js) can read the
+            // referral count offline and before this subscription first fires.
+            try { localStorage.setItem(REFERRAL_INVITED_KEY, String(invited)); } catch (e) {}
+            if (window.updateAllInUI) updateAllInUI();
             renderInviteRewardLine();
             if (pending.length) claimReferralRewards(pending);
         }, function() { /* ignore Firestore errors — rewards retry on next sign-in */ });
@@ -158,6 +204,7 @@ function creditReferralCoins(claimed) {
         ? claimed[0].name + ' joined'
         : claimed.length + ' friends joined';
     showToast('🎁 ' + who + ' — +' + total + ' coins!');
+    if (window.logVpEvent) logVpEvent('referral_claimed', { coins: total });
 }
 
 function cleanupReferrals() {
@@ -170,13 +217,20 @@ function renderInviteRewardLine() {
     // Same line lives in two places: the invite sheet and the Friends screen
     // action strip (the OS share sheet can't carry the reward pitch, so it
     // stays visible on the page itself).
+    // Milestone framing with endowed progress: the player themselves counts
+    // as the first seat, so the ladder never starts from zero.
     let text;
-    if (!referralStats.invited) {
-        text = 'Get ' + REFERRAL_REWARD_COINS + ' coins for every friend who joins with Google.';
+    const n = referralStats.invited;
+    if (!n) {
+        text = '1 of 3 seats filled — you hold the first. You get ' +
+            REFERRAL_REWARD_COINS.toLocaleString() + ' coins per friend, they get ' +
+            REFERRAL_INVITEE_COINS.toLocaleString() + '.';
+    } else if (n < 3) {
+        text = (n + 1) + ' of 3 seats filled · ' +
+            referralStats.coinsEarned.toLocaleString() + ' coins earned';
     } else {
-        const n = referralStats.invited;
-        text = n + ' friend' + (n === 1 ? '' : 's') + ' joined · ' +
-            referralStats.coinsEarned + ' coins earned';
+        text = 'Table regular — ' + n + ' friends joined · ' +
+            referralStats.coinsEarned.toLocaleString() + ' coins earned';
     }
     ['invite-reward-line', 'friends-invite-reward'].forEach(function(id) {
         const el = document.getElementById(id);

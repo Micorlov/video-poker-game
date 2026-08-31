@@ -30,6 +30,7 @@ cssFiles.forEach(file => {
 // Combine JS files in dependency order
 const jsFiles = [
     'js/audio.js',
+    'js/analytics.js',
     'js/ui.js',
     'js/progress.js',
     'js/firebase.js',
@@ -38,6 +39,7 @@ const jsFiles = [
     'js/presence.js',
     'js/friends.js',
     'js/referral.js',
+    'js/cloudsave.js',
     'js/rooms.js',
     'js/stories.js',
     'js/leaderboard-bots.js',
@@ -48,6 +50,7 @@ const jsFiles = [
     'js/game.js',
     'js/hints.js',
     'js/onboarding.js',
+    'js/signin-prompt.js',
     'js/tabs.js',
     'js/pwa.js'
 ];

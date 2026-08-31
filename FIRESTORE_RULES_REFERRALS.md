@@ -25,6 +25,12 @@ match /referrals/{referredUid} {
                 && request.resource.data.referredUid == referredUid
                 && request.resource.data.inviterUid != referredUid
                 && request.resource.data.rewardCoins == 2000
+                // Two-sided reward (v2.1): the invitee's welcome coins are
+                // pinned like rewardCoins. Optional during the rollout so
+                // pre-2.1 clients (which don't send the field) keep working;
+                // tighten to a required equality once the fleet has updated.
+                && (!('inviteeCoins' in request.resource.data)
+                    || request.resource.data.inviteeCoins == 1000)
                 && request.resource.data.claimedAt == null;
 
   // The inviter claims the reward exactly once. The resource.data.claimedAt ==

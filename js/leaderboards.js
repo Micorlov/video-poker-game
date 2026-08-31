@@ -53,7 +53,7 @@ function getDayKey(offset) {
         String(d.getDate()).padStart(2, '0');
 }
 
-let dailyProgress = { date: '', baseline: 500, bestHandRank: 0, bestHand: 'Nothing' };
+let dailyProgress = { date: '', baseline: STARTING_BALANCE, bestHandRank: 0, bestHand: 'Nothing' };
 
 function ensureDailyBaseline() {
     const today = getDayKey();
@@ -407,10 +407,15 @@ function shareLeaderboard() {
     }
 
     var text = '🃏 ' + title + '\n' + lines.join('\n');
+    // The standings double as an invite: attach the player's link so a brag
+    // carries the referral code with it.
+    var link = (window.getInviteLink && getInviteLink()) || '';
 
-    if (navigator.share) {
-        navigator.share({ title: title, text: text }).catch(function() {});
-    } else {
-        navigator.clipboard && navigator.clipboard.writeText(text);
-    }
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native', kind: 'leaderboard' });
+    shareViaNative(title, text, link).then(function(handled) {
+        if (!handled && navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link ? text + '\n' + link : text);
+            if (window.showToast) showToast('Standings copied.');
+        }
+    });
 }

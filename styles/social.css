@@ -655,6 +655,30 @@
 .share-chip.whatsapp { background: #25D366; }
 .share-chip.telegram { background: #229ED9; }
 
+/* WhatsApp/Telegram lead every share row — a dedicated messenger button
+   converts far better than the same icon buried in the OS share sheet. */
+.share-chip--primary {
+    flex: 1.4;
+    padding: 15px 0;
+    font-size: 14px;
+}
+
+/* Empty friends list → the invite is the action, not the explanation. */
+.friends-empty-invite {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    font-size: 13.5px;
+}
+
+.allin-unlock-invite {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px;
+}
+
 .sheet-done-btn {
     width: 100%;
     margin-top: 14px;
@@ -960,6 +984,21 @@
     font-weight: 600;
     color: var(--text-faint);
     cursor: pointer;
+}
+
+/* "Not now" on the guest sign-in re-prompt — a real, visible opt-out. */
+.signin-prompt-later {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 6px;
+    background: none;
+    border: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-family: inherit;
 }
 
 /* --- Friends action strip: tap-to-copy code chip + add-by-code, one row --- */

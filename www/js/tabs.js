@@ -249,4 +249,11 @@ document.addEventListener('DOMContentLoaded', function() {
     initNativeDeepLinkHandling();
     // An invite stored by an earlier launch that never got as far as sign-in.
     if (window.restorePendingInvite) restorePendingInvite();
+    // Guest sign-in re-prompt: count this session, then (from session 2 on,
+    // capped and cooled down in js/signin-prompt.js) ask shortly after launch.
+    // The delay also gives onAuthStateChanged time to settle _authResolved.
+    if (window.countSigninPromptSession) countSigninPromptSession();
+    setTimeout(function() {
+        if (window.maybeShowSigninPrompt) maybeShowSigninPrompt('session_start');
+    }, 3000);
 });

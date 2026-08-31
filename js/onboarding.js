@@ -124,6 +124,7 @@ function showOnboardingStep(index) {
         if (el) el.classList.toggle('active', i === index);
     });
     onboardingIndex = index;
+    if (window.logVpEvent) logVpEvent('onboarding_step', { step: ONBOARDING_STEPS[index] });
     if (ONBOARDING_STEPS[index] === 'push') markPushPermissionAsked();
     renderOnboardingDots();
     updateOnboardingNav();
