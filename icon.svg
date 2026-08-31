@@ -1,73 +1,66 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0E3A26"/>
-      <stop offset="55%" stop-color="#0A2A1B"/>
+    <linearGradient id="bg" x1="12%" y1="0%" x2="88%" y2="100%">
+      <stop offset="0%"   stop-color="#12432C"/>
+      <stop offset="52%"  stop-color="#0A2A1B"/>
       <stop offset="100%" stop-color="#04100C"/>
     </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="38%" r="55%">
-      <stop offset="0%" stop-color="#58E39B" stop-opacity="0.30"/>
-      <stop offset="55%" stop-color="#16C172" stop-opacity="0.08"/>
+    <radialGradient id="glow" cx="50%" cy="34%" r="58%">
+      <stop offset="0%"   stop-color="#58E39B" stop-opacity="0.42"/>
+      <stop offset="52%"  stop-color="#16C172" stop-opacity="0.12"/>
       <stop offset="100%" stop-color="#16C172" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="vignette" cx="50%" cy="50%" r="72%">
-      <stop offset="60%" stop-color="#000000" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
+    <radialGradient id="vignette" cx="50%" cy="52%" r="74%">
+      <stop offset="58%"  stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
     </radialGradient>
-    <linearGradient id="goldStroke" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F6E4B8"/>
-      <stop offset="50%" stop-color="#E9C46A"/>
-      <stop offset="100%" stop-color="#D8AE47"/>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#F6E4B8"/>
+      <stop offset="48%"  stop-color="#E9C46A"/>
+      <stop offset="100%" stop-color="#C99C33"/>
     </linearGradient>
-    <linearGradient id="cardFace" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#EDEFF6"/>
+    <linearGradient id="face" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E8ECF4"/>
     </linearGradient>
-    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="0" dy="20" stdDeviation="26" flood-color="#000000" flood-opacity="0.5"/>
+    <filter id="drop" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="26" stdDeviation="30" flood-color="#000000" flood-opacity="0.55"/>
     </filter>
+    <path id="spade" d="M50 4 C50 4 17 34 8 51 C-1 68 7 84 24 84 C34 84 43 79 47 71 C47 71 45 88 32 96 L68 96 C55 88 53 71 53 71 C57 79 66 84 76 84 C93 84 101 68 92 51 C83 34 50 4 50 4 Z"/>
+    <path id="heart" d="M50 95 C50 95 5 61 5 34 C5 17 18 8 31 8 C41 8 47 14 50 21 C53 14 59 8 69 8 C82 8 95 17 95 34 C95 61 50 95 50 95 Z"/>
   </defs>
 
-  <!-- background -->
-  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="url(#bg)"/>
-  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="url(#glow)"/>
-  <rect x="0" y="0" width="1024" height="1024" rx="224" fill="url(#vignette)"/>
+  <!-- Ground. rx is substituted per output: 0 for the Play listing (Play masks its
+       own corners), 228 for the legacy launcher PNGs that are drawn unmasked. -->
+  <rect width="1024" height="1024" rx="0" fill="url(#bg)"/>
+  <rect width="1024" height="1024" rx="0" fill="url(#glow)"/>
+  <rect width="1024" height="1024" rx="0" fill="url(#vignette)"/>
 
-  <!-- inner gold frame -->
-  <rect x="40" y="40" width="944" height="944" rx="192" fill="none" stroke="url(#goldStroke)" stroke-width="16" opacity="0.85"/>
+  <!-- Gold frame, inset far enough that Play's corner mask cannot clip it. -->
+  <rect x="70" y="70" width="884" height="884" rx="160" fill="none" stroke="url(#gold)" stroke-width="26"/>
+  <rect x="96" y="96" width="832" height="832" rx="136" fill="none" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="3"/>
 
-  <!-- fanned poker hand -->
-  <g filter="url(#cardShadow)">
-
-    <!-- LEFT card: King of Spades -->
-    <g transform="translate(432,712) rotate(-22)">
-      <g transform="translate(0,-430)">
-        <rect x="-152" y="0" width="304" height="430" rx="34" fill="url(#cardFace)" stroke="#c7bfa4" stroke-width="5"/>
-        <text x="-116" y="92" font-family="Georgia, 'Times New Roman', serif" font-size="92" font-weight="700" fill="#101322">K</text>
-        <text x="-116" y="168" font-family="Georgia, 'Times New Roman', serif" font-size="78" fill="#101322">&#9824;</text>
-        <text x="0" y="278" font-family="Georgia, 'Times New Roman', serif" font-size="190" fill="#101322" text-anchor="middle">&#9824;</text>
+  <g filter="url(#drop)">
+    <g transform="translate(360,774) rotate(-21)">
+      <g transform="translate(-158,-448)">
+        <rect x="0" y="0" width="316" height="448" rx="42" fill="url(#face)" stroke="#06180F" stroke-width="11"/>
+        <text x="42" y="150" font-family="'Instrument Sans','Helvetica Neue',Arial,sans-serif" font-size="150" font-weight="800" fill="#101322">K</text>
+        <use href="#spade" transform="translate(96,236) scale(1.24)" fill="#101322"/>
       </g>
     </g>
-
-    <!-- RIGHT card: King of Hearts -->
-    <g transform="translate(592,712) rotate(22)">
-      <g transform="translate(0,-430)">
-        <rect x="-152" y="0" width="304" height="430" rx="34" fill="url(#cardFace)" stroke="#c7bfa4" stroke-width="5"/>
-        <text x="-116" y="92" font-family="Georgia, 'Times New Roman', serif" font-size="92" font-weight="700" fill="#E01B44">K</text>
-        <text x="-116" y="168" font-family="Georgia, 'Times New Roman', serif" font-size="78" fill="#E01B44">&#9829;</text>
-        <text x="0" y="278" font-family="Georgia, 'Times New Roman', serif" font-size="190" fill="#E01B44" text-anchor="middle">&#9829;</text>
+    <g transform="translate(664,774) rotate(21)">
+      <g transform="translate(-158,-448)">
+        <rect x="0" y="0" width="316" height="448" rx="42" fill="url(#face)" stroke="#06180F" stroke-width="11"/>
+        <text x="42" y="150" font-family="'Instrument Sans','Helvetica Neue',Arial,sans-serif" font-size="150" font-weight="800" fill="#E01B44">A</text>
+        <use href="#heart" transform="translate(96,240) scale(1.24)" fill="#E01B44"/>
       </g>
     </g>
-
-    <!-- CENTER card: Ace of Spades (hero) -->
-    <g transform="translate(512,690)">
-      <g transform="translate(0,-460)">
-        <rect x="-160" y="0" width="320" height="460" rx="36" fill="url(#cardFace)" stroke="#c7bfa4" stroke-width="6"/>
-        <text x="-124" y="100" font-family="Georgia, 'Times New Roman', serif" font-size="106" font-weight="700" fill="#101322">A</text>
-        <text x="-124" y="184" font-family="Georgia, 'Times New Roman', serif" font-size="88" fill="#101322">&#9824;</text>
-        <text x="0" y="308" font-family="Georgia, 'Times New Roman', serif" font-size="232" fill="#101322" text-anchor="middle">&#9824;</text>
+    <g transform="translate(512,756)">
+      <g transform="translate(-172,-486)">
+        <rect x="0" y="0" width="344" height="486" rx="46" fill="url(#face)" stroke="#06180F" stroke-width="12"/>
+        <text x="44" y="164" font-family="'Instrument Sans','Helvetica Neue',Arial,sans-serif" font-size="166" font-weight="800" fill="#101322">A</text>
+        <use href="#spade" transform="translate(100,252) scale(1.44)" fill="#101322"/>
       </g>
     </g>
-
   </g>
 </svg>
