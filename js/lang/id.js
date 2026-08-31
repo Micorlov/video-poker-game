@@ -167,7 +167,7 @@ vpRegisterLang('id', {
     'ob.seeCards': 'Lihat kartumu, tahan yang kamu mau, lalu atur taruhan sebelum menarik.',
     'ob.balance': 'Saldo',
     'ob.totalBet': 'Total taruhan',
-    'ob.held': 'DITAHAN',
+    'play.held': 'DITAHAN',
     'ob.allInLeftOne': 'Sisa 1',
     'ob.draw': 'Tarik',
     'ob.oneFreeAllIn': 'Satu all-in gratis per hari — undang teman untuk membuka satu lagi.',

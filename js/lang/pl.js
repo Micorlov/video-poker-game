@@ -169,7 +169,7 @@ vpRegisterLang('pl', {
     'ob.seeCards': 'Zobacz karty, zatrzymaj wybrane, a potem ustaw zakład przed wymianą.',
     'ob.balance': 'Saldo',
     'ob.totalBet': 'Łączny zakład',
-    'ob.held': 'TRZYMANA',
+    'play.held': 'TRZYMANA',
     'ob.allInLeftOne': 'Zostało 1',
     'ob.draw': 'Wymień',
     'ob.oneFreeAllIn': 'Jeden darmowy all-in dziennie — zaproś znajomego, aby odblokować kolejny.',

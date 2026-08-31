@@ -167,7 +167,7 @@ vpRegisterLang('fr', {
     'ob.seeCards': 'Voyez vos cartes, gardez celles que vous voulez, puis fixez votre mise avant le tirage.',
     'ob.balance': 'Solde',
     'ob.totalBet': 'Mise totale',
-    'ob.held': 'GARDÉE',
+    'play.held': 'GARDÉE',
     'ob.allInLeftOne': '1 restant',
     'ob.draw': 'Tirer',
     'ob.oneFreeAllIn': 'Un tapis gratuit par jour — invitez un ami pour en débloquer un autre.',

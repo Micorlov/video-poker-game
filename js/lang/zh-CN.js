@@ -168,7 +168,7 @@ vpRegisterLang('zh-CN', {
     'ob.seeCards': '看牌，保留想要的，再在换牌前设置下注。',
     'ob.balance': '余额',
     'ob.totalBet': '总下注',
-    'ob.held': '保留',
+    'play.held': '保留',
     'ob.allInLeftOne': '剩 1 次',
     'ob.draw': '换牌',
     'ob.oneFreeAllIn': '每天一次免费全下 — 邀请好友再解锁一次。',

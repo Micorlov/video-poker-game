@@ -169,7 +169,7 @@ vpRegisterLang('hi', {
     'ob.seeCards': 'अपने कार्ड देखें, जो चाहें रोकें, फिर ड्रॉ से पहले दांव तय करें।',
     'ob.balance': 'बैलेंस',
     'ob.totalBet': 'कुल दांव',
-    'ob.held': 'रोका',
+    'play.held': 'रोका',
     'ob.allInLeftOne': '1 बचा',
     'ob.draw': 'ड्रॉ',
     'ob.oneFreeAllIn': 'रोज़ एक मुफ़्त ऑल-इन — एक दोस्त को बुलाकर दूसरा खोलें।',

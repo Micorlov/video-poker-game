@@ -358,10 +358,13 @@ function openAllInSheet() {
     const hands = multiHandCount || 1;
     allInPendingAmount = Math.max(1, Math.floor(balance / hands));
     const stake = allInPendingAmount * hands;
-    const amountEl = document.getElementById('allin-sheet-amount');
-    if (amountEl) amountEl.textContent = formatNumber(stake);
-    const subEl = document.getElementById('allin-sheet-target');
-    if (subEl) subEl.textContent = gameState === 'hold' ? t('play.thisHand') : t('play.theNextHand');
+    const subEl = document.getElementById('allin-sheet-sub');
+    if (subEl) {
+        subEl.textContent = t('sheet.allInSub', {
+            amount: formatNumber(stake),
+            target: gameState === 'hold' ? t('play.thisHand') : t('play.theNextHand')
+        });
+    }
 
     // A mid-table hand makes the upside concrete without promising a royal.
     // Mid-hand, the payout is computed off the raised total stake, not just
@@ -381,11 +384,24 @@ function closeAllInSheet() {
     resetAllInSlider();
 }
 
+// The thumb is placed on whichever edge the current language starts from, so
+// the inline style has to name the matching physical property — and clear the
+// other, or a language switch would leave the old one pinning it.
+let allInThumbOffset = 3;
+
+function setAllInThumbOffset(offset) {
+    allInThumbOffset = offset;
+    const thumb = document.getElementById('allin-slider-thumb');
+    if (!thumb) return;
+    const rtl = !!(window.isRtl && isRtl());
+    thumb.style.left = rtl ? '' : offset + 'px';
+    thumb.style.right = rtl ? offset + 'px' : '';
+}
+
 function resetAllInSlider() {
     const track = document.getElementById('allin-slider-track');
-    const thumb = document.getElementById('allin-slider-thumb');
     const fill = document.getElementById('allin-slider-fill');
-    if (thumb) thumb.style.left = '3px';
+    setAllInThumbOffset(3);
     if (fill) fill.style.width = '0px';
     if (track) track.classList.remove('confirmed');
 }
@@ -424,8 +440,8 @@ function initAllInSlider() {
 
     const CONFIRM_THRESHOLD = 0.85;
     let startX = 0;
-    let thumbStartLeft = 3;
-    let maxLeft = 0;
+    let thumbStartOffset = 3;
+    let maxOffset = 0;
 
     function pointerX(e) {
         return e.touches ? e.touches[0].clientX : e.clientX;
@@ -434,10 +450,11 @@ function initAllInSlider() {
     function pointerMove(e) {
         if (!allInDragging) return;
         e.preventDefault();
-        let left = thumbStartLeft + (pointerX(e) - startX);
-        left = Math.max(3, Math.min(maxLeft, left));
-        thumb.style.left = left + 'px';
-        fill.style.width = (left + thumb.offsetWidth) + 'px';
+        // Offset is measured from the start edge, so a rightward drag has to
+        // count as backwards in Hebrew and Arabic.
+        const travel = (pointerX(e) - startX) * (window.isRtl && isRtl() ? -1 : 1);
+        setAllInThumbOffset(Math.max(3, Math.min(maxOffset, thumbStartOffset + travel)));
+        fill.style.width = (allInThumbOffset + thumb.offsetWidth) + 'px';
     }
 
     function pointerUp() {
@@ -449,10 +466,10 @@ function initAllInSlider() {
         document.removeEventListener('touchmove', pointerMove);
         document.removeEventListener('touchend', pointerUp);
 
-        const pct = maxLeft > 0 ? (thumb.offsetLeft - 3) / maxLeft : 0;
+        const pct = maxOffset > 0 ? (allInThumbOffset - 3) / maxOffset : 0;
         if (pct >= CONFIRM_THRESHOLD) {
-            thumb.style.left = maxLeft + 'px';
-            fill.style.width = (maxLeft + thumb.offsetWidth) + 'px';
+            setAllInThumbOffset(maxOffset);
+            fill.style.width = (maxOffset + thumb.offsetWidth) + 'px';
             track.classList.add('confirmed');
             confirmAllIn();
         } else {
@@ -464,8 +481,8 @@ function initAllInSlider() {
         allInDragging = true;
         thumb.classList.add('dragging');
         startX = pointerX(e);
-        thumbStartLeft = thumb.offsetLeft;
-        maxLeft = track.clientWidth - thumb.offsetWidth - 3;
+        thumbStartOffset = allInThumbOffset;
+        maxOffset = track.clientWidth - thumb.offsetWidth - 3;
         document.addEventListener('mousemove', pointerMove);
         document.addEventListener('mouseup', pointerUp);
         document.addEventListener('touchmove', pointerMove, { passive: false });
@@ -855,7 +872,13 @@ function getWinBadgeText(cardIndex, handType) {
     return '';
 }
 
+// Remembers the last call so a language switch can repaint the dealt cards
+// with the same highlights — the badges are baked into the card HTML, so
+// re-rendering is the only way to translate them without waiting for a deal.
+let lastRenderHandArgs = null;
+
 function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false, animateFlip = true) {
+    lastRenderHandArgs = [winningIndices, thirdMatchIndices, secondPairIndices, isDraw, false];
     const handEl = document.getElementById('hand');
     handEl.innerHTML = '';
     const anyHeld = held.some(h => h);
@@ -901,7 +924,7 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         }
 
         cardEl.innerHTML = `
-            <div class="held-badge">HELD</div>
+            <div class="held-badge">${t('play.held')}</div>
             <div class="win-badge">${winBadgeText}</div>
             <div class="card-inner">
                 <div class="card-front">
@@ -1158,6 +1181,12 @@ if (window.vpOnLanguageChange) {
         updateAllInUI();
         updateStreakUI(false);
         document.getElementById('balance').textContent = formatNumber(balance);
+        // Repaint the dealt cards (their HELD/win badges are baked in) and
+        // re-pin the All-In thumb, which is positioned from whichever edge the
+        // reading direction starts at. Never animates: this is a repaint, not
+        // a new deal.
+        if (lastRenderHandArgs) renderHand.apply(null, lastRenderHandArgs);
+        setAllInThumbOffset(allInThumbOffset);
         // The result panel keeps the last hand's copy, so re-render it in the
         // new language rather than leaving a stale English sentence on screen.
         if (lastHandType) {

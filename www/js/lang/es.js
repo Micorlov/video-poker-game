@@ -167,7 +167,7 @@ vpRegisterLang('es', {
     'ob.seeCards': 'Mira tus cartas, conserva las que quieras y fija tu apuesta antes de robar.',
     'ob.balance': 'Saldo',
     'ob.totalBet': 'Apuesta total',
-    'ob.held': 'FIJA',
+    'play.held': 'FIJA',
     'ob.allInLeftOne': 'Queda 1',
     'ob.draw': 'Robar',
     'ob.oneFreeAllIn': 'Una apuesta TODO gratis al día — invita a un amigo para desbloquear otra.',

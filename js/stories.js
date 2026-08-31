@@ -236,8 +236,11 @@ function renderStoryViewer() {
     bodyHtml += '</div>';
 
     // Tap zones (design: .storytapzone.left / .storytapzone.right)
-    bodyHtml += '<div class="story-tap-left" onclick="event.stopPropagation();navigateStory(-1)"></div>';
-    bodyHtml += '<div class="story-tap-right" onclick="event.stopPropagation();navigateStory(1)"></div>';
+    // The zones stay physically left and right; which one moves forward flips
+    // with the reading direction, the way every RTL story viewer behaves.
+    var backStep = (window.isRtl && isRtl()) ? 1 : -1;
+    bodyHtml += '<div class="story-tap-left" onclick="event.stopPropagation();navigateStory(' + backStep + ')"></div>';
+    bodyHtml += '<div class="story-tap-right" onclick="event.stopPropagation();navigateStory(' + (-backStep) + ')"></div>';
 
     card.innerHTML = progressHtml + headerHtml + bodyHtml;
     overlay.appendChild(card);

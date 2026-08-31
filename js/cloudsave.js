@@ -80,7 +80,7 @@ function maybeRestoreCloudState(userDoc) {
     }
 
     const balanceEl = document.getElementById('balance');
-    if (balanceEl) balanceEl.textContent = balance;
+    if (balanceEl) balanceEl.textContent = formatNumber(balance);
     if (window.saveGameState) saveGameState();
     if (window.updateStats) updateStats();
     if (window.pushNetProfit) pushNetProfit();

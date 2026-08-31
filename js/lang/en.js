@@ -183,7 +183,7 @@ vpRegisterLang('en', {
     'ob.seeCards': 'See your cards, hold what you want, then set your bet before the draw.',
     'ob.balance': 'Balance',
     'ob.totalBet': 'Total Bet',
-    'ob.held': 'HELD',
+    'play.held': 'HELD',
     'ob.allInLeftOne': '1 left',
     'ob.draw': 'Draw',
     'ob.oneFreeAllIn': 'One free All-In per day — invite a friend to unlock another.',

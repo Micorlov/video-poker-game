@@ -167,7 +167,7 @@ vpRegisterLang('it', {
     'ob.seeCards': 'Guarda le carte, tieni quelle che vuoi, poi imposta la puntata prima del cambio.',
     'ob.balance': 'Saldo',
     'ob.totalBet': 'Puntata totale',
-    'ob.held': 'TENUTA',
+    'play.held': 'TENUTA',
     'ob.allInLeftOne': 'Ne resta 1',
     'ob.draw': 'Cambia',
     'ob.oneFreeAllIn': 'Un all-in gratis al giorno — invita un amico per sbloccarne un altro.',

@@ -143,6 +143,10 @@ function removeFriend(uid) {
 function renderFriendsScreen() {
     const listEl = document.getElementById('friends-list');
     const emptyEl = document.getElementById('friends-empty');
+    const emptyCta = document.getElementById('friends-empty-invite');
+    if (emptyCta) {
+        emptyCta.textContent = t('friends.emptyInvite', { reward: formatNumber(REFERRAL_REWARD_COINS) });
+    }
     const codeEl = document.getElementById('own-referral-code');
     const signedOutEl = document.getElementById('friends-signed-out');
     const signedInWrap = document.getElementById('friends-signed-in-wrap');

@@ -214,7 +214,7 @@
                         <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()" data-i18n="friends.add">Add</button>
                     </div>
                 </div>
-                <div class="friends-reward-line" id="friends-invite-reward">You get 2,000 coins per friend — they get 1,000 to start.</div>
+                <div class="friends-reward-line" id="friends-invite-reward"></div>
 
                 <div class="stats-toggle">
                     <button class="stats-toggle-btn selected" id="friends-tab-leaderboard" onclick="setFriendsTab('leaderboard')" data-i18n="friends.leaderboard">Leaderboard</button>
@@ -225,7 +225,7 @@
                     <div class="panel">
                         <div class="rooms-empty hidden" id="friends-empty">
                             <span data-i18n="friends.empty">No friends at the table yet.</span>
-                            <button class="btn-primary friends-empty-invite" onclick="openInviteSheet()">Invite your first friend — you get 2,000 coins</button>
+                            <button class="btn-primary friends-empty-invite" id="friends-empty-invite" onclick="openInviteSheet()"></button>
                         </div>
                         <div id="friends-list"></div>
                     </div>
@@ -473,7 +473,7 @@
                 <span class="sheet-title" data-i18n="sheet.inviteFriends">Invite Friends</span>
                 <button class="sheet-close" onclick="closeSheet('invite-sheet')">✕</button>
             </div>
-            <div class="sheet-sub" id="invite-reward-line">You get 2,000 coins per friend — they get 1,000 to start.</div>
+            <div class="sheet-sub" id="invite-reward-line"></div>
             <div class="share-chips-row">
                 <button class="share-chip share-chip--primary whatsapp" onclick="shareFriendInviteViaWhatsApp()" data-i18n="sheet.whatsapp">WhatsApp</button>
                 <button class="share-chip share-chip--primary telegram" onclick="shareFriendInviteViaTelegram()" data-i18n="sheet.telegram">Telegram</button>
@@ -500,7 +500,7 @@
                 <span class="sheet-title" id="room-invite-title" data-i18n="sheet.inviteFriends">Invite Friends</span>
                 <button class="sheet-close" onclick="closeSheet('room-invite-sheet')">✕</button>
             </div>
-            <div class="sheet-sub">Invite friends to "<span id="room-invite-name">—</span>" — they get a notification with a Join button.</div>
+            <div class="sheet-sub" id="room-invite-sub"></div>
             <div class="room-invite-friends" id="room-invite-friends"></div>
             <button class="rip-send-btn hidden" id="room-invite-send" onclick="sendRoomInvites()" data-i18n="room.sendInvites">Send Invites</button>
             <div class="rip-divider"><span data-i18n="sheet.orShareLink">or share a link</span></div>
@@ -526,7 +526,7 @@
                 <span class="sheet-title" id="bigwin-share-title" data-i18n="sheet.bigWinTitle">Big win!</span>
                 <button class="sheet-close" onclick="closeSheet('bigwin-share-sheet')">✕</button>
             </div>
-            <div class="sheet-sub">Rub it in — your invite link rides along, and you get 2,000 coins if a friend joins.</div>
+            <div class="sheet-sub" id="bigwin-share-sub"></div>
             <div class="share-chips-row">
                 <button class="share-chip share-chip--primary whatsapp" onclick="shareBigWinVia('whatsapp')" data-i18n="sheet.whatsapp">WhatsApp</button>
                 <button class="share-chip share-chip--primary telegram" onclick="shareBigWinVia('telegram')" data-i18n="sheet.telegram">Telegram</button>
@@ -566,7 +566,7 @@
                 </span>
                 <button class="sheet-close" onclick="closeAllInSheet()">✕</button>
             </div>
-            <div class="sheet-sub">This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on <span id="allin-sheet-target">the next hand</span>.</div>
+            <div class="sheet-sub" id="allin-sheet-sub"></div>
             <div class="sheet-stat">
                 <span class="sheet-stat-label" data-i18n="sheet.potentialOn">Potential on Full House</span>
                 <span class="sheet-stat-value" id="allin-sheet-potential">0</span>
@@ -710,11 +710,11 @@
                         </div>
                         <div class="ob-mockup-cards">
                             <div class="ob-mockup-card">
-                                <div class="ob-held-badge" data-i18n="ob.held">HELD</div>
+                                <div class="ob-held-badge" data-i18n="play.held">HELD</div>
                                 A♠
                             </div>
                             <div class="ob-mockup-card">
-                                <div class="ob-held-badge" data-i18n="ob.held">HELD</div>
+                                <div class="ob-held-badge" data-i18n="play.held">HELD</div>
                                 K♠
                             </div>
                             <div class="ob-mockup-card ob-mockup-card--red">7♦</div>

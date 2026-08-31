@@ -167,7 +167,7 @@ vpRegisterLang('tr', {
     'ob.seeCards': 'Kartlarını gör, istediğini tut, sonra çekmeden önce bahsini belirle.',
     'ob.balance': 'Bakiye',
     'ob.totalBet': 'Toplam bahis',
-    'ob.held': 'TUTULDU',
+    'play.held': 'TUTULDU',
     'ob.allInLeftOne': '1 kaldı',
     'ob.draw': 'Çek',
     'ob.oneFreeAllIn': 'Günde bir ücretsiz all in — bir arkadaş davet ederek bir tane daha aç.',

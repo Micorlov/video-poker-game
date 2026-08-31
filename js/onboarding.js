@@ -74,7 +74,10 @@ function onboardingTouchEnd(e) {
     const dx = touch.clientX - onboardingSwipeStartX;
     const dy = touch.clientY - onboardingSwipeStartY;
     if (Math.abs(dx) < ONBOARDING_SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return;
-    if (dx < 0) {
+    // Advancing means swiping toward the end edge — leftward in English,
+    // rightward in Hebrew and Arabic.
+    const forward = (window.isRtl && isRtl()) ? dx > 0 : dx < 0;
+    if (forward) {
         if (onboardingIndex < ONBOARDING_STEPS.length - 1) advanceOnboarding();
     } else if (onboardingIndex > 0) {
         goBackOnboarding();

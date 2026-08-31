@@ -169,7 +169,7 @@ vpRegisterLang('ja', {
     'ob.seeCards': 'カードを見て、残したいものをホールドし、ドロー前にベットを決めます。',
     'ob.balance': '残高',
     'ob.totalBet': '合計ベット',
-    'ob.held': 'ホールド',
+    'play.held': 'ホールド',
     'ob.allInLeftOne': '残り1回',
     'ob.draw': 'ドロー',
     'ob.oneFreeAllIn': '1日1回オールイン無料 — フレンドを招待するともう1回解放。',

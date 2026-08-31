@@ -293,11 +293,18 @@ native. Six steps, swipeable, with back arrow, dot indicator, and next arrow.
 | 5 | **Never Miss a Win** | 🔔 Push permission ask — **native only, skipped on web**. Enables all four notification categories at once. |
 | 6 | **Save Your Progress** | Google sign-in. "Continue as Guest" is **native-only** — on web, sign-in is mandatory. |
 
-**Language selection** — 14 left-to-right languages: English, Spanish, Portuguese (BR), German,
-French, Italian, Polish, Russian, Turkish, Indonesian, Hindi, Japanese, Korean, Simplified
-Chinese. The device language is detected on first launch (`navigator.languages`, folded onto
-the nearest shipped language, falling back to English); a globe chip on the onboarding welcome
-step and a row in Settings both open the picker. Persisted to `vp_lang`.
+**Language selection** — 16 languages: English, Spanish, Portuguese (BR), German, French,
+Italian, Polish, Russian, Turkish, Indonesian, Hindi, Japanese, Korean, Simplified Chinese,
+Hebrew and Arabic. The device language is detected on first launch (`navigator.languages`,
+folded onto the nearest shipped language — including Android's legacy `iw` for Hebrew —
+falling back to English); a globe chip on the onboarding welcome step and a row in Settings
+both open the picker. Persisted to `vp_lang`.
+
+Hebrew and Arabic set `dir="rtl"` on `<html>` and mirror the whole layout via
+`styles/rtl.css`. Playing cards stay left-to-right in every language: rank sits top-left and
+suit bottom-right on a real card regardless of locale, and the dealt order is what the hold
+indices and the flip animation both assume. The onboarding swipe, the story tap zones and the
+All-In slider all reverse with the reading direction.
 
 ---
 

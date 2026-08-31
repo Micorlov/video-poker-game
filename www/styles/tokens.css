@@ -74,12 +74,15 @@
     --nav-height: 78px;
     --nav-gap: 30px;
 
+    /* Bricolage Grotesque and Instrument Sans are Latin-only, so headings in
+       Hebrew, Arabic, Cyrillic, Devanagari and CJK fall through to the
+       platform's Noto faces per glyph. That is a deliberate trade: no webfont
+       exists that covers all sixteen languages, and loading a second display
+       family per script would cost more than the visual consistency is worth. */
     --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui,
-                    'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC',
+                    'Noto Sans', 'Noto Sans Hebrew', 'Noto Sans Arabic',
+                    'Noto Sans Devanagari', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC',
                     sans-serif;
-    /* The UI ships 14 LTR languages, but user-supplied names (Google display
-       names, friend names) can be in any script — the Hebrew and Arabic
-       fallbacks stay for that reason even though neither is a UI language. */
     --font-body: 'Instrument Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
                  'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC',
                  'Noto Sans Hebrew', 'Noto Sans Arabic',

@@ -49,7 +49,8 @@ function makeSandbox(navigatorLanguages, storedLang) {
         },
         navigator: { languages: navigatorLanguages, language: navigatorLanguages[0] },
         document: {
-            documentElement: noopEl,
+            // lang/dir are asserted on, so this element holds real values.
+            documentElement: Object.assign({}, noopEl, { lang: '', dir: '' }),
             title: '',
             getElementById: () => null,
             querySelectorAll: () => [],
@@ -136,6 +137,11 @@ test('detectLanguage folds regional tags onto shipped languages', () => {
         [['es-419'], 'es'],
         [['fr_CA'], 'fr'],          // underscore form some WebViews report
         [['cy', 'ja-JP'], 'ja'],    // first unsupported tag is skipped, not fatal
+        [['he-IL'], 'he'],
+        [['iw'], 'he'],             // Android still reports the pre-1989 code
+        [['iw-IL'], 'he'],
+        [['ar-EG'], 'ar'],
+        [['ar'], 'ar'],
         [['xx-YY'], 'en']           // nothing recognised
     ];
     cases.forEach(([languages, expected]) => {
@@ -150,7 +156,9 @@ test('a stored choice beats the device language', () => {
 });
 
 test('a stored language we no longer ship falls back to detection', () => {
-    const { sandbox } = loadI18n({ languages: ['de-DE'], stored: 'he' });
+    // 'sv' is deliberately not in SUPPORTED_LANGS — a stale value left in
+    // storage by an older build must not pin the UI to a missing dictionary.
+    const { sandbox } = loadI18n({ languages: ['de-DE'], stored: 'sv' });
     assert.strictEqual(sandbox.detectLanguage(), 'de');
 });
 
@@ -211,4 +219,34 @@ test('language files register exactly the code named by their filename', () => {
         const code = file.replace(/\.js$/, '');
         assert.ok(dictFor(context, code), `${file} should call vpRegisterLang('${code}', ...)`);
     });
+});
+
+test('Hebrew and Arabic are right-to-left, every other language is not', () => {
+    const { sandbox } = loadI18n({ languages: ['en-US'] });
+
+    sandbox.vpSetLanguage('he');
+    assert.strictEqual(sandbox.isRtl(), true);
+    sandbox.vpSetLanguage('ar');
+    assert.strictEqual(sandbox.isRtl(), true);
+
+    Array.from(sandbox.SUPPORTED_LANGS)
+        .filter((c) => c !== 'he' && c !== 'ar')
+        .forEach((code) => {
+            sandbox.vpSetLanguage(code);
+            assert.strictEqual(sandbox.isRtl(), false, `${code} should be left-to-right`);
+        });
+});
+
+test('applyLanguage sets dir on <html> in both directions', () => {
+    const { sandbox } = loadI18n({ languages: ['en-US'] });
+    const html = sandbox.document.documentElement;
+
+    sandbox.vpSetLanguage('he');
+    assert.strictEqual(html.dir, 'rtl');
+    assert.strictEqual(html.lang, 'he');
+
+    // Switching back must clear it, or the layout stays mirrored in English.
+    sandbox.vpSetLanguage('en');
+    assert.strictEqual(html.dir, 'ltr');
+    assert.strictEqual(html.lang, 'en');
 });

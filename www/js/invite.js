@@ -168,8 +168,13 @@ function friendInviteMessage() {
     const user = window.egUser;
     const name = (user && user.displayName) || 'A friend';
     const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
+    // Two links do two jobs: the share link (Play Store) installs, while the
+    // deep link below opens the app directly for a friend who already has it —
+    // carrying the code through intent://, which the store link cannot.
+    const openLink = window.buildInviteOpenLink ? buildInviteOpenLink(code) : '';
     return name + ' sent you 1,000 coins on Royal Video Poker 🃏 Sign in with Google to claim them.' +
-        (code ? '\nFriend code: ' + code : '');
+        (code ? '\nFriend code: ' + code : '') +
+        (openLink ? '\nAlready have the app? Tap to open: ' + openLink : '');
 }
 
 function shareFriendInviteViaWhatsApp() {
@@ -183,9 +188,16 @@ function shareFriendInviteViaTelegram() {
 // --- Room invite sheet: share-link half ---
 // The friend-picker half lives in js/rooms.js (openRoomInvitePicker); these
 // helpers fill in the link row and share chips of #room-invite-sheet.
+// Held here rather than read back out of the DOM: the sentence that used to
+// carry the name is now rendered whole from the dictionary, so there is no
+// element left to read it from.
+let roomInviteName = '';
+
 function setRoomInviteSheetLink(roomName, roomCode) {
     const link = buildRoomLink(roomCode);
-    document.getElementById('room-invite-name').textContent = roomName;
+    roomInviteName = roomName;
+    const subEl = document.getElementById('room-invite-sub');
+    if (subEl) subEl.textContent = t('sheet.roomInviteSub', { name: roomName });
     const linkEl = document.getElementById('room-invite-link');
     linkEl.textContent = link;
     linkEl.setAttribute('data-link', link);
@@ -203,7 +215,7 @@ function copyRoomLink() {
 }
 
 function roomInviteMessage() {
-    const name = document.getElementById('room-invite-name').textContent;
+    const name = roomInviteName;
     const code = document.getElementById('room-invite-link').getAttribute('data-code') || '';
     return t('share.roomInviteMsg', { name: name }) +
         (code ? '\n' + t('share.roomCodeLine', { code: code }) : '');
@@ -245,6 +257,8 @@ function maybeOfferBigWinShare(handType, win) {
     bigwinShareWin = win;
     const title = document.getElementById('bigwin-share-title');
     if (title) title.textContent = t('sheet.bigWinTitleWin', { hand: vpHandLabel(handType), coins: formatNumber(win) });
+    const sub = document.getElementById('bigwin-share-sub');
+    if (sub) sub.textContent = t('sheet.bigWinSub', { reward: formatNumber(REFERRAL_REWARD_COINS) });
     openSheet('bigwin-share-sheet');
     if (window.logVpEvent) logVpEvent('bigwin_share_shown');
 }

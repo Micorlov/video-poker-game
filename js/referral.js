@@ -124,7 +124,7 @@ function creditInviteeWelcomeCoins() {
         saveDailyProgress();
     }
     const balanceEl = document.getElementById('balance');
-    if (balanceEl) balanceEl.textContent = balance;
+    if (balanceEl) balanceEl.textContent = formatNumber(balance);
     if (window.saveGameState) saveGameState();
     if (window.pushNetProfit) pushNetProfit();
     showToast(t('toast.referralWelcome', { amount: formatNumber(REFERRAL_INVITEE_COINS) }));
@@ -148,7 +148,7 @@ function subscribeReferralRewards() {
                 if (data.claimedAt) {
                     earned += coins;
                 } else if (!referralClaimsInFlight[doc.id]) {
-                    pending.push({ id: doc.id, ref: doc.ref, coins: coins, name: data.referredName || 'A friend' });
+                    pending.push({ id: doc.id, ref: doc.ref, coins: coins, name: data.referredName || t('common.player') });
                 }
             });
             referralStats = { invited: invited, coinsEarned: earned };
@@ -192,7 +192,7 @@ function creditReferralCoins(claimed) {
     }
 
     const balanceEl = document.getElementById('balance');
-    if (balanceEl) balanceEl.textContent = balance;
+    if (balanceEl) balanceEl.textContent = formatNumber(balance);
     if (window.saveGameState) saveGameState();
 
     referralStats.coinsEarned += total;
@@ -246,3 +246,5 @@ function renderInviteRewardLine() {
 if (window.vpOnLanguageChange) {
     vpOnLanguageChange(renderInviteRewardLine);
 }
+
+document.addEventListener('DOMContentLoaded', renderInviteRewardLine);

@@ -7,12 +7,16 @@
 // at parse time — boot happens on DOMContentLoaded, by which point every
 // js/lang/*.js has registered.
 //
-// All 14 languages are left-to-right; there is deliberately no dir handling.
+// Twelve of the sixteen languages are left-to-right; Hebrew and Arabic set
+// dir="rtl" on <html>, which styles/rtl.css keys off.
 
 const SUPPORTED_LANGS = [
     'en', 'es', 'pt-BR', 'de', 'fr', 'it', 'pl',
-    'ru', 'tr', 'id', 'hi', 'ja', 'ko', 'zh-CN'
+    'ru', 'tr', 'id', 'hi', 'ja', 'ko', 'zh-CN',
+    'he', 'ar'
 ];
+
+const RTL_LANGS = ['he', 'ar'];
 
 // Each language's name in its own script — a picker that says "German" is
 // useless to the person who needs to find "Deutsch".
@@ -30,15 +34,20 @@ const LANG_NATIVE_NAMES = {
     'hi': 'हिन्दी',
     'ja': '日本語',
     'ko': '한국어',
-    'zh-CN': '简体中文'
+    'zh-CN': '简体中文',
+    'he': 'עברית',
+    'ar': 'العربية'
 };
 
 // Base tag → shipped variant, for locales we cover but don't tag exactly.
 // pt-PT gets pt-BR rather than English; every Chinese variant gets zh-CN.
+// Android still reports the pre-1989 ISO codes for a few languages, so a device
+// set to Hebrew arrives as 'iw' and Indonesian as 'in'.
 const LANG_BASE_ALIASES = {
     'pt': 'pt-BR',
     'zh': 'zh-CN',
-    'in': 'id'   // legacy ISO code some Android builds still report
+    'in': 'id',
+    'iw': 'he'
 };
 
 const LANG_STORAGE_KEY = 'vp_lang';
@@ -239,9 +248,17 @@ function getLanguage() {
     return currentLang;
 }
 
+function isRtl() {
+    return RTL_LANGS.indexOf(currentLang) !== -1;
+}
+
 function applyLanguage(lang, opts) {
     currentLang = (SUPPORTED_LANGS.indexOf(lang) !== -1) ? lang : DEFAULT_LANG;
     document.documentElement.lang = currentLang;
+    // Hebrew and Arabic mirror the whole layout. Everything direction-sensitive
+    // keys off this one attribute — styles/rtl.css for layout, isRtl() for the
+    // handful of gestures whose direction is encoded in JS.
+    document.documentElement.dir = isRtl() ? 'rtl' : 'ltr';
     document.title = t('app.title') || 'Video Poker';
 
     translateDom(document);
@@ -328,6 +345,7 @@ window.tPlural = tPlural;
 window.formatNumber = formatNumber;
 window.formatSigned = formatSigned;
 window.getLanguage = getLanguage;
+window.isRtl = isRtl;
 window.detectLanguage = detectLanguage;
 window.languageWasAutoDetected = languageWasAutoDetected;
 window.vpRegisterLang = vpRegisterLang;
@@ -339,4 +357,5 @@ window.vpHandExplanation = vpHandExplanation;
 window.vpHandTicker = vpHandTicker;
 window.openLanguageSheet = openLanguageSheet;
 window.SUPPORTED_LANGS = SUPPORTED_LANGS;
+window.RTL_LANGS = RTL_LANGS;
 window.LANG_NATIVE_NAMES = LANG_NATIVE_NAMES;

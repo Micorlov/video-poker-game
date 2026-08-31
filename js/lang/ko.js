@@ -167,7 +167,7 @@ vpRegisterLang('ko', {
     'ob.seeCards': '카드를 보고 원하는 것을 홀드한 뒤, 드로우 전에 베팅을 정하세요.',
     'ob.balance': '잔액',
     'ob.totalBet': '총 베팅',
-    'ob.held': '홀드',
+    'play.held': '홀드',
     'ob.allInLeftOne': '1회 남음',
     'ob.draw': '드로우',
     'ob.oneFreeAllIn': '하루 한 번 무료 올인 — 친구를 초대하면 한 번 더 열려요.',

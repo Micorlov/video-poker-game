@@ -169,7 +169,7 @@ vpRegisterLang('de', {
     'ob.seeCards': 'Sieh deine Karten, halte was du willst, und setze deinen Einsatz vor dem Tausch.',
     'ob.balance': 'Guthaben',
     'ob.totalBet': 'Gesamteinsatz',
-    'ob.held': 'HALTEN',
+    'play.held': 'HALTEN',
     'ob.allInLeftOne': 'Noch 1',
     'ob.draw': 'Tauschen',
     'ob.oneFreeAllIn': 'Ein gratis All-In pro Tag — lade einen Freund ein, um ein weiteres freizuschalten.',

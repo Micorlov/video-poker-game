@@ -111,12 +111,15 @@
     --nav-height: 78px;
     --nav-gap: 30px;
 
+    /* Bricolage Grotesque and Instrument Sans are Latin-only, so headings in
+       Hebrew, Arabic, Cyrillic, Devanagari and CJK fall through to the
+       platform's Noto faces per glyph. That is a deliberate trade: no webfont
+       exists that covers all sixteen languages, and loading a second display
+       family per script would cost more than the visual consistency is worth. */
     --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui,
-                    'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC',
+                    'Noto Sans', 'Noto Sans Hebrew', 'Noto Sans Arabic',
+                    'Noto Sans Devanagari', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC',
                     sans-serif;
-    /* The UI ships 14 LTR languages, but user-supplied names (Google display
-       names, friend names) can be in any script — the Hebrew and Arabic
-       fallbacks stay for that reason even though neither is a UI language. */
     --font-body: 'Instrument Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
                  'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC',
                  'Noto Sans Hebrew', 'Noto Sans Arabic',
@@ -254,7 +257,7 @@ button:focus:not(:focus-visible) {
 }
 
 .tpill {
-    padding-left: 10px;
+    padding-inline-start: 10px;
 }
 
 .tpill::before {
@@ -702,7 +705,7 @@ button:focus:not(:focus-visible) {
 }
 
 .balance-head-side {
-    text-align: right;
+    text-align: end;
     padding-bottom: 6px;
 }
 
@@ -889,7 +892,7 @@ button:focus:not(:focus-visible) {
 .allin-slider-thumb {
     position: absolute;
     top: 3px;
-    left: 3px;
+    inset-inline-start: 3px;
     width: 56px;
     height: 56px;
     border-radius: 16px;
@@ -904,7 +907,9 @@ button:focus:not(:focus-visible) {
     box-shadow: 0 10px 26px -8px rgba(22, 193, 114, 0.9);
     cursor: grab;
     touch-action: none;
-    transition: left 0.25s ease;
+    /* JS pins the thumb with `left` or `right` depending on reading
+       direction, so both are animated. */
+    transition: left 0.25s ease, right 0.25s ease;
 }
 
 .allin-slider-thumb.dragging {
@@ -1091,7 +1096,7 @@ button:focus:not(:focus-visible) {
     font-size: 11px;
     font-weight: 800;
     color: var(--green);
-    margin-left: 4px;
+    margin-inline-start: 4px;
     white-space: nowrap;
 }
 
@@ -1099,7 +1104,7 @@ button:focus:not(:focus-visible) {
     font-size: 11px;
     font-weight: 700;
     color: var(--text-faint);
-    margin-left: 4px;
+    margin-inline-start: 4px;
 }
 
 /* --- Action row --- */
@@ -1369,7 +1374,7 @@ button:focus:not(:focus-visible) {
     content: '';
     position: absolute;
     top: 3px;
-    left: 3px;
+    inset-inline-start: 3px;
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -1666,14 +1671,14 @@ button:focus:not(:focus-visible) {
     font-size: 12px;
     color: var(--text-muted);
     width: 34px;
-    text-align: right;
+    text-align: end;
     flex: 0 0 auto;
 }
 
 .friend-score {
     font-weight: 800;
     width: 56px;
-    text-align: right;
+    text-align: end;
     flex: 0 0 auto;
 }
 
@@ -1790,7 +1795,7 @@ button:focus:not(:focus-visible) {
 .modal-close {
     position: absolute;
     top: 12px;
-    right: 12px;
+    inset-inline-end: 12px;
     background: none;
     border: none;
     color: var(--text-muted);
@@ -1802,7 +1807,7 @@ button:focus:not(:focus-visible) {
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 4px;
-    padding-right: 20px;
+    padding-inline-end: 20px;
 }
 
 .modal-sub {
@@ -1966,7 +1971,7 @@ button:focus:not(:focus-visible) {
 .bracelet-badge {
     position: absolute;
     bottom: -2px;
-    right: -2px;
+    inset-inline-end: -2px;
     width: 18px;
     height: 18px;
     border-radius: 50%;
@@ -2288,7 +2293,7 @@ button:focus:not(:focus-visible) {
 .online-dot {
     position: absolute;
     bottom: 0;
-    right: 0;
+    inset-inline-end: 0;
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -2340,7 +2345,7 @@ button:focus:not(:focus-visible) {
     font-size: 13px;
     font-weight: 700;
     min-width: 58px;
-    text-align: right;
+    text-align: end;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
     flex-shrink: 0;
@@ -2752,7 +2757,7 @@ button:focus:not(:focus-visible) {
     font-size: 12px;
     color: var(--text-muted);
     width: 38px;
-    text-align: right;
+    text-align: end;
     flex-shrink: 0;
 }
 
@@ -2760,7 +2765,7 @@ button:focus:not(:focus-visible) {
     font-size: 13px;
     font-weight: 700;
     width: 58px;
-    text-align: right;
+    text-align: end;
     font-variant-numeric: tabular-nums;
     flex-shrink: 0;
 }
@@ -2940,7 +2945,7 @@ button:focus:not(:focus-visible) {
     padding: 8px 14px;
     cursor: pointer;
     font-family: inherit;
-    text-align: left;
+    text-align: start;
     transition: border-color 0.2s, transform 0.1s;
 }
 
@@ -2995,7 +3000,7 @@ button:focus:not(:focus-visible) {
 .tab-badge {
     display: inline-block;
     min-width: 17px;
-    margin-left: 6px;
+    margin-inline-start: 6px;
     padding: 1px 5px;
     border-radius: 999px;
     background: var(--green);
@@ -3012,7 +3017,7 @@ button:focus:not(:focus-visible) {
 .nav-badge {
     position: absolute;
     top: 6px;
-    right: 22%;
+    inset-inline-end: 22%;
     min-width: 16px;
     padding: 1px 4px;
     border-radius: 999px;
@@ -3031,7 +3036,7 @@ button:focus:not(:focus-visible) {
     gap: 10px;
     background: var(--surface-raised);
     border: 1px solid var(--green-line);
-    border-left: 3px solid var(--green);
+    border-inline-start: 3px solid var(--green);
     border-radius: var(--radius-sm, 16px);
     padding: 12px 14px;
     margin-bottom: 10px;
@@ -3237,7 +3242,7 @@ button:focus:not(:focus-visible) {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     margin-bottom: 16px;
-    padding-right: 2px;
+    padding-inline-end: 2px;
 }
 
 .language-option {
@@ -3254,7 +3259,7 @@ button:focus:not(:focus-visible) {
     font-family: var(--font-body);
     font-size: 15.5px;
     font-weight: 500;
-    text-align: left;
+    text-align: start;
     cursor: pointer;
 }
 
@@ -3550,7 +3555,7 @@ body.screen-shake {
 
 /* The centre card carries the corner layout of a real card face. */
 .ob-fan-card--center {
-    text-align: left;
+    text-align: start;
 }
 
 .ob-fan-card--center .ob-fan-suit {
@@ -3768,7 +3773,7 @@ body.screen-shake {
 }
 
 .ob-mockup-stat--right {
-    text-align: right;
+    text-align: end;
 }
 
 .ob-mockup-cards {
@@ -3877,7 +3882,7 @@ body.screen-shake {
 .ob-allin-badge {
     position: static;
     top: -6px;
-    right: -3px;
+    inset-inline-end: -3px;
     background: none;
     color: rgba(255, 107, 170, 0.65);
     font-size: 9px;
@@ -4053,7 +4058,7 @@ body.screen-shake {
     list-style: none;
     width: 100%;
     max-width: 280px;
-    text-align: left;
+    text-align: start;
     margin-bottom: 28px;
     display: flex;
     flex-direction: column;
@@ -4200,7 +4205,7 @@ body.screen-shake {
 .ob-lang-chip {
     position: absolute;
     top: calc(env(safe-area-inset-top, 0px) + 14px);
-    right: 16px;
+    inset-inline-end: 16px;
     z-index: 10;
     display: flex;
     align-items: center;
@@ -4233,6 +4238,117 @@ body.screen-shake {
    and Settings is the place to change language. */
 body:not(.ob-step-welcome) .ob-lang-chip {
     display: none;
+}
+
+
+/* --- styles/rtl.css --- */
+/* RTL overrides — Hebrew and Arabic.
+ *
+ * Most of the layout mirrors for free: flexbox with `gap` follows the inline
+ * axis, and the physical left/right declarations that mattered were converted
+ * to logical properties in place. What is left here are the three things a
+ * logical property cannot express: transforms, gradient angles, and glyphs
+ * whose shape encodes a direction.
+ *
+ * Loaded last in build.js so these win on specificity ties.
+ */
+
+/* ── Playing cards stay left-to-right ──
+ * A card's rank sits top-left and its suit bottom-right in every locale,
+ * including Hebrew and Arabic decks — the diagonal is what makes a fanned
+ * hand readable. Mirroring it would be wrong, not merely unfamiliar.
+ * Pinning direction on the containers also keeps the five dealt cards in
+ * deal order (index 0 leftmost), which the hold indices and the flip stagger
+ * both assume.
+ */
+[dir="rtl"] .hand,
+[dir="rtl"] .card,
+[dir="rtl"] .multi-hand-row,
+[dir="rtl"] .ob-card-fan,
+[dir="rtl"] .ob-mini-card,
+[dir="rtl"] .ob-hand-cards,
+[dir="rtl"] .ob-mockup-cards,
+[dir="rtl"] .ob-mockup-card,
+[dir="rtl"] .story-cards,
+[dir="rtl"] .story-card {
+    direction: ltr;
+}
+
+/* ── Directional glyphs ──
+ * Only the onboarding back button needs help. It is the one control that
+ * renders a bare `\2190`, which is not a Bidi_Mirrored character and so does
+ * not turn around on its own. Flipping the glyph rather than swapping the
+ * character keeps the markup meaning "back" in every language.
+ *
+ * The next button is deliberately excluded: updateOnboardingNav() always
+ * replaces its text with a word, so mirroring it would reverse the wording.
+ * The chevrons elsewhere use `\203A`, which is Bidi_Mirrored and flips itself.
+ */
+[dir="rtl"] .onboarding-nav-arrow:not(.onboarding-nav-arrow--next) {
+    transform: scaleX(-1);
+}
+
+/* ── All-In slider ──
+ * The thumb travels from the start edge, which the logical `inset-inline-start`
+ * already handles. The fill gradient does not: it is angled in physical
+ * degrees, so it has to be re-aimed.
+ */
+[dir="rtl"] .allin-slider-fill {
+    background: linear-gradient(270deg, rgba(22, 193, 114, 0.35), rgba(22, 193, 114, 0));
+}
+
+/* ── Settings toggle knob ──
+ * `inset-inline-start` puts the knob on the correct edge; the checked travel
+ * is a transform and must reverse.
+ */
+[dir="rtl"] .toggle-switch:checked::before {
+    transform: translateX(-20px);
+}
+
+/* ── Onboarding card fan ──
+ * The fan is decorative and its two outer cards are placed by transform.
+ * Mirroring keeps the arrangement visually balanced against the mirrored
+ * copy below it; the card faces inside stay LTR via the rule at the top.
+ */
+[dir="rtl"] .ob-fan-card--left {
+    transform: rotate(16deg) translateX(88px);
+    /* The anchor has to move with the card. `.ob-card-fan` is pinned to
+       direction:ltr above, so flex-start/end stay physical — swapping the
+       transform alone would leave each rank on the card's inner edge, hidden
+       behind the centre card. */
+    align-items: flex-end;
+}
+
+[dir="rtl"] .ob-fan-card--right {
+    transform: rotate(-16deg) translateX(-88px);
+    align-items: flex-start;
+}
+
+/* ── Gold shimmer ──
+ * Sweeps in a fixed screen direction; against the reading direction it looks
+ * like it is running backwards.
+ */
+[dir="rtl"] .shimmer-gold {
+    background: linear-gradient(270deg, var(--gold), #fff5cc, var(--gold));
+}
+
+/* ── Numbers keep their own direction ──
+ * A signed figure like "+1,200" inside RTL text is a classic bidi failure:
+ * the sign detaches and renders on the wrong side. Isolating these runs keeps
+ * the sign glued to its number without affecting the surrounding layout.
+ */
+[dir="rtl"] .balance-value,
+[dir="rtl"] .total-bet-value,
+[dir="rtl"] .stats-net-value,
+[dir="rtl"] .stat-tile-value,
+[dir="rtl"] .nearby-net,
+[dir="rtl"] .friend-score,
+[dir="rtl"] .friend-lb-net,
+[dir="rtl"] .payout-value,
+[dir="rtl"] .paytable-ticker-item,
+[dir="rtl"] .ob-lb-score,
+[dir="rtl"] .ob-mockup-stat-value {
+    unicode-bidi: isolate;
 }
 
 
@@ -4416,7 +4532,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                         <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()" data-i18n="friends.add">Add</button>
                     </div>
                 </div>
-                <div class="friends-reward-line" id="friends-invite-reward">You get 2,000 coins per friend — they get 1,000 to start.</div>
+                <div class="friends-reward-line" id="friends-invite-reward"></div>
 
                 <div class="stats-toggle">
                     <button class="stats-toggle-btn selected" id="friends-tab-leaderboard" onclick="setFriendsTab('leaderboard')" data-i18n="friends.leaderboard">Leaderboard</button>
@@ -4427,7 +4543,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                     <div class="panel">
                         <div class="rooms-empty hidden" id="friends-empty">
                             <span data-i18n="friends.empty">No friends at the table yet.</span>
-                            <button class="btn-primary friends-empty-invite" onclick="openInviteSheet()">Invite your first friend — you get 2,000 coins</button>
+                            <button class="btn-primary friends-empty-invite" id="friends-empty-invite" onclick="openInviteSheet()"></button>
                         </div>
                         <div id="friends-list"></div>
                     </div>
@@ -4675,7 +4791,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                 <span class="sheet-title" data-i18n="sheet.inviteFriends">Invite Friends</span>
                 <button class="sheet-close" onclick="closeSheet('invite-sheet')">✕</button>
             </div>
-            <div class="sheet-sub" id="invite-reward-line">You get 2,000 coins per friend — they get 1,000 to start.</div>
+            <div class="sheet-sub" id="invite-reward-line"></div>
             <div class="share-chips-row">
                 <button class="share-chip share-chip--primary whatsapp" onclick="shareFriendInviteViaWhatsApp()" data-i18n="sheet.whatsapp">WhatsApp</button>
                 <button class="share-chip share-chip--primary telegram" onclick="shareFriendInviteViaTelegram()" data-i18n="sheet.telegram">Telegram</button>
@@ -4702,7 +4818,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                 <span class="sheet-title" id="room-invite-title" data-i18n="sheet.inviteFriends">Invite Friends</span>
                 <button class="sheet-close" onclick="closeSheet('room-invite-sheet')">✕</button>
             </div>
-            <div class="sheet-sub">Invite friends to "<span id="room-invite-name">—</span>" — they get a notification with a Join button.</div>
+            <div class="sheet-sub" id="room-invite-sub"></div>
             <div class="room-invite-friends" id="room-invite-friends"></div>
             <button class="rip-send-btn hidden" id="room-invite-send" onclick="sendRoomInvites()" data-i18n="room.sendInvites">Send Invites</button>
             <div class="rip-divider"><span data-i18n="sheet.orShareLink">or share a link</span></div>
@@ -4728,7 +4844,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                 <span class="sheet-title" id="bigwin-share-title" data-i18n="sheet.bigWinTitle">Big win!</span>
                 <button class="sheet-close" onclick="closeSheet('bigwin-share-sheet')">✕</button>
             </div>
-            <div class="sheet-sub">Rub it in — your invite link rides along, and you get 2,000 coins if a friend joins.</div>
+            <div class="sheet-sub" id="bigwin-share-sub"></div>
             <div class="share-chips-row">
                 <button class="share-chip share-chip--primary whatsapp" onclick="shareBigWinVia('whatsapp')" data-i18n="sheet.whatsapp">WhatsApp</button>
                 <button class="share-chip share-chip--primary telegram" onclick="shareBigWinVia('telegram')" data-i18n="sheet.telegram">Telegram</button>
@@ -4768,7 +4884,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                 </span>
                 <button class="sheet-close" onclick="closeAllInSheet()">✕</button>
             </div>
-            <div class="sheet-sub">This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on <span id="allin-sheet-target">the next hand</span>.</div>
+            <div class="sheet-sub" id="allin-sheet-sub"></div>
             <div class="sheet-stat">
                 <span class="sheet-stat-label" data-i18n="sheet.potentialOn">Potential on Full House</span>
                 <span class="sheet-stat-value" id="allin-sheet-potential">0</span>
@@ -4912,11 +5028,11 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                         </div>
                         <div class="ob-mockup-cards">
                             <div class="ob-mockup-card">
-                                <div class="ob-held-badge" data-i18n="ob.held">HELD</div>
+                                <div class="ob-held-badge" data-i18n="play.held">HELD</div>
                                 A♠
                             </div>
                             <div class="ob-mockup-card">
-                                <div class="ob-held-badge" data-i18n="ob.held">HELD</div>
+                                <div class="ob-held-badge" data-i18n="play.held">HELD</div>
                                 K♠
                             </div>
                             <div class="ob-mockup-card ob-mockup-card--red">7♦</div>
@@ -5049,12 +5165,16 @@ body:not(.ob-step-welcome) .ob-lang-chip {
 // at parse time — boot happens on DOMContentLoaded, by which point every
 // js/lang/*.js has registered.
 //
-// All 14 languages are left-to-right; there is deliberately no dir handling.
+// Twelve of the sixteen languages are left-to-right; Hebrew and Arabic set
+// dir="rtl" on <html>, which styles/rtl.css keys off.
 
 const SUPPORTED_LANGS = [
     'en', 'es', 'pt-BR', 'de', 'fr', 'it', 'pl',
-    'ru', 'tr', 'id', 'hi', 'ja', 'ko', 'zh-CN'
+    'ru', 'tr', 'id', 'hi', 'ja', 'ko', 'zh-CN',
+    'he', 'ar'
 ];
+
+const RTL_LANGS = ['he', 'ar'];
 
 // Each language's name in its own script — a picker that says "German" is
 // useless to the person who needs to find "Deutsch".
@@ -5072,15 +5192,20 @@ const LANG_NATIVE_NAMES = {
     'hi': 'हिन्दी',
     'ja': '日本語',
     'ko': '한국어',
-    'zh-CN': '简体中文'
+    'zh-CN': '简体中文',
+    'he': 'עברית',
+    'ar': 'العربية'
 };
 
 // Base tag → shipped variant, for locales we cover but don't tag exactly.
 // pt-PT gets pt-BR rather than English; every Chinese variant gets zh-CN.
+// Android still reports the pre-1989 ISO codes for a few languages, so a device
+// set to Hebrew arrives as 'iw' and Indonesian as 'in'.
 const LANG_BASE_ALIASES = {
     'pt': 'pt-BR',
     'zh': 'zh-CN',
-    'in': 'id'   // legacy ISO code some Android builds still report
+    'in': 'id',
+    'iw': 'he'
 };
 
 const LANG_STORAGE_KEY = 'vp_lang';
@@ -5281,9 +5406,17 @@ function getLanguage() {
     return currentLang;
 }
 
+function isRtl() {
+    return RTL_LANGS.indexOf(currentLang) !== -1;
+}
+
 function applyLanguage(lang, opts) {
     currentLang = (SUPPORTED_LANGS.indexOf(lang) !== -1) ? lang : DEFAULT_LANG;
     document.documentElement.lang = currentLang;
+    // Hebrew and Arabic mirror the whole layout. Everything direction-sensitive
+    // keys off this one attribute — styles/rtl.css for layout, isRtl() for the
+    // handful of gestures whose direction is encoded in JS.
+    document.documentElement.dir = isRtl() ? 'rtl' : 'ltr';
     document.title = t('app.title') || 'Video Poker';
 
     translateDom(document);
@@ -5370,6 +5503,7 @@ window.tPlural = tPlural;
 window.formatNumber = formatNumber;
 window.formatSigned = formatSigned;
 window.getLanguage = getLanguage;
+window.isRtl = isRtl;
 window.detectLanguage = detectLanguage;
 window.languageWasAutoDetected = languageWasAutoDetected;
 window.vpRegisterLang = vpRegisterLang;
@@ -5381,6 +5515,7 @@ window.vpHandExplanation = vpHandExplanation;
 window.vpHandTicker = vpHandTicker;
 window.openLanguageSheet = openLanguageSheet;
 window.SUPPORTED_LANGS = SUPPORTED_LANGS;
+window.RTL_LANGS = RTL_LANGS;
 window.LANG_NATIVE_NAMES = LANG_NATIVE_NAMES;
 
 
@@ -5570,7 +5705,7 @@ vpRegisterLang('en', {
     'ob.seeCards': 'See your cards, hold what you want, then set your bet before the draw.',
     'ob.balance': 'Balance',
     'ob.totalBet': 'Total Bet',
-    'ob.held': 'HELD',
+    'play.held': 'HELD',
     'ob.allInLeftOne': '1 left',
     'ob.draw': 'Draw',
     'ob.oneFreeAllIn': 'One free All-In per day — invite a friend to unlock another.',
@@ -5973,7 +6108,7 @@ vpRegisterLang('es', {
     'ob.seeCards': 'Mira tus cartas, conserva las que quieras y fija tu apuesta antes de robar.',
     'ob.balance': 'Saldo',
     'ob.totalBet': 'Apuesta total',
-    'ob.held': 'FIJA',
+    'play.held': 'FIJA',
     'ob.allInLeftOne': 'Queda 1',
     'ob.draw': 'Robar',
     'ob.oneFreeAllIn': 'Una apuesta TODO gratis al día — invita a un amigo para desbloquear otra.',
@@ -6353,7 +6488,7 @@ vpRegisterLang('pt-BR', {
     'ob.seeCards': 'Veja suas cartas, segure as que quiser e defina sua aposta antes do descarte.',
     'ob.balance': 'Saldo',
     'ob.totalBet': 'Aposta total',
-    'ob.held': 'FIXA',
+    'play.held': 'FIXA',
     'ob.allInLeftOne': 'Resta 1',
     'ob.draw': 'Descartar',
     'ob.oneFreeAllIn': 'Uma aposta TUDO grátis por dia — convide um amigo para liberar outra.',
@@ -6735,7 +6870,7 @@ vpRegisterLang('de', {
     'ob.seeCards': 'Sieh deine Karten, halte was du willst, und setze deinen Einsatz vor dem Tausch.',
     'ob.balance': 'Guthaben',
     'ob.totalBet': 'Gesamteinsatz',
-    'ob.held': 'HALTEN',
+    'play.held': 'HALTEN',
     'ob.allInLeftOne': 'Noch 1',
     'ob.draw': 'Tauschen',
     'ob.oneFreeAllIn': 'Ein gratis All-In pro Tag — lade einen Freund ein, um ein weiteres freizuschalten.',
@@ -7115,7 +7250,7 @@ vpRegisterLang('fr', {
     'ob.seeCards': 'Voyez vos cartes, gardez celles que vous voulez, puis fixez votre mise avant le tirage.',
     'ob.balance': 'Solde',
     'ob.totalBet': 'Mise totale',
-    'ob.held': 'GARDÉE',
+    'play.held': 'GARDÉE',
     'ob.allInLeftOne': '1 restant',
     'ob.draw': 'Tirer',
     'ob.oneFreeAllIn': 'Un tapis gratuit par jour — invitez un ami pour en débloquer un autre.',
@@ -7495,7 +7630,7 @@ vpRegisterLang('it', {
     'ob.seeCards': 'Guarda le carte, tieni quelle che vuoi, poi imposta la puntata prima del cambio.',
     'ob.balance': 'Saldo',
     'ob.totalBet': 'Puntata totale',
-    'ob.held': 'TENUTA',
+    'play.held': 'TENUTA',
     'ob.allInLeftOne': 'Ne resta 1',
     'ob.draw': 'Cambia',
     'ob.oneFreeAllIn': 'Un all-in gratis al giorno — invita un amico per sbloccarne un altro.',
@@ -7877,7 +8012,7 @@ vpRegisterLang('pl', {
     'ob.seeCards': 'Zobacz karty, zatrzymaj wybrane, a potem ustaw zakład przed wymianą.',
     'ob.balance': 'Saldo',
     'ob.totalBet': 'Łączny zakład',
-    'ob.held': 'TRZYMANA',
+    'play.held': 'TRZYMANA',
     'ob.allInLeftOne': 'Zostało 1',
     'ob.draw': 'Wymień',
     'ob.oneFreeAllIn': 'Jeden darmowy all-in dziennie — zaproś znajomego, aby odblokować kolejny.',
@@ -8259,7 +8394,7 @@ vpRegisterLang('ru', {
     'ob.seeCards': 'Посмотрите карты, оставьте нужные, затем задайте ставку перед обменом.',
     'ob.balance': 'Баланс',
     'ob.totalBet': 'Общая ставка',
-    'ob.held': 'ОСТАВЛЕНА',
+    'play.held': 'ОСТАВЛЕНА',
     'ob.allInLeftOne': 'Осталась 1',
     'ob.draw': 'Обмен',
     'ob.oneFreeAllIn': 'Один бесплатный ва-банк в день — пригласите друга, чтобы открыть ещё один.',
@@ -8639,7 +8774,7 @@ vpRegisterLang('tr', {
     'ob.seeCards': 'Kartlarını gör, istediğini tut, sonra çekmeden önce bahsini belirle.',
     'ob.balance': 'Bakiye',
     'ob.totalBet': 'Toplam bahis',
-    'ob.held': 'TUTULDU',
+    'play.held': 'TUTULDU',
     'ob.allInLeftOne': '1 kaldı',
     'ob.draw': 'Çek',
     'ob.oneFreeAllIn': 'Günde bir ücretsiz all in — bir arkadaş davet ederek bir tane daha aç.',
@@ -9019,7 +9154,7 @@ vpRegisterLang('id', {
     'ob.seeCards': 'Lihat kartumu, tahan yang kamu mau, lalu atur taruhan sebelum menarik.',
     'ob.balance': 'Saldo',
     'ob.totalBet': 'Total taruhan',
-    'ob.held': 'DITAHAN',
+    'play.held': 'DITAHAN',
     'ob.allInLeftOne': 'Sisa 1',
     'ob.draw': 'Tarik',
     'ob.oneFreeAllIn': 'Satu all-in gratis per hari — undang teman untuk membuka satu lagi.',
@@ -9401,7 +9536,7 @@ vpRegisterLang('hi', {
     'ob.seeCards': 'अपने कार्ड देखें, जो चाहें रोकें, फिर ड्रॉ से पहले दांव तय करें।',
     'ob.balance': 'बैलेंस',
     'ob.totalBet': 'कुल दांव',
-    'ob.held': 'रोका',
+    'play.held': 'रोका',
     'ob.allInLeftOne': '1 बचा',
     'ob.draw': 'ड्रॉ',
     'ob.oneFreeAllIn': 'रोज़ एक मुफ़्त ऑल-इन — एक दोस्त को बुलाकर दूसरा खोलें।',
@@ -9783,7 +9918,7 @@ vpRegisterLang('ja', {
     'ob.seeCards': 'カードを見て、残したいものをホールドし、ドロー前にベットを決めます。',
     'ob.balance': '残高',
     'ob.totalBet': '合計ベット',
-    'ob.held': 'ホールド',
+    'play.held': 'ホールド',
     'ob.allInLeftOne': '残り1回',
     'ob.draw': 'ドロー',
     'ob.oneFreeAllIn': '1日1回オールイン無料 — フレンドを招待するともう1回解放。',
@@ -10163,7 +10298,7 @@ vpRegisterLang('ko', {
     'ob.seeCards': '카드를 보고 원하는 것을 홀드한 뒤, 드로우 전에 베팅을 정하세요.',
     'ob.balance': '잔액',
     'ob.totalBet': '총 베팅',
-    'ob.held': '홀드',
+    'play.held': '홀드',
     'ob.allInLeftOne': '1회 남음',
     'ob.draw': '드로우',
     'ob.oneFreeAllIn': '하루 한 번 무료 올인 — 친구를 초대하면 한 번 더 열려요.',
@@ -10544,7 +10679,7 @@ vpRegisterLang('zh-CN', {
     'ob.seeCards': '看牌，保留想要的，再在换牌前设置下注。',
     'ob.balance': '余额',
     'ob.totalBet': '总下注',
-    'ob.held': '保留',
+    'play.held': '保留',
     'ob.allInLeftOne': '剩 1 次',
     'ob.draw': '换牌',
     'ob.oneFreeAllIn': '每天一次免费全下 — 邀请好友再解锁一次。',
@@ -10751,6 +10886,762 @@ vpRegisterLang('zh-CN', {
 
     'voice.four2s4s': '四条，2 到 4',
     'voice.four5sKs': '四条，5 到 K'
+});
+
+
+/* --- js/lang/he.js --- */
+// עברית — mirrors js/lang/en.js key for key.
+// Right-to-left: js/i18n.js sets dir="rtl" and styles/rtl.css handles the
+// layout. Hebrew has no grammatical plural beyond one/many, and every
+// count-bearing string here is phrased so the number never governs an ending.
+vpRegisterLang('he', {
+    'app.title': 'וידאו פוקר',
+
+    'nav.play': 'משחק',
+    'nav.stats': 'סטטיסטיקה',
+    'nav.friends': 'חברים',
+    'nav.settings': 'הגדרות',
+
+    'play.tournamentPill': 'טורניר 2',
+    'play.tournamentExpand': '🏆 טורניר מס׳ 2',
+    'play.streak': 'רצף',
+    'play.balance': 'יתרה',
+    'play.variant': 'גרסה',
+    'play.handPlaceholder': 'השאירו את הקלפים שתרצו, ואז קבעו את ההימור לפני ההחלפה.',
+    'play.resultDefault': 'הימרו וחלקו קלפים כדי לשחק',
+    'play.winStreak': 'רצף ניצחונות',
+    'play.friendsLeaderboard': 'טבלת החברים',
+    'play.signInFriends': 'התחברו כדי לראות את החברים שלכם',
+    'play.hourlyChampions': '⏱ אלופי השעה',
+    'play.signInCompete': 'התחברו כדי להתחרות על כתר השעה',
+    'play.signInLeaderboards': 'התחברו כדי לראות את הטבלאות',
+    'play.totalBet': 'סך ההימור',
+    'play.allIn': 'הכול',
+    'play.allInLeft': 'נותרו {{n}}',
+    'play.deal': 'חלוקה',
+    'play.draw': 'החלפה',
+    'play.hintTitle': 'טיפים אסטרטגיים',
+    'play.voiceTitle': 'הכרזות קוליות',
+    'play.playWithFriends': 'שחקו עם חברים',
+    'play.seeAll': 'הצג הכול ›',
+    'play.createRoomLong': '+ פתחו חדר פוקר עם חברים',
+    'play.winResult': '🎉 {{hand}}! ‎+{{win}} קרדיטים! 🎉',
+    'play.nothingResult': 'אין צירוף — {{cards}}',
+    'play.payoutBonus': 'בונוס תשלום ‎+{{percent}}%',
+    'play.thisHand': 'היד הזו',
+    'play.theNextHand': 'היד הבאה',
+    'play.unlockAt': 'פתיחה · {{level}}',
+
+    'stats.title': 'סטטיסטיקה',
+    'stats.today': 'היום',
+    'stats.allTime': 'כל הזמנים',
+    'stats.net': 'נטו',
+    'stats.won': 'זכייה',
+    'stats.lost': 'הפסד',
+    'stats.handsPlayed': 'ידיים ששוחקו',
+    'stats.bestStreak': 'הרצף הטוב ביותר',
+
+    'friends.title': 'חברים',
+    'friends.invite': '+ הזמנה',
+    'friends.signInAdd': 'התחברו כדי להוסיף חברים',
+    'friends.yourCode': 'הקוד שלכם',
+    'friends.tapToCopy': 'הקישו להעתקה',
+    'friends.friendCodePlaceholder': 'קוד חבר…',
+    'friends.add': 'הוספה',
+    'friends.rewardLine': 'אתם מקבלים {{reward}} מטבעות על כל חבר — הם מתחילים עם {{invitee}}.',
+    'friends.leaderboard': 'טבלה',
+    'friends.pokerRooms': 'חדרי פוקר',
+    'friends.empty': 'אין עדיין חברים ליד השולחן.',
+    'friends.emptyInvite': 'הזמינו את החבר הראשון — אתם מקבלים {{reward}} מטבעות',
+    'friends.noRoomsYet': 'אין עדיין חדרים — פתחו אחד למטה.',
+    'friends.roomNamePlaceholder': 'שם החדר…',
+    'friends.createAndInvite': 'פתיחה והזמנה',
+    'friends.copiedCheck': 'הועתק ✓',
+    'friends.viaLinkTitle': 'מחוברים דרך קישור הזמנה',
+
+    'settings.title': 'הגדרות',
+    'settings.language': 'שפה',
+    'settings.gameplay': 'משחק',
+    'settings.soundEffects': 'אפקטים קוליים',
+    'settings.hapticFeedback': 'רטט',
+    'settings.voiceAnnouncements': 'הכרזות קוליות',
+    'settings.theme': 'ערכת נושא',
+    'settings.themeGreen': '🟢 ירוק',
+    'settings.themeBlue': '🔵 כחול',
+    'settings.themeCrimson': '🔴 ארגמן',
+    'settings.defaultBet': 'הימור ברירת מחדל',
+    'settings.gameVariant': 'גרסת המשחק',
+    'settings.handsPerDeal': 'ידיים בכל חלוקה',
+    'settings.oneHand': 'יד אחת',
+    'settings.threeHands': '3× ידיים',
+    'settings.fiveHands': '5× ידיים',
+    'settings.support': 'תמיכה',
+    'settings.payoutTable': 'טבלת תשלומים',
+    'settings.account': 'חשבון',
+    'settings.signInGoogle': 'התחברות עם Google',
+    'settings.signedIn': 'מחוברים',
+    'settings.signOut': 'התנתקות',
+    'settings.notifications': 'התראות',
+    'settings.friendActivity': 'פעילות חברים',
+    'settings.leaderboardUpdates': 'עדכוני טבלה',
+    'settings.dailyBonusReminder': 'תזכורת לבונוס היומי',
+    'settings.friendsBestHands': 'הידיים הטובות של החברים',
+    'settings.announcements': 'הודעות',
+    'settings.enableNotifications': 'הפעלת התראות',
+    'settings.resetStats': 'איפוס הסטטיסטיקה',
+    'settings.footer': 'וידאו פוקר · v2.1',
+
+    'variant.jacks': 'נסיכים ומעלה',
+    'variant.deuces': 'Deuces Wild',
+    'variant.bonus': 'Bonus Poker',
+    'variant.doubleBonus': 'Double Bonus',
+
+    'lb.friends': 'חברים',
+    'lb.hourly': 'שעתי',
+    'lb.daily': 'יומי',
+    'lb.friendsToday': 'חברים · היום',
+    'lb.hourlyChampions': '⏱ אלופי השעה',
+    'lb.dailyChampions': '📅 אלופי היום',
+    'lb.showTop20': 'הצג 20 מובילים ▾',
+    'lb.showTop5': 'הצג 5 מובילים ▴',
+    'lb.rankPlaceholder': '#— · —',
+
+    'modal.signInTitle': 'התחברו כדי לשחק עם חברים',
+    'modal.signInSub': 'הוסיפו חברים, הצטרפו לחדרים והשוו תוצאות.',
+    'modal.continueGoogle': 'המשך עם Google',
+    'modal.chipsOnPhoneTitle': 'הז׳יטונים שלכם קיימים רק בטלפון הזה',
+    'modal.chipsOnPhoneSub': 'התחברו פעם אחת והז׳יטונים ילכו אתכם לכל מקום.',
+    'modal.notNow': 'לא עכשיו',
+    'modal.createRoom': 'פתיחת חדר פוקר',
+    'modal.roomNamePlaceholder': 'שם החדר…',
+    'modal.buyIn5': 'כניסה 5',
+    'modal.buyIn10': 'כניסה 10',
+    'modal.buyIn20': 'כניסה 20',
+    'modal.buyIn50': 'כניסה 50',
+    'modal.createRoomBtn': 'פתיחת חדר',
+    'modal.gotCode': 'קיבלתם קוד מחבר?',
+    'modal.roomCodePlaceholder': 'קוד חדר…',
+    'modal.join': 'הצטרפות',
+    'modal.room': 'חדר',
+    'modal.code': 'קוד:',
+
+    'sheet.inviteFriends': 'הזמנת חברים',
+    'sheet.whatsapp': 'WhatsApp',
+    'sheet.telegram': 'Telegram',
+    'sheet.more': 'עוד…',
+    'sheet.share': 'שיתוף…',
+    'sheet.copy': 'העתקה',
+    'sheet.done': 'סיום',
+    'sheet.roomInviteSub': 'הזמינו חברים ל״{{name}}״ — הם יקבלו התראה עם כפתור הצטרפות.',
+    'sheet.sendInvites': 'שליחת הזמנות',
+    'sheet.orShareLink': 'או שתפו קישור',
+    'sheet.bigWinTitle': 'זכייה גדולה!',
+    'sheet.bigWinSub': 'תתפארו — קישור ההזמנה שלכם נוסע יחד, ואתם מקבלים {{reward}} מטבעות אם חבר מצטרף.',
+    'sheet.allInOutTitle': 'נגמרו ההימורים על הכול להיום',
+    'sheet.allInOutEyebrow': 'חזרו מחר — או…',
+    'sheet.allInOutSubHtml': 'כל חבר שמצטרף דרך ההזמנה שלכם פותח <strong>הימור נוסף על הכול בכל יום</strong>.',
+    'sheet.allInInviteBtn': 'הזמינו חבר',
+    'sheet.goAllIn': 'להמר על הכול',
+    'sheet.allInEyebrow': 'מספר שימושים מוגבל ביום',
+    'sheet.allInSub': 'זה מהמר את כל היתרה שלכם — {{amount}} קרדיטים — על {{target}}.',
+    'sheet.potentialOn': 'פוטנציאל בפול האוס',
+    'sheet.slideToConfirm': 'החליקו לאישור',
+
+    'lang.sheetTitle': 'בחרו שפה',
+    'lang.sheetSub': 'אפשר לשנות זאת בכל רגע בהגדרות.',
+    'lang.onboardingBtn': 'שפה',
+
+    'ob.eyebrow': 'קזינו חברתי',
+    'ob.welcomeTitle': 'Royal Video Poker',
+    'ob.welcomeSubtitle': 'חמישה קלפים. החלטה אחת. שחקו עם ז׳יטונים חינם — בלי כסף אמיתי, עם כל המתח.',
+    'ob.pill5card': 'פוקר 5 קלפים',
+    'ob.pillFreeChips': 'ז׳יטונים חינם כל יום',
+    'ob.pillNoRealMoney': 'בלי כסף אמיתי',
+    'ob.knowYourHands': 'הכירו את הצירופים',
+    'ob.biggerHands': 'צירופים גבוהים יותר משלמים מכפילים גבוהים יותר.',
+    'ob.plusNote': 'בנוסף פלאש, רצף, שלישייה ושני זוגות — תשעה צירופים מנצחים בסך הכול.',
+    'ob.betAfterDecide': 'הימרו אחרי שהחלטתם',
+    'ob.seeCards': 'ראו את הקלפים, השאירו את מה שתרצו, ואז קבעו את ההימור לפני ההחלפה.',
+    'ob.balance': 'יתרה',
+    'ob.totalBet': 'סך ההימור',
+    'play.held': 'נשמר',
+    'ob.allInLeftOne': 'נותר 1',
+    'ob.draw': 'החלפה',
+    'ob.oneFreeAllIn': 'הימור אחד על הכול חינם ביום — הזמינו חבר כדי לפתוח עוד אחד.',
+    'ob.competeClimb': 'התחרו וטפסו',
+    'ob.raceLeaderboards': 'התחרו בטבלאות החברים, השעה והיום על ז׳יטוני בונוס.',
+    'ob.friendsToday': 'חברים · היום',
+    'ob.youAreFirst': 'אתם במקום הראשון!',
+    'ob.you': 'אתם',
+    'ob.alsoLive': 'גם עכשיו: טורנירים שעתיים ויומיים מול כל השחקנים באפליקציה.',
+    'ob.neverMissWin': 'אל תפספסו אף זכייה',
+    'ob.getNotified': 'קבלו התראות על תוצאות טורנירים, אתגרי חברים ובונוסים יומיים.',
+    'ob.dailyBonusReminders': 'תזכורות לבונוס היומי',
+    'ob.friendChallengeAlerts': 'התראות על אתגרי חברים',
+    'ob.tournamentResults': 'תוצאות טורנירים',
+    'ob.enableNotifications': 'הפעלת התראות',
+    'ob.notNow': 'לא עכשיו',
+    'ob.saveProgress': 'שמרו את ההתקדמות',
+    'ob.signInSync': 'התחברו כדי לגבות את הז׳יטונים ולהתחרות מול חברים.',
+    'ob.neverLose': 'לעולם לא תאבדו ז׳יטונים או התקדמות',
+    'ob.playAcross': 'שחקו בטלפון ובטאבלט',
+    'ob.findFriends': 'מצאו חברים לפי שם באופן אוטומטי',
+    'ob.continueGoogle': 'המשך עם Google',
+    'ob.continueGuest': 'המשך כאורח',
+    'ob.back': 'חזרה',
+    'ob.next': 'הבא',
+    'ob.startWithChips': 'התחילו עם {{chips}} ז׳יטונים',
+
+    'hand.royalFlush': 'רויאל פלאש',
+    'hand.straightFlush': 'סטרייט פלאש',
+    'hand.fourOfKind': 'רביעייה',
+    'hand.fourAces': 'רביעיית אסים',
+    'hand.four2s4s': 'רביעייה 2–4',
+    'hand.four5sKs': 'רביעייה 5–K',
+    'hand.fourDeuces': 'רביעיית שתיים',
+    'hand.wildRoyalFlush': 'רויאל פלאש עם ג׳וקר',
+    'hand.fiveOfKind': 'חמישייה',
+    'hand.fullHouse': 'פול האוס',
+    'hand.flush': 'פלאש',
+    'hand.straight': 'רצף',
+    'hand.threeOfKind': 'שלישייה',
+    'hand.twoPair': 'שני זוגות',
+    'hand.jacksOrBetter': 'נסיכים ומעלה',
+    'hand.nothing': 'אין צירוף',
+
+    'exp.royalFlush': 'א׳, מלך, מלכה, נסיך, 10 — כולם באותה סדרה. הצירוף הטוב במשחק.',
+    'exp.straightFlush': 'חמישה קלפים ברצף, כולם באותה סדרה.',
+    'exp.fourOfKind': 'ארבעה קלפים באותו ערך.',
+    'exp.fourAces': 'ארבעה אסים — בונוס הרביעייה הגדול ביותר.',
+    'exp.four2s4s': 'רביעייה מקלפים 2 עד 4.',
+    'exp.four5sKs': 'רביעייה מקלפים 5 עד מלך.',
+    'exp.fourDeuces': 'ארבע שתיים ג׳וקר — זכייה אוטומטית בדרג העליון.',
+    'exp.wildRoyalFlush': 'רויאל פלאש שנבנה עם לפחות שתיים ג׳וקר אחת.',
+    'exp.fiveOfKind': 'חמישה קלפים באותו ערך, בעזרת שתיים ג׳וקר.',
+    'exp.fullHouse': 'שלישייה בתוספת זוג.',
+    'exp.flush': 'חמישה קלפים באותה סדרה, לא ברצף.',
+    'exp.straight': 'חמישה קלפים ברצף, בסדרות שונות.',
+    'exp.threeOfKind': 'שלושה קלפים באותו ערך.',
+    'exp.twoPair': 'שני זוגות נפרדים.',
+    'exp.jacksOrBetter': 'זוג נסיכים, מלכות, מלכים או אסים.',
+    'exp.nothing': 'אין צירוף משלם — בהצלחה בחלוקה הבאה.',
+
+    'ticker.royalFlush': 'רויאל',
+    'ticker.straightFlush': 'ס. פלאש',
+    'ticker.wildRoyalFlush': 'רויאל ג׳',
+    'ticker.fourDeuces': '4 שתיים',
+    'ticker.fiveOfKind': 'חמישייה',
+    'ticker.fourOfKind': 'רביעייה',
+    'ticker.fourAces': '4 אסים',
+    'ticker.four2s4s': 'רביע׳ 2-4',
+    'ticker.four5sKs': 'רביע׳ 5-K',
+    'ticker.fullHouse': 'פול האוס',
+    'ticker.flush': 'פלאש',
+    'ticker.straight': 'רצף',
+    'ticker.threeOfKind': 'שלישייה',
+    'ticker.twoPair': 'שני זוגות',
+    'ticker.jacksOrBetter': 'נסיכים+',
+    'ticker.nothing': '—',
+
+    'win.pair': 'זוג',
+    'win.threeOfKind': 'שלישייה',
+    'win.fourOfKind': 'רביעייה',
+    'win.straight': 'רצף',
+    'win.flush': 'פלאש',
+    'win.straightFlush': 'ס. פלאש',
+    'win.royalFlush': 'רויאל פלאש',
+
+    'common.you': 'אתם',
+    'common.player': 'שחקן',
+    'common.leader': 'המוביל',
+    'common.copy': 'העתקה',
+    'common.copied': 'הועתק!',
+    'common.cancel': 'ביטול',
+    'common.credits': 'קרדיטים',
+    'common.coins': 'מטבעות',
+    'common.rankYouAreFirst': '#{{rank}} · אתם במקום הראשון!',
+    'common.rankLeadsBy': '#{{rank}} · {{name}} מוביל ב־{{gap}}',
+    'common.noScoresYet': 'אין עדיין תוצאות — היו הראשונים!',
+    'common.resetsInM': 'מתאפס בעוד {{m}} דק׳',
+    'common.resetsInHM': 'מתאפס בעוד {{h}} שע׳ {{m}} דק׳',
+    'common.points': '{{n}} נק׳',
+
+    'room.defaultName': 'חדר',
+    'room.open': 'פתוח',
+    'room.inProgress': 'בעיצומו',
+    'room.joinTable': 'הצטרפו לשולחן',
+    'room.enterTable': 'כניסה לשולחן',
+    'room.membersMeta': '{{count}}/{{capacity}} חברים · הימור {{stake}}',
+    'room.sendInvites': 'שליחת הזמנות',
+    'room.sendInvitesCount': 'שליחת הזמנות ({{count}})',
+
+    'champ.resetsPlaceholder': 'מתאפס בעוד —דק׳',
+    'champ.noChampionsYet': 'אין עדיין אלופים בשעה הזו — היו הראשונים!',
+    'champ.braceletDaily': 'יומי',
+    'champ.braceletHourly': 'שעתי',
+
+    'story.noWinningHands': 'אין עדיין ידיים מנצחות',
+    'story.winAHand': 'נצחו ביד כדי ליצור את הסיפור שלכם',
+    'story.creditsMult': '‎+{{payout}} קרדיטים · {{mult}}×',
+    'story.braceletStrip': '💍 צמיד {{type}} — {{hand}} תמורת ‎+{{amount}} קרדיטים',
+    'story.payout': '‎+{{payout}} קרדיטים · {{mult}}×',
+
+    'pwa.installBar': 'התקינו את וידאו פוקר לגישה מהירה',
+    'pwa.install': 'התקנה',
+
+    'referral.rewardLine': 'אתם מקבלים {{reward}} מטבעות על כל חבר, הם מקבלים {{invitee}}.',
+    'referral.coinsEarned': '{{amount}} מטבעות שהרווחתם',
+    'referral.oneJoined': '{{name}} הצטרף',
+    'referral.manyJoined': '{{count}} חברים הצטרפו',
+    'referral.seatsFirst': 'מקום אחד מתוך 3 תפוס — הראשון שלכם. אתם מקבלים {{reward}} מטבעות על כל חבר, הם מקבלים {{invitee}}.',
+    'referral.seatsProgress': '{{filled}} מתוך 3 מקומות תפוסים · {{earned}} מטבעות שהרווחתם',
+    'referral.tableRegular': 'קבועים בשולחן — {{count}} חברים הצטרפו · {{earned}} מטבעות שהרווחתם',
+
+    'prompt.bigWin': 'יפה! יש לכם עכשיו {{coins}} מטבעות — שמורים רק במכשיר הזה. הטלפון אובד, הז׳יטונים איתו. גבו אותם בחינם עם Google.',
+    'prompt.session': 'יש לכם {{coins}} מטבעות רק במכשיר הזה. התחברו פעם אחת והם ילכו אתכם לכל מקום.',
+
+    'firebase.havingTrouble': 'יש בעיה? שחקו בינתיים כאורחים',
+
+    'share.appName': 'וידאו פוקר',
+    'share.appNameFull': 'Royal Video Poker',
+    'share.inviteText': '{{name}} רוצה לשחק אתכם וידאו פוקר! הצטרפו עם הקישור הזה:\n{{link}}',
+    'share.inviteTextShort': '{{name}} רוצה לשחק אתכם וידאו פוקר! הצטרפו כאן: {{link}}',
+    'share.roomText': 'הצטרפו לחדר הפוקר שלי ״{{name}}״ בוידאו פוקר!\n{{link}}',
+    'share.bigWinText': 'הרגע עשיתי {{hand}} ב־{{win}} קרדיטים בוידאו פוקר! חושבים שתצליחו יותר?\n{{link}}',
+    'share.bigWinMsg': 'הרגע עשיתי {{hand}} ב־{{win}} מטבעות ב־Royal Video Poker 🃏 חושבים שתצליחו יותר?',
+    'share.roomInviteMsg': 'הצטרפו לחדר הפוקר שלי ״{{name}}״ ב־Royal Video Poker.',
+    'share.roomCodeLine': 'קוד החדר: {{code}}',
+
+    'sheet.bigWinTitleWin': '{{hand}}! ‎+{{coins}} מטבעות',
+
+    'toast.unlockLevel': '🔒 נפתח ברמה {{level}}',
+    'toast.multiHandUnlock': '🔒 ריבוי ידיים נפתח ברמה {{level}}',
+    'toast.rebuy': '♻ ‎+{{amount}} קרדיטים',
+    'toast.noAllInLeft': '⛔ נגמרו ההימורים על הכול — חזרו מחר!',
+    'toast.allInGoodLuck': '🔥 הכול — בהצלחה!',
+    'toast.statsReset': 'הסטטיסטיקה אופסה',
+    'toast.hintsOn': '💡 טיפים פעילים — הקלפים המומלצים זוהרים בכחול',
+    'toast.noPlayerFound': 'לא נמצא שחקן עם הקוד הזה.',
+    'toast.ownCode': 'זה הקוד שלכם!',
+    'toast.alreadyFriends': 'כבר ברשימת החברים שלכם.',
+    'toast.friendAdded': 'החבר נוסף!',
+    'toast.couldNotAddFriend': 'לא הצלחנו להוסיף את החבר — נסו שוב.',
+    'toast.couldNotGenerateLink': 'לא הצלחנו ליצור קישור הזמנה.',
+    'toast.linkCopied': 'קישור ההזמנה הועתק!',
+    'toast.couldNotCopy': 'לא הצלחנו להעתיק — לחצו ארוכות על הקישור.',
+    'toast.couldNotOpenWhatsApp': 'לא הצלחנו לפתוח את WhatsApp.',
+    'toast.couldNotOpenTelegram': 'לא הצלחנו לפתוח את Telegram.',
+    'toast.signInConnect': 'התחברו כדי להתחבר לחבר שלכם!',
+    'toast.noPlayerInviteLink': 'לא נמצא שחקן עם קישור ההזמנה הזה.',
+    'toast.ownInviteLink': 'זה קישור ההזמנה שלכם!',
+    'toast.giveName': 'תנו שם לחדר שלכם.',
+    'toast.roomCreated': 'החדר נפתח — קוד: {{code}}',
+    'toast.couldNotCreateRoom': 'לא הצלחנו לפתוח את החדר — נסו שוב.',
+    'toast.noRoomFound': 'לא נמצא חדר עם הקוד הזה.',
+    'toast.joinedRoom': 'הצטרפתם ל־{{name}}!',
+    'toast.couldNotJoinRoom': 'לא הצלחנו להצטרף לחדר — נסו שוב.',
+    'toast.linkCopiedShare': 'הקישור הועתק — שתפו אותו עם חברים!',
+    'toast.signInJoinRoom': 'התחברו כדי להצטרף לחדר הפוקר!',
+    'toast.roomFull': 'החדר הזה מלא.',
+    'toast.alreadyInRoom': 'אתם כבר בחדר הזה.',
+    'toast.invitesSent': 'ההזמנות נשלחו!',
+    'toast.couldNotSendInvites': 'לא הצלחנו לשלוח את ההזמנות — נסו שוב.',
+    'toast.referralWelcome': '🎁 חבר שלכם שלח לכם {{amount}} מטבעות — ברוכים הבאים לשולחן!',
+    'toast.referralReward': '🎉 חבר הצטרף — הרווחתם {{amount}} מטבעות!',
+    'toast.cloudRestored': '☁ ברוכים השבים — {{amount}} המטבעות שלכם שוחזרו.',
+    'toast.signInFailed': 'ההתחברות נכשלה — נסו שוב.',
+    'toast.codeCopied': 'הקוד הועתק!',
+    'toast.friendRemoved': 'החבר הוסר.',
+    'toast.couldNotRemoveFriend': 'לא הצלחנו להסיר את החבר — נסו שוב.',
+    'toast.alreadyConnectedLink': 'אתם כבר מחוברים דרך הקישור הזה.',
+    'toast.inviteLinkInvalid': 'קישור ההזמנה הזה כבר לא תקף.',
+    'toast.standingsCopied': 'הטבלה הועתקה.',
+    'toast.signInFriendCode': 'התחברו כדי לקבל את קוד החבר שלכם.',
+    'toast.useCopyShare': 'השתמשו בהעתקה, WhatsApp או Telegram כדי לשתף.',
+    'toast.signInDailyGame': 'התחברו כדי להצטרף למשחק היומי!',
+    'toast.referralClaimed': '🎁 {{who}} — ‎+{{amount}} מטבעות!',
+    'toast.connectedViaLink': '🔗 מחוברים דרך הקישור — חברים שנוספו: {{count}}',
+
+    'voice.four2s4s': 'רביעייה, משתיים עד ארבע',
+    'voice.four5sKs': 'רביעייה, מחמש עד מלך'
+});
+
+
+/* --- js/lang/ar.js --- */
+// العربية — mirrors js/lang/en.js key for key.
+// Right-to-left: js/i18n.js sets dir="rtl" and styles/rtl.css handles the
+// layout. Arabic has six plural forms; every count-bearing string here is
+// phrased so the number never governs a noun ending.
+vpRegisterLang('ar', {
+    'app.title': 'فيديو بوكر',
+
+    'nav.play': 'اللعب',
+    'nav.stats': 'الإحصائيات',
+    'nav.friends': 'الأصدقاء',
+    'nav.settings': 'الإعدادات',
+
+    'play.tournamentPill': 'بطولة 2',
+    'play.tournamentExpand': '🏆 البطولة رقم 2',
+    'play.streak': 'سلسلة',
+    'play.balance': 'الرصيد',
+    'play.variant': 'النمط',
+    'play.handPlaceholder': 'احتفظ بما تريد من الأوراق، ثم حدّد رهانك قبل السحب.',
+    'play.resultDefault': 'ضع رهانك ووزّع الأوراق للعب',
+    'play.winStreak': 'سلسلة الانتصارات',
+    'play.friendsLeaderboard': 'ترتيب الأصدقاء',
+    'play.signInFriends': 'سجّل الدخول لرؤية أصدقائك',
+    'play.hourlyChampions': '⏱ أبطال الساعة',
+    'play.signInCompete': 'سجّل الدخول للتنافس على تاج الساعة',
+    'play.signInLeaderboards': 'سجّل الدخول لرؤية الترتيب',
+    'play.totalBet': 'إجمالي الرهان',
+    'play.allIn': 'كل الرصيد',
+    'play.allInLeft': 'المتبقي {{n}}',
+    'play.deal': 'توزيع',
+    'play.draw': 'سحب',
+    'play.hintTitle': 'تلميحات استراتيجية',
+    'play.voiceTitle': 'الإعلانات الصوتية',
+    'play.playWithFriends': 'العب مع الأصدقاء',
+    'play.seeAll': 'عرض الكل ›',
+    'play.createRoomLong': '+ أنشئ غرفة بوكر مع الأصدقاء',
+    'play.winResult': '🎉 {{hand}}! ‎+{{win}} رصيد! 🎉',
+    'play.nothingResult': 'لا يوجد — {{cards}}',
+    'play.payoutBonus': 'مكافأة دفع ‎+{{percent}}%',
+    'play.thisHand': 'هذه اليد',
+    'play.theNextHand': 'اليد التالية',
+    'play.unlockAt': 'فتح · {{level}}',
+
+    'stats.title': 'الإحصائيات',
+    'stats.today': 'اليوم',
+    'stats.allTime': 'كل الأوقات',
+    'stats.net': 'الصافي',
+    'stats.won': 'المكاسب',
+    'stats.lost': 'الخسائر',
+    'stats.handsPlayed': 'الأيدي الملعوبة',
+    'stats.bestStreak': 'أفضل سلسلة',
+
+    'friends.title': 'الأصدقاء',
+    'friends.invite': '+ دعوة',
+    'friends.signInAdd': 'سجّل الدخول لإضافة أصدقاء',
+    'friends.yourCode': 'رمزك',
+    'friends.tapToCopy': 'اضغط للنسخ',
+    'friends.friendCodePlaceholder': 'رمز صديق…',
+    'friends.add': 'إضافة',
+    'friends.rewardLine': 'تحصل على {{reward}} عملة عن كل صديق — ويبدأون برصيد {{invitee}}.',
+    'friends.leaderboard': 'الترتيب',
+    'friends.pokerRooms': 'غرف البوكر',
+    'friends.empty': 'لا يوجد أصدقاء على الطاولة بعد.',
+    'friends.emptyInvite': 'ادعُ أول صديق — تحصل على {{reward}} عملة',
+    'friends.noRoomsYet': 'لا توجد غرف بعد — أنشئ واحدة بالأسفل.',
+    'friends.roomNamePlaceholder': 'اسم الغرفة…',
+    'friends.createAndInvite': 'إنشاء ودعوة',
+    'friends.copiedCheck': 'تم النسخ ✓',
+    'friends.viaLinkTitle': 'مرتبطان عبر رابط دعوة',
+
+    'settings.title': 'الإعدادات',
+    'settings.language': 'اللغة',
+    'settings.gameplay': 'اللعب',
+    'settings.soundEffects': 'المؤثرات الصوتية',
+    'settings.hapticFeedback': 'الاهتزاز',
+    'settings.voiceAnnouncements': 'الإعلانات الصوتية',
+    'settings.theme': 'المظهر',
+    'settings.themeGreen': '🟢 أخضر',
+    'settings.themeBlue': '🔵 أزرق',
+    'settings.themeCrimson': '🔴 قرمزي',
+    'settings.defaultBet': 'الرهان الافتراضي',
+    'settings.gameVariant': 'نمط اللعبة',
+    'settings.handsPerDeal': 'الأيدي في كل توزيعة',
+    'settings.oneHand': 'يد واحدة',
+    'settings.threeHands': '3× أيدٍ',
+    'settings.fiveHands': '5× أيدٍ',
+    'settings.support': 'الدعم',
+    'settings.payoutTable': 'جدول الأرباح',
+    'settings.account': 'الحساب',
+    'settings.signInGoogle': 'تسجيل الدخول بحساب Google',
+    'settings.signedIn': 'تم تسجيل الدخول',
+    'settings.signOut': 'تسجيل الخروج',
+    'settings.notifications': 'الإشعارات',
+    'settings.friendActivity': 'نشاط الأصدقاء',
+    'settings.leaderboardUpdates': 'تحديثات الترتيب',
+    'settings.dailyBonusReminder': 'تذكير المكافأة اليومية',
+    'settings.friendsBestHands': 'أفضل أيدي الأصدقاء',
+    'settings.announcements': 'الإعلانات',
+    'settings.enableNotifications': 'تفعيل الإشعارات',
+    'settings.resetStats': 'إعادة ضبط الإحصائيات',
+    'settings.footer': 'فيديو بوكر · v2.1',
+
+    'variant.jacks': 'ولد أو أفضل',
+    'variant.deuces': 'Deuces Wild',
+    'variant.bonus': 'Bonus Poker',
+    'variant.doubleBonus': 'Double Bonus',
+
+    'lb.friends': 'الأصدقاء',
+    'lb.hourly': 'كل ساعة',
+    'lb.daily': 'يومي',
+    'lb.friendsToday': 'الأصدقاء · اليوم',
+    'lb.hourlyChampions': '⏱ أبطال الساعة',
+    'lb.dailyChampions': '📅 أبطال اليوم',
+    'lb.showTop20': 'عرض أفضل 20 ▾',
+    'lb.showTop5': 'عرض أفضل 5 ▴',
+    'lb.rankPlaceholder': '#— · —',
+
+    'modal.signInTitle': 'سجّل الدخول للعب مع الأصدقاء',
+    'modal.signInSub': 'أضف أصدقاء، وانضم إلى الغرف، وقارن النتائج.',
+    'modal.continueGoogle': 'المتابعة بحساب Google',
+    'modal.chipsOnPhoneTitle': 'رقائقك موجودة على هذا الهاتف فقط',
+    'modal.chipsOnPhoneSub': 'سجّل الدخول مرة واحدة وستذهب رقائقك معك أينما كنت.',
+    'modal.notNow': 'ليس الآن',
+    'modal.createRoom': 'إنشاء غرفة بوكر',
+    'modal.roomNamePlaceholder': 'اسم الغرفة…',
+    'modal.buyIn5': 'الدخول 5',
+    'modal.buyIn10': 'الدخول 10',
+    'modal.buyIn20': 'الدخول 20',
+    'modal.buyIn50': 'الدخول 50',
+    'modal.createRoomBtn': 'إنشاء الغرفة',
+    'modal.gotCode': 'وصلك رمز من صديق؟',
+    'modal.roomCodePlaceholder': 'رمز الغرفة…',
+    'modal.join': 'انضمام',
+    'modal.room': 'غرفة',
+    'modal.code': 'الرمز:',
+
+    'sheet.inviteFriends': 'دعوة الأصدقاء',
+    'sheet.whatsapp': 'WhatsApp',
+    'sheet.telegram': 'Telegram',
+    'sheet.more': 'المزيد…',
+    'sheet.share': 'مشاركة…',
+    'sheet.copy': 'نسخ',
+    'sheet.done': 'تم',
+    'sheet.roomInviteSub': 'ادعُ أصدقاءك إلى «{{name}}» — سيصلهم إشعار بزر انضمام.',
+    'sheet.sendInvites': 'إرسال الدعوات',
+    'sheet.orShareLink': 'أو شارك رابطًا',
+    'sheet.bigWinTitle': 'فوز كبير!',
+    'sheet.bigWinSub': 'تباهَ بذلك — رابط دعوتك يذهب معه، وتحصل على {{reward}} عملة إذا انضم صديق.',
+    'sheet.allInOutTitle': 'انتهت رهانات كل الرصيد اليوم',
+    'sheet.allInOutEyebrow': 'عد غدًا — أو…',
+    'sheet.allInOutSubHtml': 'كل صديق ينضم عبر دعوتك يفتح <strong>رهان كل رصيد إضافي كل يوم</strong>.',
+    'sheet.allInInviteBtn': 'ادعُ صديقًا',
+    'sheet.goAllIn': 'راهن بكل الرصيد',
+    'sheet.allInEyebrow': 'عدد استخدامات محدود يوميًا',
+    'sheet.allInSub': 'هذا يراهن برصيدك كله — {{amount}} رصيد — على {{target}}.',
+    'sheet.potentialOn': 'العائد المحتمل مع فُل هاوس',
+    'sheet.slideToConfirm': 'اسحب للتأكيد',
+
+    'lang.sheetTitle': 'اختر لغتك',
+    'lang.sheetSub': 'يمكنك تغييرها في أي وقت من الإعدادات.',
+    'lang.onboardingBtn': 'اللغة',
+
+    'ob.eyebrow': 'كازينو اجتماعي',
+    'ob.welcomeTitle': 'Royal Video Poker',
+    'ob.welcomeSubtitle': 'خمس أوراق. قرار واحد. العب برقائق مجانية — بلا أموال حقيقية، وبكل الإثارة.',
+    'ob.pill5card': 'بوكر بخمس أوراق',
+    'ob.pillFreeChips': 'رقائق مجانية يوميًا',
+    'ob.pillNoRealMoney': 'بلا أموال حقيقية',
+    'ob.knowYourHands': 'تعرّف على الأيدي',
+    'ob.biggerHands': 'الأيدي الأقوى تدفع مضاعفات أعلى.',
+    'ob.plusNote': 'إضافة إلى فلاش وستريت وثلاثة متشابهة وزوجين — تسع أيدٍ رابحة إجمالًا.',
+    'ob.betAfterDecide': 'راهن بعد أن تقرر',
+    'ob.seeCards': 'انظر إلى أوراقك، واحتفظ بما تريد، ثم حدّد رهانك قبل السحب.',
+    'ob.balance': 'الرصيد',
+    'ob.totalBet': 'إجمالي الرهان',
+    'play.held': 'محفوظة',
+    'ob.allInLeftOne': 'المتبقي 1',
+    'ob.draw': 'سحب',
+    'ob.oneFreeAllIn': 'رهان مجاني واحد بكل الرصيد يوميًا — ادعُ صديقًا لفتح رهان آخر.',
+    'ob.competeClimb': 'نافس واصعد',
+    'ob.raceLeaderboards': 'تسابق في ترتيب الأصدقاء والساعة واليوم للحصول على رقائق إضافية.',
+    'ob.friendsToday': 'الأصدقاء · اليوم',
+    'ob.youAreFirst': 'أنت الأول!',
+    'ob.you': 'أنت',
+    'ob.alsoLive': 'يجري الآن أيضًا: بطولات كل ساعة وكل يوم أمام جميع لاعبي التطبيق.',
+    'ob.neverMissWin': 'لا تفوّت أي فوز',
+    'ob.getNotified': 'تصلك إشعارات بنتائج البطولات وتحديات الأصدقاء والمكافآت اليومية.',
+    'ob.dailyBonusReminders': 'تذكيرات المكافأة اليومية',
+    'ob.friendChallengeAlerts': 'تنبيهات تحديات الأصدقاء',
+    'ob.tournamentResults': 'نتائج البطولات',
+    'ob.enableNotifications': 'تفعيل الإشعارات',
+    'ob.notNow': 'ليس الآن',
+    'ob.saveProgress': 'احفظ تقدمك',
+    'ob.signInSync': 'سجّل الدخول لحفظ رقائقك ومنافسة أصدقائك.',
+    'ob.neverLose': 'لن تفقد رقائقك أو تقدمك أبدًا',
+    'ob.playAcross': 'العب على هاتفك وجهازك اللوحي',
+    'ob.findFriends': 'اعثر على الأصدقاء بالاسم تلقائيًا',
+    'ob.continueGoogle': 'المتابعة بحساب Google',
+    'ob.continueGuest': 'المتابعة كضيف',
+    'ob.back': 'رجوع',
+    'ob.next': 'التالي',
+    'ob.startWithChips': 'ابدأ بـ {{chips}} رقاقة',
+
+    'hand.royalFlush': 'رويال فلاش',
+    'hand.straightFlush': 'ستريت فلاش',
+    'hand.fourOfKind': 'أربعة متشابهة',
+    'hand.fourAces': 'أربعة آسات',
+    'hand.four2s4s': 'أربعة من 2 إلى 4',
+    'hand.four5sKs': 'أربعة من 5 إلى K',
+    'hand.fourDeuces': 'أربعة ثنائيات',
+    'hand.wildRoyalFlush': 'رويال فلاش بورقة جوكر',
+    'hand.fiveOfKind': 'خمسة متشابهة',
+    'hand.fullHouse': 'فُل هاوس',
+    'hand.flush': 'فلاش',
+    'hand.straight': 'ستريت',
+    'hand.threeOfKind': 'ثلاثة متشابهة',
+    'hand.twoPair': 'زوجان',
+    'hand.jacksOrBetter': 'ولد أو أفضل',
+    'hand.nothing': 'لا يوجد',
+
+    'exp.royalFlush': 'آس وملك وملكة وولد و10 من نفس النوع. أقوى يد في اللعبة.',
+    'exp.straightFlush': 'خمس أوراق متتالية من نفس النوع.',
+    'exp.fourOfKind': 'أربع أوراق بنفس القيمة.',
+    'exp.fourAces': 'أربعة آسات — أكبر مكافأة للأربعة المتشابهة.',
+    'exp.four2s4s': 'أربعة متشابهة من 2 إلى 4.',
+    'exp.four5sKs': 'أربعة متشابهة من 5 إلى الملك.',
+    'exp.fourDeuces': 'أربع ثنائيات جوكر — فوز تلقائي من الدرجة الأولى.',
+    'exp.wildRoyalFlush': 'رويال فلاش مكوّن بورقة ثنائية جوكر واحدة على الأقل.',
+    'exp.fiveOfKind': 'خمس أوراق بنفس القيمة باستخدام الثنائيات الجوكر.',
+    'exp.fullHouse': 'ثلاثة متشابهة مع زوج.',
+    'exp.flush': 'خمس أوراق من نفس النوع وغير متتالية.',
+    'exp.straight': 'خمس أوراق متتالية من أنواع مختلفة.',
+    'exp.threeOfKind': 'ثلاث أوراق بنفس القيمة.',
+    'exp.twoPair': 'زوجان منفصلان.',
+    'exp.jacksOrBetter': 'زوج من الأولاد أو الملكات أو الملوك أو الآسات.',
+    'exp.nothing': 'لا توجد يد رابحة — حظًا أوفر في التوزيعة القادمة.',
+
+    'ticker.royalFlush': 'رويال',
+    'ticker.straightFlush': 'س. فلاش',
+    'ticker.wildRoyalFlush': 'رويال ج',
+    'ticker.fourDeuces': '4 ثنائيات',
+    'ticker.fiveOfKind': 'خمسة',
+    'ticker.fourOfKind': 'أربعة',
+    'ticker.fourAces': '4 آسات',
+    'ticker.four2s4s': 'أربعة 2-4',
+    'ticker.four5sKs': 'أربعة 5-K',
+    'ticker.fullHouse': 'فُل هاوس',
+    'ticker.flush': 'فلاش',
+    'ticker.straight': 'ستريت',
+    'ticker.threeOfKind': 'ثلاثة',
+    'ticker.twoPair': 'زوجان',
+    'ticker.jacksOrBetter': 'ولد+',
+    'ticker.nothing': '—',
+
+    'win.pair': 'زوج',
+    'win.threeOfKind': 'ثلاثة متشابهة',
+    'win.fourOfKind': 'أربعة متشابهة',
+    'win.straight': 'ستريت',
+    'win.flush': 'فلاش',
+    'win.straightFlush': 'س. فلاش',
+    'win.royalFlush': 'رويال فلاش',
+
+    'common.you': 'أنت',
+    'common.player': 'لاعب',
+    'common.leader': 'المتصدر',
+    'common.copy': 'نسخ',
+    'common.copied': 'تم النسخ!',
+    'common.cancel': 'إلغاء',
+    'common.credits': 'رصيد',
+    'common.coins': 'عملات',
+    'common.rankYouAreFirst': '#{{rank}} · أنت الأول!',
+    'common.rankLeadsBy': '#{{rank}} · {{name}} متقدم بفارق {{gap}}',
+    'common.noScoresYet': 'لا توجد نتائج بعد — كن الأول!',
+    'common.resetsInM': 'يُعاد الضبط بعد {{m}} د',
+    'common.resetsInHM': 'يُعاد الضبط بعد {{h}} س {{m}} د',
+    'common.points': '{{n}} نقطة',
+
+    'room.defaultName': 'غرفة',
+    'room.open': 'مفتوحة',
+    'room.inProgress': 'جارية',
+    'room.joinTable': 'انضم إلى الطاولة',
+    'room.enterTable': 'ادخل الطاولة',
+    'room.membersMeta': '{{count}}/{{capacity}} أصدقاء · الرهان {{stake}}',
+    'room.sendInvites': 'إرسال الدعوات',
+    'room.sendInvitesCount': 'إرسال الدعوات ({{count}})',
+
+    'champ.resetsPlaceholder': 'يُعاد الضبط بعد —د',
+    'champ.noChampionsYet': 'لا أبطال في هذه الساعة بعد — كن الأول!',
+    'champ.braceletDaily': 'يومي',
+    'champ.braceletHourly': 'كل ساعة',
+
+    'story.noWinningHands': 'لا توجد أيدٍ رابحة بعد',
+    'story.winAHand': 'اربح يدًا لإنشاء قصتك',
+    'story.creditsMult': '‎+{{payout}} رصيد · {{mult}}×',
+    'story.braceletStrip': '💍 سوار {{type}} — {{hand}} مقابل ‎+{{amount}} رصيد',
+    'story.payout': '‎+{{payout}} رصيد · {{mult}}×',
+
+    'pwa.installBar': 'ثبّت فيديو بوكر للوصول السريع',
+    'pwa.install': 'تثبيت',
+
+    'referral.rewardLine': 'تحصل على {{reward}} عملة عن كل صديق، ويحصلون على {{invitee}}.',
+    'referral.coinsEarned': '{{amount}} عملة مكتسبة',
+    'referral.oneJoined': '{{name}} انضم',
+    'referral.manyJoined': 'انضم {{count}} من الأصدقاء',
+    'referral.seatsFirst': 'مقعد واحد من 3 مشغول — الأول لك. تحصل على {{reward}} عملة عن كل صديق، ويحصلون على {{invitee}}.',
+    'referral.seatsProgress': '{{filled}} من 3 مقاعد مشغولة · {{earned}} عملة مكتسبة',
+    'referral.tableRegular': 'من رواد الطاولة — انضم {{count}} من الأصدقاء · {{earned}} عملة مكتسبة',
+
+    'prompt.bigWin': 'ضربة موفقة! لديك الآن {{coins}} عملة — محفوظة على هذا الجهاز فقط. إن ضاع الهاتف ضاعت الرقائق. احفظها مجانًا عبر Google.',
+    'prompt.session': 'لديك {{coins}} عملة على هذا الجهاز فقط. سجّل الدخول مرة واحدة وستذهب معك أينما كنت.',
+
+    'firebase.havingTrouble': 'تواجه مشكلة؟ العب كضيف في الوقت الحالي',
+
+    'share.appName': 'فيديو بوكر',
+    'share.appNameFull': 'Royal Video Poker',
+    'share.inviteText': '{{name}} يريد أن يلعب معك فيديو بوكر! انضم عبر هذا الرابط:\n{{link}}',
+    'share.inviteTextShort': '{{name}} يريد أن يلعب معك فيديو بوكر! انضم من هنا: {{link}}',
+    'share.roomText': 'انضم إلى غرفة البوكر خاصتي «{{name}}» في فيديو بوكر!\n{{link}}',
+    'share.bigWinText': 'حصلت للتو على {{hand}} بقيمة {{win}} رصيد في فيديو بوكر! هل تظن أنك تتفوق؟\n{{link}}',
+    'share.bigWinMsg': 'حصلت للتو على {{hand}} بقيمة {{win}} عملة في Royal Video Poker 🃏 هل تظن أنك تتفوق؟',
+    'share.roomInviteMsg': 'انضم إلى غرفة البوكر خاصتي «{{name}}» في Royal Video Poker.',
+    'share.roomCodeLine': 'رمز الغرفة: {{code}}',
+
+    'sheet.bigWinTitleWin': '{{hand}}! ‎+{{coins}} عملة',
+
+    'toast.unlockLevel': '🔒 يُفتح عند المستوى {{level}}',
+    'toast.multiHandUnlock': '🔒 تعدد الأيدي يُفتح عند المستوى {{level}}',
+    'toast.rebuy': '♻ ‎+{{amount}} رصيد',
+    'toast.noAllInLeft': '⛔ لم تعد لديك رهانات بكل الرصيد — عد غدًا!',
+    'toast.allInGoodLuck': '🔥 كل الرصيد — بالتوفيق!',
+    'toast.statsReset': 'أُعيد ضبط الإحصائيات',
+    'toast.hintsOn': '💡 التلميحات مفعّلة — الأوراق المقترحة تتوهج بالأزرق',
+    'toast.noPlayerFound': 'لم يُعثر على لاعب بهذا الرمز.',
+    'toast.ownCode': 'هذا رمزك أنت!',
+    'toast.alreadyFriends': 'موجود بالفعل في قائمة أصدقائك.',
+    'toast.friendAdded': 'تمت إضافة الصديق!',
+    'toast.couldNotAddFriend': 'تعذّرت إضافة الصديق — حاول مجددًا.',
+    'toast.couldNotGenerateLink': 'تعذّر إنشاء رابط الدعوة.',
+    'toast.linkCopied': 'تم نسخ رابط الدعوة!',
+    'toast.couldNotCopy': 'تعذّر النسخ — اضغط مطوّلًا على الرابط.',
+    'toast.couldNotOpenWhatsApp': 'تعذّر فتح WhatsApp.',
+    'toast.couldNotOpenTelegram': 'تعذّر فتح Telegram.',
+    'toast.signInConnect': 'سجّل الدخول للتواصل مع صديقك!',
+    'toast.noPlayerInviteLink': 'لم يُعثر على لاعب بهذا الرابط.',
+    'toast.ownInviteLink': 'هذا رابط دعوتك أنت!',
+    'toast.giveName': 'أعطِ غرفتك اسمًا.',
+    'toast.roomCreated': 'أُنشئت الغرفة — الرمز: {{code}}',
+    'toast.couldNotCreateRoom': 'تعذّر إنشاء الغرفة — حاول مجددًا.',
+    'toast.noRoomFound': 'لم يُعثر على غرفة بهذا الرمز.',
+    'toast.joinedRoom': 'انضممت إلى {{name}}!',
+    'toast.couldNotJoinRoom': 'تعذّر الانضمام إلى الغرفة — حاول مجددًا.',
+    'toast.linkCopiedShare': 'تم نسخ الرابط — شاركه مع أصدقائك!',
+    'toast.signInJoinRoom': 'سجّل الدخول للانضمام إلى غرفة البوكر!',
+    'toast.roomFull': 'هذه الغرفة ممتلئة.',
+    'toast.alreadyInRoom': 'أنت في هذه الغرفة بالفعل.',
+    'toast.invitesSent': 'أُرسلت الدعوات!',
+    'toast.couldNotSendInvites': 'تعذّر إرسال الدعوات — حاول مجددًا.',
+    'toast.referralWelcome': '🎁 أرسل لك صديقك {{amount}} عملة — أهلًا بك على الطاولة!',
+    'toast.referralReward': '🎉 انضم صديق — كسبت {{amount}} عملة!',
+    'toast.cloudRestored': '☁ أهلًا بعودتك — استُعيدت {{amount}} عملة خاصتك.',
+    'toast.signInFailed': 'فشل تسجيل الدخول — حاول مجددًا.',
+    'toast.codeCopied': 'تم نسخ الرمز!',
+    'toast.friendRemoved': 'أُزيل الصديق.',
+    'toast.couldNotRemoveFriend': 'تعذّرت إزالة الصديق — حاول مجددًا.',
+    'toast.alreadyConnectedLink': 'أنتما مرتبطان بالفعل عبر هذا الرابط.',
+    'toast.inviteLinkInvalid': 'لم يعد رابط الدعوة هذا صالحًا.',
+    'toast.standingsCopied': 'تم نسخ الترتيب.',
+    'toast.signInFriendCode': 'سجّل الدخول للحصول على رمز الصديق خاصتك.',
+    'toast.useCopyShare': 'استخدم النسخ أو WhatsApp أو Telegram للمشاركة.',
+    'toast.signInDailyGame': 'سجّل الدخول للانضمام إلى اللعبة اليومية!',
+    'toast.referralClaimed': '🎁 {{who}} — ‎+{{amount}} عملة!',
+    'toast.connectedViaLink': '🔗 مرتبطان عبر هذا الرابط — الأصدقاء المضافون: {{count}}',
+
+    'voice.four2s4s': 'أربعة متشابهة، من الاثنين إلى الأربعة',
+    'voice.four5sKs': 'أربعة متشابهة، من الخمسة إلى الملك'
 });
 
 
@@ -11668,6 +12559,17 @@ function buildInviteLink(code) {
     return PLAY_STORE_URL + '&referrer=' + encodeURIComponent('ref=' + code);
 }
 
+// The clickable https deep link for invite messages: invite.html hands the OS
+// an intent:// URL, so with the app installed it opens straight into it WITH
+// the code (which the Play link above can't do on a warm open), and without
+// it the intent's fallback lands on the Play listing anyway. Messengers only
+// linkify http(s), so this — not the raw videopoker:// scheme — is the form
+// a message can carry.
+function buildInviteOpenLink(code) {
+    if (!code) return '';
+    return getSmartLinkBase() + '?ref=' + encodeURIComponent(code);
+}
+
 function buildRoomLink(code) {
     if (!code) return '';
     return getSmartLinkBase() + '?join=' + encodeURIComponent(code);
@@ -12192,6 +13094,10 @@ function removeFriend(uid) {
 function renderFriendsScreen() {
     const listEl = document.getElementById('friends-list');
     const emptyEl = document.getElementById('friends-empty');
+    const emptyCta = document.getElementById('friends-empty-invite');
+    if (emptyCta) {
+        emptyCta.textContent = t('friends.emptyInvite', { reward: formatNumber(REFERRAL_REWARD_COINS) });
+    }
     const codeEl = document.getElementById('own-referral-code');
     const signedOutEl = document.getElementById('friends-signed-out');
     const signedInWrap = document.getElementById('friends-signed-in-wrap');
@@ -12604,7 +13510,7 @@ function creditInviteeWelcomeCoins() {
         saveDailyProgress();
     }
     const balanceEl = document.getElementById('balance');
-    if (balanceEl) balanceEl.textContent = balance;
+    if (balanceEl) balanceEl.textContent = formatNumber(balance);
     if (window.saveGameState) saveGameState();
     if (window.pushNetProfit) pushNetProfit();
     showToast(t('toast.referralWelcome', { amount: formatNumber(REFERRAL_INVITEE_COINS) }));
@@ -12628,7 +13534,7 @@ function subscribeReferralRewards() {
                 if (data.claimedAt) {
                     earned += coins;
                 } else if (!referralClaimsInFlight[doc.id]) {
-                    pending.push({ id: doc.id, ref: doc.ref, coins: coins, name: data.referredName || 'A friend' });
+                    pending.push({ id: doc.id, ref: doc.ref, coins: coins, name: data.referredName || t('common.player') });
                 }
             });
             referralStats = { invited: invited, coinsEarned: earned };
@@ -12672,7 +13578,7 @@ function creditReferralCoins(claimed) {
     }
 
     const balanceEl = document.getElementById('balance');
-    if (balanceEl) balanceEl.textContent = balance;
+    if (balanceEl) balanceEl.textContent = formatNumber(balance);
     if (window.saveGameState) saveGameState();
 
     referralStats.coinsEarned += total;
@@ -12726,6 +13632,8 @@ function renderInviteRewardLine() {
 if (window.vpOnLanguageChange) {
     vpOnLanguageChange(renderInviteRewardLine);
 }
+
+document.addEventListener('DOMContentLoaded', renderInviteRewardLine);
 
 
 /* --- js/cloudsave.js --- */
@@ -12811,7 +13719,7 @@ function maybeRestoreCloudState(userDoc) {
     }
 
     const balanceEl = document.getElementById('balance');
-    if (balanceEl) balanceEl.textContent = balance;
+    if (balanceEl) balanceEl.textContent = formatNumber(balance);
     if (window.saveGameState) saveGameState();
     if (window.updateStats) updateStats();
     if (window.pushNetProfit) pushNetProfit();
@@ -13613,8 +14521,11 @@ function renderStoryViewer() {
     bodyHtml += '</div>';
 
     // Tap zones (design: .storytapzone.left / .storytapzone.right)
-    bodyHtml += '<div class="story-tap-left" onclick="event.stopPropagation();navigateStory(-1)"></div>';
-    bodyHtml += '<div class="story-tap-right" onclick="event.stopPropagation();navigateStory(1)"></div>';
+    // The zones stay physically left and right; which one moves forward flips
+    // with the reading direction, the way every RTL story viewer behaves.
+    var backStep = (window.isRtl && isRtl()) ? 1 : -1;
+    bodyHtml += '<div class="story-tap-left" onclick="event.stopPropagation();navigateStory(' + backStep + ')"></div>';
+    bodyHtml += '<div class="story-tap-right" onclick="event.stopPropagation();navigateStory(' + (-backStep) + ')"></div>';
 
     card.innerHTML = progressHtml + headerHtml + bodyHtml;
     overlay.appendChild(card);
@@ -14688,8 +15599,13 @@ function friendInviteMessage() {
     const user = window.egUser;
     const name = (user && user.displayName) || 'A friend';
     const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
+    // Two links do two jobs: the share link (Play Store) installs, while the
+    // deep link below opens the app directly for a friend who already has it —
+    // carrying the code through intent://, which the store link cannot.
+    const openLink = window.buildInviteOpenLink ? buildInviteOpenLink(code) : '';
     return name + ' sent you 1,000 coins on Royal Video Poker 🃏 Sign in with Google to claim them.' +
-        (code ? '\nFriend code: ' + code : '');
+        (code ? '\nFriend code: ' + code : '') +
+        (openLink ? '\nAlready have the app? Tap to open: ' + openLink : '');
 }
 
 function shareFriendInviteViaWhatsApp() {
@@ -14703,9 +15619,16 @@ function shareFriendInviteViaTelegram() {
 // --- Room invite sheet: share-link half ---
 // The friend-picker half lives in js/rooms.js (openRoomInvitePicker); these
 // helpers fill in the link row and share chips of #room-invite-sheet.
+// Held here rather than read back out of the DOM: the sentence that used to
+// carry the name is now rendered whole from the dictionary, so there is no
+// element left to read it from.
+let roomInviteName = '';
+
 function setRoomInviteSheetLink(roomName, roomCode) {
     const link = buildRoomLink(roomCode);
-    document.getElementById('room-invite-name').textContent = roomName;
+    roomInviteName = roomName;
+    const subEl = document.getElementById('room-invite-sub');
+    if (subEl) subEl.textContent = t('sheet.roomInviteSub', { name: roomName });
     const linkEl = document.getElementById('room-invite-link');
     linkEl.textContent = link;
     linkEl.setAttribute('data-link', link);
@@ -14723,7 +15646,7 @@ function copyRoomLink() {
 }
 
 function roomInviteMessage() {
-    const name = document.getElementById('room-invite-name').textContent;
+    const name = roomInviteName;
     const code = document.getElementById('room-invite-link').getAttribute('data-code') || '';
     return t('share.roomInviteMsg', { name: name }) +
         (code ? '\n' + t('share.roomCodeLine', { code: code }) : '');
@@ -14765,6 +15688,8 @@ function maybeOfferBigWinShare(handType, win) {
     bigwinShareWin = win;
     const title = document.getElementById('bigwin-share-title');
     if (title) title.textContent = t('sheet.bigWinTitleWin', { hand: vpHandLabel(handType), coins: formatNumber(win) });
+    const sub = document.getElementById('bigwin-share-sub');
+    if (sub) sub.textContent = t('sheet.bigWinSub', { reward: formatNumber(REFERRAL_REWARD_COINS) });
     openSheet('bigwin-share-sheet');
     if (window.logVpEvent) logVpEvent('bigwin_share_shown');
 }
@@ -15186,10 +16111,13 @@ function openAllInSheet() {
     const hands = multiHandCount || 1;
     allInPendingAmount = Math.max(1, Math.floor(balance / hands));
     const stake = allInPendingAmount * hands;
-    const amountEl = document.getElementById('allin-sheet-amount');
-    if (amountEl) amountEl.textContent = formatNumber(stake);
-    const subEl = document.getElementById('allin-sheet-target');
-    if (subEl) subEl.textContent = gameState === 'hold' ? t('play.thisHand') : t('play.theNextHand');
+    const subEl = document.getElementById('allin-sheet-sub');
+    if (subEl) {
+        subEl.textContent = t('sheet.allInSub', {
+            amount: formatNumber(stake),
+            target: gameState === 'hold' ? t('play.thisHand') : t('play.theNextHand')
+        });
+    }
 
     // A mid-table hand makes the upside concrete without promising a royal.
     // Mid-hand, the payout is computed off the raised total stake, not just
@@ -15209,11 +16137,24 @@ function closeAllInSheet() {
     resetAllInSlider();
 }
 
+// The thumb is placed on whichever edge the current language starts from, so
+// the inline style has to name the matching physical property — and clear the
+// other, or a language switch would leave the old one pinning it.
+let allInThumbOffset = 3;
+
+function setAllInThumbOffset(offset) {
+    allInThumbOffset = offset;
+    const thumb = document.getElementById('allin-slider-thumb');
+    if (!thumb) return;
+    const rtl = !!(window.isRtl && isRtl());
+    thumb.style.left = rtl ? '' : offset + 'px';
+    thumb.style.right = rtl ? offset + 'px' : '';
+}
+
 function resetAllInSlider() {
     const track = document.getElementById('allin-slider-track');
-    const thumb = document.getElementById('allin-slider-thumb');
     const fill = document.getElementById('allin-slider-fill');
-    if (thumb) thumb.style.left = '3px';
+    setAllInThumbOffset(3);
     if (fill) fill.style.width = '0px';
     if (track) track.classList.remove('confirmed');
 }
@@ -15252,8 +16193,8 @@ function initAllInSlider() {
 
     const CONFIRM_THRESHOLD = 0.85;
     let startX = 0;
-    let thumbStartLeft = 3;
-    let maxLeft = 0;
+    let thumbStartOffset = 3;
+    let maxOffset = 0;
 
     function pointerX(e) {
         return e.touches ? e.touches[0].clientX : e.clientX;
@@ -15262,10 +16203,11 @@ function initAllInSlider() {
     function pointerMove(e) {
         if (!allInDragging) return;
         e.preventDefault();
-        let left = thumbStartLeft + (pointerX(e) - startX);
-        left = Math.max(3, Math.min(maxLeft, left));
-        thumb.style.left = left + 'px';
-        fill.style.width = (left + thumb.offsetWidth) + 'px';
+        // Offset is measured from the start edge, so a rightward drag has to
+        // count as backwards in Hebrew and Arabic.
+        const travel = (pointerX(e) - startX) * (window.isRtl && isRtl() ? -1 : 1);
+        setAllInThumbOffset(Math.max(3, Math.min(maxOffset, thumbStartOffset + travel)));
+        fill.style.width = (allInThumbOffset + thumb.offsetWidth) + 'px';
     }
 
     function pointerUp() {
@@ -15277,10 +16219,10 @@ function initAllInSlider() {
         document.removeEventListener('touchmove', pointerMove);
         document.removeEventListener('touchend', pointerUp);
 
-        const pct = maxLeft > 0 ? (thumb.offsetLeft - 3) / maxLeft : 0;
+        const pct = maxOffset > 0 ? (allInThumbOffset - 3) / maxOffset : 0;
         if (pct >= CONFIRM_THRESHOLD) {
-            thumb.style.left = maxLeft + 'px';
-            fill.style.width = (maxLeft + thumb.offsetWidth) + 'px';
+            setAllInThumbOffset(maxOffset);
+            fill.style.width = (maxOffset + thumb.offsetWidth) + 'px';
             track.classList.add('confirmed');
             confirmAllIn();
         } else {
@@ -15292,8 +16234,8 @@ function initAllInSlider() {
         allInDragging = true;
         thumb.classList.add('dragging');
         startX = pointerX(e);
-        thumbStartLeft = thumb.offsetLeft;
-        maxLeft = track.clientWidth - thumb.offsetWidth - 3;
+        thumbStartOffset = allInThumbOffset;
+        maxOffset = track.clientWidth - thumb.offsetWidth - 3;
         document.addEventListener('mousemove', pointerMove);
         document.addEventListener('mouseup', pointerUp);
         document.addEventListener('touchmove', pointerMove, { passive: false });
@@ -15683,7 +16625,13 @@ function getWinBadgeText(cardIndex, handType) {
     return '';
 }
 
+// Remembers the last call so a language switch can repaint the dealt cards
+// with the same highlights — the badges are baked into the card HTML, so
+// re-rendering is the only way to translate them without waiting for a deal.
+let lastRenderHandArgs = null;
+
 function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false, animateFlip = true) {
+    lastRenderHandArgs = [winningIndices, thirdMatchIndices, secondPairIndices, isDraw, false];
     const handEl = document.getElementById('hand');
     handEl.innerHTML = '';
     const anyHeld = held.some(h => h);
@@ -15729,7 +16677,7 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         }
 
         cardEl.innerHTML = `
-            <div class="held-badge">HELD</div>
+            <div class="held-badge">${t('play.held')}</div>
             <div class="win-badge">${winBadgeText}</div>
             <div class="card-inner">
                 <div class="card-front">
@@ -15986,6 +16934,12 @@ if (window.vpOnLanguageChange) {
         updateAllInUI();
         updateStreakUI(false);
         document.getElementById('balance').textContent = formatNumber(balance);
+        // Repaint the dealt cards (their HELD/win badges are baked in) and
+        // re-pin the All-In thumb, which is positioned from whichever edge the
+        // reading direction starts at. Never animates: this is a repaint, not
+        // a new deal.
+        if (lastRenderHandArgs) renderHand.apply(null, lastRenderHandArgs);
+        setAllInThumbOffset(allInThumbOffset);
         // The result panel keeps the last hand's copy, so re-render it in the
         // new language rather than leaving a stale English sentence on screen.
         if (lastHandType) {
@@ -16261,7 +17215,10 @@ function onboardingTouchEnd(e) {
     const dx = touch.clientX - onboardingSwipeStartX;
     const dy = touch.clientY - onboardingSwipeStartY;
     if (Math.abs(dx) < ONBOARDING_SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return;
-    if (dx < 0) {
+    // Advancing means swiping toward the end edge — leftward in English,
+    // rightward in Hebrew and Arabic.
+    const forward = (window.isRtl && isRtl()) ? dx > 0 : dx < 0;
+    if (forward) {
         if (onboardingIndex < ONBOARDING_STEPS.length - 1) advanceOnboarding();
     } else if (onboardingIndex > 0) {
         goBackOnboarding();

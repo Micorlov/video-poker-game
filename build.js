@@ -19,7 +19,9 @@ const cssFiles = [
     'styles/cards.css',
     'styles/social.css',
     'styles/animations.css',
-    'styles/onboarding.css'
+    'styles/onboarding.css',
+    // Last: RTL overrides must win specificity ties with the rules above.
+    'styles/rtl.css'
 ];
 
 let combinedCss = '';
@@ -45,6 +47,8 @@ const jsFiles = [
     'js/lang/ja.js',
     'js/lang/ko.js',
     'js/lang/zh-CN.js',
+    'js/lang/he.js',
+    'js/lang/ar.js',
     'js/audio.js',
     'js/analytics.js',
     'js/ui.js',

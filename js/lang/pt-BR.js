@@ -167,7 +167,7 @@ vpRegisterLang('pt-BR', {
     'ob.seeCards': 'Veja suas cartas, segure as que quiser e defina sua aposta antes do descarte.',
     'ob.balance': 'Saldo',
     'ob.totalBet': 'Aposta total',
-    'ob.held': 'FIXA',
+    'play.held': 'FIXA',
     'ob.allInLeftOne': 'Resta 1',
     'ob.draw': 'Descartar',
     'ob.oneFreeAllIn': 'Uma aposta TUDO grátis por dia — convide um amigo para liberar outra.',
