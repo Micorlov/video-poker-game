@@ -2571,6 +2571,30 @@ button:focus:not(:focus-visible) {
 .share-chip.whatsapp { background: #25D366; }
 .share-chip.telegram { background: #229ED9; }
 
+/* WhatsApp/Telegram lead every share row — a dedicated messenger button
+   converts far better than the same icon buried in the OS share sheet. */
+.share-chip--primary {
+    flex: 1.4;
+    padding: 15px 0;
+    font-size: 14px;
+}
+
+/* Empty friends list → the invite is the action, not the explanation. */
+.friends-empty-invite {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    font-size: 13.5px;
+}
+
+.allin-unlock-invite {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px;
+}
+
 .sheet-done-btn {
     width: 100%;
     margin-top: 14px;
@@ -2876,6 +2900,21 @@ button:focus:not(:focus-visible) {
     font-weight: 600;
     color: var(--text-faint);
     cursor: pointer;
+}
+
+/* "Not now" on the guest sign-in re-prompt — a real, visible opt-out. */
+.signin-prompt-later {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 6px;
+    background: none;
+    border: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-family: inherit;
 }
 
 /* --- Friends action strip: tap-to-copy code chip + add-by-code, one row --- */
@@ -4103,6 +4142,7 @@ body.screen-shake {
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -4130,7 +4170,7 @@ body.screen-shake {
             <div class="balance-head">
                 <div class="balance-head-main">
                     <div class="section-label">Balance</div>
-                    <div class="balance-value" id="balance">500</div>
+                    <div class="balance-value" id="balance">1000</div>
                 </div>
                 <div class="balance-head-side">
                     <div class="section-label">Variant</div>
@@ -4257,7 +4297,7 @@ body.screen-shake {
         <section id="screen-friends" class="screen">
             <div class="friends-header">
                 <h1 class="screen-title">Friends</h1>
-                <button class="invite-pill" onclick="shareInviteNative()">+ Invite</button>
+                <button class="invite-pill" onclick="openInviteSheet()">+ Invite</button>
             </div>
 
             <div class="panel friends-signin-prompt" id="friends-signed-out" onclick="openSignInModal()">
@@ -4277,7 +4317,7 @@ body.screen-shake {
                         <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()">Add</button>
                     </div>
                 </div>
-                <div class="friends-reward-line" id="friends-invite-reward">Get 2000 coins for every friend who joins with Google.</div>
+                <div class="friends-reward-line" id="friends-invite-reward">You get 2,000 coins per friend — they get 1,000 to start.</div>
 
                 <div class="stats-toggle">
                     <button class="stats-toggle-btn selected" id="friends-tab-leaderboard" onclick="setFriendsTab('leaderboard')">Leaderboard</button>
@@ -4286,7 +4326,10 @@ body.screen-shake {
 
                 <div id="friends-leaderboard-view">
                     <div class="panel">
-                        <div class="rooms-empty hidden" id="friends-empty">Add friends by their code to compare scores.</div>
+                        <div class="rooms-empty hidden" id="friends-empty">
+                            No friends at the table yet.
+                            <button class="btn-primary friends-empty-invite" onclick="openInviteSheet()">Invite your first friend — you get 2,000 coins</button>
+                        </div>
                         <div id="friends-list"></div>
                     </div>
                 </div>
@@ -4454,6 +4497,22 @@ body.screen-shake {
         </div>
     </div>
 
+    <!-- Guest re-prompt: shown by js/signin-prompt.js at capped, high-leverage
+         moments (big win / later session start) with the real at-risk balance. -->
+    <div class="modal-backdrop hidden" id="signin-prompt-modal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="dismissSigninPrompt()">✕</button>
+            <div class="modal-title">Your chips live only on this phone</div>
+            <div class="modal-sub" id="signin-prompt-body">Sign in once and your chips follow you anywhere.</div>
+            <button class="google-btn" onclick="acceptSigninPrompt()">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
+                <span>Continue with Google</span>
+            </button>
+            <button class="signin-prompt-later" onclick="dismissSigninPrompt()">Not now</button>
+            <div class="modal-error hidden" id="signin-prompt-error"></div>
+        </div>
+    </div>
+
     <div class="modal-backdrop hidden" id="room-modal">
         <div class="modal-box">
             <button class="modal-close" onclick="closeRoomModal()">✕</button>
@@ -4492,14 +4551,15 @@ body.screen-shake {
                 <span class="sheet-title">Invite Friends</span>
                 <button class="sheet-close" onclick="closeSheet('invite-sheet')">✕</button>
             </div>
-            <div class="sheet-sub" id="invite-reward-line">Get 2000 coins for every friend who joins with Google.</div>
+            <div class="sheet-sub" id="invite-reward-line">You get 2,000 coins per friend — they get 1,000 to start.</div>
+            <div class="share-chips-row">
+                <button class="share-chip share-chip--primary whatsapp" onclick="shareFriendInviteViaWhatsApp()">WhatsApp</button>
+                <button class="share-chip share-chip--primary telegram" onclick="shareFriendInviteViaTelegram()">Telegram</button>
+                <button class="share-chip native" onclick="shareInviteMore()">More…</button>
+            </div>
             <div class="sheet-link-row">
                 <span class="sheet-link-text" id="invite-sheet-link">—</span>
                 <button class="sheet-copy-btn" id="invite-sheet-copy" onclick="copyInviteSheetLink()">Copy</button>
-            </div>
-            <div class="share-chips-row">
-                <button class="share-chip whatsapp" onclick="shareFriendInviteViaWhatsApp()">WhatsApp</button>
-                <button class="share-chip telegram" onclick="shareFriendInviteViaTelegram()">Telegram</button>
             </div>
             <div class="modal-sub" style="margin-top:16px;">Got a code from a friend?</div>
             <div class="add-friend-row">
@@ -4527,11 +4587,48 @@ body.screen-shake {
                 <button class="sheet-copy-btn" id="room-invite-copy" onclick="copyRoomLink()">Copy</button>
             </div>
             <div class="share-chips-row">
+                <button class="share-chip share-chip--primary whatsapp" onclick="shareRoomViaWhatsApp()">WhatsApp</button>
+                <button class="share-chip share-chip--primary telegram" onclick="shareRoomViaTelegram()">Telegram</button>
                 <button class="share-chip native" onclick="shareRoomInviteNative()">Share…</button>
-                <button class="share-chip whatsapp" onclick="shareRoomViaWhatsApp()">WhatsApp</button>
-                <button class="share-chip telegram" onclick="shareRoomViaTelegram()">Telegram</button>
             </div>
             <button class="sheet-done-btn" onclick="closeSheet('room-invite-sheet')">Done</button>
+        </div>
+    </div>
+
+    <!-- Big-win brag sheet: shown by js/invite.js after Four of a Kind or
+         better (signed-in, max once/day). The link carries the referral code
+         so a brag doubles as an invite. -->
+    <div class="sheet-backdrop hidden" id="bigwin-share-sheet" onclick="if(event.target===this)closeSheet('bigwin-share-sheet')">
+        <div class="sheet">
+            <div class="sheet-header">
+                <span class="sheet-title" id="bigwin-share-title">Big win!</span>
+                <button class="sheet-close" onclick="closeSheet('bigwin-share-sheet')">✕</button>
+            </div>
+            <div class="sheet-sub">Rub it in — your invite link rides along, and you get 2,000 coins if a friend joins.</div>
+            <div class="share-chips-row">
+                <button class="share-chip share-chip--primary whatsapp" onclick="shareBigWinVia('whatsapp')">WhatsApp</button>
+                <button class="share-chip share-chip--primary telegram" onclick="shareBigWinVia('telegram')">Telegram</button>
+                <button class="share-chip native" onclick="shareBigWinVia('native')">More…</button>
+            </div>
+            <button class="sheet-dismiss" onclick="closeSheet('bigwin-share-sheet')">Not now</button>
+        </div>
+    </div>
+
+    <!-- All-In unlock: shown instead of the depleted toast — the scarcity
+         moment doubles as the invite hook (each referred friend = +1/day). -->
+    <div class="sheet-backdrop hidden" id="allin-unlock-sheet" onclick="if(event.target===this)closeSheet('allin-unlock-sheet')">
+        <div class="sheet">
+            <div class="sheet-header">
+                <span class="sheet-mark">♠</span>
+                <span class="sheet-heading">
+                    <span class="sheet-title">Out of All-Ins today</span>
+                    <span class="sheet-eyebrow">Back tomorrow — or…</span>
+                </span>
+                <button class="sheet-close" onclick="closeSheet('allin-unlock-sheet')">✕</button>
+            </div>
+            <div class="sheet-sub">Every friend who joins through your invite unlocks <strong>+1 All-In every day</strong>.</div>
+            <button class="btn-primary allin-unlock-invite" onclick="allInUnlockInvite()">Invite a friend</button>
+            <button class="sheet-dismiss" onclick="closeSheet('allin-unlock-sheet')">Not now</button>
         </div>
     </div>
 
@@ -4543,7 +4640,7 @@ body.screen-shake {
                 <span class="sheet-mark">♠</span>
                 <span class="sheet-heading">
                     <span class="sheet-title">Go All In</span>
-                    <span class="sheet-eyebrow">Once per day</span>
+                    <span class="sheet-eyebrow">Limited daily uses</span>
                 </span>
                 <button class="sheet-close" onclick="closeAllInSheet()">✕</button>
             </div>
@@ -4783,7 +4880,7 @@ body.screen-shake {
             <div class="onboarding-step" id="onboarding-step-signin">
                 <div class="ob-signin">
                     <div class="ob-signin-title">Save Your Progress</div>
-                    <div class="ob-signin-subtitle">Sign in to sync your chips and compete with friends.</div>
+                    <div class="ob-signin-subtitle">Sign in to back up your chips and compete with friends.</div>
                     <ul class="ob-checklist">
                         <li><span class="ob-check-icon">✓</span> Never lose your chips or progress</li>
                         <li><span class="ob-check-icon">✓</span> Play across your phone and tablet</li>
@@ -5215,6 +5312,38 @@ var audioCtx = null;
         requestAnimationFrame(update);
     }
 
+/* --- js/analytics.js --- */
+// Funnel analytics — Firebase Analytics (GA4) via the compat SDK. Chosen over
+// Firestore counters because it also works for signed-out guests (the exact
+// population the sign-in funnel needs to measure) and needs no security rules.
+//
+// Requires Google Analytics to be enabled on the Firebase project, which adds
+// a measurementId to firebaseConfig (js/firebase.js). Until that manual console
+// step is done, firebase.analytics() throws and every call here is a silent
+// no-op — the game must never depend on analytics being available.
+
+let vpAnalytics = null;
+let vpAnalyticsFailed = false;
+
+function logVpEvent(name, params) {
+    try {
+        if (vpAnalyticsFailed) return;
+        if (!vpAnalytics) {
+            if (typeof firebase === 'undefined' || !firebase.analytics) {
+                vpAnalyticsFailed = true;
+                return;
+            }
+            vpAnalytics = firebase.analytics();
+        }
+        vpAnalytics.logEvent(name, params || {});
+    } catch (e) {
+        vpAnalyticsFailed = true;
+    }
+}
+
+window.logVpEvent = logVpEvent;
+
+
 /* --- js/ui.js --- */
 // Small UI utilities: toast messages + haptic feedback (Settings toggle).
 
@@ -5419,17 +5548,28 @@ function isNativeApp() {
 // is actually visible, since only #signin-modal existed before onboarding.js
 // was added and a failure there would otherwise be silent during onboarding.
 function clearSignInErrors() {
-    ['signin-error', 'onboarding-signin-error'].forEach(function(id) {
+    ['signin-error', 'onboarding-signin-error', 'signin-prompt-error'].forEach(function(id) {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
 }
 
 function showSignInError(message) {
-    ['signin-error', 'onboarding-signin-error'].forEach(function(id) {
+    ['signin-error', 'onboarding-signin-error', 'signin-prompt-error'].forEach(function(id) {
         const el = document.getElementById(id);
         if (el) { el.textContent = message; el.classList.remove('hidden'); }
     });
+    // Web onboarding hides the guest link so sign-in is the only exit — but a
+    // failed popup must not strand the visitor on the overlay. Once a real
+    // error has been shown, surface the guest path as an escape hatch.
+    const overlay = document.getElementById('onboarding-overlay');
+    if (overlay && !overlay.classList.contains('hidden')) {
+        const guestLink = document.querySelector('.ob-guest-link');
+        if (guestLink && guestLink.classList.contains('hidden')) {
+            guestLink.textContent = 'Having trouble? Play as guest for now';
+            guestLink.classList.remove('hidden');
+        }
+    }
 }
 
 function signInWithGoogle() {
@@ -5517,6 +5657,9 @@ function logUserToFirestore(user) {
         return db.collection('users').doc(user.uid).get();
     }).then(function(doc) {
         const data = doc.exists ? doc.data() : {};
+        // Fresh device + existing cloud backup → restore the chip stack
+        // before any UI renders a stale default balance (js/cloudsave.js).
+        if (window.maybeRestoreCloudState) maybeRestoreCloudState(data);
         if (!data.referralCode) {
             const code = generateRoomCode();
             return db.collection('users').doc(user.uid).update({ referralCode: code }).then(function() {
@@ -5540,6 +5683,7 @@ if (auth) {
         window._authResolved = true;
         window.egUser = user || null;
         if (window.closeSignInModal) closeSignInModal();
+        if (user && window.closeSigninPromptModal) closeSigninPromptModal();
         if (window.updateAccountUI) updateAccountUI();
         if (user) {
             _wasSignedIn = true;
@@ -6486,12 +6630,28 @@ function renderNearbyPanel(user) {
 // while it is still null (see FIRESTORE_RULES_REFERRALS.md).
 
 const REFERRAL_REWARD_COINS = 2000;
-const STARTING_BALANCE = 500;
+// Two-sided: the invitee gets a welcome gift too. The invitee's reward is what
+// motivates the inviter — it turns the ask into gift-giving. Pinned in
+// firestore.rules alongside rewardCoins.
+const REFERRAL_INVITEE_COINS = 1000;
+// Single source of truth for the opening stack — onboarding promises
+// "Start with 1,000 chips", so every grant site must agree with it.
+const STARTING_BALANCE = 1000;
 // A referral only pays out for a genuinely new account, so an existing player
 // can't re-click a friend's link for coins. Firebase reports creationTime on
 // every sign-in path (popup, redirect, and the native plugin's credential
 // hand-off), which the UserCredential.additionalUserInfo flag does not.
 const REFERRAL_SIGNUP_WINDOW_MS = 10 * 60 * 1000;
+
+const REFERRAL_INVITED_KEY = 'vp_referral_invited';
+
+// How many friends this player has referred — powers the All-In unlock
+// (js/game.js getAllInDailyLimit). Reads the persisted copy so it works at
+// cold start and offline; subscribeReferralRewards() keeps it current.
+function getReferralInvitedCount() {
+    try { return parseInt(localStorage.getItem(REFERRAL_INVITED_KEY), 10) || 0; } catch (e) { return 0; }
+}
+window.getReferralInvitedCount = getReferralInvitedCount;
 
 function loadReferralBonusTotal() {
     try { return parseInt(localStorage.getItem('vp_referral_bonus'), 10) || 0; } catch (e) { return 0; }
@@ -6556,12 +6716,38 @@ function recordReferralJoin(code, inviterUid) {
                 code: code,
                 provider: 'google.com',
                 rewardCoins: REFERRAL_REWARD_COINS,
+                inviteeCoins: REFERRAL_INVITEE_COINS,
                 claimedAt: null,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(function() { return true; });
+            }).then(function() {
+                if (window.logVpEvent) logVpEvent('referral_joined');
+                // The ledger row landed exactly once (doc is keyed by this
+                // uid), so the welcome gift credits exactly once too.
+                creditInviteeWelcomeCoins();
+                return true;
+            });
         });
     }, function() { /* the friendship already landed — a lost reward row is not worth a toast */ })
         || Promise.resolve(false);
+}
+
+// The invitee's side of the two-sided reward. Local credit, same bookkeeping
+// as the inviter's: the gift raises the net-profit baselines so it never
+// reads as winnings on any leaderboard.
+function creditInviteeWelcomeCoins() {
+    balance += REFERRAL_INVITEE_COINS;
+    referralBonusTotal += REFERRAL_INVITEE_COINS;
+    saveReferralBonusTotal();
+    if (window.ensureDailyBaseline) {
+        ensureDailyBaseline();
+        dailyProgress.baseline += REFERRAL_INVITEE_COINS;
+        saveDailyProgress();
+    }
+    const balanceEl = document.getElementById('balance');
+    if (balanceEl) balanceEl.textContent = balance;
+    if (window.saveGameState) saveGameState();
+    if (window.pushNetProfit) pushNetProfit();
+    showToast('🎁 Your friend sent you ' + REFERRAL_INVITEE_COINS.toLocaleString() + ' coins — welcome to the table!');
 }
 
 // Live subscription rather than a one-shot read, so an inviter watching the
@@ -6586,6 +6772,10 @@ function subscribeReferralRewards() {
                 }
             });
             referralStats = { invited: invited, coinsEarned: earned };
+            // Persisted so getAllInDailyLimit() (js/game.js) can read the
+            // referral count offline and before this subscription first fires.
+            try { localStorage.setItem(REFERRAL_INVITED_KEY, String(invited)); } catch (e) {}
+            if (window.updateAllInUI) updateAllInUI();
             renderInviteRewardLine();
             if (pending.length) claimReferralRewards(pending);
         }, function() { /* ignore Firestore errors — rewards retry on next sign-in */ });
@@ -6634,6 +6824,7 @@ function creditReferralCoins(claimed) {
         ? claimed[0].name + ' joined'
         : claimed.length + ' friends joined';
     showToast('🎁 ' + who + ' — +' + total + ' coins!');
+    if (window.logVpEvent) logVpEvent('referral_claimed', { coins: total });
 }
 
 function cleanupReferrals() {
@@ -6646,19 +6837,120 @@ function renderInviteRewardLine() {
     // Same line lives in two places: the invite sheet and the Friends screen
     // action strip (the OS share sheet can't carry the reward pitch, so it
     // stays visible on the page itself).
+    // Milestone framing with endowed progress: the player themselves counts
+    // as the first seat, so the ladder never starts from zero.
     let text;
-    if (!referralStats.invited) {
-        text = 'Get ' + REFERRAL_REWARD_COINS + ' coins for every friend who joins with Google.';
+    const n = referralStats.invited;
+    if (!n) {
+        text = '1 of 3 seats filled — you hold the first. You get ' +
+            REFERRAL_REWARD_COINS.toLocaleString() + ' coins per friend, they get ' +
+            REFERRAL_INVITEE_COINS.toLocaleString() + '.';
+    } else if (n < 3) {
+        text = (n + 1) + ' of 3 seats filled · ' +
+            referralStats.coinsEarned.toLocaleString() + ' coins earned';
     } else {
-        const n = referralStats.invited;
-        text = n + ' friend' + (n === 1 ? '' : 's') + ' joined · ' +
-            referralStats.coinsEarned + ' coins earned';
+        text = 'Table regular — ' + n + ' friends joined · ' +
+            referralStats.coinsEarned.toLocaleString() + ' coins earned';
     }
     ['invite-reward-line', 'friends-invite-reward'].forEach(function(id) {
         const el = document.getElementById(id);
         if (el) el.textContent = text;
     });
 }
+
+
+/* --- js/cloudsave.js --- */
+// Cloud backup of the local chip stack — makes onboarding's "never lose your
+// chips" promise true. localStorage stays the source of truth while playing;
+// the cloud copy is written on every save (debounced) and only ever restored
+// onto a fresh install, so an existing local stack is never clobbered.
+
+const CLOUD_SAVE_DEBOUNCE_MS = 10000;
+let cloudSaveTimer = null;
+let cloudRestoreChecked = false;
+
+function schedulePushCloudState() {
+    if (!window.egUser || !db) return;
+    if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
+    cloudSaveTimer = setTimeout(pushCloudState, CLOUD_SAVE_DEBOUNCE_MS);
+}
+
+function pushCloudState() {
+    cloudSaveTimer = null;
+    const user = window.egUser;
+    if (!user || !db) return;
+    firebaseSafe(function() {
+        return db.collection('users').doc(user.uid).set({
+            cloudState: {
+                balance: balance,
+                totalWon: totalWon,
+                totalLost: totalLost,
+                handsPlayed: handsPlayed,
+                bestStreak: bestStreak,
+                referralBonus: referralBonusTotal,
+                savedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }
+        }, { merge: true });
+    });
+}
+
+// A device qualifies for a restore only when it has nothing worth keeping:
+// no saved state at all, or an untouched default stack. Anything else means
+// the player is mid-run here and the local stack wins (it gets pushed up).
+function localStateIsFresh() {
+    try {
+        if (!localStorage.getItem('vp_game_state')) return true;
+    } catch (e) {
+        return false;
+    }
+    return handsPlayed === 0 && balance === STARTING_BALANCE;
+}
+
+// Called from logUserToFirestore() once the users/{uid} doc has been read.
+function maybeRestoreCloudState(userDoc) {
+    if (cloudRestoreChecked) return;
+    cloudRestoreChecked = true;
+
+    const cloud = userDoc && userDoc.cloudState;
+    if (!cloud || typeof cloud.balance !== 'number') {
+        // Nothing in the cloud yet — seed it from whatever this device holds.
+        schedulePushCloudState();
+        return;
+    }
+    if (!localStateIsFresh()) {
+        schedulePushCloudState();
+        return;
+    }
+
+    balance = cloud.balance;
+    totalWon = cloud.totalWon || 0;
+    totalLost = cloud.totalLost || 0;
+    handsPlayed = cloud.handsPlayed || 0;
+    bestStreak = cloud.bestStreak || 0;
+
+    // The referral bonus rides along so netProfitBaseline() stays honest on
+    // the new device — otherwise gifted coins would read as winnings here.
+    referralBonusTotal = cloud.referralBonus || 0;
+    saveReferralBonusTotal();
+
+    // The restored stack is this device's day-one starting point: daily net
+    // must begin at zero, not at (restored balance − default baseline).
+    if (window.ensureDailyBaseline) {
+        ensureDailyBaseline();
+        dailyProgress.baseline = balance;
+        saveDailyProgress();
+    }
+
+    const balanceEl = document.getElementById('balance');
+    if (balanceEl) balanceEl.textContent = balance;
+    if (window.saveGameState) saveGameState();
+    if (window.updateStats) updateStats();
+    if (window.pushNetProfit) pushNetProfit();
+    showToast('☁ Welcome back — your ' + balance.toLocaleString() + ' coins are restored.');
+}
+
+window.schedulePushCloudState = schedulePushCloudState;
+window.maybeRestoreCloudState = maybeRestoreCloudState;
 
 
 /* --- js/rooms.js --- */
@@ -7945,7 +8237,7 @@ function getDayKey(offset) {
         String(d.getDate()).padStart(2, '0');
 }
 
-let dailyProgress = { date: '', baseline: 500, bestHandRank: 0, bestHand: 'Nothing' };
+let dailyProgress = { date: '', baseline: STARTING_BALANCE, bestHandRank: 0, bestHand: 'Nothing' };
 
 function ensureDailyBaseline() {
     const today = getDayKey();
@@ -8299,12 +8591,17 @@ function shareLeaderboard() {
     }
 
     var text = '🃏 ' + title + '\n' + lines.join('\n');
+    // The standings double as an invite: attach the player's link so a brag
+    // carries the referral code with it.
+    var link = (window.getInviteLink && getInviteLink()) || '';
 
-    if (navigator.share) {
-        navigator.share({ title: title, text: text }).catch(function() {});
-    } else {
-        navigator.clipboard && navigator.clipboard.writeText(text);
-    }
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native', kind: 'leaderboard' });
+    shareViaNative(title, text, link).then(function(handled) {
+        if (!handled && navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link ? text + '\n' + link : text);
+            if (window.showToast) showToast('Standings copied.');
+        }
+    });
 }
 
 
@@ -8335,6 +8632,7 @@ function openInviteSheet() {
     copyBtn.textContent = 'Copy';
     copyBtn.classList.remove('copied');
     if (window.renderInviteRewardLine) renderInviteRewardLine();
+    if (window.logVpEvent) logVpEvent('invite_sheet_opened');
     openSheet('invite-sheet');
 }
 
@@ -8362,6 +8660,7 @@ function copyInviteSheetLink() {
     const linkEl = document.getElementById('invite-sheet-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const copyBtn = document.getElementById('invite-sheet-copy');
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'copy' });
     copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
 }
 
@@ -8412,6 +8711,24 @@ function shareInviteNative() {
     });
 }
 
+// From the All-In unlock sheet: the depleted All-In is the moment the player
+// wants something an invite can buy.
+function allInUnlockInvite() {
+    if (window.logVpEvent) logVpEvent('allin_unlock_prompt_clicked');
+    closeSheet('allin-unlock-sheet');
+    openInviteSheet();
+}
+
+// The invite sheet's "More…" chip — everything beyond WhatsApp/Telegram goes
+// through the OS share sheet.
+function shareInviteMore() {
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native' });
+    shareViaNative('Royal Video Poker', friendInviteMessage(), sheetLink('invite-sheet-link'))
+        .then(function(handled) {
+            if (!handled) showToast('Use Copy, WhatsApp or Telegram to share.');
+        });
+}
+
 function fallbackCopySheet(text, onCopied) {
     var ta = document.createElement('textarea');
     ta.value = text;
@@ -8437,6 +8754,7 @@ function fallbackCopySheet(text, onCopied) {
 // message passed in here must never already contain the link — otherwise the
 // share preview repeats it.
 function openShareChannel(channel, message, link) {
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: channel });
     let url;
     if (channel === 'telegram') {
         url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
@@ -8452,11 +8770,13 @@ function sheetLink(id) {
     return el ? (el.getAttribute('data-link') || el.textContent) : '';
 }
 
+// Reciprocity framing: the invite is a gift the friend claims, not a favour
+// asked of them — the invitee's welcome coins (js/referral.js) make it true.
 function friendInviteMessage() {
     const user = window.egUser;
     const name = (user && user.displayName) || 'A friend';
     const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
-    return name + ' is playing Royal Video Poker and wants you at the table.' +
+    return name + ' sent you 1,000 coins on Royal Video Poker 🃏 Sign in with Google to claim them.' +
         (code ? '\nFriend code: ' + code : '');
 }
 
@@ -8511,6 +8831,50 @@ function shareRoomViaWhatsApp() {
 function shareRoomViaTelegram() {
     openShareChannel('telegram', roomInviteMessage(), sheetLink('room-invite-link'));
 }
+
+// --- Big-win brag sheet (signed-in users) ---
+// A rare hand is the one moment a share is a brag, not an ask — and the link
+// carries the referral code, so the brag IS an invite. Shown at most once a
+// day, only after Four of a Kind or better (the caller in js/game.js gates
+// the hand rank), and always dismissible.
+const BIGWIN_SHARE_KEY = 'vp_bigwin_share';
+let bigwinShareHand = '';
+let bigwinShareWin = 0;
+
+function maybeOfferBigWinShare(handType, win) {
+    if (!window.egUser) return;
+    const today = new Date().toDateString();
+    try { if (localStorage.getItem(BIGWIN_SHARE_KEY) === today) return; } catch (e) {}
+    if (!getInviteLink()) return;
+    const sheet = document.getElementById('bigwin-share-sheet');
+    if (!sheet) return;
+    try { localStorage.setItem(BIGWIN_SHARE_KEY, today); } catch (e) {}
+    bigwinShareHand = handType;
+    bigwinShareWin = win;
+    const title = document.getElementById('bigwin-share-title');
+    if (title) title.textContent = handType + '! +' + win.toLocaleString() + ' coins';
+    openSheet('bigwin-share-sheet');
+    if (window.logVpEvent) logVpEvent('bigwin_share_shown');
+}
+
+function bigWinShareMessage() {
+    return 'I just hit ' + bigwinShareHand + ' for ' + bigwinShareWin.toLocaleString() +
+        ' coins in Royal Video Poker 🃏 Think you can beat that?';
+}
+
+function shareBigWinVia(channel) {
+    const link = getInviteLink();
+    if (!link) { closeSheet('bigwin-share-sheet'); return; }
+    if (window.logVpEvent) logVpEvent('bigwin_share_clicked', { channel: channel });
+    if (channel === 'native') {
+        shareViaNative('Royal Video Poker', bigWinShareMessage(), link);
+    } else {
+        openShareChannel(channel, bigWinShareMessage(), link);
+    }
+    closeSheet('bigwin-share-sheet');
+}
+
+window.maybeOfferBigWinShare = maybeOfferBigWinShare;
 
 // --- Deep-link handling (?join=ROOMCODE) ---
 function handleJoinDeepLink() {
@@ -8736,7 +9100,7 @@ function getBoostChance() {
 let deck = [];
 let hand = [];
 let held = [false, false, false, false, false];
-let balance = 500;
+let balance = STARTING_BALANCE;
 let bet = 10;
 let gameState = 'bet';
 let lastHandType = null;
@@ -8747,6 +9111,7 @@ let lossStreak = 0;
 let winStreak = 0;
 let bestStreak = 0;
 let lastWinAmount = 0;
+let bestBalance = 0;
 
 // --- State persistence (localStorage) ---
 function getDefaultBet() {
@@ -8768,10 +9133,12 @@ function saveGameState() {
             lossStreak: lossStreak,
             winStreak: winStreak,
             bestStreak: bestStreak,
+            bestBalance: bestBalance,
             savedAt: Date.now()
         };
         localStorage.setItem('vp_game_state', JSON.stringify(state));
     } catch (e) { /* localStorage unavailable, silently fail */ }
+    if (window.schedulePushCloudState) schedulePushCloudState();
 }
 
 function restoreGameState() {
@@ -8779,26 +9146,27 @@ function restoreGameState() {
         const raw = localStorage.getItem('vp_game_state');
         if (!raw) return false;
         const state = JSON.parse(raw);
-        balance = typeof state.balance === 'number' ? state.balance : 500;
+        balance = typeof state.balance === 'number' ? state.balance : STARTING_BALANCE;
         totalWon = state.totalWon || 0;
         totalLost = state.totalLost || 0;
         handsPlayed = state.handsPlayed || 0;
         lossStreak = state.lossStreak || 0;
         winStreak = state.winStreak || 0;
         bestStreak = state.bestStreak || 0;
+        bestBalance = state.bestBalance || 0;
         document.getElementById('balance').textContent = balance;
         return true;
     } catch (e) { return false; }
 }
 
 function doRebuy() {
-    balance = 500;
+    balance = STARTING_BALANCE;
     document.getElementById('balance').textContent = balance;
     // The stack is back to the starting amount, so past referral coins are gone
     // too — drop them from the net-profit baseline or the board reads negative.
     if (window.resetReferralBaseline) resetReferralBaseline();
     saveGameState();
-    showToast('♻ +500 credits');
+    showToast('♻ +' + STARTING_BALANCE.toLocaleString() + ' credits');
     if (window.pushDailyRebuy) pushDailyRebuy();
 }
 
@@ -8873,11 +9241,22 @@ function setBet(amount) {
 
 // --- All In: limited daily uses ---
 const ALLIN_DAILY_LIMIT_DEFAULT = 1;
+// Onboarding promises "invite a friend to unlock another" — this delivers it:
+// each referred friend adds one daily All-In, capped to protect the economy.
+const ALLIN_REFERRAL_BONUS_CAP = 2;
 let allInUsesToday = 0;
 
 function getAllInDailyLimit() {
     const configured = window.egFeatures && window.egFeatures.allInDailyLimit;
-    return (typeof configured === 'number' && configured > 0) ? configured : ALLIN_DAILY_LIMIT_DEFAULT;
+    try {
+        const base = (typeof configured === 'number' && configured > 0) ? configured : ALLIN_DAILY_LIMIT_DEFAULT;
+        const invited = window.getReferralInvitedCount ? getReferralInvitedCount() : 0;
+        return base + Math.min(invited, ALLIN_REFERRAL_BONUS_CAP);
+    } catch (e) {
+        // The very first applyFeatureFlags() (js/firebase.js) runs before this
+        // script's top-level consts initialize — fall back to the config value.
+        return (typeof configured === 'number' && configured > 0) ? configured : 1;
+    }
 }
 
 function loadAllInUsage() {
@@ -8935,7 +9314,9 @@ function openAllInSheet() {
     // reproduce the deal-cheap/raise-later exploit that setBet() must block.
     if (gameState !== 'bet' && gameState !== 'hold') return;
     if (getAllInRemaining() <= 0) {
-        showToast('⛔ No ALL INs left — back tomorrow!');
+        // The scarcity moment is the invite hook (Ludo King model: invite
+        // because you want something) — offer the unlock, not just a wall.
+        openSheet('allin-unlock-sheet');
         return;
     }
     if (balance <= 0) {
@@ -9351,6 +9732,25 @@ function draw() {
     } else {
         triggerWinCelebration(bestType, win);
         triggerHaptic('HEAVY');
+    }
+    // A rare hand or a fresh balance high is the emotional peak — the one
+    // moment worth spending a prompt on. Guest → sign-in nudge; signed-in →
+    // brag/share sheet (js/invite.js). Never both, never mid-celebration.
+    if (win > 0) {
+        const isRareHand = (HAND_RANK[bestType] || 0) >= 7;
+        const isNewHigh = balance >= 2 * STARTING_BALANCE && balance > bestBalance;
+        if (balance > bestBalance) bestBalance = balance;
+        if (isRareHand || isNewHigh) {
+            const peakHand = bestType;
+            const peakWin = win;
+            setTimeout(function() {
+                if (!window.egUser) {
+                    if (window.maybeShowSigninPrompt) maybeShowSigninPrompt('big_win');
+                } else if (isRareHand && window.maybeOfferBigWinShare) {
+                    maybeOfferBigWinShare(peakHand, peakWin);
+                }
+            }, 2600);
+        }
     }
     saveGameState();
     if (window.pushNetProfit) pushNetProfit();
@@ -10031,6 +10431,7 @@ function showOnboardingStep(index) {
         if (el) el.classList.toggle('active', i === index);
     });
     onboardingIndex = index;
+    if (window.logVpEvent) logVpEvent('onboarding_step', { step: ONBOARDING_STEPS[index] });
     if (ONBOARDING_STEPS[index] === 'push') markPushPermissionAsked();
     renderOnboardingDots();
     updateOnboardingNav();
@@ -10108,6 +10509,113 @@ window.onboardingSignIn = onboardingSignIn;
 window.onboardingSignInSucceeded = onboardingSignInSucceeded;
 window.onboardingEnableNotifications = onboardingEnableNotifications;
 window.showOnboardingForReauth = showOnboardingForReauth;
+
+
+/* --- js/signin-prompt.js --- */
+// Guest → Google sign-in re-prompt. Onboarding asks exactly once; a guest who
+// tapped "Continue as Guest" was previously never asked again. This module
+// re-asks at high-leverage moments (a big win, the start of a later session)
+// with the player's real at-risk balance as the pitch — and hard caps how
+// often it can ever appear, so it nudges instead of nagging.
+//
+// Guardrails: lifetime cap, multi-session cooldown, once per session, never
+// during onboarding, never before auth has settled, never on coin depletion.
+
+const SIGNIN_PROMPT_KEY = 'vp_signin_prompt';
+const SIGNIN_PROMPT_LIFETIME_CAP = 5;
+const SIGNIN_PROMPT_SESSION_COOLDOWN = 3;
+const SIGNIN_PROMPT_MIN_SESSION = 2;
+
+let signinPromptState = loadSigninPromptState();
+let signinPromptShownThisSession = false;
+let signinPromptSessionCounted = false;
+let signinPromptTrigger = '';
+
+function loadSigninPromptState() {
+    try {
+        const raw = JSON.parse(localStorage.getItem(SIGNIN_PROMPT_KEY));
+        if (raw && typeof raw === 'object') {
+            return {
+                sessions: raw.sessions || 0,
+                lastPromptSession: raw.lastPromptSession || 0,
+                promptCount: raw.promptCount || 0
+            };
+        }
+    } catch (e) { /* localStorage unavailable or corrupt */ }
+    return { sessions: 0, lastPromptSession: 0, promptCount: 0 };
+}
+
+function saveSigninPromptState() {
+    try { localStorage.setItem(SIGNIN_PROMPT_KEY, JSON.stringify(signinPromptState)); } catch (e) {}
+}
+
+// One tick per cold start, from tabs.js DOMContentLoaded.
+function countSigninPromptSession() {
+    if (signinPromptSessionCounted) return;
+    signinPromptSessionCounted = true;
+    signinPromptState.sessions++;
+    saveSigninPromptState();
+}
+
+function signinPromptCooldownOver() {
+    if (!signinPromptState.lastPromptSession) return true;
+    return (signinPromptState.sessions - signinPromptState.lastPromptSession) >= SIGNIN_PROMPT_SESSION_COOLDOWN;
+}
+
+function maybeShowSigninPrompt(trigger) {
+    if (window.egUser) return;
+    // Before onAuthStateChanged fires, a signed-in returning user still reads
+    // as "no user" — prompting here would ambush them (see handleJoinDeepLink).
+    if (!window._authResolved) return;
+    const onboarding = document.getElementById('onboarding-overlay');
+    if (onboarding && !onboarding.classList.contains('hidden')) return;
+    if (signinPromptShownThisSession) return;
+    if (signinPromptState.promptCount >= SIGNIN_PROMPT_LIFETIME_CAP) return;
+    if (!signinPromptCooldownOver()) return;
+    if (trigger === 'session_start' && signinPromptState.sessions < SIGNIN_PROMPT_MIN_SESSION) return;
+
+    const modal = document.getElementById('signin-prompt-modal');
+    const body = document.getElementById('signin-prompt-body');
+    if (!modal || !body) return;
+
+    const coins = (typeof balance === 'number' ? balance : 0).toLocaleString();
+    body.textContent = trigger === 'big_win'
+        ? 'Nice hit! You now have ' + coins + ' coins — saved on this device only. ' +
+          'Lose the phone, lose the chips. Back them up free with Google.'
+        : 'You have ' + coins + ' coins on this device only. ' +
+          'Sign in once and they follow you anywhere.';
+
+    signinPromptTrigger = trigger;
+    signinPromptShownThisSession = true;
+    signinPromptState.promptCount++;
+    signinPromptState.lastPromptSession = signinPromptState.sessions;
+    saveSigninPromptState();
+
+    modal.classList.remove('hidden');
+    if (window.logVpEvent) logVpEvent('signin_prompt_shown', { trigger: trigger });
+}
+
+function acceptSigninPrompt() {
+    if (window.logVpEvent) logVpEvent('signin_prompt_accepted', { trigger: signinPromptTrigger });
+    signInWithGoogle();
+}
+
+function dismissSigninPrompt() {
+    if (window.logVpEvent) logVpEvent('signin_prompt_dismissed', { trigger: signinPromptTrigger });
+    closeSigninPromptModal();
+}
+
+// Also called from onAuthStateChanged on successful sign-in.
+function closeSigninPromptModal() {
+    const modal = document.getElementById('signin-prompt-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+window.countSigninPromptSession = countSigninPromptSession;
+window.maybeShowSigninPrompt = maybeShowSigninPrompt;
+window.acceptSigninPrompt = acceptSigninPrompt;
+window.dismissSigninPrompt = dismissSigninPrompt;
+window.closeSigninPromptModal = closeSigninPromptModal;
 
 
 /* --- js/tabs.js --- */
@@ -10362,6 +10870,13 @@ document.addEventListener('DOMContentLoaded', function() {
     initNativeDeepLinkHandling();
     // An invite stored by an earlier launch that never got as far as sign-in.
     if (window.restorePendingInvite) restorePendingInvite();
+    // Guest sign-in re-prompt: count this session, then (from session 2 on,
+    // capped and cooled down in js/signin-prompt.js) ask shortly after launch.
+    // The delay also gives onAuthStateChanged time to settle _authResolved.
+    if (window.countSigninPromptSession) countSigninPromptSession();
+    setTimeout(function() {
+        if (window.maybeShowSigninPrompt) maybeShowSigninPrompt('session_start');
+    }, 3000);
 });
 
 

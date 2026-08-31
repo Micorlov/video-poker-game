@@ -80,6 +80,11 @@ service cloud.firestore {
                     && request.resource.data.referredUid == referredUid
                     && request.resource.data.inviterUid != referredUid
                     && request.resource.data.rewardCoins == 2000
+                    // Two-sided reward: invitee welcome coins, pinned like
+                    // rewardCoins. Optional during the rollout so clients
+                    // shipped before 2.1 (which don't send it) keep working.
+                    && (!('inviteeCoins' in request.resource.data)
+                        || request.resource.data.inviteeCoins == 1000)
                     && request.resource.data.claimedAt == null;
       allow update: if request.auth != null
                     && request.auth.uid == resource.data.inviterUid

@@ -40,7 +40,8 @@ function row(overrides) {
     return { fields: Object.assign({
         referredUid: S('friendA'), referredName: S('Dana'), inviterUid: S('inviter1'),
         code: S('AB12CD'), provider: S('google.com'),
-        rewardCoins: { integerValue: '2000' }, claimedAt: { nullValue: null }
+        rewardCoins: { integerValue: '2000' }, inviteeCoins: { integerValue: '1000' },
+        claimedAt: { nullValue: null }
     }, overrides || {}) };
 }
 
@@ -76,6 +77,17 @@ test('referral ledger security rules', async (t) => {
     await t.test('the payout amount cannot be inflated by the client', async () => {
         assert.ok(!await call('POST', `/referrals?documentId=b${suffix}`, 'b' + suffix,
             row({ referredUid: S('b' + suffix), rewardCoins: { integerValue: '999999' } })));
+    });
+
+    await t.test('the invitee welcome amount cannot be inflated either', async () => {
+        assert.ok(!await call('POST', `/referrals?documentId=e${suffix}`, 'e' + suffix,
+            row({ referredUid: S('e' + suffix), inviteeCoins: { integerValue: '999999' } })));
+    });
+
+    await t.test('a pre-2.1 row without inviteeCoins is still accepted', async () => {
+        const legacy = row({ referredUid: S('f' + suffix), inviterUid: S(INV) });
+        delete legacy.fields.inviteeCoins;
+        assert.ok(await call('POST', `/referrals?documentId=f${suffix}`, 'f' + suffix, legacy));
     });
 
     await t.test('a row cannot name its own author as inviter', async () => {

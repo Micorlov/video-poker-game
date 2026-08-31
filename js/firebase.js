@@ -109,17 +109,28 @@ function isNativeApp() {
 // is actually visible, since only #signin-modal existed before onboarding.js
 // was added and a failure there would otherwise be silent during onboarding.
 function clearSignInErrors() {
-    ['signin-error', 'onboarding-signin-error'].forEach(function(id) {
+    ['signin-error', 'onboarding-signin-error', 'signin-prompt-error'].forEach(function(id) {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
 }
 
 function showSignInError(message) {
-    ['signin-error', 'onboarding-signin-error'].forEach(function(id) {
+    ['signin-error', 'onboarding-signin-error', 'signin-prompt-error'].forEach(function(id) {
         const el = document.getElementById(id);
         if (el) { el.textContent = message; el.classList.remove('hidden'); }
     });
+    // Web onboarding hides the guest link so sign-in is the only exit — but a
+    // failed popup must not strand the visitor on the overlay. Once a real
+    // error has been shown, surface the guest path as an escape hatch.
+    const overlay = document.getElementById('onboarding-overlay');
+    if (overlay && !overlay.classList.contains('hidden')) {
+        const guestLink = document.querySelector('.ob-guest-link');
+        if (guestLink && guestLink.classList.contains('hidden')) {
+            guestLink.textContent = 'Having trouble? Play as guest for now';
+            guestLink.classList.remove('hidden');
+        }
+    }
 }
 
 function signInWithGoogle() {
@@ -207,6 +218,9 @@ function logUserToFirestore(user) {
         return db.collection('users').doc(user.uid).get();
     }).then(function(doc) {
         const data = doc.exists ? doc.data() : {};
+        // Fresh device + existing cloud backup → restore the chip stack
+        // before any UI renders a stale default balance (js/cloudsave.js).
+        if (window.maybeRestoreCloudState) maybeRestoreCloudState(data);
         if (!data.referralCode) {
             const code = generateRoomCode();
             return db.collection('users').doc(user.uid).update({ referralCode: code }).then(function() {
@@ -230,6 +244,7 @@ if (auth) {
         window._authResolved = true;
         window.egUser = user || null;
         if (window.closeSignInModal) closeSignInModal();
+        if (user && window.closeSigninPromptModal) closeSigninPromptModal();
         if (window.updateAccountUI) updateAccountUI();
         if (user) {
             _wasSignedIn = true;

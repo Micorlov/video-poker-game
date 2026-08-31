@@ -14,6 +14,13 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const GAME_JS = path.join(__dirname, '..', '..', 'js', 'game.js');
+const REFERRAL_JS = path.join(__dirname, '..', '..', 'js', 'referral.js');
+
+// game.js reads STARTING_BALANCE from js/referral.js (both share one script
+// scope in the built bundle) — extract the real declaration rather than
+// hardcoding a copy that could drift from the shipped value.
+const STARTING_BALANCE_DECL =
+    fs.readFileSync(REFERRAL_JS, 'utf8').match(/^const STARTING_BALANCE = .*$/m)[0];
 
 // game.js is a browser-global script that touches the DOM freely. These stubs
 // absorb the DOM calls so the real betting logic can run under node:test.
@@ -114,7 +121,7 @@ globalThis.__setGameState = function (v) { gameState = v; };
 function loadGame() {
     const sandbox = makeSandbox();
     const context = vm.createContext(sandbox);
-    const source = fs.readFileSync(GAME_JS, 'utf8') + PROBE;
+    const source = STARTING_BALANCE_DECL + '\n' + fs.readFileSync(GAME_JS, 'utf8') + PROBE;
     vm.runInContext(source, context, { filename: 'game.js' });
     return sandbox;
 }

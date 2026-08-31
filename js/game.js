@@ -186,7 +186,7 @@ function getBoostChance() {
 let deck = [];
 let hand = [];
 let held = [false, false, false, false, false];
-let balance = 500;
+let balance = STARTING_BALANCE;
 let bet = 10;
 let gameState = 'bet';
 let lastHandType = null;
@@ -197,6 +197,7 @@ let lossStreak = 0;
 let winStreak = 0;
 let bestStreak = 0;
 let lastWinAmount = 0;
+let bestBalance = 0;
 
 // --- State persistence (localStorage) ---
 function getDefaultBet() {
@@ -218,10 +219,12 @@ function saveGameState() {
             lossStreak: lossStreak,
             winStreak: winStreak,
             bestStreak: bestStreak,
+            bestBalance: bestBalance,
             savedAt: Date.now()
         };
         localStorage.setItem('vp_game_state', JSON.stringify(state));
     } catch (e) { /* localStorage unavailable, silently fail */ }
+    if (window.schedulePushCloudState) schedulePushCloudState();
 }
 
 function restoreGameState() {
@@ -229,26 +232,27 @@ function restoreGameState() {
         const raw = localStorage.getItem('vp_game_state');
         if (!raw) return false;
         const state = JSON.parse(raw);
-        balance = typeof state.balance === 'number' ? state.balance : 500;
+        balance = typeof state.balance === 'number' ? state.balance : STARTING_BALANCE;
         totalWon = state.totalWon || 0;
         totalLost = state.totalLost || 0;
         handsPlayed = state.handsPlayed || 0;
         lossStreak = state.lossStreak || 0;
         winStreak = state.winStreak || 0;
         bestStreak = state.bestStreak || 0;
+        bestBalance = state.bestBalance || 0;
         document.getElementById('balance').textContent = balance;
         return true;
     } catch (e) { return false; }
 }
 
 function doRebuy() {
-    balance = 500;
+    balance = STARTING_BALANCE;
     document.getElementById('balance').textContent = balance;
     // The stack is back to the starting amount, so past referral coins are gone
     // too — drop them from the net-profit baseline or the board reads negative.
     if (window.resetReferralBaseline) resetReferralBaseline();
     saveGameState();
-    showToast('♻ +500 credits');
+    showToast('♻ +' + STARTING_BALANCE.toLocaleString() + ' credits');
     if (window.pushDailyRebuy) pushDailyRebuy();
 }
 
@@ -323,11 +327,22 @@ function setBet(amount) {
 
 // --- All In: limited daily uses ---
 const ALLIN_DAILY_LIMIT_DEFAULT = 1;
+// Onboarding promises "invite a friend to unlock another" — this delivers it:
+// each referred friend adds one daily All-In, capped to protect the economy.
+const ALLIN_REFERRAL_BONUS_CAP = 2;
 let allInUsesToday = 0;
 
 function getAllInDailyLimit() {
     const configured = window.egFeatures && window.egFeatures.allInDailyLimit;
-    return (typeof configured === 'number' && configured > 0) ? configured : ALLIN_DAILY_LIMIT_DEFAULT;
+    try {
+        const base = (typeof configured === 'number' && configured > 0) ? configured : ALLIN_DAILY_LIMIT_DEFAULT;
+        const invited = window.getReferralInvitedCount ? getReferralInvitedCount() : 0;
+        return base + Math.min(invited, ALLIN_REFERRAL_BONUS_CAP);
+    } catch (e) {
+        // The very first applyFeatureFlags() (js/firebase.js) runs before this
+        // script's top-level consts initialize — fall back to the config value.
+        return (typeof configured === 'number' && configured > 0) ? configured : 1;
+    }
 }
 
 function loadAllInUsage() {
@@ -385,7 +400,9 @@ function openAllInSheet() {
     // reproduce the deal-cheap/raise-later exploit that setBet() must block.
     if (gameState !== 'bet' && gameState !== 'hold') return;
     if (getAllInRemaining() <= 0) {
-        showToast('⛔ No ALL INs left — back tomorrow!');
+        // The scarcity moment is the invite hook (Ludo King model: invite
+        // because you want something) — offer the unlock, not just a wall.
+        openSheet('allin-unlock-sheet');
         return;
     }
     if (balance <= 0) {
@@ -801,6 +818,25 @@ function draw() {
     } else {
         triggerWinCelebration(bestType, win);
         triggerHaptic('HEAVY');
+    }
+    // A rare hand or a fresh balance high is the emotional peak — the one
+    // moment worth spending a prompt on. Guest → sign-in nudge; signed-in →
+    // brag/share sheet (js/invite.js). Never both, never mid-celebration.
+    if (win > 0) {
+        const isRareHand = (HAND_RANK[bestType] || 0) >= 7;
+        const isNewHigh = balance >= 2 * STARTING_BALANCE && balance > bestBalance;
+        if (balance > bestBalance) bestBalance = balance;
+        if (isRareHand || isNewHigh) {
+            const peakHand = bestType;
+            const peakWin = win;
+            setTimeout(function() {
+                if (!window.egUser) {
+                    if (window.maybeShowSigninPrompt) maybeShowSigninPrompt('big_win');
+                } else if (isRareHand && window.maybeOfferBigWinShare) {
+                    maybeOfferBigWinShare(peakHand, peakWin);
+                }
+            }, 2600);
+        }
     }
     saveGameState();
     if (window.pushNetProfit) pushNetProfit();

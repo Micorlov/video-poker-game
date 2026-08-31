@@ -24,6 +24,7 @@ function openInviteSheet() {
     copyBtn.textContent = 'Copy';
     copyBtn.classList.remove('copied');
     if (window.renderInviteRewardLine) renderInviteRewardLine();
+    if (window.logVpEvent) logVpEvent('invite_sheet_opened');
     openSheet('invite-sheet');
 }
 
@@ -51,6 +52,7 @@ function copyInviteSheetLink() {
     const linkEl = document.getElementById('invite-sheet-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const copyBtn = document.getElementById('invite-sheet-copy');
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'copy' });
     copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
 }
 
@@ -101,6 +103,24 @@ function shareInviteNative() {
     });
 }
 
+// From the All-In unlock sheet: the depleted All-In is the moment the player
+// wants something an invite can buy.
+function allInUnlockInvite() {
+    if (window.logVpEvent) logVpEvent('allin_unlock_prompt_clicked');
+    closeSheet('allin-unlock-sheet');
+    openInviteSheet();
+}
+
+// The invite sheet's "More…" chip — everything beyond WhatsApp/Telegram goes
+// through the OS share sheet.
+function shareInviteMore() {
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native' });
+    shareViaNative('Royal Video Poker', friendInviteMessage(), sheetLink('invite-sheet-link'))
+        .then(function(handled) {
+            if (!handled) showToast('Use Copy, WhatsApp or Telegram to share.');
+        });
+}
+
 function fallbackCopySheet(text, onCopied) {
     var ta = document.createElement('textarea');
     ta.value = text;
@@ -126,6 +146,7 @@ function fallbackCopySheet(text, onCopied) {
 // message passed in here must never already contain the link — otherwise the
 // share preview repeats it.
 function openShareChannel(channel, message, link) {
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: channel });
     let url;
     if (channel === 'telegram') {
         url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
@@ -141,11 +162,13 @@ function sheetLink(id) {
     return el ? (el.getAttribute('data-link') || el.textContent) : '';
 }
 
+// Reciprocity framing: the invite is a gift the friend claims, not a favour
+// asked of them — the invitee's welcome coins (js/referral.js) make it true.
 function friendInviteMessage() {
     const user = window.egUser;
     const name = (user && user.displayName) || 'A friend';
     const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
-    return name + ' is playing Royal Video Poker and wants you at the table.' +
+    return name + ' sent you 1,000 coins on Royal Video Poker 🃏 Sign in with Google to claim them.' +
         (code ? '\nFriend code: ' + code : '');
 }
 
@@ -200,6 +223,50 @@ function shareRoomViaWhatsApp() {
 function shareRoomViaTelegram() {
     openShareChannel('telegram', roomInviteMessage(), sheetLink('room-invite-link'));
 }
+
+// --- Big-win brag sheet (signed-in users) ---
+// A rare hand is the one moment a share is a brag, not an ask — and the link
+// carries the referral code, so the brag IS an invite. Shown at most once a
+// day, only after Four of a Kind or better (the caller in js/game.js gates
+// the hand rank), and always dismissible.
+const BIGWIN_SHARE_KEY = 'vp_bigwin_share';
+let bigwinShareHand = '';
+let bigwinShareWin = 0;
+
+function maybeOfferBigWinShare(handType, win) {
+    if (!window.egUser) return;
+    const today = new Date().toDateString();
+    try { if (localStorage.getItem(BIGWIN_SHARE_KEY) === today) return; } catch (e) {}
+    if (!getInviteLink()) return;
+    const sheet = document.getElementById('bigwin-share-sheet');
+    if (!sheet) return;
+    try { localStorage.setItem(BIGWIN_SHARE_KEY, today); } catch (e) {}
+    bigwinShareHand = handType;
+    bigwinShareWin = win;
+    const title = document.getElementById('bigwin-share-title');
+    if (title) title.textContent = handType + '! +' + win.toLocaleString() + ' coins';
+    openSheet('bigwin-share-sheet');
+    if (window.logVpEvent) logVpEvent('bigwin_share_shown');
+}
+
+function bigWinShareMessage() {
+    return 'I just hit ' + bigwinShareHand + ' for ' + bigwinShareWin.toLocaleString() +
+        ' coins in Royal Video Poker 🃏 Think you can beat that?';
+}
+
+function shareBigWinVia(channel) {
+    const link = getInviteLink();
+    if (!link) { closeSheet('bigwin-share-sheet'); return; }
+    if (window.logVpEvent) logVpEvent('bigwin_share_clicked', { channel: channel });
+    if (channel === 'native') {
+        shareViaNative('Royal Video Poker', bigWinShareMessage(), link);
+    } else {
+        openShareChannel(channel, bigWinShareMessage(), link);
+    }
+    closeSheet('bigwin-share-sheet');
+}
+
+window.maybeOfferBigWinShare = maybeOfferBigWinShare;
 
 // --- Deep-link handling (?join=ROOMCODE) ---
 function handleJoinDeepLink() {
