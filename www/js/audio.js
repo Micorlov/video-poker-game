@@ -104,20 +104,25 @@ var audioCtx = null;
 
     /* Voice Announcements */
     // Some paytable hand names read awkwardly out loud (e.g. "Four 2s-4s") —
-    // this maps them to a natural spoken phrase. Anything not listed here is
-    // spoken as-is (e.g. "Two Pair", "Full House" already read naturally).
+    // these map to a dictionary key holding a natural spoken phrase. Anything
+    // not listed here is spoken from its normal translated label, which already
+    // reads naturally (e.g. "Two Pair", "Full House").
     var VOICE_HAND_NAMES = {
-        'Four 2s-4s': 'Four of a kind, twos through fours',
-        'Four 5s-Ks': 'Four of a kind, fives through kings'
+        'Four 2s-4s': 'voice.four2s4s',
+        'Four 5s-Ks': 'voice.four5sKs'
     };
 
     function speakHandName(handType) {
         if (!voiceEnabled || !handType || handType === 'Nothing') return;
         if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
         try {
-            var phrase = VOICE_HAND_NAMES[handType] || handType;
+            var overrideKey = VOICE_HAND_NAMES[handType];
+            var phrase = overrideKey ? t(overrideKey) : vpHandLabel(handType);
             window.speechSynthesis.cancel();
             var utterance = new SpeechSynthesisUtterance(phrase);
+            // Without this the browser reads translated text with an English
+            // voice — recognisably wrong in every non-English language.
+            utterance.lang = getLanguage();
             utterance.volume = VOICE_VOLUME;
             utterance.rate = 1;
             utterance.pitch = 1;

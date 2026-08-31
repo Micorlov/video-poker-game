@@ -177,7 +177,7 @@ window.toggleHints = function() {
     try { localStorage.setItem('vp_hints', vpHintsOn ? '1' : '0'); } catch (e) {}
     updateHintButtonUI();
     vpApplyHintClasses();
-    if (vpHintsOn) showToast('💡 Hints on — suggested holds glow blue');
+    if (vpHintsOn) showToast(t('toast.hintsOn'));
 };
 
 window.updateHintButtonUI = function() {

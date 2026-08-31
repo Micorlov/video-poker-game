@@ -808,3 +808,45 @@
 .ob-hand-row--highlight .ob-hand-payout {
     color: var(--green-light);
 }
+
+/* ── Language chip (welcome step) ──
+   Pinned top-right of the overlay rather than in the content flow: a player
+   who cannot read the English welcome copy has to find this without
+   scrolling, and the card fan below is centred so nothing collides. */
+.ob-lang-chip {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 14px);
+    right: 16px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 46vw;
+    padding: 7px 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.ob-lang-chip:active {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.ob-lang-globe {
+    font-size: 14px;
+}
+
+/* Only the welcome step offers the picker — past it the player has committed,
+   and Settings is the place to change language. */
+body:not(.ob-step-welcome) .ob-lang-chip {
+    display: none;
+}

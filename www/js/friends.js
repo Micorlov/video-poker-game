@@ -76,18 +76,18 @@ function addFriendByCode(code) {
 
     return firebaseSafe(function() {
         return db.collection('users').where('referralCode', '==', code).limit(1).get().then(function(snap) {
-            if (snap.empty) { showToast('No player found with that code.'); return false; }
+            if (snap.empty) { showToast(t('toast.noPlayerFound')); return false; }
             const friendDoc = snap.docs[0];
-            if (friendDoc.id === user.uid) { showToast('That is your own code!'); return false; }
+            if (friendDoc.id === user.uid) { showToast(t('toast.ownCode')); return false; }
             const friendRef = db.collection('users').doc(user.uid).collection('friends').doc(friendDoc.id);
             return friendRef.get().then(function(existing) {
-                if (existing.exists) { showToast('Already in your friends list.'); return false; }
+                if (existing.exists) { showToast(t('toast.alreadyFriends')); return false; }
                 return Promise.all([
                     friendRef.set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() }),
                     db.collection('users').doc(friendDoc.id).collection('friends').doc(user.uid)
                         .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() })
                 ]).then(function() {
-                    showToast('Friend added!');
+                    showToast(t('toast.friendAdded'));
                     loadFriends();
                     // invite.html tells a friend to type this code in when the
                     // install swallowed the deep link, so the manual path must
@@ -135,9 +135,9 @@ function removeFriend(uid) {
             db.collection('users').doc(user.uid).collection('friends').doc(uid).delete(),
             db.collection('users').doc(uid).collection('friends').doc(user.uid).delete()
         ]).then(function() {
-            showToast('Friend removed.');
+            showToast(t('toast.friendRemoved'));
         });
-    }, function() { showToast('Could not remove friend — try again.'); });
+    }, function() { showToast(t('toast.couldNotRemoveFriend')); });
 }
 
 function renderFriendsScreen() {
@@ -156,7 +156,7 @@ function renderFriendsScreen() {
     if (typeof friendsTab !== 'undefined' && friendsTab === 'rooms') renderFriendsRoomsList();
 
     listEl.innerHTML = '';
-    const ranked = friendsList.concat([{ displayName: 'You', netProfit: ownNetProfit(), bestStreak: bestStreak, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
+    const ranked = friendsList.concat([{ displayName: t('common.you'), netProfit: ownNetProfit(), bestStreak: bestStreak, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
         .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
     if (emptyEl) emptyEl.classList.toggle('hidden', friendsList.length > 0);
     ranked.forEach(function(f, i) {
@@ -179,7 +179,7 @@ function renderFriendsScreen() {
 
         const nameEl = document.createElement('span');
         nameEl.className = 'friend-lb-name';
-        nameEl.textContent = f.displayName || 'Player';
+        nameEl.textContent = f.displayName || t('common.player');
         if (f.country) {
             const chip = document.createElement('span');
             chip.className = 'country-flag';
@@ -190,13 +190,13 @@ function renderFriendsScreen() {
             const linkChip = document.createElement('span');
             linkChip.className = 'link-chip';
             linkChip.textContent = '🔗';
-            linkChip.title = 'Connected via invite link';
+            linkChip.title = t('friends.viaLinkTitle');
             nameEl.appendChild(linkChip);
         }
         if (f.self) {
             const youTag = document.createElement('span');
             youTag.className = 'friend-you-tag';
-            youTag.textContent = 'You';
+            youTag.textContent = t('common.you');
             nameEl.appendChild(youTag);
         }
 
@@ -278,7 +278,7 @@ function handleIncomingInvite() {
         } else {
             // Prompt sign-in; the auth state listener will pick up _pendingInviteCode
             openSignInModal();
-            showToast('Sign in to connect with your friend!');
+            showToast(t('toast.signInConnect'));
         }
     } catch (e) { /* ignore — URL parsing shouldn't break the app */ }
 }
@@ -292,9 +292,9 @@ function addFriendByInviteCode(code) {
             // below runs, this code is spent. A network failure rejects instead,
             // leaving it stored for the next launch.
             if (window.clearPendingInvite) clearPendingInvite();
-            if (snap.empty) { showToast('No player found with that invite link.'); return; }
+            if (snap.empty) { showToast(t('toast.noPlayerInviteLink')); return; }
             var ownerUid = snap.docs[0].id;
-            if (ownerUid === user.uid) { showToast('That\'s your own invite link!'); return; }
+            if (ownerUid === user.uid) { showToast(t('toast.ownInviteLink')); return; }
 
             // Every joiner via the same link is added to that link's group, so
             // the group becomes one fully-connected friend circle — not just
@@ -302,7 +302,7 @@ function addFriendByInviteCode(code) {
             var groupRef = db.collection('referralGroups').doc(code);
             return groupRef.get().then(function(groupDoc) {
                 var members = groupDoc.exists ? (groupDoc.data().members || [ownerUid]) : [ownerUid];
-                if (members.indexOf(user.uid) !== -1) { showToast('Already connected via this link.'); return; }
+                if (members.indexOf(user.uid) !== -1) { showToast(t('toast.alreadyConnectedLink')); return; }
 
                 var newFriendUids = members.filter(function(uid) { return uid !== user.uid; });
                 return Promise.all(newFriendUids.map(function(friendUid) {
@@ -326,9 +326,10 @@ function addFriendByInviteCode(code) {
                 })).then(function() {
                     return groupRef.set({ members: members.concat([user.uid]) }, { merge: true });
                 }).then(function() {
+                    // Count-neutral phrasing: no language needs a plural form.
                     showToast(newFriendUids.length > 1
-                        ? 'Connected with ' + newFriendUids.length + ' friends via this link!'
-                        : 'Friend added!');
+                        ? t('toast.connectedViaLink', { count: newFriendUids.length })
+                        : t('toast.friendAdded'));
                     loadFriends();
                     // Files the reward row for whoever owns this link. Deliberately
                     // last and unawaited — a failed ledger write must not undo a
@@ -363,29 +364,29 @@ function renderNearbyPanel(user) {
     if (!user) {
         if (promptEl) promptEl.classList.remove('hidden');
         bodyEl.innerHTML = '';
-        if (headerEl) headerEl.textContent = '#— · —';
+        if (headerEl) headerEl.textContent = t('lb.rankPlaceholder');
         return;
     }
     if (promptEl) promptEl.classList.add('hidden');
 
     if (!friendsList.length) {
         bodyEl.innerHTML = '';
-        if (headerEl) headerEl.textContent = '#— · —';
+        if (headerEl) headerEl.textContent = t('lb.rankPlaceholder');
         return;
     }
 
     const own = ownNetProfit();
-    const ranked = friendsList.concat([{ displayName: 'You', netProfit: own, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
+    const ranked = friendsList.concat([{ displayName: t('common.you'), netProfit: own, self: true, lastSeen: Date.now(), country: (typeof getCountry === 'function' ? getCountry() : '--') }])
         .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
     const ownRank = ranked.findIndex(function(p) { return p.self; }) + 1;
     const leader = ranked[0];
 
     // Header: "#myRank · leader leads by X"
     if (leader.self) {
-        headerEl.textContent = '#' + ownRank + ' · You\'re #1!';
+        headerEl.textContent = t('common.rankYouAreFirst', { rank: ownRank });
     } else {
         const gap = (leader.netProfit || 0) - own;
-        headerEl.textContent = '#' + ownRank + ' · ' + (leader.displayName || 'Leader') + ' leads by ' + gap;
+        headerEl.textContent = t('common.rankLeadsBy', { rank: ownRank, name: leader.displayName || t('common.leader'), gap: formatNumber(gap) });
     }
 
     // Body: show user's row + up to 4 surrounding friends (5 rows total)
@@ -405,7 +406,7 @@ function renderNearbyPanel(user) {
                 '<span class="nearby-avatar">' + (f.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
                 '<span class="online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline') + '"></span>' +
             '</span>' +
-            '<span class="nearby-name">' + (f.displayName || 'Player') +
+            '<span class="nearby-name">' + (f.displayName || t('common.player')) +
                 (f.country ? '<span class="country-flag">' + countryToFlag(f.country) + '</span>' : '') +
                 (f.viaLink ? '<span class="link-chip" title="Connected via invite link">🔗</span>' : '') +
             '</span>' +
@@ -414,5 +415,14 @@ function renderNearbyPanel(user) {
             '</span>';
 
         bodyEl.appendChild(row);
+    });
+}
+
+// Re-render on language change: these panels write their own DOM, so
+// translateDom() alone would leave stale English rows on screen.
+if (window.vpOnLanguageChange) {
+    vpOnLanguageChange(function() {
+        renderFriendsScreen();
+        renderPlayFriendsWidgets();
     });
 }

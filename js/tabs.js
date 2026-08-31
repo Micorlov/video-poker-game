@@ -44,11 +44,11 @@ function renderStatsScreen() {
     }
     const net = won - lost;
     const netEl = document.getElementById('stats-net-value');
-    netEl.textContent = (net > 0 ? '+' : '') + net;
+    netEl.textContent = net > 0 ? formatSigned(net) : formatNumber(net);
     netEl.className = 'stats-net-value ' + (net > 0 ? 'positive' : net < 0 ? 'negative' : 'zero');
-    document.getElementById('stats-won-value').textContent = '+' + won;
-    document.getElementById('stats-lost-value').textContent = '-' + lost;
-    document.getElementById('stats-hands-value').textContent = hands;
+    document.getElementById('stats-won-value').textContent = '+' + formatNumber(won);
+    document.getElementById('stats-lost-value').textContent = '-' + formatNumber(lost);
+    document.getElementById('stats-hands-value').textContent = formatNumber(hands);
     document.getElementById('stats-streak-value').textContent = streak;
 }
 
@@ -161,7 +161,7 @@ function updateAccountUI() {
     if (!signedOut || !signedIn) return;
     signedOut.classList.toggle('hidden', !!user);
     signedIn.classList.toggle('hidden', !user);
-    if (user) document.getElementById('account-display-name').textContent = user.displayName || 'Signed in';
+    if (user) document.getElementById('account-display-name').textContent = user.displayName || t('settings.signedIn');
 }
 
 function setDefaultBet(v) {
@@ -189,7 +189,7 @@ function resetStatistics() {
     saveGameState();
     updateStreakUI(false);
     renderStatsScreen();
-    showToast('Statistics reset');
+    showToast(t('toast.statsReset'));
 }
 
 // Handle videopoker://open?ref=CODE / ?join=CODE while running inside the
@@ -257,3 +257,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.maybeShowSigninPrompt) maybeShowSigninPrompt('session_start');
     }, 3000);
 });
+
+if (window.vpOnLanguageChange) {
+    vpOnLanguageChange(function() {
+        renderStatsScreen();
+        updateAccountUI();
+    });
+}

@@ -154,12 +154,12 @@ function createRoom() {
     const stakeInput = document.getElementById('room-stake-input');
     const name = (nameInput.value || '').trim();
     const stake = parseInt(stakeInput.value, 10) || 10;
-    if (!name) { showToast('Give your room a name.'); return; }
+    if (!name) { showToast(t('toast.giveName')); return; }
 
     _doCreateRoom(name, stake, function(code) {
         nameInput.value = '';
         closeRoomModal();
-        showToast('Room created — code: ' + code);
+        showToast(t('toast.roomCreated', { code: code }));
     });
 }
 
@@ -190,7 +190,7 @@ function _doCreateRoom(name, stake, callback) {
                 });
             });
         });
-    }, function() { showToast('Could not create room — try again.'); });
+    }, function() { showToast(t('toast.couldNotCreateRoom')); });
 }
 
 // --- Inline room creation (Friends tab) ---
@@ -216,12 +216,12 @@ function createRoomInline() {
     if (!user) { openSignInModal(); return; }
     const nameInput = document.getElementById('inline-room-name');
     const name = (nameInput.value || '').trim();
-    if (!name) { showToast('Give your room a name.'); return; }
+    if (!name) { showToast(t('toast.giveName')); return; }
 
     _doCreateRoom(name, inlineStake, function(code) {
         nameInput.value = '';
         toggleInlineRoomForm();
-        showToast('Room created — code: ' + code);
+        showToast(t('toast.roomCreated', { code: code }));
     });
 }
 
@@ -238,7 +238,7 @@ function joinRoomByCode(code) {
     return firebaseSafe(function() {
         return db.collection('rooms').where('code', '==', code).limit(1).get().then(function(snap) {
             if (snap.empty) {
-                showToast('That invite link is no longer valid.');
+                showToast(t('toast.inviteLinkInvalid'));
                 return false;
             }
             const roomDoc = snap.docs[0];
@@ -263,7 +263,7 @@ function joinRoomByCode(code) {
 
             return roster.then(function() {
                 closeRoomModal();
-                if (!alreadyMember) showToast('Joined ' + roomName + '!');
+                if (!alreadyMember) showToast(t('toast.joinedRoom', { name: roomName }));
                 return loadMyRooms().then(function() {
                     openRoomDetail(roomDoc.id);
                     return true;
@@ -272,7 +272,7 @@ function joinRoomByCode(code) {
         });
     // firebaseSafe returns null if the operation throws synchronously, so
     // normalise to a Promise — callers chain .then() on this.
-    }, function() { showToast('Could not join room — try again.'); }) || Promise.resolve(false);
+    }, function() { showToast(t('toast.couldNotJoinRoom')); }) || Promise.resolve(false);
 }
 
 // DOM entry point for the "Got a code from a friend?" field.
@@ -288,7 +288,7 @@ function openRoomDetail(roomId) {
     activeRoomId = roomId;
     const room = myRooms.find(function(r) { return r.id === roomId; });
     if (!room) return;
-    document.getElementById('room-detail-name').textContent = room.name || 'Room';
+    document.getElementById('room-detail-name').textContent = room.name || t('room.defaultName');
     document.getElementById('room-detail-code').textContent = room.code || '';
     const bodyEl = document.getElementById('room-detail-members');
     bodyEl.innerHTML = '';
@@ -306,7 +306,7 @@ function openRoomDetail(roomId) {
                 row.className = 'friend-row';
                 const nameEl = document.createElement('span');
                 nameEl.className = 'friend-name';
-                nameEl.textContent = m.displayName || 'Player';
+                nameEl.textContent = m.displayName || t('common.player');
                 const scoreEl = document.createElement('span');
                 scoreEl.className = 'friend-score';
                 const np = m.netProfit || 0;
@@ -397,13 +397,13 @@ function renderRoomInvitePickerRows(room) {
         const row = roomEl('div', 'rip-row' + (roomInviteSelection[f.uid] ? ' selected' : '') + (invited ? ' invited' : ''));
 
         const avatar = roomEl('span', 'rip-avatar', (f.displayName || '?').charAt(0).toUpperCase());
-        const name = roomEl('span', 'rip-name', f.displayName || 'Player');
+        const name = roomEl('span', 'rip-name', f.displayName || t('common.player'));
         const check = roomEl('span', 'rip-check', invited ? 'Invited' : (roomInviteSelection[f.uid] ? '✓' : ''));
 
         if (!invited) {
             row.onclick = function() {
                 if (roomInviteSelection[f.uid]) delete roomInviteSelection[f.uid];
-                else roomInviteSelection[f.uid] = f.displayName || 'Player';
+                else roomInviteSelection[f.uid] = f.displayName || t('common.player');
                 renderRoomInvitePickerRows(room);
             };
         }
@@ -417,7 +417,7 @@ function renderRoomInvitePickerRows(room) {
     const count = Object.keys(roomInviteSelection).length;
     if (sendBtn) {
         sendBtn.classList.toggle('hidden', count === 0);
-        sendBtn.textContent = 'Send Invite' + (count === 1 ? '' : 's') + (count ? ' (' + count + ')' : '');
+        sendBtn.textContent = count ? t('room.sendInvitesCount', { count: count }) : t('room.sendInvites');
     }
 }
 
@@ -443,11 +443,11 @@ function sendRoomInvites() {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         })).then(function() {
-            showToast(uids.length === 1 ? 'Invite sent!' : uids.length + ' invites sent!');
+            showToast(t('toast.invitesSent'));
             closeSheet('room-invite-sheet');
             roomInviteSelection = {};
         });
-    }, function() { showToast('Could not send invites — try again.'); });
+    }, function() { showToast(t('toast.couldNotSendInvites')); });
 }
 
 // --- Room invites: recipient side (live banners + badges) ---
@@ -537,5 +537,13 @@ function declineRoomInvite(inviteId) {
             status: 'declined',
             respondedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+    });
+}
+
+if (window.vpOnLanguageChange) {
+    vpOnLanguageChange(function() {
+        renderRoomsList();
+        renderFriendsRoomsList();
+        renderRoomInviteBanners();
     });
 }

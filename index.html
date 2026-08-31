@@ -47,17 +47,17 @@
         <section id="screen-play" class="screen active">
             <div class="brandrow">
                 <div class="tpill" id="tournament-pill" onclick="toggleTournamentPill()">
-                    <span>Tournament 2</span>
+                    <span data-i18n="play.tournamentPill">Tournament 2</span>
                     <span class="tour-time">26:55</span>
                     <span class="tour-chev" id="tour-chev">▾</span>
                 </div>
                 <div class="streak-pill" id="streak-pill">
-                    <span>Streak</span>
+                    <span data-i18n="play.streak">Streak</span>
                     <span class="streak-pill-value streak-count" id="streak-count">0</span>
                 </div>
             </div>
             <div class="texpand hidden" id="tournament-expand">
-                <span>🏆 Tournament #2</span>
+                <span data-i18n="play.tournamentExpand">🏆 Tournament #2</span>
                 <span>09:26:55</span>
             </div>
 
@@ -66,12 +66,12 @@
 
             <div class="balance-head">
                 <div class="balance-head-main">
-                    <div class="section-label">Balance</div>
+                    <div class="section-label" data-i18n="play.balance">Balance</div>
                     <div class="balance-value" id="balance">1000</div>
                 </div>
                 <div class="balance-head-side">
-                    <div class="section-label">Variant</div>
-                    <div class="variant-value" id="variant-display">Jacks or Better</div>
+                    <div class="section-label" data-i18n="play.variant">Variant</div>
+                    <div class="variant-value" id="variant-display" data-i18n="variant.jacks">Jacks or Better</div>
                 </div>
             </div>
 
@@ -80,57 +80,57 @@
 
             <div id="multi-hands"></div>
             <div class="hand" id="hand"></div>
-            <div class="hand-placeholder-text" id="hand-placeholder-text">Hold what you want, then set your bet before the draw.</div>
+            <div class="hand-placeholder-text" id="hand-placeholder-text" data-i18n="play.handPlaceholder">Hold what you want, then set your bet before the draw.</div>
 
-            <div class="result-panel" id="result">Place your bet and deal to play</div>
+            <div class="result-panel" id="result" data-i18n="play.resultDefault">Place your bet and deal to play</div>
             <div class="explanation" id="explanation"></div>
 
             <div class="streak-bar" id="streak-bar">
                 <span>🔥</span>
-                <span>Win Streak</span>
+                <span data-i18n="play.winStreak">Win Streak</span>
                 <span class="streak-bonus-tag hidden" id="streak-bonus-tag"></span>
             </div>
 
             <!-- Web: original Phase 2 panels (untouched) -->
             <div class="panel nearby-panel" id="nearby-panel">
                 <div class="panel-head" onclick="showScreen('friends')">
-                    <span class="panel-title">Friends Leaderboard</span>
+                    <span class="panel-title" data-i18n="play.friendsLeaderboard">Friends Leaderboard</span>
                     <span class="panel-sub" id="nearby-panel-header">#— · —</span>
                 </div>
                 <div id="nearby-body"></div>
-                <div class="social-signin-prompt hidden" id="nearby-signin-prompt" onclick="openSignInModal()">Sign in to see your friends</div>
+                <div class="social-signin-prompt hidden" id="nearby-signin-prompt" onclick="openSignInModal()" data-i18n="play.signInFriends">Sign in to see your friends</div>
             </div>
 
             <div class="panel nearby-panel" id="champions-panel">
                 <div class="panel-head">
-                    <span class="panel-title">⏱ Hourly Champions</span>
-                    <span class="champ-countdown" id="champ-countdown">Resets in —m</span>
+                    <span class="panel-title" data-i18n="play.hourlyChampions">⏱ Hourly Champions</span>
+                    <span class="champ-countdown" id="champ-countdown" data-i18n="champ.resetsPlaceholder">Resets in —m</span>
                 </div>
                 <div id="champions-body"></div>
-                <div class="social-signin-prompt hidden" id="champions-signin-prompt" onclick="openSignInModal()">Sign in to compete for the hourly crown</div>
+                <div class="social-signin-prompt hidden" id="champions-signin-prompt" onclick="openSignInModal()" data-i18n="play.signInCompete">Sign in to compete for the hourly crown</div>
             </div>
 
             <!-- Native apps (Android/iOS) only: unified Leaderboards panel — Friends (daily) -> Global Hourly -> Global Daily -->
             <div class="panel nearby-panel leaderboard-panel hidden" id="leaderboard-panel">
                 <div class="lb-tabs">
-                    <button class="lb-tab selected" id="lb-tab-friends" onclick="setLeaderboardTab('friends', true)">Friends</button>
-                    <button class="lb-tab" id="lb-tab-hourly" onclick="setLeaderboardTab('hourly', true)">Hourly</button>
-                    <button class="lb-tab" id="lb-tab-daily" onclick="setLeaderboardTab('daily', true)">Daily</button>
+                    <button class="lb-tab selected" id="lb-tab-friends" onclick="setLeaderboardTab('friends', true)" data-i18n="lb.friends">Friends</button>
+                    <button class="lb-tab" id="lb-tab-hourly" onclick="setLeaderboardTab('hourly', true)" data-i18n="lb.hourly">Hourly</button>
+                    <button class="lb-tab" id="lb-tab-daily" onclick="setLeaderboardTab('daily', true)" data-i18n="lb.daily">Daily</button>
                 </div>
                 <div class="panel-head" id="lb-panel-head">
                     <span class="panel-title" id="lb-title">Friends · Today</span>
                     <span class="panel-sub" id="lb-sub">#— · —</span>
                 </div>
                 <div id="lb-body"></div>
-                <div class="social-signin-prompt hidden" id="lb-signin-prompt" onclick="openSignInModal()">Sign in to see leaderboards</div>
-                <button class="lb-expand-link hidden" id="lb-expand-link" onclick="toggleLeaderboardExpand()">Show Top 20 ▾</button>
+                <div class="social-signin-prompt hidden" id="lb-signin-prompt" onclick="openSignInModal()" data-i18n="play.signInLeaderboards">Sign in to see leaderboards</div>
+                <button class="lb-expand-link hidden" id="lb-expand-link" onclick="toggleLeaderboardExpand()" data-i18n="lb.showTop20">Show Top 20 ▾</button>
             </div>
 
             <!-- Stake, then draw. The bet sits next to the button that spends
                  it so the last thing you decide is the last thing you touch. -->
             <div class="bet-dock">
                 <div class="total-bet-row">
-                    <span class="section-label">Total bet</span>
+                    <span class="section-label" data-i18n="play.totalBet">Total bet</span>
                     <span class="total-bet-value" id="bet-display">10</span>
                 </div>
                 <div class="bet-row">
@@ -139,53 +139,53 @@
                     <button class="bet-btn" onclick="setBet(20)" id="bet-20">20</button>
                     <button class="bet-btn" onclick="setBet(50)" id="bet-50">50</button>
                     <button class="bet-btn bet-btn-allin" onclick="openAllInSheet()" id="bet-allin">
-                        <span class="allin-label">ALL IN</span>
+                        <span class="allin-label" data-i18n="play.allIn">ALL IN</span>
                         <span class="allin-badge" id="allin-badge">1</span>
                     </button>
                 </div>
                 <div class="action-row">
-                    <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">↻</span>Deal</button>
-                    <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints">💡</button>
-                    <button id="voice-btn" class="hint-btn" onclick="toggleVoice()" title="Voice announcements">🗣️</button>
+                    <button id="main-btn" class="btn-primary" onclick="mainAction()"><span class="main-btn-icon">↻</span><span data-i18n="play.deal">Deal</span></button>
+                    <button id="hint-btn" class="hint-btn" onclick="toggleHints()" title="Strategy hints" data-i18n-title="play.hintTitle">💡</button>
+                    <button id="voice-btn" class="hint-btn" onclick="toggleVoice()" title="Voice announcements" data-i18n-title="play.voiceTitle">🗣️</button>
                 </div>
             </div>
 
             <div class="panel pwf-panel" id="pwf-panel">
                 <div class="play-rooms-header">
-                    <span class="section-label">Play With Friends</span>
-                    <span class="see-all-link" onclick="showScreen('friends')">See All ›</span>
+                    <span class="section-label" data-i18n="play.playWithFriends">Play With Friends</span>
+                    <span class="see-all-link" onclick="showScreen('friends')" data-i18n="play.seeAll">See All ›</span>
                 </div>
                 <div id="play-rooms-list"></div>
-                <button class="create-room-link" onclick="openRoomModal()">+ Create a Poker Room with Friends</button>
+                <button class="create-room-link" onclick="openRoomModal()" data-i18n="play.createRoomLong">+ Create a Poker Room with Friends</button>
             </div>
 
         </section>
 
         <section id="screen-stats" class="screen">
-            <h1 class="screen-title">Statistics</h1>
+            <h1 class="screen-title" data-i18n="stats.title">Statistics</h1>
             <div class="stats-toggle">
-                <button class="stats-toggle-btn selected" id="stats-tab-today" onclick="setStatsTab('today')">Today</button>
-                <button class="stats-toggle-btn" id="stats-tab-alltime" onclick="setStatsTab('alltime')">All-Time</button>
+                <button class="stats-toggle-btn selected" id="stats-tab-today" onclick="setStatsTab('today')" data-i18n="stats.today">Today</button>
+                <button class="stats-toggle-btn" id="stats-tab-alltime" onclick="setStatsTab('alltime')" data-i18n="stats.allTime">All-Time</button>
             </div>
             <div class="panel stats-net-panel">
-                <div class="section-label">Net</div>
+                <div class="section-label" data-i18n="stats.net">Net</div>
                 <div class="stats-net-value zero" id="stats-net-value">+0</div>
             </div>
             <div class="stats-grid">
                 <div class="panel">
-                    <div class="section-label">Won</div>
+                    <div class="section-label" data-i18n="stats.won">Won</div>
                     <div class="stat-tile-value won" id="stats-won-value">+0</div>
                 </div>
                 <div class="panel">
-                    <div class="section-label">Lost</div>
+                    <div class="section-label" data-i18n="stats.lost">Lost</div>
                     <div class="stat-tile-value lost" id="stats-lost-value">-0</div>
                 </div>
                 <div class="panel">
-                    <div class="section-label">Hands Played</div>
+                    <div class="section-label" data-i18n="stats.handsPlayed">Hands Played</div>
                     <div class="stat-tile-value" id="stats-hands-value">0</div>
                 </div>
                 <div class="panel">
-                    <div class="section-label">Best Streak</div>
+                    <div class="section-label" data-i18n="stats.bestStreak">Best Streak</div>
                     <div class="stat-tile-value" id="stats-streak-value">0</div>
                 </div>
             </div>
@@ -193,38 +193,38 @@
 
         <section id="screen-friends" class="screen">
             <div class="friends-header">
-                <h1 class="screen-title">Friends</h1>
-                <button class="invite-pill" onclick="openInviteSheet()">+ Invite</button>
+                <h1 class="screen-title" data-i18n="friends.title">Friends</h1>
+                <button class="invite-pill" onclick="openInviteSheet()" data-i18n="friends.invite">+ Invite</button>
             </div>
 
             <div class="panel friends-signin-prompt" id="friends-signed-out" onclick="openSignInModal()">
-                <span class="settings-row-label">Sign in to add friends</span>
+                <span class="settings-row-label" data-i18n="friends.signInAdd">Sign in to add friends</span>
                 <span class="settings-chevron">›</span>
             </div>
 
             <div id="friends-signed-in-wrap" class="hidden">
                 <div class="friends-action-strip">
                     <button class="code-chip" id="own-code-chip" onclick="copyOwnCode()">
-                        <span class="code-chip-label">Your code</span>
+                        <span class="code-chip-label" data-i18n="friends.yourCode">Your code</span>
                         <span class="code-chip-value" id="own-referral-code">—</span>
-                        <span class="code-chip-hint" id="own-code-hint">Tap to copy</span>
+                        <span class="code-chip-hint" id="own-code-hint" data-i18n="friends.tapToCopy">Tap to copy</span>
                     </button>
                     <div class="add-friend-inline">
-                        <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
-                        <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()">Add</button>
+                        <input class="friend-code-input" id="friend-code-input" maxlength="6" placeholder="Friend code…" data-i18n-placeholder="friends.friendCodePlaceholder" autocomplete="off">
+                        <button class="btn-primary add-friend-btn" onclick="submitFriendCodeInput()" data-i18n="friends.add">Add</button>
                     </div>
                 </div>
                 <div class="friends-reward-line" id="friends-invite-reward">You get 2,000 coins per friend — they get 1,000 to start.</div>
 
                 <div class="stats-toggle">
-                    <button class="stats-toggle-btn selected" id="friends-tab-leaderboard" onclick="setFriendsTab('leaderboard')">Leaderboard</button>
-                    <button class="stats-toggle-btn" id="friends-tab-rooms" onclick="setFriendsTab('rooms')">Poker Rooms<span class="tab-badge hidden" id="rooms-tab-badge"></span></button>
+                    <button class="stats-toggle-btn selected" id="friends-tab-leaderboard" onclick="setFriendsTab('leaderboard')" data-i18n="friends.leaderboard">Leaderboard</button>
+                    <button class="stats-toggle-btn" id="friends-tab-rooms" onclick="setFriendsTab('rooms')"><span data-i18n="friends.pokerRooms">Poker Rooms</span><span class="tab-badge hidden" id="rooms-tab-badge"></span></button>
                 </div>
 
                 <div id="friends-leaderboard-view">
                     <div class="panel">
                         <div class="rooms-empty hidden" id="friends-empty">
-                            No friends at the table yet.
+                            <span data-i18n="friends.empty">No friends at the table yet.</span>
                             <button class="btn-primary friends-empty-invite" onclick="openInviteSheet()">Invite your first friend — you get 2,000 coins</button>
                         </div>
                         <div id="friends-list"></div>
@@ -233,11 +233,11 @@
 
                 <div id="friends-rooms-view" class="hidden">
                     <div id="friends-room-invites"></div>
-                    <div class="rooms-empty hidden" id="friends-rooms-empty">No rooms yet — create one below.</div>
+                    <div class="rooms-empty hidden" id="friends-rooms-empty" data-i18n="friends.noRoomsYet">No rooms yet — create one below.</div>
                     <div id="friends-rooms-list"></div>
-                    <button class="create-room-link create-room-dashed" id="friends-create-room-btn" onclick="toggleInlineRoomForm()">+ Create a Poker Room with Friends</button>
+                    <button class="create-room-link create-room-dashed" id="friends-create-room-btn" onclick="toggleInlineRoomForm()" data-i18n="play.createRoomLong">+ Create a Poker Room with Friends</button>
                     <div class="inline-room-form hidden" id="inline-room-form">
-                        <input class="room-form-input" id="inline-room-name" maxlength="24" placeholder="Room name…">
+                        <input class="room-form-input" id="inline-room-name" maxlength="24" placeholder="Room name…" data-i18n-placeholder="friends.roomNamePlaceholder">
                         <div class="room-form-stakes" id="inline-room-stakes">
                             <button class="room-form-stake selected" onclick="selectInlineStake(5)">5</button>
                             <button class="room-form-stake" onclick="selectInlineStake(10)">10</button>
@@ -245,8 +245,8 @@
                             <button class="room-form-stake" onclick="selectInlineStake(50)">50</button>
                         </div>
                         <div class="room-form-actions">
-                            <button class="room-form-create-btn" onclick="createRoomInline()">Create &amp; Invite</button>
-                            <button class="room-form-cancel-btn" onclick="toggleInlineRoomForm()">Cancel</button>
+                            <button class="room-form-create-btn" onclick="createRoomInline()" data-i18n="friends.createAndInvite">Create &amp; Invite</button>
+                            <button class="room-form-cancel-btn" onclick="toggleInlineRoomForm()" data-i18n="common.cancel">Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -254,32 +254,40 @@
         </section>
 
         <section id="screen-settings" class="screen">
-            <h1 class="screen-title">Settings</h1>
+            <h1 class="screen-title" data-i18n="settings.title">Settings</h1>
 
-            <div class="section-label">Gameplay</div>
+            <div class="section-label" data-i18n="settings.language">Language</div>
+            <div class="panel">
+                <div class="settings-row" id="settings-language-row" onclick="openLanguageSheet()" style="cursor:pointer;">
+                    <span class="settings-row-label" data-lang-current>English</span>
+                    <span class="settings-chevron">›</span>
+                </div>
+            </div>
+
+            <div class="section-label" data-i18n="settings.gameplay">Gameplay</div>
             <div class="panel">
                 <div class="settings-row">
-                    <span class="settings-row-label">Sound Effects</span>
+                    <span class="settings-row-label" data-i18n="settings.soundEffects">Sound Effects</span>
                     <input type="checkbox" class="toggle-switch" id="settings-sound-toggle">
                 </div>
                 <div class="settings-row">
-                    <span class="settings-row-label">Haptic Feedback</span>
+                    <span class="settings-row-label" data-i18n="settings.hapticFeedback">Haptic Feedback</span>
                     <input type="checkbox" class="toggle-switch" id="settings-haptics-toggle">
                 </div>
                 <div class="settings-row">
-                    <span class="settings-row-label">Voice Announcements</span>
+                    <span class="settings-row-label" data-i18n="settings.voiceAnnouncements">Voice Announcements</span>
                     <input type="checkbox" class="toggle-switch" id="settings-voice-toggle">
                 </div>
             </div>
 
-            <div class="section-label">Theme</div>
+            <div class="section-label" data-i18n="settings.theme">Theme</div>
             <div class="theme-picker">
-                <button class="theme-btn selected" id="theme-green" onclick="setTheme('green')">🟢 Green</button>
-                <button class="theme-btn" id="theme-blue" onclick="setTheme('blue')">🔵 Blue</button>
-                <button class="theme-btn" id="theme-crimson" onclick="setTheme('crimson')">🔴 Crimson</button>
+                <button class="theme-btn selected" id="theme-green" onclick="setTheme('green')" data-i18n="settings.themeGreen">🟢 Green</button>
+                <button class="theme-btn" id="theme-blue" onclick="setTheme('blue')" data-i18n="settings.themeBlue">🔵 Blue</button>
+                <button class="theme-btn" id="theme-crimson" onclick="setTheme('crimson')" data-i18n="settings.themeCrimson">🔴 Crimson</button>
             </div>
 
-            <div class="section-label">Default Bet</div>
+            <div class="section-label" data-i18n="settings.defaultBet">Default Bet</div>
             <div class="panel default-bet-row">
                 <button class="bet-btn" id="settings-defaultbet-5">5</button>
                 <button class="bet-btn" id="settings-defaultbet-10">10</button>
@@ -287,75 +295,75 @@
                 <button class="bet-btn" id="settings-defaultbet-50">50</button>
             </div>
 
-            <div class="section-label">Game Variant</div>
+            <div class="section-label" data-i18n="settings.gameVariant">Game Variant</div>
             <div class="variant-picker">
-                <button class="variant-btn selected" id="variant-jacks" onclick="setGameVariant('jacks')">Jacks or Better<span class="variant-lock"></span></button>
-                <button class="variant-btn" id="variant-deuces" onclick="setGameVariant('deuces')">Deuces Wild<span class="variant-lock"></span></button>
-                <button class="variant-btn" id="variant-bonus" onclick="setGameVariant('bonus')">Bonus Poker<span class="variant-lock"></span></button>
-                <button class="variant-btn" id="variant-doubleBonus" onclick="setGameVariant('doubleBonus')">Double Bonus<span class="variant-lock"></span></button>
+                <button class="variant-btn selected" id="variant-jacks" onclick="setGameVariant('jacks')"><span data-i18n="variant.jacks">Jacks or Better</span><span class="variant-lock"></span></button>
+                <button class="variant-btn" id="variant-deuces" onclick="setGameVariant('deuces')"><span data-i18n="variant.deuces">Deuces Wild</span><span class="variant-lock"></span></button>
+                <button class="variant-btn" id="variant-bonus" onclick="setGameVariant('bonus')"><span data-i18n="variant.bonus">Bonus Poker</span><span class="variant-lock"></span></button>
+                <button class="variant-btn" id="variant-doubleBonus" onclick="setGameVariant('doubleBonus')"><span data-i18n="variant.doubleBonus">Double Bonus</span><span class="variant-lock"></span></button>
             </div>
 
-            <div class="section-label">Hands per Deal</div>
+            <div class="section-label" data-i18n="settings.handsPerDeal">Hands per Deal</div>
             <div class="multi-picker">
-                <button class="multi-btn selected" id="multi-1" onclick="setMultiHand(1)">1 Hand</button>
-                <button class="multi-btn" id="multi-3" onclick="setMultiHand(3)">3× Hands</button>
-                <button class="multi-btn" id="multi-5" onclick="setMultiHand(5)">5× Hands</button>
+                <button class="multi-btn selected" id="multi-1" onclick="setMultiHand(1)" data-i18n="settings.oneHand">1 Hand</button>
+                <button class="multi-btn" id="multi-3" onclick="setMultiHand(3)" data-i18n="settings.threeHands">3× Hands</button>
+                <button class="multi-btn" id="multi-5" onclick="setMultiHand(5)" data-i18n="settings.fiveHands">5× Hands</button>
             </div>
 
-            <div class="section-label">Support</div>
+            <div class="section-label" data-i18n="settings.support">Support</div>
             <div class="panel payout-panel collapsed" id="payout-panel">
                 <button class="payout-header" onclick="document.getElementById('payout-panel').classList.toggle('collapsed')" id="settings-view-paytable">
-                    <span class="payout-header-label">Payout Table</span>
+                    <span class="payout-header-label" data-i18n="settings.payoutTable">Payout Table</span>
                     <span class="payout-caret">▲</span>
                 </button>
                 <div class="payouts" id="payouts"></div>
             </div>
 
-            <div class="section-label">Account</div>
+            <div class="section-label" data-i18n="settings.account">Account</div>
             <div class="panel">
                 <div class="settings-row" id="account-signed-out" onclick="openSignInModal()" style="cursor:pointer;">
-                    <span class="settings-row-label">Sign in with Google</span>
+                    <span class="settings-row-label" data-i18n="settings.signInGoogle">Sign in with Google</span>
                     <span class="settings-chevron">›</span>
                 </div>
                 <div class="settings-row hidden" id="account-signed-in">
-                    <span class="settings-row-label" id="account-display-name">Signed in</span>
-                    <button class="btn-danger account-signout-btn" onclick="signOutUser()">Sign Out</button>
+                    <span class="settings-row-label" id="account-display-name" data-i18n="settings.signedIn">Signed in</span>
+                    <button class="btn-danger account-signout-btn" onclick="signOutUser()" data-i18n="settings.signOut">Sign Out</button>
                 </div>
             </div>
 
             <div class="hidden" id="settings-notifications-panel">
-                <div class="section-label">Notifications</div>
+                <div class="section-label" data-i18n="settings.notifications">Notifications</div>
                 <div class="panel">
                     <div class="settings-row">
-                        <span class="settings-row-label">Friend activity</span>
+                        <span class="settings-row-label" data-i18n="settings.friendActivity">Friend activity</span>
                         <input type="checkbox" class="toggle-switch" id="settings-notif-social">
                     </div>
                     <div class="settings-row">
-                        <span class="settings-row-label">Leaderboard updates</span>
+                        <span class="settings-row-label" data-i18n="settings.leaderboardUpdates">Leaderboard updates</span>
                         <input type="checkbox" class="toggle-switch" id="settings-notif-leaderboard">
                     </div>
                     <div class="settings-row">
-                        <span class="settings-row-label">Daily bonus reminder</span>
+                        <span class="settings-row-label" data-i18n="settings.dailyBonusReminder">Daily bonus reminder</span>
                         <input type="checkbox" class="toggle-switch" id="settings-notif-dailyReminder">
                     </div>
                     <div class="settings-row">
-                        <span class="settings-row-label">Friends' best hands</span>
+                        <span class="settings-row-label" data-i18n="settings.friendsBestHands">Friends' best hands</span>
                         <input type="checkbox" class="toggle-switch" id="settings-notif-bestHand">
                     </div>
                     <div class="settings-row">
-                        <span class="settings-row-label">Announcements</span>
+                        <span class="settings-row-label" data-i18n="settings.announcements">Announcements</span>
                         <input type="checkbox" class="toggle-switch" id="settings-notif-announcement">
                     </div>
                     <div class="settings-row" id="settings-notifications-enable" style="cursor:pointer;">
-                        <span class="settings-row-label">Enable Notifications</span>
+                        <span class="settings-row-label" data-i18n="settings.enableNotifications">Enable Notifications</span>
                         <span class="settings-chevron">›</span>
                     </div>
                 </div>
             </div>
 
-            <button class="btn-danger" id="settings-reset-stats">Reset Statistics</button>
+            <button class="btn-danger" id="settings-reset-stats" data-i18n="settings.resetStats">Reset Statistics</button>
 
-            <div class="settings-footer">Video Poker · v1.3</div>
+            <div class="settings-footer" data-i18n="settings.footer">Video Poker · v2.1</div>
         </section>
     </div>
 
@@ -363,20 +371,20 @@
         <div class="bottom-nav-inner">
             <button class="nav-btn active" id="nav-play" onclick="showScreen('play')">
                 <span class="nav-icon">♠</span>
-                <span>Play</span>
+                <span data-i18n="nav.play">Play</span>
             </button>
             <button class="nav-btn" id="nav-stats" onclick="showScreen('stats')">
                 <span class="nav-icon">▤</span>
-                <span>Stats</span>
+                <span data-i18n="nav.stats">Stats</span>
             </button>
             <button class="nav-btn" id="nav-friends" onclick="showScreen('friends')">
                 <span class="nav-icon">◍</span>
-                <span>Friends</span>
+                <span data-i18n="nav.friends">Friends</span>
                 <span class="nav-badge hidden" id="nav-friends-badge"></span>
             </button>
             <button class="nav-btn" id="nav-settings" onclick="showScreen('settings')">
                 <span class="nav-icon">⚙</span>
-                <span>Settings</span>
+                <span data-i18n="nav.settings">Settings</span>
             </button>
         </div>
     </nav>
@@ -384,11 +392,11 @@
     <div class="modal-backdrop hidden" id="signin-modal">
         <div class="modal-box">
             <button class="modal-close" onclick="closeSignInModal()">✕</button>
-            <div class="modal-title">Sign in to play with friends</div>
-            <div class="modal-sub">Add friends, join rooms, and compare scores.</div>
+            <div class="modal-title" data-i18n="modal.signInTitle">Sign in to play with friends</div>
+            <div class="modal-sub" data-i18n="modal.signInSub">Add friends, join rooms, and compare scores.</div>
             <button class="google-btn" onclick="signInWithGoogle()">
                 <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
-                <span>Continue with Google</span>
+                <span data-i18n="modal.continueGoogle">Continue with Google</span>
             </button>
             <div class="modal-error hidden" id="signin-error"></div>
         </div>
@@ -399,13 +407,13 @@
     <div class="modal-backdrop hidden" id="signin-prompt-modal">
         <div class="modal-box">
             <button class="modal-close" onclick="dismissSigninPrompt()">✕</button>
-            <div class="modal-title">Your chips live only on this phone</div>
-            <div class="modal-sub" id="signin-prompt-body">Sign in once and your chips follow you anywhere.</div>
+            <div class="modal-title" data-i18n="modal.chipsOnPhoneTitle">Your chips live only on this phone</div>
+            <div class="modal-sub" id="signin-prompt-body" data-i18n="modal.chipsOnPhoneSub">Sign in once and your chips follow you anywhere.</div>
             <button class="google-btn" onclick="acceptSigninPrompt()">
                 <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
-                <span>Continue with Google</span>
+                <span data-i18n="modal.continueGoogle">Continue with Google</span>
             </button>
-            <button class="signin-prompt-later" onclick="dismissSigninPrompt()">Not now</button>
+            <button class="signin-prompt-later" onclick="dismissSigninPrompt()" data-i18n="modal.notNow">Not now</button>
             <div class="modal-error hidden" id="signin-prompt-error"></div>
         </div>
     </div>
@@ -413,21 +421,21 @@
     <div class="modal-backdrop hidden" id="room-modal">
         <div class="modal-box">
             <button class="modal-close" onclick="closeRoomModal()">✕</button>
-            <div class="modal-title">Create a Poker Room</div>
-            <input class="friend-code-input" id="room-name-input" maxlength="24" placeholder="Room name…">
+            <div class="modal-title" data-i18n="modal.createRoom">Create a Poker Room</div>
+            <input class="friend-code-input" id="room-name-input" maxlength="24" placeholder="Room name…" data-i18n-placeholder="modal.roomNamePlaceholder">
             <div class="room-stake-row">
                 <select class="room-stake-select" id="room-stake-input">
-                    <option value="5">Buy-in 5</option>
-                    <option value="10" selected>Buy-in 10</option>
-                    <option value="20">Buy-in 20</option>
-                    <option value="50">Buy-in 50</option>
+                    <option value="5" data-i18n="modal.buyIn5">Buy-in 5</option>
+                    <option value="10" selected data-i18n="modal.buyIn10">Buy-in 10</option>
+                    <option value="20" data-i18n="modal.buyIn20">Buy-in 20</option>
+                    <option value="50" data-i18n="modal.buyIn50">Buy-in 50</option>
                 </select>
             </div>
-            <button class="btn-primary" style="width:100%;" onclick="createRoom()">Create Room</button>
-            <div class="modal-sub" style="margin-top:16px;">Got a code from a friend?</div>
+            <button class="btn-primary" style="width:100%;" onclick="createRoom()" data-i18n="modal.createRoomBtn">Create Room</button>
+            <div class="modal-sub" style="margin-top:16px;" data-i18n="modal.gotCode">Got a code from a friend?</div>
             <div class="add-friend-row">
-                <input class="friend-code-input" id="room-code-input" maxlength="6" placeholder="Room code…" autocomplete="off">
-                <button class="btn-secondary" onclick="submitRoomCodeInput()">Join</button>
+                <input class="friend-code-input" id="room-code-input" maxlength="6" placeholder="Room code…" data-i18n-placeholder="modal.roomCodePlaceholder" autocomplete="off">
+                <button class="btn-secondary" onclick="submitRoomCodeInput()" data-i18n="modal.join">Join</button>
             </div>
         </div>
     </div>
@@ -435,9 +443,26 @@
     <div class="modal-backdrop hidden" id="room-detail-modal">
         <div class="modal-box">
             <button class="modal-close" onclick="closeRoomDetail()">✕</button>
-            <div class="modal-title" id="room-detail-name">Room</div>
-            <div class="modal-sub">Code: <span id="room-detail-code"></span></div>
+            <div class="modal-title" id="room-detail-name" data-i18n="modal.room">Room</div>
+            <div class="modal-sub"><span data-i18n="modal.code">Code:</span> <span id="room-detail-code"></span></div>
             <div id="room-detail-members" style="margin-top:12px;"></div>
+        </div>
+    </div>
+
+    <!-- Language picker: shared by the onboarding chip and the Settings row.
+         Rows are generated by renderLanguageOptions() in js/i18n.js. -->
+    <div class="sheet-backdrop hidden" id="language-sheet" onclick="if(event.target===this)closeSheet('language-sheet')">
+        <div class="sheet">
+            <div class="sheet-header">
+                <span class="sheet-mark">🌐</span>
+                <span class="sheet-heading">
+                    <span class="sheet-title" data-i18n="lang.sheetTitle">Choose your language</span>
+                    <span class="sheet-eyebrow" data-i18n="lang.sheetSub">You can change this any time in Settings.</span>
+                </span>
+                <button class="sheet-close" onclick="closeSheet('language-sheet')">✕</button>
+            </div>
+            <div class="language-list" id="language-list"></div>
+            <button class="sheet-done-btn" onclick="closeSheet('language-sheet')" data-i18n="sheet.done">Done</button>
         </div>
     </div>
 
@@ -445,25 +470,25 @@
     <div class="sheet-backdrop hidden" id="invite-sheet" onclick="if(event.target===this)closeSheet('invite-sheet')">
         <div class="sheet">
             <div class="sheet-header">
-                <span class="sheet-title">Invite Friends</span>
+                <span class="sheet-title" data-i18n="sheet.inviteFriends">Invite Friends</span>
                 <button class="sheet-close" onclick="closeSheet('invite-sheet')">✕</button>
             </div>
             <div class="sheet-sub" id="invite-reward-line">You get 2,000 coins per friend — they get 1,000 to start.</div>
             <div class="share-chips-row">
-                <button class="share-chip share-chip--primary whatsapp" onclick="shareFriendInviteViaWhatsApp()">WhatsApp</button>
-                <button class="share-chip share-chip--primary telegram" onclick="shareFriendInviteViaTelegram()">Telegram</button>
-                <button class="share-chip native" onclick="shareInviteMore()">More…</button>
+                <button class="share-chip share-chip--primary whatsapp" onclick="shareFriendInviteViaWhatsApp()" data-i18n="sheet.whatsapp">WhatsApp</button>
+                <button class="share-chip share-chip--primary telegram" onclick="shareFriendInviteViaTelegram()" data-i18n="sheet.telegram">Telegram</button>
+                <button class="share-chip native" onclick="shareInviteMore()" data-i18n="sheet.more">More…</button>
             </div>
             <div class="sheet-link-row">
                 <span class="sheet-link-text" id="invite-sheet-link">—</span>
-                <button class="sheet-copy-btn" id="invite-sheet-copy" onclick="copyInviteSheetLink()">Copy</button>
+                <button class="sheet-copy-btn" id="invite-sheet-copy" onclick="copyInviteSheetLink()" data-i18n="sheet.copy">Copy</button>
             </div>
-            <div class="modal-sub" style="margin-top:16px;">Got a code from a friend?</div>
+            <div class="modal-sub" style="margin-top:16px;" data-i18n="modal.gotCode">Got a code from a friend?</div>
             <div class="add-friend-row">
-                <input class="friend-code-input" id="invite-sheet-code-input" maxlength="6" placeholder="Friend code…" autocomplete="off">
-                <button class="btn-primary add-friend-btn" onclick="submitInviteSheetFriendCode()">Add</button>
+                <input class="friend-code-input" id="invite-sheet-code-input" maxlength="6" placeholder="Friend code…" data-i18n-placeholder="friends.friendCodePlaceholder" autocomplete="off">
+                <button class="btn-primary add-friend-btn" onclick="submitInviteSheetFriendCode()" data-i18n="friends.add">Add</button>
             </div>
-            <button class="sheet-done-btn" onclick="closeSheet('invite-sheet')">Done</button>
+            <button class="sheet-done-btn" onclick="closeSheet('invite-sheet')" data-i18n="sheet.done">Done</button>
         </div>
     </div>
 
@@ -472,23 +497,23 @@
     <div class="sheet-backdrop hidden" id="room-invite-sheet" onclick="if(event.target===this)closeSheet('room-invite-sheet')">
         <div class="sheet">
             <div class="sheet-header">
-                <span class="sheet-title" id="room-invite-title">Invite Friends</span>
+                <span class="sheet-title" id="room-invite-title" data-i18n="sheet.inviteFriends">Invite Friends</span>
                 <button class="sheet-close" onclick="closeSheet('room-invite-sheet')">✕</button>
             </div>
             <div class="sheet-sub">Invite friends to "<span id="room-invite-name">—</span>" — they get a notification with a Join button.</div>
             <div class="room-invite-friends" id="room-invite-friends"></div>
-            <button class="rip-send-btn hidden" id="room-invite-send" onclick="sendRoomInvites()">Send Invites</button>
-            <div class="rip-divider"><span>or share a link</span></div>
+            <button class="rip-send-btn hidden" id="room-invite-send" onclick="sendRoomInvites()" data-i18n="room.sendInvites">Send Invites</button>
+            <div class="rip-divider"><span data-i18n="sheet.orShareLink">or share a link</span></div>
             <div class="sheet-link-row">
                 <span class="sheet-link-text" id="room-invite-link">—</span>
-                <button class="sheet-copy-btn" id="room-invite-copy" onclick="copyRoomLink()">Copy</button>
+                <button class="sheet-copy-btn" id="room-invite-copy" onclick="copyRoomLink()" data-i18n="sheet.copy">Copy</button>
             </div>
             <div class="share-chips-row">
-                <button class="share-chip share-chip--primary whatsapp" onclick="shareRoomViaWhatsApp()">WhatsApp</button>
-                <button class="share-chip share-chip--primary telegram" onclick="shareRoomViaTelegram()">Telegram</button>
-                <button class="share-chip native" onclick="shareRoomInviteNative()">Share…</button>
+                <button class="share-chip share-chip--primary whatsapp" onclick="shareRoomViaWhatsApp()" data-i18n="sheet.whatsapp">WhatsApp</button>
+                <button class="share-chip share-chip--primary telegram" onclick="shareRoomViaTelegram()" data-i18n="sheet.telegram">Telegram</button>
+                <button class="share-chip native" onclick="shareRoomInviteNative()" data-i18n="sheet.share">Share…</button>
             </div>
-            <button class="sheet-done-btn" onclick="closeSheet('room-invite-sheet')">Done</button>
+            <button class="sheet-done-btn" onclick="closeSheet('room-invite-sheet')" data-i18n="sheet.done">Done</button>
         </div>
     </div>
 
@@ -498,16 +523,16 @@
     <div class="sheet-backdrop hidden" id="bigwin-share-sheet" onclick="if(event.target===this)closeSheet('bigwin-share-sheet')">
         <div class="sheet">
             <div class="sheet-header">
-                <span class="sheet-title" id="bigwin-share-title">Big win!</span>
+                <span class="sheet-title" id="bigwin-share-title" data-i18n="sheet.bigWinTitle">Big win!</span>
                 <button class="sheet-close" onclick="closeSheet('bigwin-share-sheet')">✕</button>
             </div>
             <div class="sheet-sub">Rub it in — your invite link rides along, and you get 2,000 coins if a friend joins.</div>
             <div class="share-chips-row">
-                <button class="share-chip share-chip--primary whatsapp" onclick="shareBigWinVia('whatsapp')">WhatsApp</button>
-                <button class="share-chip share-chip--primary telegram" onclick="shareBigWinVia('telegram')">Telegram</button>
-                <button class="share-chip native" onclick="shareBigWinVia('native')">More…</button>
+                <button class="share-chip share-chip--primary whatsapp" onclick="shareBigWinVia('whatsapp')" data-i18n="sheet.whatsapp">WhatsApp</button>
+                <button class="share-chip share-chip--primary telegram" onclick="shareBigWinVia('telegram')" data-i18n="sheet.telegram">Telegram</button>
+                <button class="share-chip native" onclick="shareBigWinVia('native')" data-i18n="sheet.more">More…</button>
             </div>
-            <button class="sheet-dismiss" onclick="closeSheet('bigwin-share-sheet')">Not now</button>
+            <button class="sheet-dismiss" onclick="closeSheet('bigwin-share-sheet')" data-i18n="modal.notNow">Not now</button>
         </div>
     </div>
 
@@ -518,14 +543,14 @@
             <div class="sheet-header">
                 <span class="sheet-mark">♠</span>
                 <span class="sheet-heading">
-                    <span class="sheet-title">Out of All-Ins today</span>
-                    <span class="sheet-eyebrow">Back tomorrow — or…</span>
+                    <span class="sheet-title" data-i18n="sheet.allInOutTitle">Out of All-Ins today</span>
+                    <span class="sheet-eyebrow" data-i18n="sheet.allInOutEyebrow">Back tomorrow — or…</span>
                 </span>
                 <button class="sheet-close" onclick="closeSheet('allin-unlock-sheet')">✕</button>
             </div>
-            <div class="sheet-sub">Every friend who joins through your invite unlocks <strong>+1 All-In every day</strong>.</div>
-            <button class="btn-primary allin-unlock-invite" onclick="allInUnlockInvite()">Invite a friend</button>
-            <button class="sheet-dismiss" onclick="closeSheet('allin-unlock-sheet')">Not now</button>
+            <div class="sheet-sub" data-i18n-html="sheet.allInOutSubHtml">Every friend who joins through your invite unlocks <strong>+1 All-In every day</strong>.</div>
+            <button class="btn-primary allin-unlock-invite" onclick="allInUnlockInvite()" data-i18n="sheet.allInInviteBtn">Invite a friend</button>
+            <button class="sheet-dismiss" onclick="closeSheet('allin-unlock-sheet')" data-i18n="modal.notNow">Not now</button>
         </div>
     </div>
 
@@ -536,27 +561,32 @@
             <div class="sheet-header">
                 <span class="sheet-mark">♠</span>
                 <span class="sheet-heading">
-                    <span class="sheet-title">Go All In</span>
-                    <span class="sheet-eyebrow">Limited daily uses</span>
+                    <span class="sheet-title" data-i18n="sheet.goAllIn">Go All In</span>
+                    <span class="sheet-eyebrow" data-i18n="sheet.allInEyebrow">Limited daily uses</span>
                 </span>
                 <button class="sheet-close" onclick="closeAllInSheet()">✕</button>
             </div>
             <div class="sheet-sub">This bets your entire balance — <strong id="allin-sheet-amount">0</strong> credits — on <span id="allin-sheet-target">the next hand</span>.</div>
             <div class="sheet-stat">
-                <span class="sheet-stat-label">Potential on Full House</span>
+                <span class="sheet-stat-label" data-i18n="sheet.potentialOn">Potential on Full House</span>
                 <span class="sheet-stat-value" id="allin-sheet-potential">0</span>
             </div>
             <div class="allin-slider-track" id="allin-slider-track">
                 <div class="allin-slider-fill" id="allin-slider-fill"></div>
-                <span class="allin-slider-label">Slide to confirm</span>
+                <span class="allin-slider-label" data-i18n="sheet.slideToConfirm">Slide to confirm</span>
                 <div class="allin-slider-thumb" id="allin-slider-thumb">»</div>
             </div>
-            <button class="sheet-dismiss" onclick="closeAllInSheet()">Not now</button>
+            <button class="sheet-dismiss" onclick="closeAllInSheet()" data-i18n="modal.notNow">Not now</button>
         </div>
     </div>
 
     <!-- First-launch onboarding: welcome → hands → gameplay → leaderboard → push → signin -->
     <div class="onboarding-overlay hidden" id="onboarding-overlay">
+
+        <button class="ob-lang-chip" id="onboarding-lang-chip" onclick="openLanguageSheet()">
+            <span class="ob-lang-globe">🌐</span>
+            <span data-lang-current>English</span>
+        </button>
 
         <!-- Scrollable step content -->
         <div class="onboarding-content">
@@ -575,13 +605,13 @@
                             <span>Q</span><span class="ob-fan-suit">♠</span>
                         </div>
                     </div>
-                    <div class="ob-welcome-eyebrow">Social Casino</div>
-                    <div class="ob-welcome-title">Royal Video Poker</div>
-                    <div class="ob-welcome-subtitle">Five cards. One decision. Play with free chips — no real money, all the thrill.</div>
+                    <div class="ob-welcome-eyebrow" data-i18n="ob.eyebrow">Social Casino</div>
+                    <div class="ob-welcome-title" data-i18n="ob.welcomeTitle">Royal Video Poker</div>
+                    <div class="ob-welcome-subtitle" data-i18n="ob.welcomeSubtitle">Five cards. One decision. Play with free chips — no real money, all the thrill.</div>
                     <div class="ob-welcome-pills">
-                        <span class="ob-pill ob-pill--gold">5-Card Draw</span>
-                        <span class="ob-pill ob-pill--teal">Free Chips Daily</span>
-                        <span class="ob-pill">No Real Money</span>
+                        <span class="ob-pill ob-pill--gold" data-i18n="ob.pill5card">5-Card Draw</span>
+                        <span class="ob-pill ob-pill--teal" data-i18n="ob.pillFreeChips">Free Chips Daily</span>
+                        <span class="ob-pill" data-i18n="ob.pillNoRealMoney">No Real Money</span>
                     </div>
                 </div>
             </div>
@@ -589,8 +619,8 @@
             <!-- Step 2: Know Your Hands -->
             <div class="onboarding-step" id="onboarding-step-hands">
                 <div class="ob-screen">
-                    <div class="ob-screen-title">Know Your Hands</div>
-                    <div class="ob-screen-subtitle">Bigger hands pay bigger multipliers.</div>
+                    <div class="ob-screen-title" data-i18n="ob.knowYourHands">Know Your Hands</div>
+                    <div class="ob-screen-subtitle" data-i18n="ob.biggerHands">Bigger hands pay bigger multipliers.</div>
                     <div class="ob-hands-list">
                         <div class="ob-hand-row ob-hand-row--highlight">
                             <div class="ob-hand-cards">
@@ -601,7 +631,7 @@
                                 <div class="ob-mini-card">A♠</div>
                             </div>
                             <div class="ob-hand-info">
-                                <span class="ob-hand-name">Royal Flush</span>
+                                <span class="ob-hand-name" data-i18n="hand.royalFlush">Royal Flush</span>
                                 <span class="ob-hand-payout">250x</span>
                             </div>
                         </div>
@@ -614,7 +644,7 @@
                                 <div class="ob-mini-card ob-mini-card--red">9♥</div>
                             </div>
                             <div class="ob-hand-info">
-                                <span class="ob-hand-name">Straight Flush</span>
+                                <span class="ob-hand-name" data-i18n="hand.straightFlush">Straight Flush</span>
                                 <span class="ob-hand-payout">50x</span>
                             </div>
                         </div>
@@ -627,7 +657,7 @@
                                 <div class="ob-mini-card">4♣</div>
                             </div>
                             <div class="ob-hand-info">
-                                <span class="ob-hand-name">Four of a Kind</span>
+                                <span class="ob-hand-name" data-i18n="hand.fourOfKind">Four of a Kind</span>
                                 <span class="ob-hand-payout">20x</span>
                             </div>
                         </div>
@@ -640,7 +670,7 @@
                                 <div class="ob-mini-card">3♠</div>
                             </div>
                             <div class="ob-hand-info">
-                                <span class="ob-hand-name">Full House</span>
+                                <span class="ob-hand-name" data-i18n="hand.fullHouse">Full House</span>
                                 <span class="ob-hand-payout">7x</span>
                             </div>
                         </div>
@@ -653,38 +683,38 @@
                                 <div class="ob-mini-card">2♠</div>
                             </div>
                             <div class="ob-hand-info">
-                                <span class="ob-hand-name">Jacks or Better</span>
+                                <span class="ob-hand-name" data-i18n="hand.jacksOrBetter">Jacks or Better</span>
                                 <span class="ob-hand-payout">1x</span>
                             </div>
                         </div>
                     </div>
-                    <div class="ob-screen-note">Plus Flush, Straight, Three of a Kind, and Two Pair — nine winning hands in total.</div>
+                    <div class="ob-screen-note" data-i18n="ob.plusNote">Plus Flush, Straight, Three of a Kind, and Two Pair — nine winning hands in total.</div>
                 </div>
             </div>
 
             <!-- Step 3: Bet After You Decide -->
             <div class="onboarding-step" id="onboarding-step-gameplay">
                 <div class="ob-screen">
-                    <div class="ob-screen-title">Bet After You Decide</div>
-                    <div class="ob-screen-subtitle">See your cards, hold what you want, then set your bet before the draw.</div>
+                    <div class="ob-screen-title" data-i18n="ob.betAfterDecide">Bet After You Decide</div>
+                    <div class="ob-screen-subtitle" data-i18n="ob.seeCards">See your cards, hold what you want, then set your bet before the draw.</div>
                     <div class="ob-game-mockup">
                         <div class="ob-mockup-stats">
                             <div class="ob-mockup-stat">
-                                <span class="ob-mockup-stat-label">Balance</span>
+                                <span class="ob-mockup-stat-label" data-i18n="ob.balance">Balance</span>
                                 <span class="ob-mockup-stat-value">3,770</span>
                             </div>
                             <div class="ob-mockup-stat ob-mockup-stat--right">
-                                <span class="ob-mockup-stat-label">Total Bet</span>
+                                <span class="ob-mockup-stat-label" data-i18n="ob.totalBet">Total Bet</span>
                                 <span class="ob-mockup-stat-value">20</span>
                             </div>
                         </div>
                         <div class="ob-mockup-cards">
                             <div class="ob-mockup-card">
-                                <div class="ob-held-badge">HELD</div>
+                                <div class="ob-held-badge" data-i18n="ob.held">HELD</div>
                                 A♠
                             </div>
                             <div class="ob-mockup-card">
-                                <div class="ob-held-badge">HELD</div>
+                                <div class="ob-held-badge" data-i18n="ob.held">HELD</div>
                                 K♠
                             </div>
                             <div class="ob-mockup-card ob-mockup-card--red">7♦</div>
@@ -698,34 +728,34 @@
                             <div class="ob-mockup-bet">50</div>
                             <div class="ob-mockup-bet ob-mockup-bet--allin">
                                 ALL IN
-                                <span class="ob-allin-badge">1 left</span>
+                                <span class="ob-allin-badge" data-i18n="ob.allInLeftOne">1 left</span>
                             </div>
                         </div>
-                        <div class="ob-mockup-draw-btn">↻ Draw</div>
+                        <div class="ob-mockup-draw-btn"><span>↻ </span><span data-i18n="ob.draw">Draw</span></div>
                     </div>
-                    <div class="ob-screen-note">One free All-In per day — invite a friend to unlock another.</div>
+                    <div class="ob-screen-note" data-i18n="ob.oneFreeAllIn">One free All-In per day — invite a friend to unlock another.</div>
                 </div>
             </div>
 
             <!-- Step 4: Compete & Climb -->
             <div class="onboarding-step" id="onboarding-step-leaderboard">
                 <div class="ob-screen">
-                    <div class="ob-screen-title">Compete &amp; Climb</div>
-                    <div class="ob-screen-subtitle">Race Friends, Hourly, and Daily leaderboards for bonus chips.</div>
+                    <div class="ob-screen-title" data-i18n="ob.competeClimb">Compete &amp; Climb</div>
+                    <div class="ob-screen-subtitle" data-i18n="ob.raceLeaderboards">Race Friends, Hourly, and Daily leaderboards for bonus chips.</div>
                     <div class="ob-lb-tabs">
-                        <div class="ob-lb-tab ob-lb-tab--active">Friends</div>
-                        <div class="ob-lb-tab">Hourly</div>
-                        <div class="ob-lb-tab">Daily</div>
+                        <div class="ob-lb-tab ob-lb-tab--active" data-i18n="lb.friends">Friends</div>
+                        <div class="ob-lb-tab" data-i18n="lb.hourly">Hourly</div>
+                        <div class="ob-lb-tab" data-i18n="lb.daily">Daily</div>
                     </div>
                     <div class="ob-lb-header">
-                        <span>Friends · Today</span>
-                        <span class="ob-lb-you-badge">You're #1!</span>
+                        <span data-i18n="ob.friendsToday">Friends · Today</span>
+                        <span class="ob-lb-you-badge" data-i18n="ob.youAreFirst">You're #1!</span>
                     </div>
                     <div class="ob-lb-list">
                         <div class="ob-lb-row ob-lb-row--you">
                             <span class="ob-lb-rank">1</span>
                             <div class="ob-lb-avatar">Y</div>
-                            <span class="ob-lb-name">You</span>
+                            <span class="ob-lb-name" data-i18n="ob.you">You</span>
                             <span class="ob-lb-score">+100</span>
                         </div>
                         <div class="ob-lb-row">
@@ -753,7 +783,7 @@
                             <span class="ob-lb-score">+9</span>
                         </div>
                     </div>
-                    <div class="ob-screen-note">Also live: hourly and daily tournaments against every player in the app.</div>
+                    <div class="ob-screen-note" data-i18n="ob.alsoLive">Also live: hourly and daily tournaments against every player in the app.</div>
                 </div>
             </div>
 
@@ -761,34 +791,34 @@
             <div class="onboarding-step" id="onboarding-step-push">
                 <div class="ob-push">
                     <div class="ob-bell-circle">🔔</div>
-                    <div class="ob-push-title">Never Miss a Win</div>
-                    <div class="ob-push-subtitle">Get notified about tournament results, friend challenges, and daily bonuses.</div>
+                    <div class="ob-push-title" data-i18n="ob.neverMissWin">Never Miss a Win</div>
+                    <div class="ob-push-subtitle" data-i18n="ob.getNotified">Get notified about tournament results, friend challenges, and daily bonuses.</div>
                     <ul class="ob-checklist">
-                        <li><span class="ob-check-icon">✓</span> Daily bonus reminders</li>
-                        <li><span class="ob-check-icon">✓</span> Friend challenge alerts</li>
-                        <li><span class="ob-check-icon">✓</span> Tournament results</li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.dailyBonusReminders">Daily bonus reminders</span></li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.friendChallengeAlerts">Friend challenge alerts</span></li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.tournamentResults">Tournament results</span></li>
                     </ul>
-                    <button class="ob-enable-btn" onclick="onboardingEnableNotifications()">Enable Notifications</button>
-                    <button class="ob-not-now" onclick="advanceOnboarding()">Not Now</button>
+                    <button class="ob-enable-btn" onclick="onboardingEnableNotifications()" data-i18n="ob.enableNotifications">Enable Notifications</button>
+                    <button class="ob-not-now" onclick="advanceOnboarding()" data-i18n="ob.notNow">Not Now</button>
                 </div>
             </div>
 
             <!-- Step 6: Save Your Progress (sign-in) -->
             <div class="onboarding-step" id="onboarding-step-signin">
                 <div class="ob-signin">
-                    <div class="ob-signin-title">Save Your Progress</div>
-                    <div class="ob-signin-subtitle">Sign in to back up your chips and compete with friends.</div>
+                    <div class="ob-signin-title" data-i18n="ob.saveProgress">Save Your Progress</div>
+                    <div class="ob-signin-subtitle" data-i18n="ob.signInSync">Sign in to back up your chips and compete with friends.</div>
                     <ul class="ob-checklist">
-                        <li><span class="ob-check-icon">✓</span> Never lose your chips or progress</li>
-                        <li><span class="ob-check-icon">✓</span> Play across your phone and tablet</li>
-                        <li><span class="ob-check-icon">✓</span> Find friends by name automatically</li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.neverLose">Never lose your chips or progress</span></li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.playAcross">Play across your phone and tablet</span></li>
+                        <li><span class="ob-check-icon">✓</span> <span data-i18n="ob.findFriends">Find friends by name automatically</span></li>
                     </ul>
                     <div class="ob-signin-error hidden" id="onboarding-signin-error"></div>
                     <button class="ob-google-btn" onclick="onboardingSignIn('google')">
                         <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
-                        Continue with Google
+                        <span data-i18n="ob.continueGoogle">Continue with Google</span>
                     </button>
-                    <button class="ob-guest-link" onclick="finishOnboarding()">Continue as Guest</button>
+                    <button class="ob-guest-link" onclick="finishOnboarding()" data-i18n="ob.continueGuest">Continue as Guest</button>
                 </div>
             </div>
 
@@ -796,9 +826,9 @@
 
         <!-- Bottom navigation -->
         <div class="onboarding-nav">
-            <button class="onboarding-nav-arrow ob-hidden" id="onboarding-back" onclick="goBackOnboarding()" aria-label="Back">←</button>
+            <button class="onboarding-nav-arrow ob-hidden" id="onboarding-back" onclick="goBackOnboarding()" aria-label="Back" data-i18n-aria-label="ob.back">←</button>
             <div class="onboarding-dots" id="onboarding-dots"></div>
-            <button class="onboarding-nav-arrow onboarding-nav-arrow--next" id="onboarding-next" onclick="advanceOnboarding()" aria-label="Next">→</button>
+            <button class="onboarding-nav-arrow onboarding-nav-arrow--next" id="onboarding-next" onclick="advanceOnboarding()" aria-label="Next" data-i18n-aria-label="ob.next">→</button>
         </div>
 
     </div>

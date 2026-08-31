@@ -1304,3 +1304,56 @@
     cursor: pointer;
     font-family: inherit;
 }
+
+/* ── Language picker ──
+   Shared bottom sheet opened from the onboarding chip and the Settings row.
+   14 options need their own scroll region so the sheet never outgrows the
+   viewport on a short phone. */
+.language-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: min(52vh, 420px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 16px;
+    padding-right: 2px;
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    border-radius: 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15.5px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+}
+
+.language-option:active {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.language-option.selected {
+    background: rgba(22, 193, 114, 0.12);
+    border-color: rgba(22, 193, 114, 0.45);
+    font-weight: 700;
+}
+
+.language-option-check {
+    color: var(--green);
+    font-size: 15px;
+    opacity: 0;
+}
+
+.language-option.selected .language-option-check {
+    opacity: 1;
+}

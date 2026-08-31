@@ -368,10 +368,6 @@
     color: rgba(255, 107, 170, 0.65);
 }
 
-.allin-badge::after {
-    content: ' left';
-}
-
 .bet-btn-allin.selected {
     background: rgba(22, 193, 114, 0.22);
     border-color: transparent;

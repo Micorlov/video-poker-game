@@ -74,8 +74,16 @@
     --nav-height: 78px;
     --nav-gap: 30px;
 
-    --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui, sans-serif;
-    --font-body: 'Instrument Sans', system-ui, 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    --font-display: 'Bricolage Grotesque', 'Instrument Sans', system-ui,
+                    'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC',
+                    sans-serif;
+    /* The UI ships 14 LTR languages, but user-supplied names (Google display
+       names, friend names) can be in any script — the Hebrew and Arabic
+       fallbacks stay for that reason even though neither is a UI language. */
+    --font-body: 'Instrument Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                 'Noto Sans', 'Noto Sans Devanagari', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans SC',
+                 'Noto Sans Hebrew', 'Noto Sans Arabic',
+                 sans-serif;
 }
 
 /* --- Blue theme: same night glass, cooler action colour --- */

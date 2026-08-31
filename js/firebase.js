@@ -127,7 +127,7 @@ function showSignInError(message) {
     if (overlay && !overlay.classList.contains('hidden')) {
         const guestLink = document.querySelector('.ob-guest-link');
         if (guestLink && guestLink.classList.contains('hidden')) {
-            guestLink.textContent = 'Having trouble? Play as guest for now';
+            guestLink.textContent = t('firebase.havingTrouble');
             guestLink.classList.remove('hidden');
         }
     }
@@ -313,7 +313,7 @@ if (auth) {
             // stays parked in _pendingJoinCode and is replayed above on success.
             if (window._pendingJoinCode) {
                 if (window.openSignInModal) openSignInModal();
-                if (window.showToast) showToast('Sign in to join the daily game!');
+                if (window.showToast) showToast(t('toast.signInDailyGame'));
             }
             if (isNativeApp()) {
                 if (window.cleanupLeaderboards) cleanupLeaderboards();

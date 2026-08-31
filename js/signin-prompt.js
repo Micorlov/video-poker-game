@@ -64,12 +64,8 @@ function maybeShowSigninPrompt(trigger) {
     const body = document.getElementById('signin-prompt-body');
     if (!modal || !body) return;
 
-    const coins = (typeof balance === 'number' ? balance : 0).toLocaleString();
-    body.textContent = trigger === 'big_win'
-        ? 'Nice hit! You now have ' + coins + ' coins — saved on this device only. ' +
-          'Lose the phone, lose the chips. Back them up free with Google.'
-        : 'You have ' + coins + ' coins on this device only. ' +
-          'Sign in once and they follow you anywhere.';
+    const coins = formatNumber(typeof balance === 'number' ? balance : 0);
+    body.textContent = t(trigger === 'big_win' ? 'prompt.bigWin' : 'prompt.session', { coins: coins });
 
     signinPromptTrigger = trigger;
     signinPromptShownThisSession = true;

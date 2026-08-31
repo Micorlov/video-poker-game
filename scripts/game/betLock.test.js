@@ -15,6 +15,11 @@ const vm = require('node:vm');
 
 const GAME_JS = path.join(__dirname, '..', '..', 'js', 'game.js');
 const REFERRAL_JS = path.join(__dirname, '..', '..', 'js', 'referral.js');
+// game.js renders every label through the i18n layer, so the real engine and
+// the English dictionary are loaded here rather than stubbed — a stubbed t()
+// would hide a broken key lookup.
+const I18N_JS = path.join(__dirname, '..', '..', 'js', 'i18n.js');
+const LANG_EN_JS = path.join(__dirname, '..', '..', 'js', 'lang', 'en.js');
 
 // game.js reads STARTING_BALANCE from js/referral.js (both share one script
 // scope in the built bundle) — extract the real declaration rather than
@@ -100,7 +105,15 @@ function makeSandbox() {
         renderStatsScreen: () => {},
         showToast: () => {},
         triggerHaptic: () => {},
-        triggerWinCelebration: () => {}
+        triggerWinCelebration: () => {},
+
+        // Needed by js/i18n.js (Intl for number formatting and plural rules).
+        Intl,
+        Object,
+        Number,
+        String,
+        Array,
+        isFinite
     };
     sandbox.window = sandbox;
     sandbox.globalThis = sandbox;
@@ -121,6 +134,9 @@ globalThis.__setGameState = function (v) { gameState = v; };
 function loadGame() {
     const sandbox = makeSandbox();
     const context = vm.createContext(sandbox);
+    // Same order as build.js: i18n first, then its dictionary, then game.js.
+    vm.runInContext(fs.readFileSync(I18N_JS, 'utf8'), context, { filename: 'i18n.js' });
+    vm.runInContext(fs.readFileSync(LANG_EN_JS, 'utf8'), context, { filename: 'en.js' });
     const source = STARTING_BALANCE_DECL + '\n' + fs.readFileSync(GAME_JS, 'utf8') + PROBE;
     vm.runInContext(source, context, { filename: 'game.js' });
     return sandbox;

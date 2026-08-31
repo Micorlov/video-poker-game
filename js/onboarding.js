@@ -100,8 +100,8 @@ function renderOnboardingDots() {
 
 // The first screen names the reward rather than the direction — it is the
 // only place the chip grant is promised, so it earns the full-width label.
-const ONBOARDING_NEXT_LABELS = {
-    welcome: 'Start with 1,000 chips'
+const ONBOARDING_NEXT_LABEL_KEYS = {
+    welcome: 'ob.startWithChips'
 };
 
 function updateOnboardingNav() {
@@ -115,7 +115,10 @@ function updateOnboardingNav() {
     // Next: hidden on last screen (sign-in CTAs take over)
     nextBtn.classList.toggle('ob-hidden', onboardingIndex === ONBOARDING_STEPS.length - 1);
 
-    nextBtn.textContent = ONBOARDING_NEXT_LABELS[ONBOARDING_STEPS[onboardingIndex]] || 'Next';
+    const labelKey = ONBOARDING_NEXT_LABEL_KEYS[ONBOARDING_STEPS[onboardingIndex]];
+    nextBtn.textContent = labelKey
+        ? t(labelKey, { chips: formatNumber(STARTING_BALANCE) })
+        : t('ob.next');
 }
 
 function showOnboardingStep(index) {
@@ -124,6 +127,7 @@ function showOnboardingStep(index) {
         if (el) el.classList.toggle('active', i === index);
     });
     onboardingIndex = index;
+    document.body.classList.toggle('ob-step-welcome', ONBOARDING_STEPS[index] === 'welcome');
     if (window.logVpEvent) logVpEvent('onboarding_step', { step: ONBOARDING_STEPS[index] });
     if (ONBOARDING_STEPS[index] === 'push') markPushPermissionAsked();
     renderOnboardingDots();
@@ -155,6 +159,7 @@ function goBackOnboarding() {
 
 function finishOnboarding() {
     markOnboardingSeen();
+    document.body.classList.remove('ob-step-welcome');
     const overlay = document.getElementById('onboarding-overlay');
     if (overlay) overlay.classList.add('hidden');
     showScreen('play');
@@ -194,6 +199,8 @@ function showOnboardingForReauth() {
     showOnboardingStep(0);
     overlay.classList.remove('hidden');
 }
+
+if (window.vpOnLanguageChange) vpOnLanguageChange(updateOnboardingNav);
 
 window.initOnboarding = initOnboarding;
 window.advanceOnboarding = advanceOnboarding;

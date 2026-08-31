@@ -91,7 +91,7 @@ function recordReferralJoin(code, inviterUid) {
             if (doc.exists) return false;
             return rowRef.set({
                 referredUid: user.uid,
-                referredName: user.displayName || 'Player',
+                referredName: user.displayName || t('common.player'),
                 inviterUid: inviterUid,
                 code: code,
                 provider: 'google.com',
@@ -127,7 +127,7 @@ function creditInviteeWelcomeCoins() {
     if (balanceEl) balanceEl.textContent = balance;
     if (window.saveGameState) saveGameState();
     if (window.pushNetProfit) pushNetProfit();
-    showToast('🎁 Your friend sent you ' + REFERRAL_INVITEE_COINS.toLocaleString() + ' coins — welcome to the table!');
+    showToast(t('toast.referralWelcome', { amount: formatNumber(REFERRAL_INVITEE_COINS) }));
 }
 
 // Live subscription rather than a one-shot read, so an inviter watching the
@@ -201,9 +201,9 @@ function creditReferralCoins(claimed) {
     if (window.pushNetProfit) pushNetProfit();
 
     const who = claimed.length === 1
-        ? claimed[0].name + ' joined'
-        : claimed.length + ' friends joined';
-    showToast('🎁 ' + who + ' — +' + total + ' coins!');
+        ? t('referral.oneJoined', { name: claimed[0].name })
+        : t('referral.manyJoined', { count: claimed.length });
+    showToast(t('toast.referralClaimed', { who: who, amount: formatNumber(total) }));
     if (window.logVpEvent) logVpEvent('referral_claimed', { coins: total });
 }
 
@@ -222,18 +222,27 @@ function renderInviteRewardLine() {
     let text;
     const n = referralStats.invited;
     if (!n) {
-        text = '1 of 3 seats filled — you hold the first. You get ' +
-            REFERRAL_REWARD_COINS.toLocaleString() + ' coins per friend, they get ' +
-            REFERRAL_INVITEE_COINS.toLocaleString() + '.';
+        text = t('referral.seatsFirst', {
+            reward: formatNumber(REFERRAL_REWARD_COINS),
+            invitee: formatNumber(REFERRAL_INVITEE_COINS)
+        });
     } else if (n < 3) {
-        text = (n + 1) + ' of 3 seats filled · ' +
-            referralStats.coinsEarned.toLocaleString() + ' coins earned';
+        text = t('referral.seatsProgress', {
+            filled: n + 1,
+            earned: formatNumber(referralStats.coinsEarned)
+        });
     } else {
-        text = 'Table regular — ' + n + ' friends joined · ' +
-            referralStats.coinsEarned.toLocaleString() + ' coins earned';
+        text = t('referral.tableRegular', {
+            count: n,
+            earned: formatNumber(referralStats.coinsEarned)
+        });
     }
     ['invite-reward-line', 'friends-invite-reward'].forEach(function(id) {
         const el = document.getElementById(id);
         if (el) el.textContent = text;
     });
+}
+
+if (window.vpOnLanguageChange) {
+    vpOnLanguageChange(renderInviteRewardLine);
 }
