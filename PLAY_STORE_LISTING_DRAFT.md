@@ -6,7 +6,9 @@ Draft only — nothing here has been submitted to Play Console. Review and edit,
 
 ## 1. Store Listing
 
-> Updated 2026-08-28 (ASO pass for the "video poker" search term) — this copy is LIVE on the en-US listing, pushed via the Play API. The installed APK label stays "Video Poker" (strings.xml), unchanged on purpose.
+> Updated 2026-08-31 (localization ASO pass) — this copy is LIVE on the en-US listing, pushed via the Play API. The installed APK label stays "Video Poker" (strings.xml), unchanged on purpose.
+>
+> **Localized listings are also LIVE in all 15 non-English app languages** (es-ES, pt-BR, de-DE, fr-FR, it-IT, pl-PL, ru-RU, tr-TR, id, hi-IN, ja-JP, ko-KR, zh-CN, iw-IL, ar), each with a translated title (keeping the "Video Poker"/local transliteration + "Jacks or Better" keyword pattern), short description, and full description mirroring the en-US structure below. Hebrew and Arabic listings additionally call out the full right-to-left layout. Graphics fall back to the default (en-US) set — localized screenshots not yet produced.
 
 **App name (store title, 28/30 chars):** Video Poker: Jacks or Better
 
@@ -31,6 +33,12 @@ This isn't solo video poker. Every hand you win moves you up the hourly and dail
 
 CHALLENGE YOUR FRIENDS
 Sign in with Google or Facebook, add friends, and see exactly who's the best video poker player in your crew. Create or join rooms to play at the same table and climb the leaderboard together.
+
+PLAY IN YOUR LANGUAGE
+Royal Video Poker speaks 16 languages: English, Spanish, Portuguese, German, French, Italian, Polish, Russian, Turkish, Indonesian, Hindi, Japanese, Korean, Chinese, Hebrew, and Arabic — with full right-to-left layouts. The game automatically matches your device language.
+
+YOUR PROGRESS, SAFE IN THE CLOUD
+Sign in once and your chips, levels, and stats are backed up automatically — switch phones and pick up right where you left off.
 
 DAILY FREE CHIPS & REWARDS
 Come back every day for free bonus chips, streak bonuses, and level progression.
