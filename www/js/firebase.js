@@ -243,6 +243,7 @@ if (auth) {
         // "signed out" and pop the sign-in modal. See handleJoinDeepLink().
         window._authResolved = true;
         window.egUser = user || null;
+        if (window.isNativeApp && isNativeApp() && window.applyDefaultLeaderboardTab) applyDefaultLeaderboardTab();
         if (window.closeSignInModal) closeSignInModal();
         if (user && window.closeSigninPromptModal) closeSigninPromptModal();
         if (window.updateAccountUI) updateAccountUI();

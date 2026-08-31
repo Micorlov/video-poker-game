@@ -4216,9 +4216,9 @@ body.screen-shake {
             <!-- Native apps (Android/iOS) only: unified Leaderboards panel — Friends (daily) -> Global Hourly -> Global Daily -->
             <div class="panel nearby-panel leaderboard-panel hidden" id="leaderboard-panel">
                 <div class="lb-tabs">
-                    <button class="lb-tab selected" id="lb-tab-friends" onclick="setLeaderboardTab('friends')">Friends</button>
-                    <button class="lb-tab" id="lb-tab-hourly" onclick="setLeaderboardTab('hourly')">Hourly</button>
-                    <button class="lb-tab" id="lb-tab-daily" onclick="setLeaderboardTab('daily')">Daily</button>
+                    <button class="lb-tab selected" id="lb-tab-friends" onclick="setLeaderboardTab('friends', true)">Friends</button>
+                    <button class="lb-tab" id="lb-tab-hourly" onclick="setLeaderboardTab('hourly', true)">Hourly</button>
+                    <button class="lb-tab" id="lb-tab-daily" onclick="setLeaderboardTab('daily', true)">Daily</button>
                 </div>
                 <div class="panel-head" id="lb-panel-head">
                     <span class="panel-title" id="lb-title">Friends · Today</span>
@@ -5682,6 +5682,7 @@ if (auth) {
         // "signed out" and pop the sign-in modal. See handleJoinDeepLink().
         window._authResolved = true;
         window.egUser = user || null;
+        if (window.isNativeApp && isNativeApp() && window.applyDefaultLeaderboardTab) applyDefaultLeaderboardTab();
         if (window.closeSignInModal) closeSignInModal();
         if (user && window.closeSigninPromptModal) closeSigninPromptModal();
         if (window.updateAccountUI) updateAccountUI();
@@ -8220,6 +8221,7 @@ const LEADERBOARD_TAB_TITLES = {
 };
 
 let leaderboardTab = 'friends';
+let leaderboardTabUserSet = false;
 let leaderboardExpanded = false;
 let hourlyBoardList = [];
 let dailyBoardList = [];
@@ -8422,14 +8424,25 @@ function rankedFriendsDaily() {
 }
 
 // --- Tab switching + expand ---
-function setLeaderboardTab(tab) {
+function setLeaderboardTab(tab, isUserAction) {
     leaderboardTab = tab;
+    if (isUserAction) leaderboardTabUserSet = true;
     leaderboardExpanded = false;
     ['friends', 'hourly', 'daily'].forEach(function(t) {
         const btn = document.getElementById('lb-tab-' + t);
         if (btn) btn.classList.toggle('selected', t === tab);
     });
     renderLeaderboardPanel();
+}
+
+// Guests land on Daily (visible without needing Friends data); signed-in
+// players keep the existing Friends default. Re-applied once auth settles
+// so a returning signed-in user isn't stuck on the guest default from the
+// brief window before onAuthStateChanged fires. Never overrides a tab the
+// player already picked by hand.
+function applyDefaultLeaderboardTab() {
+    if (leaderboardTabUserSet) return;
+    setLeaderboardTab(window.egUser ? 'friends' : 'daily');
 }
 
 function toggleLeaderboardExpand() {
@@ -10859,7 +10872,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderFriendsScreen();
     renderPlayFriendsWidgets();
     if (window.applyLeaderboardPlatformUI) applyLeaderboardPlatformUI();
-    if (window.isNativeApp && isNativeApp() && window.setLeaderboardTab) setLeaderboardTab('friends');
+    if (window.isNativeApp && isNativeApp() && window.applyDefaultLeaderboardTab) applyDefaultLeaderboardTab();
     if (window.initOnboarding) initOnboarding(); else showScreen('play');
     initPwa();
     // Handle deep links: ?ref=CODE (add friend) and ?join=ROOMCODE (daily game).

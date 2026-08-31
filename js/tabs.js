@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderFriendsScreen();
     renderPlayFriendsWidgets();
     if (window.applyLeaderboardPlatformUI) applyLeaderboardPlatformUI();
-    if (window.isNativeApp && isNativeApp() && window.setLeaderboardTab) setLeaderboardTab('friends');
+    if (window.isNativeApp && isNativeApp() && window.applyDefaultLeaderboardTab) applyDefaultLeaderboardTab();
     if (window.initOnboarding) initOnboarding(); else showScreen('play');
     initPwa();
     // Handle deep links: ?ref=CODE (add friend) and ?join=ROOMCODE (daily game).

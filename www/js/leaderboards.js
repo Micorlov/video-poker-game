@@ -36,6 +36,7 @@ const LEADERBOARD_TAB_TITLES = {
 };
 
 let leaderboardTab = 'friends';
+let leaderboardTabUserSet = false;
 let leaderboardExpanded = false;
 let hourlyBoardList = [];
 let dailyBoardList = [];
@@ -238,14 +239,25 @@ function rankedFriendsDaily() {
 }
 
 // --- Tab switching + expand ---
-function setLeaderboardTab(tab) {
+function setLeaderboardTab(tab, isUserAction) {
     leaderboardTab = tab;
+    if (isUserAction) leaderboardTabUserSet = true;
     leaderboardExpanded = false;
     ['friends', 'hourly', 'daily'].forEach(function(t) {
         const btn = document.getElementById('lb-tab-' + t);
         if (btn) btn.classList.toggle('selected', t === tab);
     });
     renderLeaderboardPanel();
+}
+
+// Guests land on Daily (visible without needing Friends data); signed-in
+// players keep the existing Friends default. Re-applied once auth settles
+// so a returning signed-in user isn't stuck on the guest default from the
+// brief window before onAuthStateChanged fires. Never overrides a tab the
+// player already picked by hand.
+function applyDefaultLeaderboardTab() {
+    if (leaderboardTabUserSet) return;
+    setLeaderboardTab(window.egUser ? 'friends' : 'daily');
 }
 
 function toggleLeaderboardExpand() {
