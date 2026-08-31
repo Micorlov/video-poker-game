@@ -33,8 +33,8 @@ vpRegisterLang('pt-BR', {
     'play.winResult': '🎉 {{hand}}! +{{win}} créditos! 🎉',
     'play.nothingResult': 'Nada — {{cards}}',
     'play.payoutBonus': '+{{percent}}% de bônus no prêmio',
-    'play.thisHand': 'esta mão',
-    'play.theNextHand': 'a próxima mão',
+    'play.thisHand': 'nesta mão',
+    'play.theNextHand': 'na próxima mão',
     'play.unlockAt': 'Desbloquear · {{level}}',
 
     'stats.title': 'Estatísticas',
@@ -146,7 +146,7 @@ vpRegisterLang('pt-BR', {
     'sheet.allInInviteBtn': 'Convidar um amigo',
     'sheet.goAllIn': 'Apostar TUDO',
     'sheet.allInEyebrow': 'Usos diários limitados',
-    'sheet.allInSub': 'Isto aposta todo o seu saldo — {{amount}} créditos — em {{target}}.',
+    'sheet.allInSub': 'Isto aposta todo o seu saldo — {{amount}} créditos — {{target}}.',
     'sheet.potentialOn': 'Potencial com Full House',
     'sheet.slideToConfirm': 'Deslize para confirmar',
 
