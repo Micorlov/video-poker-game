@@ -1,66 +1,76 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <linearGradient id="bg" x1="12%" y1="0%" x2="88%" y2="100%">
-      <stop offset="0%"   stop-color="#12432C"/>
-      <stop offset="52%"  stop-color="#0A2A1B"/>
-      <stop offset="100%" stop-color="#04100C"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="34%" r="58%">
-      <stop offset="0%"   stop-color="#58E39B" stop-opacity="0.42"/>
-      <stop offset="52%"  stop-color="#16C172" stop-opacity="0.12"/>
-      <stop offset="100%" stop-color="#16C172" stop-opacity="0"/>
+    <radialGradient id="bg" cx="50%" cy="38%" r="80%">
+      <stop offset="0%"   stop-color="#155C39"/>
+      <stop offset="45%"  stop-color="#0C3A24"/>
+      <stop offset="100%" stop-color="#041108"/>
     </radialGradient>
-    <radialGradient id="vignette" cx="50%" cy="52%" r="74%">
-      <stop offset="58%"  stop-color="#000000" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
+    <radialGradient id="glow" cx="50%" cy="36%" r="56%">
+      <stop offset="0%"   stop-color="#FFE9A8" stop-opacity="0.98"/>
+      <stop offset="36%"  stop-color="#FFC94B" stop-opacity="0.6"/>
+      <stop offset="70%"  stop-color="#E9A62A" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#E9A62A" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#F6E4B8"/>
-      <stop offset="48%"  stop-color="#E9C46A"/>
-      <stop offset="100%" stop-color="#C99C33"/>
-    </linearGradient>
     <linearGradient id="face" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%"   stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#E8ECF4"/>
+      <stop offset="0%"   stop-color="#FFFEF9"/>
+      <stop offset="100%" stop-color="#F1E8D3"/>
+    </linearGradient>
+    <linearGradient id="redSuit" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#FF4E63"/>
+      <stop offset="55%"  stop-color="#E5203C"/>
+      <stop offset="100%" stop-color="#B80E2C"/>
+    </linearGradient>
+    <linearGradient id="sparkGold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#FFF3C4"/>
+      <stop offset="100%" stop-color="#F0B429"/>
     </linearGradient>
     <filter id="drop" x="-60%" y="-60%" width="220%" height="220%">
-      <feDropShadow dx="0" dy="26" stdDeviation="30" flood-color="#000000" flood-opacity="0.55"/>
+      <feDropShadow dx="0" dy="22" stdDeviation="26" flood-color="#000000" flood-opacity="0.5"/>
     </filter>
     <path id="spade" d="M50 4 C50 4 17 34 8 51 C-1 68 7 84 24 84 C34 84 43 79 47 71 C47 71 45 88 32 96 L68 96 C55 88 53 71 53 71 C57 79 66 84 76 84 C93 84 101 68 92 51 C83 34 50 4 50 4 Z"/>
     <path id="heart" d="M50 95 C50 95 5 61 5 34 C5 17 18 8 31 8 C41 8 47 14 50 21 C53 14 59 8 69 8 C82 8 95 17 95 34 C95 61 50 95 50 95 Z"/>
+    <path id="diamond" d="M50 2 L88 50 L50 98 L12 50 Z"/>
+    <path id="spark" d="M50 0 C54 30 60 40 100 50 C60 60 54 70 50 100 C46 70 40 60 0 50 C40 40 46 30 50 0 Z"/>
   </defs>
 
-  <!-- Ground. rx is substituted per output: 0 for the Play listing (Play masks its
-       own corners), 228 for the legacy launcher PNGs that are drawn unmasked. -->
-  <rect width="1024" height="1024" rx="0" fill="url(#bg)"/>
-  <rect width="1024" height="1024" rx="0" fill="url(#glow)"/>
-  <rect width="1024" height="1024" rx="0" fill="url(#vignette)"/>
-
-  <!-- Gold frame, inset far enough that Play's corner mask cannot clip it. -->
-  <rect x="70" y="70" width="884" height="884" rx="160" fill="none" stroke="url(#gold)" stroke-width="26"/>
-  <rect x="96" y="96" width="832" height="832" rx="136" fill="none" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="3"/>
+  <!-- Ground -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <!-- Jackpot light bursting from behind the fan -->
+  <rect width="1024" height="1024" fill="url(#glow)"/>
 
   <g filter="url(#drop)">
-    <g transform="translate(360,774) rotate(-21)">
-      <g transform="translate(-158,-448)">
-        <rect x="0" y="0" width="316" height="448" rx="42" fill="url(#face)" stroke="#06180F" stroke-width="11"/>
-        <text x="42" y="150" font-family="'Instrument Sans','Helvetica Neue',Arial,sans-serif" font-size="150" font-weight="800" fill="#101322">K</text>
-        <use href="#spade" transform="translate(96,236) scale(1.24)" fill="#101322"/>
+    <!-- Left card: A spade -->
+    <g transform="translate(280,742) rotate(-22)">
+      <g transform="translate(-190,-390)">
+        <rect x="0" y="0" width="380" height="780" rx="48" fill="url(#face)" stroke="#06180F" stroke-width="13"/>
+        <text x="46" y="182" font-family="'Helvetica Neue',Arial,sans-serif" font-size="175" font-weight="800" fill="#131625">A</text>
+        <use href="#spade" transform="translate(104,272) scale(1.72)" fill="#131625"/>
       </g>
     </g>
-    <g transform="translate(664,774) rotate(21)">
-      <g transform="translate(-158,-448)">
-        <rect x="0" y="0" width="316" height="448" rx="42" fill="url(#face)" stroke="#06180F" stroke-width="11"/>
-        <text x="42" y="150" font-family="'Instrument Sans','Helvetica Neue',Arial,sans-serif" font-size="150" font-weight="800" fill="#E01B44">A</text>
-        <use href="#heart" transform="translate(96,240) scale(1.24)" fill="#E01B44"/>
+    <!-- Right card: K diamond -->
+    <g transform="translate(744,742) rotate(22)">
+      <g transform="translate(-190,-390)">
+        <rect x="0" y="0" width="380" height="780" rx="48" fill="url(#face)" stroke="#06180F" stroke-width="13"/>
+        <text x="46" y="182" font-family="'Helvetica Neue',Arial,sans-serif" font-size="175" font-weight="800" fill="#D01535">K</text>
+        <use href="#diamond" transform="translate(104,268) scale(1.72)" fill="url(#redSuit)"/>
       </g>
     </g>
-    <g transform="translate(512,756)">
-      <g transform="translate(-172,-486)">
-        <rect x="0" y="0" width="344" height="486" rx="46" fill="url(#face)" stroke="#06180F" stroke-width="12"/>
-        <text x="44" y="164" font-family="'Instrument Sans','Helvetica Neue',Arial,sans-serif" font-size="166" font-weight="800" fill="#101322">A</text>
-        <use href="#spade" transform="translate(100,252) scale(1.44)" fill="#101322"/>
+    <!-- Front card: A heart, the hero -->
+    <g transform="translate(512,712) rotate(-5)">
+      <g transform="translate(-220,-425)">
+        <rect x="0" y="0" width="440" height="850" rx="52" fill="url(#face)" stroke="#06180F" stroke-width="14"/>
+        <text x="50" y="202" font-family="'Helvetica Neue',Arial,sans-serif" font-size="198" font-weight="800" fill="#D01535">A</text>
+        <use href="#heart" transform="translate(88,258) scale(2.65)" fill="url(#redSuit)"/>
+        <!-- gloss on the heart -->
+        <ellipse cx="178" cy="342" rx="48" ry="27" fill="#FFFFFF" opacity="0.35" transform="rotate(-18 178 342)"/>
       </g>
     </g>
   </g>
+
+  <!-- Sparkles: the win about to happen -->
+  <use href="#spark" transform="translate(206,118) scale(1.0)" fill="url(#sparkGold)"/>
+  <use href="#spark" transform="translate(742,96) scale(0.75)" fill="url(#sparkGold)"/>
+  <use href="#spark" transform="translate(910,258) scale(0.48)" fill="url(#sparkGold)" opacity="0.9"/>
+  <use href="#spark" transform="translate(66,330) scale(0.42)" fill="url(#sparkGold)" opacity="0.85"/>
+  <use href="#spark" transform="translate(560,40) scale(0.4)" fill="url(#sparkGold)" opacity="0.8"/>
 </svg>
