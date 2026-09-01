@@ -6,7 +6,7 @@ Draft only — nothing here has been submitted to Play Console. Review and edit,
 
 ## 1. Store Listing
 
-> Updated 2026-08-31 (localization ASO pass) — this copy is LIVE on the en-US listing, pushed via the Play API. The installed APK label stays "Video Poker" (strings.xml), unchanged on purpose.
+> Updated 2026-09-01 — replaced the "DAILY FREE CHIPS & REWARDS" section (it promised a daily bonus the app doesn't grant; see FEATURES.md gap #2) with an accurate "FREE CHIPS, WIN STREAKS & LEVELS" section. This en-US change is NOT yet pushed to the Play API — the live en-US listing and all 15 localized listings still carry the old wording. The installed APK label stays "Video Poker" (strings.xml), unchanged on purpose.
 >
 > **Localized listings are also LIVE in all 15 non-English app languages** (es-ES, pt-BR, de-DE, fr-FR, it-IT, pl-PL, ru-RU, tr-TR, id, hi-IN, ja-JP, ko-KR, zh-CN, iw-IL, ar), each with a translated title (keeping the "Video Poker"/local transliteration + "Jacks or Better" keyword pattern), short description, and full description mirroring the en-US structure below. Hebrew and Arabic listings additionally call out the full right-to-left layout.
 >
@@ -42,8 +42,8 @@ Royal Video Poker speaks 16 languages: English, Spanish, Portuguese, German, Fre
 YOUR PROGRESS, SAFE IN THE CLOUD
 Sign in once and your chips, levels, and stats are backed up automatically — switch phones and pick up right where you left off.
 
-DAILY FREE CHIPS & REWARDS
-Come back every day for free bonus chips, streak bonuses, and level progression.
+FREE CHIPS, WIN STREAKS & LEVELS
+Never go bust — free chip top-ups keep you in the game. Build win streaks for payout bonuses up to +50%, level up to unlock new poker variants, and come back daily for your free ALL IN mega-bet.
 
 INVITE FRIENDS, EARN CHIPS
 Invite a friend to play and you both earn bonus chips when they join.
