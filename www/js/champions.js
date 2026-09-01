@@ -30,7 +30,7 @@ function pushChampionPoints(handType, win) {
     const hourKey = getHourKey();
     firebaseSafe(function() {
         return db.collection('hourly').doc(hourKey).collection('entries').doc(user.uid).set({
-            displayName: user.displayName || 'Player',
+            displayName: user.displayName || t('common.player'),
             country: getCountry(),
             points: firebase.firestore.FieldValue.increment(points),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -79,7 +79,7 @@ function renderChampionsTimer() {
     if (!el) return;
     const now = new Date();
     const minsLeft = 59 - now.getUTCMinutes();
-    el.textContent = 'Resets in ' + minsLeft + 'm';
+    el.textContent = t('common.resetsInM', { m: minsLeft });
 }
 
 function renderChampionsPanel() {
@@ -109,7 +109,7 @@ function renderChampionsPanel() {
     if (!displayList.length) {
         const row = document.createElement('div');
         row.className = 'nearby-row';
-        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">No champions yet this hour — be the first!</span>';
+        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">' + t('champ.noChampionsYet') + '</span>';
         bodyEl.appendChild(row);
         return;
     }
@@ -126,7 +126,7 @@ function renderChampionsPanel() {
                 '<span class="nearby-avatar champ">' + (ch.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
                 '<span class="online-dot"></span>' +
             '</span>' +
-            '<span class="nearby-name">' + (ch.displayName || 'Player') +
+            '<span class="nearby-name">' + (ch.displayName || t('common.player')) +
                 (ch.country ? '<span class="country-flag">' + countryToFlag(ch.country) + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net positive">' + (ch.points || 0) + ' pts</span>';
@@ -139,4 +139,11 @@ function cleanupChampions() {
     if (championsUnsubscribe) { championsUnsubscribe(); championsUnsubscribe = null; }
     if (champTimerInterval) { clearInterval(champTimerInterval); champTimerInterval = null; }
     championsList = [];
+}
+
+if (window.vpOnLanguageChange) {
+    vpOnLanguageChange(function() {
+        renderChampionsPanel();
+        renderChampionsTimer();
+    });
 }

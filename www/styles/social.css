@@ -46,7 +46,7 @@
 .bracelet-badge {
     position: absolute;
     bottom: -2px;
-    right: -2px;
+    inset-inline-end: -2px;
     width: 18px;
     height: 18px;
     border-radius: 50%;
@@ -368,7 +368,7 @@
 .online-dot {
     position: absolute;
     bottom: 0;
-    right: 0;
+    inset-inline-end: 0;
     width: 10px;
     height: 10px;
     border-radius: 50%;
@@ -420,7 +420,7 @@
     font-size: 13px;
     font-weight: 700;
     min-width: 58px;
-    text-align: right;
+    text-align: end;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
     flex-shrink: 0;
@@ -832,7 +832,7 @@
     font-size: 12px;
     color: var(--text-muted);
     width: 38px;
-    text-align: right;
+    text-align: end;
     flex-shrink: 0;
 }
 
@@ -840,7 +840,7 @@
     font-size: 13px;
     font-weight: 700;
     width: 58px;
-    text-align: right;
+    text-align: end;
     font-variant-numeric: tabular-nums;
     flex-shrink: 0;
 }
@@ -1020,7 +1020,7 @@
     padding: 8px 14px;
     cursor: pointer;
     font-family: inherit;
-    text-align: left;
+    text-align: start;
     transition: border-color 0.2s, transform 0.1s;
 }
 
@@ -1075,7 +1075,7 @@
 .tab-badge {
     display: inline-block;
     min-width: 17px;
-    margin-left: 6px;
+    margin-inline-start: 6px;
     padding: 1px 5px;
     border-radius: 999px;
     background: var(--green);
@@ -1092,7 +1092,7 @@
 .nav-badge {
     position: absolute;
     top: 6px;
-    right: 22%;
+    inset-inline-end: 22%;
     min-width: 16px;
     padding: 1px 4px;
     border-radius: 999px;
@@ -1111,7 +1111,7 @@
     gap: 10px;
     background: var(--surface-raised);
     border: 1px solid var(--green-line);
-    border-left: 3px solid var(--green);
+    border-inline-start: 3px solid var(--green);
     border-radius: var(--radius-sm, 16px);
     padding: 12px 14px;
     margin-bottom: 10px;
@@ -1303,4 +1303,57 @@
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
+}
+
+/* ── Language picker ──
+   Shared bottom sheet opened from the onboarding chip and the Settings row.
+   14 options need their own scroll region so the sheet never outgrows the
+   viewport on a short phone. */
+.language-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: min(52vh, 420px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 16px;
+    padding-inline-end: 2px;
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    border-radius: 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15.5px;
+    font-weight: 500;
+    text-align: start;
+    cursor: pointer;
+}
+
+.language-option:active {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.language-option.selected {
+    background: rgba(22, 193, 114, 0.12);
+    border-color: rgba(22, 193, 114, 0.45);
+    font-weight: 700;
+}
+
+.language-option-check {
+    color: var(--green);
+    font-size: 15px;
+    opacity: 0;
+}
+
+.language-option.selected .language-option-check {
+    opacity: 1;
 }

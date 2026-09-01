@@ -1,0 +1,108 @@
+/* RTL overrides — Hebrew and Arabic.
+ *
+ * Most of the layout mirrors for free: flexbox with `gap` follows the inline
+ * axis, and the physical left/right declarations that mattered were converted
+ * to logical properties in place. What is left here are the three things a
+ * logical property cannot express: transforms, gradient angles, and glyphs
+ * whose shape encodes a direction.
+ *
+ * Loaded last in build.js so these win on specificity ties.
+ */
+
+/* ── Playing cards stay left-to-right ──
+ * A card's rank sits top-left and its suit bottom-right in every locale,
+ * including Hebrew and Arabic decks — the diagonal is what makes a fanned
+ * hand readable. Mirroring it would be wrong, not merely unfamiliar.
+ * Pinning direction on the containers also keeps the five dealt cards in
+ * deal order (index 0 leftmost), which the hold indices and the flip stagger
+ * both assume.
+ */
+[dir="rtl"] .hand,
+[dir="rtl"] .card,
+[dir="rtl"] .multi-hand-row,
+[dir="rtl"] .ob-card-fan,
+[dir="rtl"] .ob-mini-card,
+[dir="rtl"] .ob-hand-cards,
+[dir="rtl"] .ob-mockup-cards,
+[dir="rtl"] .ob-mockup-card,
+[dir="rtl"] .story-cards,
+[dir="rtl"] .story-card {
+    direction: ltr;
+}
+
+/* ── Directional glyphs ──
+ * Only the onboarding back button needs help. It is the one control that
+ * renders a bare `\2190`, which is not a Bidi_Mirrored character and so does
+ * not turn around on its own. Flipping the glyph rather than swapping the
+ * character keeps the markup meaning "back" in every language.
+ *
+ * The next button is deliberately excluded: updateOnboardingNav() always
+ * replaces its text with a word, so mirroring it would reverse the wording.
+ * The chevrons elsewhere use `\203A`, which is Bidi_Mirrored and flips itself.
+ */
+[dir="rtl"] .onboarding-nav-arrow:not(.onboarding-nav-arrow--next) {
+    transform: scaleX(-1);
+}
+
+/* ── All-In slider ──
+ * The thumb travels from the start edge, which the logical `inset-inline-start`
+ * already handles. The fill gradient does not: it is angled in physical
+ * degrees, so it has to be re-aimed.
+ */
+[dir="rtl"] .allin-slider-fill {
+    background: linear-gradient(270deg, rgba(22, 193, 114, 0.35), rgba(22, 193, 114, 0));
+}
+
+/* ── Settings toggle knob ──
+ * `inset-inline-start` puts the knob on the correct edge; the checked travel
+ * is a transform and must reverse.
+ */
+[dir="rtl"] .toggle-switch:checked::before {
+    transform: translateX(-20px);
+}
+
+/* ── Onboarding card fan ──
+ * The fan is decorative and its two outer cards are placed by transform.
+ * Mirroring keeps the arrangement visually balanced against the mirrored
+ * copy below it; the card faces inside stay LTR via the rule at the top.
+ */
+[dir="rtl"] .ob-fan-card--left {
+    transform: rotate(16deg) translateX(88px);
+    /* The anchor has to move with the card. `.ob-card-fan` is pinned to
+       direction:ltr above, so flex-start/end stay physical — swapping the
+       transform alone would leave each rank on the card's inner edge, hidden
+       behind the centre card. */
+    align-items: flex-end;
+}
+
+[dir="rtl"] .ob-fan-card--right {
+    transform: rotate(-16deg) translateX(-88px);
+    align-items: flex-start;
+}
+
+/* ── Gold shimmer ──
+ * Sweeps in a fixed screen direction; against the reading direction it looks
+ * like it is running backwards.
+ */
+[dir="rtl"] .shimmer-gold {
+    background: linear-gradient(270deg, var(--gold), #fff5cc, var(--gold));
+}
+
+/* ── Numbers keep their own direction ──
+ * A signed figure like "+1,200" inside RTL text is a classic bidi failure:
+ * the sign detaches and renders on the wrong side. Isolating these runs keeps
+ * the sign glued to its number without affecting the surrounding layout.
+ */
+[dir="rtl"] .balance-value,
+[dir="rtl"] .total-bet-value,
+[dir="rtl"] .stats-net-value,
+[dir="rtl"] .stat-tile-value,
+[dir="rtl"] .nearby-net,
+[dir="rtl"] .friend-score,
+[dir="rtl"] .friend-lb-net,
+[dir="rtl"] .payout-value,
+[dir="rtl"] .paytable-ticker-item,
+[dir="rtl"] .ob-lb-score,
+[dir="rtl"] .ob-mockup-stat-value {
+    unicode-bidi: isolate;
+}

@@ -21,6 +21,21 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # index.html in the repo is the *build template* (it contains
+      # BUILD_CSS_PLACEHOLDER / BUILD_JS_PLACEHOLDER comments and no game code).
+      # build.js inlines all styles and modules into video_poker.html; that
+      # built file is what the public site must serve as index.html.
+      - name: Build site
+        run: |
+          node build.js
+          if grep -q "BUILD_CSS_PLACEHOLDER" video_poker.html; then
+            echo "build failed: placeholder survived in output"
+            exit 1
+          fi
+          cp video_poker.html index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

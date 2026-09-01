@@ -80,11 +80,11 @@ function maybeRestoreCloudState(userDoc) {
     }
 
     const balanceEl = document.getElementById('balance');
-    if (balanceEl) balanceEl.textContent = balance;
+    if (balanceEl) balanceEl.textContent = formatNumber(balance);
     if (window.saveGameState) saveGameState();
     if (window.updateStats) updateStats();
     if (window.pushNetProfit) pushNetProfit();
-    showToast('☁ Welcome back — your ' + balance.toLocaleString() + ' coins are restored.');
+    showToast(t('toast.cloudRestored', { amount: formatNumber(balance) }));
 }
 
 window.schedulePushCloudState = schedulePushCloudState;

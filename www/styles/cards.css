@@ -234,7 +234,7 @@
 }
 
 .balance-head-side {
-    text-align: right;
+    text-align: end;
     padding-bottom: 6px;
 }
 
@@ -368,10 +368,6 @@
     color: rgba(255, 107, 170, 0.65);
 }
 
-.allin-badge::after {
-    content: ' left';
-}
-
 .bet-btn-allin.selected {
     background: rgba(22, 193, 114, 0.22);
     border-color: transparent;
@@ -425,7 +421,7 @@
 .allin-slider-thumb {
     position: absolute;
     top: 3px;
-    left: 3px;
+    inset-inline-start: 3px;
     width: 56px;
     height: 56px;
     border-radius: 16px;
@@ -440,7 +436,9 @@
     box-shadow: 0 10px 26px -8px rgba(22, 193, 114, 0.9);
     cursor: grab;
     touch-action: none;
-    transition: left 0.25s ease;
+    /* JS pins the thumb with `left` or `right` depending on reading
+       direction, so both are animated. */
+    transition: left 0.25s ease, right 0.25s ease;
 }
 
 .allin-slider-thumb.dragging {
@@ -627,7 +625,7 @@
     font-size: 11px;
     font-weight: 800;
     color: var(--green);
-    margin-left: 4px;
+    margin-inline-start: 4px;
     white-space: nowrap;
 }
 
@@ -635,7 +633,7 @@
     font-size: 11px;
     font-weight: 700;
     color: var(--text-faint);
-    margin-left: 4px;
+    margin-inline-start: 4px;
 }
 
 /* --- Action row --- */
@@ -905,7 +903,7 @@
     content: '';
     position: absolute;
     top: 3px;
-    left: 3px;
+    inset-inline-start: 3px;
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -1202,14 +1200,14 @@
     font-size: 12px;
     color: var(--text-muted);
     width: 34px;
-    text-align: right;
+    text-align: end;
     flex: 0 0 auto;
 }
 
 .friend-score {
     font-weight: 800;
     width: 56px;
-    text-align: right;
+    text-align: end;
     flex: 0 0 auto;
 }
 
@@ -1326,7 +1324,7 @@
 .modal-close {
     position: absolute;
     top: 12px;
-    right: 12px;
+    inset-inline-end: 12px;
     background: none;
     border: none;
     color: var(--text-muted);
@@ -1338,7 +1336,7 @@
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 4px;
-    padding-right: 20px;
+    padding-inline-end: 20px;
 }
 
 .modal-sub {

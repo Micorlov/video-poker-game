@@ -57,47 +57,11 @@ const PAYTABLES = {
     }
 };
 
-const VARIANT_LABELS = {
-    jacks: 'Jacks or Better',
-    deuces: 'Deuces Wild',
-    bonus: 'Bonus Poker',
-    doubleBonus: 'Double Bonus'
-};
-
 const HAND_ORDERS = {
     jacks: ['Royal Flush', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
     deuces: ['Royal Flush', 'Four Deuces', 'Wild Royal Flush', 'Five of a Kind', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Nothing'],
     bonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
     doubleBonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing']
-};
-
-const EXPLANATIONS = {
-    'Royal Flush': 'A, K, Q, J, 10 — all the same suit. The best hand in the game.',
-    'Straight Flush': 'Five cards in a row, all the same suit.',
-    'Four of a Kind': 'Four cards of the same rank.',
-    'Four Aces': 'Four Aces — the biggest quad bonus.',
-    'Four 2s-4s': 'Four of a kind, rank 2 through 4.',
-    'Four 5s-Ks': 'Four of a kind, rank 5 through King.',
-    'Four Deuces': 'Four wild deuces — an automatic top-tier win.',
-    'Wild Royal Flush': 'A Royal Flush made using at least one wild deuce.',
-    'Five of a Kind': 'Five cards of the same rank, using wild deuces.',
-    'Full House': 'Three of a kind plus a pair.',
-    'Flush': 'Five cards of the same suit, not in sequence.',
-    'Straight': 'Five cards in sequence, mixed suits.',
-    'Three of a Kind': 'Three cards of the same rank.',
-    'Two Pair': 'Two separate pairs.',
-    'Jacks or Better': 'A pair of Jacks, Queens, Kings, or Aces.',
-    'Nothing': 'No paying hand — better luck next deal.'
-};
-
-const WIN_LABELS = {
-    pair: 'Pair',
-    threeOfKind: '3 of a Kind',
-    fourOfKind: '4 of a Kind',
-    straight: 'Straight',
-    flush: 'Flush',
-    straightFlush: 'Str. Flush',
-    royalFlush: 'Royal Flush'
 };
 
 const HAND_RANK = {
@@ -134,7 +98,7 @@ function multiHandUnlocked() {
 function setGameVariant(v) {
     if (!PAYTABLES[v] || gameState !== 'bet' || v === gameVariant) return;
     if (!variantUnlocked(v)) {
-        showToast('🔒 Unlocks at level ' + VARIANT_MIN_LEVEL[v]);
+        showToast(t('toast.unlockLevel', { level: VARIANT_MIN_LEVEL[v] }));
         return;
     }
     gameVariant = v;
@@ -154,7 +118,7 @@ function updateVariantUI() {
         btn.classList.toggle('locked', locked);
         const lockEl = btn.querySelector('.variant-lock');
         if (lockEl) {
-            lockEl.textContent = locked ? 'Unlock · ' + VARIANT_MIN_LEVEL[v] : '';
+            lockEl.textContent = locked ? t('play.unlockAt', { level: VARIANT_MIN_LEVEL[v] }) : '';
             lockEl.style.display = locked ? '' : 'none';
         }
     });
@@ -240,41 +204,21 @@ function restoreGameState() {
         winStreak = state.winStreak || 0;
         bestStreak = state.bestStreak || 0;
         bestBalance = state.bestBalance || 0;
-        document.getElementById('balance').textContent = balance;
+        document.getElementById('balance').textContent = formatNumber(balance);
         return true;
     } catch (e) { return false; }
 }
 
 function doRebuy() {
     balance = STARTING_BALANCE;
-    document.getElementById('balance').textContent = balance;
+    document.getElementById('balance').textContent = formatNumber(balance);
     // The stack is back to the starting amount, so past referral coins are gone
     // too — drop them from the net-profit baseline or the board reads negative.
     if (window.resetReferralBaseline) resetReferralBaseline();
     saveGameState();
-    showToast('♻ +' + STARTING_BALANCE.toLocaleString() + ' credits');
+    showToast(t('toast.rebuy', { amount: formatNumber(STARTING_BALANCE) }));
     if (window.pushDailyRebuy) pushDailyRebuy();
 }
-
-// Short labels for the always-visible ticker. The full names live in the
-// payout table, so this row only needs enough to be recognisable at a glance.
-const TICKER_LABELS = {
-    'Royal Flush': 'ROYAL',
-    'Straight Flush': 'S. FLUSH',
-    'Wild Royal Flush': 'W. ROYAL',
-    'Four Deuces': '4 DEUCES',
-    'Five of a Kind': 'FIVE',
-    'Four of a Kind': 'QUADS',
-    'Four Aces': '4 ACES',
-    'Four 2s-4s': 'QUADS 2-4',
-    'Four 5s-Ks': 'QUADS 5-K',
-    'Full House': 'HOUSE',
-    'Flush': 'FLUSH',
-    'Straight': 'STRAIGHT',
-    'Three of a Kind': 'TRIPS',
-    'Two Pair': 'TWO PAIR',
-    'Jacks or Better': 'JACKS+'
-};
 
 const TICKER_HAND_COUNT = 4;
 
@@ -288,14 +232,14 @@ function renderPaytableTicker() {
         .forEach(handType => {
             const item = document.createElement('span');
             item.className = 'paytable-ticker-item';
-            item.textContent = (TICKER_LABELS[handType] || handType.toUpperCase()) + ' ' + currentPayouts[handType] + '×';
+            item.textContent = vpHandTicker(handType) + ' ' + currentPayouts[handType] + '×';
             el.appendChild(item);
         });
 }
 
 function renderVariantLabel() {
     const el = document.getElementById('variant-display');
-    if (el) el.textContent = VARIANT_LABELS[gameVariant];
+    if (el) el.textContent = t('variant.' + gameVariant);
 }
 
 function renderPayouts() {
@@ -305,7 +249,7 @@ function renderPayouts() {
     handOrder.forEach(handType => {
         const row = document.createElement('div');
         row.className = 'payout-row';
-        row.innerHTML = `<div class="payout-hand">${handType}</div><div class="payout-value">${currentPayouts[handType]}</div>`;
+        row.innerHTML = `<div class="payout-hand">${vpHandLabel(handType)}</div><div class="payout-value">${currentPayouts[handType]}</div>`;
         payoutsEl.appendChild(row);
     });
     renderPaytableTicker();
@@ -381,7 +325,9 @@ function getAllInRemaining() {
 function updateAllInUI() {
     const remaining = getAllInRemaining();
     const badge = document.getElementById('allin-badge');
-    if (badge) badge.textContent = remaining;
+    // The count and the word travel together: a CSS ::after suffix could not
+    // be translated.
+    if (badge) badge.textContent = t('play.allInLeft', { n: remaining });
     const btn = document.getElementById('bet-allin');
     if (btn) btn.classList.toggle('depleted', remaining === 0);
 }
@@ -412,10 +358,13 @@ function openAllInSheet() {
     const hands = multiHandCount || 1;
     allInPendingAmount = Math.max(1, Math.floor(balance / hands));
     const stake = allInPendingAmount * hands;
-    const amountEl = document.getElementById('allin-sheet-amount');
-    if (amountEl) amountEl.textContent = stake.toLocaleString();
-    const subEl = document.getElementById('allin-sheet-target');
-    if (subEl) subEl.textContent = gameState === 'hold' ? 'this hand' : 'the next hand';
+    const subEl = document.getElementById('allin-sheet-sub');
+    if (subEl) {
+        subEl.textContent = t('sheet.allInSub', {
+            amount: formatNumber(stake),
+            target: gameState === 'hold' ? t('play.thisHand') : t('play.theNextHand')
+        });
+    }
 
     // A mid-table hand makes the upside concrete without promising a royal.
     // Mid-hand, the payout is computed off the raised total stake, not just
@@ -424,7 +373,7 @@ function openAllInSheet() {
     if (potentialEl) {
         const multiplier = currentPayouts['Full House'] || 0;
         const newBetPerHand = (gameState === 'hold' ? bet : 0) + allInPendingAmount;
-        potentialEl.textContent = (newBetPerHand * multiplier * hands).toLocaleString();
+        potentialEl.textContent = formatNumber(newBetPerHand * multiplier * hands);
     }
     resetAllInSlider();
     openSheet('allin-sheet');
@@ -435,11 +384,24 @@ function closeAllInSheet() {
     resetAllInSlider();
 }
 
+// The thumb is placed on whichever edge the current language starts from, so
+// the inline style has to name the matching physical property — and clear the
+// other, or a language switch would leave the old one pinning it.
+let allInThumbOffset = 3;
+
+function setAllInThumbOffset(offset) {
+    allInThumbOffset = offset;
+    const thumb = document.getElementById('allin-slider-thumb');
+    if (!thumb) return;
+    const rtl = !!(window.isRtl && isRtl());
+    thumb.style.left = rtl ? '' : offset + 'px';
+    thumb.style.right = rtl ? offset + 'px' : '';
+}
+
 function resetAllInSlider() {
     const track = document.getElementById('allin-slider-track');
-    const thumb = document.getElementById('allin-slider-thumb');
     const fill = document.getElementById('allin-slider-fill');
-    if (thumb) thumb.style.left = '3px';
+    setAllInThumbOffset(3);
     if (fill) fill.style.width = '0px';
     if (track) track.classList.remove('confirmed');
 }
@@ -456,7 +418,7 @@ function confirmAllIn() {
         const hands = multiHandCount || 1;
         balance -= allInPendingAmount * hands;
         bet += allInPendingAmount;
-        document.getElementById('balance').textContent = balance;
+        document.getElementById('balance').textContent = formatNumber(balance);
         updateTotalBetDisplay();
     } else {
         setBet(allInPendingAmount);
@@ -467,7 +429,7 @@ function confirmAllIn() {
     saveAllInUsage();
     updateAllInUI();
     closeSheet('allin-sheet');
-    showToast('🔥 ALL IN — good luck!');
+    showToast(t('toast.allInGoodLuck'));
 }
 
 function initAllInSlider() {
@@ -478,8 +440,8 @@ function initAllInSlider() {
 
     const CONFIRM_THRESHOLD = 0.85;
     let startX = 0;
-    let thumbStartLeft = 3;
-    let maxLeft = 0;
+    let thumbStartOffset = 3;
+    let maxOffset = 0;
 
     function pointerX(e) {
         return e.touches ? e.touches[0].clientX : e.clientX;
@@ -488,10 +450,11 @@ function initAllInSlider() {
     function pointerMove(e) {
         if (!allInDragging) return;
         e.preventDefault();
-        let left = thumbStartLeft + (pointerX(e) - startX);
-        left = Math.max(3, Math.min(maxLeft, left));
-        thumb.style.left = left + 'px';
-        fill.style.width = (left + thumb.offsetWidth) + 'px';
+        // Offset is measured from the start edge, so a rightward drag has to
+        // count as backwards in Hebrew and Arabic.
+        const travel = (pointerX(e) - startX) * (window.isRtl && isRtl() ? -1 : 1);
+        setAllInThumbOffset(Math.max(3, Math.min(maxOffset, thumbStartOffset + travel)));
+        fill.style.width = (allInThumbOffset + thumb.offsetWidth) + 'px';
     }
 
     function pointerUp() {
@@ -503,10 +466,10 @@ function initAllInSlider() {
         document.removeEventListener('touchmove', pointerMove);
         document.removeEventListener('touchend', pointerUp);
 
-        const pct = maxLeft > 0 ? (thumb.offsetLeft - 3) / maxLeft : 0;
+        const pct = maxOffset > 0 ? (allInThumbOffset - 3) / maxOffset : 0;
         if (pct >= CONFIRM_THRESHOLD) {
-            thumb.style.left = maxLeft + 'px';
-            fill.style.width = (maxLeft + thumb.offsetWidth) + 'px';
+            setAllInThumbOffset(maxOffset);
+            fill.style.width = (maxOffset + thumb.offsetWidth) + 'px';
             track.classList.add('confirmed');
             confirmAllIn();
         } else {
@@ -518,8 +481,8 @@ function initAllInSlider() {
         allInDragging = true;
         thumb.classList.add('dragging');
         startX = pointerX(e);
-        thumbStartLeft = thumb.offsetLeft;
-        maxLeft = track.clientWidth - thumb.offsetWidth - 3;
+        thumbStartOffset = allInThumbOffset;
+        maxOffset = track.clientWidth - thumb.offsetWidth - 3;
         document.addEventListener('mousemove', pointerMove);
         document.addEventListener('mouseup', pointerUp);
         document.addEventListener('touchmove', pointerMove, { passive: false });
@@ -630,7 +593,7 @@ try {
 function setMultiHand(n) {
     if (![1, 3, 5].includes(n) || gameState !== 'bet') return;
     if (n > 1 && !multiHandUnlocked()) {
-        showToast('🔒 Multi-hand unlocks at level ' + MULTI_HAND_MIN_LEVEL);
+        showToast(t('toast.multiHandUnlock', { level: MULTI_HAND_MIN_LEVEL }));
         return;
     }
     multiHandCount = n;
@@ -674,8 +637,8 @@ function updateMainButton() {
     // Monochrome glyphs, not emoji — colour on this button belongs to the
     // green surface alone.
     btn.innerHTML = isDraw
-        ? '<span class="main-btn-icon">↻</span>Draw'
-        : '<span class="main-btn-icon">♠</span>Deal';
+        ? '<span class="main-btn-icon">↻</span>' + t('play.draw')
+        : '<span class="main-btn-icon">♠</span>' + t('play.deal');
     btn.className = isDraw ? 'btn-secondary' : 'btn-primary';
 }
 
@@ -708,7 +671,7 @@ function deal() {
     document.querySelectorAll('.flash-overlay, .confetti-burst-piece, .gold-rain-piece').forEach(el => el.remove());
 
     balance -= totalBet;
-    document.getElementById('balance').textContent = balance;
+    document.getElementById('balance').textContent = formatNumber(balance);
 
     deck = createDeck();
     shuffle(deck);
@@ -724,7 +687,7 @@ function deal() {
     lastHandType = null;
     const resultEl = document.getElementById('result');
     resultEl.className = 'result-panel';
-    resultEl.textContent = 'Hold what you want, then set your bet before the draw.';
+    resultEl.textContent = t('play.handPlaceholder');
     document.getElementById('explanation').innerHTML = '';
     if (window.vpRenderHints) vpRenderHints();
     triggerHaptic('MEDIUM');
@@ -813,7 +776,7 @@ function draw() {
     updateMultiHandUI();
 
     if (win === 0) {
-        document.getElementById('balance').textContent = balance;
+        document.getElementById('balance').textContent = formatNumber(balance);
         playSound('loss');
     } else {
         triggerWinCelebration(bestType, win);
@@ -849,16 +812,16 @@ function draw() {
         // Hand name, then the payout at display scale with its multiplier
         // alongside — the number is the news, the multiplier is the context.
         resultEl.innerHTML =
-            `<span class="result-hand">${handType}</span>` +
+            `<span class="result-hand">${vpHandLabel(handType)}</span>` +
             `<span class="result-amount">` +
-            `<span class="win">+${win.toLocaleString()}</span>` +
+            `<span class="win">+${formatNumber(win)}</span>` +
             `<span class="result-mult">${currentPayouts[handType]}×</span>` +
             `</span>`;
-        document.getElementById('explanation').textContent = EXPLANATIONS[handType] || '';
+        document.getElementById('explanation').textContent = vpHandExplanation(handType);
     } else {
         resultEl.className = 'result-panel';
-        resultEl.innerHTML = `<span>Nothing — ${hand.map(c => c.rank + c.suit).join(' ')}</span>`;
-        document.getElementById('explanation').textContent = EXPLANATIONS[handType] || '';
+        resultEl.innerHTML = `<span>${t('play.nothingResult', { cards: hand.map(c => c.rank + c.suit).join(' ') })}</span>`;
+        document.getElementById('explanation').textContent = vpHandExplanation(handType);
     }
 
     renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
@@ -888,28 +851,34 @@ function getWinBadgeText(cardIndex, handType) {
     const rankLabel = card.rank;
 
     if (handType === 'Jacks or Better' || handType === 'Two Pair') {
-        return WIN_LABELS.pair + ' ' + rankLabel;
+        return t('win.pair') + ' ' + rankLabel;
     }
     if (handType === 'Three of a Kind') {
-        return WIN_LABELS.threeOfKind;
+        return t('win.threeOfKind');
     }
     if (handType === 'Full House') {
         const count = rankCounts[card.rank] || 0;
-        if (count === 3) return WIN_LABELS.threeOfKind;
-        if (count === 2) return WIN_LABELS.pair + ' ' + rankLabel;
+        if (count === 3) return t('win.threeOfKind');
+        if (count === 2) return t('win.pair') + ' ' + rankLabel;
     }
     if (handType === 'Four of a Kind' || handType === 'Four Aces' ||
         handType === 'Four 2s-4s' || handType === 'Four 5s-Ks') {
-        return WIN_LABELS.fourOfKind;
+        return t('win.fourOfKind');
     }
-    if (handType === 'Straight') return WIN_LABELS.straight;
-    if (handType === 'Flush') return WIN_LABELS.flush;
-    if (handType === 'Straight Flush') return WIN_LABELS.straightFlush;
-    if (handType === 'Royal Flush') return WIN_LABELS.royalFlush;
+    if (handType === 'Straight') return t('win.straight');
+    if (handType === 'Flush') return t('win.flush');
+    if (handType === 'Straight Flush') return t('win.straightFlush');
+    if (handType === 'Royal Flush') return t('win.royalFlush');
     return '';
 }
 
+// Remembers the last call so a language switch can repaint the dealt cards
+// with the same highlights — the badges are baked into the card HTML, so
+// re-rendering is the only way to translate them without waiting for a deal.
+let lastRenderHandArgs = null;
+
 function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false, animateFlip = true) {
+    lastRenderHandArgs = [winningIndices, thirdMatchIndices, secondPairIndices, isDraw, false];
     const handEl = document.getElementById('hand');
     handEl.innerHTML = '';
     const anyHeld = held.some(h => h);
@@ -955,7 +924,7 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         }
 
         cardEl.innerHTML = `
-            <div class="held-badge">HELD</div>
+            <div class="held-badge">${t('play.held')}</div>
             <div class="win-badge">${winBadgeText}</div>
             <div class="card-inner">
                 <div class="card-front">
@@ -1159,7 +1128,7 @@ function updateStreakUI(justWon) {
     bar.classList.toggle('active', winStreak >= 2);
     const bonus = getStreakBonus(winStreak);
     if (bonus > 0) {
-        tag.textContent = '+' + Math.round(bonus * 100) + '% payout bonus';
+        tag.textContent = t('play.payoutBonus', { percent: Math.round(bonus * 100) });
         tag.classList.remove('hidden');
     } else {
         tag.classList.add('hidden');
@@ -1199,3 +1168,29 @@ document.addEventListener('keydown', function(e) {
     if (keyMap[e.key] && gameState === 'bet') setBet(keyMap[e.key]);
     if (e.key === 'd' || e.key === 'D') mainAction();
 });
+
+// Repaint every label the game owns when the language changes. Cheaper and far
+// safer than reloading: a reload mid-hand would discard the dealt cards.
+if (window.vpOnLanguageChange) {
+    vpOnLanguageChange(function() {
+        renderVariantLabel();
+        renderPaytableTicker();
+        renderPayouts();
+        updateVariantUI();
+        updateMainButton();
+        updateAllInUI();
+        updateStreakUI(false);
+        document.getElementById('balance').textContent = formatNumber(balance);
+        // Repaint the dealt cards (their HELD/win badges are baked in) and
+        // re-pin the All-In thumb, which is positioned from whichever edge the
+        // reading direction starts at. Never animates: this is a repaint, not
+        // a new deal.
+        if (lastRenderHandArgs) renderHand.apply(null, lastRenderHandArgs);
+        setAllInThumbOffset(allInThumbOffset);
+        // The result panel keeps the last hand's copy, so re-render it in the
+        // new language rather than leaving a stale English sentence on screen.
+        if (lastHandType) {
+            document.getElementById('explanation').textContent = vpHandExplanation(lastHandType);
+        }
+    });
+}

@@ -16,12 +16,12 @@ function openInviteSheet() {
     const user = window.egUser;
     if (!user) { openSignInModal(); return; }
     const link = getInviteLink();
-    if (!link) { showToast('Could not generate invite link.'); return; }
+    if (!link) { showToast(t('toast.couldNotGenerateLink')); return; }
     document.getElementById('invite-sheet-link').textContent = link;
     document.getElementById('invite-sheet-link').setAttribute('data-link', link);
     // Reset copy button state
     const copyBtn = document.getElementById('invite-sheet-copy');
-    copyBtn.textContent = 'Copy';
+    copyBtn.textContent = t('common.copy');
     copyBtn.classList.remove('copied');
     if (window.renderInviteRewardLine) renderInviteRewardLine();
     if (window.logVpEvent) logVpEvent('invite_sheet_opened');
@@ -40,10 +40,10 @@ function copyTextToClipboard(text, onCopied) {
 }
 
 function copyBtnFeedback(copyBtn) {
-    copyBtn.textContent = 'Copied!';
+    copyBtn.textContent = t('common.copied');
     copyBtn.classList.add('copied');
     setTimeout(function() {
-        copyBtn.textContent = 'Copy';
+        copyBtn.textContent = t('common.copy');
         copyBtn.classList.remove('copied');
     }, 2000);
 }
@@ -59,15 +59,15 @@ function copyInviteSheetLink() {
 // Tap-to-copy on the Friends screen's "Your code" chip.
 function copyOwnCode() {
     const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
-    if (!code) { showToast('Sign in to get your friend code.'); return; }
+    if (!code) { showToast(t('toast.signInFriendCode')); return; }
     const chip = document.getElementById('own-code-chip');
     const hint = document.getElementById('own-code-hint');
     copyTextToClipboard(code, function() {
         if (chip) chip.classList.add('copied');
-        if (hint) hint.textContent = 'Copied ✓';
+        if (hint) hint.textContent = t('friends.copiedCheck');
         setTimeout(function() {
             if (chip) chip.classList.remove('copied');
-            if (hint) hint.textContent = 'Tap to copy';
+            if (hint) hint.textContent = t('friends.tapToCopy');
         }, 2000);
     });
 }
@@ -97,8 +97,8 @@ function shareInviteNative() {
     const user = window.egUser;
     if (!user) { openSignInModal(); return; }
     const link = getInviteLink();
-    if (!link) { showToast('Could not generate invite link.'); return; }
-    shareViaNative('Royal Video Poker', friendInviteMessage(), link).then(function(handled) {
+    if (!link) { showToast(t('toast.couldNotGenerateLink')); return; }
+    shareViaNative(t('share.appNameFull'), friendInviteMessage(), link).then(function(handled) {
         if (!handled) openInviteSheet();
     });
 }
@@ -115,9 +115,9 @@ function allInUnlockInvite() {
 // through the OS share sheet.
 function shareInviteMore() {
     if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native' });
-    shareViaNative('Royal Video Poker', friendInviteMessage(), sheetLink('invite-sheet-link'))
+    shareViaNative(t('share.appNameFull'), friendInviteMessage(), sheetLink('invite-sheet-link'))
         .then(function(handled) {
-            if (!handled) showToast('Use Copy, WhatsApp or Telegram to share.');
+            if (!handled) showToast(t('toast.useCopyShare'));
         });
 }
 
@@ -132,7 +132,7 @@ function fallbackCopySheet(text, onCopied) {
         document.execCommand('copy');
         if (onCopied) onCopied();
     } catch (e) {
-        showToast('Could not copy — tap and hold the link.');
+        showToast(t('toast.couldNotCopy'));
     }
     document.body.removeChild(ta);
 }
@@ -168,8 +168,13 @@ function friendInviteMessage() {
     const user = window.egUser;
     const name = (user && user.displayName) || 'A friend';
     const code = (window.egUserDoc && window.egUserDoc.referralCode) || '';
+    // Two links do two jobs: the share link (Play Store) installs, while the
+    // deep link below opens the app directly for a friend who already has it —
+    // carrying the code through intent://, which the store link cannot.
+    const openLink = window.buildInviteOpenLink ? buildInviteOpenLink(code) : '';
     return name + ' sent you 1,000 coins on Royal Video Poker 🃏 Sign in with Google to claim them.' +
-        (code ? '\nFriend code: ' + code : '');
+        (code ? '\nFriend code: ' + code : '') +
+        (openLink ? '\nAlready have the app? Tap to open: ' + openLink : '');
 }
 
 function shareFriendInviteViaWhatsApp() {
@@ -183,15 +188,22 @@ function shareFriendInviteViaTelegram() {
 // --- Room invite sheet: share-link half ---
 // The friend-picker half lives in js/rooms.js (openRoomInvitePicker); these
 // helpers fill in the link row and share chips of #room-invite-sheet.
+// Held here rather than read back out of the DOM: the sentence that used to
+// carry the name is now rendered whole from the dictionary, so there is no
+// element left to read it from.
+let roomInviteName = '';
+
 function setRoomInviteSheetLink(roomName, roomCode) {
     const link = buildRoomLink(roomCode);
-    document.getElementById('room-invite-name').textContent = roomName;
+    roomInviteName = roomName;
+    const subEl = document.getElementById('room-invite-sub');
+    if (subEl) subEl.textContent = t('sheet.roomInviteSub', { name: roomName });
     const linkEl = document.getElementById('room-invite-link');
     linkEl.textContent = link;
     linkEl.setAttribute('data-link', link);
     linkEl.setAttribute('data-code', roomCode);
     const copyBtn = document.getElementById('room-invite-copy');
-    copyBtn.textContent = 'Copy';
+    copyBtn.textContent = t('common.copy');
     copyBtn.classList.remove('copied');
 }
 
@@ -203,16 +215,16 @@ function copyRoomLink() {
 }
 
 function roomInviteMessage() {
-    const name = document.getElementById('room-invite-name').textContent;
+    const name = roomInviteName;
     const code = document.getElementById('room-invite-link').getAttribute('data-code') || '';
-    return 'Join my poker room "' + name + '" on Royal Video Poker.' +
-        (code ? '\nRoom code: ' + code : '');
+    return t('share.roomInviteMsg', { name: name }) +
+        (code ? '\n' + t('share.roomCodeLine', { code: code }) : '');
 }
 
 function shareRoomInviteNative() {
-    shareViaNative('Royal Video Poker', roomInviteMessage(), sheetLink('room-invite-link'))
+    shareViaNative(t('share.appNameFull'), roomInviteMessage(), sheetLink('room-invite-link'))
         .then(function(handled) {
-            if (!handled) showToast('Use Copy, WhatsApp or Telegram to share.');
+            if (!handled) showToast(t('toast.useCopyShare'));
         });
 }
 
@@ -244,14 +256,18 @@ function maybeOfferBigWinShare(handType, win) {
     bigwinShareHand = handType;
     bigwinShareWin = win;
     const title = document.getElementById('bigwin-share-title');
-    if (title) title.textContent = handType + '! +' + win.toLocaleString() + ' coins';
+    if (title) title.textContent = t('sheet.bigWinTitleWin', { hand: vpHandLabel(handType), coins: formatNumber(win) });
+    const sub = document.getElementById('bigwin-share-sub');
+    if (sub) sub.textContent = t('sheet.bigWinSub', { reward: formatNumber(REFERRAL_REWARD_COINS) });
     openSheet('bigwin-share-sheet');
     if (window.logVpEvent) logVpEvent('bigwin_share_shown');
 }
 
 function bigWinShareMessage() {
-    return 'I just hit ' + bigwinShareHand + ' for ' + bigwinShareWin.toLocaleString() +
-        ' coins in Royal Video Poker 🃏 Think you can beat that?';
+    return t('share.bigWinMsg', {
+        hand: vpHandLabel(bigwinShareHand),
+        win: formatNumber(bigwinShareWin)
+    });
 }
 
 function shareBigWinVia(channel) {
@@ -259,7 +275,7 @@ function shareBigWinVia(channel) {
     if (!link) { closeSheet('bigwin-share-sheet'); return; }
     if (window.logVpEvent) logVpEvent('bigwin_share_clicked', { channel: channel });
     if (channel === 'native') {
-        shareViaNative('Royal Video Poker', bigWinShareMessage(), link);
+        shareViaNative(t('share.appNameFull'), bigWinShareMessage(), link);
     } else {
         openShareChannel(channel, bigWinShareMessage(), link);
     }
@@ -294,7 +310,7 @@ function handleJoinDeepLink() {
         } else if (window._authResolved) {
             // Auth has settled and there is genuinely no user.
             openSignInModal();
-            showToast('Sign in to join the daily game!');
+            showToast(t('toast.signInDailyGame'));
         }
         // Otherwise: auth is still resolving. Do nothing — firing the sign-in
         // modal here would ambush every already-signed-in user who clicks a

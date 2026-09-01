@@ -1,17 +1,17 @@
-// Smart invite links (Android / Play Store).
+// Invite links (Android / Play Store).
 //
-// One https link does all three jobs the invite flow needs:
-//   app installed  → invite.html hands the OS an intent:// URL, Android opens
-//                    the app, and js/tabs.js replays ?ref= / ?join= inside it.
-//   not installed  → the same intent carries browser_fallback_url, so Chrome
-//                    lands on the Play Store listing instead of a dead scheme.
-//   after install  → the Play referrer string carries the code through the
-//                    install, and MainActivity feeds it back in on first launch
-//                    (see __onInstallReferrer below), so the friendship still
-//                    connects even though the original click is long gone.
+// FRIEND invites link straight to the Play Store listing with the referral
+// code in the &referrer= parameter: messengers preview the real store card
+// (not a github.io page), Play carries the code through the install, and
+// MainActivity feeds it back in on first launch (see __onInstallReferrer
+// below), so the friendship connects even though the original click is long
+// gone. A recipient who already has the app gets Play's "Open" button — the
+// code doesn't pass on a warm open, which is why every invite message also
+// carries the friend code in plain text for manual entry.
 //
-// Everything that is not Android (desktop, iOS, in-app browsers we can't
-// detect) falls through to the web build — never to a store page it can't use.
+// ROOM links still go through invite.html's smart link: rooms are shared
+// between players who already have the app, and its intent:// hand-off is the
+// only way to deliver a join code into an existing install.
 
 const ANDROID_PACKAGE = 'com.micorlov.videopoker';
 const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=' + ANDROID_PACKAGE;
@@ -37,6 +37,17 @@ function getSmartLinkBase() {
 }
 
 function buildInviteLink(code) {
+    if (!code) return '';
+    return PLAY_STORE_URL + '&referrer=' + encodeURIComponent('ref=' + code);
+}
+
+// The clickable https deep link for invite messages: invite.html hands the OS
+// an intent:// URL, so with the app installed it opens straight into it WITH
+// the code (which the Play link above can't do on a warm open), and without
+// it the intent's fallback lands on the Play listing anyway. Messengers only
+// linkify http(s), so this — not the raw videopoker:// scheme — is the form
+// a message can carry.
+function buildInviteOpenLink(code) {
     if (!code) return '';
     return getSmartLinkBase() + '?ref=' + encodeURIComponent(code);
 }

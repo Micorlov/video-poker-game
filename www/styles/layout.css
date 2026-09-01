@@ -43,7 +43,7 @@
 }
 
 .tpill {
-    padding-left: 10px;
+    padding-inline-start: 10px;
 }
 
 .tpill::before {

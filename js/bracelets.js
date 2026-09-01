@@ -32,7 +32,7 @@ function pushBraceletProgress(handType, win) {
                 const hourMax = (snaps[0].exists && snaps[0].data().maxWin) || 0;
                 const dayMax = (snaps[1].exists && snaps[1].data().maxWin) || 0;
                 const meta = {
-                    displayName: user.displayName || 'Player',
+                    displayName: user.displayName || t('common.player'),
                     country: getCountry(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };

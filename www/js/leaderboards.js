@@ -29,13 +29,17 @@ function applyLeaderboardPlatformUI() {
     }
 }
 
-const LEADERBOARD_TAB_TITLES = {
-    friends: 'Friends · Today',
-    hourly: '⏱ Hourly Champions',
-    daily: '📅 Daily Champions'
+// Keys, not copy: the panel re-renders on every tab switch and on every
+// language change, so holding literal English here would overwrite whatever
+// translateDom() had just put in the element.
+const LEADERBOARD_TAB_TITLE_KEYS = {
+    friends: 'lb.friendsToday',
+    hourly: 'lb.hourlyChampions',
+    daily: 'lb.dailyChampions'
 };
 
 let leaderboardTab = 'friends';
+let leaderboardTabUserSet = false;
 let leaderboardExpanded = false;
 let hourlyBoardList = [];
 let dailyBoardList = [];
@@ -86,7 +90,7 @@ function pushDailyScore(handType, win, totalBet) {
     const dayKey = getDayKey();
     const fields = {
         uid: user.uid,
-        displayName: user.displayName || 'Player',
+        displayName: user.displayName || t('common.player'),
         photoURL: user.photoURL || null,
         country: (typeof getCountry === 'function' ? getCountry() : null),
         dayKey: dayKey,
@@ -113,7 +117,7 @@ function pushDailyRebuy() {
     firebaseSafe(function() {
         return db.collection('daily_scores').doc(dayKey + '_' + user.uid).set({
             uid: user.uid,
-            displayName: user.displayName || 'Player',
+            displayName: user.displayName || t('common.player'),
             photoURL: user.photoURL || null,
             dayKey: dayKey,
             rebuys: firebase.firestore.FieldValue.increment(1),
@@ -228,7 +232,7 @@ function effectiveDailyNetProfit(entry, todayKey) {
 function rankedFriendsDaily() {
     const todayKey = getDayKey();
     const self = {
-        displayName: 'You', self: true, lastSeen: Date.now(),
+        displayName: t('common.you'), self: true, lastSeen: Date.now(),
         country: (typeof getCountry === 'function' ? getCountry() : '--'),
         dailyNetProfit: ownDailyNetProfit(), dailyDateKey: todayKey
     };
@@ -238,14 +242,25 @@ function rankedFriendsDaily() {
 }
 
 // --- Tab switching + expand ---
-function setLeaderboardTab(tab) {
+function setLeaderboardTab(tab, isUserAction) {
     leaderboardTab = tab;
+    if (isUserAction) leaderboardTabUserSet = true;
     leaderboardExpanded = false;
     ['friends', 'hourly', 'daily'].forEach(function(t) {
         const btn = document.getElementById('lb-tab-' + t);
         if (btn) btn.classList.toggle('selected', t === tab);
     });
     renderLeaderboardPanel();
+}
+
+// Guests land on Daily (visible without needing Friends data); signed-in
+// players keep the existing Friends default. Re-applied once auth settles
+// so a returning signed-in user isn't stuck on the guest default from the
+// brief window before onAuthStateChanged fires. Never overrides a tab the
+// player already picked by hand.
+function applyDefaultLeaderboardTab() {
+    if (leaderboardTabUserSet) return;
+    setLeaderboardTab(window.egUser ? 'friends' : 'daily');
 }
 
 function toggleLeaderboardExpand() {
@@ -265,11 +280,11 @@ function renderFriendsDailyBody(bodyEl, limit) {
                 '<span class="nearby-avatar">' + (f.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
                 '<span class="online-dot' + ((typeof isOnline === 'function' && isOnline(f.lastSeen)) ? '' : ' offline') + '"></span>' +
             '</span>' +
-            '<span class="nearby-name">' + (f.displayName || 'Player') +
+            '<span class="nearby-name">' + (f.displayName || t('common.player')) +
                 (f.country ? '<span class="country-flag">' + countryToFlag(f.country) + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net ' + ((f.netProfit || 0) > 0 ? 'positive' : (f.netProfit || 0) < 0 ? 'negative' : 'zero') + '">' +
-                ((f.netProfit || 0) >= 0 ? '+' : '') + (f.netProfit || 0).toLocaleString() +
+                formatSigned(f.netProfit || 0) +
             '</span>';
         bodyEl.appendChild(row);
     });
@@ -281,7 +296,7 @@ function renderGlobalBody(bodyEl, list, limit, valueField, valueSuffix, allowNeg
     if (!slice.length) {
         const row = document.createElement('div');
         row.className = 'nearby-row';
-        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">No scores yet — be the first!</span>';
+        row.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">' + t('common.noScoresYet') + '</span>';
         bodyEl.appendChild(row);
         return;
     }
@@ -291,13 +306,13 @@ function renderGlobalBody(bodyEl, list, limit, valueField, valueSuffix, allowNeg
         row.className = 'nearby-row' + (isMe ? ' me' : '');
         const val = entry[valueField] || 0;
         const cls = !allowNegative ? 'positive' : (val > 0 ? 'positive' : val < 0 ? 'negative' : 'zero');
-        const text = allowNegative ? ((val >= 0 ? '+' : '') + val.toLocaleString()) : (val.toLocaleString() + valueSuffix);
+        const text = allowNegative ? formatSigned(val) : (formatNumber(val) + valueSuffix);
         row.innerHTML =
             '<span class="nearby-rank">' + (i + 1) + '</span>' +
             '<span class="nearby-avatar-wrap">' +
                 '<span class="nearby-avatar champ">' + (entry.displayName || 'P').charAt(0).toUpperCase() + '</span>' +
             '</span>' +
-            '<span class="nearby-name">' + (entry.displayName || 'Player') +
+            '<span class="nearby-name">' + (entry.displayName || t('common.player')) +
                 (entry.country ? '<span class="country-flag">' + countryToFlag(entry.country) + '</span>' : '') +
             '</span>' +
             '<span class="nearby-net ' + cls + '">' + text + '</span>';
@@ -310,13 +325,13 @@ function renderLeaderboardTimer() {
     if (!subEl) return;
     if (leaderboardTab === 'hourly') {
         const now = new Date();
-        subEl.textContent = 'Resets in ' + (59 - now.getUTCMinutes()) + 'm';
+        subEl.textContent = t('common.resetsInM', { m: 59 - now.getUTCMinutes() });
     } else if (leaderboardTab === 'daily') {
         const now = new Date();
         const msLeft = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
         const hrs = Math.floor(msLeft / 3600000);
         const mins = Math.floor((msLeft % 3600000) / 60000);
-        subEl.textContent = 'Resets in ' + hrs + 'h ' + mins + 'm';
+        subEl.textContent = t('common.resetsInHM', { h: hrs, m: mins });
     }
 }
 
@@ -328,14 +343,14 @@ function renderLeaderboardPanel() {
     const expandLink = document.getElementById('lb-expand-link');
     if (!bodyEl) return;
 
-    if (titleEl) titleEl.textContent = LEADERBOARD_TAB_TITLES[leaderboardTab];
+    if (titleEl) titleEl.textContent = t(LEADERBOARD_TAB_TITLE_KEYS[leaderboardTab]);
 
     const user = window.egUser;
     if (!user) {
         if (promptEl) promptEl.classList.remove('hidden');
         bodyEl.innerHTML = '';
         if (expandLink) expandLink.classList.add('hidden');
-        if (subEl) subEl.textContent = '#— · —';
+        if (subEl) subEl.textContent = t('lb.rankPlaceholder');
         return;
     }
     if (promptEl) promptEl.classList.add('hidden');
@@ -351,12 +366,12 @@ function renderLeaderboardPanel() {
         const leader = ranked[0];
         if (subEl) {
             if (!leader) {
-                subEl.textContent = '#— · —';
+                subEl.textContent = t('lb.rankPlaceholder');
             } else if (leader.self) {
-                subEl.textContent = '#' + ownRank + ' · You\'re #1!';
+                subEl.textContent = t('common.rankYouAreFirst', { rank: ownRank });
             } else {
                 const gap = (leader.netProfit || 0) - ownDailyNetProfit();
-                subEl.textContent = '#' + ownRank + ' · ' + (leader.displayName || 'Leader') + ' leads by ' + gap;
+                subEl.textContent = t('common.rankLeadsBy', { rank: ownRank, name: leader.displayName || t('common.leader'), gap: formatNumber(gap) });
             }
         }
         renderFriendsDailyBody(bodyEl, limit);
@@ -374,7 +389,7 @@ function renderLeaderboardPanel() {
 
     if (expandLink) {
         expandLink.classList.toggle('hidden', totalCount <= 5);
-        expandLink.textContent = leaderboardExpanded ? 'Show Top 5 ▴' : 'Show Top 20 ▾';
+        expandLink.textContent = leaderboardExpanded ? t('lb.showTop5') : t('lb.showTop20');
     }
 }
 
@@ -392,17 +407,17 @@ function shareLeaderboard() {
     if (leaderboardTab === 'friends') {
         rankedFriendsDaily().slice(0, limit).forEach(function(f, i) {
             var val = f.netProfit || 0;
-            lines.push((i + 1) + '. ' + (f.self ? 'You' : (f.displayName || 'Player')) +
-                '  ' + (val >= 0 ? '+' : '') + val.toLocaleString());
+            lines.push((i + 1) + '. ' + (f.self ? t('common.you') : (f.displayName || t('common.player'))) +
+                '  ' + formatSigned(val));
         });
     } else if (leaderboardTab === 'hourly') {
         mergedHourlyList().slice(0, limit).forEach(function(e, i) {
-            lines.push((i + 1) + '. ' + (e.displayName || 'Player') + '  ' + (e.points || 0).toLocaleString() + ' pts');
+            lines.push((i + 1) + '. ' + (e.displayName || t('common.player')) + '  ' + t('common.points', { n: formatNumber(e.points || 0) }));
         });
     } else {
         mergedDailyList().slice(0, limit).forEach(function(e, i) {
             var val = e.score || 0;
-            lines.push((i + 1) + '. ' + (e.displayName || 'Player') + '  ' + (val >= 0 ? '+' : '') + val.toLocaleString());
+            lines.push((i + 1) + '. ' + (e.displayName || t('common.player')) + '  ' + formatSigned(val));
         });
     }
 
@@ -415,7 +430,14 @@ function shareLeaderboard() {
     shareViaNative(title, text, link).then(function(handled) {
         if (!handled && navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(link ? text + '\n' + link : text);
-            if (window.showToast) showToast('Standings copied.');
+            if (window.showToast) showToast(t('toast.standingsCopied'));
         }
+    });
+}
+
+if (window.vpOnLanguageChange) {
+    vpOnLanguageChange(function() {
+        renderLeaderboardPanel();
+        renderLeaderboardTimer();
     });
 }

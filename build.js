@@ -19,7 +19,9 @@ const cssFiles = [
     'styles/cards.css',
     'styles/social.css',
     'styles/animations.css',
-    'styles/onboarding.css'
+    'styles/onboarding.css',
+    // Last: RTL overrides must win specificity ties with the rules above.
+    'styles/rtl.css'
 ];
 
 let combinedCss = '';
@@ -29,6 +31,24 @@ cssFiles.forEach(file => {
 
 // Combine JS files in dependency order
 const jsFiles = [
+    // i18n first: every module below calls t() at render time.
+    'js/i18n.js',
+    'js/lang/en.js',
+    'js/lang/es.js',
+    'js/lang/pt-BR.js',
+    'js/lang/de.js',
+    'js/lang/fr.js',
+    'js/lang/it.js',
+    'js/lang/pl.js',
+    'js/lang/ru.js',
+    'js/lang/tr.js',
+    'js/lang/id.js',
+    'js/lang/hi.js',
+    'js/lang/ja.js',
+    'js/lang/ko.js',
+    'js/lang/zh-CN.js',
+    'js/lang/he.js',
+    'js/lang/ar.js',
     'js/audio.js',
     'js/analytics.js',
     'js/ui.js',
