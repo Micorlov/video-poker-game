@@ -20,9 +20,9 @@
 }
 
 .variant-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 .variant-btn.locked {
@@ -59,9 +59,9 @@
 }
 
 .theme-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 /* --- Multi-hand picker --- */
@@ -84,9 +84,9 @@
 }
 
 .multi-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 .multi-btn.locked {
@@ -153,7 +153,7 @@
 }
 
 .payout-value {
-    color: var(--green);
+    color: var(--action);
     font-weight: 700;
 }
 
@@ -163,7 +163,7 @@
     align-items: center;
     gap: 6px;
     width: 100%;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface);
     border: none;
     border-top: 1px solid var(--border);
     color: var(--text-muted);
@@ -180,12 +180,12 @@
 }
 
 .payout-help-toggle.open {
-    color: var(--green);
+    color: var(--action);
 }
 
 .payout-help {
     display: none;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--surface);
     border-radius: 8px;
     padding: 10px 12px;
     margin-top: 8px;
@@ -212,7 +212,7 @@
 }
 
 .payout-help-example {
-    color: var(--green);
+    color: var(--action);
 }
 
 .payout-panel.collapsed .payout-help-toggle,
@@ -262,7 +262,7 @@
     padding: 9px 14px;
     margin-bottom: 6px;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.035);
+    background: var(--surface);
     border: 1px solid rgba(255, 255, 255, 0.07);
     overflow-x: auto;
     scrollbar-width: none;
@@ -289,11 +289,14 @@
     margin-top: 18px;
     padding: 14px;
     border-radius: var(--radius-xl);
-    background: var(--nav-glass);
-    border: 1px solid var(--nav-border);
+    /* Felt-glass, not the near-opaque rail the bottom nav uses: this dock sits
+       *in* the page rather than floating over it, so a heavy slab here would
+       cut the table in half. The blur does the legibility work instead. */
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.9);
+    box-shadow: var(--lift-panel);
 }
 
 .total-bet-row {
@@ -339,9 +342,9 @@
 /* Selection is a ring plus a wash, not a solid fill — the chips stay a row
    of equals and only the Draw button carries a full green surface. */
 .bet-btn.selected {
-    background: rgba(22, 193, 114, 0.22);
+    background: rgba(var(--action-rgb), 0.22);
     border-color: transparent;
-    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    box-shadow: 0 0 0 2px var(--action), 0 12px 26px -12px rgba(var(--action-rgb), 0.9);
     color: var(--text);
 }
 
@@ -351,9 +354,9 @@
     align-items: center;
     justify-content: center;
     gap: 1px;
-    background: var(--green-dim);
-    border: 1px solid rgba(22, 193, 114, 0.45);
-    color: var(--green-light);
+    background: var(--action-dim);
+    border: 1px solid rgba(var(--action-rgb), 0.45);
+    color: var(--action-light);
 }
 
 .allin-label {
@@ -369,9 +372,9 @@
 }
 
 .bet-btn-allin.selected {
-    background: rgba(22, 193, 114, 0.22);
+    background: rgba(var(--action-rgb), 0.22);
     border-color: transparent;
-    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    box-shadow: 0 0 0 2px var(--action), 0 12px 26px -12px rgba(var(--action-rgb), 0.9);
     color: var(--text);
 }
 
@@ -389,8 +392,8 @@
     height: 64px;
     margin-top: 20px;
     border-radius: var(--radius-md);
-    background: var(--green-dim);
-    border: 1px solid rgba(22, 193, 114, 0.35);
+    background: var(--action-dim);
+    border: 1px solid rgba(var(--action-rgb), 0.35);
     overflow: hidden;
     -webkit-user-select: none;
     user-select: none;
@@ -401,7 +404,7 @@
     position: absolute;
     inset: 0;
     width: 0;
-    background: linear-gradient(90deg, rgba(22, 193, 114, 0.35), rgba(22, 193, 114, 0));
+    background: linear-gradient(90deg, rgba(var(--action-rgb), 0.35), rgba(var(--action-rgb), 0));
 }
 
 .allin-slider-label {
@@ -412,7 +415,7 @@
     justify-content: center;
     font-size: 13.5px;
     font-weight: 700;
-    color: var(--green-wash);
+    color: var(--action-wash);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     pointer-events: none;
@@ -425,15 +428,15 @@
     width: 56px;
     height: 56px;
     border-radius: 16px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-weight: 800;
     font-size: 20px;
-    box-shadow: 0 10px 26px -8px rgba(22, 193, 114, 0.9);
+    box-shadow: 0 10px 26px -8px rgba(var(--action-rgb), 0.9);
     cursor: grab;
     touch-action: none;
     /* JS pins the thumb with `left` or `right` depending on reading
@@ -447,7 +450,7 @@
 }
 
 .allin-slider-track.confirmed .allin-slider-label {
-    color: var(--green-ink);
+    color: var(--action-ink);
 }
 
 /* --- Hand / cards --- */
@@ -497,41 +500,59 @@
     overflow: hidden;
 }
 
-/* Cards are the only bright surface in the app. The face is paper, lifted
-   off the felt by a long shadow rather than a border. */
+/* Cards are the brightest surface in the app: ivory stock on green cloth.
+   The lit top edge and the heavy shadowed bottom one give the tile a real
+   thickness — the same bevel recipe the buttons use, at card scale. */
 .card-front {
     background: var(--card-face-bg);
     color: var(--card-black);
     padding: 7px 8px;
     justify-content: center;
-    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85);
+    border-top: 1.5px solid var(--card-bevel-top);
+    border-bottom: 3px solid var(--card-bevel-bottom);
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5);
 }
 
 .card.red .card-front {
     color: var(--card-red);
 }
 
+/* The back is a printed deck's red marble with a pale drawn border where
+   the filigree would sit. */
 .card-back {
-    background: var(--panel-solid);
-    border: 1px solid var(--border-strong);
-    background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 6px, transparent 6px 12px);
+    background: var(--card-back-bg);
+    border: 1px solid var(--card-back-border);
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5);
     transform: rotateY(180deg);
 }
 
-.card.held .card-front {
-    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85),
-                0 0 0 2px var(--green),
-                0 0 22px -2px rgba(22, 193, 114, 0.8);
+/* A drawn inner rule, inset from the edge — the filigree frame. */
+.card-back::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1px solid var(--card-back-border);
+    border-radius: 7px;
+    pointer-events: none;
 }
 
+.card.held .card-front {
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5),
+                0 0 0 3px var(--action),
+                0 0 22px -2px var(--action-line);
+}
+
+/* Dim by shading the card, not by making it translucent. Opacity would let
+   the green felt through an ivory face and turn the card green — on the old
+   near-black ground that read as "grey", on this one it reads as a bug. */
 .card.unheld {
-    opacity: 0.55;
+    filter: brightness(0.74) saturate(0.85);
 }
 
 .card.winning .card-front,
 .card.second-pair .card-front,
 .card.third-match .card-front {
-    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85), 0 0 0 2px var(--green);
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5), 0 0 0 3px var(--gold);
 }
 
 /* Rank top-left, suit bottom-right: the diagonal reads as a real card even
@@ -574,9 +595,17 @@
     opacity: 0;
 }
 
-.held-badge, .win-badge {
-    background: var(--green);
-    color: var(--green-ink);
+/* Held is a choice you made — action orange. A win is money — gold. */
+.held-badge {
+    background: linear-gradient(180deg, var(--action) 0%, var(--action-deep) 100%);
+    color: var(--action-ink);
+    box-shadow: var(--lift-pill);
+}
+
+.win-badge {
+    background: linear-gradient(180deg, var(--gold) 0%, var(--gold-600) 100%);
+    color: #3A2A02;
+    box-shadow: var(--lift-pill);
 }
 
 .card.held .held-badge,
@@ -624,7 +653,7 @@
 .mh-win {
     font-size: 11px;
     font-weight: 800;
-    color: var(--green);
+    color: var(--action);
     margin-inline-start: 4px;
     white-space: nowrap;
 }
@@ -643,16 +672,19 @@
     margin-top: 14px;
 }
 
-/* The single green surface on the screen. Everything else is glass, so the
-   button that spends chips is impossible to mistake for anything else. */
+/* The single warm surface on the screen. Everything else is felt-glass, so
+   the button that spends chips is impossible to mistake for anything else.
+   The dark bottom lip plus the dip on press is what makes a flat rectangle
+   feel like something you actually pushed. */
 .btn-primary, .btn-secondary {
     flex: 1;
-    height: 62px;
+    height: 68px;
     padding: 0 16px;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     border: none;
+    border-bottom: 4px solid var(--action-edge);
     font-family: var(--font-display);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     letter-spacing: -0.01em;
     cursor: pointer;
@@ -660,7 +692,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    transition: background 0.16s;
+    transition: background 0.16s, transform 0.08s, border-bottom-width 0.08s;
 }
 
 .main-btn-icon {
@@ -669,18 +701,28 @@
 }
 
 .btn-primary, .btn-secondary {
-    background: var(--green);
-    color: var(--green-ink);
-    box-shadow: var(--green-glow);
+    background: linear-gradient(180deg, var(--action) 0%, var(--action-deep) 100%);
+    color: var(--action-ink);
+    box-shadow: var(--action-glow);
 }
 
 .btn-primary:hover:not(:disabled),
 .btn-secondary:hover:not(:disabled) {
-    background: var(--green-hover);
+    background: linear-gradient(180deg, var(--action-hover) 0%, var(--action) 100%);
 }
 
+/* The press eats the bottom lip and drops the face onto it. */
+.btn-primary:active:not(:disabled),
+.btn-secondary:active:not(:disabled) {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+    box-shadow: none;
+}
+
+/* Disabled drops to plain glass: no lip, no glow, nothing to press. */
 .btn-primary:disabled, .btn-secondary:disabled {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--surface-raised);
+    border-bottom-color: transparent;
     color: var(--text-faint);
     box-shadow: none;
 }
@@ -688,7 +730,7 @@
 .hint-btn {
     flex: 0 0 62px;
     height: 62px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-raised);
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-md);
     font-size: 20px;
@@ -700,7 +742,7 @@
 
 .hint-btn.on {
     opacity: 1;
-    box-shadow: 0 0 0 2px var(--green);
+    box-shadow: 0 0 0 2px var(--action);
 }
 
 .card.hint-suggest .card-front {
@@ -716,7 +758,7 @@
 }
 
 .result-panel .win {
-    color: var(--green);
+    color: var(--action);
     font-weight: 800;
     font-family: var(--font-display);
     font-size: 24px;
@@ -762,7 +804,7 @@
     padding: 4px;
     margin-bottom: 14px;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
 }
 
@@ -779,8 +821,8 @@
 }
 
 .stats-toggle-btn.selected {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-weight: 700;
 }
 
@@ -792,7 +834,7 @@
     padding: 3px;
     margin-bottom: 12px;
     border-radius: var(--radius-xs);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-raised);
     border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
@@ -814,8 +856,8 @@
 .lb-tab.hidden { display: none; }
 
 .lb-tab.selected {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-weight: 700;
 }
 
@@ -846,7 +888,7 @@
     margin-top: 4px;
 }
 
-.stats-net-value.positive { color: var(--green); }
+.stats-net-value.positive { color: var(--action); }
 .stats-net-value.negative { color: var(--red); }
 .stats-net-value.zero { color: var(--text); }
 
@@ -862,7 +904,7 @@
     margin-top: 4px;
 }
 
-.stat-tile-value.won { color: var(--green); }
+.stat-tile-value.won { color: var(--action); }
 .stat-tile-value.lost { color: var(--red); }
 
 /* --- Settings screen --- */
@@ -892,7 +934,7 @@
     height: 26px;
     -webkit-appearance: none;
     appearance: none;
-    background: rgba(255, 255, 255, 0.14);
+    background: var(--track);
     border-radius: 999px;
     cursor: pointer;
     outline: none;
@@ -912,7 +954,7 @@
 }
 
 .toggle-switch:checked {
-    background: var(--green);
+    background: var(--action);
 }
 
 .toggle-switch:checked::before {
@@ -989,8 +1031,8 @@
 .pwa-bar span { flex: 1; }
 
 .pwa-bar-yes, .pwa-bar-no {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     border: none;
     border-radius: 8px;
     padding: 6px 10px;
@@ -1000,7 +1042,7 @@
 }
 
 .pwa-bar-no {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-hover);
     color: var(--text);
 }
 
@@ -1018,7 +1060,7 @@
     align-items: center;
     gap: 12px;
     margin-top: 12px;
-    border: 1px solid var(--green-line);
+    border: 1px solid var(--action-line);
     cursor: pointer;
 }
 
@@ -1027,8 +1069,8 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--green-dim);
-    color: var(--green-light);
+    background: var(--action-dim);
+    color: var(--action-light);
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -1150,7 +1192,7 @@
 }
 
 .friend-row.me {
-    background: var(--green-dim);
+    background: var(--action-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -1190,8 +1232,8 @@
 .friend-you-tag {
     font-size: 9px;
     font-weight: 800;
-    color: var(--green-ink);
-    background: var(--green);
+    color: var(--action-ink);
+    background: var(--action);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -1211,7 +1253,7 @@
     flex: 0 0 auto;
 }
 
-.friend-score.positive { color: var(--green); }
+.friend-score.positive { color: var(--action); }
 .friend-score.negative { color: var(--red); }
 .friend-score.zero { color: var(--text-muted); }
 
@@ -1259,7 +1301,7 @@
 
 .roomstatus.open {
     background: var(--gold-100);
-    color: var(--green);
+    color: var(--action);
 }
 
 .roomstatus.playing {
@@ -1278,8 +1320,8 @@
     text-align: center;
     padding: 9px 0;
     border-radius: 8px;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;

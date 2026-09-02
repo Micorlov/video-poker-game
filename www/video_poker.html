@@ -27,7 +27,7 @@
     })();
     </script>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#04100C">
+    <meta name="theme-color" content="#1E6B3C">
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,75 +38,126 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* =========================================================================
-   Royal Video Poker — 2026 "night glass" system.
+   Royal Video Poker — "table felt" system.
 
-   One felt-green action colour, tabular numerals for money, and playing
-   cards as the only bright surface on screen. Everything else is dark
-   glass: low-alpha white fills over a deep green-black ground.
+   A bright, lamp-lit card room rather than a casino at night. The ground is
+   green felt with a lamp hung over the middle of the table; panels are
+   felt-glass (low-alpha *black* over the green, so they read as shadow on
+   cloth rather than frost on a window); and one warm orange carries every
+   call to action. Gold is spent only on money and celebration.
+
+   The inversion that matters versus the old night-glass system: surfaces
+   darken the ground instead of lightening it. On a bright field, a white
+   wash turns to milk and loses its edge — a black wash keeps its shape.
    ========================================================================= */
 
 :root {
-    /* Ground — the casino floor at night, lit from the top of the screen. */
-    --bg-base: #04100C;
-    --bg-mid: #071612;
-    --bg-glow: #123326;
-    --app-bg: radial-gradient(120% 60% at 50% 0%, var(--bg-glow) 0%, var(--bg-mid) 58%, var(--bg-base) 100%);
+    /* Ground — the felt, lit from a lamp above the middle of the table.
+       The glow sits at 38% rather than the top edge, which is what makes it
+       read as a hanging lamp instead of a screen-edge vignette. */
+    --bg-base: #1E6B3C;
+    --bg-mid: #2A8A4E;
+    --bg-glow: #3DA45F;
+    --bg-edge: #14522C;
+    --app-bg: radial-gradient(ellipse 140% 90% at 50% 38%,
+                              var(--bg-glow) 0%,
+                              var(--bg-mid) 52%,
+                              var(--bg-base) 82%,
+                              var(--bg-edge) 100%);
 
-    /* Action colour — the only saturated hue in the chrome. */
-    --green: #16C172;
-    --green-hover: #2FD886;
-    --green-light: #58E39B;
-    --green-ink: #04170E;
-    --green-dim: rgba(22, 193, 114, 0.12);
-    --green-line: rgba(22, 193, 114, 0.32);
-    --green-wash: rgba(207, 245, 225, 0.65);
-    --green-glow: 0 18px 40px -14px rgba(22, 193, 114, 0.85);
+    /* Action colour — the one warm surface on a cool field. Named for its
+       job, not its hue: the felt is the green in this system now. */
+    --action: #F5872E;
+    /* The bare triplet, for the handful of places that need the action hue at
+       an alpha the named tokens don't carry (glows, washes, rings). Keeping it
+       as a variable is what lets the themes below actually retint them. */
+    --action-rgb: 245, 135, 46;
+    --action-hover: #FF9A47;
+    --action-deep: #D96B12;
+    --action-light: #FFB877;
+    --action-ink: #FFFFFF;
+    --action-dim: rgba(245, 135, 46, 0.16);
+    --action-line: rgba(245, 135, 46, 0.45);
+    --action-wash: rgba(90, 43, 5, 0.72);
+    --action-glow: 0 10px 24px -8px rgba(217, 107, 18, 0.6);
+    /* The dark bottom lip that gives a button its pressable thickness. */
+    --action-edge: rgba(90, 43, 5, 0.55);
 
-    /* Reserved for time pressure and scarcity only (timers, entry fees). */
-    --gold: #E9C46A;
-    --gold-600: #D8AE47;
-    --gold-100: #F6E4B8;
-    --gold-dim: rgba(233, 196, 106, 0.1);
-    --gold-line: rgba(233, 196, 106, 0.28);
+    /* Money, rank and celebration — never a call to action. */
+    --gold: #FFC93C;
+    --gold-600: #D99E1B;
+    --gold-100: #FFE9A8;
+    --gold-dim: rgba(255, 201, 60, 0.14);
+    --gold-line: rgba(255, 201, 60, 0.34);
 
-    --red: #FF6BAA;
-    --red-dim: rgba(255, 107, 170, 0.12);
+    /* A destructive control cannot be red ink on a translucent green wash:
+       that pairing is the lowest contrast on the felt and the first thing to
+       go for a red-green colour blind player. Solid dark ground, pale red
+       ink — the difference is in luminance, so it survives without the hue. */
+    --red: #FF5A5F;
+    --red-dim: rgba(255, 90, 95, 0.16);
+    --red-surface: #5E1F22;
+    --red-surface-edge: rgba(255, 90, 95, 0.55);
+    --red-ink: #FFC2C4;
 
-    /* Glass surfaces — alpha over the ground, never an opaque panel. */
-    --surface: rgba(255, 255, 255, 0.04);
-    --surface-raised: rgba(255, 255, 255, 0.055);
-    --surface-hover: rgba(255, 255, 255, 0.09);
-    --border: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.1);
+    /* Felt-glass surfaces — alpha black over the green ground. */
+    --surface: rgba(0, 0, 0, 0.18);
+    --surface-raised: rgba(0, 0, 0, 0.26);
+    --surface-hover: rgba(0, 0, 0, 0.34);
+    --border: rgba(255, 255, 255, 0.16);
+    --border-strong: rgba(255, 255, 255, 0.26);
+    --track: rgba(0, 0, 0, 0.32);
 
-    /* The floating navigation bar reads as frosted glass over the felt. */
-    --nav-glass: rgba(8, 26, 20, 0.84);
-    --nav-border: rgba(255, 255, 255, 0.09);
+    /* The floating navigation bar reads as a shadowed rail on the cloth. */
+    --nav-glass: rgba(11, 58, 32, 0.88);
+    --nav-border: rgba(255, 255, 255, 0.2);
+
+    /* Modals sit on an opaque panel so the scrim behind them reads as depth. */
+    --panel-solid: #175A32;
+    --scrim: rgba(0, 0, 0, 0.55);
+
+    /* Light cards (results, rules) and the ink that sits on them. */
+    --panel-cream: #FFF8EC;
+    --ink-text: #243447;
+    --ink-text-muted: rgba(36, 52, 71, 0.62);
 
     /* Legacy aliases — older rules still reach for these names. */
     --panel: var(--surface);
-    --panel-solid: #0E2019;
-    --felt-900: var(--bg-base);
-    --felt-800: var(--bg-mid);
-    --felt-700: var(--bg-glow);
+    --felt-900: var(--bg-edge);
+    --felt-800: var(--bg-base);
+    --felt-700: var(--bg-mid);
     --felt-600: var(--border-strong);
 
     --text: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.58);
-    --text-faint: rgba(255, 255, 255, 0.4);
-    --text-ghost: rgba(255, 255, 255, 0.32);
+    --text-muted: rgba(255, 255, 255, 0.78);
+    --text-faint: rgba(255, 255, 255, 0.58);
+    /* A bright ground eats faint ink — the ghost tier sits higher here than it
+       would on the old near-black one, or the paytable ticker disappears. */
+    --text-ghost: rgba(255, 255, 255, 0.56);
 
-    /* Cards are the one bright surface — paper white, never tinted. */
-    --card-face-bg: linear-gradient(180deg, #FFFFFF 0%, #EDEFF6 100%);
-    --card-black: #101322;
-    --card-red: #E01B44;
+    /* Cards are ivory stock, not paper white — a bevelled tile with a lit
+       top edge and a shadowed bottom one, so it sits *on* the felt. */
+    --card-face-bg: linear-gradient(180deg, #FFFFFF 0%, #EDE8DA 100%);
+    --card-bevel-top: rgba(255, 255, 255, 0.95);
+    --card-bevel-bottom: rgba(103, 94, 72, 0.55);
+    --card-black: #22242E;
+    --card-red: #C0273A;
+    /* The back borrows a printed deck's red marble, with a pale drawn border
+       where the filigree would sit. */
+    --card-back-bg: linear-gradient(180deg, #B03A4A 0%, #7E2433 100%);
+    --card-back-border: rgba(255, 233, 236, 0.45);
+
+    /* Lifts. Nothing on the felt is flat — everything casts. */
+    --lift-tile: 0 6px 14px -4px rgba(0, 0, 0, 0.4);
+    --lift-pill: 0 3px 8px -2px rgba(0, 0, 0, 0.35);
+    --lift-panel: 0 14px 34px -12px rgba(0, 0, 0, 0.45);
 
     --radius-xl: 26px;
     --radius-lg: 22px;
     --radius-md: 20px;
     --radius-sm: 14px;
     --radius-xs: 12px;
-    --radius-card: 15px;
+    --radius-card: 14px;
 
     --nav-height: 78px;
     --nav-gap: 30px;
@@ -126,38 +177,45 @@
                  sans-serif;
 }
 
-/* --- Blue theme: same night glass, cooler action colour --- */
+/* --- Blue theme: a cooler cloth, and a warm call to action to match it --- */
 body.theme-blue {
-    --bg-base: #040C14;
-    --bg-mid: #07131F;
-    --bg-glow: #12293F;
-    --green: #2E9BF0;
-    --green-hover: #55B4FA;
-    --green-light: #7FCBFF;
-    --green-ink: #04121E;
-    --green-dim: rgba(46, 155, 240, 0.12);
-    --green-line: rgba(46, 155, 240, 0.32);
-    --green-wash: rgba(207, 231, 245, 0.65);
-    --green-glow: 0 18px 40px -14px rgba(46, 155, 240, 0.85);
-    --nav-glass: rgba(8, 20, 32, 0.84);
-    --panel-solid: #0E1A26;
+    --action-rgb: 255, 177, 60;
+    --bg-base: #1B4F7A;
+    --bg-mid: #246A9E;
+    --bg-glow: #3288BF;
+    --bg-edge: #123A5C;
+    --action: #FFB13C;
+    --action-hover: #FFC163;
+    --action-deep: #E08A12;
+    --action-light: #FFD08F;
+    --action-dim: rgba(255, 177, 60, 0.16);
+    --action-line: rgba(255, 177, 60, 0.45);
+    --action-wash: rgba(92, 56, 6, 0.72);
+    --action-glow: 0 10px 24px -8px rgba(224, 138, 18, 0.6);
+    --action-edge: rgba(92, 56, 6, 0.55);
+    --nav-glass: rgba(12, 45, 70, 0.88);
+    --panel-solid: #164468;
 }
 
-/* --- Crimson theme: same night glass, warmer action colour --- */
+/* --- Crimson theme: a burgundy room, lit by a gold call to action --- */
 body.theme-crimson {
-    --bg-base: #140406;
-    --bg-mid: #1D080B;
-    --bg-glow: #3A1218;
-    --green: #E8456A;
-    --green-hover: #F26A88;
-    --green-light: #FF93A9;
-    --green-ink: #1D0409;
-    --green-dim: rgba(232, 69, 106, 0.12);
-    --green-line: rgba(232, 69, 106, 0.32);
-    --green-wash: rgba(245, 214, 221, 0.65);
-    --green-glow: 0 18px 40px -14px rgba(232, 69, 106, 0.85);
-    --nav-glass: rgba(28, 8, 12, 0.84);
-    --panel-solid: #22090D;
+    --action-rgb: 255, 201, 60;
+    --bg-base: #6B1E2E;
+    --bg-mid: #8A2A3D;
+    --bg-glow: #A43D51;
+    --bg-edge: #521421;
+    --action: #FFC93C;
+    --action-hover: #FFD766;
+    --action-deep: #D99E1B;
+    --action-light: #FFE49A;
+    --action-ink: #3A2A02;
+    --action-dim: rgba(255, 201, 60, 0.16);
+    --action-line: rgba(255, 201, 60, 0.45);
+    --action-wash: rgba(72, 52, 4, 0.72);
+    --action-glow: 0 10px 24px -8px rgba(217, 158, 27, 0.6);
+    --action-edge: rgba(90, 66, 6, 0.55);
+    --nav-glass: rgba(58, 16, 26, 0.88);
+    --panel-solid: #5C1A28;
 }
 
 html, body {
@@ -175,8 +233,8 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* The glow is painted behind the scrolling content so it stays anchored to
-   the top of the viewport rather than sliding away with the page. */
+/* The lamp glow is painted behind the scrolling content so it stays anchored
+   to the table rather than sliding away with the page. */
 body::before {
     content: '';
     position: fixed;
@@ -265,8 +323,8 @@ button:focus:not(:focus-visible) {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px 2px rgba(22, 193, 114, 0.7);
+    background: var(--action);
+    box-shadow: 0 0 8px 2px rgba(var(--action-rgb), 0.7);
     flex-shrink: 0;
 }
 
@@ -406,8 +464,8 @@ button:focus:not(:focus-visible) {
 }
 
 .nav-btn.active {
-    color: var(--green);
-    background: var(--green-dim);
+    color: var(--action);
+    background: var(--action-dim);
     font-weight: 700;
 }
 
@@ -425,7 +483,7 @@ button:focus:not(:focus-visible) {
    ========================================================================= */
 @media (min-width: 620px) {
     html {
-        background: #05100D;
+        background: var(--bg-edge);
     }
 
     body {
@@ -491,9 +549,9 @@ button:focus:not(:focus-visible) {
 }
 
 .variant-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 .variant-btn.locked {
@@ -530,9 +588,9 @@ button:focus:not(:focus-visible) {
 }
 
 .theme-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 /* --- Multi-hand picker --- */
@@ -555,9 +613,9 @@ button:focus:not(:focus-visible) {
 }
 
 .multi-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 .multi-btn.locked {
@@ -624,7 +682,7 @@ button:focus:not(:focus-visible) {
 }
 
 .payout-value {
-    color: var(--green);
+    color: var(--action);
     font-weight: 700;
 }
 
@@ -634,7 +692,7 @@ button:focus:not(:focus-visible) {
     align-items: center;
     gap: 6px;
     width: 100%;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface);
     border: none;
     border-top: 1px solid var(--border);
     color: var(--text-muted);
@@ -651,12 +709,12 @@ button:focus:not(:focus-visible) {
 }
 
 .payout-help-toggle.open {
-    color: var(--green);
+    color: var(--action);
 }
 
 .payout-help {
     display: none;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--surface);
     border-radius: 8px;
     padding: 10px 12px;
     margin-top: 8px;
@@ -683,7 +741,7 @@ button:focus:not(:focus-visible) {
 }
 
 .payout-help-example {
-    color: var(--green);
+    color: var(--action);
 }
 
 .payout-panel.collapsed .payout-help-toggle,
@@ -733,7 +791,7 @@ button:focus:not(:focus-visible) {
     padding: 9px 14px;
     margin-bottom: 6px;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.035);
+    background: var(--surface);
     border: 1px solid rgba(255, 255, 255, 0.07);
     overflow-x: auto;
     scrollbar-width: none;
@@ -760,11 +818,14 @@ button:focus:not(:focus-visible) {
     margin-top: 18px;
     padding: 14px;
     border-radius: var(--radius-xl);
-    background: var(--nav-glass);
-    border: 1px solid var(--nav-border);
+    /* Felt-glass, not the near-opaque rail the bottom nav uses: this dock sits
+       *in* the page rather than floating over it, so a heavy slab here would
+       cut the table in half. The blur does the legibility work instead. */
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.9);
+    box-shadow: var(--lift-panel);
 }
 
 .total-bet-row {
@@ -810,9 +871,9 @@ button:focus:not(:focus-visible) {
 /* Selection is a ring plus a wash, not a solid fill — the chips stay a row
    of equals and only the Draw button carries a full green surface. */
 .bet-btn.selected {
-    background: rgba(22, 193, 114, 0.22);
+    background: rgba(var(--action-rgb), 0.22);
     border-color: transparent;
-    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    box-shadow: 0 0 0 2px var(--action), 0 12px 26px -12px rgba(var(--action-rgb), 0.9);
     color: var(--text);
 }
 
@@ -822,9 +883,9 @@ button:focus:not(:focus-visible) {
     align-items: center;
     justify-content: center;
     gap: 1px;
-    background: var(--green-dim);
-    border: 1px solid rgba(22, 193, 114, 0.45);
-    color: var(--green-light);
+    background: var(--action-dim);
+    border: 1px solid rgba(var(--action-rgb), 0.45);
+    color: var(--action-light);
 }
 
 .allin-label {
@@ -840,9 +901,9 @@ button:focus:not(:focus-visible) {
 }
 
 .bet-btn-allin.selected {
-    background: rgba(22, 193, 114, 0.22);
+    background: rgba(var(--action-rgb), 0.22);
     border-color: transparent;
-    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    box-shadow: 0 0 0 2px var(--action), 0 12px 26px -12px rgba(var(--action-rgb), 0.9);
     color: var(--text);
 }
 
@@ -860,8 +921,8 @@ button:focus:not(:focus-visible) {
     height: 64px;
     margin-top: 20px;
     border-radius: var(--radius-md);
-    background: var(--green-dim);
-    border: 1px solid rgba(22, 193, 114, 0.35);
+    background: var(--action-dim);
+    border: 1px solid rgba(var(--action-rgb), 0.35);
     overflow: hidden;
     -webkit-user-select: none;
     user-select: none;
@@ -872,7 +933,7 @@ button:focus:not(:focus-visible) {
     position: absolute;
     inset: 0;
     width: 0;
-    background: linear-gradient(90deg, rgba(22, 193, 114, 0.35), rgba(22, 193, 114, 0));
+    background: linear-gradient(90deg, rgba(var(--action-rgb), 0.35), rgba(var(--action-rgb), 0));
 }
 
 .allin-slider-label {
@@ -883,7 +944,7 @@ button:focus:not(:focus-visible) {
     justify-content: center;
     font-size: 13.5px;
     font-weight: 700;
-    color: var(--green-wash);
+    color: var(--action-wash);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     pointer-events: none;
@@ -896,15 +957,15 @@ button:focus:not(:focus-visible) {
     width: 56px;
     height: 56px;
     border-radius: 16px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-weight: 800;
     font-size: 20px;
-    box-shadow: 0 10px 26px -8px rgba(22, 193, 114, 0.9);
+    box-shadow: 0 10px 26px -8px rgba(var(--action-rgb), 0.9);
     cursor: grab;
     touch-action: none;
     /* JS pins the thumb with `left` or `right` depending on reading
@@ -918,7 +979,7 @@ button:focus:not(:focus-visible) {
 }
 
 .allin-slider-track.confirmed .allin-slider-label {
-    color: var(--green-ink);
+    color: var(--action-ink);
 }
 
 /* --- Hand / cards --- */
@@ -968,41 +1029,59 @@ button:focus:not(:focus-visible) {
     overflow: hidden;
 }
 
-/* Cards are the only bright surface in the app. The face is paper, lifted
-   off the felt by a long shadow rather than a border. */
+/* Cards are the brightest surface in the app: ivory stock on green cloth.
+   The lit top edge and the heavy shadowed bottom one give the tile a real
+   thickness — the same bevel recipe the buttons use, at card scale. */
 .card-front {
     background: var(--card-face-bg);
     color: var(--card-black);
     padding: 7px 8px;
     justify-content: center;
-    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85);
+    border-top: 1.5px solid var(--card-bevel-top);
+    border-bottom: 3px solid var(--card-bevel-bottom);
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5);
 }
 
 .card.red .card-front {
     color: var(--card-red);
 }
 
+/* The back is a printed deck's red marble with a pale drawn border where
+   the filigree would sit. */
 .card-back {
-    background: var(--panel-solid);
-    border: 1px solid var(--border-strong);
-    background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 6px, transparent 6px 12px);
+    background: var(--card-back-bg);
+    border: 1px solid var(--card-back-border);
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5);
     transform: rotateY(180deg);
 }
 
-.card.held .card-front {
-    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85),
-                0 0 0 2px var(--green),
-                0 0 22px -2px rgba(22, 193, 114, 0.8);
+/* A drawn inner rule, inset from the edge — the filigree frame. */
+.card-back::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1px solid var(--card-back-border);
+    border-radius: 7px;
+    pointer-events: none;
 }
 
+.card.held .card-front {
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5),
+                0 0 0 3px var(--action),
+                0 0 22px -2px var(--action-line);
+}
+
+/* Dim by shading the card, not by making it translucent. Opacity would let
+   the green felt through an ivory face and turn the card green — on the old
+   near-black ground that read as "grey", on this one it reads as a bug. */
 .card.unheld {
-    opacity: 0.55;
+    filter: brightness(0.74) saturate(0.85);
 }
 
 .card.winning .card-front,
 .card.second-pair .card-front,
 .card.third-match .card-front {
-    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85), 0 0 0 2px var(--green);
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5), 0 0 0 3px var(--gold);
 }
 
 /* Rank top-left, suit bottom-right: the diagonal reads as a real card even
@@ -1045,9 +1124,17 @@ button:focus:not(:focus-visible) {
     opacity: 0;
 }
 
-.held-badge, .win-badge {
-    background: var(--green);
-    color: var(--green-ink);
+/* Held is a choice you made — action orange. A win is money — gold. */
+.held-badge {
+    background: linear-gradient(180deg, var(--action) 0%, var(--action-deep) 100%);
+    color: var(--action-ink);
+    box-shadow: var(--lift-pill);
+}
+
+.win-badge {
+    background: linear-gradient(180deg, var(--gold) 0%, var(--gold-600) 100%);
+    color: #3A2A02;
+    box-shadow: var(--lift-pill);
 }
 
 .card.held .held-badge,
@@ -1095,7 +1182,7 @@ button:focus:not(:focus-visible) {
 .mh-win {
     font-size: 11px;
     font-weight: 800;
-    color: var(--green);
+    color: var(--action);
     margin-inline-start: 4px;
     white-space: nowrap;
 }
@@ -1114,16 +1201,19 @@ button:focus:not(:focus-visible) {
     margin-top: 14px;
 }
 
-/* The single green surface on the screen. Everything else is glass, so the
-   button that spends chips is impossible to mistake for anything else. */
+/* The single warm surface on the screen. Everything else is felt-glass, so
+   the button that spends chips is impossible to mistake for anything else.
+   The dark bottom lip plus the dip on press is what makes a flat rectangle
+   feel like something you actually pushed. */
 .btn-primary, .btn-secondary {
     flex: 1;
-    height: 62px;
+    height: 68px;
     padding: 0 16px;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     border: none;
+    border-bottom: 4px solid var(--action-edge);
     font-family: var(--font-display);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     letter-spacing: -0.01em;
     cursor: pointer;
@@ -1131,7 +1221,7 @@ button:focus:not(:focus-visible) {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    transition: background 0.16s;
+    transition: background 0.16s, transform 0.08s, border-bottom-width 0.08s;
 }
 
 .main-btn-icon {
@@ -1140,18 +1230,28 @@ button:focus:not(:focus-visible) {
 }
 
 .btn-primary, .btn-secondary {
-    background: var(--green);
-    color: var(--green-ink);
-    box-shadow: var(--green-glow);
+    background: linear-gradient(180deg, var(--action) 0%, var(--action-deep) 100%);
+    color: var(--action-ink);
+    box-shadow: var(--action-glow);
 }
 
 .btn-primary:hover:not(:disabled),
 .btn-secondary:hover:not(:disabled) {
-    background: var(--green-hover);
+    background: linear-gradient(180deg, var(--action-hover) 0%, var(--action) 100%);
 }
 
+/* The press eats the bottom lip and drops the face onto it. */
+.btn-primary:active:not(:disabled),
+.btn-secondary:active:not(:disabled) {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+    box-shadow: none;
+}
+
+/* Disabled drops to plain glass: no lip, no glow, nothing to press. */
 .btn-primary:disabled, .btn-secondary:disabled {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--surface-raised);
+    border-bottom-color: transparent;
     color: var(--text-faint);
     box-shadow: none;
 }
@@ -1159,7 +1259,7 @@ button:focus:not(:focus-visible) {
 .hint-btn {
     flex: 0 0 62px;
     height: 62px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-raised);
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-md);
     font-size: 20px;
@@ -1171,7 +1271,7 @@ button:focus:not(:focus-visible) {
 
 .hint-btn.on {
     opacity: 1;
-    box-shadow: 0 0 0 2px var(--green);
+    box-shadow: 0 0 0 2px var(--action);
 }
 
 .card.hint-suggest .card-front {
@@ -1187,7 +1287,7 @@ button:focus:not(:focus-visible) {
 }
 
 .result-panel .win {
-    color: var(--green);
+    color: var(--action);
     font-weight: 800;
     font-family: var(--font-display);
     font-size: 24px;
@@ -1233,7 +1333,7 @@ button:focus:not(:focus-visible) {
     padding: 4px;
     margin-bottom: 14px;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
 }
 
@@ -1250,8 +1350,8 @@ button:focus:not(:focus-visible) {
 }
 
 .stats-toggle-btn.selected {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-weight: 700;
 }
 
@@ -1263,7 +1363,7 @@ button:focus:not(:focus-visible) {
     padding: 3px;
     margin-bottom: 12px;
     border-radius: var(--radius-xs);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-raised);
     border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
@@ -1285,8 +1385,8 @@ button:focus:not(:focus-visible) {
 .lb-tab.hidden { display: none; }
 
 .lb-tab.selected {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-weight: 700;
 }
 
@@ -1317,7 +1417,7 @@ button:focus:not(:focus-visible) {
     margin-top: 4px;
 }
 
-.stats-net-value.positive { color: var(--green); }
+.stats-net-value.positive { color: var(--action); }
 .stats-net-value.negative { color: var(--red); }
 .stats-net-value.zero { color: var(--text); }
 
@@ -1333,7 +1433,7 @@ button:focus:not(:focus-visible) {
     margin-top: 4px;
 }
 
-.stat-tile-value.won { color: var(--green); }
+.stat-tile-value.won { color: var(--action); }
 .stat-tile-value.lost { color: var(--red); }
 
 /* --- Settings screen --- */
@@ -1363,7 +1463,7 @@ button:focus:not(:focus-visible) {
     height: 26px;
     -webkit-appearance: none;
     appearance: none;
-    background: rgba(255, 255, 255, 0.14);
+    background: var(--track);
     border-radius: 999px;
     cursor: pointer;
     outline: none;
@@ -1383,7 +1483,7 @@ button:focus:not(:focus-visible) {
 }
 
 .toggle-switch:checked {
-    background: var(--green);
+    background: var(--action);
 }
 
 .toggle-switch:checked::before {
@@ -1460,8 +1560,8 @@ button:focus:not(:focus-visible) {
 .pwa-bar span { flex: 1; }
 
 .pwa-bar-yes, .pwa-bar-no {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     border: none;
     border-radius: 8px;
     padding: 6px 10px;
@@ -1471,7 +1571,7 @@ button:focus:not(:focus-visible) {
 }
 
 .pwa-bar-no {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-hover);
     color: var(--text);
 }
 
@@ -1489,7 +1589,7 @@ button:focus:not(:focus-visible) {
     align-items: center;
     gap: 12px;
     margin-top: 12px;
-    border: 1px solid var(--green-line);
+    border: 1px solid var(--action-line);
     cursor: pointer;
 }
 
@@ -1498,8 +1598,8 @@ button:focus:not(:focus-visible) {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--green-dim);
-    color: var(--green-light);
+    background: var(--action-dim);
+    color: var(--action-light);
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -1621,7 +1721,7 @@ button:focus:not(:focus-visible) {
 }
 
 .friend-row.me {
-    background: var(--green-dim);
+    background: var(--action-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -1661,8 +1761,8 @@ button:focus:not(:focus-visible) {
 .friend-you-tag {
     font-size: 9px;
     font-weight: 800;
-    color: var(--green-ink);
-    background: var(--green);
+    color: var(--action-ink);
+    background: var(--action);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -1682,7 +1782,7 @@ button:focus:not(:focus-visible) {
     flex: 0 0 auto;
 }
 
-.friend-score.positive { color: var(--green); }
+.friend-score.positive { color: var(--action); }
 .friend-score.negative { color: var(--red); }
 .friend-score.zero { color: var(--text-muted); }
 
@@ -1730,7 +1830,7 @@ button:focus:not(:focus-visible) {
 
 .roomstatus.open {
     background: var(--gold-100);
-    color: var(--green);
+    color: var(--action);
 }
 
 .roomstatus.playing {
@@ -1749,8 +1849,8 @@ button:focus:not(:focus-visible) {
     text-align: center;
     padding: 9px 0;
     border-radius: 8px;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
@@ -1956,7 +2056,7 @@ button:focus:not(:focus-visible) {
     width: 56px;
     height: 56px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--green), var(--green-light));
+    background: linear-gradient(135deg, var(--action), var(--action-light));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2191,7 +2291,7 @@ button:focus:not(:focus-visible) {
 .story-payout {
     font-size: 14px;
     font-weight: 700;
-    color: var(--green);
+    color: var(--action);
     text-align: center;
 }
 
@@ -2226,12 +2326,12 @@ button:focus:not(:focus-visible) {
 .nearby-panel .panel-sub {
     font-size: 10px;
     font-weight: 700;
-    color: var(--green-light);
+    color: var(--action-light);
     letter-spacing: 0.06em;
     padding: 2px 7px;
     border-radius: 6px;
-    background: rgba(22, 193, 114, 0.16);
-    border: 1px solid var(--green-line);
+    background: rgba(var(--action-rgb), 0.16);
+    border: 1px solid var(--action-line);
 }
 
 .champ-countdown {
@@ -2253,7 +2353,7 @@ button:focus:not(:focus-visible) {
 }
 
 .nearby-row.me {
-    background: var(--green-dim);
+    background: var(--action-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -2297,7 +2397,7 @@ button:focus:not(:focus-visible) {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--green);
+    background: var(--action);
     border: 2px solid var(--panel-solid);
 }
 
@@ -2351,7 +2451,7 @@ button:focus:not(:focus-visible) {
     flex-shrink: 0;
 }
 
-.nearby-net.positive { color: var(--green); }
+.nearby-net.positive { color: var(--action); }
 .nearby-net.negative { color: var(--red); }
 .nearby-net.zero     { color: var(--text-muted); }
 
@@ -2392,7 +2492,7 @@ button:focus:not(:focus-visible) {
 
 .mr-status.open {
     background: var(--gold-dim);
-    color: var(--green);
+    color: var(--action);
 }
 
 .mr-status.playing {
@@ -2403,8 +2503,8 @@ button:focus:not(:focus-visible) {
 .mr-join {
     font-size: 12px;
     font-weight: 700;
-    color: var(--green-ink);
-    background: var(--green);
+    color: var(--action-ink);
+    background: var(--action);
     padding: 6px 12px;
     border-radius: 999px;
     cursor: pointer;
@@ -2451,8 +2551,8 @@ button:focus:not(:focus-visible) {
 .invite-pill {
     font-size: 13px;
     font-weight: 700;
-    color: var(--green-ink);
-    background: var(--green);
+    color: var(--action-ink);
+    background: var(--action);
     padding: 8px 14px;
     border-radius: 999px;
     cursor: pointer;
@@ -2472,14 +2572,14 @@ button:focus:not(:focus-visible) {
 
 .sheet {
     width: 100%;
-    background: linear-gradient(180deg, #0E2019 0%, #08130F 100%);
+    background: linear-gradient(180deg, var(--panel-solid) 0%, var(--bg-edge) 100%);
     border-radius: 32px 32px 0 0;
     padding: 20px 18px max(28px, env(safe-area-inset-bottom));
     box-sizing: border-box;
-    box-shadow: 0 -30px 60px -20px rgba(22, 193, 114, 0.35);
+    box-shadow: 0 -30px 60px -20px rgba(var(--action-rgb), 0.35);
     max-width: 460px;
     margin: 0 auto;
-    border-top: 1px solid rgba(22, 193, 114, 0.28);
+    border-top: 1px solid rgba(var(--action-rgb), 0.28);
 }
 
 .sheet-header {
@@ -2539,8 +2639,8 @@ button:focus:not(:focus-visible) {
 .sheet-copy-btn {
     font-size: 12px;
     font-weight: 700;
-    color: var(--green);
-    border: 1px solid var(--green-line);
+    color: var(--action);
+    border: 1px solid var(--action-line);
     padding: 9px 12px;
     border-radius: 10px;
     cursor: pointer;
@@ -2552,9 +2652,9 @@ button:focus:not(:focus-visible) {
 }
 
 .sheet-copy-btn.copied {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 /* Share chips (WhatsApp / Telegram) */
@@ -2664,9 +2764,9 @@ button:focus:not(:focus-visible) {
 }
 
 .inline-room-form .room-form-stake.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 .inline-room-form .room-form-actions {
@@ -2686,8 +2786,8 @@ button:focus:not(:focus-visible) {
 }
 
 .room-form-create-btn {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
 }
 
 .room-form-cancel-btn {
@@ -2710,7 +2810,7 @@ button:focus:not(:focus-visible) {
 }
 
 .friend-leaderboard-row.me {
-    background: var(--green-dim);
+    background: var(--action-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -2770,7 +2870,7 @@ button:focus:not(:focus-visible) {
     flex-shrink: 0;
 }
 
-.friend-lb-net.positive { color: var(--green); }
+.friend-lb-net.positive { color: var(--action); }
 .friend-lb-net.negative { color: var(--red); }
 .friend-lb-net.zero     { color: var(--text-muted); }
 
@@ -2805,8 +2905,8 @@ button:focus:not(:focus-visible) {
 .friend-you-tag {
     font-size: 9px;
     font-weight: 700;
-    color: var(--green-ink);
-    background: var(--green);
+    color: var(--action-ink);
+    background: var(--action);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -2827,8 +2927,8 @@ button:focus:not(:focus-visible) {
    so your own row is findable without reading a single name. */
 .nearby-row.me .nearby-avatar,
 .friend-leaderboard-row.me .friend-lb-avatar {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
 }
 
 .stories-row:not(:empty) {
@@ -2849,13 +2949,13 @@ button:focus:not(:focus-visible) {
     width: 44px;
     height: 44px;
     border-radius: var(--radius-sm);
-    background: rgba(22, 193, 114, 0.14);
-    border: 1px solid var(--green-line);
+    background: rgba(var(--action-rgb), 0.14);
+    border: 1px solid var(--action-line);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 19px;
-    color: var(--green-light);
+    color: var(--action-light);
 }
 
 .sheet-heading {
@@ -2951,7 +3051,7 @@ button:focus:not(:focus-visible) {
 
 .code-chip:active { transform: scale(0.97); }
 
-.code-chip.copied { border-color: var(--green); }
+.code-chip.copied { border-color: var(--action); }
 
 .code-chip-label {
     font-size: 10px;
@@ -2965,7 +3065,7 @@ button:focus:not(:focus-visible) {
     font-size: 17px;
     font-weight: 800;
     letter-spacing: 0.18em;
-    color: var(--green);
+    color: var(--action);
     font-variant-numeric: tabular-nums;
 }
 
@@ -2974,7 +3074,7 @@ button:focus:not(:focus-visible) {
     color: var(--text-faint);
 }
 
-.code-chip.copied .code-chip-hint { color: var(--green); }
+.code-chip.copied .code-chip-hint { color: var(--action); }
 
 .add-friend-inline {
     flex: 1;
@@ -3003,8 +3103,8 @@ button:focus:not(:focus-visible) {
     margin-inline-start: 6px;
     padding: 1px 5px;
     border-radius: 999px;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-size: 11px;
     font-weight: 800;
     line-height: 15px;
@@ -3021,8 +3121,8 @@ button:focus:not(:focus-visible) {
     min-width: 16px;
     padding: 1px 4px;
     border-radius: 999px;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-size: 10px;
     font-weight: 800;
     line-height: 14px;
@@ -3035,8 +3135,8 @@ button:focus:not(:focus-visible) {
     align-items: center;
     gap: 10px;
     background: var(--surface-raised);
-    border: 1px solid var(--green-line);
-    border-inline-start: 3px solid var(--green);
+    border: 1px solid var(--action-line);
+    border-inline-start: 3px solid var(--action);
     border-radius: var(--radius-sm, 16px);
     padding: 12px 14px;
     margin-bottom: 10px;
@@ -3068,8 +3168,8 @@ button:focus:not(:focus-visible) {
 }
 
 .rib-accept {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     border: none;
     border-radius: 10px;
     padding: 8px 14px;
@@ -3116,8 +3216,8 @@ button:focus:not(:focus-visible) {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--green-dim);
-    color: var(--green);
+    background: var(--action-dim);
+    color: var(--action);
     font-size: 14px;
     font-weight: 800;
     display: flex;
@@ -3143,7 +3243,7 @@ button:focus:not(:focus-visible) {
     height: 22px;
     border-radius: 50%;
     border: 1.5px solid var(--border-strong);
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-size: 13px;
     font-weight: 800;
     display: flex;
@@ -3153,8 +3253,8 @@ button:focus:not(:focus-visible) {
 }
 
 .rip-row.selected .rip-check {
-    background: var(--green);
-    border-color: var(--green);
+    background: var(--action);
+    border-color: var(--action);
 }
 
 .rip-row.invited .rip-check {
@@ -3163,8 +3263,8 @@ button:focus:not(:focus-visible) {
     width: auto;
     height: auto;
     padding: 2px 8px;
-    background: var(--green-dim);
-    color: var(--green);
+    background: var(--action-dim);
+    color: var(--action);
     font-size: 11px;
     font-weight: 700;
 }
@@ -3181,8 +3281,8 @@ button:focus:not(:focus-visible) {
     margin-top: 6px;
     padding: 13px 0;
     border-radius: 12px;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     border: none;
     font-size: 14.5px;
     font-weight: 800;
@@ -3211,8 +3311,8 @@ button:focus:not(:focus-visible) {
 /* Native OS share chip alongside WhatsApp/Telegram */
 .share-chip.native {
     background: var(--surface-hover);
-    border: 1px solid var(--green-line);
-    color: var(--green);
+    border: 1px solid var(--action-line);
+    color: var(--action);
 }
 
 /* Small secondary "+ Invite friends" action on room cards */
@@ -3222,8 +3322,8 @@ button:focus:not(:focus-visible) {
     padding: 9px 0;
     border-radius: 10px;
     background: none;
-    border: 1px dashed var(--green-line);
-    color: var(--green);
+    border: 1px dashed var(--action-line);
+    color: var(--action);
     font-size: 12.5px;
     font-weight: 700;
     cursor: pointer;
@@ -3252,7 +3352,7 @@ button:focus:not(:focus-visible) {
     gap: 12px;
     width: 100%;
     padding: 13px 14px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface);
     border: 1px solid transparent;
     border-radius: 14px;
     color: var(--text);
@@ -3264,17 +3364,17 @@ button:focus:not(:focus-visible) {
 }
 
 .language-option:active {
-    background: rgba(255, 255, 255, 0.07);
+    background: var(--surface-hover);
 }
 
 .language-option.selected {
-    background: rgba(22, 193, 114, 0.12);
-    border-color: rgba(22, 193, 114, 0.45);
+    background: rgba(var(--action-rgb), 0.12);
+    border-color: rgba(var(--action-rgb), 0.45);
     font-weight: 700;
 }
 
 .language-option-check {
-    color: var(--green);
+    color: var(--action);
     font-size: 15px;
     opacity: 0;
 }
@@ -3438,7 +3538,7 @@ body.screen-shake {
     height: 62px;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-strong);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-raised);
     color: rgba(255, 255, 255, 0.75);
     font-size: 20px;
     cursor: pointer;
@@ -3459,18 +3559,28 @@ body.screen-shake {
     justify-content: center;
 }
 
+/* The same pressable lip the deal button carries — this is the first button
+   a new player ever touches, so it should feel like the rest of the app. */
 .onboarding-nav-arrow--next {
-    background: var(--green);
+    background: linear-gradient(180deg, var(--action) 0%, var(--action-deep) 100%);
     border-color: transparent;
-    color: var(--green-ink);
+    border-bottom: 4px solid var(--action-edge);
+    color: var(--action-ink);
     font-weight: 700;
     font-family: var(--font-display);
     font-size: 20px;
     letter-spacing: -0.01em;
-    box-shadow: var(--green-glow);
+    box-shadow: var(--action-glow);
     flex: 1;
     width: auto;
-    height: 62px;
+    height: 66px;
+    transition: transform 0.08s, border-bottom-width 0.08s;
+}
+
+.onboarding-nav-arrow--next:active {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+    box-shadow: none;
 }
 
 .onboarding-dots {
@@ -3489,7 +3599,7 @@ body.screen-shake {
 
 .onboarding-dot.active {
     width: 22px;
-    background: var(--green);
+    background: var(--action);
     height: 5px;
 }
 
@@ -3550,7 +3660,7 @@ body.screen-shake {
     align-items: stretch;
     padding: 13px;
     z-index: 3;
-    box-shadow: 0 26px 50px -18px rgba(0, 0, 0, 0.95), 0 0 0 2px rgba(22, 193, 114, 0.55);
+    box-shadow: 0 26px 50px -18px rgba(0, 0, 0, 0.95), 0 0 0 2px rgba(var(--action-rgb), 0.55);
 }
 
 /* The centre card carries the corner layout of a real card face. */
@@ -3682,8 +3792,8 @@ body.screen-shake {
 }
 
 .ob-hand-row--highlight {
-    border-color: rgba(22, 193, 114, 0.3);
-    background: rgba(22, 193, 114, 0.1);
+    border-color: rgba(var(--action-rgb), 0.3);
+    background: rgba(var(--action-rgb), 0.1);
 }
 
 .ob-hand-cards {
@@ -3809,8 +3919,8 @@ body.screen-shake {
     top: -9px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-size: 8px;
     font-weight: 800;
     letter-spacing: 0.06em;
@@ -3822,10 +3932,10 @@ body.screen-shake {
 .ob-mockup-draw-btn {
     width: 100%;
     padding: 11px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     border-radius: var(--radius-sm);
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-size: 15px;
     font-weight: 700;
     margin-bottom: 10px;
@@ -3858,17 +3968,17 @@ body.screen-shake {
 }
 
 .ob-mockup-bet--active {
-    background: rgba(22, 193, 114, 0.22);
+    background: rgba(var(--action-rgb), 0.22);
     color: var(--text);
-    box-shadow: 0 0 0 2px var(--green);
+    box-shadow: 0 0 0 2px var(--action);
     border-color: transparent;
 }
 
 .ob-mockup-bet--allin {
-    background: var(--green-dim);
-    color: var(--green-light);
+    background: var(--action-dim);
+    color: var(--action-light);
     position: relative;
-    border: 1px solid rgba(22, 193, 114, 0.45);
+    border: 1px solid rgba(var(--action-rgb), 0.45);
     flex-direction: column;
     gap: 1px;
     display: flex;
@@ -3906,7 +4016,7 @@ body.screen-shake {
     margin-bottom: 14px;
     padding: 4px;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
 }
 
@@ -3928,9 +4038,9 @@ body.screen-shake {
 }
 
 .ob-lb-tab--active {
-    background: var(--green);
+    background: var(--action);
     border-color: transparent;
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-weight: 700;
 }
 
@@ -3968,7 +4078,7 @@ body.screen-shake {
 }
 
 .ob-lb-row--you {
-    background: rgba(22, 193, 114, 0.12);
+    background: rgba(var(--action-rgb), 0.12);
     border: 1px solid rgba(62, 198, 160, 0.25);
 }
 
@@ -3984,8 +4094,8 @@ body.screen-shake {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-size: 13px;
     font-weight: 800;
     display: flex;
@@ -4078,12 +4188,12 @@ body.screen-shake {
     width: 22px;
     height: 22px;
     border-radius: 7px;
-    background: rgba(22, 193, 114, 0.18);
+    background: rgba(var(--action-rgb), 0.18);
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--green-light);
+    color: var(--action-light);
     font-size: 13px;
     font-weight: 800;
 }
@@ -4092,16 +4202,16 @@ body.screen-shake {
     width: 100%;
     max-width: 300px;
     padding: 16px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     border-radius: var(--radius-md);
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
     font-family: var(--font-display);
-    box-shadow: var(--green-glow);
+    box-shadow: var(--action-glow);
 }
 
 /* A quiet decline — the design never competes with its own primary action. */
@@ -4152,16 +4262,16 @@ body.screen-shake {
     width: 100%;
     max-width: 340px;
     padding: 0 16px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     border-radius: var(--radius-md);
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
     font-family: var(--font-display);
-    box-shadow: var(--green-glow);
+    box-shadow: var(--action-glow);
     height: 62px;
 }
 
@@ -4195,7 +4305,7 @@ body.screen-shake {
 }
 
 .ob-hand-row--highlight .ob-hand-payout {
-    color: var(--green-light);
+    color: var(--action-light);
 }
 
 /* ── Language chip (welcome step) ──
@@ -4212,7 +4322,7 @@ body.screen-shake {
     gap: 6px;
     max-width: 46vw;
     padding: 7px 12px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--surface-raised);
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 999px;
     color: var(--text);
@@ -4227,7 +4337,7 @@ body.screen-shake {
 }
 
 .ob-lang-chip:active {
-    background: rgba(255, 255, 255, 0.14);
+    background: var(--surface-hover);
 }
 
 .ob-lang-globe {
@@ -4294,7 +4404,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
  * degrees, so it has to be re-aimed.
  */
 [dir="rtl"] .allin-slider-fill {
-    background: linear-gradient(270deg, rgba(22, 193, 114, 0.35), rgba(22, 193, 114, 0));
+    background: linear-gradient(270deg, rgba(var(--action-rgb), 0.35), rgba(var(--action-rgb), 0));
 }
 
 /* ── Settings toggle knob ──
