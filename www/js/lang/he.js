@@ -282,6 +282,7 @@ vpRegisterLang('he', {
     'room.membersMeta': '{{count}}/{{capacity}} חברים · הימור {{stake}}',
     'room.sendInvites': 'שליחת הזמנות',
     'room.sendInvitesCount': 'שליחת הזמנות ({{count}})',
+    'room.onlineNowCount': '{{n}} מחוברים עכשיו',
 
     'champ.resetsPlaceholder': 'מתאפס בעוד —דק׳',
     'champ.noChampionsYet': 'אין עדיין אלופים בשעה הזו — היו הראשונים!',

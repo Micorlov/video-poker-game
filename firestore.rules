@@ -35,10 +35,16 @@ service cloud.firestore {
                     && request.resource.data.memberUids == [request.auth.uid];
       // joinRoomByCode (js/rooms.js) writes memberUids AND updatedAt — the
       // timestamp is what the push poller (scripts/push/rooms.js) cursors on,
-      // so it must be allowed alongside the roster append.
+      // so it must be allowed alongside the roster append. The final clause
+      // restores a guard FIRESTORE_RULES_FRIENDS_ROOMS.md always documented
+      // but the deployed rules were missing: without it, a member already in
+      // memberUids could send that same array + [own uid] again — the
+      // equality check alone doesn't stop a duplicate entry, only the client
+      // skipping the write does, which is not something rules can rely on.
       allow update: if request.auth != null
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids', 'updatedAt'])
-                    && request.resource.data.memberUids == resource.data.memberUids.concat([request.auth.uid]);
+                    && request.resource.data.memberUids == resource.data.memberUids.concat([request.auth.uid])
+                    && !(request.auth.uid in resource.data.memberUids);
 
       match /members/{uid} {
         allow read: if request.auth != null;
@@ -104,6 +110,105 @@ service cloud.firestore {
       allow update: if request.auth != null
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
                     && request.resource.data.members == resource.data.members.concat([request.auth.uid]);
+    }
+
+    // Duels — one doc per head-to-head challenge; id = the 6-char share code
+    // (js/duel.js), so a code collision is a rejected create, not a silent
+    // overwrite. The deck is a pure function of (seed, hand index) — see
+    // js/duel-deck.js — so the five hold masks per side are the only thing a
+    // player ever commits; scores are recomputed from holds by every reader
+    // and never trusted from challengerScore/opponentScore, which exist only
+    // for cheap UI display. winnerUid/resolvedAt/expiredAt/notifiedAt are
+    // written only by the Admin SDK poller (scripts/push/duels.js), which
+    // bypasses these rules entirely — no client rule below ever mentions them.
+    match /duels/{duelId} {
+      function isParticipant() {
+        return request.auth.uid in resource.data.participants;
+      }
+      function isInvitee() {
+        return resource.data.toUid == request.auth.uid;
+      }
+      function duelHoldsValid(h) {
+        return h is list && h.size() == 5
+            && h[0] is int && h[0] >= 0 && h[0] <= 31
+            && h[1] is int && h[1] >= 0 && h[1] <= 31
+            && h[2] is int && h[2] >= 0 && h[2] <= 31
+            && h[3] is int && h[3] >= 0 && h[3] <= 31
+            && h[4] is int && h[4] >= 0 && h[4] <= 31;
+      }
+      // The opponent takes an open duel by filing their five hold masks in
+      // ONE write — there is no separate "accept" step, so a duel is never
+      // left half-accepted. The 24h window is measured against the actual
+      // request time, not anything the client controls.
+      function duelSubmit() {
+        return resource.data.status == 'open'
+            && resource.data.opponentUid == null
+            && request.auth.uid != resource.data.challengerUid
+            && (resource.data.toUid == null || isInvitee())
+            && request.time < resource.data.createdAt + duration.value(24, 'h')
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['status', 'opponentUid', 'opponentName', 'opponentHolds',
+                           'opponentScore', 'participants', 'scoredAt'])
+            && request.resource.data.status == 'scored'
+            && request.resource.data.opponentUid == request.auth.uid
+            && request.resource.data.opponentName is string
+            && duelHoldsValid(request.resource.data.opponentHolds)
+            && request.resource.data.opponentScore is int
+            && request.resource.data.participants
+                 == resource.data.participants.concat([request.auth.uid])
+            && request.resource.data.scoredAt is timestamp;
+      }
+      // Each participant stamps claims.<own uid> exactly once, only once the
+      // duel has settled — js/duel.js credits the pot/refund locally only
+      // after this write is accepted, the same anti-double-credit mechanism
+      // referrals/{uid}.claimedAt already uses.
+      function duelClaim() {
+        return resource.data.status in ['scored', 'expired']
+            && isParticipant()
+            && !(request.auth.uid in resource.data.claims)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['claims'])
+            && request.resource.data.claims.diff(resource.data.claims).affectedKeys()
+                 .hasOnly([request.auth.uid])
+            && request.resource.data.claims[request.auth.uid] is timestamp;
+      }
+      // Funnel only: the challenger records which channel an open duel's
+      // link went out on.
+      function duelShareMark() {
+        return resource.data.status == 'open'
+            && request.auth.uid == resource.data.challengerUid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['sharedVia'])
+            && request.resource.data.sharedVia is list;
+      }
+
+      // An open duel is readable by any signed-in user (a link-clicker who
+      // isn't a participant yet must be able to preview it before taking
+      // it); once it's no longer open, only the two players and whoever was
+      // invited may read it.
+      allow get: if request.auth != null
+                 && (resource.data.status == 'open' || isParticipant() || isInvitee());
+      allow list: if request.auth != null && (isParticipant() || isInvitee());
+      allow create: if request.auth != null
+                    && duelId.size() == 6
+                    && request.resource.data.challengerUid == request.auth.uid
+                    && request.resource.data.challengerName is string
+                    && request.resource.data.participants == [request.auth.uid]
+                    && request.resource.data.status == 'open'
+                    && request.resource.data.seed is int
+                    && request.resource.data.seed >= 0
+                    && request.resource.data.seed <= 4294967295
+                    && request.resource.data.fee in [0, 100]
+                    && duelHoldsValid(request.resource.data.challengerHolds)
+                    && request.resource.data.challengerScore is int
+                    && request.resource.data.opponentUid == null
+                    && request.resource.data.opponentHolds == null
+                    && (request.resource.data.toUid == null
+                        || (request.resource.data.toUid is string
+                            && request.resource.data.toUid != request.auth.uid))
+                    && request.resource.data.claims == {}
+                    && request.resource.data.createdAt is timestamp;
+      allow update: if request.auth != null
+                    && (duelSubmit() || duelClaim() || duelShareMark());
+      allow delete: if false;
     }
 
     // config/features — remote feature toggles read by every client on load,

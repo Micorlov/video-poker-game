@@ -3212,6 +3212,25 @@ button:focus:not(:focus-visible) {
 
 .rip-row.invited { cursor: default; opacity: 0.55; }
 
+/* Online-first grouping in the room-invite friend picker. */
+.rip-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 8px 6px 4px;
+}
+
+.rip-section-label:first-child {
+    padding-top: 2px;
+}
+
+.rip-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
 .rip-avatar {
     width: 32px;
     height: 32px;
@@ -4488,6 +4507,11 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                 <span data-i18n="play.tournamentExpand">🏆 Tournament #2</span>
                 <span>09:26:55</span>
             </div>
+
+            <!-- Incoming poker-room invites, mirrored here from the Friends -> Poker
+                 Rooms tab (js/rooms.js renderRoomInviteBanners) so they are visible
+                 on the screen where all session time is actually spent. -->
+            <div id="duel-banners"></div>
 
             <!-- Phase 2: Stories row -->
             <div class="stories-row" id="stories-row"></div>
@@ -5933,6 +5957,7 @@ vpRegisterLang('en', {
     'room.membersMeta': '{{count}}/{{capacity}} friends · Stake {{stake}}',
     'room.sendInvites': 'Send Invites',
     'room.sendInvitesCount': 'Send Invites ({{count}})',
+    'room.onlineNowCount': '{{n}} online now',
 
     // ── Hourly champions ──
     'champ.resetsPlaceholder': 'Resets in —m',
@@ -6328,6 +6353,7 @@ vpRegisterLang('es', {
     'room.membersMeta': '{{count}}/{{capacity}} amigos · Apuesta {{stake}}',
     'room.sendInvites': 'Enviar invitaciones',
     'room.sendInvitesCount': 'Enviar invitaciones ({{count}})',
+    'room.onlineNowCount': '{{n}} en línea ahora',
 
     'champ.resetsPlaceholder': 'Se reinicia en —min',
     'champ.noChampionsYet': 'Aún no hay campeones esta hora — ¡sé el primero!',
@@ -6708,6 +6734,7 @@ vpRegisterLang('pt-BR', {
     'room.membersMeta': '{{count}}/{{capacity}} amigos · Aposta {{stake}}',
     'room.sendInvites': 'Enviar convites',
     'room.sendInvitesCount': 'Enviar convites ({{count}})',
+    'room.onlineNowCount': '{{n}} online agora',
 
     'champ.resetsPlaceholder': 'Zera em —min',
     'champ.noChampionsYet': 'Nenhum campeão nesta hora ainda — seja o primeiro!',
@@ -7090,6 +7117,7 @@ vpRegisterLang('de', {
     'room.membersMeta': '{{count}}/{{capacity}} Freunde · Einsatz {{stake}}',
     'room.sendInvites': 'Einladungen senden',
     'room.sendInvitesCount': 'Einladungen senden ({{count}})',
+    'room.onlineNowCount': '{{n}} gerade online',
 
     'champ.resetsPlaceholder': 'Zurücksetzung in —Min.',
     'champ.noChampionsYet': 'Diese Stunde noch keine Champions — sei der Erste!',
@@ -7470,6 +7498,7 @@ vpRegisterLang('fr', {
     'room.membersMeta': '{{count}}/{{capacity}} amis · Mise {{stake}}',
     'room.sendInvites': 'Envoyer les invitations',
     'room.sendInvitesCount': 'Envoyer les invitations ({{count}})',
+    'room.onlineNowCount': '{{n}} en ligne maintenant',
 
     'champ.resetsPlaceholder': 'Réinitialisation dans —min',
     'champ.noChampionsYet': 'Aucun champion cette heure — soyez le premier !',
@@ -7850,6 +7879,7 @@ vpRegisterLang('it', {
     'room.membersMeta': '{{count}}/{{capacity}} amici · Puntata {{stake}}',
     'room.sendInvites': 'Invia inviti',
     'room.sendInvitesCount': 'Invia inviti ({{count}})',
+    'room.onlineNowCount': '{{n}} online ora',
 
     'champ.resetsPlaceholder': 'Si azzera tra —min',
     'champ.noChampionsYet': 'Nessun campione in quest’ora — sii il primo!',
@@ -8232,6 +8262,7 @@ vpRegisterLang('pl', {
     'room.membersMeta': '{{count}}/{{capacity}} znajomych · Stawka {{stake}}',
     'room.sendInvites': 'Wyślij zaproszenia',
     'room.sendInvitesCount': 'Wyślij zaproszenia ({{count}})',
+    'room.onlineNowCount': '{{n}} teraz online',
 
     'champ.resetsPlaceholder': 'Reset za —min',
     'champ.noChampionsYet': 'Brak mistrzów w tej godzinie — bądź pierwszy!',
@@ -8614,6 +8645,7 @@ vpRegisterLang('ru', {
     'room.membersMeta': '{{count}}/{{capacity}} друзей · Ставка {{stake}}',
     'room.sendInvites': 'Отправить приглашения',
     'room.sendInvitesCount': 'Отправить приглашения ({{count}})',
+    'room.onlineNowCount': '{{n}} сейчас онлайн',
 
     'champ.resetsPlaceholder': 'Сброс через —мин',
     'champ.noChampionsYet': 'В этом часе чемпионов ещё нет — будьте первым!',
@@ -8994,6 +9026,7 @@ vpRegisterLang('tr', {
     'room.membersMeta': '{{count}}/{{capacity}} arkadaş · Bahis {{stake}}',
     'room.sendInvites': 'Davetleri gönder',
     'room.sendInvitesCount': 'Davetleri gönder ({{count}})',
+    'room.onlineNowCount': '{{n}} şu an çevrimiçi',
 
     'champ.resetsPlaceholder': '—dk içinde sıfırlanır',
     'champ.noChampionsYet': 'Bu saatte henüz şampiyon yok — ilk sen ol!',
@@ -9374,6 +9407,7 @@ vpRegisterLang('id', {
     'room.membersMeta': '{{count}}/{{capacity}} teman · Taruhan {{stake}}',
     'room.sendInvites': 'Kirim undangan',
     'room.sendInvitesCount': 'Kirim undangan ({{count}})',
+    'room.onlineNowCount': '{{n}} online sekarang',
 
     'champ.resetsPlaceholder': 'Disetel ulang dalam —mnt',
     'champ.noChampionsYet': 'Belum ada juara jam ini — jadilah yang pertama!',
@@ -9756,6 +9790,7 @@ vpRegisterLang('hi', {
     'room.membersMeta': '{{count}}/{{capacity}} दोस्त · दांव {{stake}}',
     'room.sendInvites': 'न्योते भेजें',
     'room.sendInvitesCount': 'न्योते भेजें ({{count}})',
+    'room.onlineNowCount': '{{n}} अभी ऑनलाइन',
 
     'champ.resetsPlaceholder': '—मि. में रीसेट',
     'champ.noChampionsYet': 'इस घंटे अभी कोई चैंपियन नहीं — पहले आप बनें!',
@@ -10138,6 +10173,7 @@ vpRegisterLang('ja', {
     'room.membersMeta': 'フレンド {{count}}/{{capacity}} · レート {{stake}}',
     'room.sendInvites': '招待を送る',
     'room.sendInvitesCount': '招待を送る ({{count}})',
+    'room.onlineNowCount': '現在{{n}}人がオンライン',
 
     'champ.resetsPlaceholder': '—分後にリセット',
     'champ.noChampionsYet': 'この時間帯はまだチャンピオンなし — 一番乗りを狙おう！',
@@ -10518,6 +10554,7 @@ vpRegisterLang('ko', {
     'room.membersMeta': '친구 {{count}}/{{capacity}} · 베팅 {{stake}}',
     'room.sendInvites': '초대 보내기',
     'room.sendInvitesCount': '초대 보내기 ({{count}})',
+    'room.onlineNowCount': '{{n}}명 온라인',
 
     'champ.resetsPlaceholder': '—분 후 초기화',
     'champ.noChampionsYet': '이번 시간에는 아직 챔피언이 없어요 — 첫 주인공이 되어 보세요!',
@@ -10899,6 +10936,7 @@ vpRegisterLang('zh-CN', {
     'room.membersMeta': '{{count}}/{{capacity}} 位好友 · 注额 {{stake}}',
     'room.sendInvites': '发送邀请',
     'room.sendInvitesCount': '发送邀请（{{count}}）',
+    'room.onlineNowCount': '{{n}} 人在线',
 
     'champ.resetsPlaceholder': '—分钟后重置',
     'champ.noChampionsYet': '本小时还没有冠军 — 抢个头名吧！',
@@ -11284,6 +11322,7 @@ vpRegisterLang('he', {
     'room.membersMeta': '{{count}}/{{capacity}} חברים · הימור {{stake}}',
     'room.sendInvites': 'שליחת הזמנות',
     'room.sendInvitesCount': 'שליחת הזמנות ({{count}})',
+    'room.onlineNowCount': '{{n}} מחוברים עכשיו',
 
     'champ.resetsPlaceholder': 'מתאפס בעוד —דק׳',
     'champ.noChampionsYet': 'אין עדיין אלופים בשעה הזו — היו הראשונים!',
@@ -11662,6 +11701,7 @@ vpRegisterLang('ar', {
     'room.membersMeta': '{{count}}/{{capacity}} أصدقاء · الرهان {{stake}}',
     'room.sendInvites': 'إرسال الدعوات',
     'room.sendInvitesCount': 'إرسال الدعوات ({{count}})',
+    'room.onlineNowCount': '{{n}} متصل الآن',
 
     'champ.resetsPlaceholder': 'يُعاد الضبط بعد —د',
     'champ.noChampionsYet': 'لا أبطال في هذه الساعة بعد — كن الأول!',
@@ -12283,6 +12323,440 @@ function recordAllTimeHand(win, totalBet, streak) {
 
 function resetAllTimeStats() {
     saveAllTimeStats({ won: 0, lost: 0, handsPlayed: 0, bestStreak: 0 });
+}
+
+
+/* --- js/prng.js --- */
+// Deterministic PRNG: FNV-1a string hash feeding a mulberry32 generator.
+// Moved out of js/leaderboard-bots.js (which used it to seed each bot's
+// per-period, per-player "personality" so the same player/period/board
+// always gets the same trailing rivals) so js/duel-deck.js can seed a
+// duel's deck the same way — same generator, unrelated purpose.
+//
+// module.exports tail is for Node only (scripts/duels/deck.test.js,
+// scripts/push/duels.js); the browser bundle just gets two more top-level
+// functions in the concatenated script, same as every other module here.
+
+function fnv1aHash(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0;
+}
+
+function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function() {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { fnv1aHash, mulberry32 };
+}
+
+
+/* --- js/hand-eval.js --- */
+// Pure hand-evaluation engine: card model, paytables, and the Jacks-or-Better
+// / Deuces-Wild evaluators. No DOM, no localStorage, no game state — moved out
+// of js/game.js (which still owns everything state-related: gameVariant,
+// currentPayouts, unlock levels) so js/duel-deck.js and the Node-side tests
+// and poller can use the exact same evaluator the solo game uses, without
+// pulling in the whole game module.
+//
+// Loaded as a bare <script> early in the browser bundle (build.js), so every
+// declaration below is also just a top-level const/function in the
+// concatenated script, exactly as it was inside game.js — nothing about how
+// the app consumes these names changes. The module.exports tail at the
+// bottom is for Node only (require()'d by scripts/duels/deck.test.js,
+// scripts/push/duels.js, and scripts/game/betLock.test.js).
+
+const SUITS = ['♠', '♥', '♦', '♣'];
+const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+
+const PAYTABLES = {
+    jacks: {
+        'Royal Flush': 250,
+        'Straight Flush': 50,
+        'Four of a Kind': 20,
+        'Full House': 7,
+        'Flush': 5,
+        'Straight': 4,
+        'Three of a Kind': 3,
+        'Two Pair': 2,
+        'Jacks or Better': 1,
+        'Nothing': 0
+    },
+    deuces: {
+        'Royal Flush': 250,
+        'Four Deuces': 200,
+        'Wild Royal Flush': 25,
+        'Five of a Kind': 15,
+        'Straight Flush': 9,
+        'Four of a Kind': 5,
+        'Full House': 3,
+        'Flush': 2,
+        'Straight': 2,
+        'Three of a Kind': 1,
+        'Nothing': 0
+    },
+    bonus: {
+        'Royal Flush': 250,
+        'Straight Flush': 50,
+        'Four Aces': 80,
+        'Four 2s-4s': 40,
+        'Four 5s-Ks': 25,
+        'Full House': 8,
+        'Flush': 5,
+        'Straight': 4,
+        'Three of a Kind': 3,
+        'Two Pair': 2,
+        'Jacks or Better': 1,
+        'Nothing': 0
+    },
+    doubleBonus: {
+        'Royal Flush': 250,
+        'Straight Flush': 50,
+        'Four Aces': 160,
+        'Four 2s-4s': 80,
+        'Four 5s-Ks': 50,
+        'Full House': 10,
+        'Flush': 7,
+        'Straight': 5,
+        'Three of a Kind': 3,
+        'Two Pair': 1,
+        'Jacks or Better': 1,
+        'Nothing': 0
+    }
+};
+
+const HAND_ORDERS = {
+    jacks: ['Royal Flush', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
+    deuces: ['Royal Flush', 'Four Deuces', 'Wild Royal Flush', 'Five of a Kind', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Nothing'],
+    bonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
+    doubleBonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing']
+};
+
+const HAND_RANK = {
+    'Nothing': 0, 'Jacks or Better': 1, 'Two Pair': 2, 'Three of a Kind': 3,
+    'Straight': 4, 'Flush': 5, 'Full House': 6, 'Four of a Kind': 7,
+    'Straight Flush': 8, 'Royal Flush': 9,
+    'Five of a Kind': 7, 'Wild Royal Flush': 8, 'Four Deuces': 8,
+    'Four 5s-Ks': 7, 'Four 2s-4s': 7, 'Four Aces': 7
+};
+
+function createDeck() {
+    const d = [];
+    for (let suit of SUITS) {
+        for (let rank of RANKS) {
+            d.push({ rank, suit });
+        }
+    }
+    return d;
+}
+
+function evaluateHand(hand) {
+    const ranks = hand.map(c => c.rank);
+    const suits = hand.map(c => c.suit);
+
+    const rankCounts = {};
+    ranks.forEach(r => rankCounts[r] = (rankCounts[r] || 0) + 1);
+    const counts = Object.values(rankCounts).sort((a, b) => b - a);
+
+    const flush = new Set(suits).size === 1;
+
+    let values = ranks.map(r => {
+        if (r === 'A') return 14;
+        if (r === 'J') return 11;
+        if (r === 'Q') return 12;
+        if (r === 'K') return 13;
+        return parseInt(r);
+    }).sort((a, b) => a - b);
+
+    let straight = false;
+    const uniqueValues = [...new Set(values)];
+    if (uniqueValues.length === 5) {
+        if (uniqueValues[4] - uniqueValues[0] === 4) {
+            straight = true;
+        } else if (uniqueValues.join(',') === '2,3,4,5,14') {
+            straight = true;
+            values = [1, 2, 3, 4, 5];
+        }
+    }
+
+    const findIndices = (targetRanks) => {
+        return hand.map((card, i) => targetRanks.includes(card.rank) ? i : -1).filter(i => i !== -1);
+    };
+
+    const findIndicesByCount = (targetCount) => {
+        const targetRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === targetCount);
+        return findIndices(targetRanks);
+    };
+
+    const allIndices = [0, 1, 2, 3, 4];
+    let result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] };
+
+    if (straight && flush) {
+        if (values.join(',') === '10,11,12,13,14') {
+            result.type = 'Royal Flush';
+        } else {
+            result.type = 'Straight Flush';
+        }
+        result.winIndices = allIndices;
+    } else if (counts[0] === 4) {
+        result.type = 'Four of a Kind';
+        result.winIndices = findIndicesByCount(4);
+    } else if (counts[0] === 3 && counts[1] === 2) {
+        result.type = 'Full House';
+        const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
+        const twoRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
+        result.winIndices = findIndices([threeRank]);
+        result.secondPairIndices = findIndices([twoRank]);
+    } else if (flush) {
+        result.type = 'Flush';
+        result.winIndices = allIndices;
+    } else if (straight) {
+        result.type = 'Straight';
+        result.winIndices = allIndices;
+    } else if (counts[0] === 3) {
+        result.type = 'Three of a Kind';
+        result.winIndices = findIndicesByCount(3);
+        const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
+        const threeIndices = findIndices([threeRank]);
+        if (threeRank === 'J' && threeIndices.length > 0) {
+            result.thirdMatchIndices.push(threeIndices[0]);
+        }
+    } else if (counts[0] === 2 && counts[1] === 2) {
+        const pairRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === 2);
+        result.type = 'Two Pair';
+        result.winIndices = findIndices([pairRanks[0]]);
+        result.secondPairIndices = findIndices([pairRanks[1]]);
+    } else if (counts[0] === 2) {
+        const pairRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
+        if (['J', 'Q', 'K', 'A'].includes(pairRank)) {
+            result.type = 'Jacks or Better';
+            result.winIndices = findIndices([pairRank]);
+        }
+    }
+    return result;
+}
+
+// Deuces Wild: 2s substitute for any card. Minimum paying hand is Three of a Kind.
+function evaluateDeucesHand(hand) {
+    const allIndices = [0, 1, 2, 3, 4];
+    const result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] };
+    const others = hand.filter(c => c.rank !== '2');
+    const n = 5 - others.length;
+
+    if (n === 4) {
+        result.type = 'Four Deuces';
+        result.winIndices = allIndices;
+        return result;
+    }
+
+    const rankCounts = {};
+    others.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
+    const counts = Object.values(rankCounts).sort((a, b) => b - a);
+    const maxCount = counts[0] || 0;
+    const flush = new Set(others.map(c => c.suit)).size <= 1;
+    const vals = others.map(c =>
+        c.rank === 'A' ? 14 : c.rank === 'J' ? 11 : c.rank === 'Q' ? 12 : c.rank === 'K' ? 13 : parseInt(c.rank));
+    const distinct = new Set(vals).size === others.length;
+
+    const fitsWindow = arr => arr.length === 0 || (Math.max(...arr) - Math.min(...arr) <= 4);
+    const straight = distinct && (fitsWindow(vals) || (vals.includes(14) && fitsWindow(vals.map(v => v === 14 ? 1 : v))));
+    const allRoyalVals = distinct && vals.every(v => v >= 10);
+
+    if (n === 0 && flush && straight && Math.min(...vals) === 10) {
+        result.type = 'Royal Flush';
+    } else if (n > 0 && flush && allRoyalVals) {
+        result.type = 'Wild Royal Flush';
+    } else if (maxCount + n >= 5) {
+        result.type = 'Five of a Kind';
+    } else if (flush && straight) {
+        result.type = 'Straight Flush';
+    } else if (maxCount + n >= 4) {
+        result.type = 'Four of a Kind';
+    } else if ((maxCount === 3 && counts[1] === 2) || (n === 1 && maxCount === 2 && counts[1] === 2)) {
+        result.type = 'Full House';
+    } else if (flush) {
+        result.type = 'Flush';
+    } else if (straight) {
+        result.type = 'Straight';
+    } else if (maxCount + n >= 3) {
+        result.type = 'Three of a Kind';
+    }
+
+    if (result.type !== 'Nothing') result.winIndices = allIndices;
+    return result;
+}
+
+// js/game.js keeps its own evaluateForVariant(h) wrapper that reads the
+// module's own gameVariant global — this version takes the variant
+// explicitly so callers with no notion of "the current game variant" (duels,
+// which are always Jacks or Better regardless of the player's own setting;
+// Node tests; the push poller) can use it directly.
+function evaluateWithVariant(h, variant) {
+    if (variant === 'deuces') return evaluateDeucesHand(h);
+    const result = evaluateHand(h);
+    if (result.type === 'Four of a Kind' && (variant === 'bonus' || variant === 'doubleBonus')) {
+        const rankCounts = {};
+        h.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
+        const quadRank = Object.keys(rankCounts).find(r => rankCounts[r] === 4);
+        if (quadRank === 'A') result.type = 'Four Aces';
+        else if (['2', '3', '4'].includes(quadRank)) result.type = 'Four 2s-4s';
+        else result.type = 'Four 5s-Ks';
+    }
+    return result;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        SUITS, RANKS, PAYTABLES, HAND_ORDERS, HAND_RANK,
+        createDeck, evaluateHand, evaluateDeucesHand, evaluateWithVariant
+    };
+}
+
+
+/* --- js/duel-deck.js --- */
+// Deterministic duel deck — the fairness mechanism behind js/duel.js. Given
+// a duel's seed and a hand index (0-4), the five dealt cards and the five
+// "positional" replacement cards are entirely determined; a player's only
+// input is which of the five positions to hold. Both the challenger and the
+// opponent see identical cards for identical choices, so a duel measures
+// skill, not luck — like duplicate bridge, everyone plays the same board.
+//
+// Deliberately NOT the same replacement mechanic as solo play (js/game.js
+// draw(), which pops cards off a shrinking deck in position order, so an
+// unheld position's replacement depends on how many OTHER positions were
+// also unheld). Here each of the 5 positions has one fixed hidden
+// replacement card from the moment the hand is dealt, independent of the
+// hold pattern chosen — the only way two players holding different subsets
+// can be meaningfully compared on the same random draw.
+//
+// Loaded as a bare <script> in the browser bundle, after js/prng.js and
+// js/hand-eval.js (build.js) — every function below reads those two
+// modules' exports through one `duelEngine` object rather than declaring
+// same-named locals, because PAYTABLES/HAND_RANK are `const` in that
+// shared script scope and a colliding var/let redeclaration of a const
+// name is a SyntaxError even on a branch that never runs. In Node
+// (scripts/duels/deck.test.js, scripts/push/duels.js) the same object is
+// built from two require() calls instead.
+
+var duelEngine = (typeof require === 'function' && typeof module !== 'undefined' && module.exports)
+    ? Object.assign({}, require('./prng.js'), require('./hand-eval.js'))
+    : {
+        mulberry32: mulberry32, fnv1aHash: fnv1aHash, createDeck: createDeck,
+        evaluateWithVariant: evaluateWithVariant, PAYTABLES: PAYTABLES, HAND_RANK: HAND_RANK
+    };
+
+const DUEL_HANDS = 5;
+const DUEL_POINTS_PER_UNIT = 10;
+
+// One independent seeded shuffle per hand index — hand k of a duel never
+// shares randomness with any other hand of that duel or any other duel.
+function duelHandRng(seed, handIndex) {
+    return duelEngine.mulberry32(duelEngine.fnv1aHash(seed + ':' + handIndex));
+}
+
+function duelDeckFor(seed, handIndex) {
+    const deck = duelEngine.createDeck();
+    const rand = duelHandRng(seed, handIndex);
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        const tmp = deck[i]; deck[i] = deck[j]; deck[j] = tmp;
+    }
+    return { dealt: deck.slice(0, 5), replacements: deck.slice(5, 10) };
+}
+
+// mask: 0-31, bit i (1 << i) set means position i was held.
+function duelFinalHand(seed, handIndex, mask) {
+    const cards = duelDeckFor(seed, handIndex);
+    const hand = [];
+    for (let i = 0; i < 5; i++) {
+        hand.push((mask & (1 << i)) ? cards.dealt[i] : cards.replacements[i]);
+    }
+    return hand;
+}
+
+// holds: array of 5 masks, one per hand (0 for a hand not yet played, which
+// scores as "Nothing" — so a partial array never throws, it just scores the
+// unplayed hands as zero). Duels are always Jacks or Better, regardless of
+// the player's own solo-game variant setting.
+function duelScoreHolds(seed, holds) {
+    let total = 0;
+    let best = 'Nothing';
+    const hands = [];
+    for (let k = 0; k < DUEL_HANDS; k++) {
+        const mask = (holds && holds[k]) || 0;
+        const finalHand = duelFinalHand(seed, k, mask);
+        const result = duelEngine.evaluateWithVariant(finalHand, 'jacks');
+        const points = (duelEngine.PAYTABLES.jacks[result.type] || 0) * DUEL_POINTS_PER_UNIT;
+        total += points;
+        if ((duelEngine.HAND_RANK[result.type] || 0) > (duelEngine.HAND_RANK[best] || 0)) best = result.type;
+        hands.push({ type: result.type, points: points, hand: finalHand });
+    }
+    return { total: total, best: best, hands: hands };
+}
+
+// Recomputes both sides' scores straight from the committed hold masks —
+// never trusts a doc's own challengerScore/opponentScore field, which is
+// informational only (a tampered client can already set its own local
+// balance to anything; the fields exist for cheap UI display, not as the
+// source of truth for payouts). Winner is decided by total score, then by
+// best single hand rank as a tiebreak, then a true tie (winnerUid null).
+function duelOutcome(doc) {
+    const challenger = duelScoreHolds(doc.seed, doc.challengerHolds);
+    if (!doc.opponentHolds) return { challenger: challenger, opponent: null, winnerUid: null };
+    const opponent = duelScoreHolds(doc.seed, doc.opponentHolds);
+
+    let winnerUid = null;
+    if (challenger.total > opponent.total) {
+        winnerUid = doc.challengerUid;
+    } else if (opponent.total > challenger.total) {
+        winnerUid = doc.opponentUid;
+    } else {
+        const cRank = duelEngine.HAND_RANK[challenger.best] || 0;
+        const oRank = duelEngine.HAND_RANK[opponent.best] || 0;
+        if (cRank > oRank) winnerUid = doc.challengerUid;
+        else if (oRank > cRank) winnerUid = doc.opponentUid;
+        // else: a true tie — winnerUid stays null.
+    }
+    return { challenger: challenger, opponent: opponent, winnerUid: winnerUid };
+}
+
+// Coins owed to `uid` once a duel has settled. A win takes both fees, a tie
+// refunds each side's own fee, a loss pays nothing, and an expired duel
+// (nobody took the challenge) refunds only the challenger — the opponent
+// never staked anything by not showing up.
+function duelPayoutFor(doc, uid) {
+    if (doc.status === 'expired') {
+        return uid === doc.challengerUid ? (doc.fee || 0) : 0;
+    }
+    if (doc.status !== 'scored') return 0;
+    const outcome = duelOutcome(doc);
+    if (!outcome.opponent) return 0;
+    if (outcome.winnerUid === null) return doc.fee || 0;
+    if (outcome.winnerUid === uid) return (doc.fee || 0) * 2;
+    return 0;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        DUEL_HANDS: DUEL_HANDS,
+        DUEL_POINTS_PER_UNIT: DUEL_POINTS_PER_UNIT,
+        duelHandRng: duelHandRng,
+        duelDeckFor: duelDeckFor,
+        duelFinalHand: duelFinalHand,
+        duelScoreHolds: duelScoreHolds,
+        duelOutcome: duelOutcome,
+        duelPayoutFor: duelPayoutFor
+    };
 }
 
 
@@ -13149,6 +13623,7 @@ function addFriendByCode(code) {
                         .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() })
                 ]).then(function() {
                     showToast(t('toast.friendAdded'));
+                    if (window.logVpEvent) logVpEvent('friend_added', { via: 'code' });
                     loadFriends();
                     // invite.html tells a friend to type this code in when the
                     // install swallowed the deep link, so the manual path must
@@ -13332,6 +13807,8 @@ function handleIncomingInvite() {
             window.history.replaceState({}, '', url);
         }
 
+        if (window.logVpEvent) logVpEvent('invite_link_opened', { kind: 'friend' });
+
         // Store for after sign-in. Persisted as well as parked: the URL has just
         // been cleaned, so a reload before signing in would otherwise lose it.
         window._pendingInviteCode = refCode;
@@ -13395,6 +13872,7 @@ function addFriendByInviteCode(code) {
                     showToast(newFriendUids.length > 1
                         ? t('toast.connectedViaLink', { count: newFriendUids.length })
                         : t('toast.friendAdded'));
+                    if (window.logVpEvent) logVpEvent('friend_added', { via: 'link', count: newFriendUids.length });
                     loadFriends();
                     // Files the reward row for whoever owns this link. Deliberately
                     // last and unawaited — a failed ledger write must not undo a
@@ -14025,6 +14503,7 @@ function _doCreateRoom(name, stake, callback) {
                 netProfit: balance - netProfitBaseline(),
                 bestStreak: bestStreak
             }).then(function() {
+                if (window.logVpEvent) logVpEvent('room_created', { stake: stake });
                 if (callback) callback(code);
                 // Refresh myRooms first so the picker can find the new room,
                 // then go straight into inviting friends.
@@ -14072,7 +14551,7 @@ function createRoomInline() {
 // this read #room-code-input directly, which forced the deep-link path to stuff
 // the code into a hidden DOM node before calling it — and silently lost the
 // code whenever that input wasn't in the DOM.
-function joinRoomByCode(code) {
+function joinRoomByCode(code, via) {
     const user = window.egUser;
     if (!user) { openSignInModal(); return Promise.resolve(false); }
     code = (code || '').trim().toUpperCase();
@@ -14106,7 +14585,10 @@ function joinRoomByCode(code) {
 
             return roster.then(function() {
                 closeRoomModal();
-                if (!alreadyMember) showToast(t('toast.joinedRoom', { name: roomName }));
+                if (!alreadyMember) {
+                    showToast(t('toast.joinedRoom', { name: roomName }));
+                    if (window.logVpEvent) logVpEvent('room_joined', { via: via || 'code' });
+                }
                 return loadMyRooms().then(function() {
                     openRoomDetail(roomDoc.id);
                     return true;
@@ -14235,11 +14717,26 @@ function renderRoomInvitePickerRows(room) {
         return;
     }
 
-    candidates.forEach(function(f) {
+    // Online friends first — someone who could actually play right now is
+    // the best person to invite. Filter is a stable partition, so within each
+    // group friendsList's own net-profit order (js/friends.js) is preserved.
+    function friendIsOnline(f) { return typeof isOnline === 'function' && isOnline(f.lastSeen); }
+    const online = candidates.filter(friendIsOnline);
+    const offline = candidates.filter(function(f) { return !friendIsOnline(f); });
+    if (online.length) {
+        listEl.appendChild(roomEl('div', 'rip-section-label', t('room.onlineNowCount', { n: online.length })));
+    }
+
+    online.concat(offline).forEach(function(f) {
         const invited = !!roomInviteAlreadySent[f.uid];
         const row = roomEl('div', 'rip-row' + (roomInviteSelection[f.uid] ? ' selected' : '') + (invited ? ' invited' : ''));
 
+        const avatarWrap = roomEl('span', 'rip-avatar-wrap');
         const avatar = roomEl('span', 'rip-avatar', (f.displayName || '?').charAt(0).toUpperCase());
+        const dot = roomEl('span', 'online-dot' + (friendIsOnline(f) ? '' : ' offline'));
+        avatarWrap.appendChild(avatar);
+        avatarWrap.appendChild(dot);
+
         const name = roomEl('span', 'rip-name', f.displayName || t('common.player'));
         const check = roomEl('span', 'rip-check', invited ? 'Invited' : (roomInviteSelection[f.uid] ? '✓' : ''));
 
@@ -14251,7 +14748,7 @@ function renderRoomInvitePickerRows(room) {
             };
         }
 
-        row.appendChild(avatar);
+        row.appendChild(avatarWrap);
         row.appendChild(name);
         row.appendChild(check);
         listEl.appendChild(row);
@@ -14287,6 +14784,7 @@ function sendRoomInvites() {
             });
         })).then(function() {
             showToast(t('toast.invitesSent'));
+            if (window.logVpEvent) logVpEvent('room_invites_sent', { count: uids.length });
             closeSheet('room-invite-sheet');
             roomInviteSelection = {};
         });
@@ -14322,30 +14820,42 @@ function cleanupRoomInvites() {
     updateRoomInviteBadges();
 }
 
+// A DOM node can only live in one place, so a fresh banner is built per
+// container rather than appending the same node twice.
+function buildRoomInviteBanner(inv) {
+    const banner = roomEl('div', 'room-invite-banner');
+
+    const text = roomEl('div', 'rib-text');
+    text.appendChild(roomEl('span', 'rib-from', inv.fromName || 'A friend'));
+    text.appendChild(document.createTextNode(' invited you to '));
+    text.appendChild(roomEl('span', 'rib-room', inv.roomName || 'a room'));
+    text.appendChild(roomEl('div', 'rib-meta', 'Buy-in ' + (inv.stake || 10)));
+
+    const actions = roomEl('div', 'rib-actions');
+    const accept = roomEl('button', 'rib-accept', 'Join');
+    accept.onclick = function() { acceptRoomInvite(inv.id); };
+    const decline = roomEl('button', 'rib-decline', 'Decline');
+    decline.onclick = function() { declineRoomInvite(inv.id); };
+    actions.appendChild(accept);
+    actions.appendChild(decline);
+
+    banner.appendChild(text);
+    banner.appendChild(actions);
+    return banner;
+}
+
+// Renders into the Friends -> Poker Rooms tab (original) and into
+// #duel-banners on the Play screen: previously a pending invite was only
+// ever visible if the player happened to open Friends and switch to the
+// Poker Rooms sub-tab, so nobody outside that one screen ever saw one.
 function renderRoomInviteBanners() {
-    const el = document.getElementById('friends-room-invites');
-    if (!el) return;
-    el.innerHTML = '';
-    incomingRoomInvites.forEach(function(inv) {
-        const banner = roomEl('div', 'room-invite-banner');
-
-        const text = roomEl('div', 'rib-text');
-        text.appendChild(roomEl('span', 'rib-from', inv.fromName || 'A friend'));
-        text.appendChild(document.createTextNode(' invited you to '));
-        text.appendChild(roomEl('span', 'rib-room', inv.roomName || 'a room'));
-        text.appendChild(roomEl('div', 'rib-meta', 'Buy-in ' + (inv.stake || 10)));
-
-        const actions = roomEl('div', 'rib-actions');
-        const accept = roomEl('button', 'rib-accept', 'Join');
-        accept.onclick = function() { acceptRoomInvite(inv.id); };
-        const decline = roomEl('button', 'rib-decline', 'Decline');
-        decline.onclick = function() { declineRoomInvite(inv.id); };
-        actions.appendChild(accept);
-        actions.appendChild(decline);
-
-        banner.appendChild(text);
-        banner.appendChild(actions);
-        el.appendChild(banner);
+    ['friends-room-invites', 'duel-banners'].forEach(function(containerId) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        el.innerHTML = '';
+        incomingRoomInvites.forEach(function(inv) {
+            el.appendChild(buildRoomInviteBanner(inv));
+        });
     });
 }
 
@@ -14362,15 +14872,22 @@ function updateRoomInviteBadges() {
 function acceptRoomInvite(inviteId) {
     const inv = incomingRoomInvites.find(function(i) { return i.id === inviteId; });
     if (!inv) return;
-    joinRoomByCode(inv.roomCode).then(function(ok) {
-        // If the room is gone, joinRoomByCode already toasted — mark the invite
-        // declined either way so the banner doesn't linger.
+    joinRoomByCode(inv.roomCode, 'invite').then(function(result) {
+        // joinRoomByCode resolves exactly three ways: true (joined), false (the
+        // room genuinely no longer exists — a real decline), or null (network
+        // or rules failure via firebaseSafe, already toasted inside
+        // joinRoomByCode). The old code coerced null to "declined" too, so a
+        // transient blip permanently lost the invite — the recipient rule only
+        // allows one pending -> * transition, so it could never be re-accepted.
+        // Leave it pending on null and let the player just retry.
+        if (result === null) return;
         firebaseSafe(function() {
             return db.collection('roomInvites').doc(inviteId).update({
-                status: ok ? 'accepted' : 'declined',
+                status: result ? 'accepted' : 'declined',
                 respondedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         });
+        if (window.logVpEvent) logVpEvent('room_invite_' + (result ? 'accepted' : 'declined'));
     });
 }
 
@@ -14381,6 +14898,7 @@ function declineRoomInvite(inviteId) {
             respondedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
     });
+    if (window.logVpEvent) logVpEvent('room_invite_declined');
 }
 
 if (window.vpOnLanguageChange) {
@@ -14717,25 +15235,8 @@ const BOT_POOL = [
     { name: 'Salim W.',    country: 'OM' }
 ];
 
-function botHashSeed(str) {
-    let h = 0x811c9dc5;
-    for (let i = 0; i < str.length; i++) {
-        h ^= str.charCodeAt(i);
-        h = Math.imul(h, 0x01000193);
-    }
-    return h >>> 0;
-}
-
-function botMulberry32(seed) {
-    let a = seed >>> 0;
-    return function() {
-        a |= 0; a = (a + 0x6D2B79F5) | 0;
-        let t = Math.imul(a ^ (a >>> 15), 1 | a);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-}
-
+// fnv1aHash/mulberry32 now live in js/prng.js (extracted so js/duel-deck.js
+// can seed a duel's deck with the exact same generator).
 function botRandBetween(rand, min, max) {
     return min + rand() * (max - min);
 }
@@ -14753,7 +15254,7 @@ function botUidFor(profile) {
 // Deterministic per-player, per-period roster with seeded personalities.
 function createBotState(boardType, periodKey) {
     const uid = window.egUser ? window.egUser.uid : '';
-    const rand = botMulberry32(botHashSeed(periodKey + '|' + boardType + '|' + uid));
+    const rand = mulberry32(fnv1aHash(periodKey + '|' + boardType + '|' + uid));
     const pool = BOT_POOL.slice();
     for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(rand() * (i + 1));
@@ -15593,7 +16094,7 @@ function copyInviteSheetLink() {
     const linkEl = document.getElementById('invite-sheet-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const copyBtn = document.getElementById('invite-sheet-copy');
-    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'copy' });
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'copy', kind: 'friend' });
     copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
 }
 
@@ -15655,7 +16156,7 @@ function allInUnlockInvite() {
 // The invite sheet's "More…" chip — everything beyond WhatsApp/Telegram goes
 // through the OS share sheet.
 function shareInviteMore() {
-    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native' });
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native', kind: 'friend' });
     shareViaNative(t('share.appNameFull'), friendInviteMessage(), sheetLink('invite-sheet-link'))
         .then(function(handled) {
             if (!handled) showToast(t('toast.useCopyShare'));
@@ -15686,8 +16187,8 @@ function fallbackCopySheet(text, onCopied) {
 // Telegram takes the link and the message as separate parameters, so the
 // message passed in here must never already contain the link — otherwise the
 // share preview repeats it.
-function openShareChannel(channel, message, link) {
-    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: channel });
+function openShareChannel(channel, message, link, kind) {
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: channel, kind: kind || 'friend' });
     let url;
     if (channel === 'telegram') {
         url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
@@ -15695,7 +16196,8 @@ function openShareChannel(channel, message, link) {
     } else {
         url = 'https://wa.me/?text=' + encodeURIComponent(message + '\n' + link);
     }
-    window.open(url, '_blank');
+    const win = window.open(url, '_blank');
+    if (!win) showToast(t('toast.useCopyShare'));
 }
 
 function sheetLink(id) {
@@ -15719,11 +16221,11 @@ function friendInviteMessage() {
 }
 
 function shareFriendInviteViaWhatsApp() {
-    openShareChannel('whatsapp', friendInviteMessage(), sheetLink('invite-sheet-link'));
+    openShareChannel('whatsapp', friendInviteMessage(), sheetLink('invite-sheet-link'), 'friend');
 }
 
 function shareFriendInviteViaTelegram() {
-    openShareChannel('telegram', friendInviteMessage(), sheetLink('invite-sheet-link'));
+    openShareChannel('telegram', friendInviteMessage(), sheetLink('invite-sheet-link'), 'friend');
 }
 
 // --- Room invite sheet: share-link half ---
@@ -15752,6 +16254,7 @@ function copyRoomLink() {
     const linkEl = document.getElementById('room-invite-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const copyBtn = document.getElementById('room-invite-copy');
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'copy', kind: 'room' });
     copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
 }
 
@@ -15763,6 +16266,7 @@ function roomInviteMessage() {
 }
 
 function shareRoomInviteNative() {
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native', kind: 'room' });
     shareViaNative(t('share.appNameFull'), roomInviteMessage(), sheetLink('room-invite-link'))
         .then(function(handled) {
             if (!handled) showToast(t('toast.useCopyShare'));
@@ -15770,11 +16274,11 @@ function shareRoomInviteNative() {
 }
 
 function shareRoomViaWhatsApp() {
-    openShareChannel('whatsapp', roomInviteMessage(), sheetLink('room-invite-link'));
+    openShareChannel('whatsapp', roomInviteMessage(), sheetLink('room-invite-link'), 'room');
 }
 
 function shareRoomViaTelegram() {
-    openShareChannel('telegram', roomInviteMessage(), sheetLink('room-invite-link'));
+    openShareChannel('telegram', roomInviteMessage(), sheetLink('room-invite-link'), 'room');
 }
 
 // --- Big-win brag sheet (signed-in users) ---
@@ -15845,9 +16349,11 @@ function handleJoinDeepLink() {
         // settled yet — by the onAuthStateChanged handler in js/firebase.js.
         window._pendingJoinCode = joinCode;
 
+        if (window.logVpEvent) logVpEvent('invite_link_opened', { kind: 'room' });
+
         if (window.egUser) {
             window._pendingJoinCode = null;
-            joinRoomByCode(joinCode);
+            joinRoomByCode(joinCode, 'link');
         } else if (window._authResolved) {
             // Auth has settled and there is genuinely no user.
             openSignInModal();
@@ -15861,79 +16367,11 @@ function handleJoinDeepLink() {
 
 
 /* --- js/game.js --- */
-const SUITS = ['♠', '♥', '♦', '♣'];
-const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-
-const PAYTABLES = {
-    jacks: {
-        'Royal Flush': 250,
-        'Straight Flush': 50,
-        'Four of a Kind': 20,
-        'Full House': 7,
-        'Flush': 5,
-        'Straight': 4,
-        'Three of a Kind': 3,
-        'Two Pair': 2,
-        'Jacks or Better': 1,
-        'Nothing': 0
-    },
-    deuces: {
-        'Royal Flush': 250,
-        'Four Deuces': 200,
-        'Wild Royal Flush': 25,
-        'Five of a Kind': 15,
-        'Straight Flush': 9,
-        'Four of a Kind': 5,
-        'Full House': 3,
-        'Flush': 2,
-        'Straight': 2,
-        'Three of a Kind': 1,
-        'Nothing': 0
-    },
-    bonus: {
-        'Royal Flush': 250,
-        'Straight Flush': 50,
-        'Four Aces': 80,
-        'Four 2s-4s': 40,
-        'Four 5s-Ks': 25,
-        'Full House': 8,
-        'Flush': 5,
-        'Straight': 4,
-        'Three of a Kind': 3,
-        'Two Pair': 2,
-        'Jacks or Better': 1,
-        'Nothing': 0
-    },
-    doubleBonus: {
-        'Royal Flush': 250,
-        'Straight Flush': 50,
-        'Four Aces': 160,
-        'Four 2s-4s': 80,
-        'Four 5s-Ks': 50,
-        'Full House': 10,
-        'Flush': 7,
-        'Straight': 5,
-        'Three of a Kind': 3,
-        'Two Pair': 1,
-        'Jacks or Better': 1,
-        'Nothing': 0
-    }
-};
-
-const HAND_ORDERS = {
-    jacks: ['Royal Flush', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
-    deuces: ['Royal Flush', 'Four Deuces', 'Wild Royal Flush', 'Five of a Kind', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Nothing'],
-    bonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
-    doubleBonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing']
-};
-
-const HAND_RANK = {
-    'Nothing': 0, 'Jacks or Better': 1, 'Two Pair': 2, 'Three of a Kind': 3,
-    'Straight': 4, 'Flush': 5, 'Full House': 6, 'Four of a Kind': 7,
-    'Straight Flush': 8, 'Royal Flush': 9,
-    'Five of a Kind': 7, 'Wild Royal Flush': 8, 'Four Deuces': 8,
-    'Four 5s-Ks': 7, 'Four 2s-4s': 7, 'Four Aces': 7
-};
+// SUITS, RANKS, PAYTABLES, HAND_ORDERS, HAND_RANK, createDeck, evaluateHand,
+// evaluateDeucesHand and evaluateWithVariant now live in js/hand-eval.js
+// (loaded earlier in build.js, before this file) — this module still owns
+// everything state-related: which variant is selected, current payouts,
+// and unlock levels.
 
 // Variants unlock as the player's local level rises — gives leveling a purpose
 const VARIANT_MIN_LEVEL = { jacks: 1, deuces: 3, bonus: 8, doubleBonus: 15 };
@@ -16361,16 +16799,7 @@ function updateTotalBetDisplay() {
     if (el) el.textContent = bet * multiHandCount;
 }
 
-function createDeck() {
-    const d = [];
-    for (let suit of SUITS) {
-        for (let rank of RANKS) {
-            d.push({ rank, suit });
-        }
-    }
-    return d;
-}
-
+// createDeck() now lives in js/hand-eval.js.
 function shuffle(deck) {
     for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -16829,154 +17258,12 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
     if (window.vpApplyHintClasses && gameState === 'hold') vpApplyHintClasses();
 }
 
-function evaluateHand(hand) {
-    const ranks = hand.map(c => c.rank);
-    const suits = hand.map(c => c.suit);
-
-    const rankCounts = {};
-    ranks.forEach(r => rankCounts[r] = (rankCounts[r] || 0) + 1);
-    const counts = Object.values(rankCounts).sort((a, b) => b - a);
-
-    const flush = new Set(suits).size === 1;
-
-    let values = ranks.map(r => {
-        if (r === 'A') return 14;
-        if (r === 'J') return 11;
-        if (r === 'Q') return 12;
-        if (r === 'K') return 13;
-        return parseInt(r);
-    }).sort((a, b) => a - b);
-
-    let straight = false;
-    const uniqueValues = [...new Set(values)];
-    if (uniqueValues.length === 5) {
-        if (uniqueValues[4] - uniqueValues[0] === 4) {
-            straight = true;
-        } else if (uniqueValues.join(',') === '2,3,4,5,14') {
-            straight = true;
-            values = [1, 2, 3, 4, 5];
-        }
-    }
-
-    const findIndices = (targetRanks) => {
-        return hand.map((card, i) => targetRanks.includes(card.rank) ? i : -1).filter(i => i !== -1);
-    };
-
-    const findIndicesByCount = (targetCount) => {
-        const targetRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === targetCount);
-        return findIndices(targetRanks);
-    };
-
-    const allIndices = [0, 1, 2, 3, 4];
-    let result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] };
-
-    if (straight && flush) {
-        if (values.join(',') === '10,11,12,13,14') {
-            result.type = 'Royal Flush';
-        } else {
-            result.type = 'Straight Flush';
-        }
-        result.winIndices = allIndices;
-    } else if (counts[0] === 4) {
-        result.type = 'Four of a Kind';
-        result.winIndices = findIndicesByCount(4);
-    } else if (counts[0] === 3 && counts[1] === 2) {
-        result.type = 'Full House';
-        const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
-        const twoRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
-        result.winIndices = findIndices([threeRank]);
-        result.secondPairIndices = findIndices([twoRank]);
-    } else if (flush) {
-        result.type = 'Flush';
-        result.winIndices = allIndices;
-    } else if (straight) {
-        result.type = 'Straight';
-        result.winIndices = allIndices;
-    } else if (counts[0] === 3) {
-        result.type = 'Three of a Kind';
-        result.winIndices = findIndicesByCount(3);
-        const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
-        const threeIndices = findIndices([threeRank]);
-        if (threeRank === 'J' && threeIndices.length > 0) {
-            result.thirdMatchIndices.push(threeIndices[0]);
-        }
-    } else if (counts[0] === 2 && counts[1] === 2) {
-        const pairRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === 2);
-        result.type = 'Two Pair';
-        result.winIndices = findIndices([pairRanks[0]]);
-        result.secondPairIndices = findIndices([pairRanks[1]]);
-    } else if (counts[0] === 2) {
-        const pairRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
-        if (['J', 'Q', 'K', 'A'].includes(pairRank)) {
-            result.type = 'Jacks or Better';
-            result.winIndices = findIndices([pairRank]);
-        }
-    }
-    return result;
-}
-
+// evaluateHand() and evaluateDeucesHand() now live in js/hand-eval.js.
+// This wrapper just supplies this module's own gameVariant to the
+// variant-explicit evaluateWithVariant() — every existing call site
+// (evaluateForVariant(hand) in draw(), etc.) is unchanged.
 function evaluateForVariant(h) {
-    if (gameVariant === 'deuces') return evaluateDeucesHand(h);
-    const result = evaluateHand(h);
-    if (result.type === 'Four of a Kind' && (gameVariant === 'bonus' || gameVariant === 'doubleBonus')) {
-        const rankCounts = {};
-        h.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
-        const quadRank = Object.keys(rankCounts).find(r => rankCounts[r] === 4);
-        if (quadRank === 'A') result.type = 'Four Aces';
-        else if (['2', '3', '4'].includes(quadRank)) result.type = 'Four 2s-4s';
-        else result.type = 'Four 5s-Ks';
-    }
-    return result;
-}
-
-// Deuces Wild: 2s substitute for any card. Minimum paying hand is Three of a Kind.
-function evaluateDeucesHand(hand) {
-    const allIndices = [0, 1, 2, 3, 4];
-    const result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] };
-    const others = hand.filter(c => c.rank !== '2');
-    const n = 5 - others.length;
-
-    if (n === 4) {
-        result.type = 'Four Deuces';
-        result.winIndices = allIndices;
-        return result;
-    }
-
-    const rankCounts = {};
-    others.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
-    const counts = Object.values(rankCounts).sort((a, b) => b - a);
-    const maxCount = counts[0] || 0;
-    const flush = new Set(others.map(c => c.suit)).size <= 1;
-    const vals = others.map(c =>
-        c.rank === 'A' ? 14 : c.rank === 'J' ? 11 : c.rank === 'Q' ? 12 : c.rank === 'K' ? 13 : parseInt(c.rank));
-    const distinct = new Set(vals).size === others.length;
-
-    const fitsWindow = arr => arr.length === 0 || (Math.max(...arr) - Math.min(...arr) <= 4);
-    const straight = distinct && (fitsWindow(vals) || (vals.includes(14) && fitsWindow(vals.map(v => v === 14 ? 1 : v))));
-    const allRoyalVals = distinct && vals.every(v => v >= 10);
-
-    if (n === 0 && flush && straight && Math.min(...vals) === 10) {
-        result.type = 'Royal Flush';
-    } else if (n > 0 && flush && allRoyalVals) {
-        result.type = 'Wild Royal Flush';
-    } else if (maxCount + n >= 5) {
-        result.type = 'Five of a Kind';
-    } else if (flush && straight) {
-        result.type = 'Straight Flush';
-    } else if (maxCount + n >= 4) {
-        result.type = 'Four of a Kind';
-    } else if ((maxCount === 3 && counts[1] === 2) || (n === 1 && maxCount === 2 && counts[1] === 2)) {
-        result.type = 'Full House';
-    } else if (flush) {
-        result.type = 'Flush';
-    } else if (straight) {
-        result.type = 'Straight';
-    } else if (maxCount + n >= 3) {
-        result.type = 'Three of a Kind';
-    }
-
-    if (result.type !== 'Nothing') result.winIndices = allIndices;
-    return result;
+    return evaluateWithVariant(h, gameVariant);
 }
 
 function updateStats() {

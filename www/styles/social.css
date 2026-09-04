@@ -1187,6 +1187,25 @@
 
 .rip-row.invited { cursor: default; opacity: 0.55; }
 
+/* Online-first grouping in the room-invite friend picker. */
+.rip-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 8px 6px 4px;
+}
+
+.rip-section-label:first-child {
+    padding-top: 2px;
+}
+
+.rip-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
 .rip-avatar {
     width: 32px;
     height: 32px;

@@ -53,6 +53,11 @@ const jsFiles = [
     'js/analytics.js',
     'js/ui.js',
     'js/progress.js',
+    // Pure engine modules — no DOM, no game state — loaded early so anything
+    // below (game.js, leaderboard-bots.js, duel-play.js) can rely on them.
+    'js/prng.js',
+    'js/hand-eval.js',
+    'js/duel-deck.js',
     'js/firebase.js',
     'js/deeplink.js',
     'js/push.js',

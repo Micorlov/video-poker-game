@@ -301,6 +301,7 @@ vpRegisterLang('en', {
     'room.membersMeta': '{{count}}/{{capacity}} friends · Stake {{stake}}',
     'room.sendInvites': 'Send Invites',
     'room.sendInvitesCount': 'Send Invites ({{count}})',
+    'room.onlineNowCount': '{{n}} online now',
 
     // ── Hourly champions ──
     'champ.resetsPlaceholder': 'Resets in —m',

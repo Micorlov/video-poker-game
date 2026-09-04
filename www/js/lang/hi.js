@@ -279,6 +279,7 @@ vpRegisterLang('hi', {
     'room.membersMeta': '{{count}}/{{capacity}} दोस्त · दांव {{stake}}',
     'room.sendInvites': 'न्योते भेजें',
     'room.sendInvitesCount': 'न्योते भेजें ({{count}})',
+    'room.onlineNowCount': '{{n}} अभी ऑनलाइन',
 
     'champ.resetsPlaceholder': '—मि. में रीसेट',
     'champ.noChampionsYet': 'इस घंटे अभी कोई चैंपियन नहीं — पहले आप बनें!',

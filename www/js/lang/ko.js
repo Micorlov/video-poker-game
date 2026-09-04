@@ -277,6 +277,7 @@ vpRegisterLang('ko', {
     'room.membersMeta': '친구 {{count}}/{{capacity}} · 베팅 {{stake}}',
     'room.sendInvites': '초대 보내기',
     'room.sendInvitesCount': '초대 보내기 ({{count}})',
+    'room.onlineNowCount': '{{n}}명 온라인',
 
     'champ.resetsPlaceholder': '—분 후 초기화',
     'champ.noChampionsYet': '이번 시간에는 아직 챔피언이 없어요 — 첫 주인공이 되어 보세요!',

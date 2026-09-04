@@ -278,6 +278,7 @@ vpRegisterLang('zh-CN', {
     'room.membersMeta': '{{count}}/{{capacity}} 位好友 · 注额 {{stake}}',
     'room.sendInvites': '发送邀请',
     'room.sendInvitesCount': '发送邀请（{{count}}）',
+    'room.onlineNowCount': '{{n}} 人在线',
 
     'champ.resetsPlaceholder': '—分钟后重置',
     'champ.noChampionsYet': '本小时还没有冠军 — 抢个头名吧！',

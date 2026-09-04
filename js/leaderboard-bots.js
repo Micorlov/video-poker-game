@@ -43,25 +43,8 @@ const BOT_POOL = [
     { name: 'Salim W.',    country: 'OM' }
 ];
 
-function botHashSeed(str) {
-    let h = 0x811c9dc5;
-    for (let i = 0; i < str.length; i++) {
-        h ^= str.charCodeAt(i);
-        h = Math.imul(h, 0x01000193);
-    }
-    return h >>> 0;
-}
-
-function botMulberry32(seed) {
-    let a = seed >>> 0;
-    return function() {
-        a |= 0; a = (a + 0x6D2B79F5) | 0;
-        let t = Math.imul(a ^ (a >>> 15), 1 | a);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-}
-
+// fnv1aHash/mulberry32 now live in js/prng.js (extracted so js/duel-deck.js
+// can seed a duel's deck with the exact same generator).
 function botRandBetween(rand, min, max) {
     return min + rand() * (max - min);
 }
@@ -79,7 +62,7 @@ function botUidFor(profile) {
 // Deterministic per-player, per-period roster with seeded personalities.
 function createBotState(boardType, periodKey) {
     const uid = window.egUser ? window.egUser.uid : '';
-    const rand = botMulberry32(botHashSeed(periodKey + '|' + boardType + '|' + uid));
+    const rand = mulberry32(fnv1aHash(periodKey + '|' + boardType + '|' + uid));
     const pool = BOT_POOL.slice();
     for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(rand() * (i + 1));
