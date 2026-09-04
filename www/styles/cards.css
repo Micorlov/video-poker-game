@@ -549,9 +549,9 @@
     filter: brightness(0.74) saturate(0.85);
 }
 
-.card.winning .card-front,
-.card.second-pair .card-front,
-.card.third-match .card-front {
+.card.revealed.winning .card-front,
+.card.revealed.second-pair .card-front,
+.card.revealed.third-match .card-front {
     box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5), 0 0 0 3px var(--gold);
 }
 

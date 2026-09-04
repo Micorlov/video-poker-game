@@ -884,13 +884,28 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
                     if (inner) {
                         inner.classList.add('animating');
                         cardEl.classList.remove('flipped');
-                        cardEl.classList.add('revealed');
                         playSound('deal');
                         triggerHaptic('LIGHT');
-                        setTimeout(() => {
-                            inner.classList.remove('animating');
+                        // 'revealed' (and the win effects it gates) must wait for the
+                        // card-inner's own rotateY transition to actually finish —
+                        // adding it at flip-start left the gold glow/badge popping in
+                        // ~1.1s before the card had visually turned to face up.
+                        let settled = false;
+                        const settle = () => {
+                            if (settled) return;
+                            settled = true;
+                            cardEl.classList.add('revealed');
                             flipsFinished++;
                             if (flipsFinished === flippingCount && onFlipsComplete) onFlipsComplete();
+                        };
+                        setTimeout(() => {
+                            inner.classList.remove('animating');
+                            inner.addEventListener('transitionend', function onFlipEnd(e) {
+                                if (e.propertyName !== 'transform') return;
+                                inner.removeEventListener('transitionend', onFlipEnd);
+                                settle();
+                            });
+                            setTimeout(settle, 550);
                         }, 600);
                     }
                 }, flipDelayIndex * 250);
