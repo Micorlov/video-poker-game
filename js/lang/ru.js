@@ -279,6 +279,7 @@ vpRegisterLang('ru', {
     'room.membersMeta': '{{count}}/{{capacity}} друзей · Ставка {{stake}}',
     'room.sendInvites': 'Отправить приглашения',
     'room.sendInvitesCount': 'Отправить приглашения ({{count}})',
+    'room.onlineNowCount': '{{n}} сейчас онлайн',
 
     'champ.resetsPlaceholder': 'Сброс через —мин',
     'champ.noChampionsYet': 'В этом часе чемпионов ещё нет — будьте первым!',

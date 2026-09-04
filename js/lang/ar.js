@@ -282,6 +282,7 @@ vpRegisterLang('ar', {
     'room.membersMeta': '{{count}}/{{capacity}} أصدقاء · الرهان {{stake}}',
     'room.sendInvites': 'إرسال الدعوات',
     'room.sendInvitesCount': 'إرسال الدعوات ({{count}})',
+    'room.onlineNowCount': '{{n}} متصل الآن',
 
     'champ.resetsPlaceholder': 'يُعاد الضبط بعد —د',
     'champ.noChampionsYet': 'لا أبطال في هذه الساعة بعد — كن الأول!',

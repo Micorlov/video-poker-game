@@ -279,6 +279,7 @@ vpRegisterLang('pl', {
     'room.membersMeta': '{{count}}/{{capacity}} znajomych · Stawka {{stake}}',
     'room.sendInvites': 'Wyślij zaproszenia',
     'room.sendInvitesCount': 'Wyślij zaproszenia ({{count}})',
+    'room.onlineNowCount': '{{n}} teraz online',
 
     'champ.resetsPlaceholder': 'Reset za —min',
     'champ.noChampionsYet': 'Brak mistrzów w tej godzinie — bądź pierwszy!',

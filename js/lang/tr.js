@@ -277,6 +277,7 @@ vpRegisterLang('tr', {
     'room.membersMeta': '{{count}}/{{capacity}} arkadaş · Bahis {{stake}}',
     'room.sendInvites': 'Davetleri gönder',
     'room.sendInvitesCount': 'Davetleri gönder ({{count}})',
+    'room.onlineNowCount': '{{n}} şu an çevrimiçi',
 
     'champ.resetsPlaceholder': '—dk içinde sıfırlanır',
     'champ.noChampionsYet': 'Bu saatte henüz şampiyon yok — ilk sen ol!',

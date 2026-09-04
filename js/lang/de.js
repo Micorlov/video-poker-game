@@ -279,6 +279,7 @@ vpRegisterLang('de', {
     'room.membersMeta': '{{count}}/{{capacity}} Freunde · Einsatz {{stake}}',
     'room.sendInvites': 'Einladungen senden',
     'room.sendInvitesCount': 'Einladungen senden ({{count}})',
+    'room.onlineNowCount': '{{n}} gerade online',
 
     'champ.resetsPlaceholder': 'Zurücksetzung in —Min.',
     'champ.noChampionsYet': 'Diese Stunde noch keine Champions — sei der Erste!',

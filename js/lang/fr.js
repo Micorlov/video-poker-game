@@ -277,6 +277,7 @@ vpRegisterLang('fr', {
     'room.membersMeta': '{{count}}/{{capacity}} amis · Mise {{stake}}',
     'room.sendInvites': 'Envoyer les invitations',
     'room.sendInvitesCount': 'Envoyer les invitations ({{count}})',
+    'room.onlineNowCount': '{{n}} en ligne maintenant',
 
     'champ.resetsPlaceholder': 'Réinitialisation dans —min',
     'champ.noChampionsYet': 'Aucun champion cette heure — soyez le premier !',

@@ -279,6 +279,7 @@ vpRegisterLang('ja', {
     'room.membersMeta': 'フレンド {{count}}/{{capacity}} · レート {{stake}}',
     'room.sendInvites': '招待を送る',
     'room.sendInvitesCount': '招待を送る ({{count}})',
+    'room.onlineNowCount': '現在{{n}}人がオンライン',
 
     'champ.resetsPlaceholder': '—分後にリセット',
     'champ.noChampionsYet': 'この時間帯はまだチャンピオンなし — 一番乗りを狙おう！',

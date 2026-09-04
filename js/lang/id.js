@@ -277,6 +277,7 @@ vpRegisterLang('id', {
     'room.membersMeta': '{{count}}/{{capacity}} teman · Taruhan {{stake}}',
     'room.sendInvites': 'Kirim undangan',
     'room.sendInvitesCount': 'Kirim undangan ({{count}})',
+    'room.onlineNowCount': '{{n}} online sekarang',
 
     'champ.resetsPlaceholder': 'Disetel ulang dalam —mnt',
     'champ.noChampionsYet': 'Belum ada juara jam ini — jadilah yang pertama!',
