@@ -609,9 +609,9 @@
 }
 
 .card.held .held-badge,
-.card.winning .win-badge,
-.card.second-pair .win-badge,
-.card.third-match .win-badge {
+.card.revealed.winning .win-badge,
+.card.revealed.second-pair .win-badge,
+.card.revealed.third-match .win-badge {
     opacity: 1;
 }
 

@@ -700,10 +700,6 @@ function draw() {
 
     if (win === 0) {
         document.getElementById('balance').textContent = formatNumber(balance);
-        playSound('loss');
-    } else {
-        triggerWinCelebration(bestType, win);
-        triggerHaptic('HEAVY');
     }
     // A rare hand or a fresh balance high is the emotional peak — the one
     // moment worth spending a prompt on. Guest → sign-in nudge; signed-in →
@@ -747,7 +743,14 @@ function draw() {
         document.getElementById('explanation').textContent = vpHandExplanation(handType);
     }
 
-    renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
+    renderHand(winIndices, thirdMatchIndices, secondPairIndices, true, true, function() {
+        if (win === 0) {
+            playSound('loss');
+        } else {
+            triggerWinCelebration(bestType, win);
+            triggerHaptic('HEAVY');
+        }
+    });
 
     gameState = 'bet';
     if (betBeforeAllIn !== null) {
@@ -800,21 +803,26 @@ function getWinBadgeText(cardIndex, handType) {
 // re-rendering is the only way to translate them without waiting for a deal.
 let lastRenderHandArgs = null;
 
-function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false, animateFlip = true) {
+function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false, animateFlip = true, onFlipsComplete = null) {
     lastRenderHandArgs = [winningIndices, thirdMatchIndices, secondPairIndices, isDraw, false];
     const handEl = document.getElementById('hand');
     handEl.innerHTML = '';
     const anyHeld = held.some(h => h);
+    let flippingCount = 0;
 
     hand.forEach((card, i) => {
         const cardEl = document.createElement('div');
         const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || secondPairIndices.length > 0;
 
         const shouldStartFlipped = animateFlip && (isDraw ? !held[i] : true);
+        if (shouldStartFlipped) flippingCount++;
 
         const isHeld = !isResult && held[i];
         const isUnheld = !isResult && anyHeld && !held[i];
-        let classes = `card ${shouldStartFlipped ? 'flipped' : ''} ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
+        // A card still showing its back has nothing to reveal yet — the win
+        // badge and highlight wait for 'revealed', added when this card's own
+        // flip starts, so they never flash above a face-down card.
+        let classes = `card ${shouldStartFlipped ? 'flipped' : 'revealed'} ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
 
         if (winningIndices.includes(i)) classes += ' winning';
         if (secondPairIndices.includes(i)) classes += ' second-pair';
@@ -865,8 +873,9 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
     const placeholder = document.getElementById('hand-placeholder-text');
     if (placeholder) placeholder.classList.toggle('hidden', hand.length > 0);
 
-    if (animateFlip) {
+    if (animateFlip && flippingCount > 0) {
         let flipDelayIndex = 0;
+        let flipsFinished = 0;
         hand.forEach((card, i) => {
             const cardEl = handEl.children[i];
             if (cardEl && cardEl.classList.contains('flipped')) {
@@ -875,15 +884,21 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
                     if (inner) {
                         inner.classList.add('animating');
                         cardEl.classList.remove('flipped');
+                        cardEl.classList.add('revealed');
                         playSound('deal');
+                        triggerHaptic('LIGHT');
                         setTimeout(() => {
                             inner.classList.remove('animating');
+                            flipsFinished++;
+                            if (flipsFinished === flippingCount && onFlipsComplete) onFlipsComplete();
                         }, 600);
                     }
                 }, flipDelayIndex * 250);
                 flipDelayIndex++;
             }
         });
+    } else if (onFlipsComplete) {
+        onFlipsComplete();
     }
 
     if (window.vpApplyHintClasses && gameState === 'hold') vpApplyHintClasses();
