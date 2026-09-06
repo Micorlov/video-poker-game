@@ -16,16 +16,16 @@ Draft only — nothing here has been submitted to Play Console. Review and edit,
 
 **Short description** (max 80 chars):
 ```
-Free video poker! Jacks or Better & more. Beat your friends & players worldwide
+No ads, 100% free! Jacks or Better & more. Beat your friends & players worldwide
 ```
-(79 chars)
+(80 chars)
 
 **Full description** (max 4000 chars):
 ```
 Royal Video Poker — free multiplayer video poker with Jacks or Better and classic casino variants. Draw five cards, hold the winners, and chase the Royal Flush — against your friends and against every player in the app.
 
 PLAY VIDEO POKER FREE
-Every hand of video poker is played with free virtual chips. No real money, no purchases required — just the pure thrill of 5-card draw poker.
+Every hand of video poker is played with free virtual chips. No real money, no purchases required, no ads to sit through — just the pure thrill of 5-card draw poker.
 
 JACKS OR BETTER & CLASSIC VARIANTS
 Play Jacks or Better — the classic video poker game — plus more variants and multi-hand modes. Deal one hand at a time or go big with multi-hand video poker.
