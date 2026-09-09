@@ -26,13 +26,21 @@
 
 ## 1. Store Listing
 
+> **Play policy note (2026-09-09).** Play Console flags a short description that "uses keywords
+> that indicate price or promotion" and makes the app ineligible for Google Play promotion. The
+> old text ("No ads, 100% free!") tripped it, so the short description in every locale now names
+> the variants and modes instead and carries no price or promotional wording. "No ads" is still
+> allowed in the full description, the screenshots and the feature graphic, and stays there. The
+> Console banner does not re-evaluate as you type; it reflects the published listing.
+
+
 **App name (store title, 28/30 chars):** Video Poker: Jacks or Better
 
 **Short description** (max 80 chars):
 ```
-No ads, no real money: Deuces Wild, Bonus Poker, multi-hand & live leaderboards
+Deuces Wild, Bonus Poker, Double Bonus, multi-hand play and live leaderboards
 ```
-(79 chars)
+(77 chars)
 
 **Full description** (max 4000 chars):
 ```
