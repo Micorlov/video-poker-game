@@ -102,7 +102,9 @@ vpRegisterLang('en', {
     'settings.announcements': 'Announcements',
     'settings.enableNotifications': 'Enable Notifications',
     'settings.resetStats': 'Reset Statistics',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Rate this game',
+    'settings.moreGames': 'More games by Orlov Games',
+    'settings.footer': 'Video Poker · v2.4',
 
     // ── Game variants ──
     'variant.jacks': 'Jacks or Better',
@@ -338,6 +340,7 @@ vpRegisterLang('en', {
     'toast.unlockLevel': '🔒 Unlocks at level {{level}}',
     'toast.multiHandUnlock': '🔒 Multi-hand unlocks at level {{level}}',
     'toast.rebuy': '♻ +{{amount}} credits',
+    'toast.dailyBonus': 'Daily bonus: +{{amount}} free chips!',
     'toast.noAllInLeft': '⛔ No ALL INs left — back tomorrow!',
     'toast.allInGoodLuck': '🔥 ALL IN — good luck!',
     'toast.statsReset': 'Statistics reset',

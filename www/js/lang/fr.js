@@ -92,7 +92,9 @@ vpRegisterLang('fr', {
     'settings.announcements': 'Annonces',
     'settings.enableNotifications': 'Activer les notifications',
     'settings.resetStats': 'Réinitialiser les stats',
-    'settings.footer': 'Vidéo Poker · v2.1',
+    'settings.rateGame': 'Noter ce jeu',
+    'settings.moreGames': 'Plus de jeux par Orlov Games',
+    'settings.footer': 'Vidéo Poker · v2.4',
 
     'variant.jacks': 'Valets ou mieux',
     'variant.deuces': 'Deuces Wild',
@@ -307,6 +309,7 @@ vpRegisterLang('fr', {
     'toast.unlockLevel': '🔒 Débloqué au niveau {{level}}',
     'toast.multiHandUnlock': '🔒 Le multi-mains se débloque au niveau {{level}}',
     'toast.rebuy': '♻ +{{amount}} crédits',
+    'toast.dailyBonus': 'Bonus quotidien : +{{amount}} jetons gratuits !',
     'toast.noAllInLeft': '⛔ Plus de tapis — revenez demain !',
     'toast.allInGoodLuck': '🔥 TAPIS — bonne chance !',
     'toast.statsReset': 'Statistiques réinitialisées',

@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Micorlov/video-poker-game#readme",
   "dependencies": {
     "@capacitor-community/apple-sign-in": "^7.1.0",
+    "@capacitor-community/in-app-review": "^8.0.0",
     "@capacitor-firebase/authentication": "^8.3.0",
     "@capacitor/android": "^8.4.1",
     "@capacitor/app": "^8.1.0",

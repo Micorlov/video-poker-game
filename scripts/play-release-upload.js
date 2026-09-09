@@ -20,11 +20,11 @@ const UPLOAD_API = 'https://androidpublisher.googleapis.com/upload/androidpublis
 const KEY_FILE = path.join(process.env.HOME, '.config/mcp/google-play-service-account.json');
 
 const RELEASE_NOTES = {
-    'en-US': `A fresh table-felt look across the game.
+    'en-US': `Daily free chips bonus every day you come back.
 
-Fixed: pending room invites could disappear from the Play screen instead of showing up.
+New: Rate this game and More games in Settings.
 
-Fixed: winning highlights, sounds, and haptics now land exactly when the card finishes flipping, not before.`
+Win highlights, sounds and haptics now land exactly on the card flip.`
 };
 
 const mode = process.argv[2];

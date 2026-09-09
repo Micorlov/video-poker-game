@@ -1,5 +1,11 @@
 // Small UI utilities: toast messages + haptic feedback (Settings toggle).
 
+// Local-calendar-day key for once-a-day localStorage records (ALL IN usage,
+// daily bonus). Local, not UTC: the player's day is the one that matters.
+function vpTodayKey() {
+    return new Date().toDateString();
+}
+
 function showToast(text) {
     let el = document.getElementById('vp-toast');
     if (!el) {

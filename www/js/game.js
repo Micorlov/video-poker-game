@@ -224,7 +224,7 @@ function getAllInDailyLimit() {
 function loadAllInUsage() {
     try {
         const raw = JSON.parse(localStorage.getItem('vp_allin_usage'));
-        allInUsesToday = (raw && raw.date === new Date().toDateString()) ? (raw.count || 0) : 0;
+        allInUsesToday = (raw && raw.date === vpTodayKey()) ? (raw.count || 0) : 0;
     } catch (e) {
         allInUsesToday = 0;
     }
@@ -241,7 +241,7 @@ function syncLastPlayedDate() {
 
 function saveAllInUsage() {
     try {
-        localStorage.setItem('vp_allin_usage', JSON.stringify({ date: new Date().toDateString(), count: allInUsesToday }));
+        localStorage.setItem('vp_allin_usage', JSON.stringify({ date: vpTodayKey(), count: allInUsesToday }));
     } catch (e) { /* localStorage unavailable, silently fail */ }
 }
 
@@ -673,6 +673,8 @@ function draw() {
     handsPlayed++;
     addLifetimeHand();
     recordAllTimeHand(win, totalBet, winStreak > bestStreak ? winStreak : bestStreak);
+    // A Straight or better counts toward the one-time in-app review ask (js/review.js).
+    if (win > 0 && (HAND_RANK[bestType] || 0) >= 4 && window.vpOnQualityWin) vpOnQualityWin();
 
     if (win > 0) {
         totalWon += win;

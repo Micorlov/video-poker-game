@@ -92,7 +92,9 @@ vpRegisterLang('id', {
     'settings.announcements': 'Pengumuman',
     'settings.enableNotifications': 'Aktifkan notifikasi',
     'settings.resetStats': 'Setel ulang statistik',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Beri nilai game ini',
+    'settings.moreGames': 'Game lain dari Orlov Games',
+    'settings.footer': 'Video Poker · v2.4',
 
     'variant.jacks': 'Jack atau lebih',
     'variant.deuces': 'Deuces Wild',
@@ -307,6 +309,7 @@ vpRegisterLang('id', {
     'toast.unlockLevel': '🔒 Terbuka di level {{level}}',
     'toast.multiHandUnlock': '🔒 Multi-tangan terbuka di level {{level}}',
     'toast.rebuy': '♻ +{{amount}} kredit',
+    'toast.dailyBonus': 'Bonus harian: +{{amount}} chip gratis!',
     'toast.noAllInLeft': '⛔ All-in habis — kembali besok!',
     'toast.allInGoodLuck': '🔥 ALL IN — semoga beruntung!',
     'toast.statsReset': 'Statistik disetel ulang',

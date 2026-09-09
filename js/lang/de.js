@@ -94,7 +94,9 @@ vpRegisterLang('de', {
     'settings.announcements': 'Ankündigungen',
     'settings.enableNotifications': 'Benachrichtigungen aktivieren',
     'settings.resetStats': 'Statistik zurücksetzen',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Spiel bewerten',
+    'settings.moreGames': 'Mehr Spiele von Orlov Games',
+    'settings.footer': 'Video Poker · v2.4',
 
     'variant.jacks': 'Buben oder besser',
     'variant.deuces': 'Deuces Wild',
@@ -309,6 +311,7 @@ vpRegisterLang('de', {
     'toast.unlockLevel': '🔒 Ab Level {{level}} verfügbar',
     'toast.multiHandUnlock': '🔒 Multi-Hand ab Level {{level}} verfügbar',
     'toast.rebuy': '♻ +{{amount}} Credits',
+    'toast.dailyBonus': 'Tagesbonus: +{{amount}} Gratis-Chips!',
     'toast.noAllInLeft': '⛔ Keine All-Ins mehr — morgen wieder!',
     'toast.allInGoodLuck': '🔥 ALL IN — viel Glück!',
     'toast.statsReset': 'Statistik zurückgesetzt',

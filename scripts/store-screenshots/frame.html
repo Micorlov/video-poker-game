@@ -34,8 +34,8 @@
     font-weight: 800; font-size: 92px; line-height: 1.06;
     letter-spacing: -0.01em;
   }
-  #l1 { color: #f1e9d4; display: block; }
-  #l2 { color: #43e08a; display: block; }
+  #l1 { color: #f1e9d4; display: block; white-space: nowrap; }
+  #l2 { color: #43e08a; display: block; white-space: nowrap; }
   #phone {
     position: absolute; top: 470px; left: 50%; transform: translateX(-50%);
     width: 744px; height: 1600px;
@@ -80,12 +80,25 @@
   }
   const img = document.getElementById('shot');
   img.src = q.get('img') || '';
+  // Long localized lines must never wrap into the phone: shrink the headline
+  // (2px steps, floor 60px) until both lines fit the 1000px column.
+  const HEADLINE_MAX_PX = 92, HEADLINE_MIN_PX = 60;
+  function fitHeadline() {
+    const head = document.getElementById('headline');
+    let size = HEADLINE_MAX_PX;
+    head.style.fontSize = size + 'px';
+    while (size > HEADLINE_MIN_PX && head.scrollWidth > head.clientWidth) {
+      size -= 2;
+      head.style.fontSize = size + 'px';
+    }
+    window.headlineFontPx = size;
+  }
   // Signals run.js polls before taking the screenshot.
   window.frameReady = false;
   Promise.all([
     document.fonts.ready,
     new Promise(res => { img.complete ? res() : (img.onload = res, img.onerror = res); })
-  ]).then(() => { window.frameReady = true; });
+  ]).then(() => { fitHeadline(); window.frameReady = true; });
 </script>
 </body>
 </html>

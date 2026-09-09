@@ -3,7 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Video Poker</title>
+    <title>Video Poker: Jacks or Better — Free, No Ads</title>
+    <!-- Search and link-preview metadata for the GitHub Pages build. -->
+    <meta name="description" content="Free video poker with no ads and no real money: Jacks or Better, Deuces Wild, Bonus Poker and Double Bonus, multi-hand Triple Play and Five Play, and live leaderboards you can play against friends.">
+    <link rel="canonical" href="https://micorlov.github.io/video-poker-game/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Video Poker: Jacks or Better">
+    <meta property="og:title" content="Video Poker: Jacks or Better — free, no ads">
+    <meta property="og:description" content="Jacks or Better, Deuces Wild, Bonus Poker, Double Bonus and multi-hand video poker. Free chips, no real money, no ads.">
+    <meta property="og:url" content="https://micorlov.github.io/video-poker-game/">
+    <meta property="og:image" content="https://micorlov.github.io/video-poker-game/play-store-assets/feature_graphic.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Video Poker: Jacks or Better — free, no ads">
+    <meta name="twitter:description" content="Four video poker variants, multi-hand, live leaderboards. Free chips, no real money, no ads.">
+    <meta name="twitter:image" content="https://micorlov.github.io/video-poker-game/play-store-assets/feature_graphic.png">
+    <meta name="google-play-app" content="app-id=com.micorlov.videopoker">
     <script>
     // If this page was opened outside the app (e.g. a link tapped in WhatsApp)
     // and carries an invite/join code, try to hand off to the installed app
@@ -323,6 +337,16 @@
                 </button>
                 <div class="payouts" id="payouts"></div>
             </div>
+            <div class="panel">
+                <div class="settings-row" id="settings-rate-game" onclick="openRateGame()" style="cursor:pointer;">
+                    <span class="settings-row-label" data-i18n="settings.rateGame">Rate this game</span>
+                    <span class="settings-chevron">›</span>
+                </div>
+                <div class="settings-row" id="settings-more-games" onclick="openMoreGames()" style="cursor:pointer;">
+                    <span class="settings-row-label" data-i18n="settings.moreGames">More games by Orlov Games</span>
+                    <span class="settings-chevron">›</span>
+                </div>
+            </div>
 
             <div class="section-label" data-i18n="settings.account">Account</div>
             <div class="panel">
@@ -368,7 +392,7 @@
 
             <button class="btn-danger" id="settings-reset-stats" data-i18n="settings.resetStats">Reset Statistics</button>
 
-            <div class="settings-footer" data-i18n="settings.footer">Video Poker · v2.1</div>
+            <div class="settings-footer" data-i18n="settings.footer">Video Poker · v2.4</div>
         </section>
     </div>
 

@@ -94,7 +94,9 @@ vpRegisterLang('ja', {
     'settings.announcements': 'お知らせ',
     'settings.enableNotifications': '通知をオンにする',
     'settings.resetStats': '成績をリセット',
-    'settings.footer': 'ビデオポーカー · v2.1',
+    'settings.rateGame': 'このゲームを評価',
+    'settings.moreGames': 'Orlov Games の他のゲーム',
+    'settings.footer': 'ビデオポーカー · v2.4',
 
     'variant.jacks': 'ジャックス・オア・ベター',
     'variant.deuces': 'デュースワイルド',
@@ -309,6 +311,7 @@ vpRegisterLang('ja', {
     'toast.unlockLevel': '🔒 レベル{{level}}で解放',
     'toast.multiHandUnlock': '🔒 マルチハンドはレベル{{level}}で解放',
     'toast.rebuy': '♻ +{{amount}} クレジット',
+    'toast.dailyBonus': 'デイリーボーナス：+{{amount}} 無料チップ！',
     'toast.noAllInLeft': '⛔ オールインの残り回数なし — また明日！',
     'toast.allInGoodLuck': '🔥 オールイン — 幸運を！',
     'toast.statsReset': '成績をリセットしました',

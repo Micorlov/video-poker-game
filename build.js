@@ -53,6 +53,7 @@ const jsFiles = [
     'js/analytics.js',
     'js/ui.js',
     'js/progress.js',
+    'js/review.js',
     // Pure engine modules — no DOM, no game state — loaded early so anything
     // below (game.js, leaderboard-bots.js, duel-play.js) can rely on them.
     'js/prng.js',
@@ -64,6 +65,7 @@ const jsFiles = [
     'js/presence.js',
     'js/friends.js',
     'js/referral.js',
+    'js/daily-bonus.js',
     'js/cloudsave.js',
     'js/rooms.js',
     'js/stories.js',

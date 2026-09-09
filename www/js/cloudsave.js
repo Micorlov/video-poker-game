@@ -53,6 +53,8 @@ function maybeRestoreCloudState(userDoc) {
     if (!cloud || typeof cloud.balance !== 'number') {
         // Nothing in the cloud yet — seed it from whatever this device holds.
         schedulePushCloudState();
+        // The boot-time grant deferred to this check; nothing to restore, so pay it now.
+        if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
         return;
     }
     if (!localStateIsFresh()) {
@@ -85,7 +87,10 @@ function maybeRestoreCloudState(userDoc) {
     if (window.updateStats) updateStats();
     if (window.pushNetProfit) pushNetProfit();
     showToast(t('toast.cloudRestored', { amount: formatNumber(balance) }));
+    // The boot-time grant deferred so it would not block this restore (js/daily-bonus.js).
+    if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
 }
 
 window.schedulePushCloudState = schedulePushCloudState;
 window.maybeRestoreCloudState = maybeRestoreCloudState;
+window.localStateIsFresh = localStateIsFresh;

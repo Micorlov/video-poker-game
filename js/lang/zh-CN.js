@@ -93,7 +93,9 @@ vpRegisterLang('zh-CN', {
     'settings.announcements': '公告',
     'settings.enableNotifications': '开启通知',
     'settings.resetStats': '重置统计',
-    'settings.footer': '视频扑克 · v2.1',
+    'settings.rateGame': '给游戏评分',
+    'settings.moreGames': 'Orlov Games 的更多游戏',
+    'settings.footer': '视频扑克 · v2.4',
 
     'variant.jacks': 'J 或更好',
     'variant.deuces': '百搭 2',
@@ -308,6 +310,7 @@ vpRegisterLang('zh-CN', {
     'toast.unlockLevel': '🔒 等级 {{level}} 解锁',
     'toast.multiHandUnlock': '🔒 多手模式在等级 {{level}} 解锁',
     'toast.rebuy': '♻ +{{amount}} 积分',
+    'toast.dailyBonus': '每日奖励：+{{amount}} 免费筹码！',
     'toast.noAllInLeft': '⛔ 全下次数已用完 — 明天再来！',
     'toast.allInGoodLuck': '🔥 全下 — 祝你好运！',
     'toast.statsReset': '统计已重置',

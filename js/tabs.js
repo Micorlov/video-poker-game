@@ -232,6 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initSound();
     initVoice();
     initGame();
+    if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
     initSettingsScreen();
     updateHintButtonUI();
     updateAccountUI();

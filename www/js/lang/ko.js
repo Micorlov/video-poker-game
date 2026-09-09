@@ -92,7 +92,9 @@ vpRegisterLang('ko', {
     'settings.announcements': '공지',
     'settings.enableNotifications': '알림 켜기',
     'settings.resetStats': '통계 초기화',
-    'settings.footer': '비디오 포커 · v2.1',
+    'settings.rateGame': '이 게임 평가하기',
+    'settings.moreGames': 'Orlov Games의 다른 게임',
+    'settings.footer': '비디오 포커 · v2.4',
 
     'variant.jacks': '잭 오어 베터',
     'variant.deuces': '듀스 와일드',
@@ -307,6 +309,7 @@ vpRegisterLang('ko', {
     'toast.unlockLevel': '🔒 레벨 {{level}}에서 열려요',
     'toast.multiHandUnlock': '🔒 멀티핸드는 레벨 {{level}}에서 열려요',
     'toast.rebuy': '♻ +{{amount}} 크레딧',
+    'toast.dailyBonus': '일일 보너스: +{{amount}} 무료 칩!',
     'toast.noAllInLeft': '⛔ 남은 올인이 없어요 — 내일 다시!',
     'toast.allInGoodLuck': '🔥 올인 — 행운을 빌어요!',
     'toast.statsReset': '통계를 초기화했어요',

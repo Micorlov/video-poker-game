@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- Play Store feature graphic (1024x500). Same felt/green/gold language as
+     frame.html. Rendered by feature.js in headless Chrome. English only. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #06130c; overflow: hidden; }
+  #canvas {
+    position: relative; width: 1024px; height: 500px; overflow: hidden;
+    background:
+      radial-gradient(90% 120% at 18% 0%, #14382395 0%, transparent 60%),
+      radial-gradient(70% 110% at 88% 110%, #0d2a1baa 0%, transparent 60%),
+      #071710;
+  }
+  #canvas::after { /* soft felt vignette + hairline gold border */
+    content: ''; position: absolute; inset: 14px; border-radius: 26px;
+    border: 1px solid rgba(217, 180, 95, 0.32);
+    box-shadow: inset 0 0 120px rgba(0,0,0,0.45);
+    pointer-events: none;
+  }
+  #kicker {
+    position: absolute; top: 118px; left: 78px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600; font-size: 21px; letter-spacing: 0.38em;
+    color: #d9b45f; text-transform: uppercase;
+  }
+  #headline {
+    position: absolute; top: 152px; left: 76px; width: 560px;
+    font-family: 'Bricolage Grotesque', 'Instrument Sans', sans-serif;
+    font-weight: 800; font-size: 86px; line-height: 1.02; letter-spacing: -0.015em;
+  }
+  #l1 { color: #f1e9d4; display: block; white-space: nowrap; }
+  #l2 { color: #43e08a; display: block; white-space: nowrap; }
+  #sub {
+    position: absolute; top: 352px; left: 78px; width: 540px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 500; font-size: 20px; color: #c9d4cb; letter-spacing: 0.005em;
+    white-space: nowrap;
+  }
+  #sub b { color: #d9b45f; font-weight: 500; padding: 0 3px; }
+
+  /* Fanned royal flush, ace on top — mirrors the previous graphic. Cards
+     pivot around a point well below them so the fan spreads sideways. */
+  #fan { position: absolute; left: 640px; top: 0; width: 384px; height: 500px; }
+  .card {
+    position: absolute; left: 160px; top: 150px;
+    width: 148px; height: 208px; border-radius: 14px;
+    background: linear-gradient(170deg, #ffffff 0%, #eef0ee 100%);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.55), 0 2px 0 rgba(255,255,255,0.35) inset;
+    transform-origin: 50% 150%;
+    font-family: 'Bricolage Grotesque', 'Instrument Sans', sans-serif;
+    font-weight: 800; color: #14201a;
+  }
+  .card.red { color: #d63a4a; }
+  .card .rank {
+    position: absolute; top: 12px; left: 16px;
+    font-size: 54px; line-height: 1; letter-spacing: -0.03em;
+  }
+  .card .pip {
+    position: absolute; top: 66px; left: 18px; font-size: 26px; line-height: 1;
+  }
+  .card .big {
+    position: absolute; right: 18px; bottom: 14px; font-size: 92px; line-height: 1;
+  }
+  .card:nth-child(1) { transform: rotate(-38deg); }
+  .card:nth-child(2) { transform: rotate(-26deg); }
+  .card:nth-child(3) { transform: rotate(-14deg); }
+  .card:nth-child(4) { transform: rotate(-2deg); }
+  .card:nth-child(5) { transform: rotate(10deg); }
+</style>
+</head>
+<body>
+<div id="canvas">
+  <div id="kicker">Free · No real money</div>
+  <div id="headline"><span id="l1">Video Poker,</span><span id="l2">no ads.</span></div>
+  <div id="sub">Jacks or Better<b>·</b>Deuces Wild<b>·</b>Bonus Poker<b>·</b>16 languages</div>
+  <div id="fan">
+    <div class="card"><div class="rank">10</div><div class="pip">♠</div><div class="big">♠</div></div>
+    <div class="card"><div class="rank">J</div><div class="pip">♠</div><div class="big">♠</div></div>
+    <div class="card"><div class="rank">Q</div><div class="pip">♠</div><div class="big">♠</div></div>
+    <div class="card red"><div class="rank">K</div><div class="pip">♥</div><div class="big">♥</div></div>
+    <div class="card"><div class="rank">A</div><div class="pip">♠</div><div class="big">♠</div></div>
+  </div>
+</div>
+<script>
+  window.frameReady = false;
+  document.fonts.ready.then(() => { window.frameReady = true; });
+</script>
+</body>
+</html>

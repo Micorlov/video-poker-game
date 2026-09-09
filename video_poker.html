@@ -3,7 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Video Poker</title>
+    <title>Video Poker: Jacks or Better — Free, No Ads</title>
+    <!-- Search and link-preview metadata for the GitHub Pages build. -->
+    <meta name="description" content="Free video poker with no ads and no real money: Jacks or Better, Deuces Wild, Bonus Poker and Double Bonus, multi-hand Triple Play and Five Play, and live leaderboards you can play against friends.">
+    <link rel="canonical" href="https://micorlov.github.io/video-poker-game/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Video Poker: Jacks or Better">
+    <meta property="og:title" content="Video Poker: Jacks or Better — free, no ads">
+    <meta property="og:description" content="Jacks or Better, Deuces Wild, Bonus Poker, Double Bonus and multi-hand video poker. Free chips, no real money, no ads.">
+    <meta property="og:url" content="https://micorlov.github.io/video-poker-game/">
+    <meta property="og:image" content="https://micorlov.github.io/video-poker-game/play-store-assets/feature_graphic.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Video Poker: Jacks or Better — free, no ads">
+    <meta name="twitter:description" content="Four video poker variants, multi-hand, live leaderboards. Free chips, no real money, no ads.">
+    <meta name="twitter:image" content="https://micorlov.github.io/video-poker-game/play-store-assets/feature_graphic.png">
+    <meta name="google-play-app" content="app-id=com.micorlov.videopoker">
     <script>
     // If this page was opened outside the app (e.g. a link tapped in WhatsApp)
     // and carries an invite/join code, try to hand off to the installed app
@@ -4770,6 +4784,16 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                 </button>
                 <div class="payouts" id="payouts"></div>
             </div>
+            <div class="panel">
+                <div class="settings-row" id="settings-rate-game" onclick="openRateGame()" style="cursor:pointer;">
+                    <span class="settings-row-label" data-i18n="settings.rateGame">Rate this game</span>
+                    <span class="settings-chevron">›</span>
+                </div>
+                <div class="settings-row" id="settings-more-games" onclick="openMoreGames()" style="cursor:pointer;">
+                    <span class="settings-row-label" data-i18n="settings.moreGames">More games by Orlov Games</span>
+                    <span class="settings-chevron">›</span>
+                </div>
+            </div>
 
             <div class="section-label" data-i18n="settings.account">Account</div>
             <div class="panel">
@@ -4815,7 +4839,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
 
             <button class="btn-danger" id="settings-reset-stats" data-i18n="settings.resetStats">Reset Statistics</button>
 
-            <div class="settings-footer" data-i18n="settings.footer">Video Poker · v2.1</div>
+            <div class="settings-footer" data-i18n="settings.footer">Video Poker · v2.4</div>
         </section>
     </div>
 
@@ -5758,7 +5782,9 @@ vpRegisterLang('en', {
     'settings.announcements': 'Announcements',
     'settings.enableNotifications': 'Enable Notifications',
     'settings.resetStats': 'Reset Statistics',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Rate this game',
+    'settings.moreGames': 'More games by Orlov Games',
+    'settings.footer': 'Video Poker · v2.4',
 
     // ── Game variants ──
     'variant.jacks': 'Jacks or Better',
@@ -5994,6 +6020,7 @@ vpRegisterLang('en', {
     'toast.unlockLevel': '🔒 Unlocks at level {{level}}',
     'toast.multiHandUnlock': '🔒 Multi-hand unlocks at level {{level}}',
     'toast.rebuy': '♻ +{{amount}} credits',
+    'toast.dailyBonus': 'Daily bonus: +{{amount}} free chips!',
     'toast.noAllInLeft': '⛔ No ALL INs left — back tomorrow!',
     'toast.allInGoodLuck': '🔥 ALL IN — good luck!',
     'toast.statsReset': 'Statistics reset',
@@ -6168,7 +6195,9 @@ vpRegisterLang('es', {
     'settings.announcements': 'Anuncios',
     'settings.enableNotifications': 'Activar notificaciones',
     'settings.resetStats': 'Restablecer estadísticas',
-    'settings.footer': 'Video Póker · v2.1',
+    'settings.rateGame': 'Valorar este juego',
+    'settings.moreGames': 'Más juegos de Orlov Games',
+    'settings.footer': 'Video Póker · v2.4',
 
     'variant.jacks': 'Jotas o mejor',
     'variant.deuces': 'Deuces Wild',
@@ -6383,6 +6412,7 @@ vpRegisterLang('es', {
     'toast.unlockLevel': '🔒 Se desbloquea en el nivel {{level}}',
     'toast.multiHandUnlock': '🔒 El multimano se desbloquea en el nivel {{level}}',
     'toast.rebuy': '♻ +{{amount}} créditos',
+    'toast.dailyBonus': 'Bono diario: ¡+{{amount}} fichas gratis!',
     'toast.noAllInLeft': '⛔ No te quedan apuestas TODO — ¡vuelve mañana!',
     'toast.allInGoodLuck': '🔥 TODO — ¡buena suerte!',
     'toast.statsReset': 'Estadísticas restablecidas',
@@ -6549,7 +6579,9 @@ vpRegisterLang('pt-BR', {
     'settings.announcements': 'Comunicados',
     'settings.enableNotifications': 'Ativar notificações',
     'settings.resetStats': 'Zerar estatísticas',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Avaliar este jogo',
+    'settings.moreGames': 'Mais jogos da Orlov Games',
+    'settings.footer': 'Video Poker · v2.4',
 
     'variant.jacks': 'Valetes ou melhor',
     'variant.deuces': 'Deuces Wild',
@@ -6764,6 +6796,7 @@ vpRegisterLang('pt-BR', {
     'toast.unlockLevel': '🔒 Libera no nível {{level}}',
     'toast.multiHandUnlock': '🔒 Multimão libera no nível {{level}}',
     'toast.rebuy': '♻ +{{amount}} créditos',
+    'toast.dailyBonus': 'Bônus diário: +{{amount}} fichas grátis!',
     'toast.noAllInLeft': '⛔ Sem apostas TUDO — volte amanhã!',
     'toast.allInGoodLuck': '🔥 TUDO — boa sorte!',
     'toast.statsReset': 'Estatísticas zeradas',
@@ -6932,7 +6965,9 @@ vpRegisterLang('de', {
     'settings.announcements': 'Ankündigungen',
     'settings.enableNotifications': 'Benachrichtigungen aktivieren',
     'settings.resetStats': 'Statistik zurücksetzen',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Spiel bewerten',
+    'settings.moreGames': 'Mehr Spiele von Orlov Games',
+    'settings.footer': 'Video Poker · v2.4',
 
     'variant.jacks': 'Buben oder besser',
     'variant.deuces': 'Deuces Wild',
@@ -7147,6 +7182,7 @@ vpRegisterLang('de', {
     'toast.unlockLevel': '🔒 Ab Level {{level}} verfügbar',
     'toast.multiHandUnlock': '🔒 Multi-Hand ab Level {{level}} verfügbar',
     'toast.rebuy': '♻ +{{amount}} Credits',
+    'toast.dailyBonus': 'Tagesbonus: +{{amount}} Gratis-Chips!',
     'toast.noAllInLeft': '⛔ Keine All-Ins mehr — morgen wieder!',
     'toast.allInGoodLuck': '🔥 ALL IN — viel Glück!',
     'toast.statsReset': 'Statistik zurückgesetzt',
@@ -7313,7 +7349,9 @@ vpRegisterLang('fr', {
     'settings.announcements': 'Annonces',
     'settings.enableNotifications': 'Activer les notifications',
     'settings.resetStats': 'Réinitialiser les stats',
-    'settings.footer': 'Vidéo Poker · v2.1',
+    'settings.rateGame': 'Noter ce jeu',
+    'settings.moreGames': 'Plus de jeux par Orlov Games',
+    'settings.footer': 'Vidéo Poker · v2.4',
 
     'variant.jacks': 'Valets ou mieux',
     'variant.deuces': 'Deuces Wild',
@@ -7528,6 +7566,7 @@ vpRegisterLang('fr', {
     'toast.unlockLevel': '🔒 Débloqué au niveau {{level}}',
     'toast.multiHandUnlock': '🔒 Le multi-mains se débloque au niveau {{level}}',
     'toast.rebuy': '♻ +{{amount}} crédits',
+    'toast.dailyBonus': 'Bonus quotidien : +{{amount}} jetons gratuits !',
     'toast.noAllInLeft': '⛔ Plus de tapis — revenez demain !',
     'toast.allInGoodLuck': '🔥 TAPIS — bonne chance !',
     'toast.statsReset': 'Statistiques réinitialisées',
@@ -7694,7 +7733,9 @@ vpRegisterLang('it', {
     'settings.announcements': 'Annunci',
     'settings.enableNotifications': 'Attiva notifiche',
     'settings.resetStats': 'Azzera statistiche',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Valuta questo gioco',
+    'settings.moreGames': 'Altri giochi di Orlov Games',
+    'settings.footer': 'Video Poker · v2.4',
 
     'variant.jacks': 'Jack o superiore',
     'variant.deuces': 'Deuces Wild',
@@ -7909,6 +7950,7 @@ vpRegisterLang('it', {
     'toast.unlockLevel': '🔒 Si sblocca al livello {{level}}',
     'toast.multiHandUnlock': '🔒 Il multi-mano si sblocca al livello {{level}}',
     'toast.rebuy': '♻ +{{amount}} crediti',
+    'toast.dailyBonus': 'Bonus giornaliero: +{{amount}} fiches gratis!',
     'toast.noAllInLeft': '⛔ All-in finiti — torna domani!',
     'toast.allInGoodLuck': '🔥 ALL IN — buona fortuna!',
     'toast.statsReset': 'Statistiche azzerate',
@@ -8077,7 +8119,9 @@ vpRegisterLang('pl', {
     'settings.announcements': 'Ogłoszenia',
     'settings.enableNotifications': 'Włącz powiadomienia',
     'settings.resetStats': 'Zresetuj statystyki',
-    'settings.footer': 'Wideo Poker · v2.1',
+    'settings.rateGame': 'Oceń tę grę',
+    'settings.moreGames': 'Więcej gier od Orlov Games',
+    'settings.footer': 'Wideo Poker · v2.4',
 
     'variant.jacks': 'Walety lub lepsze',
     'variant.deuces': 'Deuces Wild',
@@ -8292,6 +8336,7 @@ vpRegisterLang('pl', {
     'toast.unlockLevel': '🔒 Odblokowuje się na poziomie {{level}}',
     'toast.multiHandUnlock': '🔒 Tryb wielu rozdań odblokowuje się na poziomie {{level}}',
     'toast.rebuy': '♻ +{{amount}} kredytów',
+    'toast.dailyBonus': 'Bonus dzienny: +{{amount}} darmowych żetonów!',
     'toast.noAllInLeft': '⛔ Brak all-inów — wróć jutro!',
     'toast.allInGoodLuck': '🔥 ALL IN — powodzenia!',
     'toast.statsReset': 'Statystyki zresetowane',
@@ -8460,7 +8505,9 @@ vpRegisterLang('ru', {
     'settings.announcements': 'Объявления',
     'settings.enableNotifications': 'Включить уведомления',
     'settings.resetStats': 'Сбросить статистику',
-    'settings.footer': 'Видеопокер · v2.1',
+    'settings.rateGame': 'Оценить игру',
+    'settings.moreGames': 'Другие игры от Orlov Games',
+    'settings.footer': 'Видеопокер · v2.4',
 
     'variant.jacks': 'Валеты или лучше',
     'variant.deuces': 'Deuces Wild',
@@ -8675,6 +8722,7 @@ vpRegisterLang('ru', {
     'toast.unlockLevel': '🔒 Откроется на уровне {{level}}',
     'toast.multiHandUnlock': '🔒 Мультираздача откроется на уровне {{level}}',
     'toast.rebuy': '♻ +{{amount}} кредитов',
+    'toast.dailyBonus': 'Ежедневный бонус: +{{amount}} бесплатных фишек!',
     'toast.noAllInLeft': '⛔ Ва-банк закончился — возвращайтесь завтра!',
     'toast.allInGoodLuck': '🔥 ВА-БАНК — удачи!',
     'toast.statsReset': 'Статистика сброшена',
@@ -8841,7 +8889,9 @@ vpRegisterLang('tr', {
     'settings.announcements': 'Duyurular',
     'settings.enableNotifications': 'Bildirimleri aç',
     'settings.resetStats': 'İstatistikleri sıfırla',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Bu oyunu değerlendir',
+    'settings.moreGames': 'Orlov Games’ten daha fazla oyun',
+    'settings.footer': 'Video Poker · v2.4',
 
     'variant.jacks': 'Vale veya üstü',
     'variant.deuces': 'Deuces Wild',
@@ -9056,6 +9106,7 @@ vpRegisterLang('tr', {
     'toast.unlockLevel': '🔒 {{level}}. seviyede açılır',
     'toast.multiHandUnlock': '🔒 Çoklu el {{level}}. seviyede açılır',
     'toast.rebuy': '♻ +{{amount}} kredi',
+    'toast.dailyBonus': 'Günlük bonus: +{{amount}} ücretsiz çip!',
     'toast.noAllInLeft': '⛔ All in hakkın kalmadı — yarın gel!',
     'toast.allInGoodLuck': '🔥 ALL IN — bol şans!',
     'toast.statsReset': 'İstatistikler sıfırlandı',
@@ -9222,7 +9273,9 @@ vpRegisterLang('id', {
     'settings.announcements': 'Pengumuman',
     'settings.enableNotifications': 'Aktifkan notifikasi',
     'settings.resetStats': 'Setel ulang statistik',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Beri nilai game ini',
+    'settings.moreGames': 'Game lain dari Orlov Games',
+    'settings.footer': 'Video Poker · v2.4',
 
     'variant.jacks': 'Jack atau lebih',
     'variant.deuces': 'Deuces Wild',
@@ -9437,6 +9490,7 @@ vpRegisterLang('id', {
     'toast.unlockLevel': '🔒 Terbuka di level {{level}}',
     'toast.multiHandUnlock': '🔒 Multi-tangan terbuka di level {{level}}',
     'toast.rebuy': '♻ +{{amount}} kredit',
+    'toast.dailyBonus': 'Bonus harian: +{{amount}} chip gratis!',
     'toast.noAllInLeft': '⛔ All-in habis — kembali besok!',
     'toast.allInGoodLuck': '🔥 ALL IN — semoga beruntung!',
     'toast.statsReset': 'Statistik disetel ulang',
@@ -9605,7 +9659,9 @@ vpRegisterLang('hi', {
     'settings.announcements': 'घोषणाएँ',
     'settings.enableNotifications': 'सूचनाएँ चालू करें',
     'settings.resetStats': 'आँकड़े रीसेट करें',
-    'settings.footer': 'वीडियो पोकर · v2.1',
+    'settings.rateGame': 'इस गेम को रेट करें',
+    'settings.moreGames': 'Orlov Games के और गेम',
+    'settings.footer': 'वीडियो पोकर · v2.4',
 
     'variant.jacks': 'जैक या बेहतर',
     'variant.deuces': 'ड्यूसेस वाइल्ड',
@@ -9820,6 +9876,7 @@ vpRegisterLang('hi', {
     'toast.unlockLevel': '🔒 लेवल {{level}} पर खुलता है',
     'toast.multiHandUnlock': '🔒 मल्टी-हैंड लेवल {{level}} पर खुलता है',
     'toast.rebuy': '♻ +{{amount}} क्रेडिट',
+    'toast.dailyBonus': 'दैनिक बोनस: +{{amount}} मुफ़्त चिप्स!',
     'toast.noAllInLeft': '⛔ कोई ऑल इन नहीं बचा — कल आएँ!',
     'toast.allInGoodLuck': '🔥 ऑल इन — शुभकामनाएँ!',
     'toast.statsReset': 'आँकड़े रीसेट हो गए',
@@ -9988,7 +10045,9 @@ vpRegisterLang('ja', {
     'settings.announcements': 'お知らせ',
     'settings.enableNotifications': '通知をオンにする',
     'settings.resetStats': '成績をリセット',
-    'settings.footer': 'ビデオポーカー · v2.1',
+    'settings.rateGame': 'このゲームを評価',
+    'settings.moreGames': 'Orlov Games の他のゲーム',
+    'settings.footer': 'ビデオポーカー · v2.4',
 
     'variant.jacks': 'ジャックス・オア・ベター',
     'variant.deuces': 'デュースワイルド',
@@ -10203,6 +10262,7 @@ vpRegisterLang('ja', {
     'toast.unlockLevel': '🔒 レベル{{level}}で解放',
     'toast.multiHandUnlock': '🔒 マルチハンドはレベル{{level}}で解放',
     'toast.rebuy': '♻ +{{amount}} クレジット',
+    'toast.dailyBonus': 'デイリーボーナス：+{{amount}} 無料チップ！',
     'toast.noAllInLeft': '⛔ オールインの残り回数なし — また明日！',
     'toast.allInGoodLuck': '🔥 オールイン — 幸運を！',
     'toast.statsReset': '成績をリセットしました',
@@ -10369,7 +10429,9 @@ vpRegisterLang('ko', {
     'settings.announcements': '공지',
     'settings.enableNotifications': '알림 켜기',
     'settings.resetStats': '통계 초기화',
-    'settings.footer': '비디오 포커 · v2.1',
+    'settings.rateGame': '이 게임 평가하기',
+    'settings.moreGames': 'Orlov Games의 다른 게임',
+    'settings.footer': '비디오 포커 · v2.4',
 
     'variant.jacks': '잭 오어 베터',
     'variant.deuces': '듀스 와일드',
@@ -10584,6 +10646,7 @@ vpRegisterLang('ko', {
     'toast.unlockLevel': '🔒 레벨 {{level}}에서 열려요',
     'toast.multiHandUnlock': '🔒 멀티핸드는 레벨 {{level}}에서 열려요',
     'toast.rebuy': '♻ +{{amount}} 크레딧',
+    'toast.dailyBonus': '일일 보너스: +{{amount}} 무료 칩!',
     'toast.noAllInLeft': '⛔ 남은 올인이 없어요 — 내일 다시!',
     'toast.allInGoodLuck': '🔥 올인 — 행운을 빌어요!',
     'toast.statsReset': '통계를 초기화했어요',
@@ -10751,7 +10814,9 @@ vpRegisterLang('zh-CN', {
     'settings.announcements': '公告',
     'settings.enableNotifications': '开启通知',
     'settings.resetStats': '重置统计',
-    'settings.footer': '视频扑克 · v2.1',
+    'settings.rateGame': '给游戏评分',
+    'settings.moreGames': 'Orlov Games 的更多游戏',
+    'settings.footer': '视频扑克 · v2.4',
 
     'variant.jacks': 'J 或更好',
     'variant.deuces': '百搭 2',
@@ -10966,6 +11031,7 @@ vpRegisterLang('zh-CN', {
     'toast.unlockLevel': '🔒 等级 {{level}} 解锁',
     'toast.multiHandUnlock': '🔒 多手模式在等级 {{level}} 解锁',
     'toast.rebuy': '♻ +{{amount}} 积分',
+    'toast.dailyBonus': '每日奖励：+{{amount}} 免费筹码！',
     'toast.noAllInLeft': '⛔ 全下次数已用完 — 明天再来！',
     'toast.allInGoodLuck': '🔥 全下 — 祝你好运！',
     'toast.statsReset': '统计已重置',
@@ -11137,7 +11203,9 @@ vpRegisterLang('he', {
     'settings.announcements': 'הודעות',
     'settings.enableNotifications': 'הפעלת התראות',
     'settings.resetStats': 'איפוס הסטטיסטיקה',
-    'settings.footer': 'וידאו פוקר · v2.1',
+    'settings.rateGame': 'דרגו את המשחק',
+    'settings.moreGames': 'עוד משחקים מבית Orlov Games',
+    'settings.footer': 'וידאו פוקר · v2.4',
 
     'variant.jacks': 'נסיכים ומעלה',
     'variant.deuces': 'Deuces Wild',
@@ -11366,6 +11434,7 @@ vpRegisterLang('he', {
     'toast.unlockLevel': '🔒 נפתח ברמה {{level}}',
     'toast.multiHandUnlock': '🔒 ריבוי ידיים נפתח ברמה {{level}}',
     'toast.rebuy': '♻ ‎+{{amount}} קרדיטים',
+    'toast.dailyBonus': 'בונוס יומי: ‎+{{amount}} צ׳יפים חינם!',
     'toast.noAllInLeft': '⛔ נגמרו ההימורים על הכול — חזרו מחר!',
     'toast.allInGoodLuck': '🔥 הכול — בהצלחה!',
     'toast.statsReset': 'הסטטיסטיקה אופסה',
@@ -11516,7 +11585,9 @@ vpRegisterLang('ar', {
     'settings.announcements': 'الإعلانات',
     'settings.enableNotifications': 'تفعيل الإشعارات',
     'settings.resetStats': 'إعادة ضبط الإحصائيات',
-    'settings.footer': 'فيديو بوكر · v2.1',
+    'settings.rateGame': 'قيّم هذه اللعبة',
+    'settings.moreGames': 'المزيد من الألعاب من Orlov Games',
+    'settings.footer': 'فيديو بوكر · v2.4',
 
     'variant.jacks': 'ولد أو أفضل',
     'variant.deuces': 'Deuces Wild',
@@ -11745,6 +11816,7 @@ vpRegisterLang('ar', {
     'toast.unlockLevel': '🔒 يُفتح عند المستوى {{level}}',
     'toast.multiHandUnlock': '🔒 تعدد الأيدي يُفتح عند المستوى {{level}}',
     'toast.rebuy': '♻ ‎+{{amount}} رصيد',
+    'toast.dailyBonus': 'المكافأة اليومية: ‎+{{amount}} رقاقة مجانية!',
     'toast.noAllInLeft': '⛔ لم تعد لديك رهانات بكل الرصيد — عد غدًا!',
     'toast.allInGoodLuck': '🔥 كل الرصيد — بالتوفيق!',
     'toast.statsReset': 'أُعيد ضبط الإحصائيات',
@@ -12237,6 +12309,12 @@ window.logVpEvent = logVpEvent;
 /* --- js/ui.js --- */
 // Small UI utilities: toast messages + haptic feedback (Settings toggle).
 
+// Local-calendar-day key for once-a-day localStorage records (ALL IN usage,
+// daily bonus). Local, not UTC: the player's day is the one that matters.
+function vpTodayKey() {
+    return new Date().toDateString();
+}
+
 function showToast(text) {
     let el = document.getElementById('vp-toast');
     if (!el) {
@@ -12324,6 +12402,62 @@ function recordAllTimeHand(win, totalBet, streak) {
 function resetAllTimeStats() {
     saveAllTimeStats({ won: 0, lost: 0, handsPlayed: 0, bestStreak: 0 });
 }
+
+
+/* --- js/review.js --- */
+// In-app review prompt (Play In-App Review via @capacitor-community/in-app-review).
+//
+// Asked once, only inside the native app, and only after the player has had a
+// good run: three quality wins (a Straight or better, see draw() in js/game.js)
+// or level 3. The win counter and the "already shown" flag persist in
+// localStorage so the ask never repeats. Play rate-limits the sheet and may
+// silently show nothing, so the call is fire-and-forget on purpose.
+
+const REVIEW_QUALITY_WINS_NEEDED = 3;
+const REVIEW_LEVEL_THRESHOLD = 3;
+// Let the win highlight and toast finish before the review sheet slides up.
+const REVIEW_PROMPT_DELAY_MS = 2600;
+
+function loadReviewState() {
+    try {
+        const raw = JSON.parse(localStorage.getItem('vp_review'));
+        if (raw && typeof raw === 'object') {
+            return { wins: raw.wins || 0, shown: !!raw.shown };
+        }
+    } catch (e) { /* corrupt or unavailable — start fresh */ }
+    return { wins: 0, shown: false };
+}
+
+function saveReviewState(state) {
+    try {
+        localStorage.setItem('vp_review', JSON.stringify(state));
+    } catch (e) { /* localStorage unavailable, silently fail */ }
+}
+
+function requestInAppReview() {
+    const plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.InAppReview;
+    if (!plugin || typeof plugin.requestReview !== 'function') return;
+    try {
+        Promise.resolve(plugin.requestReview()).catch(function() { /* Play declined to show the sheet */ });
+    } catch (e) { /* a synchronous plugin failure must never reach the game loop */ }
+}
+
+// Called from draw() in js/game.js on every Straight-or-better win.
+function vpOnQualityWin() {
+    const prev = loadReviewState();
+    const state = { wins: prev.wins + 1, shown: prev.shown };
+    const level = window.getLocalLevel ? getLocalLevel() : 1;
+    const earned = state.wins >= REVIEW_QUALITY_WINS_NEEDED || level >= REVIEW_LEVEL_THRESHOLD;
+    if (earned && !state.shown && window.isNativeApp && isNativeApp()) {
+        state.shown = true;
+        saveReviewState(state);
+        setTimeout(requestInAppReview, REVIEW_PROMPT_DELAY_MS);
+        return;
+    }
+    saveReviewState(state);
+}
+
+window.vpOnQualityWin = vpOnQualityWin;
 
 
 /* --- js/prng.js --- */
@@ -13161,6 +13295,20 @@ function buildRoomLink(code) {
 
 function getPlayStoreLink() {
     return PLAY_STORE_URL;
+}
+
+const DEVELOPER_PAGE_URL = 'https://play.google.com/store/apps/developer?id=Orlov+Games';
+
+// Settings → Support rows. window.open rather than location.href: inside the
+// native WebView Capacitor hands the URL to the Play app / system browser,
+// and on the web it keeps the game tab alive (same as the share links in
+// js/invite.js).
+function openRateGame() {
+    window.open(PLAY_STORE_URL, '_blank');
+}
+
+function openMoreGames() {
+    window.open(DEVELOPER_PAGE_URL, '_blank');
 }
 
 // --- Deferred deep link: Play Store install referrer -----------------------
@@ -14224,6 +14372,73 @@ if (window.vpOnLanguageChange) {
 document.addEventListener('DOMContentLoaded', renderInviteRewardLine);
 
 
+/* --- js/daily-bonus.js --- */
+// Daily free chips: +200 on the first launch of each local calendar day.
+//
+// Same bookkeeping as the invitee welcome gift (js/referral.js): the chips
+// raise the referral-bonus and daily-net baselines so they never read as
+// winnings on any leaderboard.
+
+const DAILY_BONUS_CHIPS = 200;
+const DAILY_BONUS_KEY = 'vp_daily_bonus';
+
+function loadDailyBonusDate() {
+    try {
+        const raw = JSON.parse(localStorage.getItem(DAILY_BONUS_KEY));
+        return (raw && typeof raw.date === 'string') ? raw.date : '';
+    } catch (e) {
+        return '';
+    }
+}
+
+function saveDailyBonusDate(date) {
+    try {
+        localStorage.setItem(DAILY_BONUS_KEY, JSON.stringify({ date: date }));
+    } catch (e) { /* localStorage unavailable, silently fail */ }
+}
+
+// A device with no saved state yet may be about to receive a cloud restore
+// (js/cloudsave.js), which only happens while the local stack looks untouched.
+// Granting first would make the stack look played and block the restore, so
+// the grant waits; maybeRestoreCloudState() calls back in once it has settled.
+function dailyBonusMustWaitForCloud() {
+    try {
+        if (localStorage.getItem('vp_game_state')) return false;
+    } catch (e) {
+        return false;
+    }
+    return !!(window.localStateIsFresh && localStateIsFresh());
+}
+
+function grantDailyBonus(amount) {
+    balance += amount;
+    referralBonusTotal += amount;
+    saveReferralBonusTotal();
+    if (window.ensureDailyBaseline) {
+        ensureDailyBaseline();
+        dailyProgress.baseline += amount;
+        saveDailyProgress();
+    }
+    const balanceEl = document.getElementById('balance');
+    if (balanceEl) balanceEl.textContent = formatNumber(balance);
+    if (window.saveGameState) saveGameState();
+    if (window.pushNetProfit) pushNetProfit();
+}
+
+// Idempotent per day: safe to call at boot and again after a cloud restore.
+function maybeGrantDailyBonus() {
+    const today = vpTodayKey();
+    if (loadDailyBonusDate() === today) return false;
+    if (dailyBonusMustWaitForCloud()) return false;
+    grantDailyBonus(DAILY_BONUS_CHIPS);
+    saveDailyBonusDate(today);
+    showToast(t('toast.dailyBonus', { amount: formatNumber(DAILY_BONUS_CHIPS) }));
+    return true;
+}
+
+window.maybeGrantDailyBonus = maybeGrantDailyBonus;
+
+
 /* --- js/cloudsave.js --- */
 // Cloud backup of the local chip stack — makes onboarding's "never lose your
 // chips" promise true. localStorage stays the source of truth while playing;
@@ -14280,6 +14495,8 @@ function maybeRestoreCloudState(userDoc) {
     if (!cloud || typeof cloud.balance !== 'number') {
         // Nothing in the cloud yet — seed it from whatever this device holds.
         schedulePushCloudState();
+        // The boot-time grant deferred to this check; nothing to restore, so pay it now.
+        if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
         return;
     }
     if (!localStateIsFresh()) {
@@ -14312,10 +14529,13 @@ function maybeRestoreCloudState(userDoc) {
     if (window.updateStats) updateStats();
     if (window.pushNetProfit) pushNetProfit();
     showToast(t('toast.cloudRestored', { amount: formatNumber(balance) }));
+    // The boot-time grant deferred so it would not block this restore (js/daily-bonus.js).
+    if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
 }
 
 window.schedulePushCloudState = schedulePushCloudState;
 window.maybeRestoreCloudState = maybeRestoreCloudState;
+window.localStateIsFresh = localStateIsFresh;
 
 
 /* --- js/rooms.js --- */
@@ -16593,7 +16813,7 @@ function getAllInDailyLimit() {
 function loadAllInUsage() {
     try {
         const raw = JSON.parse(localStorage.getItem('vp_allin_usage'));
-        allInUsesToday = (raw && raw.date === new Date().toDateString()) ? (raw.count || 0) : 0;
+        allInUsesToday = (raw && raw.date === vpTodayKey()) ? (raw.count || 0) : 0;
     } catch (e) {
         allInUsesToday = 0;
     }
@@ -16610,7 +16830,7 @@ function syncLastPlayedDate() {
 
 function saveAllInUsage() {
     try {
-        localStorage.setItem('vp_allin_usage', JSON.stringify({ date: new Date().toDateString(), count: allInUsesToday }));
+        localStorage.setItem('vp_allin_usage', JSON.stringify({ date: vpTodayKey(), count: allInUsesToday }));
     } catch (e) { /* localStorage unavailable, silently fail */ }
 }
 
@@ -17042,6 +17262,8 @@ function draw() {
     handsPlayed++;
     addLifetimeHand();
     recordAllTimeHand(win, totalBet, winStreak > bestStreak ? winStreak : bestStreak);
+    // A Straight or better counts toward the one-time in-app review ask (js/review.js).
+    if (win > 0 && (HAND_RANK[bestType] || 0) >= 4 && window.vpOnQualityWin) vpOnQualityWin();
 
     if (win > 0) {
         totalWon += win;
@@ -18120,6 +18342,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initSound();
     initVoice();
     initGame();
+    if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
     initSettingsScreen();
     updateHintButtonUI();
     updateAccountUI();
