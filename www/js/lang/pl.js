@@ -96,7 +96,7 @@ vpRegisterLang('pl', {
     'settings.resetStats': 'Zresetuj statystyki',
     'settings.rateGame': 'Oceń tę grę',
     'settings.moreGames': 'Więcej gier od Orlov Games',
-    'settings.footer': 'Wideo Poker · v2.4',
+    'settings.footer': 'Wideo Poker · v2.5',
 
     'variant.jacks': 'Walety lub lepsze',
     'variant.deuces': 'Deuces Wild',

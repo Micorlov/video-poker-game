@@ -99,7 +99,7 @@ vpRegisterLang('he', {
     'settings.resetStats': 'איפוס הסטטיסטיקה',
     'settings.rateGame': 'דרגו את המשחק',
     'settings.moreGames': 'עוד משחקים מבית Orlov Games',
-    'settings.footer': 'וידאו פוקר · v2.4',
+    'settings.footer': 'וידאו פוקר · v2.5',
 
     'variant.jacks': 'נסיכים ומעלה',
     'variant.deuces': 'Deuces Wild',

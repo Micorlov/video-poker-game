@@ -99,7 +99,7 @@ vpRegisterLang('ar', {
     'settings.resetStats': 'إعادة ضبط الإحصائيات',
     'settings.rateGame': 'قيّم هذه اللعبة',
     'settings.moreGames': 'المزيد من الألعاب من Orlov Games',
-    'settings.footer': 'فيديو بوكر · v2.4',
+    'settings.footer': 'فيديو بوكر · v2.5',
 
     'variant.jacks': 'ولد أو أفضل',
     'variant.deuces': 'Deuces Wild',

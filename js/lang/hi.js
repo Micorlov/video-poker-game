@@ -96,7 +96,7 @@ vpRegisterLang('hi', {
     'settings.resetStats': 'आँकड़े रीसेट करें',
     'settings.rateGame': 'इस गेम को रेट करें',
     'settings.moreGames': 'Orlov Games के और गेम',
-    'settings.footer': 'वीडियो पोकर · v2.4',
+    'settings.footer': 'वीडियो पोकर · v2.5',
 
     'variant.jacks': 'जैक या बेहतर',
     'variant.deuces': 'ड्यूसेस वाइल्ड',

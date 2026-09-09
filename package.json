@@ -5,7 +5,8 @@
   "main": "build.js",
   "scripts": {
     "build": "node build.js",
-    "test": "node --test \"scripts/**/*.test.js\""
+    "test": "node --test \"scripts/**/*.test.js\"",
+    "validate:aso": "node scripts/validate-aso.js"
   },
   "repository": {
     "type": "git",

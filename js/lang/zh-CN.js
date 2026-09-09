@@ -95,7 +95,7 @@ vpRegisterLang('zh-CN', {
     'settings.resetStats': '重置统计',
     'settings.rateGame': '给游戏评分',
     'settings.moreGames': 'Orlov Games 的更多游戏',
-    'settings.footer': '视频扑克 · v2.4',
+    'settings.footer': '视频扑克 · v2.5',
 
     'variant.jacks': 'J 或更好',
     'variant.deuces': '百搭 2',

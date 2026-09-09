@@ -57,6 +57,7 @@ function maybeGrantDailyBonus() {
     if (dailyBonusMustWaitForCloud()) return false;
     grantDailyBonus(DAILY_BONUS_CHIPS);
     saveDailyBonusDate(today);
+    if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.dailyBonusClaimed, { amount: DAILY_BONUS_CHIPS });
     showToast(t('toast.dailyBonus', { amount: formatNumber(DAILY_BONUS_CHIPS) }));
     return true;
 }

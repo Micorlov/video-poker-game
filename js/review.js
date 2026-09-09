@@ -44,6 +44,10 @@ function vpOnQualityWin() {
     if (earned && !state.shown && window.isNativeApp && isNativeApp()) {
         state.shown = true;
         saveReviewState(state);
+        if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.reviewPromptEarned, {
+            quality_wins: state.wins,
+            level: level
+        });
         setTimeout(requestInAppReview, REVIEW_PROMPT_DELAY_MS);
         return;
     }

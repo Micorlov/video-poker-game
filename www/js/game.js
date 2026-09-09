@@ -613,6 +613,11 @@ function deal() {
     resultEl.textContent = t('play.handPlaceholder');
     document.getElementById('explanation').innerHTML = '';
     if (window.vpRenderHints) vpRenderHints();
+    if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.handStarted, {
+        variant: gameVariant,
+        hands: multiHandCount,
+        bet: bet
+    });
     triggerHaptic('MEDIUM');
 }
 
@@ -694,6 +699,12 @@ function draw() {
         }
     }
     if (window.pushDailyScore) pushDailyScore(bestType, win, totalBet);
+    if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.handCompleted, {
+        variant: gameVariant,
+        hands: multiHandCount,
+        result: handType,
+        won: win > 0
+    });
     renderMultiHands(extraResults);
     updateStats();
     renderPayouts();

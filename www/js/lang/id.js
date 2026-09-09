@@ -94,7 +94,7 @@ vpRegisterLang('id', {
     'settings.resetStats': 'Setel ulang statistik',
     'settings.rateGame': 'Beri nilai game ini',
     'settings.moreGames': 'Game lain dari Orlov Games',
-    'settings.footer': 'Video Poker · v2.4',
+    'settings.footer': 'Video Poker · v2.5',
 
     'variant.jacks': 'Jack atau lebih',
     'variant.deuces': 'Deuces Wild',

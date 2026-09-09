@@ -68,6 +68,7 @@ const DEVELOPER_PAGE_URL = 'https://play.google.com/store/apps/developer?id=Orlo
 // and on the web it keeps the game tab alive (same as the share links in
 // js/invite.js).
 function openRateGame() {
+    if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.storeLinkOpened, { destination: 'app_listing' });
     window.open(PLAY_STORE_URL, '_blank');
 }
 

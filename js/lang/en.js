@@ -104,7 +104,7 @@ vpRegisterLang('en', {
     'settings.resetStats': 'Reset Statistics',
     'settings.rateGame': 'Rate this game',
     'settings.moreGames': 'More games by Orlov Games',
-    'settings.footer': 'Video Poker · v2.4',
+    'settings.footer': 'Video Poker · v2.5',
 
     // ── Game variants ──
     'variant.jacks': 'Jacks or Better',

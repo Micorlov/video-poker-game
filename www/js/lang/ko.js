@@ -94,7 +94,7 @@ vpRegisterLang('ko', {
     'settings.resetStats': '통계 초기화',
     'settings.rateGame': '이 게임 평가하기',
     'settings.moreGames': 'Orlov Games의 다른 게임',
-    'settings.footer': '비디오 포커 · v2.4',
+    'settings.footer': '비디오 포커 · v2.5',
 
     'variant.jacks': '잭 오어 베터',
     'variant.deuces': '듀스 와일드',

@@ -94,7 +94,7 @@ vpRegisterLang('tr', {
     'settings.resetStats': 'İstatistikleri sıfırla',
     'settings.rateGame': 'Bu oyunu değerlendir',
     'settings.moreGames': 'Orlov Games’ten daha fazla oyun',
-    'settings.footer': 'Video Poker · v2.4',
+    'settings.footer': 'Video Poker · v2.5',
 
     'variant.jacks': 'Vale veya üstü',
     'variant.deuces': 'Deuces Wild',
