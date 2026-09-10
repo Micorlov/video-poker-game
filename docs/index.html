@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Poker: Jacks or Better — Free, No Ads</title>
+
+  <!-- Open Graph / WhatsApp / Twitter -->
+  <meta property="og:type"         content="website" />
+  <meta property="og:url"          content="https://micorlov.github.io/video-poker-game/" />
+  <meta property="og:title"        content="Video Poker: Jacks or Better — Free, No Ads" />
+  <meta property="og:description"  content="Jacks or Better, Deuces Wild, Bonus Poker &amp; Double Bonus — multi-hand play, live leaderboards. 100% free, zero ads." />
+  <meta property="og:image"        content="https://micorlov.github.io/video-poker-game/og-card.png" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:site_name"    content="Video Poker" />
+
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Video Poker: Jacks or Better" />
+  <meta name="twitter:description" content="Free video poker with 4 variants, multi-hand play &amp; live leaderboards. Zero ads." />
+  <meta name="twitter:image"       content="https://micorlov.github.io/video-poker-game/og-card.png" />
+
+  <style>
+    :root {
+      --bg:      #0a0f0e;
+      --surface: #111a17;
+      --border:  rgba(255,255,255,.08);
+      --green:   #22c55e;
+      --gold:    #fbbf24;
+      --text:    #f0fdf4;
+      --muted:   #6b7280;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px 60px;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(34,197,94,.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px 32px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 32px 80px rgba(0,0,0,.6);
+    }
+
+    .icon-wrap {
+      width: 112px; height: 112px;
+      border-radius: 24px;
+      margin: 0 auto 24px;
+      overflow: hidden;
+      box-shadow: 0 0 0 3px var(--green), 0 16px 40px rgba(34,197,94,.35);
+    }
+    .icon-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+    h1 span { color: var(--green); }
+
+    .tagline {
+      color: var(--muted);
+      font-size: .95rem;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .stat {
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: .82rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat .value { color: var(--text); font-weight: 600; }
+    .stat .label { color: var(--muted); }
+    .rank-badge {
+      background: linear-gradient(135deg, rgba(251,191,36,.15), rgba(251,191,36,.05));
+      border: 1px solid rgba(251,191,36,.3);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: .82rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .variants {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .variant {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      text-align: left;
+      font-size: .82rem;
+    }
+    .variant .v-name { font-weight: 600; color: var(--text); }
+    .variant .v-desc { color: var(--muted); font-size: .76rem; margin-top: 2px; }
+
+    .cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--green);
+      color: #000;
+      font-weight: 800;
+      font-size: 1rem;
+      text-decoration: none;
+      border-radius: 14px;
+      padding: 16px 28px;
+      transition: background .2s, transform .15s;
+      box-shadow: 0 8px 24px rgba(34,197,94,.4);
+    }
+    .cta:hover  { background: #16a34a; transform: translateY(-2px); }
+    .cta:active { transform: translateY(0); }
+    .cta svg { width: 22px; height: 22px; flex-shrink: 0; }
+
+    .free-badge {
+      margin-top: 14px;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+    .free-badge strong { color: var(--green); }
+
+    footer {
+      margin-top: 32px;
+      font-size: .72rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    footer a { color: var(--muted); text-decoration: underline; }
+
+    @media (max-width: 400px) {
+      .card { padding: 28px 20px; }
+      h1 { font-size: 1.3rem; }
+      .variants { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="icon-wrap">
+    <img src="icon.png" alt="Video Poker app icon" />
+  </div>
+
+  <h1>Video Poker: <span>Jacks or Better</span></h1>
+  <p class="tagline">4 classic variants · multi-hand play · live leaderboards<br>100% free — zero ads, zero in-app purchases</p>
+
+  <div class="stats">
+    <div class="rank-badge">🏆 Top 5 · "Jacks or Better"</div>
+    <div class="stat">
+      <span>⭐</span>
+      <span class="value" id="stat-rating">New</span>
+      <span class="label">rating</span>
+    </div>
+    <div class="stat">
+      <span>📥</span>
+      <span class="value" id="stat-installs">10+</span>
+      <span class="label">installs</span>
+    </div>
+    <div class="stat">
+      <span>🆙</span>
+      <span class="value" id="stat-version">v2.4</span>
+      <span class="label">latest</span>
+    </div>
+    <div class="stat">
+      <span>🌍</span>
+      <span class="value">16</span>
+      <span class="label">languages</span>
+    </div>
+  </div>
+
+  <div class="variants">
+    <div class="variant">
+      <div class="v-name">♠ Jacks or Better</div>
+      <div class="v-desc">Classic video poker</div>
+    </div>
+    <div class="variant">
+      <div class="v-name">🃏 Deuces Wild</div>
+      <div class="v-desc">Every 2 is wild</div>
+    </div>
+    <div class="variant">
+      <div class="v-name">♣ Bonus Poker</div>
+      <div class="v-desc">Big four-of-a-kind pays</div>
+    </div>
+    <div class="variant">
+      <div class="v-name">♦ Double Bonus</div>
+      <div class="v-desc">High-variance favourite</div>
+    </div>
+  </div>
+
+  <a class="cta" href="https://play.google.com/store/apps/details?id=com.micorlov.videopoker" target="_blank" rel="noopener">
+    <!-- Google Play icon path -->
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4.08 23.76a1.5 1.5 0 0 0 1.25.04l13.45-7.54-2.95-2.96L4.08 23.76z"/>
+      <path d="M.5 1.6A1.5 1.5 0 0 0 0 2.76v17.63c0 .47.23.9.6 1.17L13.34 12 .5 1.6z"/>
+      <path d="M22.31 9.72l-2.98-1.67-3.27 1.84 2.95 2.95 3.3-1.85a1.5 1.5 0 0 0 0-1.27z"/>
+      <path d="M2.08.24C1.67.04 1.23.06.84.28L14.22 13.5l2.95-2.96L2.08.24z"/>
+    </svg>
+    Download on Google Play
+  </a>
+  <p class="free-badge"><strong>Free</strong> · No ads · No purchases · Always</p>
+</div>
+
+<footer>
+  <p>Stats updated: <span id="updated-date">—</span></p>
+  <p style="margin-top:6px"><a href="../privacy-policy.html">Privacy Policy</a></p>
+</footer>
+
+<script>
+  fetch('stats.json')
+    .then(r => r.ok ? r.json() : null)
+    .catch(() => null)
+    .then(s => {
+      if (!s) return;
+      if (s.rating)    document.getElementById('stat-rating').textContent   = s.rating;
+      if (s.installs)  document.getElementById('stat-installs').textContent = s.installs;
+      if (s.version)   document.getElementById('stat-version').textContent  = 'v' + s.version;
+      if (s.updatedAt) document.getElementById('updated-date').textContent  =
+        new Date(s.updatedAt).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+    });
+</script>
+</body>
+</html>

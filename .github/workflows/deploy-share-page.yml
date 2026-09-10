@@ -1,0 +1,54 @@
+name: Deploy Share Page
+
+# Runs on every push to main (or manually).
+# Builds the WhatsApp / social share landing page and deploys it to GitHub Pages.
+# Live URL: https://micorlov.github.io/video-poker-game/
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write    # needed by peaceiris/actions-gh-pages to push to gh-pages branch
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Install canvas (OG image generation)
+        run: npm install canvas --no-save
+
+      # Fetch live stats: rating, version, rough install tier.
+      # Gracefully falls back to static defaults if the secret is absent.
+      - name: Fetch Play Store stats
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: node scripts/fetch-play-stats.js
+
+      # Render a 1200×630 Open Graph card from the stats + app icon
+      - name: Generate OG card image
+        run: node scripts/generate-og-card.js
+
+      # Push the docs/ folder to the gh-pages branch
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          commit_message: 'chore: deploy share page [skip ci]'
