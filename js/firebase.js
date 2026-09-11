@@ -246,6 +246,36 @@ function logUserToFirestore(user) {
     });
 }
 
+var _vpSessionStart = Date.now();
+var _vpSessionHour  = new Date().getHours();
+
+function _vpFlushSession() {
+    if (!db || !auth || !auth.currentUser) return;
+    var dur = Date.now() - _vpSessionStart;
+    if (dur < 10000) return;
+    var uid = auth.currentUser.uid;
+    var update = {
+        totalPlayTimeMs: firebase.firestore.FieldValue.increment(dur),
+        lastSessionMs:   dur,
+        lastSessionHour: _vpSessionHour
+    };
+    update['playHourMap.h' + _vpSessionHour] = firebase.firestore.FieldValue.increment(1);
+    db.collection('users').doc(uid).update(update).catch(function() {});
+}
+
+function _vpResetSession() {
+    _vpSessionStart = Date.now();
+    _vpSessionHour  = new Date().getHours();
+}
+
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden') { _vpFlushSession(); }
+    else { _vpResetSession(); }
+});
+window.addEventListener('pagehide', _vpFlushSession);
+document.addEventListener('pause',  _vpFlushSession);
+document.addEventListener('resume', _vpResetSession);
+
 let _wasSignedIn = false;
 
 if (auth) {

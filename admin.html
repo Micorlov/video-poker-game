@@ -290,9 +290,12 @@
                             <th onclick="sortUsers('netProfit')">Net P&amp;L ↕</th>
                             <th onclick="sortUsers('firstSeen')">First Seen ↕</th>
                             <th onclick="sortUsers('lastLogin')">Last Login ↕</th>
+                            <th onclick="sortUsers('_avgSessionMin')">Avg Session ↕</th>
+                            <th onclick="sortUsers('_handsPerSession')">Hands/Session ↕</th>
+                            <th onclick="sortUsers('_favHour')">Fav Hour ↕</th>
                             <th>Status</th>
                         </tr></thead>
-                        <tbody id="all-users-body"><tr><td colspan="10" class="empty-state">Loading...</td></tr></tbody>
+                        <tbody id="all-users-body"><tr><td colspan="13" class="empty-state">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -411,9 +414,13 @@
                     <div class="panel-header"><h2>🎯 Top Referrers</h2></div>
                     <div id="chart-referrers" style="padding:16px 20px"></div>
                 </div>
-                <div class="panel">
+                <div class="panel" style="margin-bottom:16px">
                     <div class="panel-header"><h2>💰 Balance Histogram</h2></div>
                     <div id="chart-histogram" style="padding:16px 20px"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h2>⏰ When Users Play</h2></div>
+                    <div id="chart-playhours" style="padding:16px 20px"></div>
                 </div>
             </div>
             </div>
@@ -750,6 +757,16 @@
                 var d = doc.data();
                 d._balance = (d.cloudState && d.cloudState.balance) ? parseInt(d.cloudState.balance) : 0;
                 d._hands = (d.cloudState && d.cloudState.handsPlayed) ? parseInt(d.cloudState.handsPlayed) : 0;
+                d._avgSessionMin = (d.totalPlayTimeMs && d.sessionCount)
+                    ? Math.round(d.totalPlayTimeMs / d.sessionCount / 60000) : 0;
+                d._handsPerSession = (d._hands && d.sessionCount)
+                    ? Math.round(d._hands / d.sessionCount) : 0;
+                var phm = d.playHourMap;
+                if (phm && Object.keys(phm).length) {
+                    var bestKey = Object.keys(phm).reduce(function(a, b) { return phm[a] > phm[b] ? a : b; });
+                    var fh = parseInt(bestKey.replace('h', ''), 10);
+                    d._favHour = (fh % 12 || 12) + (fh < 12 ? ' AM' : ' PM');
+                } else { d._favHour = '—'; }
                 allUsersData.push(d);
             });
             document.getElementById('users-count').textContent = allUsersData.length;
@@ -785,7 +802,7 @@
         });
         var tbody = document.getElementById('all-users-body');
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No users found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="13" class="empty-state">No users found</td></tr>';
             return;
         }
         tbody.innerHTML = '';
@@ -812,6 +829,9 @@
                 '<td class="' + netClass + '">' + (d.netProfit != null ? netText : '—') + '</td>' +
                 '<td>' + fs + '</td>' +
                 '<td>' + ll + '</td>' +
+                '<td>' + (d._avgSessionMin ? d._avgSessionMin + ' min' : '—') + '</td>' +
+                '<td>' + (d._handsPerSession || '—') + '</td>' +
+                '<td>' + d._favHour + '</td>' +
                 '<td>' + badge + '</td>';
             tbody.appendChild(tr);
         });
@@ -952,6 +972,7 @@
             renderBestHands(users);
             renderTopReferrers(users);
             renderBalanceHistogram(users);
+            renderPlayHours(users);
         });
     }
 
@@ -1059,6 +1080,24 @@
             return barHtml((u.displayName || '—') + ' [' + code + ']', u.cloudState.referralBonus, max, '#8b5cf6');
         }).join('');
         document.getElementById('chart-referrers').innerHTML = html;
+    }
+
+    function renderPlayHours(users) {
+        var buckets = Array(24).fill(0);
+        users.forEach(function(u) {
+            if (!u.playHourMap) return;
+            Object.keys(u.playHourMap).forEach(function(k) {
+                var h = parseInt(k.replace('h', ''), 10);
+                if (h >= 0 && h < 24) buckets[h] += u.playHourMap[k];
+            });
+        });
+        var max = Math.max.apply(null, buckets) || 1;
+        var labels = ['12 AM','1 AM','2 AM','3 AM','4 AM','5 AM','6 AM','7 AM','8 AM','9 AM','10 AM','11 AM',
+                      '12 PM','1 PM','2 PM','3 PM','4 PM','5 PM','6 PM','7 PM','8 PM','9 PM','10 PM','11 PM'];
+        var html = buckets.map(function(v, i) {
+            return barHtml(labels[i], v, max, '#6366f1');
+        }).join('');
+        document.getElementById('chart-playhours').innerHTML = html || '<p style="color:#64748b">No play-time data yet — data accumulates as users play</p>';
     }
 
     function renderBalanceHistogram(users) {
