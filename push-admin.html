@@ -170,6 +170,7 @@ tr:last-child td { border-bottom: none; }
 
     <div class="tabs">
       <button class="tab active" data-tab="compose" onclick="switchTab('compose')">Compose</button>
+      <button class="tab" data-tab="daily" onclick="switchTab('daily')">Daily campaign</button>
       <button class="tab" data-tab="campaigns" onclick="switchTab('campaigns')">Campaigns</button>
       <button class="tab" data-tab="triggers" onclick="switchTab('triggers')">Triggers &amp; timing</button>
       <button class="tab" data-tab="log" onclick="switchTab('log')">Delivery log</button>
@@ -324,6 +325,116 @@ tr:last-child td { border-bottom: none; }
                 </div>
               </div>
               <div class="hint">Exact styling varies by device. Android shows roughly two lines of body text collapsed; iOS shows four.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= DAILY ================= -->
+    <div class="tab-content" id="tab-daily">
+      <div class="row" style="align-items:flex-start;">
+        <div style="flex:2; min-width:330px;">
+
+          <div class="panel">
+            <div class="panel-header"><h2>New daily campaign</h2></div>
+            <div class="panel-body">
+              <div class="row">
+                <div class="field">
+                  <label for="d-title">Title</label>
+                  <input type="text" id="d-title" maxlength="60" placeholder="Your daily bonus is ready" oninput="renderDailyPreview()">
+                </div>
+                <div class="field" style="flex:0 0 145px;">
+                  <label for="d-time">Send time (your local)</label>
+                  <input type="time" id="d-time" value="20:00" onchange="renderDailyNextRun()">
+                </div>
+              </div>
+              <div class="field">
+                <label for="d-body">Body</label>
+                <textarea id="d-body" maxlength="180" placeholder="Log in now to collect today's free chips." oninput="renderDailyPreview()"></textarea>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="d-deeplink">Opens screen</label>
+                  <select id="d-deeplink">
+                    <option value="">Default (Friends → Rooms)</option>
+                    <option value="play" selected>Play</option>
+                    <option value="stats">Stats</option>
+                    <option value="friends">Friends</option>
+                    <option value="settings">Settings</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="d-category">Category</label>
+                  <select id="d-category" onchange="renderDailyPreview()">
+                    <option value="dailyReminder" selected>dailyReminder</option>
+                    <option value="announcement">announcement</option>
+                    <option value="leaderboard">leaderboard</option>
+                    <option value="social">social</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="d-segment">Audience</label>
+                <select id="d-segment" onchange="renderDailyEstimate()">
+                  <option value="all">Everyone</option>
+                  <option value="activeLast7d">Active — played in the last 7 days</option>
+                  <option value="inactive3d">Lapsing — inactive 3+ days</option>
+                  <option value="inactive7d">Lapsing — inactive 7+ days</option>
+                  <option value="inactive14d">At risk — inactive 14+ days</option>
+                  <option value="lowBalance">Low balance (under 1,000 coins)</option>
+                  <option value="highHands">High engagement (top 10% by hands)</option>
+                </select>
+              </div>
+              <div class="checkline" style="margin-bottom:12px;">
+                <input type="checkbox" id="d-respect" checked onchange="renderDailyEstimate()">
+                <label for="d-respect">Respect muted category preference</label>
+              </div>
+              <div class="estimate" id="d-estimate" style="margin-bottom:16px;">Loading…</div>
+              <div class="hint" id="d-next-run" style="margin-bottom:16px;">—</div>
+
+              <div style="display:flex; align-items:center; gap:14px;">
+                <button class="btn-primary" id="d-queue-btn" onclick="createDailyCampaign()">Create daily campaign</button>
+                <span id="d-status" style="font-size:13px; color:#64748b;"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:0;">
+            <div class="panel-header">
+              <h2>Quick message templates</h2>
+            </div>
+            <div class="tpl-grid" id="d-tpl-grid" style="padding:14px 20px 16px;"></div>
+          </div>
+        </div>
+
+        <div style="flex:1; min-width:250px;">
+          <div class="panel">
+            <div class="panel-header"><h2>Preview</h2></div>
+            <div class="panel-body preview-wrap">
+              <div class="preview-label">Lock screen</div>
+              <div class="notif">
+                <div class="ico">🎰</div>
+                <div class="txt">
+                  <div class="app">Video Poker · now</div>
+                  <div class="t" id="d-pv-title">Your title</div>
+                  <div class="b" id="d-pv-body">Your message body appears here.</div>
+                </div>
+              </div>
+              <div class="hint">Sent every day at the chosen time, indefinitely until paused.</div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:16px;">
+            <div class="panel-header">
+              <h2>Active daily campaigns</h2>
+              <button onclick="loadDailyCampaigns()">↻ Refresh</button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Time</th><th>Message</th><th>Audience</th><th>Status</th><th></th></tr></thead>
+                <tbody id="daily-rows"><tr><td colspan="5" class="empty-state">Loading…</td></tr></tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -512,6 +623,7 @@ function loadAll() {
     loadPollStatus();
     loadDirectory();
     loadCampaigns();
+    loadDailyCampaigns();
     loadSettings();
     loadPushLogs();
     renderPreview();
@@ -527,6 +639,11 @@ function toast(message, isError) {
 function switchTab(name) {
     document.querySelectorAll('.tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === name); });
     document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.toggle('active', c.id === 'tab-' + name); });
+    if (name === 'daily') {
+        renderDailyTemplates();
+        renderDailyEstimate();
+        renderDailyNextRun();
+    }
 }
 
 // Keeps the pill-style radio borders in step with the actual checked input.
@@ -1269,6 +1386,194 @@ function applyTemplate(t) {
     // Scroll to compose form
     document.getElementById('c-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
     toast('Template applied — review and queue');
+}
+
+// ---------- daily campaign ----------
+
+var DAILY_TEMPLATES = [
+    { title: 'Your daily bonus is ready', body: 'Log in now to collect today\'s free chips.', category: 'dailyReminder', segment: 'all' },
+    { title: 'Don\'t break your streak', body: 'You\'re on a roll — keep it going tonight.', category: 'dailyReminder', segment: 'activeLast7d' },
+    { title: 'Tonight\'s tournament is live', body: '50,000 chips on the line. Are you in?', category: 'leaderboard', segment: 'activeLast7d' },
+    { title: 'Your coins are waiting', body: 'You\'ve got chips on the table. Come deal a hand.', category: 'dailyReminder', segment: 'inactive3d' },
+    { title: 'Running low? Here\'s a boost', body: 'Your balance is getting thin. We topped up your account.', category: 'announcement', segment: 'lowBalance' },
+    { title: 'Royal Flush is closer than you think', body: 'One hand away from glory. Your chips are ready.', category: 'dailyReminder', segment: 'all' }
+];
+
+function renderDailyTemplates() {
+    var grid = document.getElementById('d-tpl-grid');
+    if (!grid || grid.children.length) return;
+    DAILY_TEMPLATES.forEach(function(t) {
+        var card = document.createElement('div');
+        card.className = 'tpl-card';
+        card.innerHTML = '<span class="tpl-badge badge-habit">' + t.category + '</span>' +
+            '<div class="tpl-title"></div><div class="tpl-body-text"></div>';
+        card.children[1].textContent = t.title;
+        card.children[2].textContent = t.body;
+        card.onclick = function() {
+            document.getElementById('d-title').value = t.title;
+            document.getElementById('d-body').value = t.body;
+            document.getElementById('d-category').value = t.category;
+            if (t.segment !== 'all') document.getElementById('d-segment').value = t.segment;
+            renderDailyPreview();
+            renderDailyEstimate();
+            toast('Template applied');
+        };
+        grid.appendChild(card);
+    });
+}
+
+function renderDailyPreview() {
+    var title = document.getElementById('d-title').value.trim();
+    var body = document.getElementById('d-body').value.trim();
+    document.getElementById('d-pv-title').textContent = title || 'Your title';
+    document.getElementById('d-pv-body').textContent = body || 'Your message body appears here.';
+    renderDailyEstimate();
+}
+
+function renderDailyEstimate() {
+    var segVal = document.getElementById('d-segment').value;
+    var category = document.getElementById('d-category').value;
+    var respect = document.getElementById('d-respect').checked;
+    var box = document.getElementById('d-estimate');
+
+    var entries;
+    if (segVal === 'all') {
+        entries = tokenIndex;
+    } else {
+        var uids = uidsInSegment(segVal);
+        if (!uids) { box.innerHTML = '<strong>?</strong> — size resolved at send time.'; return; }
+        var inSeg = {};
+        uids.forEach(function(uid) { inSeg[uid] = true; });
+        entries = tokenIndex.filter(function(t) { return inSeg[t.uid]; });
+    }
+
+    var muted = {};
+    if (respect) {
+        allUsers.forEach(function(u) { if (u.notificationPrefs[category] === false) muted[u.uid] = true; });
+    }
+    var eligible = entries.filter(function(t) { return !muted[t.uid]; });
+    var users = {};
+    eligible.forEach(function(t) { users[t.uid] = true; });
+    var mutedOut = entries.length - eligible.length;
+    box.innerHTML = '<strong>' + eligible.length + '</strong> device' + (eligible.length === 1 ? '' : 's') +
+        ' across ' + Object.keys(users).length + ' player' + (Object.keys(users).length === 1 ? '' : 's') +
+        '<div class="sub">' + (mutedOut ? mutedOut + ' device(s) skipped — muted "' + category + '". ' : '') +
+        'Audience re-resolved fresh at each daily send.</div>';
+}
+
+function renderDailyNextRun() {
+    var hint = document.getElementById('d-next-run');
+    hint.textContent = 'First send: ' + calcNextDailyRunAt().toLocaleString() + '. Then every 24 h.';
+}
+
+function calcNextDailyRunAt() {
+    var parts = (document.getElementById('d-time').value || '20:00').split(':');
+    var hour = parseInt(parts[0], 10) || 20;
+    var minute = parseInt(parts[1], 10) || 0;
+    var now = new Date();
+    var target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1);
+    return target;
+}
+
+function createDailyCampaign() {
+    var title = document.getElementById('d-title').value.trim();
+    var body = document.getElementById('d-body').value.trim();
+    var status = document.getElementById('d-status');
+    if (!title || !body) { status.textContent = 'Title and body are required.'; status.style.color = '#f87171'; return; }
+
+    var segVal = document.getElementById('d-segment').value;
+    var audience = segVal === 'all'
+        ? { type: 'all', platform: null, uid: null, segment: null }
+        : { type: 'segment', platform: null, uid: null, segment: segVal };
+
+    var firstRun = calcNextDailyRunAt();
+
+    var payload = {
+        title: title,
+        body: body,
+        deepLink: document.getElementById('d-deeplink').value || null,
+        category: document.getElementById('d-category').value,
+        audience: audience,
+        schedule: {
+            mode: 'recurring',
+            sendAt: null,
+            intervalHours: 24,
+            nextRunAt: firebase.firestore.Timestamp.fromDate(firstRun),
+            lastRunAt: null
+        },
+        respectPrefs: document.getElementById('d-respect').checked,
+        status: 'scheduled',
+        stats: { audienceSize: 0, sent: 0, failed: 0, skipped: 0 },
+        createdBy: (auth.currentUser || {}).email || null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        error: null
+    };
+
+    var btn = document.getElementById('d-queue-btn');
+    btn.disabled = true;
+    status.textContent = 'Creating…';
+    status.style.color = '#fbbf24';
+
+    db.collection(CAMPAIGNS).add(payload).then(function() {
+        btn.disabled = false;
+        status.textContent = 'Daily campaign created — first send ' + firstRun.toLocaleString() + '.';
+        status.style.color = '#4ade80';
+        document.getElementById('d-title').value = '';
+        document.getElementById('d-body').value = '';
+        renderDailyPreview();
+        toast('Daily campaign created');
+        loadDailyCampaigns();
+    }).catch(function(err) {
+        btn.disabled = false;
+        status.textContent = 'Failed: ' + (err.code || err.message);
+        status.style.color = '#f87171';
+    });
+}
+
+var dailyCampaignsUnsub = null;
+
+function loadDailyCampaigns() {
+    if (dailyCampaignsUnsub) dailyCampaignsUnsub();
+    var rows = document.getElementById('daily-rows');
+    dailyCampaignsUnsub = db.collection(CAMPAIGNS)
+        .where('schedule.mode', '==', 'recurring')
+        .where('schedule.intervalHours', '==', 24)
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(function(snap) {
+            rows.innerHTML = '';
+            if (snap.empty) {
+                rows.innerHTML = '<tr><td colspan="5" class="empty-state">No daily campaigns yet</td></tr>';
+                return;
+            }
+            snap.docs.forEach(function(doc) {
+                var c = doc.data();
+                var next = c.schedule && c.schedule.nextRunAt && c.schedule.nextRunAt.toDate
+                    ? c.schedule.nextRunAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : '—';
+                var tr = document.createElement('tr');
+                var tdTime = document.createElement('td');
+                tdTime.textContent = next;
+                tdTime.style.whiteSpace = 'nowrap';
+                tr.appendChild(tdTime);
+                var tdMsg = document.createElement('td');
+                tdMsg.innerHTML = '<div style="font-weight:500;"></div><div style="color:#64748b;font-size:12px;"></div>';
+                tdMsg.children[0].textContent = c.title || '—';
+                tdMsg.children[1].textContent = c.body || '';
+                tr.appendChild(tdMsg);
+                tr.appendChild(cell(audienceLabel(c.audience)));
+                tr.appendChild(cell(c.status || '—', STATUS_COLORS[c.status] || '#94a3b8'));
+                var tdAct = document.createElement('td');
+                tdAct.style.whiteSpace = 'nowrap';
+                if (c.status === 'scheduled') tdAct.appendChild(actionButton('Pause', 'btn-ghost', function() { setCampaignStatus(doc.id, 'paused'); }));
+                if (c.status === 'paused')    tdAct.appendChild(actionButton('Resume', 'btn-ghost', function() { setCampaignStatus(doc.id, 'scheduled'); }));
+                tdAct.appendChild(actionButton('Delete', 'btn-danger', function() { deleteCampaign(doc.id, c.title); }));
+                tr.appendChild(tdAct);
+                rows.appendChild(tr);
+            });
+        }, function(err) {
+            rows.innerHTML = '<tr><td colspan="5" style="color:#f87171;">Error: ' + err.code + '</td></tr>';
+        });
 }
 
 function prefillCompose(c) {
