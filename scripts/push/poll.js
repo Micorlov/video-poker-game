@@ -19,6 +19,19 @@ const { checkGlobalRank } = require('./globalRank');
 const { processCampaigns } = require('./campaigns');
 const { checkBracelets } = require('../bracelets/award');
 
+// Each check is independent — a broken query in one of them (a missing
+// index, a bad doc shape) must not take the others down with it via
+// Promise.all's fail-fast behaviour, and must not skip setCursor() below,
+// which would replay every check — including the ones that already
+// succeeded and already sent pushes — from the same "since" next run.
+async function safeCheck(name, fn) {
+  try {
+    await fn();
+  } catch (err) {
+    console.error(`Push check "${name}" failed:`, err);
+  }
+}
+
 async function poll() {
   const since = await getCursor();
   const pollStartedAt = new Date();
@@ -28,16 +41,16 @@ async function poll() {
   const settings = await loadSettings();
 
   await Promise.all([
-    checkNewFriends(since, settings),
-    checkRoomActivity(since, settings),
-    checkRoomInvites(since, settings),
-    checkHourlyLeaderboard(settings),
-    checkBestHand(since, settings),
-    checkFriendRanks(since, settings),
-    checkDailyProfitRank(settings),
-    checkGlobalRank(settings),
-    processCampaigns(settings),
-    checkBracelets(),
+    safeCheck('newFriends', () => checkNewFriends(since, settings)),
+    safeCheck('roomActivity', () => checkRoomActivity(since, settings)),
+    safeCheck('roomInvites', () => checkRoomInvites(since, settings)),
+    safeCheck('hourlyLeaderboard', () => checkHourlyLeaderboard(settings)),
+    safeCheck('bestHand', () => checkBestHand(since, settings)),
+    safeCheck('friendRanks', () => checkFriendRanks(since, settings)),
+    safeCheck('dailyProfitRank', () => checkDailyProfitRank(settings)),
+    safeCheck('globalRank', () => checkGlobalRank(settings)),
+    safeCheck('campaigns', () => processCampaigns(settings)),
+    safeCheck('bracelets', () => checkBracelets()),
   ]);
 
   await setCursor(pollStartedAt);

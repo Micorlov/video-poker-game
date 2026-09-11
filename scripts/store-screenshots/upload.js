@@ -65,9 +65,13 @@ async function api(token, method, url, body, contentType) {
     }
     jobs.push({ locale: 'en-US', imageType: 'sevenInchScreenshots', dir: path.join(FRAMED, 'tablet7') });
     jobs.push({ locale: 'en-US', imageType: 'tenInchScreenshots', dir: path.join(FRAMED, 'tablet10') });
+    // The 1024x500 feature graphic is rendered by feature.js into play-store-assets/.
+    jobs.push({ locale: 'en-US', imageType: 'featureGraphic', dir: path.join(__dirname, '..', '..', 'play-store-assets'), only: 'feature_graphic.png' });
 
     for (const job of jobs) {
-        const files = fs.readdirSync(job.dir).filter(f => f.endsWith('.png')).sort();
+        const files = job.only
+            ? [job.only]
+            : fs.readdirSync(job.dir).filter(f => f.endsWith('.png')).sort();
         await api(token, 'DELETE', `${API}/edits/${edit.id}/listings/${job.locale}/${job.imageType}`);
         for (const f of files) {
             await api(token, 'POST',

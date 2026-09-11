@@ -1,75 +1,126 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* =========================================================================
-   Royal Video Poker — 2026 "night glass" system.
+   Royal Video Poker — "table felt" system.
 
-   One felt-green action colour, tabular numerals for money, and playing
-   cards as the only bright surface on screen. Everything else is dark
-   glass: low-alpha white fills over a deep green-black ground.
+   A bright, lamp-lit card room rather than a casino at night. The ground is
+   green felt with a lamp hung over the middle of the table; panels are
+   felt-glass (low-alpha *black* over the green, so they read as shadow on
+   cloth rather than frost on a window); and one warm orange carries every
+   call to action. Gold is spent only on money and celebration.
+
+   The inversion that matters versus the old night-glass system: surfaces
+   darken the ground instead of lightening it. On a bright field, a white
+   wash turns to milk and loses its edge — a black wash keeps its shape.
    ========================================================================= */
 
 :root {
-    /* Ground — the casino floor at night, lit from the top of the screen. */
-    --bg-base: #04100C;
-    --bg-mid: #071612;
-    --bg-glow: #123326;
-    --app-bg: radial-gradient(120% 60% at 50% 0%, var(--bg-glow) 0%, var(--bg-mid) 58%, var(--bg-base) 100%);
+    /* Ground — the felt, lit from a lamp above the middle of the table.
+       The glow sits at 38% rather than the top edge, which is what makes it
+       read as a hanging lamp instead of a screen-edge vignette. */
+    --bg-base: #1E6B3C;
+    --bg-mid: #2A8A4E;
+    --bg-glow: #3DA45F;
+    --bg-edge: #14522C;
+    --app-bg: radial-gradient(ellipse 140% 90% at 50% 38%,
+                              var(--bg-glow) 0%,
+                              var(--bg-mid) 52%,
+                              var(--bg-base) 82%,
+                              var(--bg-edge) 100%);
 
-    /* Action colour — the only saturated hue in the chrome. */
-    --green: #16C172;
-    --green-hover: #2FD886;
-    --green-light: #58E39B;
-    --green-ink: #04170E;
-    --green-dim: rgba(22, 193, 114, 0.12);
-    --green-line: rgba(22, 193, 114, 0.32);
-    --green-wash: rgba(207, 245, 225, 0.65);
-    --green-glow: 0 18px 40px -14px rgba(22, 193, 114, 0.85);
+    /* Action colour — the one warm surface on a cool field. Named for its
+       job, not its hue: the felt is the green in this system now. */
+    --action: #F5872E;
+    /* The bare triplet, for the handful of places that need the action hue at
+       an alpha the named tokens don't carry (glows, washes, rings). Keeping it
+       as a variable is what lets the themes below actually retint them. */
+    --action-rgb: 245, 135, 46;
+    --action-hover: #FF9A47;
+    --action-deep: #D96B12;
+    --action-light: #FFB877;
+    --action-ink: #FFFFFF;
+    --action-dim: rgba(245, 135, 46, 0.16);
+    --action-line: rgba(245, 135, 46, 0.45);
+    --action-wash: rgba(90, 43, 5, 0.72);
+    --action-glow: 0 10px 24px -8px rgba(217, 107, 18, 0.6);
+    /* The dark bottom lip that gives a button its pressable thickness. */
+    --action-edge: rgba(90, 43, 5, 0.55);
 
-    /* Reserved for time pressure and scarcity only (timers, entry fees). */
-    --gold: #E9C46A;
-    --gold-600: #D8AE47;
-    --gold-100: #F6E4B8;
-    --gold-dim: rgba(233, 196, 106, 0.1);
-    --gold-line: rgba(233, 196, 106, 0.28);
+    /* Money, rank and celebration — never a call to action. */
+    --gold: #FFC93C;
+    --gold-600: #D99E1B;
+    --gold-100: #FFE9A8;
+    --gold-dim: rgba(255, 201, 60, 0.14);
+    --gold-line: rgba(255, 201, 60, 0.34);
 
-    --red: #FF6BAA;
-    --red-dim: rgba(255, 107, 170, 0.12);
+    /* A destructive control cannot be red ink on a translucent green wash:
+       that pairing is the lowest contrast on the felt and the first thing to
+       go for a red-green colour blind player. Solid dark ground, pale red
+       ink — the difference is in luminance, so it survives without the hue. */
+    --red: #FF5A5F;
+    --red-dim: rgba(255, 90, 95, 0.16);
+    --red-surface: #5E1F22;
+    --red-surface-edge: rgba(255, 90, 95, 0.55);
+    --red-ink: #FFC2C4;
 
-    /* Glass surfaces — alpha over the ground, never an opaque panel. */
-    --surface: rgba(255, 255, 255, 0.04);
-    --surface-raised: rgba(255, 255, 255, 0.055);
-    --surface-hover: rgba(255, 255, 255, 0.09);
-    --border: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.1);
+    /* Felt-glass surfaces — alpha black over the green ground. */
+    --surface: rgba(0, 0, 0, 0.18);
+    --surface-raised: rgba(0, 0, 0, 0.26);
+    --surface-hover: rgba(0, 0, 0, 0.34);
+    --border: rgba(255, 255, 255, 0.16);
+    --border-strong: rgba(255, 255, 255, 0.26);
+    --track: rgba(0, 0, 0, 0.32);
 
-    /* The floating navigation bar reads as frosted glass over the felt. */
-    --nav-glass: rgba(8, 26, 20, 0.84);
-    --nav-border: rgba(255, 255, 255, 0.09);
+    /* The floating navigation bar reads as a shadowed rail on the cloth. */
+    --nav-glass: rgba(11, 58, 32, 0.88);
+    --nav-border: rgba(255, 255, 255, 0.2);
+
+    /* Modals sit on an opaque panel so the scrim behind them reads as depth. */
+    --panel-solid: #175A32;
+    --scrim: rgba(0, 0, 0, 0.55);
+
+    /* Light cards (results, rules) and the ink that sits on them. */
+    --panel-cream: #FFF8EC;
+    --ink-text: #243447;
+    --ink-text-muted: rgba(36, 52, 71, 0.62);
 
     /* Legacy aliases — older rules still reach for these names. */
     --panel: var(--surface);
-    --panel-solid: #0E2019;
-    --felt-900: var(--bg-base);
-    --felt-800: var(--bg-mid);
-    --felt-700: var(--bg-glow);
+    --felt-900: var(--bg-edge);
+    --felt-800: var(--bg-base);
+    --felt-700: var(--bg-mid);
     --felt-600: var(--border-strong);
 
     --text: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.58);
-    --text-faint: rgba(255, 255, 255, 0.4);
-    --text-ghost: rgba(255, 255, 255, 0.32);
+    --text-muted: rgba(255, 255, 255, 0.78);
+    --text-faint: rgba(255, 255, 255, 0.58);
+    /* A bright ground eats faint ink — the ghost tier sits higher here than it
+       would on the old near-black one, or the paytable ticker disappears. */
+    --text-ghost: rgba(255, 255, 255, 0.56);
 
-    /* Cards are the one bright surface — paper white, never tinted. */
-    --card-face-bg: linear-gradient(180deg, #FFFFFF 0%, #EDEFF6 100%);
-    --card-black: #101322;
-    --card-red: #E01B44;
+    /* Cards are ivory stock, not paper white — a bevelled tile with a lit
+       top edge and a shadowed bottom one, so it sits *on* the felt. */
+    --card-face-bg: linear-gradient(180deg, #FFFFFF 0%, #EDE8DA 100%);
+    --card-bevel-top: rgba(255, 255, 255, 0.95);
+    --card-bevel-bottom: rgba(103, 94, 72, 0.55);
+    --card-black: #22242E;
+    --card-red: #C0273A;
+    /* The back borrows a printed deck's red marble, with a pale drawn border
+       where the filigree would sit. */
+    --card-back-bg: linear-gradient(180deg, #B03A4A 0%, #7E2433 100%);
+    --card-back-border: rgba(255, 233, 236, 0.45);
+
+    /* Lifts. Nothing on the felt is flat — everything casts. */
+    --lift-tile: 0 6px 14px -4px rgba(0, 0, 0, 0.4);
+    --lift-pill: 0 3px 8px -2px rgba(0, 0, 0, 0.35);
+    --lift-panel: 0 14px 34px -12px rgba(0, 0, 0, 0.45);
 
     --radius-xl: 26px;
     --radius-lg: 22px;
     --radius-md: 20px;
     --radius-sm: 14px;
     --radius-xs: 12px;
-    --radius-card: 15px;
+    --radius-card: 14px;
 
     --nav-height: 78px;
     --nav-gap: 30px;
@@ -89,38 +140,45 @@
                  sans-serif;
 }
 
-/* --- Blue theme: same night glass, cooler action colour --- */
+/* --- Blue theme: a cooler cloth, and a warm call to action to match it --- */
 body.theme-blue {
-    --bg-base: #040C14;
-    --bg-mid: #07131F;
-    --bg-glow: #12293F;
-    --green: #2E9BF0;
-    --green-hover: #55B4FA;
-    --green-light: #7FCBFF;
-    --green-ink: #04121E;
-    --green-dim: rgba(46, 155, 240, 0.12);
-    --green-line: rgba(46, 155, 240, 0.32);
-    --green-wash: rgba(207, 231, 245, 0.65);
-    --green-glow: 0 18px 40px -14px rgba(46, 155, 240, 0.85);
-    --nav-glass: rgba(8, 20, 32, 0.84);
-    --panel-solid: #0E1A26;
+    --action-rgb: 255, 177, 60;
+    --bg-base: #1B4F7A;
+    --bg-mid: #246A9E;
+    --bg-glow: #3288BF;
+    --bg-edge: #123A5C;
+    --action: #FFB13C;
+    --action-hover: #FFC163;
+    --action-deep: #E08A12;
+    --action-light: #FFD08F;
+    --action-dim: rgba(255, 177, 60, 0.16);
+    --action-line: rgba(255, 177, 60, 0.45);
+    --action-wash: rgba(92, 56, 6, 0.72);
+    --action-glow: 0 10px 24px -8px rgba(224, 138, 18, 0.6);
+    --action-edge: rgba(92, 56, 6, 0.55);
+    --nav-glass: rgba(12, 45, 70, 0.88);
+    --panel-solid: #164468;
 }
 
-/* --- Crimson theme: same night glass, warmer action colour --- */
+/* --- Crimson theme: a burgundy room, lit by a gold call to action --- */
 body.theme-crimson {
-    --bg-base: #140406;
-    --bg-mid: #1D080B;
-    --bg-glow: #3A1218;
-    --green: #E8456A;
-    --green-hover: #F26A88;
-    --green-light: #FF93A9;
-    --green-ink: #1D0409;
-    --green-dim: rgba(232, 69, 106, 0.12);
-    --green-line: rgba(232, 69, 106, 0.32);
-    --green-wash: rgba(245, 214, 221, 0.65);
-    --green-glow: 0 18px 40px -14px rgba(232, 69, 106, 0.85);
-    --nav-glass: rgba(28, 8, 12, 0.84);
-    --panel-solid: #22090D;
+    --action-rgb: 255, 201, 60;
+    --bg-base: #6B1E2E;
+    --bg-mid: #8A2A3D;
+    --bg-glow: #A43D51;
+    --bg-edge: #521421;
+    --action: #FFC93C;
+    --action-hover: #FFD766;
+    --action-deep: #D99E1B;
+    --action-light: #FFE49A;
+    --action-ink: #3A2A02;
+    --action-dim: rgba(255, 201, 60, 0.16);
+    --action-line: rgba(255, 201, 60, 0.45);
+    --action-wash: rgba(72, 52, 4, 0.72);
+    --action-glow: 0 10px 24px -8px rgba(217, 158, 27, 0.6);
+    --action-edge: rgba(90, 66, 6, 0.55);
+    --nav-glass: rgba(58, 16, 26, 0.88);
+    --panel-solid: #5C1A28;
 }
 
 html, body {
@@ -138,8 +196,8 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* The glow is painted behind the scrolling content so it stays anchored to
-   the top of the viewport rather than sliding away with the page. */
+/* The lamp glow is painted behind the scrolling content so it stays anchored
+   to the table rather than sliding away with the page. */
 body::before {
     content: '';
     position: fixed;

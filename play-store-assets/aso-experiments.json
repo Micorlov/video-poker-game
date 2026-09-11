@@ -1,0 +1,73 @@
+{
+  "appId": "com.micorlov.videopoker",
+  "control": {
+    "title": "Video Poker: Jacks or Better",
+    "shortDescription": "Deuces Wild, Bonus Poker, Double Bonus, multi-hand play and live leaderboards"
+  },
+  "experiments": [
+    {
+      "id": "feature-graphic-01",
+      "order": 1,
+      "element": "feature_graphic",
+      "hypothesis": "A gameplay-first hero communicates the product faster than text-first promotion.",
+      "variantAsset": "play-store-assets/feature_graphic.png",
+      "durationDays": 14,
+      "primaryMetric": "store_listing_conversion",
+      "secondaryMetrics": ["impressions", "store_listing_visitors", "installs"]
+    },
+    {
+      "id": "screenshot-sequence-01",
+      "order": 2,
+      "element": "phone_screenshots",
+      "hypothesis": "Showing the core hand, variants, and multi-hand play first improves install intent.",
+      "controlAssets": ["phone_1.png", "phone_2.png", "phone_3.png"],
+      "variantAssets": ["phone_2.png", "phone_3.png", "phone_1.png"],
+      "durationDays": 14,
+      "primaryMetric": "store_listing_conversion",
+      "secondaryMetrics": ["impressions", "installs", "d1_retention"]
+    },
+    {
+      "id": "short-description-01",
+      "order": 3,
+      "element": "short_description",
+      "hypothesis": "Variant-led copy attracts more qualified searchers than social-led copy.",
+      "variants": [
+        {
+          "name": "variant-led",
+          "text": "Deuces Wild, Bonus Poker, Double Bonus, multi-hand play and live leaderboards"
+        },
+        {
+          "name": "social-led",
+          "text": "Play Jacks or Better with friends, multi-hand modes and live leaderboards"
+        },
+        {
+          "name": "free-play-led",
+          "text": "Classic video poker with free chips, no ads, multi-hand play and friends"
+        }
+      ],
+      "durationDays": 14,
+      "primaryMetric": "store_listing_conversion",
+      "secondaryMetrics": ["search_impressions", "installs", "rating_volume"]
+    },
+    {
+      "id": "icon-01",
+      "order": 4,
+      "element": "app_icon",
+      "hypothesis": "The simpler card-and-crown mark is more recognizable at search-result size.",
+      "controlAsset": "play-store-assets/icon_512.png",
+      "candidateAssets": ["video-poker-app-icon-v2.png", "video-poker-app-icon-reference.png"],
+      "durationDays": 14,
+      "primaryMetric": "store_listing_conversion",
+      "secondaryMetrics": ["impressions", "installs"]
+    },
+    {
+      "id": "description-opening-01",
+      "order": 5,
+      "element": "full_description",
+      "hypothesis": "Leading with the no-ads, no-real-money promise clarifies trust before feature depth.",
+      "durationDays": 14,
+      "primaryMetric": "store_listing_conversion",
+      "secondaryMetrics": ["search_impressions", "installs", "d1_retention"]
+    }
+  ]
+}

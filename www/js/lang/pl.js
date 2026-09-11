@@ -94,7 +94,9 @@ vpRegisterLang('pl', {
     'settings.announcements': 'Ogłoszenia',
     'settings.enableNotifications': 'Włącz powiadomienia',
     'settings.resetStats': 'Zresetuj statystyki',
-    'settings.footer': 'Wideo Poker · v2.1',
+    'settings.rateGame': 'Oceń tę grę',
+    'settings.moreGames': 'Więcej gier od Orlov Games',
+    'settings.footer': 'Wideo Poker · v2.5',
 
     'variant.jacks': 'Walety lub lepsze',
     'variant.deuces': 'Deuces Wild',
@@ -279,6 +281,7 @@ vpRegisterLang('pl', {
     'room.membersMeta': '{{count}}/{{capacity}} znajomych · Stawka {{stake}}',
     'room.sendInvites': 'Wyślij zaproszenia',
     'room.sendInvitesCount': 'Wyślij zaproszenia ({{count}})',
+    'room.onlineNowCount': '{{n}} teraz online',
 
     'champ.resetsPlaceholder': 'Reset za —min',
     'champ.noChampionsYet': 'Brak mistrzów w tej godzinie — bądź pierwszy!',
@@ -308,6 +311,7 @@ vpRegisterLang('pl', {
     'toast.unlockLevel': '🔒 Odblokowuje się na poziomie {{level}}',
     'toast.multiHandUnlock': '🔒 Tryb wielu rozdań odblokowuje się na poziomie {{level}}',
     'toast.rebuy': '♻ +{{amount}} kredytów',
+    'toast.dailyBonus': 'Bonus dzienny: +{{amount}} darmowych żetonów!',
     'toast.noAllInLeft': '⛔ Brak all-inów — wróć jutro!',
     'toast.allInGoodLuck': '🔥 ALL IN — powodzenia!',
     'toast.statsReset': 'Statystyki zresetowane',

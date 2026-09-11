@@ -92,7 +92,9 @@ vpRegisterLang('tr', {
     'settings.announcements': 'Duyurular',
     'settings.enableNotifications': 'Bildirimleri aç',
     'settings.resetStats': 'İstatistikleri sıfırla',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Bu oyunu değerlendir',
+    'settings.moreGames': 'Orlov Games’ten daha fazla oyun',
+    'settings.footer': 'Video Poker · v2.5',
 
     'variant.jacks': 'Vale veya üstü',
     'variant.deuces': 'Deuces Wild',
@@ -277,6 +279,7 @@ vpRegisterLang('tr', {
     'room.membersMeta': '{{count}}/{{capacity}} arkadaş · Bahis {{stake}}',
     'room.sendInvites': 'Davetleri gönder',
     'room.sendInvitesCount': 'Davetleri gönder ({{count}})',
+    'room.onlineNowCount': '{{n}} şu an çevrimiçi',
 
     'champ.resetsPlaceholder': '—dk içinde sıfırlanır',
     'champ.noChampionsYet': 'Bu saatte henüz şampiyon yok — ilk sen ol!',
@@ -306,6 +309,7 @@ vpRegisterLang('tr', {
     'toast.unlockLevel': '🔒 {{level}}. seviyede açılır',
     'toast.multiHandUnlock': '🔒 Çoklu el {{level}}. seviyede açılır',
     'toast.rebuy': '♻ +{{amount}} kredi',
+    'toast.dailyBonus': 'Günlük bonus: +{{amount}} ücretsiz çip!',
     'toast.noAllInLeft': '⛔ All in hakkın kalmadı — yarın gel!',
     'toast.allInGoodLuck': '🔥 ALL IN — bol şans!',
     'toast.statsReset': 'İstatistikler sıfırlandı',

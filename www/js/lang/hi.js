@@ -94,7 +94,9 @@ vpRegisterLang('hi', {
     'settings.announcements': 'घोषणाएँ',
     'settings.enableNotifications': 'सूचनाएँ चालू करें',
     'settings.resetStats': 'आँकड़े रीसेट करें',
-    'settings.footer': 'वीडियो पोकर · v2.1',
+    'settings.rateGame': 'इस गेम को रेट करें',
+    'settings.moreGames': 'Orlov Games के और गेम',
+    'settings.footer': 'वीडियो पोकर · v2.5',
 
     'variant.jacks': 'जैक या बेहतर',
     'variant.deuces': 'ड्यूसेस वाइल्ड',
@@ -279,6 +281,7 @@ vpRegisterLang('hi', {
     'room.membersMeta': '{{count}}/{{capacity}} दोस्त · दांव {{stake}}',
     'room.sendInvites': 'न्योते भेजें',
     'room.sendInvitesCount': 'न्योते भेजें ({{count}})',
+    'room.onlineNowCount': '{{n}} अभी ऑनलाइन',
 
     'champ.resetsPlaceholder': '—मि. में रीसेट',
     'champ.noChampionsYet': 'इस घंटे अभी कोई चैंपियन नहीं — पहले आप बनें!',
@@ -308,6 +311,7 @@ vpRegisterLang('hi', {
     'toast.unlockLevel': '🔒 लेवल {{level}} पर खुलता है',
     'toast.multiHandUnlock': '🔒 मल्टी-हैंड लेवल {{level}} पर खुलता है',
     'toast.rebuy': '♻ +{{amount}} क्रेडिट',
+    'toast.dailyBonus': 'दैनिक बोनस: +{{amount}} मुफ़्त चिप्स!',
     'toast.noAllInLeft': '⛔ कोई ऑल इन नहीं बचा — कल आएँ!',
     'toast.allInGoodLuck': '🔥 ऑल इन — शुभकामनाएँ!',
     'toast.statsReset': 'आँकड़े रीसेट हो गए',

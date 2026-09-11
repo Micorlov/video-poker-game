@@ -88,6 +88,7 @@ function addFriendByCode(code) {
                         .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() })
                 ]).then(function() {
                     showToast(t('toast.friendAdded'));
+                    if (window.logVpEvent) logVpEvent('friend_added', { via: 'code' });
                     loadFriends();
                     // invite.html tells a friend to type this code in when the
                     // install swallowed the deep link, so the manual path must
@@ -271,6 +272,8 @@ function handleIncomingInvite() {
             window.history.replaceState({}, '', url);
         }
 
+        if (window.logVpEvent) logVpEvent('invite_link_opened', { kind: 'friend' });
+
         // Store for after sign-in. Persisted as well as parked: the URL has just
         // been cleaned, so a reload before signing in would otherwise lose it.
         window._pendingInviteCode = refCode;
@@ -334,6 +337,7 @@ function addFriendByInviteCode(code) {
                     showToast(newFriendUids.length > 1
                         ? t('toast.connectedViaLink', { count: newFriendUids.length })
                         : t('toast.friendAdded'));
+                    if (window.logVpEvent) logVpEvent('friend_added', { via: 'link', count: newFriendUids.length });
                     loadFriends();
                     // Files the reward row for whoever owns this link. Deliberately
                     // last and unawaited — a failed ledger write must not undo a

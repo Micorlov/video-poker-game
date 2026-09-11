@@ -92,7 +92,9 @@ vpRegisterLang('pt-BR', {
     'settings.announcements': 'Comunicados',
     'settings.enableNotifications': 'Ativar notificações',
     'settings.resetStats': 'Zerar estatísticas',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Avaliar este jogo',
+    'settings.moreGames': 'Mais jogos da Orlov Games',
+    'settings.footer': 'Video Poker · v2.5',
 
     'variant.jacks': 'Valetes ou melhor',
     'variant.deuces': 'Deuces Wild',
@@ -277,6 +279,7 @@ vpRegisterLang('pt-BR', {
     'room.membersMeta': '{{count}}/{{capacity}} amigos · Aposta {{stake}}',
     'room.sendInvites': 'Enviar convites',
     'room.sendInvitesCount': 'Enviar convites ({{count}})',
+    'room.onlineNowCount': '{{n}} online agora',
 
     'champ.resetsPlaceholder': 'Zera em —min',
     'champ.noChampionsYet': 'Nenhum campeão nesta hora ainda — seja o primeiro!',
@@ -306,6 +309,7 @@ vpRegisterLang('pt-BR', {
     'toast.unlockLevel': '🔒 Libera no nível {{level}}',
     'toast.multiHandUnlock': '🔒 Multimão libera no nível {{level}}',
     'toast.rebuy': '♻ +{{amount}} créditos',
+    'toast.dailyBonus': 'Bônus diário: +{{amount}} fichas grátis!',
     'toast.noAllInLeft': '⛔ Sem apostas TUDO — volte amanhã!',
     'toast.allInGoodLuck': '🔥 TUDO — boa sorte!',
     'toast.statsReset': 'Estatísticas zeradas',

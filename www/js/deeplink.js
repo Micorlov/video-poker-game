@@ -61,6 +61,21 @@ function getPlayStoreLink() {
     return PLAY_STORE_URL;
 }
 
+const DEVELOPER_PAGE_URL = 'https://play.google.com/store/apps/developer?id=Orlov+Games';
+
+// Settings → Support rows. window.open rather than location.href: inside the
+// native WebView Capacitor hands the URL to the Play app / system browser,
+// and on the web it keeps the game tab alive (same as the share links in
+// js/invite.js).
+function openRateGame() {
+    if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.storeLinkOpened, { destination: 'app_listing' });
+    window.open(PLAY_STORE_URL, '_blank');
+}
+
+function openMoreGames() {
+    window.open(DEVELOPER_PAGE_URL, '_blank');
+}
+
 // --- Deferred deep link: Play Store install referrer -----------------------
 //
 // The friend who taps an invite without the app installed goes to Play, and the

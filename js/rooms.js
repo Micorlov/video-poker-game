@@ -182,6 +182,7 @@ function _doCreateRoom(name, stake, callback) {
                 netProfit: balance - netProfitBaseline(),
                 bestStreak: bestStreak
             }).then(function() {
+                if (window.logVpEvent) logVpEvent('room_created', { stake: stake });
                 if (callback) callback(code);
                 // Refresh myRooms first so the picker can find the new room,
                 // then go straight into inviting friends.
@@ -229,7 +230,7 @@ function createRoomInline() {
 // this read #room-code-input directly, which forced the deep-link path to stuff
 // the code into a hidden DOM node before calling it — and silently lost the
 // code whenever that input wasn't in the DOM.
-function joinRoomByCode(code) {
+function joinRoomByCode(code, via) {
     const user = window.egUser;
     if (!user) { openSignInModal(); return Promise.resolve(false); }
     code = (code || '').trim().toUpperCase();
@@ -263,7 +264,10 @@ function joinRoomByCode(code) {
 
             return roster.then(function() {
                 closeRoomModal();
-                if (!alreadyMember) showToast(t('toast.joinedRoom', { name: roomName }));
+                if (!alreadyMember) {
+                    showToast(t('toast.joinedRoom', { name: roomName }));
+                    if (window.logVpEvent) logVpEvent('room_joined', { via: via || 'code' });
+                }
                 return loadMyRooms().then(function() {
                     openRoomDetail(roomDoc.id);
                     return true;
@@ -392,11 +396,26 @@ function renderRoomInvitePickerRows(room) {
         return;
     }
 
-    candidates.forEach(function(f) {
+    // Online friends first — someone who could actually play right now is
+    // the best person to invite. Filter is a stable partition, so within each
+    // group friendsList's own net-profit order (js/friends.js) is preserved.
+    function friendIsOnline(f) { return typeof isOnline === 'function' && isOnline(f.lastSeen); }
+    const online = candidates.filter(friendIsOnline);
+    const offline = candidates.filter(function(f) { return !friendIsOnline(f); });
+    if (online.length) {
+        listEl.appendChild(roomEl('div', 'rip-section-label', t('room.onlineNowCount', { n: online.length })));
+    }
+
+    online.concat(offline).forEach(function(f) {
         const invited = !!roomInviteAlreadySent[f.uid];
         const row = roomEl('div', 'rip-row' + (roomInviteSelection[f.uid] ? ' selected' : '') + (invited ? ' invited' : ''));
 
+        const avatarWrap = roomEl('span', 'rip-avatar-wrap');
         const avatar = roomEl('span', 'rip-avatar', (f.displayName || '?').charAt(0).toUpperCase());
+        const dot = roomEl('span', 'online-dot' + (friendIsOnline(f) ? '' : ' offline'));
+        avatarWrap.appendChild(avatar);
+        avatarWrap.appendChild(dot);
+
         const name = roomEl('span', 'rip-name', f.displayName || t('common.player'));
         const check = roomEl('span', 'rip-check', invited ? 'Invited' : (roomInviteSelection[f.uid] ? '✓' : ''));
 
@@ -408,7 +427,7 @@ function renderRoomInvitePickerRows(room) {
             };
         }
 
-        row.appendChild(avatar);
+        row.appendChild(avatarWrap);
         row.appendChild(name);
         row.appendChild(check);
         listEl.appendChild(row);
@@ -444,6 +463,7 @@ function sendRoomInvites() {
             });
         })).then(function() {
             showToast(t('toast.invitesSent'));
+            if (window.logVpEvent) logVpEvent('room_invites_sent', { count: uids.length });
             closeSheet('room-invite-sheet');
             roomInviteSelection = {};
         });
@@ -479,30 +499,42 @@ function cleanupRoomInvites() {
     updateRoomInviteBadges();
 }
 
+// A DOM node can only live in one place, so a fresh banner is built per
+// container rather than appending the same node twice.
+function buildRoomInviteBanner(inv) {
+    const banner = roomEl('div', 'room-invite-banner');
+
+    const text = roomEl('div', 'rib-text');
+    text.appendChild(roomEl('span', 'rib-from', inv.fromName || 'A friend'));
+    text.appendChild(document.createTextNode(' invited you to '));
+    text.appendChild(roomEl('span', 'rib-room', inv.roomName || 'a room'));
+    text.appendChild(roomEl('div', 'rib-meta', 'Buy-in ' + (inv.stake || 10)));
+
+    const actions = roomEl('div', 'rib-actions');
+    const accept = roomEl('button', 'rib-accept', 'Join');
+    accept.onclick = function() { acceptRoomInvite(inv.id); };
+    const decline = roomEl('button', 'rib-decline', 'Decline');
+    decline.onclick = function() { declineRoomInvite(inv.id); };
+    actions.appendChild(accept);
+    actions.appendChild(decline);
+
+    banner.appendChild(text);
+    banner.appendChild(actions);
+    return banner;
+}
+
+// Renders into the Friends -> Poker Rooms tab (original) and into
+// #duel-banners on the Play screen: previously a pending invite was only
+// ever visible if the player happened to open Friends and switch to the
+// Poker Rooms sub-tab, so nobody outside that one screen ever saw one.
 function renderRoomInviteBanners() {
-    const el = document.getElementById('friends-room-invites');
-    if (!el) return;
-    el.innerHTML = '';
-    incomingRoomInvites.forEach(function(inv) {
-        const banner = roomEl('div', 'room-invite-banner');
-
-        const text = roomEl('div', 'rib-text');
-        text.appendChild(roomEl('span', 'rib-from', inv.fromName || 'A friend'));
-        text.appendChild(document.createTextNode(' invited you to '));
-        text.appendChild(roomEl('span', 'rib-room', inv.roomName || 'a room'));
-        text.appendChild(roomEl('div', 'rib-meta', 'Buy-in ' + (inv.stake || 10)));
-
-        const actions = roomEl('div', 'rib-actions');
-        const accept = roomEl('button', 'rib-accept', 'Join');
-        accept.onclick = function() { acceptRoomInvite(inv.id); };
-        const decline = roomEl('button', 'rib-decline', 'Decline');
-        decline.onclick = function() { declineRoomInvite(inv.id); };
-        actions.appendChild(accept);
-        actions.appendChild(decline);
-
-        banner.appendChild(text);
-        banner.appendChild(actions);
-        el.appendChild(banner);
+    ['friends-room-invites', 'duel-banners'].forEach(function(containerId) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        el.innerHTML = '';
+        incomingRoomInvites.forEach(function(inv) {
+            el.appendChild(buildRoomInviteBanner(inv));
+        });
     });
 }
 
@@ -519,15 +551,22 @@ function updateRoomInviteBadges() {
 function acceptRoomInvite(inviteId) {
     const inv = incomingRoomInvites.find(function(i) { return i.id === inviteId; });
     if (!inv) return;
-    joinRoomByCode(inv.roomCode).then(function(ok) {
-        // If the room is gone, joinRoomByCode already toasted — mark the invite
-        // declined either way so the banner doesn't linger.
+    joinRoomByCode(inv.roomCode, 'invite').then(function(result) {
+        // joinRoomByCode resolves exactly three ways: true (joined), false (the
+        // room genuinely no longer exists — a real decline), or null (network
+        // or rules failure via firebaseSafe, already toasted inside
+        // joinRoomByCode). The old code coerced null to "declined" too, so a
+        // transient blip permanently lost the invite — the recipient rule only
+        // allows one pending -> * transition, so it could never be re-accepted.
+        // Leave it pending on null and let the player just retry.
+        if (result === null) return;
         firebaseSafe(function() {
             return db.collection('roomInvites').doc(inviteId).update({
-                status: ok ? 'accepted' : 'declined',
+                status: result ? 'accepted' : 'declined',
                 respondedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         });
+        if (window.logVpEvent) logVpEvent('room_invite_' + (result ? 'accepted' : 'declined'));
     });
 }
 
@@ -538,6 +577,7 @@ function declineRoomInvite(inviteId) {
             respondedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
     });
+    if (window.logVpEvent) logVpEvent('room_invite_declined');
 }
 
 if (window.vpOnLanguageChange) {

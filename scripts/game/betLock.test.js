@@ -14,6 +14,10 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const GAME_JS = path.join(__dirname, '..', '..', 'js', 'game.js');
+// game.js reads PAYTABLES/HAND_RANK/createDeck/evaluateHand/etc. from this
+// sibling module at top level (`let currentPayouts = { ...basePayouts() }`
+// runs at parse time) — it must load before game.js, same as in build.js.
+const HAND_EVAL_JS = path.join(__dirname, '..', '..', 'js', 'hand-eval.js');
 const REFERRAL_JS = path.join(__dirname, '..', '..', 'js', 'referral.js');
 // game.js renders every label through the i18n layer, so the real engine and
 // the English dictionary are loaded here rather than stubbed — a stubbed t()
@@ -137,6 +141,7 @@ function loadGame() {
     // Same order as build.js: i18n first, then its dictionary, then game.js.
     vm.runInContext(fs.readFileSync(I18N_JS, 'utf8'), context, { filename: 'i18n.js' });
     vm.runInContext(fs.readFileSync(LANG_EN_JS, 'utf8'), context, { filename: 'en.js' });
+    vm.runInContext(fs.readFileSync(HAND_EVAL_JS, 'utf8'), context, { filename: 'hand-eval.js' });
     const source = STARTING_BALANCE_DECL + '\n' + fs.readFileSync(GAME_JS, 'utf8') + PROBE;
     vm.runInContext(source, context, { filename: 'game.js' });
     return sandbox;

@@ -50,7 +50,7 @@
  * degrees, so it has to be re-aimed.
  */
 [dir="rtl"] .allin-slider-fill {
-    background: linear-gradient(270deg, rgba(22, 193, 114, 0.35), rgba(22, 193, 114, 0));
+    background: linear-gradient(270deg, rgba(var(--action-rgb), 0.35), rgba(var(--action-rgb), 0));
 }
 
 /* ── Settings toggle knob ──

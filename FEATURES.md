@@ -428,6 +428,25 @@ When the balance can't cover the minimum bet, the game grants **+500 credits** w
 The highest-payout hand ever won is stored locally and mirrored to the player's profile, powering
 both the Stories row and the "best hand" push notification.
 
+### 8.6 Daily Bonus (since 2.4)
+
+`js/daily-bonus.js` grants **+200 free chips** the first time the app opens on a new *local*
+calendar day (`vpTodayKey()`, the same day key the ALL IN allowance uses). The grant runs right
+after `initGame()` and shows a `Daily bonus: +200 free chips!` toast. Bookkeeping mirrors the
+referral welcome gift: the chips are added to `referralBonusTotal` and to the daily net-profit
+baseline, so they never count as winnings on any leaderboard. The paid date is stored in
+`vp_daily_bonus`.
+
+On a device with no saved `vp_game_state` and an untouched stack the grant is deferred (the date
+is *not* marked) so it cannot block a cloud restore; `maybeRestoreCloudState()` calls
+`maybeGrantDailyBonus()` again once the restore has settled (or found nothing to restore).
+
+### 8.7 In-App Review Ask (since 2.4)
+
+`js/review.js` counts quality wins (a Straight or better) in `vp_review`. On the native app, once
+the player has three such wins or reaches level 3, the Play in-app review sheet is requested
+once (`@capacitor-community/in-app-review`, 2.6 s after the winning draw) and never again.
+
 ---
 
 ## 9. Leaderboards & Tournaments
@@ -488,7 +507,7 @@ send (sent / skipped / failed) for the admin delivery log.
 | **Default Bet** | 5 · 10 · 20 · 50 |
 | **Game Variant** | Jacks or Better · Deuces Wild 🔒 · Bonus Poker 🔒 · Double Bonus 🔒 |
 | **Hands per Deal** | 1 Hand · 3× Hands 🔒 · 5× Hands 🔒 |
-| **Support** | Collapsible Payout Table for the active variant |
+| **Support** | Collapsible Payout Table for the active variant · Rate this game › (Play listing) · More games by Orlov Games › (Play developer page) |
 | **Account** | Sign in with Google, or display name + Sign Out |
 | **Notifications** *(when supported)* | Four category toggles + "Enable Notifications ›" |
 | **Danger** | Reset Statistics |
@@ -558,7 +577,7 @@ Security rules are documented in `FIRESTORE_RULES_FRIENDS_ROOMS.md` and
 `vp_game_state` · `vp_default_bet` · `vp_game_variant` · `vp_multi_hands` · `vp_allin_usage` ·
 `vp_lifetime_hands` · `vp_alltime_stats` · `vp_daily_progress` · `vp_best_hand` · `vp_hints` ·
 `vp_theme` · `vp_sound_enabled` · `vp_lang` · `vp_onboarding_seen` ·
-`vp_push_permission_asked` · `vp_visits` · `vp_install_dismissed`
+`vp_push_permission_asked` · `vp_visits` · `vp_install_dismissed` · `vp_review` · `vp_daily_bonus`
 
 ### Automation (GitHub Actions)
 
@@ -577,9 +596,9 @@ Documented from source review — these are observations, not a change request.
 
 1. **Tournament pill is static.** The `⏱ #1 · 26:55` / `🏆 Tournament #2` text is hardcoded; no
    tournament engine exists, though onboarding copy promises tournaments.
-2. **No daily bonus grant.** The "Daily bonus reminder" notification and onboarding bullet exist,
-   but no code awards a daily bonus. The closest mechanics are the free unlimited rebuy and the
-   daily ALL IN charge.
+2. **Daily bonus grant — resolved in 2.4.** `js/daily-bonus.js` now awards +200 free chips on the
+   first launch of each local calendar day (see §8.6), so the "Daily bonus reminder" notification
+   and onboarding bullet finally have a grant behind them.
 3. **Daily periods disagree.** `daily_scores` uses the *local* date; bracelets and hourly boards
    use *UTC*. The two "daily" windows don't align.
 4. **Shared Firestore document.** Bracelet progress (`maxWin`) and champion points (`points`)

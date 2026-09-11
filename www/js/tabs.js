@@ -8,6 +8,7 @@ function showScreen(name) {
         if (nav) nav.classList.toggle('active', s === name);
     });
     if (name === 'stats') renderStatsScreen();
+    if (name === 'leaderboard' && window.logVpEvent) logVpEvent(VP_ASO_EVENTS.leaderboardViewed);
     if (name === 'friends') {
         renderFriendsScreen();
         // Room list is a one-shot .get(); refresh member counts on every visit
@@ -228,10 +229,12 @@ function initNativeDeepLinkHandling() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    if (window.initVpAnalytics) initVpAnalytics();
     applyTheme();
     initSound();
     initVoice();
     initGame();
+    if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
     initSettingsScreen();
     updateHintButtonUI();
     updateAccountUI();

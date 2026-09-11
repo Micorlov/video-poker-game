@@ -94,7 +94,9 @@ vpRegisterLang('ja', {
     'settings.announcements': 'お知らせ',
     'settings.enableNotifications': '通知をオンにする',
     'settings.resetStats': '成績をリセット',
-    'settings.footer': 'ビデオポーカー · v2.1',
+    'settings.rateGame': 'このゲームを評価',
+    'settings.moreGames': 'Orlov Games の他のゲーム',
+    'settings.footer': 'ビデオポーカー · v2.5',
 
     'variant.jacks': 'ジャックス・オア・ベター',
     'variant.deuces': 'デュースワイルド',
@@ -279,6 +281,7 @@ vpRegisterLang('ja', {
     'room.membersMeta': 'フレンド {{count}}/{{capacity}} · レート {{stake}}',
     'room.sendInvites': '招待を送る',
     'room.sendInvitesCount': '招待を送る ({{count}})',
+    'room.onlineNowCount': '現在{{n}}人がオンライン',
 
     'champ.resetsPlaceholder': '—分後にリセット',
     'champ.noChampionsYet': 'この時間帯はまだチャンピオンなし — 一番乗りを狙おう！',
@@ -308,6 +311,7 @@ vpRegisterLang('ja', {
     'toast.unlockLevel': '🔒 レベル{{level}}で解放',
     'toast.multiHandUnlock': '🔒 マルチハンドはレベル{{level}}で解放',
     'toast.rebuy': '♻ +{{amount}} クレジット',
+    'toast.dailyBonus': 'デイリーボーナス：+{{amount}} 無料チップ！',
     'toast.noAllInLeft': '⛔ オールインの残り回数なし — また明日！',
     'toast.allInGoodLuck': '🔥 オールイン — 幸運を！',
     'toast.statsReset': '成績をリセットしました',

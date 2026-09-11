@@ -3,7 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Video Poker</title>
+    <title>Video Poker: Jacks or Better — Free, No Ads</title>
+    <!-- Search and link-preview metadata for the GitHub Pages build. -->
+    <meta name="description" content="Free video poker with no ads and no real money: Jacks or Better, Deuces Wild, Bonus Poker and Double Bonus, multi-hand Triple Play and Five Play, and live leaderboards you can play against friends.">
+    <link rel="canonical" href="https://micorlov.github.io/video-poker-game/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Video Poker: Jacks or Better">
+    <meta property="og:title" content="Video Poker: Jacks or Better — free, no ads">
+    <meta property="og:description" content="Jacks or Better, Deuces Wild, Bonus Poker, Double Bonus and multi-hand video poker. Free chips, no real money, no ads.">
+    <meta property="og:url" content="https://micorlov.github.io/video-poker-game/">
+    <meta property="og:image" content="https://micorlov.github.io/video-poker-game/play-store-assets/feature_graphic.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Video Poker: Jacks or Better — free, no ads">
+    <meta name="twitter:description" content="Four video poker variants, multi-hand, live leaderboards. Free chips, no real money, no ads.">
+    <meta name="twitter:image" content="https://micorlov.github.io/video-poker-game/play-store-assets/feature_graphic.png">
+    <meta name="google-play-app" content="app-id=com.micorlov.videopoker">
     <script>
     // If this page was opened outside the app (e.g. a link tapped in WhatsApp)
     // and carries an invite/join code, try to hand off to the installed app
@@ -27,7 +41,7 @@
     })();
     </script>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#04100C">
+    <meta name="theme-color" content="#1E6B3C">
     <link rel="icon" href="icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,75 +52,126 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* =========================================================================
-   Royal Video Poker — 2026 "night glass" system.
+   Royal Video Poker — "table felt" system.
 
-   One felt-green action colour, tabular numerals for money, and playing
-   cards as the only bright surface on screen. Everything else is dark
-   glass: low-alpha white fills over a deep green-black ground.
+   A bright, lamp-lit card room rather than a casino at night. The ground is
+   green felt with a lamp hung over the middle of the table; panels are
+   felt-glass (low-alpha *black* over the green, so they read as shadow on
+   cloth rather than frost on a window); and one warm orange carries every
+   call to action. Gold is spent only on money and celebration.
+
+   The inversion that matters versus the old night-glass system: surfaces
+   darken the ground instead of lightening it. On a bright field, a white
+   wash turns to milk and loses its edge — a black wash keeps its shape.
    ========================================================================= */
 
 :root {
-    /* Ground — the casino floor at night, lit from the top of the screen. */
-    --bg-base: #04100C;
-    --bg-mid: #071612;
-    --bg-glow: #123326;
-    --app-bg: radial-gradient(120% 60% at 50% 0%, var(--bg-glow) 0%, var(--bg-mid) 58%, var(--bg-base) 100%);
+    /* Ground — the felt, lit from a lamp above the middle of the table.
+       The glow sits at 38% rather than the top edge, which is what makes it
+       read as a hanging lamp instead of a screen-edge vignette. */
+    --bg-base: #1E6B3C;
+    --bg-mid: #2A8A4E;
+    --bg-glow: #3DA45F;
+    --bg-edge: #14522C;
+    --app-bg: radial-gradient(ellipse 140% 90% at 50% 38%,
+                              var(--bg-glow) 0%,
+                              var(--bg-mid) 52%,
+                              var(--bg-base) 82%,
+                              var(--bg-edge) 100%);
 
-    /* Action colour — the only saturated hue in the chrome. */
-    --green: #16C172;
-    --green-hover: #2FD886;
-    --green-light: #58E39B;
-    --green-ink: #04170E;
-    --green-dim: rgba(22, 193, 114, 0.12);
-    --green-line: rgba(22, 193, 114, 0.32);
-    --green-wash: rgba(207, 245, 225, 0.65);
-    --green-glow: 0 18px 40px -14px rgba(22, 193, 114, 0.85);
+    /* Action colour — the one warm surface on a cool field. Named for its
+       job, not its hue: the felt is the green in this system now. */
+    --action: #F5872E;
+    /* The bare triplet, for the handful of places that need the action hue at
+       an alpha the named tokens don't carry (glows, washes, rings). Keeping it
+       as a variable is what lets the themes below actually retint them. */
+    --action-rgb: 245, 135, 46;
+    --action-hover: #FF9A47;
+    --action-deep: #D96B12;
+    --action-light: #FFB877;
+    --action-ink: #FFFFFF;
+    --action-dim: rgba(245, 135, 46, 0.16);
+    --action-line: rgba(245, 135, 46, 0.45);
+    --action-wash: rgba(90, 43, 5, 0.72);
+    --action-glow: 0 10px 24px -8px rgba(217, 107, 18, 0.6);
+    /* The dark bottom lip that gives a button its pressable thickness. */
+    --action-edge: rgba(90, 43, 5, 0.55);
 
-    /* Reserved for time pressure and scarcity only (timers, entry fees). */
-    --gold: #E9C46A;
-    --gold-600: #D8AE47;
-    --gold-100: #F6E4B8;
-    --gold-dim: rgba(233, 196, 106, 0.1);
-    --gold-line: rgba(233, 196, 106, 0.28);
+    /* Money, rank and celebration — never a call to action. */
+    --gold: #FFC93C;
+    --gold-600: #D99E1B;
+    --gold-100: #FFE9A8;
+    --gold-dim: rgba(255, 201, 60, 0.14);
+    --gold-line: rgba(255, 201, 60, 0.34);
 
-    --red: #FF6BAA;
-    --red-dim: rgba(255, 107, 170, 0.12);
+    /* A destructive control cannot be red ink on a translucent green wash:
+       that pairing is the lowest contrast on the felt and the first thing to
+       go for a red-green colour blind player. Solid dark ground, pale red
+       ink — the difference is in luminance, so it survives without the hue. */
+    --red: #FF5A5F;
+    --red-dim: rgba(255, 90, 95, 0.16);
+    --red-surface: #5E1F22;
+    --red-surface-edge: rgba(255, 90, 95, 0.55);
+    --red-ink: #FFC2C4;
 
-    /* Glass surfaces — alpha over the ground, never an opaque panel. */
-    --surface: rgba(255, 255, 255, 0.04);
-    --surface-raised: rgba(255, 255, 255, 0.055);
-    --surface-hover: rgba(255, 255, 255, 0.09);
-    --border: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.1);
+    /* Felt-glass surfaces — alpha black over the green ground. */
+    --surface: rgba(0, 0, 0, 0.18);
+    --surface-raised: rgba(0, 0, 0, 0.26);
+    --surface-hover: rgba(0, 0, 0, 0.34);
+    --border: rgba(255, 255, 255, 0.16);
+    --border-strong: rgba(255, 255, 255, 0.26);
+    --track: rgba(0, 0, 0, 0.32);
 
-    /* The floating navigation bar reads as frosted glass over the felt. */
-    --nav-glass: rgba(8, 26, 20, 0.84);
-    --nav-border: rgba(255, 255, 255, 0.09);
+    /* The floating navigation bar reads as a shadowed rail on the cloth. */
+    --nav-glass: rgba(11, 58, 32, 0.88);
+    --nav-border: rgba(255, 255, 255, 0.2);
+
+    /* Modals sit on an opaque panel so the scrim behind them reads as depth. */
+    --panel-solid: #175A32;
+    --scrim: rgba(0, 0, 0, 0.55);
+
+    /* Light cards (results, rules) and the ink that sits on them. */
+    --panel-cream: #FFF8EC;
+    --ink-text: #243447;
+    --ink-text-muted: rgba(36, 52, 71, 0.62);
 
     /* Legacy aliases — older rules still reach for these names. */
     --panel: var(--surface);
-    --panel-solid: #0E2019;
-    --felt-900: var(--bg-base);
-    --felt-800: var(--bg-mid);
-    --felt-700: var(--bg-glow);
+    --felt-900: var(--bg-edge);
+    --felt-800: var(--bg-base);
+    --felt-700: var(--bg-mid);
     --felt-600: var(--border-strong);
 
     --text: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.58);
-    --text-faint: rgba(255, 255, 255, 0.4);
-    --text-ghost: rgba(255, 255, 255, 0.32);
+    --text-muted: rgba(255, 255, 255, 0.78);
+    --text-faint: rgba(255, 255, 255, 0.58);
+    /* A bright ground eats faint ink — the ghost tier sits higher here than it
+       would on the old near-black one, or the paytable ticker disappears. */
+    --text-ghost: rgba(255, 255, 255, 0.56);
 
-    /* Cards are the one bright surface — paper white, never tinted. */
-    --card-face-bg: linear-gradient(180deg, #FFFFFF 0%, #EDEFF6 100%);
-    --card-black: #101322;
-    --card-red: #E01B44;
+    /* Cards are ivory stock, not paper white — a bevelled tile with a lit
+       top edge and a shadowed bottom one, so it sits *on* the felt. */
+    --card-face-bg: linear-gradient(180deg, #FFFFFF 0%, #EDE8DA 100%);
+    --card-bevel-top: rgba(255, 255, 255, 0.95);
+    --card-bevel-bottom: rgba(103, 94, 72, 0.55);
+    --card-black: #22242E;
+    --card-red: #C0273A;
+    /* The back borrows a printed deck's red marble, with a pale drawn border
+       where the filigree would sit. */
+    --card-back-bg: linear-gradient(180deg, #B03A4A 0%, #7E2433 100%);
+    --card-back-border: rgba(255, 233, 236, 0.45);
+
+    /* Lifts. Nothing on the felt is flat — everything casts. */
+    --lift-tile: 0 6px 14px -4px rgba(0, 0, 0, 0.4);
+    --lift-pill: 0 3px 8px -2px rgba(0, 0, 0, 0.35);
+    --lift-panel: 0 14px 34px -12px rgba(0, 0, 0, 0.45);
 
     --radius-xl: 26px;
     --radius-lg: 22px;
     --radius-md: 20px;
     --radius-sm: 14px;
     --radius-xs: 12px;
-    --radius-card: 15px;
+    --radius-card: 14px;
 
     --nav-height: 78px;
     --nav-gap: 30px;
@@ -126,38 +191,45 @@
                  sans-serif;
 }
 
-/* --- Blue theme: same night glass, cooler action colour --- */
+/* --- Blue theme: a cooler cloth, and a warm call to action to match it --- */
 body.theme-blue {
-    --bg-base: #040C14;
-    --bg-mid: #07131F;
-    --bg-glow: #12293F;
-    --green: #2E9BF0;
-    --green-hover: #55B4FA;
-    --green-light: #7FCBFF;
-    --green-ink: #04121E;
-    --green-dim: rgba(46, 155, 240, 0.12);
-    --green-line: rgba(46, 155, 240, 0.32);
-    --green-wash: rgba(207, 231, 245, 0.65);
-    --green-glow: 0 18px 40px -14px rgba(46, 155, 240, 0.85);
-    --nav-glass: rgba(8, 20, 32, 0.84);
-    --panel-solid: #0E1A26;
+    --action-rgb: 255, 177, 60;
+    --bg-base: #1B4F7A;
+    --bg-mid: #246A9E;
+    --bg-glow: #3288BF;
+    --bg-edge: #123A5C;
+    --action: #FFB13C;
+    --action-hover: #FFC163;
+    --action-deep: #E08A12;
+    --action-light: #FFD08F;
+    --action-dim: rgba(255, 177, 60, 0.16);
+    --action-line: rgba(255, 177, 60, 0.45);
+    --action-wash: rgba(92, 56, 6, 0.72);
+    --action-glow: 0 10px 24px -8px rgba(224, 138, 18, 0.6);
+    --action-edge: rgba(92, 56, 6, 0.55);
+    --nav-glass: rgba(12, 45, 70, 0.88);
+    --panel-solid: #164468;
 }
 
-/* --- Crimson theme: same night glass, warmer action colour --- */
+/* --- Crimson theme: a burgundy room, lit by a gold call to action --- */
 body.theme-crimson {
-    --bg-base: #140406;
-    --bg-mid: #1D080B;
-    --bg-glow: #3A1218;
-    --green: #E8456A;
-    --green-hover: #F26A88;
-    --green-light: #FF93A9;
-    --green-ink: #1D0409;
-    --green-dim: rgba(232, 69, 106, 0.12);
-    --green-line: rgba(232, 69, 106, 0.32);
-    --green-wash: rgba(245, 214, 221, 0.65);
-    --green-glow: 0 18px 40px -14px rgba(232, 69, 106, 0.85);
-    --nav-glass: rgba(28, 8, 12, 0.84);
-    --panel-solid: #22090D;
+    --action-rgb: 255, 201, 60;
+    --bg-base: #6B1E2E;
+    --bg-mid: #8A2A3D;
+    --bg-glow: #A43D51;
+    --bg-edge: #521421;
+    --action: #FFC93C;
+    --action-hover: #FFD766;
+    --action-deep: #D99E1B;
+    --action-light: #FFE49A;
+    --action-ink: #3A2A02;
+    --action-dim: rgba(255, 201, 60, 0.16);
+    --action-line: rgba(255, 201, 60, 0.45);
+    --action-wash: rgba(72, 52, 4, 0.72);
+    --action-glow: 0 10px 24px -8px rgba(217, 158, 27, 0.6);
+    --action-edge: rgba(90, 66, 6, 0.55);
+    --nav-glass: rgba(58, 16, 26, 0.88);
+    --panel-solid: #5C1A28;
 }
 
 html, body {
@@ -175,8 +247,8 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* The glow is painted behind the scrolling content so it stays anchored to
-   the top of the viewport rather than sliding away with the page. */
+/* The lamp glow is painted behind the scrolling content so it stays anchored
+   to the table rather than sliding away with the page. */
 body::before {
     content: '';
     position: fixed;
@@ -265,8 +337,8 @@ button:focus:not(:focus-visible) {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px 2px rgba(22, 193, 114, 0.7);
+    background: var(--action);
+    box-shadow: 0 0 8px 2px rgba(var(--action-rgb), 0.7);
     flex-shrink: 0;
 }
 
@@ -406,8 +478,8 @@ button:focus:not(:focus-visible) {
 }
 
 .nav-btn.active {
-    color: var(--green);
-    background: var(--green-dim);
+    color: var(--action);
+    background: var(--action-dim);
     font-weight: 700;
 }
 
@@ -425,7 +497,7 @@ button:focus:not(:focus-visible) {
    ========================================================================= */
 @media (min-width: 620px) {
     html {
-        background: #05100D;
+        background: var(--bg-edge);
     }
 
     body {
@@ -491,9 +563,9 @@ button:focus:not(:focus-visible) {
 }
 
 .variant-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 .variant-btn.locked {
@@ -530,9 +602,9 @@ button:focus:not(:focus-visible) {
 }
 
 .theme-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 /* --- Multi-hand picker --- */
@@ -555,9 +627,9 @@ button:focus:not(:focus-visible) {
 }
 
 .multi-btn.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 .multi-btn.locked {
@@ -624,7 +696,7 @@ button:focus:not(:focus-visible) {
 }
 
 .payout-value {
-    color: var(--green);
+    color: var(--action);
     font-weight: 700;
 }
 
@@ -634,7 +706,7 @@ button:focus:not(:focus-visible) {
     align-items: center;
     gap: 6px;
     width: 100%;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface);
     border: none;
     border-top: 1px solid var(--border);
     color: var(--text-muted);
@@ -651,12 +723,12 @@ button:focus:not(:focus-visible) {
 }
 
 .payout-help-toggle.open {
-    color: var(--green);
+    color: var(--action);
 }
 
 .payout-help {
     display: none;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--surface);
     border-radius: 8px;
     padding: 10px 12px;
     margin-top: 8px;
@@ -683,7 +755,7 @@ button:focus:not(:focus-visible) {
 }
 
 .payout-help-example {
-    color: var(--green);
+    color: var(--action);
 }
 
 .payout-panel.collapsed .payout-help-toggle,
@@ -733,7 +805,7 @@ button:focus:not(:focus-visible) {
     padding: 9px 14px;
     margin-bottom: 6px;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.035);
+    background: var(--surface);
     border: 1px solid rgba(255, 255, 255, 0.07);
     overflow-x: auto;
     scrollbar-width: none;
@@ -760,11 +832,14 @@ button:focus:not(:focus-visible) {
     margin-top: 18px;
     padding: 14px;
     border-radius: var(--radius-xl);
-    background: var(--nav-glass);
-    border: 1px solid var(--nav-border);
+    /* Felt-glass, not the near-opaque rail the bottom nav uses: this dock sits
+       *in* the page rather than floating over it, so a heavy slab here would
+       cut the table in half. The blur does the legibility work instead. */
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.9);
+    box-shadow: var(--lift-panel);
 }
 
 .total-bet-row {
@@ -810,9 +885,9 @@ button:focus:not(:focus-visible) {
 /* Selection is a ring plus a wash, not a solid fill — the chips stay a row
    of equals and only the Draw button carries a full green surface. */
 .bet-btn.selected {
-    background: rgba(22, 193, 114, 0.22);
+    background: rgba(var(--action-rgb), 0.22);
     border-color: transparent;
-    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    box-shadow: 0 0 0 2px var(--action), 0 12px 26px -12px rgba(var(--action-rgb), 0.9);
     color: var(--text);
 }
 
@@ -822,9 +897,9 @@ button:focus:not(:focus-visible) {
     align-items: center;
     justify-content: center;
     gap: 1px;
-    background: var(--green-dim);
-    border: 1px solid rgba(22, 193, 114, 0.45);
-    color: var(--green-light);
+    background: var(--action-dim);
+    border: 1px solid rgba(var(--action-rgb), 0.45);
+    color: var(--action-light);
 }
 
 .allin-label {
@@ -840,9 +915,9 @@ button:focus:not(:focus-visible) {
 }
 
 .bet-btn-allin.selected {
-    background: rgba(22, 193, 114, 0.22);
+    background: rgba(var(--action-rgb), 0.22);
     border-color: transparent;
-    box-shadow: 0 0 0 2px var(--green), 0 12px 26px -12px rgba(22, 193, 114, 0.9);
+    box-shadow: 0 0 0 2px var(--action), 0 12px 26px -12px rgba(var(--action-rgb), 0.9);
     color: var(--text);
 }
 
@@ -860,8 +935,8 @@ button:focus:not(:focus-visible) {
     height: 64px;
     margin-top: 20px;
     border-radius: var(--radius-md);
-    background: var(--green-dim);
-    border: 1px solid rgba(22, 193, 114, 0.35);
+    background: var(--action-dim);
+    border: 1px solid rgba(var(--action-rgb), 0.35);
     overflow: hidden;
     -webkit-user-select: none;
     user-select: none;
@@ -872,7 +947,7 @@ button:focus:not(:focus-visible) {
     position: absolute;
     inset: 0;
     width: 0;
-    background: linear-gradient(90deg, rgba(22, 193, 114, 0.35), rgba(22, 193, 114, 0));
+    background: linear-gradient(90deg, rgba(var(--action-rgb), 0.35), rgba(var(--action-rgb), 0));
 }
 
 .allin-slider-label {
@@ -883,7 +958,7 @@ button:focus:not(:focus-visible) {
     justify-content: center;
     font-size: 13.5px;
     font-weight: 700;
-    color: var(--green-wash);
+    color: var(--action-wash);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     pointer-events: none;
@@ -896,15 +971,15 @@ button:focus:not(:focus-visible) {
     width: 56px;
     height: 56px;
     border-radius: 16px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-weight: 800;
     font-size: 20px;
-    box-shadow: 0 10px 26px -8px rgba(22, 193, 114, 0.9);
+    box-shadow: 0 10px 26px -8px rgba(var(--action-rgb), 0.9);
     cursor: grab;
     touch-action: none;
     /* JS pins the thumb with `left` or `right` depending on reading
@@ -918,7 +993,7 @@ button:focus:not(:focus-visible) {
 }
 
 .allin-slider-track.confirmed .allin-slider-label {
-    color: var(--green-ink);
+    color: var(--action-ink);
 }
 
 /* --- Hand / cards --- */
@@ -968,41 +1043,59 @@ button:focus:not(:focus-visible) {
     overflow: hidden;
 }
 
-/* Cards are the only bright surface in the app. The face is paper, lifted
-   off the felt by a long shadow rather than a border. */
+/* Cards are the brightest surface in the app: ivory stock on green cloth.
+   The lit top edge and the heavy shadowed bottom one give the tile a real
+   thickness — the same bevel recipe the buttons use, at card scale. */
 .card-front {
     background: var(--card-face-bg);
     color: var(--card-black);
     padding: 7px 8px;
     justify-content: center;
-    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85);
+    border-top: 1.5px solid var(--card-bevel-top);
+    border-bottom: 3px solid var(--card-bevel-bottom);
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5);
 }
 
 .card.red .card-front {
     color: var(--card-red);
 }
 
+/* The back is a printed deck's red marble with a pale drawn border where
+   the filigree would sit. */
 .card-back {
-    background: var(--panel-solid);
-    border: 1px solid var(--border-strong);
-    background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 6px, transparent 6px 12px);
+    background: var(--card-back-bg);
+    border: 1px solid var(--card-back-border);
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5);
     transform: rotateY(180deg);
 }
 
+/* A drawn inner rule, inset from the edge — the filigree frame. */
+.card-back::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1px solid var(--card-back-border);
+    border-radius: 7px;
+    pointer-events: none;
+}
+
 .card.held .card-front {
-    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85),
-                0 0 0 2px var(--green),
-                0 0 22px -2px rgba(22, 193, 114, 0.8);
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5),
+                0 0 0 3px var(--action),
+                0 0 22px -2px var(--action-line);
 }
 
+/* Dim by shading the card, not by making it translucent. Opacity would let
+   the green felt through an ivory face and turn the card green — on the old
+   near-black ground that read as "grey", on this one it reads as a bug. */
 .card.unheld {
-    opacity: 0.55;
+    filter: brightness(0.74) saturate(0.85);
 }
 
-.card.winning .card-front,
-.card.second-pair .card-front,
-.card.third-match .card-front {
-    box-shadow: 0 12px 26px -12px rgba(0, 0, 0, 0.85), 0 0 0 2px var(--green);
+.card.revealed.winning .card-front,
+.card.revealed.second-pair .card-front,
+.card.revealed.third-match .card-front {
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.5), 0 0 0 3px var(--gold);
 }
 
 /* Rank top-left, suit bottom-right: the diagonal reads as a real card even
@@ -1045,15 +1138,23 @@ button:focus:not(:focus-visible) {
     opacity: 0;
 }
 
-.held-badge, .win-badge {
-    background: var(--green);
-    color: var(--green-ink);
+/* Held is a choice you made — action orange. A win is money — gold. */
+.held-badge {
+    background: linear-gradient(180deg, var(--action) 0%, var(--action-deep) 100%);
+    color: var(--action-ink);
+    box-shadow: var(--lift-pill);
+}
+
+.win-badge {
+    background: linear-gradient(180deg, var(--gold) 0%, var(--gold-600) 100%);
+    color: #3A2A02;
+    box-shadow: var(--lift-pill);
 }
 
 .card.held .held-badge,
-.card.winning .win-badge,
-.card.second-pair .win-badge,
-.card.third-match .win-badge {
+.card.revealed.winning .win-badge,
+.card.revealed.second-pair .win-badge,
+.card.revealed.third-match .win-badge {
     opacity: 1;
 }
 
@@ -1095,7 +1196,7 @@ button:focus:not(:focus-visible) {
 .mh-win {
     font-size: 11px;
     font-weight: 800;
-    color: var(--green);
+    color: var(--action);
     margin-inline-start: 4px;
     white-space: nowrap;
 }
@@ -1114,16 +1215,19 @@ button:focus:not(:focus-visible) {
     margin-top: 14px;
 }
 
-/* The single green surface on the screen. Everything else is glass, so the
-   button that spends chips is impossible to mistake for anything else. */
+/* The single warm surface on the screen. Everything else is felt-glass, so
+   the button that spends chips is impossible to mistake for anything else.
+   The dark bottom lip plus the dip on press is what makes a flat rectangle
+   feel like something you actually pushed. */
 .btn-primary, .btn-secondary {
     flex: 1;
-    height: 62px;
+    height: 68px;
     padding: 0 16px;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     border: none;
+    border-bottom: 4px solid var(--action-edge);
     font-family: var(--font-display);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     letter-spacing: -0.01em;
     cursor: pointer;
@@ -1131,7 +1235,7 @@ button:focus:not(:focus-visible) {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    transition: background 0.16s;
+    transition: background 0.16s, transform 0.08s, border-bottom-width 0.08s;
 }
 
 .main-btn-icon {
@@ -1140,18 +1244,28 @@ button:focus:not(:focus-visible) {
 }
 
 .btn-primary, .btn-secondary {
-    background: var(--green);
-    color: var(--green-ink);
-    box-shadow: var(--green-glow);
+    background: linear-gradient(180deg, var(--action) 0%, var(--action-deep) 100%);
+    color: var(--action-ink);
+    box-shadow: var(--action-glow);
 }
 
 .btn-primary:hover:not(:disabled),
 .btn-secondary:hover:not(:disabled) {
-    background: var(--green-hover);
+    background: linear-gradient(180deg, var(--action-hover) 0%, var(--action) 100%);
 }
 
+/* The press eats the bottom lip and drops the face onto it. */
+.btn-primary:active:not(:disabled),
+.btn-secondary:active:not(:disabled) {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+    box-shadow: none;
+}
+
+/* Disabled drops to plain glass: no lip, no glow, nothing to press. */
 .btn-primary:disabled, .btn-secondary:disabled {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--surface-raised);
+    border-bottom-color: transparent;
     color: var(--text-faint);
     box-shadow: none;
 }
@@ -1159,7 +1273,7 @@ button:focus:not(:focus-visible) {
 .hint-btn {
     flex: 0 0 62px;
     height: 62px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-raised);
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-md);
     font-size: 20px;
@@ -1171,7 +1285,7 @@ button:focus:not(:focus-visible) {
 
 .hint-btn.on {
     opacity: 1;
-    box-shadow: 0 0 0 2px var(--green);
+    box-shadow: 0 0 0 2px var(--action);
 }
 
 .card.hint-suggest .card-front {
@@ -1187,7 +1301,7 @@ button:focus:not(:focus-visible) {
 }
 
 .result-panel .win {
-    color: var(--green);
+    color: var(--action);
     font-weight: 800;
     font-family: var(--font-display);
     font-size: 24px;
@@ -1233,7 +1347,7 @@ button:focus:not(:focus-visible) {
     padding: 4px;
     margin-bottom: 14px;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
 }
 
@@ -1250,8 +1364,8 @@ button:focus:not(:focus-visible) {
 }
 
 .stats-toggle-btn.selected {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-weight: 700;
 }
 
@@ -1263,7 +1377,7 @@ button:focus:not(:focus-visible) {
     padding: 3px;
     margin-bottom: 12px;
     border-radius: var(--radius-xs);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-raised);
     border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
@@ -1285,8 +1399,8 @@ button:focus:not(:focus-visible) {
 .lb-tab.hidden { display: none; }
 
 .lb-tab.selected {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-weight: 700;
 }
 
@@ -1317,7 +1431,7 @@ button:focus:not(:focus-visible) {
     margin-top: 4px;
 }
 
-.stats-net-value.positive { color: var(--green); }
+.stats-net-value.positive { color: var(--action); }
 .stats-net-value.negative { color: var(--red); }
 .stats-net-value.zero { color: var(--text); }
 
@@ -1333,7 +1447,7 @@ button:focus:not(:focus-visible) {
     margin-top: 4px;
 }
 
-.stat-tile-value.won { color: var(--green); }
+.stat-tile-value.won { color: var(--action); }
 .stat-tile-value.lost { color: var(--red); }
 
 /* --- Settings screen --- */
@@ -1363,7 +1477,7 @@ button:focus:not(:focus-visible) {
     height: 26px;
     -webkit-appearance: none;
     appearance: none;
-    background: rgba(255, 255, 255, 0.14);
+    background: var(--track);
     border-radius: 999px;
     cursor: pointer;
     outline: none;
@@ -1383,7 +1497,7 @@ button:focus:not(:focus-visible) {
 }
 
 .toggle-switch:checked {
-    background: var(--green);
+    background: var(--action);
 }
 
 .toggle-switch:checked::before {
@@ -1460,8 +1574,8 @@ button:focus:not(:focus-visible) {
 .pwa-bar span { flex: 1; }
 
 .pwa-bar-yes, .pwa-bar-no {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     border: none;
     border-radius: 8px;
     padding: 6px 10px;
@@ -1471,7 +1585,7 @@ button:focus:not(:focus-visible) {
 }
 
 .pwa-bar-no {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-hover);
     color: var(--text);
 }
 
@@ -1489,7 +1603,7 @@ button:focus:not(:focus-visible) {
     align-items: center;
     gap: 12px;
     margin-top: 12px;
-    border: 1px solid var(--green-line);
+    border: 1px solid var(--action-line);
     cursor: pointer;
 }
 
@@ -1498,8 +1612,8 @@ button:focus:not(:focus-visible) {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--green-dim);
-    color: var(--green-light);
+    background: var(--action-dim);
+    color: var(--action-light);
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -1621,7 +1735,7 @@ button:focus:not(:focus-visible) {
 }
 
 .friend-row.me {
-    background: var(--green-dim);
+    background: var(--action-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -1661,8 +1775,8 @@ button:focus:not(:focus-visible) {
 .friend-you-tag {
     font-size: 9px;
     font-weight: 800;
-    color: var(--green-ink);
-    background: var(--green);
+    color: var(--action-ink);
+    background: var(--action);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -1682,7 +1796,7 @@ button:focus:not(:focus-visible) {
     flex: 0 0 auto;
 }
 
-.friend-score.positive { color: var(--green); }
+.friend-score.positive { color: var(--action); }
 .friend-score.negative { color: var(--red); }
 .friend-score.zero { color: var(--text-muted); }
 
@@ -1730,7 +1844,7 @@ button:focus:not(:focus-visible) {
 
 .roomstatus.open {
     background: var(--gold-100);
-    color: var(--green);
+    color: var(--action);
 }
 
 .roomstatus.playing {
@@ -1749,8 +1863,8 @@ button:focus:not(:focus-visible) {
     text-align: center;
     padding: 9px 0;
     border-radius: 8px;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
@@ -1956,7 +2070,7 @@ button:focus:not(:focus-visible) {
     width: 56px;
     height: 56px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--green), var(--green-light));
+    background: linear-gradient(135deg, var(--action), var(--action-light));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2191,7 +2305,7 @@ button:focus:not(:focus-visible) {
 .story-payout {
     font-size: 14px;
     font-weight: 700;
-    color: var(--green);
+    color: var(--action);
     text-align: center;
 }
 
@@ -2226,12 +2340,12 @@ button:focus:not(:focus-visible) {
 .nearby-panel .panel-sub {
     font-size: 10px;
     font-weight: 700;
-    color: var(--green-light);
+    color: var(--action-light);
     letter-spacing: 0.06em;
     padding: 2px 7px;
     border-radius: 6px;
-    background: rgba(22, 193, 114, 0.16);
-    border: 1px solid var(--green-line);
+    background: rgba(var(--action-rgb), 0.16);
+    border: 1px solid var(--action-line);
 }
 
 .champ-countdown {
@@ -2253,7 +2367,7 @@ button:focus:not(:focus-visible) {
 }
 
 .nearby-row.me {
-    background: var(--green-dim);
+    background: var(--action-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -2297,7 +2411,7 @@ button:focus:not(:focus-visible) {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--green);
+    background: var(--action);
     border: 2px solid var(--panel-solid);
 }
 
@@ -2351,7 +2465,7 @@ button:focus:not(:focus-visible) {
     flex-shrink: 0;
 }
 
-.nearby-net.positive { color: var(--green); }
+.nearby-net.positive { color: var(--action); }
 .nearby-net.negative { color: var(--red); }
 .nearby-net.zero     { color: var(--text-muted); }
 
@@ -2392,7 +2506,7 @@ button:focus:not(:focus-visible) {
 
 .mr-status.open {
     background: var(--gold-dim);
-    color: var(--green);
+    color: var(--action);
 }
 
 .mr-status.playing {
@@ -2403,8 +2517,8 @@ button:focus:not(:focus-visible) {
 .mr-join {
     font-size: 12px;
     font-weight: 700;
-    color: var(--green-ink);
-    background: var(--green);
+    color: var(--action-ink);
+    background: var(--action);
     padding: 6px 12px;
     border-radius: 999px;
     cursor: pointer;
@@ -2451,8 +2565,8 @@ button:focus:not(:focus-visible) {
 .invite-pill {
     font-size: 13px;
     font-weight: 700;
-    color: var(--green-ink);
-    background: var(--green);
+    color: var(--action-ink);
+    background: var(--action);
     padding: 8px 14px;
     border-radius: 999px;
     cursor: pointer;
@@ -2472,14 +2586,14 @@ button:focus:not(:focus-visible) {
 
 .sheet {
     width: 100%;
-    background: linear-gradient(180deg, #0E2019 0%, #08130F 100%);
+    background: linear-gradient(180deg, var(--panel-solid) 0%, var(--bg-edge) 100%);
     border-radius: 32px 32px 0 0;
     padding: 20px 18px max(28px, env(safe-area-inset-bottom));
     box-sizing: border-box;
-    box-shadow: 0 -30px 60px -20px rgba(22, 193, 114, 0.35);
+    box-shadow: 0 -30px 60px -20px rgba(var(--action-rgb), 0.35);
     max-width: 460px;
     margin: 0 auto;
-    border-top: 1px solid rgba(22, 193, 114, 0.28);
+    border-top: 1px solid rgba(var(--action-rgb), 0.28);
 }
 
 .sheet-header {
@@ -2539,8 +2653,8 @@ button:focus:not(:focus-visible) {
 .sheet-copy-btn {
     font-size: 12px;
     font-weight: 700;
-    color: var(--green);
-    border: 1px solid var(--green-line);
+    color: var(--action);
+    border: 1px solid var(--action-line);
     padding: 9px 12px;
     border-radius: 10px;
     cursor: pointer;
@@ -2552,9 +2666,9 @@ button:focus:not(:focus-visible) {
 }
 
 .sheet-copy-btn.copied {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 /* Share chips (WhatsApp / Telegram) */
@@ -2664,9 +2778,9 @@ button:focus:not(:focus-visible) {
 }
 
 .inline-room-form .room-form-stake.selected {
-    background: var(--green);
-    border-color: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    border-color: var(--action);
+    color: var(--action-ink);
 }
 
 .inline-room-form .room-form-actions {
@@ -2686,8 +2800,8 @@ button:focus:not(:focus-visible) {
 }
 
 .room-form-create-btn {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
 }
 
 .room-form-cancel-btn {
@@ -2710,7 +2824,7 @@ button:focus:not(:focus-visible) {
 }
 
 .friend-leaderboard-row.me {
-    background: var(--green-dim);
+    background: var(--action-dim);
     border-radius: 10px;
     border-bottom-color: transparent;
 }
@@ -2770,7 +2884,7 @@ button:focus:not(:focus-visible) {
     flex-shrink: 0;
 }
 
-.friend-lb-net.positive { color: var(--green); }
+.friend-lb-net.positive { color: var(--action); }
 .friend-lb-net.negative { color: var(--red); }
 .friend-lb-net.zero     { color: var(--text-muted); }
 
@@ -2805,8 +2919,8 @@ button:focus:not(:focus-visible) {
 .friend-you-tag {
     font-size: 9px;
     font-weight: 700;
-    color: var(--green-ink);
-    background: var(--green);
+    color: var(--action-ink);
+    background: var(--action);
     padding: 2px 6px;
     border-radius: 999px;
 }
@@ -2827,8 +2941,8 @@ button:focus:not(:focus-visible) {
    so your own row is findable without reading a single name. */
 .nearby-row.me .nearby-avatar,
 .friend-leaderboard-row.me .friend-lb-avatar {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
 }
 
 .stories-row:not(:empty) {
@@ -2849,13 +2963,13 @@ button:focus:not(:focus-visible) {
     width: 44px;
     height: 44px;
     border-radius: var(--radius-sm);
-    background: rgba(22, 193, 114, 0.14);
-    border: 1px solid var(--green-line);
+    background: rgba(var(--action-rgb), 0.14);
+    border: 1px solid var(--action-line);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 19px;
-    color: var(--green-light);
+    color: var(--action-light);
 }
 
 .sheet-heading {
@@ -2951,7 +3065,7 @@ button:focus:not(:focus-visible) {
 
 .code-chip:active { transform: scale(0.97); }
 
-.code-chip.copied { border-color: var(--green); }
+.code-chip.copied { border-color: var(--action); }
 
 .code-chip-label {
     font-size: 10px;
@@ -2965,7 +3079,7 @@ button:focus:not(:focus-visible) {
     font-size: 17px;
     font-weight: 800;
     letter-spacing: 0.18em;
-    color: var(--green);
+    color: var(--action);
     font-variant-numeric: tabular-nums;
 }
 
@@ -2974,7 +3088,7 @@ button:focus:not(:focus-visible) {
     color: var(--text-faint);
 }
 
-.code-chip.copied .code-chip-hint { color: var(--green); }
+.code-chip.copied .code-chip-hint { color: var(--action); }
 
 .add-friend-inline {
     flex: 1;
@@ -3003,8 +3117,8 @@ button:focus:not(:focus-visible) {
     margin-inline-start: 6px;
     padding: 1px 5px;
     border-radius: 999px;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-size: 11px;
     font-weight: 800;
     line-height: 15px;
@@ -3021,8 +3135,8 @@ button:focus:not(:focus-visible) {
     min-width: 16px;
     padding: 1px 4px;
     border-radius: 999px;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-size: 10px;
     font-weight: 800;
     line-height: 14px;
@@ -3035,8 +3149,8 @@ button:focus:not(:focus-visible) {
     align-items: center;
     gap: 10px;
     background: var(--surface-raised);
-    border: 1px solid var(--green-line);
-    border-inline-start: 3px solid var(--green);
+    border: 1px solid var(--action-line);
+    border-inline-start: 3px solid var(--action);
     border-radius: var(--radius-sm, 16px);
     padding: 12px 14px;
     margin-bottom: 10px;
@@ -3068,8 +3182,8 @@ button:focus:not(:focus-visible) {
 }
 
 .rib-accept {
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     border: none;
     border-radius: 10px;
     padding: 8px 14px;
@@ -3112,12 +3226,31 @@ button:focus:not(:focus-visible) {
 
 .rip-row.invited { cursor: default; opacity: 0.55; }
 
+/* Online-first grouping in the room-invite friend picker. */
+.rip-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 8px 6px 4px;
+}
+
+.rip-section-label:first-child {
+    padding-top: 2px;
+}
+
+.rip-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
 .rip-avatar {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--green-dim);
-    color: var(--green);
+    background: var(--action-dim);
+    color: var(--action);
     font-size: 14px;
     font-weight: 800;
     display: flex;
@@ -3143,7 +3276,7 @@ button:focus:not(:focus-visible) {
     height: 22px;
     border-radius: 50%;
     border: 1.5px solid var(--border-strong);
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-size: 13px;
     font-weight: 800;
     display: flex;
@@ -3153,8 +3286,8 @@ button:focus:not(:focus-visible) {
 }
 
 .rip-row.selected .rip-check {
-    background: var(--green);
-    border-color: var(--green);
+    background: var(--action);
+    border-color: var(--action);
 }
 
 .rip-row.invited .rip-check {
@@ -3163,8 +3296,8 @@ button:focus:not(:focus-visible) {
     width: auto;
     height: auto;
     padding: 2px 8px;
-    background: var(--green-dim);
-    color: var(--green);
+    background: var(--action-dim);
+    color: var(--action);
     font-size: 11px;
     font-weight: 700;
 }
@@ -3181,8 +3314,8 @@ button:focus:not(:focus-visible) {
     margin-top: 6px;
     padding: 13px 0;
     border-radius: 12px;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     border: none;
     font-size: 14.5px;
     font-weight: 800;
@@ -3211,8 +3344,8 @@ button:focus:not(:focus-visible) {
 /* Native OS share chip alongside WhatsApp/Telegram */
 .share-chip.native {
     background: var(--surface-hover);
-    border: 1px solid var(--green-line);
-    color: var(--green);
+    border: 1px solid var(--action-line);
+    color: var(--action);
 }
 
 /* Small secondary "+ Invite friends" action on room cards */
@@ -3222,8 +3355,8 @@ button:focus:not(:focus-visible) {
     padding: 9px 0;
     border-radius: 10px;
     background: none;
-    border: 1px dashed var(--green-line);
-    color: var(--green);
+    border: 1px dashed var(--action-line);
+    color: var(--action);
     font-size: 12.5px;
     font-weight: 700;
     cursor: pointer;
@@ -3252,7 +3385,7 @@ button:focus:not(:focus-visible) {
     gap: 12px;
     width: 100%;
     padding: 13px 14px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--surface);
     border: 1px solid transparent;
     border-radius: 14px;
     color: var(--text);
@@ -3264,17 +3397,17 @@ button:focus:not(:focus-visible) {
 }
 
 .language-option:active {
-    background: rgba(255, 255, 255, 0.07);
+    background: var(--surface-hover);
 }
 
 .language-option.selected {
-    background: rgba(22, 193, 114, 0.12);
-    border-color: rgba(22, 193, 114, 0.45);
+    background: rgba(var(--action-rgb), 0.12);
+    border-color: rgba(var(--action-rgb), 0.45);
     font-weight: 700;
 }
 
 .language-option-check {
-    color: var(--green);
+    color: var(--action);
     font-size: 15px;
     opacity: 0;
 }
@@ -3438,7 +3571,7 @@ body.screen-shake {
     height: 62px;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-strong);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-raised);
     color: rgba(255, 255, 255, 0.75);
     font-size: 20px;
     cursor: pointer;
@@ -3459,18 +3592,28 @@ body.screen-shake {
     justify-content: center;
 }
 
+/* The same pressable lip the deal button carries — this is the first button
+   a new player ever touches, so it should feel like the rest of the app. */
 .onboarding-nav-arrow--next {
-    background: var(--green);
+    background: linear-gradient(180deg, var(--action) 0%, var(--action-deep) 100%);
     border-color: transparent;
-    color: var(--green-ink);
+    border-bottom: 4px solid var(--action-edge);
+    color: var(--action-ink);
     font-weight: 700;
     font-family: var(--font-display);
     font-size: 20px;
     letter-spacing: -0.01em;
-    box-shadow: var(--green-glow);
+    box-shadow: var(--action-glow);
     flex: 1;
     width: auto;
-    height: 62px;
+    height: 66px;
+    transition: transform 0.08s, border-bottom-width 0.08s;
+}
+
+.onboarding-nav-arrow--next:active {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+    box-shadow: none;
 }
 
 .onboarding-dots {
@@ -3489,7 +3632,7 @@ body.screen-shake {
 
 .onboarding-dot.active {
     width: 22px;
-    background: var(--green);
+    background: var(--action);
     height: 5px;
 }
 
@@ -3550,7 +3693,7 @@ body.screen-shake {
     align-items: stretch;
     padding: 13px;
     z-index: 3;
-    box-shadow: 0 26px 50px -18px rgba(0, 0, 0, 0.95), 0 0 0 2px rgba(22, 193, 114, 0.55);
+    box-shadow: 0 26px 50px -18px rgba(0, 0, 0, 0.95), 0 0 0 2px rgba(var(--action-rgb), 0.55);
 }
 
 /* The centre card carries the corner layout of a real card face. */
@@ -3682,8 +3825,8 @@ body.screen-shake {
 }
 
 .ob-hand-row--highlight {
-    border-color: rgba(22, 193, 114, 0.3);
-    background: rgba(22, 193, 114, 0.1);
+    border-color: rgba(var(--action-rgb), 0.3);
+    background: rgba(var(--action-rgb), 0.1);
 }
 
 .ob-hand-cards {
@@ -3809,8 +3952,8 @@ body.screen-shake {
     top: -9px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-size: 8px;
     font-weight: 800;
     letter-spacing: 0.06em;
@@ -3822,10 +3965,10 @@ body.screen-shake {
 .ob-mockup-draw-btn {
     width: 100%;
     padding: 11px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     border-radius: var(--radius-sm);
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-size: 15px;
     font-weight: 700;
     margin-bottom: 10px;
@@ -3858,17 +4001,17 @@ body.screen-shake {
 }
 
 .ob-mockup-bet--active {
-    background: rgba(22, 193, 114, 0.22);
+    background: rgba(var(--action-rgb), 0.22);
     color: var(--text);
-    box-shadow: 0 0 0 2px var(--green);
+    box-shadow: 0 0 0 2px var(--action);
     border-color: transparent;
 }
 
 .ob-mockup-bet--allin {
-    background: var(--green-dim);
-    color: var(--green-light);
+    background: var(--action-dim);
+    color: var(--action-light);
     position: relative;
-    border: 1px solid rgba(22, 193, 114, 0.45);
+    border: 1px solid rgba(var(--action-rgb), 0.45);
     flex-direction: column;
     gap: 1px;
     display: flex;
@@ -3906,7 +4049,7 @@ body.screen-shake {
     margin-bottom: 14px;
     padding: 4px;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
 }
 
@@ -3928,9 +4071,9 @@ body.screen-shake {
 }
 
 .ob-lb-tab--active {
-    background: var(--green);
+    background: var(--action);
     border-color: transparent;
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-weight: 700;
 }
 
@@ -3968,7 +4111,7 @@ body.screen-shake {
 }
 
 .ob-lb-row--you {
-    background: rgba(22, 193, 114, 0.12);
+    background: rgba(var(--action-rgb), 0.12);
     border: 1px solid rgba(62, 198, 160, 0.25);
 }
 
@@ -3984,8 +4127,8 @@ body.screen-shake {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-size: 13px;
     font-weight: 800;
     display: flex;
@@ -4078,12 +4221,12 @@ body.screen-shake {
     width: 22px;
     height: 22px;
     border-radius: 7px;
-    background: rgba(22, 193, 114, 0.18);
+    background: rgba(var(--action-rgb), 0.18);
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--green-light);
+    color: var(--action-light);
     font-size: 13px;
     font-weight: 800;
 }
@@ -4092,16 +4235,16 @@ body.screen-shake {
     width: 100%;
     max-width: 300px;
     padding: 16px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     border-radius: var(--radius-md);
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
     font-family: var(--font-display);
-    box-shadow: var(--green-glow);
+    box-shadow: var(--action-glow);
 }
 
 /* A quiet decline — the design never competes with its own primary action. */
@@ -4152,16 +4295,16 @@ body.screen-shake {
     width: 100%;
     max-width: 340px;
     padding: 0 16px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     border-radius: var(--radius-md);
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
     font-family: var(--font-display);
-    box-shadow: var(--green-glow);
+    box-shadow: var(--action-glow);
     height: 62px;
 }
 
@@ -4195,7 +4338,7 @@ body.screen-shake {
 }
 
 .ob-hand-row--highlight .ob-hand-payout {
-    color: var(--green-light);
+    color: var(--action-light);
 }
 
 /* ── Language chip (welcome step) ──
@@ -4212,7 +4355,7 @@ body.screen-shake {
     gap: 6px;
     max-width: 46vw;
     padding: 7px 12px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--surface-raised);
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 999px;
     color: var(--text);
@@ -4227,7 +4370,7 @@ body.screen-shake {
 }
 
 .ob-lang-chip:active {
-    background: rgba(255, 255, 255, 0.14);
+    background: var(--surface-hover);
 }
 
 .ob-lang-globe {
@@ -4294,7 +4437,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
  * degrees, so it has to be re-aimed.
  */
 [dir="rtl"] .allin-slider-fill {
-    background: linear-gradient(270deg, rgba(22, 193, 114, 0.35), rgba(22, 193, 114, 0));
+    background: linear-gradient(270deg, rgba(var(--action-rgb), 0.35), rgba(var(--action-rgb), 0));
 }
 
 /* ── Settings toggle knob ──
@@ -4378,6 +4521,11 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                 <span data-i18n="play.tournamentExpand">🏆 Tournament #2</span>
                 <span>09:26:55</span>
             </div>
+
+            <!-- Incoming poker-room invites, mirrored here from the Friends -> Poker
+                 Rooms tab (js/rooms.js renderRoomInviteBanners) so they are visible
+                 on the screen where all session time is actually spent. -->
+            <div id="duel-banners"></div>
 
             <!-- Phase 2: Stories row -->
             <div class="stories-row" id="stories-row"></div>
@@ -4636,6 +4784,16 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                 </button>
                 <div class="payouts" id="payouts"></div>
             </div>
+            <div class="panel">
+                <div class="settings-row" id="settings-rate-game" onclick="openRateGame()" style="cursor:pointer;">
+                    <span class="settings-row-label" data-i18n="settings.rateGame">Rate this game</span>
+                    <span class="settings-chevron">›</span>
+                </div>
+                <div class="settings-row" id="settings-more-games" onclick="openMoreGames()" style="cursor:pointer;">
+                    <span class="settings-row-label" data-i18n="settings.moreGames">More games by Orlov Games</span>
+                    <span class="settings-chevron">›</span>
+                </div>
+            </div>
 
             <div class="section-label" data-i18n="settings.account">Account</div>
             <div class="panel">
@@ -4681,7 +4839,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
 
             <button class="btn-danger" id="settings-reset-stats" data-i18n="settings.resetStats">Reset Statistics</button>
 
-            <div class="settings-footer" data-i18n="settings.footer">Video Poker · v2.1</div>
+            <div class="settings-footer" data-i18n="settings.footer">Video Poker · v2.5</div>
         </section>
     </div>
 
@@ -5624,7 +5782,9 @@ vpRegisterLang('en', {
     'settings.announcements': 'Announcements',
     'settings.enableNotifications': 'Enable Notifications',
     'settings.resetStats': 'Reset Statistics',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Rate this game',
+    'settings.moreGames': 'More games by Orlov Games',
+    'settings.footer': 'Video Poker · v2.5',
 
     // ── Game variants ──
     'variant.jacks': 'Jacks or Better',
@@ -5823,6 +5983,7 @@ vpRegisterLang('en', {
     'room.membersMeta': '{{count}}/{{capacity}} friends · Stake {{stake}}',
     'room.sendInvites': 'Send Invites',
     'room.sendInvitesCount': 'Send Invites ({{count}})',
+    'room.onlineNowCount': '{{n}} online now',
 
     // ── Hourly champions ──
     'champ.resetsPlaceholder': 'Resets in —m',
@@ -5859,6 +6020,7 @@ vpRegisterLang('en', {
     'toast.unlockLevel': '🔒 Unlocks at level {{level}}',
     'toast.multiHandUnlock': '🔒 Multi-hand unlocks at level {{level}}',
     'toast.rebuy': '♻ +{{amount}} credits',
+    'toast.dailyBonus': 'Daily bonus: +{{amount}} free chips!',
     'toast.noAllInLeft': '⛔ No ALL INs left — back tomorrow!',
     'toast.allInGoodLuck': '🔥 ALL IN — good luck!',
     'toast.statsReset': 'Statistics reset',
@@ -6033,7 +6195,9 @@ vpRegisterLang('es', {
     'settings.announcements': 'Anuncios',
     'settings.enableNotifications': 'Activar notificaciones',
     'settings.resetStats': 'Restablecer estadísticas',
-    'settings.footer': 'Video Póker · v2.1',
+    'settings.rateGame': 'Valorar este juego',
+    'settings.moreGames': 'Más juegos de Orlov Games',
+    'settings.footer': 'Video Póker · v2.5',
 
     'variant.jacks': 'Jotas o mejor',
     'variant.deuces': 'Deuces Wild',
@@ -6218,6 +6382,7 @@ vpRegisterLang('es', {
     'room.membersMeta': '{{count}}/{{capacity}} amigos · Apuesta {{stake}}',
     'room.sendInvites': 'Enviar invitaciones',
     'room.sendInvitesCount': 'Enviar invitaciones ({{count}})',
+    'room.onlineNowCount': '{{n}} en línea ahora',
 
     'champ.resetsPlaceholder': 'Se reinicia en —min',
     'champ.noChampionsYet': 'Aún no hay campeones esta hora — ¡sé el primero!',
@@ -6247,6 +6412,7 @@ vpRegisterLang('es', {
     'toast.unlockLevel': '🔒 Se desbloquea en el nivel {{level}}',
     'toast.multiHandUnlock': '🔒 El multimano se desbloquea en el nivel {{level}}',
     'toast.rebuy': '♻ +{{amount}} créditos',
+    'toast.dailyBonus': 'Bono diario: ¡+{{amount}} fichas gratis!',
     'toast.noAllInLeft': '⛔ No te quedan apuestas TODO — ¡vuelve mañana!',
     'toast.allInGoodLuck': '🔥 TODO — ¡buena suerte!',
     'toast.statsReset': 'Estadísticas restablecidas',
@@ -6413,7 +6579,9 @@ vpRegisterLang('pt-BR', {
     'settings.announcements': 'Comunicados',
     'settings.enableNotifications': 'Ativar notificações',
     'settings.resetStats': 'Zerar estatísticas',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Avaliar este jogo',
+    'settings.moreGames': 'Mais jogos da Orlov Games',
+    'settings.footer': 'Video Poker · v2.5',
 
     'variant.jacks': 'Valetes ou melhor',
     'variant.deuces': 'Deuces Wild',
@@ -6598,6 +6766,7 @@ vpRegisterLang('pt-BR', {
     'room.membersMeta': '{{count}}/{{capacity}} amigos · Aposta {{stake}}',
     'room.sendInvites': 'Enviar convites',
     'room.sendInvitesCount': 'Enviar convites ({{count}})',
+    'room.onlineNowCount': '{{n}} online agora',
 
     'champ.resetsPlaceholder': 'Zera em —min',
     'champ.noChampionsYet': 'Nenhum campeão nesta hora ainda — seja o primeiro!',
@@ -6627,6 +6796,7 @@ vpRegisterLang('pt-BR', {
     'toast.unlockLevel': '🔒 Libera no nível {{level}}',
     'toast.multiHandUnlock': '🔒 Multimão libera no nível {{level}}',
     'toast.rebuy': '♻ +{{amount}} créditos',
+    'toast.dailyBonus': 'Bônus diário: +{{amount}} fichas grátis!',
     'toast.noAllInLeft': '⛔ Sem apostas TUDO — volte amanhã!',
     'toast.allInGoodLuck': '🔥 TUDO — boa sorte!',
     'toast.statsReset': 'Estatísticas zeradas',
@@ -6795,7 +6965,9 @@ vpRegisterLang('de', {
     'settings.announcements': 'Ankündigungen',
     'settings.enableNotifications': 'Benachrichtigungen aktivieren',
     'settings.resetStats': 'Statistik zurücksetzen',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Spiel bewerten',
+    'settings.moreGames': 'Mehr Spiele von Orlov Games',
+    'settings.footer': 'Video Poker · v2.5',
 
     'variant.jacks': 'Buben oder besser',
     'variant.deuces': 'Deuces Wild',
@@ -6980,6 +7152,7 @@ vpRegisterLang('de', {
     'room.membersMeta': '{{count}}/{{capacity}} Freunde · Einsatz {{stake}}',
     'room.sendInvites': 'Einladungen senden',
     'room.sendInvitesCount': 'Einladungen senden ({{count}})',
+    'room.onlineNowCount': '{{n}} gerade online',
 
     'champ.resetsPlaceholder': 'Zurücksetzung in —Min.',
     'champ.noChampionsYet': 'Diese Stunde noch keine Champions — sei der Erste!',
@@ -7009,6 +7182,7 @@ vpRegisterLang('de', {
     'toast.unlockLevel': '🔒 Ab Level {{level}} verfügbar',
     'toast.multiHandUnlock': '🔒 Multi-Hand ab Level {{level}} verfügbar',
     'toast.rebuy': '♻ +{{amount}} Credits',
+    'toast.dailyBonus': 'Tagesbonus: +{{amount}} Gratis-Chips!',
     'toast.noAllInLeft': '⛔ Keine All-Ins mehr — morgen wieder!',
     'toast.allInGoodLuck': '🔥 ALL IN — viel Glück!',
     'toast.statsReset': 'Statistik zurückgesetzt',
@@ -7175,7 +7349,9 @@ vpRegisterLang('fr', {
     'settings.announcements': 'Annonces',
     'settings.enableNotifications': 'Activer les notifications',
     'settings.resetStats': 'Réinitialiser les stats',
-    'settings.footer': 'Vidéo Poker · v2.1',
+    'settings.rateGame': 'Noter ce jeu',
+    'settings.moreGames': 'Plus de jeux par Orlov Games',
+    'settings.footer': 'Vidéo Poker · v2.5',
 
     'variant.jacks': 'Valets ou mieux',
     'variant.deuces': 'Deuces Wild',
@@ -7360,6 +7536,7 @@ vpRegisterLang('fr', {
     'room.membersMeta': '{{count}}/{{capacity}} amis · Mise {{stake}}',
     'room.sendInvites': 'Envoyer les invitations',
     'room.sendInvitesCount': 'Envoyer les invitations ({{count}})',
+    'room.onlineNowCount': '{{n}} en ligne maintenant',
 
     'champ.resetsPlaceholder': 'Réinitialisation dans —min',
     'champ.noChampionsYet': 'Aucun champion cette heure — soyez le premier !',
@@ -7389,6 +7566,7 @@ vpRegisterLang('fr', {
     'toast.unlockLevel': '🔒 Débloqué au niveau {{level}}',
     'toast.multiHandUnlock': '🔒 Le multi-mains se débloque au niveau {{level}}',
     'toast.rebuy': '♻ +{{amount}} crédits',
+    'toast.dailyBonus': 'Bonus quotidien : +{{amount}} jetons gratuits !',
     'toast.noAllInLeft': '⛔ Plus de tapis — revenez demain !',
     'toast.allInGoodLuck': '🔥 TAPIS — bonne chance !',
     'toast.statsReset': 'Statistiques réinitialisées',
@@ -7555,7 +7733,9 @@ vpRegisterLang('it', {
     'settings.announcements': 'Annunci',
     'settings.enableNotifications': 'Attiva notifiche',
     'settings.resetStats': 'Azzera statistiche',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Valuta questo gioco',
+    'settings.moreGames': 'Altri giochi di Orlov Games',
+    'settings.footer': 'Video Poker · v2.5',
 
     'variant.jacks': 'Jack o superiore',
     'variant.deuces': 'Deuces Wild',
@@ -7740,6 +7920,7 @@ vpRegisterLang('it', {
     'room.membersMeta': '{{count}}/{{capacity}} amici · Puntata {{stake}}',
     'room.sendInvites': 'Invia inviti',
     'room.sendInvitesCount': 'Invia inviti ({{count}})',
+    'room.onlineNowCount': '{{n}} online ora',
 
     'champ.resetsPlaceholder': 'Si azzera tra —min',
     'champ.noChampionsYet': 'Nessun campione in quest’ora — sii il primo!',
@@ -7769,6 +7950,7 @@ vpRegisterLang('it', {
     'toast.unlockLevel': '🔒 Si sblocca al livello {{level}}',
     'toast.multiHandUnlock': '🔒 Il multi-mano si sblocca al livello {{level}}',
     'toast.rebuy': '♻ +{{amount}} crediti',
+    'toast.dailyBonus': 'Bonus giornaliero: +{{amount}} fiches gratis!',
     'toast.noAllInLeft': '⛔ All-in finiti — torna domani!',
     'toast.allInGoodLuck': '🔥 ALL IN — buona fortuna!',
     'toast.statsReset': 'Statistiche azzerate',
@@ -7937,7 +8119,9 @@ vpRegisterLang('pl', {
     'settings.announcements': 'Ogłoszenia',
     'settings.enableNotifications': 'Włącz powiadomienia',
     'settings.resetStats': 'Zresetuj statystyki',
-    'settings.footer': 'Wideo Poker · v2.1',
+    'settings.rateGame': 'Oceń tę grę',
+    'settings.moreGames': 'Więcej gier od Orlov Games',
+    'settings.footer': 'Wideo Poker · v2.5',
 
     'variant.jacks': 'Walety lub lepsze',
     'variant.deuces': 'Deuces Wild',
@@ -8122,6 +8306,7 @@ vpRegisterLang('pl', {
     'room.membersMeta': '{{count}}/{{capacity}} znajomych · Stawka {{stake}}',
     'room.sendInvites': 'Wyślij zaproszenia',
     'room.sendInvitesCount': 'Wyślij zaproszenia ({{count}})',
+    'room.onlineNowCount': '{{n}} teraz online',
 
     'champ.resetsPlaceholder': 'Reset za —min',
     'champ.noChampionsYet': 'Brak mistrzów w tej godzinie — bądź pierwszy!',
@@ -8151,6 +8336,7 @@ vpRegisterLang('pl', {
     'toast.unlockLevel': '🔒 Odblokowuje się na poziomie {{level}}',
     'toast.multiHandUnlock': '🔒 Tryb wielu rozdań odblokowuje się na poziomie {{level}}',
     'toast.rebuy': '♻ +{{amount}} kredytów',
+    'toast.dailyBonus': 'Bonus dzienny: +{{amount}} darmowych żetonów!',
     'toast.noAllInLeft': '⛔ Brak all-inów — wróć jutro!',
     'toast.allInGoodLuck': '🔥 ALL IN — powodzenia!',
     'toast.statsReset': 'Statystyki zresetowane',
@@ -8319,7 +8505,9 @@ vpRegisterLang('ru', {
     'settings.announcements': 'Объявления',
     'settings.enableNotifications': 'Включить уведомления',
     'settings.resetStats': 'Сбросить статистику',
-    'settings.footer': 'Видеопокер · v2.1',
+    'settings.rateGame': 'Оценить игру',
+    'settings.moreGames': 'Другие игры от Orlov Games',
+    'settings.footer': 'Видеопокер · v2.5',
 
     'variant.jacks': 'Валеты или лучше',
     'variant.deuces': 'Deuces Wild',
@@ -8504,6 +8692,7 @@ vpRegisterLang('ru', {
     'room.membersMeta': '{{count}}/{{capacity}} друзей · Ставка {{stake}}',
     'room.sendInvites': 'Отправить приглашения',
     'room.sendInvitesCount': 'Отправить приглашения ({{count}})',
+    'room.onlineNowCount': '{{n}} сейчас онлайн',
 
     'champ.resetsPlaceholder': 'Сброс через —мин',
     'champ.noChampionsYet': 'В этом часе чемпионов ещё нет — будьте первым!',
@@ -8533,6 +8722,7 @@ vpRegisterLang('ru', {
     'toast.unlockLevel': '🔒 Откроется на уровне {{level}}',
     'toast.multiHandUnlock': '🔒 Мультираздача откроется на уровне {{level}}',
     'toast.rebuy': '♻ +{{amount}} кредитов',
+    'toast.dailyBonus': 'Ежедневный бонус: +{{amount}} бесплатных фишек!',
     'toast.noAllInLeft': '⛔ Ва-банк закончился — возвращайтесь завтра!',
     'toast.allInGoodLuck': '🔥 ВА-БАНК — удачи!',
     'toast.statsReset': 'Статистика сброшена',
@@ -8699,7 +8889,9 @@ vpRegisterLang('tr', {
     'settings.announcements': 'Duyurular',
     'settings.enableNotifications': 'Bildirimleri aç',
     'settings.resetStats': 'İstatistikleri sıfırla',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Bu oyunu değerlendir',
+    'settings.moreGames': 'Orlov Games’ten daha fazla oyun',
+    'settings.footer': 'Video Poker · v2.5',
 
     'variant.jacks': 'Vale veya üstü',
     'variant.deuces': 'Deuces Wild',
@@ -8884,6 +9076,7 @@ vpRegisterLang('tr', {
     'room.membersMeta': '{{count}}/{{capacity}} arkadaş · Bahis {{stake}}',
     'room.sendInvites': 'Davetleri gönder',
     'room.sendInvitesCount': 'Davetleri gönder ({{count}})',
+    'room.onlineNowCount': '{{n}} şu an çevrimiçi',
 
     'champ.resetsPlaceholder': '—dk içinde sıfırlanır',
     'champ.noChampionsYet': 'Bu saatte henüz şampiyon yok — ilk sen ol!',
@@ -8913,6 +9106,7 @@ vpRegisterLang('tr', {
     'toast.unlockLevel': '🔒 {{level}}. seviyede açılır',
     'toast.multiHandUnlock': '🔒 Çoklu el {{level}}. seviyede açılır',
     'toast.rebuy': '♻ +{{amount}} kredi',
+    'toast.dailyBonus': 'Günlük bonus: +{{amount}} ücretsiz çip!',
     'toast.noAllInLeft': '⛔ All in hakkın kalmadı — yarın gel!',
     'toast.allInGoodLuck': '🔥 ALL IN — bol şans!',
     'toast.statsReset': 'İstatistikler sıfırlandı',
@@ -9079,7 +9273,9 @@ vpRegisterLang('id', {
     'settings.announcements': 'Pengumuman',
     'settings.enableNotifications': 'Aktifkan notifikasi',
     'settings.resetStats': 'Setel ulang statistik',
-    'settings.footer': 'Video Poker · v2.1',
+    'settings.rateGame': 'Beri nilai game ini',
+    'settings.moreGames': 'Game lain dari Orlov Games',
+    'settings.footer': 'Video Poker · v2.5',
 
     'variant.jacks': 'Jack atau lebih',
     'variant.deuces': 'Deuces Wild',
@@ -9264,6 +9460,7 @@ vpRegisterLang('id', {
     'room.membersMeta': '{{count}}/{{capacity}} teman · Taruhan {{stake}}',
     'room.sendInvites': 'Kirim undangan',
     'room.sendInvitesCount': 'Kirim undangan ({{count}})',
+    'room.onlineNowCount': '{{n}} online sekarang',
 
     'champ.resetsPlaceholder': 'Disetel ulang dalam —mnt',
     'champ.noChampionsYet': 'Belum ada juara jam ini — jadilah yang pertama!',
@@ -9293,6 +9490,7 @@ vpRegisterLang('id', {
     'toast.unlockLevel': '🔒 Terbuka di level {{level}}',
     'toast.multiHandUnlock': '🔒 Multi-tangan terbuka di level {{level}}',
     'toast.rebuy': '♻ +{{amount}} kredit',
+    'toast.dailyBonus': 'Bonus harian: +{{amount}} chip gratis!',
     'toast.noAllInLeft': '⛔ All-in habis — kembali besok!',
     'toast.allInGoodLuck': '🔥 ALL IN — semoga beruntung!',
     'toast.statsReset': 'Statistik disetel ulang',
@@ -9461,7 +9659,9 @@ vpRegisterLang('hi', {
     'settings.announcements': 'घोषणाएँ',
     'settings.enableNotifications': 'सूचनाएँ चालू करें',
     'settings.resetStats': 'आँकड़े रीसेट करें',
-    'settings.footer': 'वीडियो पोकर · v2.1',
+    'settings.rateGame': 'इस गेम को रेट करें',
+    'settings.moreGames': 'Orlov Games के और गेम',
+    'settings.footer': 'वीडियो पोकर · v2.5',
 
     'variant.jacks': 'जैक या बेहतर',
     'variant.deuces': 'ड्यूसेस वाइल्ड',
@@ -9646,6 +9846,7 @@ vpRegisterLang('hi', {
     'room.membersMeta': '{{count}}/{{capacity}} दोस्त · दांव {{stake}}',
     'room.sendInvites': 'न्योते भेजें',
     'room.sendInvitesCount': 'न्योते भेजें ({{count}})',
+    'room.onlineNowCount': '{{n}} अभी ऑनलाइन',
 
     'champ.resetsPlaceholder': '—मि. में रीसेट',
     'champ.noChampionsYet': 'इस घंटे अभी कोई चैंपियन नहीं — पहले आप बनें!',
@@ -9675,6 +9876,7 @@ vpRegisterLang('hi', {
     'toast.unlockLevel': '🔒 लेवल {{level}} पर खुलता है',
     'toast.multiHandUnlock': '🔒 मल्टी-हैंड लेवल {{level}} पर खुलता है',
     'toast.rebuy': '♻ +{{amount}} क्रेडिट',
+    'toast.dailyBonus': 'दैनिक बोनस: +{{amount}} मुफ़्त चिप्स!',
     'toast.noAllInLeft': '⛔ कोई ऑल इन नहीं बचा — कल आएँ!',
     'toast.allInGoodLuck': '🔥 ऑल इन — शुभकामनाएँ!',
     'toast.statsReset': 'आँकड़े रीसेट हो गए',
@@ -9843,7 +10045,9 @@ vpRegisterLang('ja', {
     'settings.announcements': 'お知らせ',
     'settings.enableNotifications': '通知をオンにする',
     'settings.resetStats': '成績をリセット',
-    'settings.footer': 'ビデオポーカー · v2.1',
+    'settings.rateGame': 'このゲームを評価',
+    'settings.moreGames': 'Orlov Games の他のゲーム',
+    'settings.footer': 'ビデオポーカー · v2.5',
 
     'variant.jacks': 'ジャックス・オア・ベター',
     'variant.deuces': 'デュースワイルド',
@@ -10028,6 +10232,7 @@ vpRegisterLang('ja', {
     'room.membersMeta': 'フレンド {{count}}/{{capacity}} · レート {{stake}}',
     'room.sendInvites': '招待を送る',
     'room.sendInvitesCount': '招待を送る ({{count}})',
+    'room.onlineNowCount': '現在{{n}}人がオンライン',
 
     'champ.resetsPlaceholder': '—分後にリセット',
     'champ.noChampionsYet': 'この時間帯はまだチャンピオンなし — 一番乗りを狙おう！',
@@ -10057,6 +10262,7 @@ vpRegisterLang('ja', {
     'toast.unlockLevel': '🔒 レベル{{level}}で解放',
     'toast.multiHandUnlock': '🔒 マルチハンドはレベル{{level}}で解放',
     'toast.rebuy': '♻ +{{amount}} クレジット',
+    'toast.dailyBonus': 'デイリーボーナス：+{{amount}} 無料チップ！',
     'toast.noAllInLeft': '⛔ オールインの残り回数なし — また明日！',
     'toast.allInGoodLuck': '🔥 オールイン — 幸運を！',
     'toast.statsReset': '成績をリセットしました',
@@ -10223,7 +10429,9 @@ vpRegisterLang('ko', {
     'settings.announcements': '공지',
     'settings.enableNotifications': '알림 켜기',
     'settings.resetStats': '통계 초기화',
-    'settings.footer': '비디오 포커 · v2.1',
+    'settings.rateGame': '이 게임 평가하기',
+    'settings.moreGames': 'Orlov Games의 다른 게임',
+    'settings.footer': '비디오 포커 · v2.5',
 
     'variant.jacks': '잭 오어 베터',
     'variant.deuces': '듀스 와일드',
@@ -10408,6 +10616,7 @@ vpRegisterLang('ko', {
     'room.membersMeta': '친구 {{count}}/{{capacity}} · 베팅 {{stake}}',
     'room.sendInvites': '초대 보내기',
     'room.sendInvitesCount': '초대 보내기 ({{count}})',
+    'room.onlineNowCount': '{{n}}명 온라인',
 
     'champ.resetsPlaceholder': '—분 후 초기화',
     'champ.noChampionsYet': '이번 시간에는 아직 챔피언이 없어요 — 첫 주인공이 되어 보세요!',
@@ -10437,6 +10646,7 @@ vpRegisterLang('ko', {
     'toast.unlockLevel': '🔒 레벨 {{level}}에서 열려요',
     'toast.multiHandUnlock': '🔒 멀티핸드는 레벨 {{level}}에서 열려요',
     'toast.rebuy': '♻ +{{amount}} 크레딧',
+    'toast.dailyBonus': '일일 보너스: +{{amount}} 무료 칩!',
     'toast.noAllInLeft': '⛔ 남은 올인이 없어요 — 내일 다시!',
     'toast.allInGoodLuck': '🔥 올인 — 행운을 빌어요!',
     'toast.statsReset': '통계를 초기화했어요',
@@ -10604,7 +10814,9 @@ vpRegisterLang('zh-CN', {
     'settings.announcements': '公告',
     'settings.enableNotifications': '开启通知',
     'settings.resetStats': '重置统计',
-    'settings.footer': '视频扑克 · v2.1',
+    'settings.rateGame': '给游戏评分',
+    'settings.moreGames': 'Orlov Games 的更多游戏',
+    'settings.footer': '视频扑克 · v2.5',
 
     'variant.jacks': 'J 或更好',
     'variant.deuces': '百搭 2',
@@ -10789,6 +11001,7 @@ vpRegisterLang('zh-CN', {
     'room.membersMeta': '{{count}}/{{capacity}} 位好友 · 注额 {{stake}}',
     'room.sendInvites': '发送邀请',
     'room.sendInvitesCount': '发送邀请（{{count}}）',
+    'room.onlineNowCount': '{{n}} 人在线',
 
     'champ.resetsPlaceholder': '—分钟后重置',
     'champ.noChampionsYet': '本小时还没有冠军 — 抢个头名吧！',
@@ -10818,6 +11031,7 @@ vpRegisterLang('zh-CN', {
     'toast.unlockLevel': '🔒 等级 {{level}} 解锁',
     'toast.multiHandUnlock': '🔒 多手模式在等级 {{level}} 解锁',
     'toast.rebuy': '♻ +{{amount}} 积分',
+    'toast.dailyBonus': '每日奖励：+{{amount}} 免费筹码！',
     'toast.noAllInLeft': '⛔ 全下次数已用完 — 明天再来！',
     'toast.allInGoodLuck': '🔥 全下 — 祝你好运！',
     'toast.statsReset': '统计已重置',
@@ -10989,7 +11203,9 @@ vpRegisterLang('he', {
     'settings.announcements': 'הודעות',
     'settings.enableNotifications': 'הפעלת התראות',
     'settings.resetStats': 'איפוס הסטטיסטיקה',
-    'settings.footer': 'וידאו פוקר · v2.1',
+    'settings.rateGame': 'דרגו את המשחק',
+    'settings.moreGames': 'עוד משחקים מבית Orlov Games',
+    'settings.footer': 'וידאו פוקר · v2.5',
 
     'variant.jacks': 'נסיכים ומעלה',
     'variant.deuces': 'Deuces Wild',
@@ -11174,6 +11390,7 @@ vpRegisterLang('he', {
     'room.membersMeta': '{{count}}/{{capacity}} חברים · הימור {{stake}}',
     'room.sendInvites': 'שליחת הזמנות',
     'room.sendInvitesCount': 'שליחת הזמנות ({{count}})',
+    'room.onlineNowCount': '{{n}} מחוברים עכשיו',
 
     'champ.resetsPlaceholder': 'מתאפס בעוד —דק׳',
     'champ.noChampionsYet': 'אין עדיין אלופים בשעה הזו — היו הראשונים!',
@@ -11217,6 +11434,7 @@ vpRegisterLang('he', {
     'toast.unlockLevel': '🔒 נפתח ברמה {{level}}',
     'toast.multiHandUnlock': '🔒 ריבוי ידיים נפתח ברמה {{level}}',
     'toast.rebuy': '♻ ‎+{{amount}} קרדיטים',
+    'toast.dailyBonus': 'בונוס יומי: ‎+{{amount}} צ׳יפים חינם!',
     'toast.noAllInLeft': '⛔ נגמרו ההימורים על הכול — חזרו מחר!',
     'toast.allInGoodLuck': '🔥 הכול — בהצלחה!',
     'toast.statsReset': 'הסטטיסטיקה אופסה',
@@ -11367,7 +11585,9 @@ vpRegisterLang('ar', {
     'settings.announcements': 'الإعلانات',
     'settings.enableNotifications': 'تفعيل الإشعارات',
     'settings.resetStats': 'إعادة ضبط الإحصائيات',
-    'settings.footer': 'فيديو بوكر · v2.1',
+    'settings.rateGame': 'قيّم هذه اللعبة',
+    'settings.moreGames': 'المزيد من الألعاب من Orlov Games',
+    'settings.footer': 'فيديو بوكر · v2.5',
 
     'variant.jacks': 'ولد أو أفضل',
     'variant.deuces': 'Deuces Wild',
@@ -11552,6 +11772,7 @@ vpRegisterLang('ar', {
     'room.membersMeta': '{{count}}/{{capacity}} أصدقاء · الرهان {{stake}}',
     'room.sendInvites': 'إرسال الدعوات',
     'room.sendInvitesCount': 'إرسال الدعوات ({{count}})',
+    'room.onlineNowCount': '{{n}} متصل الآن',
 
     'champ.resetsPlaceholder': 'يُعاد الضبط بعد —د',
     'champ.noChampionsYet': 'لا أبطال في هذه الساعة بعد — كن الأول!',
@@ -11595,6 +11816,7 @@ vpRegisterLang('ar', {
     'toast.unlockLevel': '🔒 يُفتح عند المستوى {{level}}',
     'toast.multiHandUnlock': '🔒 تعدد الأيدي يُفتح عند المستوى {{level}}',
     'toast.rebuy': '♻ ‎+{{amount}} رصيد',
+    'toast.dailyBonus': 'المكافأة اليومية: ‎+{{amount}} رقاقة مجانية!',
     'toast.noAllInLeft': '⛔ لم تعد لديك رهانات بكل الرصيد — عد غدًا!',
     'toast.allInGoodLuck': '🔥 كل الرصيد — بالتوفيق!',
     'toast.statsReset': 'أُعيد ضبط الإحصائيات',
@@ -12065,6 +12287,37 @@ var audioCtx = null;
 let vpAnalytics = null;
 let vpAnalyticsFailed = false;
 
+// Keep the event vocabulary small and stable so Play Console/Firebase reports
+// can be compared week over week. These events never include account ids,
+// names, invite codes, or card-level gameplay data.
+const VP_ASO_EVENTS = Object.freeze({
+    appOpen: 'app_open',
+    sessionStart: 'session_start',
+    onboardingStep: 'onboarding_step',
+    handStarted: 'hand_started',
+    handCompleted: 'hand_completed',
+    dailyBonusClaimed: 'daily_bonus_claimed',
+    leaderboardViewed: 'leaderboard_viewed',
+    reviewPromptEarned: 'review_prompt_earned',
+    storeLinkOpened: 'store_link_opened',
+    inviteShared: 'invite_shared'
+});
+
+function vpMarketingContext() {
+    try {
+        const params = new URLSearchParams(window.location.search || '');
+        const allowed = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'referrer'];
+        const context = {};
+        allowed.forEach(function(key) {
+            const value = params.get(key);
+            if (value && value.length <= 100) context[key] = value;
+        });
+        return context;
+    } catch (e) {
+        return {};
+    }
+}
+
 function logVpEvent(name, params) {
     try {
         if (vpAnalyticsFailed) return;
@@ -12075,17 +12328,34 @@ function logVpEvent(name, params) {
             }
             vpAnalytics = firebase.analytics();
         }
-        vpAnalytics.logEvent(name, params || {});
+        vpAnalytics.logEvent(name, Object.assign({}, vpMarketingContext(), params || {}));
     } catch (e) {
         vpAnalyticsFailed = true;
     }
 }
 
+function initVpAnalytics() {
+    if (window.__vpAnalyticsSessionStarted) return;
+    window.__vpAnalyticsSessionStarted = true;
+    logVpEvent(VP_ASO_EVENTS.appOpen, { app_version: '2.5' });
+    logVpEvent(VP_ASO_EVENTS.sessionStart, {
+        platform: window.Capacitor && window.Capacitor.isNativePlatform ? 'native' : 'web'
+    });
+}
+
+window.VP_ASO_EVENTS = VP_ASO_EVENTS;
+window.initVpAnalytics = initVpAnalytics;
 window.logVpEvent = logVpEvent;
 
 
 /* --- js/ui.js --- */
 // Small UI utilities: toast messages + haptic feedback (Settings toggle).
+
+// Local-calendar-day key for once-a-day localStorage records (ALL IN usage,
+// daily bonus). Local, not UTC: the player's day is the one that matters.
+function vpTodayKey() {
+    return new Date().toDateString();
+}
 
 function showToast(text) {
     let el = document.getElementById('vp-toast');
@@ -12173,6 +12443,500 @@ function recordAllTimeHand(win, totalBet, streak) {
 
 function resetAllTimeStats() {
     saveAllTimeStats({ won: 0, lost: 0, handsPlayed: 0, bestStreak: 0 });
+}
+
+
+/* --- js/review.js --- */
+// In-app review prompt (Play In-App Review via @capacitor-community/in-app-review).
+//
+// Asked once, only inside the native app, and only after the player has had a
+// good run: three quality wins (a Straight or better, see draw() in js/game.js)
+// or level 3. The win counter and the "already shown" flag persist in
+// localStorage so the ask never repeats. Play rate-limits the sheet and may
+// silently show nothing, so the call is fire-and-forget on purpose.
+
+const REVIEW_QUALITY_WINS_NEEDED = 3;
+const REVIEW_LEVEL_THRESHOLD = 3;
+// Let the win highlight and toast finish before the review sheet slides up.
+const REVIEW_PROMPT_DELAY_MS = 2600;
+
+function loadReviewState() {
+    try {
+        const raw = JSON.parse(localStorage.getItem('vp_review'));
+        if (raw && typeof raw === 'object') {
+            return { wins: raw.wins || 0, shown: !!raw.shown };
+        }
+    } catch (e) { /* corrupt or unavailable — start fresh */ }
+    return { wins: 0, shown: false };
+}
+
+function saveReviewState(state) {
+    try {
+        localStorage.setItem('vp_review', JSON.stringify(state));
+    } catch (e) { /* localStorage unavailable, silently fail */ }
+}
+
+function requestInAppReview() {
+    const plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.InAppReview;
+    if (!plugin || typeof plugin.requestReview !== 'function') return;
+    try {
+        Promise.resolve(plugin.requestReview()).catch(function() { /* Play declined to show the sheet */ });
+    } catch (e) { /* a synchronous plugin failure must never reach the game loop */ }
+}
+
+// Called from draw() in js/game.js on every Straight-or-better win.
+function vpOnQualityWin() {
+    const prev = loadReviewState();
+    const state = { wins: prev.wins + 1, shown: prev.shown };
+    const level = window.getLocalLevel ? getLocalLevel() : 1;
+    const earned = state.wins >= REVIEW_QUALITY_WINS_NEEDED || level >= REVIEW_LEVEL_THRESHOLD;
+    if (earned && !state.shown && window.isNativeApp && isNativeApp()) {
+        state.shown = true;
+        saveReviewState(state);
+        if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.reviewPromptEarned, {
+            quality_wins: state.wins,
+            level: level
+        });
+        setTimeout(requestInAppReview, REVIEW_PROMPT_DELAY_MS);
+        return;
+    }
+    saveReviewState(state);
+}
+
+window.vpOnQualityWin = vpOnQualityWin;
+
+
+/* --- js/prng.js --- */
+// Deterministic PRNG: FNV-1a string hash feeding a mulberry32 generator.
+// Moved out of js/leaderboard-bots.js (which used it to seed each bot's
+// per-period, per-player "personality" so the same player/period/board
+// always gets the same trailing rivals) so js/duel-deck.js can seed a
+// duel's deck the same way — same generator, unrelated purpose.
+//
+// module.exports tail is for Node only (scripts/duels/deck.test.js,
+// scripts/push/duels.js); the browser bundle just gets two more top-level
+// functions in the concatenated script, same as every other module here.
+
+function fnv1aHash(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+    }
+    return h >>> 0;
+}
+
+function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function() {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { fnv1aHash, mulberry32 };
+}
+
+
+/* --- js/hand-eval.js --- */
+// Pure hand-evaluation engine: card model, paytables, and the Jacks-or-Better
+// / Deuces-Wild evaluators. No DOM, no localStorage, no game state — moved out
+// of js/game.js (which still owns everything state-related: gameVariant,
+// currentPayouts, unlock levels) so js/duel-deck.js and the Node-side tests
+// and poller can use the exact same evaluator the solo game uses, without
+// pulling in the whole game module.
+//
+// Loaded as a bare <script> early in the browser bundle (build.js), so every
+// declaration below is also just a top-level const/function in the
+// concatenated script, exactly as it was inside game.js — nothing about how
+// the app consumes these names changes. The module.exports tail at the
+// bottom is for Node only (require()'d by scripts/duels/deck.test.js,
+// scripts/push/duels.js, and scripts/game/betLock.test.js).
+
+const SUITS = ['♠', '♥', '♦', '♣'];
+const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+
+const PAYTABLES = {
+    jacks: {
+        'Royal Flush': 250,
+        'Straight Flush': 50,
+        'Four of a Kind': 20,
+        'Full House': 7,
+        'Flush': 5,
+        'Straight': 4,
+        'Three of a Kind': 3,
+        'Two Pair': 2,
+        'Jacks or Better': 1,
+        'Nothing': 0
+    },
+    deuces: {
+        'Royal Flush': 250,
+        'Four Deuces': 200,
+        'Wild Royal Flush': 25,
+        'Five of a Kind': 15,
+        'Straight Flush': 9,
+        'Four of a Kind': 5,
+        'Full House': 3,
+        'Flush': 2,
+        'Straight': 2,
+        'Three of a Kind': 1,
+        'Nothing': 0
+    },
+    bonus: {
+        'Royal Flush': 250,
+        'Straight Flush': 50,
+        'Four Aces': 80,
+        'Four 2s-4s': 40,
+        'Four 5s-Ks': 25,
+        'Full House': 8,
+        'Flush': 5,
+        'Straight': 4,
+        'Three of a Kind': 3,
+        'Two Pair': 2,
+        'Jacks or Better': 1,
+        'Nothing': 0
+    },
+    doubleBonus: {
+        'Royal Flush': 250,
+        'Straight Flush': 50,
+        'Four Aces': 160,
+        'Four 2s-4s': 80,
+        'Four 5s-Ks': 50,
+        'Full House': 10,
+        'Flush': 7,
+        'Straight': 5,
+        'Three of a Kind': 3,
+        'Two Pair': 1,
+        'Jacks or Better': 1,
+        'Nothing': 0
+    }
+};
+
+const HAND_ORDERS = {
+    jacks: ['Royal Flush', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
+    deuces: ['Royal Flush', 'Four Deuces', 'Wild Royal Flush', 'Five of a Kind', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Nothing'],
+    bonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
+    doubleBonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing']
+};
+
+const HAND_RANK = {
+    'Nothing': 0, 'Jacks or Better': 1, 'Two Pair': 2, 'Three of a Kind': 3,
+    'Straight': 4, 'Flush': 5, 'Full House': 6, 'Four of a Kind': 7,
+    'Straight Flush': 8, 'Royal Flush': 9,
+    'Five of a Kind': 7, 'Wild Royal Flush': 8, 'Four Deuces': 8,
+    'Four 5s-Ks': 7, 'Four 2s-4s': 7, 'Four Aces': 7
+};
+
+function createDeck() {
+    const d = [];
+    for (let suit of SUITS) {
+        for (let rank of RANKS) {
+            d.push({ rank, suit });
+        }
+    }
+    return d;
+}
+
+function evaluateHand(hand) {
+    const ranks = hand.map(c => c.rank);
+    const suits = hand.map(c => c.suit);
+
+    const rankCounts = {};
+    ranks.forEach(r => rankCounts[r] = (rankCounts[r] || 0) + 1);
+    const counts = Object.values(rankCounts).sort((a, b) => b - a);
+
+    const flush = new Set(suits).size === 1;
+
+    let values = ranks.map(r => {
+        if (r === 'A') return 14;
+        if (r === 'J') return 11;
+        if (r === 'Q') return 12;
+        if (r === 'K') return 13;
+        return parseInt(r);
+    }).sort((a, b) => a - b);
+
+    let straight = false;
+    const uniqueValues = [...new Set(values)];
+    if (uniqueValues.length === 5) {
+        if (uniqueValues[4] - uniqueValues[0] === 4) {
+            straight = true;
+        } else if (uniqueValues.join(',') === '2,3,4,5,14') {
+            straight = true;
+            values = [1, 2, 3, 4, 5];
+        }
+    }
+
+    const findIndices = (targetRanks) => {
+        return hand.map((card, i) => targetRanks.includes(card.rank) ? i : -1).filter(i => i !== -1);
+    };
+
+    const findIndicesByCount = (targetCount) => {
+        const targetRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === targetCount);
+        return findIndices(targetRanks);
+    };
+
+    const allIndices = [0, 1, 2, 3, 4];
+    let result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] };
+
+    if (straight && flush) {
+        if (values.join(',') === '10,11,12,13,14') {
+            result.type = 'Royal Flush';
+        } else {
+            result.type = 'Straight Flush';
+        }
+        result.winIndices = allIndices;
+    } else if (counts[0] === 4) {
+        result.type = 'Four of a Kind';
+        result.winIndices = findIndicesByCount(4);
+    } else if (counts[0] === 3 && counts[1] === 2) {
+        result.type = 'Full House';
+        const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
+        const twoRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
+        result.winIndices = findIndices([threeRank]);
+        result.secondPairIndices = findIndices([twoRank]);
+    } else if (flush) {
+        result.type = 'Flush';
+        result.winIndices = allIndices;
+    } else if (straight) {
+        result.type = 'Straight';
+        result.winIndices = allIndices;
+    } else if (counts[0] === 3) {
+        result.type = 'Three of a Kind';
+        result.winIndices = findIndicesByCount(3);
+        const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
+        const threeIndices = findIndices([threeRank]);
+        if (threeRank === 'J' && threeIndices.length > 0) {
+            result.thirdMatchIndices.push(threeIndices[0]);
+        }
+    } else if (counts[0] === 2 && counts[1] === 2) {
+        const pairRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === 2);
+        result.type = 'Two Pair';
+        result.winIndices = findIndices([pairRanks[0]]);
+        result.secondPairIndices = findIndices([pairRanks[1]]);
+    } else if (counts[0] === 2) {
+        const pairRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
+        if (['J', 'Q', 'K', 'A'].includes(pairRank)) {
+            result.type = 'Jacks or Better';
+            result.winIndices = findIndices([pairRank]);
+        }
+    }
+    return result;
+}
+
+// Deuces Wild: 2s substitute for any card. Minimum paying hand is Three of a Kind.
+function evaluateDeucesHand(hand) {
+    const allIndices = [0, 1, 2, 3, 4];
+    const result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] };
+    const others = hand.filter(c => c.rank !== '2');
+    const n = 5 - others.length;
+
+    if (n === 4) {
+        result.type = 'Four Deuces';
+        result.winIndices = allIndices;
+        return result;
+    }
+
+    const rankCounts = {};
+    others.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
+    const counts = Object.values(rankCounts).sort((a, b) => b - a);
+    const maxCount = counts[0] || 0;
+    const flush = new Set(others.map(c => c.suit)).size <= 1;
+    const vals = others.map(c =>
+        c.rank === 'A' ? 14 : c.rank === 'J' ? 11 : c.rank === 'Q' ? 12 : c.rank === 'K' ? 13 : parseInt(c.rank));
+    const distinct = new Set(vals).size === others.length;
+
+    const fitsWindow = arr => arr.length === 0 || (Math.max(...arr) - Math.min(...arr) <= 4);
+    const straight = distinct && (fitsWindow(vals) || (vals.includes(14) && fitsWindow(vals.map(v => v === 14 ? 1 : v))));
+    const allRoyalVals = distinct && vals.every(v => v >= 10);
+
+    if (n === 0 && flush && straight && Math.min(...vals) === 10) {
+        result.type = 'Royal Flush';
+    } else if (n > 0 && flush && allRoyalVals) {
+        result.type = 'Wild Royal Flush';
+    } else if (maxCount + n >= 5) {
+        result.type = 'Five of a Kind';
+    } else if (flush && straight) {
+        result.type = 'Straight Flush';
+    } else if (maxCount + n >= 4) {
+        result.type = 'Four of a Kind';
+    } else if ((maxCount === 3 && counts[1] === 2) || (n === 1 && maxCount === 2 && counts[1] === 2)) {
+        result.type = 'Full House';
+    } else if (flush) {
+        result.type = 'Flush';
+    } else if (straight) {
+        result.type = 'Straight';
+    } else if (maxCount + n >= 3) {
+        result.type = 'Three of a Kind';
+    }
+
+    if (result.type !== 'Nothing') result.winIndices = allIndices;
+    return result;
+}
+
+// js/game.js keeps its own evaluateForVariant(h) wrapper that reads the
+// module's own gameVariant global — this version takes the variant
+// explicitly so callers with no notion of "the current game variant" (duels,
+// which are always Jacks or Better regardless of the player's own setting;
+// Node tests; the push poller) can use it directly.
+function evaluateWithVariant(h, variant) {
+    if (variant === 'deuces') return evaluateDeucesHand(h);
+    const result = evaluateHand(h);
+    if (result.type === 'Four of a Kind' && (variant === 'bonus' || variant === 'doubleBonus')) {
+        const rankCounts = {};
+        h.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
+        const quadRank = Object.keys(rankCounts).find(r => rankCounts[r] === 4);
+        if (quadRank === 'A') result.type = 'Four Aces';
+        else if (['2', '3', '4'].includes(quadRank)) result.type = 'Four 2s-4s';
+        else result.type = 'Four 5s-Ks';
+    }
+    return result;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        SUITS, RANKS, PAYTABLES, HAND_ORDERS, HAND_RANK,
+        createDeck, evaluateHand, evaluateDeucesHand, evaluateWithVariant
+    };
+}
+
+
+/* --- js/duel-deck.js --- */
+// Deterministic duel deck — the fairness mechanism behind js/duel.js. Given
+// a duel's seed and a hand index (0-4), the five dealt cards and the five
+// "positional" replacement cards are entirely determined; a player's only
+// input is which of the five positions to hold. Both the challenger and the
+// opponent see identical cards for identical choices, so a duel measures
+// skill, not luck — like duplicate bridge, everyone plays the same board.
+//
+// Deliberately NOT the same replacement mechanic as solo play (js/game.js
+// draw(), which pops cards off a shrinking deck in position order, so an
+// unheld position's replacement depends on how many OTHER positions were
+// also unheld). Here each of the 5 positions has one fixed hidden
+// replacement card from the moment the hand is dealt, independent of the
+// hold pattern chosen — the only way two players holding different subsets
+// can be meaningfully compared on the same random draw.
+//
+// Loaded as a bare <script> in the browser bundle, after js/prng.js and
+// js/hand-eval.js (build.js) — every function below reads those two
+// modules' exports through one `duelEngine` object rather than declaring
+// same-named locals, because PAYTABLES/HAND_RANK are `const` in that
+// shared script scope and a colliding var/let redeclaration of a const
+// name is a SyntaxError even on a branch that never runs. In Node
+// (scripts/duels/deck.test.js, scripts/push/duels.js) the same object is
+// built from two require() calls instead.
+
+var duelEngine = (typeof require === 'function' && typeof module !== 'undefined' && module.exports)
+    ? Object.assign({}, require('./prng.js'), require('./hand-eval.js'))
+    : {
+        mulberry32: mulberry32, fnv1aHash: fnv1aHash, createDeck: createDeck,
+        evaluateWithVariant: evaluateWithVariant, PAYTABLES: PAYTABLES, HAND_RANK: HAND_RANK
+    };
+
+const DUEL_HANDS = 5;
+const DUEL_POINTS_PER_UNIT = 10;
+
+// One independent seeded shuffle per hand index — hand k of a duel never
+// shares randomness with any other hand of that duel or any other duel.
+function duelHandRng(seed, handIndex) {
+    return duelEngine.mulberry32(duelEngine.fnv1aHash(seed + ':' + handIndex));
+}
+
+function duelDeckFor(seed, handIndex) {
+    const deck = duelEngine.createDeck();
+    const rand = duelHandRng(seed, handIndex);
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        const tmp = deck[i]; deck[i] = deck[j]; deck[j] = tmp;
+    }
+    return { dealt: deck.slice(0, 5), replacements: deck.slice(5, 10) };
+}
+
+// mask: 0-31, bit i (1 << i) set means position i was held.
+function duelFinalHand(seed, handIndex, mask) {
+    const cards = duelDeckFor(seed, handIndex);
+    const hand = [];
+    for (let i = 0; i < 5; i++) {
+        hand.push((mask & (1 << i)) ? cards.dealt[i] : cards.replacements[i]);
+    }
+    return hand;
+}
+
+// holds: array of 5 masks, one per hand (0 for a hand not yet played, which
+// scores as "Nothing" — so a partial array never throws, it just scores the
+// unplayed hands as zero). Duels are always Jacks or Better, regardless of
+// the player's own solo-game variant setting.
+function duelScoreHolds(seed, holds) {
+    let total = 0;
+    let best = 'Nothing';
+    const hands = [];
+    for (let k = 0; k < DUEL_HANDS; k++) {
+        const mask = (holds && holds[k]) || 0;
+        const finalHand = duelFinalHand(seed, k, mask);
+        const result = duelEngine.evaluateWithVariant(finalHand, 'jacks');
+        const points = (duelEngine.PAYTABLES.jacks[result.type] || 0) * DUEL_POINTS_PER_UNIT;
+        total += points;
+        if ((duelEngine.HAND_RANK[result.type] || 0) > (duelEngine.HAND_RANK[best] || 0)) best = result.type;
+        hands.push({ type: result.type, points: points, hand: finalHand });
+    }
+    return { total: total, best: best, hands: hands };
+}
+
+// Recomputes both sides' scores straight from the committed hold masks —
+// never trusts a doc's own challengerScore/opponentScore field, which is
+// informational only (a tampered client can already set its own local
+// balance to anything; the fields exist for cheap UI display, not as the
+// source of truth for payouts). Winner is decided by total score, then by
+// best single hand rank as a tiebreak, then a true tie (winnerUid null).
+function duelOutcome(doc) {
+    const challenger = duelScoreHolds(doc.seed, doc.challengerHolds);
+    if (!doc.opponentHolds) return { challenger: challenger, opponent: null, winnerUid: null };
+    const opponent = duelScoreHolds(doc.seed, doc.opponentHolds);
+
+    let winnerUid = null;
+    if (challenger.total > opponent.total) {
+        winnerUid = doc.challengerUid;
+    } else if (opponent.total > challenger.total) {
+        winnerUid = doc.opponentUid;
+    } else {
+        const cRank = duelEngine.HAND_RANK[challenger.best] || 0;
+        const oRank = duelEngine.HAND_RANK[opponent.best] || 0;
+        if (cRank > oRank) winnerUid = doc.challengerUid;
+        else if (oRank > cRank) winnerUid = doc.opponentUid;
+        // else: a true tie — winnerUid stays null.
+    }
+    return { challenger: challenger, opponent: opponent, winnerUid: winnerUid };
+}
+
+// Coins owed to `uid` once a duel has settled. A win takes both fees, a tie
+// refunds each side's own fee, a loss pays nothing, and an expired duel
+// (nobody took the challenge) refunds only the challenger — the opponent
+// never staked anything by not showing up.
+function duelPayoutFor(doc, uid) {
+    if (doc.status === 'expired') {
+        return uid === doc.challengerUid ? (doc.fee || 0) : 0;
+    }
+    if (doc.status !== 'scored') return 0;
+    const outcome = duelOutcome(doc);
+    if (!outcome.opponent) return 0;
+    if (outcome.winnerUid === null) return doc.fee || 0;
+    if (outcome.winnerUid === uid) return (doc.fee || 0) * 2;
+    return 0;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        DUEL_HANDS: DUEL_HANDS,
+        DUEL_POINTS_PER_UNIT: DUEL_POINTS_PER_UNIT,
+        duelHandRng: duelHandRng,
+        duelDeckFor: duelDeckFor,
+        duelFinalHand: duelFinalHand,
+        duelScoreHolds: duelScoreHolds,
+        duelOutcome: duelOutcome,
+        duelPayoutFor: duelPayoutFor
+    };
 }
 
 
@@ -12577,6 +13341,21 @@ function buildRoomLink(code) {
 
 function getPlayStoreLink() {
     return PLAY_STORE_URL;
+}
+
+const DEVELOPER_PAGE_URL = 'https://play.google.com/store/apps/developer?id=Orlov+Games';
+
+// Settings → Support rows. window.open rather than location.href: inside the
+// native WebView Capacitor hands the URL to the Play app / system browser,
+// and on the web it keeps the game tab alive (same as the share links in
+// js/invite.js).
+function openRateGame() {
+    if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.storeLinkOpened, { destination: 'app_listing' });
+    window.open(PLAY_STORE_URL, '_blank');
+}
+
+function openMoreGames() {
+    window.open(DEVELOPER_PAGE_URL, '_blank');
 }
 
 // --- Deferred deep link: Play Store install referrer -----------------------
@@ -13039,6 +13818,7 @@ function addFriendByCode(code) {
                         .set({ addedAt: firebase.firestore.FieldValue.serverTimestamp() })
                 ]).then(function() {
                     showToast(t('toast.friendAdded'));
+                    if (window.logVpEvent) logVpEvent('friend_added', { via: 'code' });
                     loadFriends();
                     // invite.html tells a friend to type this code in when the
                     // install swallowed the deep link, so the manual path must
@@ -13222,6 +14002,8 @@ function handleIncomingInvite() {
             window.history.replaceState({}, '', url);
         }
 
+        if (window.logVpEvent) logVpEvent('invite_link_opened', { kind: 'friend' });
+
         // Store for after sign-in. Persisted as well as parked: the URL has just
         // been cleaned, so a reload before signing in would otherwise lose it.
         window._pendingInviteCode = refCode;
@@ -13285,6 +14067,7 @@ function addFriendByInviteCode(code) {
                     showToast(newFriendUids.length > 1
                         ? t('toast.connectedViaLink', { count: newFriendUids.length })
                         : t('toast.friendAdded'));
+                    if (window.logVpEvent) logVpEvent('friend_added', { via: 'link', count: newFriendUids.length });
                     loadFriends();
                     // Files the reward row for whoever owns this link. Deliberately
                     // last and unawaited — a failed ledger write must not undo a
@@ -13636,6 +14419,74 @@ if (window.vpOnLanguageChange) {
 document.addEventListener('DOMContentLoaded', renderInviteRewardLine);
 
 
+/* --- js/daily-bonus.js --- */
+// Daily free chips: +200 on the first launch of each local calendar day.
+//
+// Same bookkeeping as the invitee welcome gift (js/referral.js): the chips
+// raise the referral-bonus and daily-net baselines so they never read as
+// winnings on any leaderboard.
+
+const DAILY_BONUS_CHIPS = 200;
+const DAILY_BONUS_KEY = 'vp_daily_bonus';
+
+function loadDailyBonusDate() {
+    try {
+        const raw = JSON.parse(localStorage.getItem(DAILY_BONUS_KEY));
+        return (raw && typeof raw.date === 'string') ? raw.date : '';
+    } catch (e) {
+        return '';
+    }
+}
+
+function saveDailyBonusDate(date) {
+    try {
+        localStorage.setItem(DAILY_BONUS_KEY, JSON.stringify({ date: date }));
+    } catch (e) { /* localStorage unavailable, silently fail */ }
+}
+
+// A device with no saved state yet may be about to receive a cloud restore
+// (js/cloudsave.js), which only happens while the local stack looks untouched.
+// Granting first would make the stack look played and block the restore, so
+// the grant waits; maybeRestoreCloudState() calls back in once it has settled.
+function dailyBonusMustWaitForCloud() {
+    try {
+        if (localStorage.getItem('vp_game_state')) return false;
+    } catch (e) {
+        return false;
+    }
+    return !!(window.localStateIsFresh && localStateIsFresh());
+}
+
+function grantDailyBonus(amount) {
+    balance += amount;
+    referralBonusTotal += amount;
+    saveReferralBonusTotal();
+    if (window.ensureDailyBaseline) {
+        ensureDailyBaseline();
+        dailyProgress.baseline += amount;
+        saveDailyProgress();
+    }
+    const balanceEl = document.getElementById('balance');
+    if (balanceEl) balanceEl.textContent = formatNumber(balance);
+    if (window.saveGameState) saveGameState();
+    if (window.pushNetProfit) pushNetProfit();
+}
+
+// Idempotent per day: safe to call at boot and again after a cloud restore.
+function maybeGrantDailyBonus() {
+    const today = vpTodayKey();
+    if (loadDailyBonusDate() === today) return false;
+    if (dailyBonusMustWaitForCloud()) return false;
+    grantDailyBonus(DAILY_BONUS_CHIPS);
+    saveDailyBonusDate(today);
+    if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.dailyBonusClaimed, { amount: DAILY_BONUS_CHIPS });
+    showToast(t('toast.dailyBonus', { amount: formatNumber(DAILY_BONUS_CHIPS) }));
+    return true;
+}
+
+window.maybeGrantDailyBonus = maybeGrantDailyBonus;
+
+
 /* --- js/cloudsave.js --- */
 // Cloud backup of the local chip stack — makes onboarding's "never lose your
 // chips" promise true. localStorage stays the source of truth while playing;
@@ -13692,6 +14543,8 @@ function maybeRestoreCloudState(userDoc) {
     if (!cloud || typeof cloud.balance !== 'number') {
         // Nothing in the cloud yet — seed it from whatever this device holds.
         schedulePushCloudState();
+        // The boot-time grant deferred to this check; nothing to restore, so pay it now.
+        if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
         return;
     }
     if (!localStateIsFresh()) {
@@ -13724,10 +14577,13 @@ function maybeRestoreCloudState(userDoc) {
     if (window.updateStats) updateStats();
     if (window.pushNetProfit) pushNetProfit();
     showToast(t('toast.cloudRestored', { amount: formatNumber(balance) }));
+    // The boot-time grant deferred so it would not block this restore (js/daily-bonus.js).
+    if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
 }
 
 window.schedulePushCloudState = schedulePushCloudState;
 window.maybeRestoreCloudState = maybeRestoreCloudState;
+window.localStateIsFresh = localStateIsFresh;
 
 
 /* --- js/rooms.js --- */
@@ -13915,6 +14771,7 @@ function _doCreateRoom(name, stake, callback) {
                 netProfit: balance - netProfitBaseline(),
                 bestStreak: bestStreak
             }).then(function() {
+                if (window.logVpEvent) logVpEvent('room_created', { stake: stake });
                 if (callback) callback(code);
                 // Refresh myRooms first so the picker can find the new room,
                 // then go straight into inviting friends.
@@ -13962,7 +14819,7 @@ function createRoomInline() {
 // this read #room-code-input directly, which forced the deep-link path to stuff
 // the code into a hidden DOM node before calling it — and silently lost the
 // code whenever that input wasn't in the DOM.
-function joinRoomByCode(code) {
+function joinRoomByCode(code, via) {
     const user = window.egUser;
     if (!user) { openSignInModal(); return Promise.resolve(false); }
     code = (code || '').trim().toUpperCase();
@@ -13996,7 +14853,10 @@ function joinRoomByCode(code) {
 
             return roster.then(function() {
                 closeRoomModal();
-                if (!alreadyMember) showToast(t('toast.joinedRoom', { name: roomName }));
+                if (!alreadyMember) {
+                    showToast(t('toast.joinedRoom', { name: roomName }));
+                    if (window.logVpEvent) logVpEvent('room_joined', { via: via || 'code' });
+                }
                 return loadMyRooms().then(function() {
                     openRoomDetail(roomDoc.id);
                     return true;
@@ -14125,11 +14985,26 @@ function renderRoomInvitePickerRows(room) {
         return;
     }
 
-    candidates.forEach(function(f) {
+    // Online friends first — someone who could actually play right now is
+    // the best person to invite. Filter is a stable partition, so within each
+    // group friendsList's own net-profit order (js/friends.js) is preserved.
+    function friendIsOnline(f) { return typeof isOnline === 'function' && isOnline(f.lastSeen); }
+    const online = candidates.filter(friendIsOnline);
+    const offline = candidates.filter(function(f) { return !friendIsOnline(f); });
+    if (online.length) {
+        listEl.appendChild(roomEl('div', 'rip-section-label', t('room.onlineNowCount', { n: online.length })));
+    }
+
+    online.concat(offline).forEach(function(f) {
         const invited = !!roomInviteAlreadySent[f.uid];
         const row = roomEl('div', 'rip-row' + (roomInviteSelection[f.uid] ? ' selected' : '') + (invited ? ' invited' : ''));
 
+        const avatarWrap = roomEl('span', 'rip-avatar-wrap');
         const avatar = roomEl('span', 'rip-avatar', (f.displayName || '?').charAt(0).toUpperCase());
+        const dot = roomEl('span', 'online-dot' + (friendIsOnline(f) ? '' : ' offline'));
+        avatarWrap.appendChild(avatar);
+        avatarWrap.appendChild(dot);
+
         const name = roomEl('span', 'rip-name', f.displayName || t('common.player'));
         const check = roomEl('span', 'rip-check', invited ? 'Invited' : (roomInviteSelection[f.uid] ? '✓' : ''));
 
@@ -14141,7 +15016,7 @@ function renderRoomInvitePickerRows(room) {
             };
         }
 
-        row.appendChild(avatar);
+        row.appendChild(avatarWrap);
         row.appendChild(name);
         row.appendChild(check);
         listEl.appendChild(row);
@@ -14177,6 +15052,7 @@ function sendRoomInvites() {
             });
         })).then(function() {
             showToast(t('toast.invitesSent'));
+            if (window.logVpEvent) logVpEvent('room_invites_sent', { count: uids.length });
             closeSheet('room-invite-sheet');
             roomInviteSelection = {};
         });
@@ -14212,30 +15088,42 @@ function cleanupRoomInvites() {
     updateRoomInviteBadges();
 }
 
+// A DOM node can only live in one place, so a fresh banner is built per
+// container rather than appending the same node twice.
+function buildRoomInviteBanner(inv) {
+    const banner = roomEl('div', 'room-invite-banner');
+
+    const text = roomEl('div', 'rib-text');
+    text.appendChild(roomEl('span', 'rib-from', inv.fromName || 'A friend'));
+    text.appendChild(document.createTextNode(' invited you to '));
+    text.appendChild(roomEl('span', 'rib-room', inv.roomName || 'a room'));
+    text.appendChild(roomEl('div', 'rib-meta', 'Buy-in ' + (inv.stake || 10)));
+
+    const actions = roomEl('div', 'rib-actions');
+    const accept = roomEl('button', 'rib-accept', 'Join');
+    accept.onclick = function() { acceptRoomInvite(inv.id); };
+    const decline = roomEl('button', 'rib-decline', 'Decline');
+    decline.onclick = function() { declineRoomInvite(inv.id); };
+    actions.appendChild(accept);
+    actions.appendChild(decline);
+
+    banner.appendChild(text);
+    banner.appendChild(actions);
+    return banner;
+}
+
+// Renders into the Friends -> Poker Rooms tab (original) and into
+// #duel-banners on the Play screen: previously a pending invite was only
+// ever visible if the player happened to open Friends and switch to the
+// Poker Rooms sub-tab, so nobody outside that one screen ever saw one.
 function renderRoomInviteBanners() {
-    const el = document.getElementById('friends-room-invites');
-    if (!el) return;
-    el.innerHTML = '';
-    incomingRoomInvites.forEach(function(inv) {
-        const banner = roomEl('div', 'room-invite-banner');
-
-        const text = roomEl('div', 'rib-text');
-        text.appendChild(roomEl('span', 'rib-from', inv.fromName || 'A friend'));
-        text.appendChild(document.createTextNode(' invited you to '));
-        text.appendChild(roomEl('span', 'rib-room', inv.roomName || 'a room'));
-        text.appendChild(roomEl('div', 'rib-meta', 'Buy-in ' + (inv.stake || 10)));
-
-        const actions = roomEl('div', 'rib-actions');
-        const accept = roomEl('button', 'rib-accept', 'Join');
-        accept.onclick = function() { acceptRoomInvite(inv.id); };
-        const decline = roomEl('button', 'rib-decline', 'Decline');
-        decline.onclick = function() { declineRoomInvite(inv.id); };
-        actions.appendChild(accept);
-        actions.appendChild(decline);
-
-        banner.appendChild(text);
-        banner.appendChild(actions);
-        el.appendChild(banner);
+    ['friends-room-invites', 'duel-banners'].forEach(function(containerId) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        el.innerHTML = '';
+        incomingRoomInvites.forEach(function(inv) {
+            el.appendChild(buildRoomInviteBanner(inv));
+        });
     });
 }
 
@@ -14252,15 +15140,22 @@ function updateRoomInviteBadges() {
 function acceptRoomInvite(inviteId) {
     const inv = incomingRoomInvites.find(function(i) { return i.id === inviteId; });
     if (!inv) return;
-    joinRoomByCode(inv.roomCode).then(function(ok) {
-        // If the room is gone, joinRoomByCode already toasted — mark the invite
-        // declined either way so the banner doesn't linger.
+    joinRoomByCode(inv.roomCode, 'invite').then(function(result) {
+        // joinRoomByCode resolves exactly three ways: true (joined), false (the
+        // room genuinely no longer exists — a real decline), or null (network
+        // or rules failure via firebaseSafe, already toasted inside
+        // joinRoomByCode). The old code coerced null to "declined" too, so a
+        // transient blip permanently lost the invite — the recipient rule only
+        // allows one pending -> * transition, so it could never be re-accepted.
+        // Leave it pending on null and let the player just retry.
+        if (result === null) return;
         firebaseSafe(function() {
             return db.collection('roomInvites').doc(inviteId).update({
-                status: ok ? 'accepted' : 'declined',
+                status: result ? 'accepted' : 'declined',
                 respondedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         });
+        if (window.logVpEvent) logVpEvent('room_invite_' + (result ? 'accepted' : 'declined'));
     });
 }
 
@@ -14271,6 +15166,7 @@ function declineRoomInvite(inviteId) {
             respondedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
     });
+    if (window.logVpEvent) logVpEvent('room_invite_declined');
 }
 
 if (window.vpOnLanguageChange) {
@@ -14607,25 +15503,8 @@ const BOT_POOL = [
     { name: 'Salim W.',    country: 'OM' }
 ];
 
-function botHashSeed(str) {
-    let h = 0x811c9dc5;
-    for (let i = 0; i < str.length; i++) {
-        h ^= str.charCodeAt(i);
-        h = Math.imul(h, 0x01000193);
-    }
-    return h >>> 0;
-}
-
-function botMulberry32(seed) {
-    let a = seed >>> 0;
-    return function() {
-        a |= 0; a = (a + 0x6D2B79F5) | 0;
-        let t = Math.imul(a ^ (a >>> 15), 1 | a);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-}
-
+// fnv1aHash/mulberry32 now live in js/prng.js (extracted so js/duel-deck.js
+// can seed a duel's deck with the exact same generator).
 function botRandBetween(rand, min, max) {
     return min + rand() * (max - min);
 }
@@ -14643,7 +15522,7 @@ function botUidFor(profile) {
 // Deterministic per-player, per-period roster with seeded personalities.
 function createBotState(boardType, periodKey) {
     const uid = window.egUser ? window.egUser.uid : '';
-    const rand = botMulberry32(botHashSeed(periodKey + '|' + boardType + '|' + uid));
+    const rand = mulberry32(fnv1aHash(periodKey + '|' + boardType + '|' + uid));
     const pool = BOT_POOL.slice();
     for (let i = pool.length - 1; i > 0; i--) {
         const j = Math.floor(rand() * (i + 1));
@@ -15483,7 +16362,7 @@ function copyInviteSheetLink() {
     const linkEl = document.getElementById('invite-sheet-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const copyBtn = document.getElementById('invite-sheet-copy');
-    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'copy' });
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'copy', kind: 'friend' });
     copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
 }
 
@@ -15545,7 +16424,7 @@ function allInUnlockInvite() {
 // The invite sheet's "More…" chip — everything beyond WhatsApp/Telegram goes
 // through the OS share sheet.
 function shareInviteMore() {
-    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native' });
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native', kind: 'friend' });
     shareViaNative(t('share.appNameFull'), friendInviteMessage(), sheetLink('invite-sheet-link'))
         .then(function(handled) {
             if (!handled) showToast(t('toast.useCopyShare'));
@@ -15576,8 +16455,8 @@ function fallbackCopySheet(text, onCopied) {
 // Telegram takes the link and the message as separate parameters, so the
 // message passed in here must never already contain the link — otherwise the
 // share preview repeats it.
-function openShareChannel(channel, message, link) {
-    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: channel });
+function openShareChannel(channel, message, link, kind) {
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: channel, kind: kind || 'friend' });
     let url;
     if (channel === 'telegram') {
         url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
@@ -15585,7 +16464,8 @@ function openShareChannel(channel, message, link) {
     } else {
         url = 'https://wa.me/?text=' + encodeURIComponent(message + '\n' + link);
     }
-    window.open(url, '_blank');
+    const win = window.open(url, '_blank');
+    if (!win) showToast(t('toast.useCopyShare'));
 }
 
 function sheetLink(id) {
@@ -15609,11 +16489,11 @@ function friendInviteMessage() {
 }
 
 function shareFriendInviteViaWhatsApp() {
-    openShareChannel('whatsapp', friendInviteMessage(), sheetLink('invite-sheet-link'));
+    openShareChannel('whatsapp', friendInviteMessage(), sheetLink('invite-sheet-link'), 'friend');
 }
 
 function shareFriendInviteViaTelegram() {
-    openShareChannel('telegram', friendInviteMessage(), sheetLink('invite-sheet-link'));
+    openShareChannel('telegram', friendInviteMessage(), sheetLink('invite-sheet-link'), 'friend');
 }
 
 // --- Room invite sheet: share-link half ---
@@ -15642,6 +16522,7 @@ function copyRoomLink() {
     const linkEl = document.getElementById('room-invite-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const copyBtn = document.getElementById('room-invite-copy');
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'copy', kind: 'room' });
     copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
 }
 
@@ -15653,6 +16534,7 @@ function roomInviteMessage() {
 }
 
 function shareRoomInviteNative() {
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native', kind: 'room' });
     shareViaNative(t('share.appNameFull'), roomInviteMessage(), sheetLink('room-invite-link'))
         .then(function(handled) {
             if (!handled) showToast(t('toast.useCopyShare'));
@@ -15660,11 +16542,11 @@ function shareRoomInviteNative() {
 }
 
 function shareRoomViaWhatsApp() {
-    openShareChannel('whatsapp', roomInviteMessage(), sheetLink('room-invite-link'));
+    openShareChannel('whatsapp', roomInviteMessage(), sheetLink('room-invite-link'), 'room');
 }
 
 function shareRoomViaTelegram() {
-    openShareChannel('telegram', roomInviteMessage(), sheetLink('room-invite-link'));
+    openShareChannel('telegram', roomInviteMessage(), sheetLink('room-invite-link'), 'room');
 }
 
 // --- Big-win brag sheet (signed-in users) ---
@@ -15735,9 +16617,11 @@ function handleJoinDeepLink() {
         // settled yet — by the onAuthStateChanged handler in js/firebase.js.
         window._pendingJoinCode = joinCode;
 
+        if (window.logVpEvent) logVpEvent('invite_link_opened', { kind: 'room' });
+
         if (window.egUser) {
             window._pendingJoinCode = null;
-            joinRoomByCode(joinCode);
+            joinRoomByCode(joinCode, 'link');
         } else if (window._authResolved) {
             // Auth has settled and there is genuinely no user.
             openSignInModal();
@@ -15751,79 +16635,11 @@ function handleJoinDeepLink() {
 
 
 /* --- js/game.js --- */
-const SUITS = ['♠', '♥', '♦', '♣'];
-const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-
-const PAYTABLES = {
-    jacks: {
-        'Royal Flush': 250,
-        'Straight Flush': 50,
-        'Four of a Kind': 20,
-        'Full House': 7,
-        'Flush': 5,
-        'Straight': 4,
-        'Three of a Kind': 3,
-        'Two Pair': 2,
-        'Jacks or Better': 1,
-        'Nothing': 0
-    },
-    deuces: {
-        'Royal Flush': 250,
-        'Four Deuces': 200,
-        'Wild Royal Flush': 25,
-        'Five of a Kind': 15,
-        'Straight Flush': 9,
-        'Four of a Kind': 5,
-        'Full House': 3,
-        'Flush': 2,
-        'Straight': 2,
-        'Three of a Kind': 1,
-        'Nothing': 0
-    },
-    bonus: {
-        'Royal Flush': 250,
-        'Straight Flush': 50,
-        'Four Aces': 80,
-        'Four 2s-4s': 40,
-        'Four 5s-Ks': 25,
-        'Full House': 8,
-        'Flush': 5,
-        'Straight': 4,
-        'Three of a Kind': 3,
-        'Two Pair': 2,
-        'Jacks or Better': 1,
-        'Nothing': 0
-    },
-    doubleBonus: {
-        'Royal Flush': 250,
-        'Straight Flush': 50,
-        'Four Aces': 160,
-        'Four 2s-4s': 80,
-        'Four 5s-Ks': 50,
-        'Full House': 10,
-        'Flush': 7,
-        'Straight': 5,
-        'Three of a Kind': 3,
-        'Two Pair': 1,
-        'Jacks or Better': 1,
-        'Nothing': 0
-    }
-};
-
-const HAND_ORDERS = {
-    jacks: ['Royal Flush', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
-    deuces: ['Royal Flush', 'Four Deuces', 'Wild Royal Flush', 'Five of a Kind', 'Straight Flush', 'Four of a Kind', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Nothing'],
-    bonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing'],
-    doubleBonus: ['Royal Flush', 'Straight Flush', 'Four Aces', 'Four 2s-4s', 'Four 5s-Ks', 'Full House', 'Flush', 'Straight', 'Three of a Kind', 'Two Pair', 'Jacks or Better', 'Nothing']
-};
-
-const HAND_RANK = {
-    'Nothing': 0, 'Jacks or Better': 1, 'Two Pair': 2, 'Three of a Kind': 3,
-    'Straight': 4, 'Flush': 5, 'Full House': 6, 'Four of a Kind': 7,
-    'Straight Flush': 8, 'Royal Flush': 9,
-    'Five of a Kind': 7, 'Wild Royal Flush': 8, 'Four Deuces': 8,
-    'Four 5s-Ks': 7, 'Four 2s-4s': 7, 'Four Aces': 7
-};
+// SUITS, RANKS, PAYTABLES, HAND_ORDERS, HAND_RANK, createDeck, evaluateHand,
+// evaluateDeucesHand and evaluateWithVariant now live in js/hand-eval.js
+// (loaded earlier in build.js, before this file) — this module still owns
+// everything state-related: which variant is selected, current payouts,
+// and unlock levels.
 
 // Variants unlock as the player's local level rises — gives leveling a purpose
 const VARIANT_MIN_LEVEL = { jacks: 1, deuces: 3, bonus: 8, doubleBonus: 15 };
@@ -16045,7 +16861,7 @@ function getAllInDailyLimit() {
 function loadAllInUsage() {
     try {
         const raw = JSON.parse(localStorage.getItem('vp_allin_usage'));
-        allInUsesToday = (raw && raw.date === new Date().toDateString()) ? (raw.count || 0) : 0;
+        allInUsesToday = (raw && raw.date === vpTodayKey()) ? (raw.count || 0) : 0;
     } catch (e) {
         allInUsesToday = 0;
     }
@@ -16062,7 +16878,7 @@ function syncLastPlayedDate() {
 
 function saveAllInUsage() {
     try {
-        localStorage.setItem('vp_allin_usage', JSON.stringify({ date: new Date().toDateString(), count: allInUsesToday }));
+        localStorage.setItem('vp_allin_usage', JSON.stringify({ date: vpTodayKey(), count: allInUsesToday }));
     } catch (e) { /* localStorage unavailable, silently fail */ }
 }
 
@@ -16251,16 +17067,7 @@ function updateTotalBetDisplay() {
     if (el) el.textContent = bet * multiHandCount;
 }
 
-function createDeck() {
-    const d = [];
-    for (let suit of SUITS) {
-        for (let rank of RANKS) {
-            d.push({ rank, suit });
-        }
-    }
-    return d;
-}
-
+// createDeck() now lives in js/hand-eval.js.
 function shuffle(deck) {
     for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -16443,6 +17250,11 @@ function deal() {
     resultEl.textContent = t('play.handPlaceholder');
     document.getElementById('explanation').innerHTML = '';
     if (window.vpRenderHints) vpRenderHints();
+    if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.handStarted, {
+        variant: gameVariant,
+        hands: multiHandCount,
+        bet: bet
+    });
     triggerHaptic('MEDIUM');
 }
 
@@ -16503,6 +17315,8 @@ function draw() {
     handsPlayed++;
     addLifetimeHand();
     recordAllTimeHand(win, totalBet, winStreak > bestStreak ? winStreak : bestStreak);
+    // A Straight or better counts toward the one-time in-app review ask (js/review.js).
+    if (win > 0 && (HAND_RANK[bestType] || 0) >= 4 && window.vpOnQualityWin) vpOnQualityWin();
 
     if (win > 0) {
         totalWon += win;
@@ -16522,6 +17336,12 @@ function draw() {
         }
     }
     if (window.pushDailyScore) pushDailyScore(bestType, win, totalBet);
+    if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.handCompleted, {
+        variant: gameVariant,
+        hands: multiHandCount,
+        result: handType,
+        won: win > 0
+    });
     renderMultiHands(extraResults);
     updateStats();
     renderPayouts();
@@ -16530,10 +17350,6 @@ function draw() {
 
     if (win === 0) {
         document.getElementById('balance').textContent = formatNumber(balance);
-        playSound('loss');
-    } else {
-        triggerWinCelebration(bestType, win);
-        triggerHaptic('HEAVY');
     }
     // A rare hand or a fresh balance high is the emotional peak — the one
     // moment worth spending a prompt on. Guest → sign-in nudge; signed-in →
@@ -16577,7 +17393,14 @@ function draw() {
         document.getElementById('explanation').textContent = vpHandExplanation(handType);
     }
 
-    renderHand(winIndices, thirdMatchIndices, secondPairIndices, true);
+    renderHand(winIndices, thirdMatchIndices, secondPairIndices, true, true, function() {
+        if (win === 0) {
+            playSound('loss');
+        } else {
+            triggerWinCelebration(bestType, win);
+            triggerHaptic('HEAVY');
+        }
+    });
 
     gameState = 'bet';
     if (betBeforeAllIn !== null) {
@@ -16630,21 +17453,26 @@ function getWinBadgeText(cardIndex, handType) {
 // re-rendering is the only way to translate them without waiting for a deal.
 let lastRenderHandArgs = null;
 
-function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false, animateFlip = true) {
+function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false, animateFlip = true, onFlipsComplete = null) {
     lastRenderHandArgs = [winningIndices, thirdMatchIndices, secondPairIndices, isDraw, false];
     const handEl = document.getElementById('hand');
     handEl.innerHTML = '';
     const anyHeld = held.some(h => h);
+    let flippingCount = 0;
 
     hand.forEach((card, i) => {
         const cardEl = document.createElement('div');
         const isResult = winningIndices.length > 0 || thirdMatchIndices.length > 0 || secondPairIndices.length > 0;
 
         const shouldStartFlipped = animateFlip && (isDraw ? !held[i] : true);
+        if (shouldStartFlipped) flippingCount++;
 
         const isHeld = !isResult && held[i];
         const isUnheld = !isResult && anyHeld && !held[i];
-        let classes = `card ${shouldStartFlipped ? 'flipped' : ''} ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
+        // A card still showing its back has nothing to reveal yet — the win
+        // badge and highlight wait for 'revealed', added when this card's own
+        // flip starts, so they never flash above a face-down card.
+        let classes = `card ${shouldStartFlipped ? 'flipped' : 'revealed'} ${isHeld ? 'held' : ''} ${isUnheld ? 'unheld' : ''} ${card.suit === '♥' || card.suit === '♦' ? 'red' : ''}`;
 
         if (winningIndices.includes(i)) classes += ' winning';
         if (secondPairIndices.includes(i)) classes += ' second-pair';
@@ -16695,8 +17523,9 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
     const placeholder = document.getElementById('hand-placeholder-text');
     if (placeholder) placeholder.classList.toggle('hidden', hand.length > 0);
 
-    if (animateFlip) {
+    if (animateFlip && flippingCount > 0) {
         let flipDelayIndex = 0;
+        let flipsFinished = 0;
         hand.forEach((card, i) => {
             const cardEl = handEl.children[i];
             if (cardEl && cardEl.classList.contains('flipped')) {
@@ -16706,167 +17535,46 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
                         inner.classList.add('animating');
                         cardEl.classList.remove('flipped');
                         playSound('deal');
+                        triggerHaptic('LIGHT');
+                        // 'revealed' (and the win effects it gates) must wait for the
+                        // card-inner's own rotateY transition to actually finish —
+                        // adding it at flip-start left the gold glow/badge popping in
+                        // ~1.1s before the card had visually turned to face up.
+                        let settled = false;
+                        const settle = () => {
+                            if (settled) return;
+                            settled = true;
+                            cardEl.classList.add('revealed');
+                            flipsFinished++;
+                            if (flipsFinished === flippingCount && onFlipsComplete) onFlipsComplete();
+                        };
                         setTimeout(() => {
                             inner.classList.remove('animating');
+                            inner.addEventListener('transitionend', function onFlipEnd(e) {
+                                if (e.propertyName !== 'transform') return;
+                                inner.removeEventListener('transitionend', onFlipEnd);
+                                settle();
+                            });
+                            setTimeout(settle, 550);
                         }, 600);
                     }
                 }, flipDelayIndex * 250);
                 flipDelayIndex++;
             }
         });
+    } else if (onFlipsComplete) {
+        onFlipsComplete();
     }
 
     if (window.vpApplyHintClasses && gameState === 'hold') vpApplyHintClasses();
 }
 
-function evaluateHand(hand) {
-    const ranks = hand.map(c => c.rank);
-    const suits = hand.map(c => c.suit);
-
-    const rankCounts = {};
-    ranks.forEach(r => rankCounts[r] = (rankCounts[r] || 0) + 1);
-    const counts = Object.values(rankCounts).sort((a, b) => b - a);
-
-    const flush = new Set(suits).size === 1;
-
-    let values = ranks.map(r => {
-        if (r === 'A') return 14;
-        if (r === 'J') return 11;
-        if (r === 'Q') return 12;
-        if (r === 'K') return 13;
-        return parseInt(r);
-    }).sort((a, b) => a - b);
-
-    let straight = false;
-    const uniqueValues = [...new Set(values)];
-    if (uniqueValues.length === 5) {
-        if (uniqueValues[4] - uniqueValues[0] === 4) {
-            straight = true;
-        } else if (uniqueValues.join(',') === '2,3,4,5,14') {
-            straight = true;
-            values = [1, 2, 3, 4, 5];
-        }
-    }
-
-    const findIndices = (targetRanks) => {
-        return hand.map((card, i) => targetRanks.includes(card.rank) ? i : -1).filter(i => i !== -1);
-    };
-
-    const findIndicesByCount = (targetCount) => {
-        const targetRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === targetCount);
-        return findIndices(targetRanks);
-    };
-
-    const allIndices = [0, 1, 2, 3, 4];
-    let result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] };
-
-    if (straight && flush) {
-        if (values.join(',') === '10,11,12,13,14') {
-            result.type = 'Royal Flush';
-        } else {
-            result.type = 'Straight Flush';
-        }
-        result.winIndices = allIndices;
-    } else if (counts[0] === 4) {
-        result.type = 'Four of a Kind';
-        result.winIndices = findIndicesByCount(4);
-    } else if (counts[0] === 3 && counts[1] === 2) {
-        result.type = 'Full House';
-        const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
-        const twoRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
-        result.winIndices = findIndices([threeRank]);
-        result.secondPairIndices = findIndices([twoRank]);
-    } else if (flush) {
-        result.type = 'Flush';
-        result.winIndices = allIndices;
-    } else if (straight) {
-        result.type = 'Straight';
-        result.winIndices = allIndices;
-    } else if (counts[0] === 3) {
-        result.type = 'Three of a Kind';
-        result.winIndices = findIndicesByCount(3);
-        const threeRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
-        const threeIndices = findIndices([threeRank]);
-        if (threeRank === 'J' && threeIndices.length > 0) {
-            result.thirdMatchIndices.push(threeIndices[0]);
-        }
-    } else if (counts[0] === 2 && counts[1] === 2) {
-        const pairRanks = Object.keys(rankCounts).filter(r => rankCounts[r] === 2);
-        result.type = 'Two Pair';
-        result.winIndices = findIndices([pairRanks[0]]);
-        result.secondPairIndices = findIndices([pairRanks[1]]);
-    } else if (counts[0] === 2) {
-        const pairRank = Object.keys(rankCounts).find(r => rankCounts[r] === 2);
-        if (['J', 'Q', 'K', 'A'].includes(pairRank)) {
-            result.type = 'Jacks or Better';
-            result.winIndices = findIndices([pairRank]);
-        }
-    }
-    return result;
-}
-
+// evaluateHand() and evaluateDeucesHand() now live in js/hand-eval.js.
+// This wrapper just supplies this module's own gameVariant to the
+// variant-explicit evaluateWithVariant() — every existing call site
+// (evaluateForVariant(hand) in draw(), etc.) is unchanged.
 function evaluateForVariant(h) {
-    if (gameVariant === 'deuces') return evaluateDeucesHand(h);
-    const result = evaluateHand(h);
-    if (result.type === 'Four of a Kind' && (gameVariant === 'bonus' || gameVariant === 'doubleBonus')) {
-        const rankCounts = {};
-        h.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
-        const quadRank = Object.keys(rankCounts).find(r => rankCounts[r] === 4);
-        if (quadRank === 'A') result.type = 'Four Aces';
-        else if (['2', '3', '4'].includes(quadRank)) result.type = 'Four 2s-4s';
-        else result.type = 'Four 5s-Ks';
-    }
-    return result;
-}
-
-// Deuces Wild: 2s substitute for any card. Minimum paying hand is Three of a Kind.
-function evaluateDeucesHand(hand) {
-    const allIndices = [0, 1, 2, 3, 4];
-    const result = { type: 'Nothing', winIndices: [], thirdMatchIndices: [], secondPairIndices: [] };
-    const others = hand.filter(c => c.rank !== '2');
-    const n = 5 - others.length;
-
-    if (n === 4) {
-        result.type = 'Four Deuces';
-        result.winIndices = allIndices;
-        return result;
-    }
-
-    const rankCounts = {};
-    others.forEach(c => rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1);
-    const counts = Object.values(rankCounts).sort((a, b) => b - a);
-    const maxCount = counts[0] || 0;
-    const flush = new Set(others.map(c => c.suit)).size <= 1;
-    const vals = others.map(c =>
-        c.rank === 'A' ? 14 : c.rank === 'J' ? 11 : c.rank === 'Q' ? 12 : c.rank === 'K' ? 13 : parseInt(c.rank));
-    const distinct = new Set(vals).size === others.length;
-
-    const fitsWindow = arr => arr.length === 0 || (Math.max(...arr) - Math.min(...arr) <= 4);
-    const straight = distinct && (fitsWindow(vals) || (vals.includes(14) && fitsWindow(vals.map(v => v === 14 ? 1 : v))));
-    const allRoyalVals = distinct && vals.every(v => v >= 10);
-
-    if (n === 0 && flush && straight && Math.min(...vals) === 10) {
-        result.type = 'Royal Flush';
-    } else if (n > 0 && flush && allRoyalVals) {
-        result.type = 'Wild Royal Flush';
-    } else if (maxCount + n >= 5) {
-        result.type = 'Five of a Kind';
-    } else if (flush && straight) {
-        result.type = 'Straight Flush';
-    } else if (maxCount + n >= 4) {
-        result.type = 'Four of a Kind';
-    } else if ((maxCount === 3 && counts[1] === 2) || (n === 1 && maxCount === 2 && counts[1] === 2)) {
-        result.type = 'Full House';
-    } else if (flush) {
-        result.type = 'Flush';
-    } else if (straight) {
-        result.type = 'Straight';
-    } else if (maxCount + n >= 3) {
-        result.type = 'Three of a Kind';
-    }
-
-    if (result.type !== 'Nothing') result.winIndices = allIndices;
-    return result;
+    return evaluateWithVariant(h, gameVariant);
 }
 
 function updateStats() {
@@ -17469,6 +18177,7 @@ function showScreen(name) {
         if (nav) nav.classList.toggle('active', s === name);
     });
     if (name === 'stats') renderStatsScreen();
+    if (name === 'leaderboard' && window.logVpEvent) logVpEvent(VP_ASO_EVENTS.leaderboardViewed);
     if (name === 'friends') {
         renderFriendsScreen();
         // Room list is a one-shot .get(); refresh member counts on every visit
@@ -17689,10 +18398,12 @@ function initNativeDeepLinkHandling() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    if (window.initVpAnalytics) initVpAnalytics();
     applyTheme();
     initSound();
     initVoice();
     initGame();
+    if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
     initSettingsScreen();
     updateHintButtonUI();
     updateAccountUI();

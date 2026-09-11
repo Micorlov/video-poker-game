@@ -97,7 +97,9 @@ vpRegisterLang('ar', {
     'settings.announcements': 'الإعلانات',
     'settings.enableNotifications': 'تفعيل الإشعارات',
     'settings.resetStats': 'إعادة ضبط الإحصائيات',
-    'settings.footer': 'فيديو بوكر · v2.1',
+    'settings.rateGame': 'قيّم هذه اللعبة',
+    'settings.moreGames': 'المزيد من الألعاب من Orlov Games',
+    'settings.footer': 'فيديو بوكر · v2.5',
 
     'variant.jacks': 'ولد أو أفضل',
     'variant.deuces': 'Deuces Wild',
@@ -282,6 +284,7 @@ vpRegisterLang('ar', {
     'room.membersMeta': '{{count}}/{{capacity}} أصدقاء · الرهان {{stake}}',
     'room.sendInvites': 'إرسال الدعوات',
     'room.sendInvitesCount': 'إرسال الدعوات ({{count}})',
+    'room.onlineNowCount': '{{n}} متصل الآن',
 
     'champ.resetsPlaceholder': 'يُعاد الضبط بعد —د',
     'champ.noChampionsYet': 'لا أبطال في هذه الساعة بعد — كن الأول!',
@@ -325,6 +328,7 @@ vpRegisterLang('ar', {
     'toast.unlockLevel': '🔒 يُفتح عند المستوى {{level}}',
     'toast.multiHandUnlock': '🔒 تعدد الأيدي يُفتح عند المستوى {{level}}',
     'toast.rebuy': '♻ ‎+{{amount}} رصيد',
+    'toast.dailyBonus': 'المكافأة اليومية: ‎+{{amount}} رقاقة مجانية!',
     'toast.noAllInLeft': '⛔ لم تعد لديك رهانات بكل الرصيد — عد غدًا!',
     'toast.allInGoodLuck': '🔥 كل الرصيد — بالتوفيق!',
     'toast.statsReset': 'أُعيد ضبط الإحصائيات',

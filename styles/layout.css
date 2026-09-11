@@ -51,8 +51,8 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px 2px rgba(22, 193, 114, 0.7);
+    background: var(--action);
+    box-shadow: 0 0 8px 2px rgba(var(--action-rgb), 0.7);
     flex-shrink: 0;
 }
 
@@ -192,8 +192,8 @@
 }
 
 .nav-btn.active {
-    color: var(--green);
-    background: var(--green-dim);
+    color: var(--action);
+    background: var(--action-dim);
     font-weight: 700;
 }
 
@@ -211,7 +211,7 @@
    ========================================================================= */
 @media (min-width: 620px) {
     html {
-        background: #05100D;
+        background: var(--bg-edge);
     }
 
     body {

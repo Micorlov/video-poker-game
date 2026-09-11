@@ -97,7 +97,9 @@ vpRegisterLang('he', {
     'settings.announcements': 'הודעות',
     'settings.enableNotifications': 'הפעלת התראות',
     'settings.resetStats': 'איפוס הסטטיסטיקה',
-    'settings.footer': 'וידאו פוקר · v2.1',
+    'settings.rateGame': 'דרגו את המשחק',
+    'settings.moreGames': 'עוד משחקים מבית Orlov Games',
+    'settings.footer': 'וידאו פוקר · v2.5',
 
     'variant.jacks': 'נסיכים ומעלה',
     'variant.deuces': 'Deuces Wild',
@@ -282,6 +284,7 @@ vpRegisterLang('he', {
     'room.membersMeta': '{{count}}/{{capacity}} חברים · הימור {{stake}}',
     'room.sendInvites': 'שליחת הזמנות',
     'room.sendInvitesCount': 'שליחת הזמנות ({{count}})',
+    'room.onlineNowCount': '{{n}} מחוברים עכשיו',
 
     'champ.resetsPlaceholder': 'מתאפס בעוד —דק׳',
     'champ.noChampionsYet': 'אין עדיין אלופים בשעה הזו — היו הראשונים!',
@@ -325,6 +328,7 @@ vpRegisterLang('he', {
     'toast.unlockLevel': '🔒 נפתח ברמה {{level}}',
     'toast.multiHandUnlock': '🔒 ריבוי ידיים נפתח ברמה {{level}}',
     'toast.rebuy': '♻ ‎+{{amount}} קרדיטים',
+    'toast.dailyBonus': 'בונוס יומי: ‎+{{amount}} צ׳יפים חינם!',
     'toast.noAllInLeft': '⛔ נגמרו ההימורים על הכול — חזרו מחר!',
     'toast.allInGoodLuck': '🔥 הכול — בהצלחה!',
     'toast.statsReset': 'הסטטיסטיקה אופסה',

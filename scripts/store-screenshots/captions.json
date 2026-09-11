@@ -1,115 +1,130 @@
 {
   "en": [
-    { "kicker": "Classic video poker", "l1": "Jacks or Better,", "l2": "played properly." },
+    { "kicker": "Free video poker", "l1": "No ads. No real money.", "l2": "Just five cards." },
+    { "kicker": "Deuces Wild", "l1": "Every 2 is wild.", "l2": "Chase Four Deuces." },
+    { "kicker": "Triple Play & Five Play", "l1": "Hold once.", "l2": "Draw five hands." },
     { "kicker": "Nine winning hands", "l1": "Hit a Straight.", "l2": "Chase the Royal." },
-    { "kicker": "Play with friends", "l1": "Invite a friend.", "l2": "You both get chips." },
-    { "kicker": "Sixteen languages", "l1": "Plays in your", "l2": "own language." },
-    { "kicker": "Compete worldwide", "l1": "Climb the daily", "l2": "leaderboards." },
-    { "kicker": "Right-to-left too", "l1": "Hebrew and Arabic,", "l2": "fully mirrored." }
+    { "kicker": "Play with friends", "l1": "Live leaderboards.", "l2": "Beat your crew." },
+    { "kicker": "16 languages", "l1": "Plays in your", "l2": "own language." }
   ],
   "es": [
-    { "kicker": "Video póker clásico", "l1": "Jacks or Better,", "l2": "como debe ser." },
+    { "kicker": "Video póker gratis", "l1": "Sin anuncios ni dinero.", "l2": "Solo cinco cartas." },
+    { "kicker": "Deuces Wild", "l1": "Cada 2 es comodín.", "l2": "Busca los cuatro 2." },
+    { "kicker": "Triple Play y Five Play", "l1": "Retén una vez.", "l2": "Juega cinco manos." },
     { "kicker": "Nueve jugadas ganadoras", "l1": "Liga una escalera.", "l2": "Persigue la Real." },
-    { "kicker": "Juega con amigos", "l1": "Invita a un amigo.", "l2": "Ambos ganáis fichas." },
-    { "kicker": "Dieciséis idiomas", "l1": "Juega en", "l2": "tu idioma." },
-    { "kicker": "Compite con el mundo", "l1": "Sube en los rankings", "l2": "diarios." }
+    { "kicker": "Juega con amigos", "l1": "Rankings en vivo.", "l2": "Supera a tu grupo." },
+    { "kicker": "16 idiomas", "l1": "Juega en", "l2": "tu idioma." }
   ],
   "pt-BR": [
-    { "kicker": "Vídeo pôquer clássico", "l1": "Jacks or Better,", "l2": "do jeito certo." },
+    { "kicker": "Vídeo pôquer grátis", "l1": "Sem anúncios. Sem dinheiro.", "l2": "Só cinco cartas." },
+    { "kicker": "Deuces Wild", "l1": "Todo 2 é curinga.", "l2": "Busque os quatro 2." },
+    { "kicker": "Triple Play e Five Play", "l1": "Segure uma vez.", "l2": "Puxe cinco mãos." },
     { "kicker": "Nove mãos vencedoras", "l1": "Acerte uma sequência.", "l2": "Busque o Royal." },
-    { "kicker": "Jogue com amigos", "l1": "Convide um amigo.", "l2": "Os dois ganham fichas." },
-    { "kicker": "Dezesseis idiomas", "l1": "Joga no", "l2": "seu idioma." },
-    { "kicker": "Compita com o mundo", "l1": "Suba nos rankings", "l2": "diários." }
+    { "kicker": "Jogue com amigos", "l1": "Rankings ao vivo.", "l2": "Vença sua turma." },
+    { "kicker": "16 idiomas", "l1": "Joga no", "l2": "seu idioma." }
   ],
   "de": [
-    { "kicker": "Klassisches Video Poker", "l1": "Jacks or Better,", "l2": "richtig gespielt." },
+    { "kicker": "Gratis Video Poker", "l1": "Ohne Werbung, ohne Geld.", "l2": "Nur fünf Karten." },
+    { "kicker": "Deuces Wild", "l1": "Jede 2 ist ein Joker.", "l2": "Jag die vier Zweien." },
+    { "kicker": "Triple Play & Five Play", "l1": "Einmal halten.", "l2": "Fünf Hände ziehen." },
     { "kicker": "Neun Gewinnhände", "l1": "Triff die Straße.", "l2": "Jag den Royal." },
-    { "kicker": "Mit Freunden spielen", "l1": "Lade Freunde ein —", "l2": "ihr beide bekommt Chips." },
-    { "kicker": "Sechzehn Sprachen", "l1": "Spielt in deiner", "l2": "Sprache." },
-    { "kicker": "Weltweit antreten", "l1": "Klettere in den", "l2": "Tages-Ranglisten." }
+    { "kicker": "Mit Freunden spielen", "l1": "Live-Ranglisten.", "l2": "Schlag deine Crew." },
+    { "kicker": "16 Sprachen", "l1": "Spielt in deiner", "l2": "Sprache." }
   ],
   "fr": [
-    { "kicker": "Vidéo poker classique", "l1": "Jacks or Better,", "l2": "dans les règles." },
+    { "kicker": "Vidéo poker gratuit", "l1": "Sans pub. Sans argent.", "l2": "Juste cinq cartes." },
+    { "kicker": "Deuces Wild", "l1": "Chaque 2 est un joker.", "l2": "Visez les quatre 2." },
+    { "kicker": "Triple Play & Five Play", "l1": "Gardez une fois.", "l2": "Tirez cinq mains." },
     { "kicker": "Neuf mains gagnantes", "l1": "Touchez une quinte.", "l2": "Visez la Royale." },
-    { "kicker": "Jouez entre amis", "l1": "Invitez un ami —", "l2": "des jetons pour deux." },
-    { "kicker": "Seize langues", "l1": "Joue dans", "l2": "votre langue." },
-    { "kicker": "Défiez le monde", "l1": "Grimpez au classement", "l2": "quotidien." }
+    { "kicker": "Jouez entre amis", "l1": "Classements en direct.", "l2": "Battez vos amis." },
+    { "kicker": "16 langues", "l1": "Joue dans", "l2": "votre langue." }
   ],
   "it": [
-    { "kicker": "Video poker classico", "l1": "Jacks or Better,", "l2": "come si deve." },
+    { "kicker": "Video poker gratis", "l1": "Zero pubblicità.", "l2": "Zero soldi veri." },
+    { "kicker": "Deuces Wild", "l1": "Ogni 2 è un jolly.", "l2": "Insegui i quattro 2." },
+    { "kicker": "Triple Play e Five Play", "l1": "Tieni una volta.", "l2": "Pesca cinque mani." },
     { "kicker": "Nove mani vincenti", "l1": "Fai scala.", "l2": "Insegui la Reale." },
-    { "kicker": "Gioca con gli amici", "l1": "Invita un amico —", "l2": "fiches per entrambi." },
-    { "kicker": "Sedici lingue", "l1": "Gioca nella", "l2": "tua lingua." },
-    { "kicker": "Sfida il mondo", "l1": "Scala le classifiche", "l2": "giornaliere." }
+    { "kicker": "Gioca con gli amici", "l1": "Classifiche live.", "l2": "Batti i tuoi amici." },
+    { "kicker": "16 lingue", "l1": "Gioca nella", "l2": "tua lingua." }
   ],
   "pl": [
-    { "kicker": "Klasyczny video poker", "l1": "Jacks or Better,", "l2": "jak należy." },
+    { "kicker": "Darmowy video poker", "l1": "Bez reklam. Bez kasy.", "l2": "Tylko pięć kart." },
+    { "kicker": "Deuces Wild", "l1": "Każda 2 to dżoker.", "l2": "Goń cztery dwójki." },
+    { "kicker": "Triple Play i Five Play", "l1": "Zatrzymaj raz.", "l2": "Dobierz pięć rąk." },
     { "kicker": "Dziewięć układów", "l1": "Traf strita.", "l2": "Goń pokera królewskiego." },
-    { "kicker": "Graj ze znajomymi", "l1": "Zaproś znajomego —", "l2": "oboje macie żetony." },
-    { "kicker": "Szesnaście języków", "l1": "Gra w Twoim", "l2": "języku." },
-    { "kicker": "Rywalizuj ze światem", "l1": "Wspinaj się w dziennych", "l2": "rankingach." }
+    { "kicker": "Graj ze znajomymi", "l1": "Rankingi na żywo.", "l2": "Pokonaj ekipę." },
+    { "kicker": "16 języków", "l1": "Gra w Twoim", "l2": "języku." }
   ],
   "ru": [
-    { "kicker": "Классический видеопокер", "l1": "Jacks or Better —", "l2": "как положено." },
+    { "kicker": "Бесплатный видеопокер", "l1": "Без рекламы и денег.", "l2": "Только пять карт." },
+    { "kicker": "Deuces Wild", "l1": "Каждая 2 — джокер.", "l2": "Лови четыре двойки." },
+    { "kicker": "Triple Play и Five Play", "l1": "Держи один раз.", "l2": "Тяни пять рук." },
     { "kicker": "Девять выигрышных рук", "l1": "Собери стрит.", "l2": "Гонись за роялем." },
-    { "kicker": "Играй с друзьями", "l1": "Пригласи друга —", "l2": "фишки получат оба." },
-    { "kicker": "Шестнадцать языков", "l1": "Играет на вашем", "l2": "языке." },
-    { "kicker": "Соревнуйся с миром", "l1": "Поднимайся в дневных", "l2": "рейтингах." }
+    { "kicker": "Играй с друзьями", "l1": "Живые рейтинги.", "l2": "Обойди друзей." },
+    { "kicker": "16 языков", "l1": "Играет на вашем", "l2": "языке." }
   ],
   "tr": [
-    { "kicker": "Klasik video poker", "l1": "Jacks or Better,", "l2": "hakkıyla." },
+    { "kicker": "Ücretsiz video poker", "l1": "Reklam yok. Para yok.", "l2": "Sadece beş kart." },
+    { "kicker": "Deuces Wild", "l1": "Her 2 jokerdir.", "l2": "Dört ikiliyi kovala." },
+    { "kicker": "Triple Play & Five Play", "l1": "Bir kez tut.", "l2": "Beş el çek." },
     { "kicker": "Dokuz kazanan el", "l1": "Kent yakala.", "l2": "Royal'i kovala." },
-    { "kicker": "Arkadaşlarınla oyna", "l1": "Arkadaşını davet et —", "l2": "ikiniz de fiş kazanın." },
-    { "kicker": "On altı dil", "l1": "Kendi dilinde", "l2": "oynar." },
-    { "kicker": "Dünyayla yarış", "l1": "Günlük sıralamalarda", "l2": "yüksel." }
+    { "kicker": "Arkadaşlarınla oyna", "l1": "Canlı sıralamalar.", "l2": "Ekibini geç." },
+    { "kicker": "16 dil", "l1": "Kendi dilinde", "l2": "oynar." }
   ],
   "id": [
-    { "kicker": "Video poker klasik", "l1": "Jacks or Better,", "l2": "dimainkan dengan benar." },
+    { "kicker": "Video poker gratis", "l1": "Tanpa iklan, tanpa uang.", "l2": "Cuma lima kartu." },
+    { "kicker": "Deuces Wild", "l1": "Setiap 2 adalah wild.", "l2": "Kejar empat kartu 2." },
+    { "kicker": "Triple Play & Five Play", "l1": "Tahan sekali.", "l2": "Tarik lima tangan." },
     { "kicker": "Sembilan tangan menang", "l1": "Dapatkan straight.", "l2": "Kejar Royal Flush." },
-    { "kicker": "Main bersama teman", "l1": "Undang teman —", "l2": "kalian berdua dapat chip." },
-    { "kicker": "Enam belas bahasa", "l1": "Main dalam", "l2": "bahasamu." },
-    { "kicker": "Bersaing sedunia", "l1": "Naiki papan peringkat", "l2": "harian." }
+    { "kicker": "Main bersama teman", "l1": "Papan peringkat live.", "l2": "Kalahkan temanmu." },
+    { "kicker": "16 bahasa", "l1": "Main dalam", "l2": "bahasamu." }
   ],
   "hi": [
-    { "kicker": "क्लासिक वीडियो पोकर", "l1": "Jacks or Better,", "l2": "सही अंदाज़ में।" },
+    { "kicker": "मुफ़्त वीडियो पोकर", "l1": "न विज्ञापन, न असली पैसा।", "l2": "बस पाँच पत्ते।" },
+    { "kicker": "Deuces Wild", "l1": "हर 2 वाइल्ड है।", "l2": "चार 2 का पीछा करें।" },
+    { "kicker": "Triple Play और Five Play", "l1": "एक बार होल्ड करें।", "l2": "पाँच हाथ खेलें।" },
     { "kicker": "नौ जीतने वाले हाथ", "l1": "स्ट्रेट बनाएँ।", "l2": "रॉयल का पीछा करें।" },
-    { "kicker": "दोस्तों के साथ खेलें", "l1": "दोस्त को बुलाएँ —", "l2": "दोनों को चिप्स मिलेंगी।" },
-    { "kicker": "सोलह भाषाएँ", "l1": "आपकी अपनी", "l2": "भाषा में।" },
-    { "kicker": "दुनिया से मुक़ाबला", "l1": "दैनिक लीडरबोर्ड में", "l2": "ऊपर चढ़ें।" }
+    { "kicker": "दोस्तों के साथ खेलें", "l1": "लाइव लीडरबोर्ड।", "l2": "दोस्तों को हराएँ।" },
+    { "kicker": "16 भाषाएँ", "l1": "आपकी अपनी", "l2": "भाषा में।" }
   ],
   "ja": [
-    { "kicker": "クラシックビデオポーカー", "l1": "本格の", "l2": "ジャックス・オア・ベター。" },
+    { "kicker": "無料ビデオポーカー", "l1": "広告なし、課金なし。", "l2": "カードは5枚だけ。" },
+    { "kicker": "Deuces Wild", "l1": "2はすべてワイルド。", "l2": "フォーデュースを狙え。" },
+    { "kicker": "Triple Play & Five Play", "l1": "ホールドは一度、", "l2": "5ハンドをドロー。" },
     { "kicker": "9種類の役", "l1": "ストレートを決めて", "l2": "ロイヤルを狙え。" },
-    { "kicker": "友達とプレイ", "l1": "友達を招待すれば", "l2": "2人ともチップ獲得。" },
-    { "kicker": "16言語対応", "l1": "あなたの言語で", "l2": "遊べる。" },
-    { "kicker": "世界と競おう", "l1": "デイリーランキングを", "l2": "駆け上がれ。" }
+    { "kicker": "友達とプレイ", "l1": "ライブランキングで", "l2": "仲間に勝て。" },
+    { "kicker": "16言語対応", "l1": "あなたの言語で", "l2": "遊べる。" }
   ],
   "ko": [
-    { "kicker": "클래식 비디오 포커", "l1": "제대로 즐기는", "l2": "잭스 오어 베터." },
+    { "kicker": "무료 비디오 포커", "l1": "광고 없음. 현금 없음.", "l2": "카드 다섯 장뿐." },
+    { "kicker": "Deuces Wild", "l1": "모든 2가 와일드.", "l2": "포 듀스를 노려요." },
+    { "kicker": "Triple Play & Five Play", "l1": "한 번 홀드하고", "l2": "다섯 핸드 드로우." },
     { "kicker": "아홉 가지 족보", "l1": "스트레이트를 맞추고", "l2": "로열을 노리세요." },
-    { "kicker": "친구와 함께", "l1": "친구를 초대하면", "l2": "둘 다 칩을 받아요." },
-    { "kicker": "16개 언어", "l1": "내 언어로", "l2": "플레이." },
-    { "kicker": "전 세계와 경쟁", "l1": "일일 리더보드를", "l2": "정복하세요." }
+    { "kicker": "친구와 함께", "l1": "실시간 리더보드.", "l2": "친구들을 이겨요." },
+    { "kicker": "16개 언어", "l1": "내 언어로", "l2": "플레이." }
   ],
   "zh-CN": [
-    { "kicker": "经典视频扑克", "l1": "原汁原味的", "l2": "Jacks or Better。" },
+    { "kicker": "免费视频扑克", "l1": "无广告，无真钱。", "l2": "只有五张牌。" },
+    { "kicker": "Deuces Wild", "l1": "每张2都是百搭。", "l2": "冲击四条2。" },
+    { "kicker": "Triple Play & Five Play", "l1": "保留一次，", "l2": "同时抽五手牌。" },
     { "kicker": "九种获胜牌型", "l1": "拿下顺子，", "l2": "冲击皇家同花顺。" },
-    { "kicker": "与好友同乐", "l1": "邀请好友，", "l2": "两人都得筹码。" },
-    { "kicker": "十六种语言", "l1": "用你的语言", "l2": "畅玩。" },
-    { "kicker": "全球竞技", "l1": "攀登每日", "l2": "排行榜。" }
+    { "kicker": "与好友同乐", "l1": "实时排行榜。", "l2": "击败你的好友。" },
+    { "kicker": "十六种语言", "l1": "用你的语言", "l2": "畅玩。" }
   ],
   "he": [
-    { "kicker": "וידאו פוקר קלאסי", "l1": "Jacks or Better", "l2": "כמו שצריך." },
+    { "kicker": "וידאו פוקר חינם", "l1": "בלי פרסומות. בלי כסף.", "l2": "רק חמישה קלפים." },
+    { "kicker": "Deuces Wild", "l1": "כל 2 הוא ג'וקר.", "l2": "רדפו אחרי ארבעה 2." },
+    { "kicker": "Triple Play & Five Play", "l1": "החזיקו פעם אחת.", "l2": "משכו חמש ידיים." },
     { "kicker": "תשע ידיים זוכות", "l1": "תפסו סטרייט.", "l2": "רדפו אחרי הרויאל." },
-    { "kicker": "שחקו עם חברים", "l1": "הזמינו חבר —", "l2": "שניכם מקבלים ז'יטונים." },
-    { "kicker": "שש עשרה שפות", "l1": "משחק בשפה", "l2": "שלכם." },
-    { "kicker": "התחרו מול העולם", "l1": "טפסו בדירוגים", "l2": "היומיים." }
+    { "kicker": "שחקו עם חברים", "l1": "דירוגים חיים.", "l2": "נצחו את החבר'ה." },
+    { "kicker": "16 שפות", "l1": "משחק בשפה", "l2": "שלכם." }
   ],
   "ar": [
-    { "kicker": "فيديو بوكر كلاسيكي", "l1": "Jacks or Better", "l2": "كما يجب." },
+    { "kicker": "فيديو بوكر مجاني", "l1": "بلا إعلانات. بلا مال.", "l2": "خمس بطاقات فقط." },
+    { "kicker": "Deuces Wild", "l1": "كل 2 جوكر.", "l2": "طارد أربع ثنائيات." },
+    { "kicker": "Triple Play و Five Play", "l1": "ثبّت مرة واحدة.", "l2": "واسحب خمس أيادٍ." },
     { "kicker": "تسع أيادٍ رابحة", "l1": "كوّن ستريت.", "l2": "وطارد الرويال." },
-    { "kicker": "العب مع الأصدقاء", "l1": "ادعُ صديقًا —", "l2": "وكلاكما يربح رقائق." },
-    { "kicker": "ست عشرة لغة", "l1": "العب", "l2": "بلغتك." },
-    { "kicker": "نافس العالم", "l1": "تصدّر التصنيفات", "l2": "اليومية." }
+    { "kicker": "العب مع الأصدقاء", "l1": "تصنيفات مباشرة.", "l2": "تغلّب على أصدقائك." },
+    { "kicker": "16 لغة", "l1": "العب", "l2": "بلغتك." }
   ]
 }

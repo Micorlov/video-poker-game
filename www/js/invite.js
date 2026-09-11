@@ -52,7 +52,7 @@ function copyInviteSheetLink() {
     const linkEl = document.getElementById('invite-sheet-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const copyBtn = document.getElementById('invite-sheet-copy');
-    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'copy' });
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'copy', kind: 'friend' });
     copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
 }
 
@@ -114,7 +114,7 @@ function allInUnlockInvite() {
 // The invite sheet's "More…" chip — everything beyond WhatsApp/Telegram goes
 // through the OS share sheet.
 function shareInviteMore() {
-    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native' });
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native', kind: 'friend' });
     shareViaNative(t('share.appNameFull'), friendInviteMessage(), sheetLink('invite-sheet-link'))
         .then(function(handled) {
             if (!handled) showToast(t('toast.useCopyShare'));
@@ -145,8 +145,8 @@ function fallbackCopySheet(text, onCopied) {
 // Telegram takes the link and the message as separate parameters, so the
 // message passed in here must never already contain the link — otherwise the
 // share preview repeats it.
-function openShareChannel(channel, message, link) {
-    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: channel });
+function openShareChannel(channel, message, link, kind) {
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: channel, kind: kind || 'friend' });
     let url;
     if (channel === 'telegram') {
         url = 'https://t.me/share/url?url=' + encodeURIComponent(link) +
@@ -154,7 +154,8 @@ function openShareChannel(channel, message, link) {
     } else {
         url = 'https://wa.me/?text=' + encodeURIComponent(message + '\n' + link);
     }
-    window.open(url, '_blank');
+    const win = window.open(url, '_blank');
+    if (!win) showToast(t('toast.useCopyShare'));
 }
 
 function sheetLink(id) {
@@ -178,11 +179,11 @@ function friendInviteMessage() {
 }
 
 function shareFriendInviteViaWhatsApp() {
-    openShareChannel('whatsapp', friendInviteMessage(), sheetLink('invite-sheet-link'));
+    openShareChannel('whatsapp', friendInviteMessage(), sheetLink('invite-sheet-link'), 'friend');
 }
 
 function shareFriendInviteViaTelegram() {
-    openShareChannel('telegram', friendInviteMessage(), sheetLink('invite-sheet-link'));
+    openShareChannel('telegram', friendInviteMessage(), sheetLink('invite-sheet-link'), 'friend');
 }
 
 // --- Room invite sheet: share-link half ---
@@ -211,6 +212,7 @@ function copyRoomLink() {
     const linkEl = document.getElementById('room-invite-link');
     const link = linkEl.getAttribute('data-link') || linkEl.textContent;
     const copyBtn = document.getElementById('room-invite-copy');
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'copy', kind: 'room' });
     copyTextToClipboard(link, function() { copyBtnFeedback(copyBtn); });
 }
 
@@ -222,6 +224,7 @@ function roomInviteMessage() {
 }
 
 function shareRoomInviteNative() {
+    if (window.logVpEvent) logVpEvent('share_channel_clicked', { channel: 'native', kind: 'room' });
     shareViaNative(t('share.appNameFull'), roomInviteMessage(), sheetLink('room-invite-link'))
         .then(function(handled) {
             if (!handled) showToast(t('toast.useCopyShare'));
@@ -229,11 +232,11 @@ function shareRoomInviteNative() {
 }
 
 function shareRoomViaWhatsApp() {
-    openShareChannel('whatsapp', roomInviteMessage(), sheetLink('room-invite-link'));
+    openShareChannel('whatsapp', roomInviteMessage(), sheetLink('room-invite-link'), 'room');
 }
 
 function shareRoomViaTelegram() {
-    openShareChannel('telegram', roomInviteMessage(), sheetLink('room-invite-link'));
+    openShareChannel('telegram', roomInviteMessage(), sheetLink('room-invite-link'), 'room');
 }
 
 // --- Big-win brag sheet (signed-in users) ---
@@ -304,9 +307,11 @@ function handleJoinDeepLink() {
         // settled yet — by the onAuthStateChanged handler in js/firebase.js.
         window._pendingJoinCode = joinCode;
 
+        if (window.logVpEvent) logVpEvent('invite_link_opened', { kind: 'room' });
+
         if (window.egUser) {
             window._pendingJoinCode = null;
-            joinRoomByCode(joinCode);
+            joinRoomByCode(joinCode, 'link');
         } else if (window._authResolved) {
             // Auth has settled and there is genuinely no user.
             openSignInModal();

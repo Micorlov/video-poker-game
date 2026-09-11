@@ -208,12 +208,22 @@ if (auth) {
     });
 }
 
+function detectPlatform() {
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        return /android/i.test(navigator.userAgent) ? 'android' : 'ios';
+    }
+    return 'web';
+}
+
 function logUserToFirestore(user) {
     return db.collection('users').doc(user.uid).set({
         uid: user.uid,
         displayName: user.displayName || '',
         photoURL: user.photoURL || '',
-        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        email: user.email || '',
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+        sessionCount: firebase.firestore.FieldValue.increment(1),
+        platform: detectPlatform()
     }, { merge: true }).then(function() {
         return db.collection('users').doc(user.uid).get();
     }).then(function(doc) {
@@ -221,10 +231,13 @@ function logUserToFirestore(user) {
         // Fresh device + existing cloud backup → restore the chip stack
         // before any UI renders a stale default balance (js/cloudsave.js).
         if (window.maybeRestoreCloudState) maybeRestoreCloudState(data);
-        if (!data.referralCode) {
-            const code = generateRoomCode();
-            return db.collection('users').doc(user.uid).update({ referralCode: code }).then(function() {
-                window.egUserDoc = Object.assign({}, data, { referralCode: code });
+        const updates = {};
+        // firstSeen is written once on first login and never overwritten.
+        if (!data.firstSeen) updates.firstSeen = firebase.firestore.FieldValue.serverTimestamp();
+        if (!data.referralCode) updates.referralCode = generateRoomCode();
+        if (Object.keys(updates).length > 0) {
+            return db.collection('users').doc(user.uid).update(updates).then(function() {
+                window.egUserDoc = Object.assign({}, data, updates);
                 if (window.renderFriendsScreen) renderFriendsScreen();
             });
         }

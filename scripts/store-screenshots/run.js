@@ -2,8 +2,9 @@
 //
 // Phase 1 (capture): boots the web app at http://localhost:8642 in headless
 // Chrome (360x760 CSS @ 3x = 1080x2280 raw PNGs), forces each supported
-// language via localStorage.vp_lang, stages five scenes with the app's own
-// global functions, and screenshots them to out/raw/<lang>/s<N>.png.
+// language via localStorage.vp_lang, seeds a level-21 player so Deuces Wild
+// and Five Play are unlocked, stages six scenes with the app's own global
+// functions, and screenshots them to out/raw/<lang>/s<N>.png.
 //
 // Phase 2 (compose): renders frame.html (branded 9:16 marketing frame) around
 // each raw capture at phone (1080x1920) size for every language, plus
@@ -12,6 +13,7 @@
 //
 // Usage: node scripts/store-screenshots/run.js [lang ...]   (default: all)
 // Requires: python3 -m http.server 8642 serving the repo root.
+// The feature graphic is a separate step: node scripts/store-screenshots/feature.js
 
 const { Builder } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
@@ -37,21 +39,63 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 // Card literals for deterministic hands (suit chars match js/game.js SUITS).
 const HAND_NEUTRAL = "[{rank:'7',suit:'\\u2665'},{rank:'9',suit:'\\u2666'},{rank:'Q',suit:'\\u2660'},{rank:'A',suit:'\\u2665'},{rank:'10',suit:'\\u2666'}]";
 const HAND_STRAIGHT = "[{rank:'9',suit:'\\u2666'},{rank:'Q',suit:'\\u2660'},{rank:'K',suit:'\\u2666'},{rank:'J',suit:'\\u2663'},{rank:'10',suit:'\\u2660'}]";
+// Deuces Wild: four 2s dealt straight — hold all, draw, Four Deuces (200x).
+const HAND_FOUR_DEUCES = "[{rank:'2',suit:'\\u2660'},{rank:'2',suit:'\\u2665'},{rank:'A',suit:'\\u2660'},{rank:'2',suit:'\\u2666'},{rank:'2',suit:'\\u2663'}]";
+// Five Play: three Kings held, so every one of the five hands pays at least trips.
+const HAND_TRIP_KINGS = "[{rank:'K',suit:'\\u2660'},{rank:'K',suit:'\\u2665'},{rank:'K',suit:'\\u2666'},{rank:'7',suit:'\\u2663'},{rank:'4',suit:'\\u2666'}]";
+
+// Lifetime hands seeded before load: level = 1 + floor(hands / 5), so 100
+// hands = level 21, which unlocks every variant (Deuces at 3, Double Bonus
+// at 15) and Triple/Five Play (level 10).
+const SEED_LIFETIME_HANDS = '100';
 
 const RESET_UI = `
     window.logVpEvent = function(){};
+    window.maybeShowSigninPrompt = function(){};
+    window.maybeOfferBigWinShare = function(){};
     document.querySelectorAll('.sheet-backdrop').forEach(e => e.classList.add('hidden'));
     document.querySelectorAll('.toast').forEach(e => e.remove());
     document.body.classList.remove('screen-shake');
     document.querySelectorAll('.flash-overlay, .confetti-burst-piece, .gold-rain-piece').forEach(e => e.remove());
 `;
 
+// Put the play screen into a known variant / hand count before dealing.
+// setGameVariant/setMultiHand only act while gameState === 'bet'.
+function prepPlay(variant, hands) {
+    return `
+        showScreen('play');
+        document.querySelectorAll('#nearby-panel, #champions-panel').forEach(e => e.style.display = 'none');
+        gameState = 'bet';
+        held = [false, false, false, false, false];
+        setGameVariant('${variant}');
+        setMultiHand(${hands});
+        balance = 1000;
+        // Wins in earlier scenes leave a streak pill and a best-hand story
+        // avatar behind; clear both so every shot starts clean.
+        winStreak = 0;
+        updateStreakUI(false);
+        document.getElementById('stories-row').style.display = 'none';
+    `;
+}
+
+// Deterministic side-hand draws for the Five Play scene: swap the game's
+// Math.random shuffle for a seeded LCG so every locale gets the same hands.
+const SEEDED_SHUFFLE = `
+    (function() {
+        let seed = 20260909;
+        shuffle = function(d) {
+            for (let i = d.length - 1; i > 0; i--) {
+                seed = (seed * 1103515245 + 12345) % 2147483648;
+                const j = seed % (i + 1);
+                [d[i], d[j]] = [d[j], d[i]];
+            }
+        };
+    })();
+`;
+
 const SCENES = [
-    { // 1: gameplay, pre-draw hold state
-        stage: RESET_UI + `
-            showScreen('play');
-            document.querySelectorAll('#nearby-panel, #champions-panel').forEach(e => e.style.display = 'none');
-            balance = 1000;
+    { // 1: hook — Jacks or Better gameplay, pre-draw hold state
+        stage: RESET_UI + prepPlay('jacks', 1) + `
             deal();
             hand = ${HAND_NEUTRAL};
             dealtHand = hand.slice();
@@ -60,11 +104,37 @@ const SCENES = [
         `,
         settle: 2000
     },
-    { // 2: straight win with held badges + result
-        stage: RESET_UI + `
-            showScreen('play');
-            document.querySelectorAll('#nearby-panel, #champions-panel').forEach(e => e.style.display = 'none');
-            balance = 1000;
+    { // 2: Deuces Wild — Four Deuces win
+        stage: RESET_UI + prepPlay('deuces', 1) + `
+            deal();
+            hand = ${HAND_FOUR_DEUCES};
+            dealtHand = hand.slice();
+            renderHand();
+            held = [true, true, true, true, true];
+            draw();
+        `,
+        after: RESET_UI + `window.scrollTo(0, 0);`,
+        settle: 2200
+    },
+    { // 3: Five Play — hold trip Kings, draw five hands
+        stage: RESET_UI + SEEDED_SHUFFLE + prepPlay('jacks', 5) + `
+            deal();
+            hand = ${HAND_TRIP_KINGS};
+            dealtHand = hand.slice();
+            renderHand();
+            held = [true, true, true, false, false];
+            draw();
+        `,
+        after: RESET_UI + `
+            // The sticky bet dock would cover the main hand + result under
+            // four extra rows; let it flow so all five hands are on screen.
+            document.querySelector('.bet-dock').style.position = 'static';
+            window.scrollTo(0, 0);
+        `,
+        settle: 2200
+    },
+    { // 4: straight win with held badges + result
+        stage: RESET_UI + prepPlay('jacks', 1) + `
             deal();
             hand = ${HAND_STRAIGHT};
             dealtHand = hand.slice();
@@ -75,36 +145,8 @@ const SCENES = [
         after: RESET_UI + `window.scrollTo(0, 0);`,
         settle: 2000
     },
-    { // 3: friends screen + invite sheet (guest state dressed as signed-in)
-        stage: RESET_UI + `
-            showScreen('friends');
-            document.getElementById('friends-signed-out').classList.add('hidden');
-            document.getElementById('friends-signed-in-wrap').classList.remove('hidden');
-            document.getElementById('own-referral-code').textContent = 'K7QM2P';
-            const seats = t('referral.seatsFirst', { reward: formatNumber(2000), invitee: formatNumber(1000) });
-            document.getElementById('friends-invite-reward').textContent = seats;
-            document.getElementById('invite-reward-line').textContent = seats;
-            document.getElementById('friends-empty').classList.remove('hidden');
-            document.getElementById('friends-empty-invite').textContent = t('friends.emptyInvite', { reward: formatNumber(2000) });
-            document.getElementById('invite-sheet-link').textContent = 'https://play.google.com/store/apps/details?id=com.micorlov.videopoker';
-            openSheet('invite-sheet');
-            window.scrollTo(0, 0);
-        `,
-        settle: 900
-    },
-    { // 4: settings + language sheet
-        stage: RESET_UI + `
-            showScreen('settings');
-            openLanguageSheet();
-            window.scrollTo(0, 0);
-        `,
-        settle: 900
-    },
     { // 5: global daily leaderboard panel under a fresh hand
-        stage: RESET_UI + `
-            showScreen('play');
-            document.querySelectorAll('#nearby-panel, #champions-panel').forEach(e => e.style.display = 'none');
-            balance = 1000;
+        stage: RESET_UI + prepPlay('jacks', 1) + `
             deal();
             hand = ${HAND_NEUTRAL};
             dealtHand = hand.slice();
@@ -122,8 +164,17 @@ const SCENES = [
             document.getElementById('leaderboard-panel').scrollIntoView({ block: 'center' });
         `,
         settle: 2000
+    },
+    { // 6: settings + language sheet
+        stage: RESET_UI + `
+            showScreen('settings');
+            openLanguageSheet();
+            window.scrollTo(0, 0);
+        `,
+        settle: 900
     }
 ];
+const SHOTS = SCENES.length;
 
 async function makeDriver(args) {
     const opts = new chrome.Options().addArguments(
@@ -164,7 +215,8 @@ async function capture(langs) {
                 localStorage.setItem('vp_lang', arguments[0]);
                 localStorage.setItem('vp_onboarding_seen', '1');
                 localStorage.setItem('vp_push_permission_asked', '1');
-            `, lang);
+                localStorage.setItem('vp_lifetime_hands', arguments[1]);
+            `, lang, SEED_LIFETIME_HANDS);
             await driver.get(BASE + '/video_poker.html');
             await sleep(3500); // firebase init, fonts, i18n apply, bot boards
             for (let i = 0; i < SCENES.length; i++) {
@@ -193,6 +245,8 @@ async function renderFrame(driver, { img, cap, dir, w, h, out }) {
         await sleep(100);
     }
     await sleep(200);
+    const px = await driver.executeScript('return window.headlineFontPx');
+    if (px && px < 92) console.log(`  headline shrunk to ${px}px for ${path.basename(out)} (${cap.l1} / ${cap.l2})`);
     await shoot(driver, out);
 }
 
@@ -204,19 +258,11 @@ async function compose(langs) {
             const dir = RTL_LANGS.includes(lang) ? 'rtl' : 'ltr';
             const outDir = path.join(FRAMED, 'phone', PLAY_LOCALE[lang]);
             fs.mkdirSync(outDir, { recursive: true });
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < SHOTS; i++) {
                 await renderFrame(driver, {
                     img: `/scripts/store-screenshots/out/raw/${lang}/s${i + 1}.png`,
                     cap: caps[i], dir, w: 1080, h: 1920,
                     out: path.join(outDir, `phone_${i + 1}.png`)
-                });
-            }
-            // English gets a sixth shot: the Hebrew RTL gameplay capture.
-            if (lang === 'en' && caps[5] && fs.existsSync(path.join(RAW, 'he', 's1.png'))) {
-                await renderFrame(driver, {
-                    img: '/scripts/store-screenshots/out/raw/he/s1.png',
-                    cap: caps[5], dir: 'ltr', w: 1080, h: 1920,
-                    out: path.join(outDir, 'phone_6.png')
                 });
             }
             console.log(`framed phone/${PLAY_LOCALE[lang]}`);
@@ -226,18 +272,11 @@ async function compose(langs) {
             for (const [set, w, h] of [['tablet7', 1200, 2133], ['tablet10', 1440, 2560]]) {
                 const outDir = path.join(FRAMED, set);
                 fs.mkdirSync(outDir, { recursive: true });
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < SHOTS; i++) {
                     await renderFrame(driver, {
                         img: `/scripts/store-screenshots/out/raw/en/s${i + 1}.png`,
                         cap: CAPTIONS.en[i], dir: 'ltr', w, h,
                         out: path.join(outDir, `${set}_${i + 1}.png`)
-                    });
-                }
-                if (fs.existsSync(path.join(RAW, 'he', 's1.png'))) {
-                    await renderFrame(driver, {
-                        img: '/scripts/store-screenshots/out/raw/he/s1.png',
-                        cap: CAPTIONS.en[5], dir: 'ltr', w, h,
-                        out: path.join(outDir, `${set}_6.png`)
                     });
                 }
                 console.log(`framed ${set}`);

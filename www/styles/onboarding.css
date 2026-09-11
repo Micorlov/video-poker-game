@@ -49,7 +49,7 @@
     height: 62px;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-strong);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-raised);
     color: rgba(255, 255, 255, 0.75);
     font-size: 20px;
     cursor: pointer;
@@ -70,18 +70,28 @@
     justify-content: center;
 }
 
+/* The same pressable lip the deal button carries — this is the first button
+   a new player ever touches, so it should feel like the rest of the app. */
 .onboarding-nav-arrow--next {
-    background: var(--green);
+    background: linear-gradient(180deg, var(--action) 0%, var(--action-deep) 100%);
     border-color: transparent;
-    color: var(--green-ink);
+    border-bottom: 4px solid var(--action-edge);
+    color: var(--action-ink);
     font-weight: 700;
     font-family: var(--font-display);
     font-size: 20px;
     letter-spacing: -0.01em;
-    box-shadow: var(--green-glow);
+    box-shadow: var(--action-glow);
     flex: 1;
     width: auto;
-    height: 62px;
+    height: 66px;
+    transition: transform 0.08s, border-bottom-width 0.08s;
+}
+
+.onboarding-nav-arrow--next:active {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+    box-shadow: none;
 }
 
 .onboarding-dots {
@@ -100,7 +110,7 @@
 
 .onboarding-dot.active {
     width: 22px;
-    background: var(--green);
+    background: var(--action);
     height: 5px;
 }
 
@@ -161,7 +171,7 @@
     align-items: stretch;
     padding: 13px;
     z-index: 3;
-    box-shadow: 0 26px 50px -18px rgba(0, 0, 0, 0.95), 0 0 0 2px rgba(22, 193, 114, 0.55);
+    box-shadow: 0 26px 50px -18px rgba(0, 0, 0, 0.95), 0 0 0 2px rgba(var(--action-rgb), 0.55);
 }
 
 /* The centre card carries the corner layout of a real card face. */
@@ -293,8 +303,8 @@
 }
 
 .ob-hand-row--highlight {
-    border-color: rgba(22, 193, 114, 0.3);
-    background: rgba(22, 193, 114, 0.1);
+    border-color: rgba(var(--action-rgb), 0.3);
+    background: rgba(var(--action-rgb), 0.1);
 }
 
 .ob-hand-cards {
@@ -420,8 +430,8 @@
     top: -9px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-size: 8px;
     font-weight: 800;
     letter-spacing: 0.06em;
@@ -433,10 +443,10 @@
 .ob-mockup-draw-btn {
     width: 100%;
     padding: 11px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     border-radius: var(--radius-sm);
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-size: 15px;
     font-weight: 700;
     margin-bottom: 10px;
@@ -469,17 +479,17 @@
 }
 
 .ob-mockup-bet--active {
-    background: rgba(22, 193, 114, 0.22);
+    background: rgba(var(--action-rgb), 0.22);
     color: var(--text);
-    box-shadow: 0 0 0 2px var(--green);
+    box-shadow: 0 0 0 2px var(--action);
     border-color: transparent;
 }
 
 .ob-mockup-bet--allin {
-    background: var(--green-dim);
-    color: var(--green-light);
+    background: var(--action-dim);
+    color: var(--action-light);
     position: relative;
-    border: 1px solid rgba(22, 193, 114, 0.45);
+    border: 1px solid rgba(var(--action-rgb), 0.45);
     flex-direction: column;
     gap: 1px;
     display: flex;
@@ -517,7 +527,7 @@
     margin-bottom: 14px;
     padding: 4px;
     border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-raised);
     border: 1px solid var(--border);
 }
 
@@ -539,9 +549,9 @@
 }
 
 .ob-lb-tab--active {
-    background: var(--green);
+    background: var(--action);
     border-color: transparent;
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-weight: 700;
 }
 
@@ -579,7 +589,7 @@
 }
 
 .ob-lb-row--you {
-    background: rgba(22, 193, 114, 0.12);
+    background: rgba(var(--action-rgb), 0.12);
     border: 1px solid rgba(62, 198, 160, 0.25);
 }
 
@@ -595,8 +605,8 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: var(--green);
-    color: var(--green-ink);
+    background: var(--action);
+    color: var(--action-ink);
     font-size: 13px;
     font-weight: 800;
     display: flex;
@@ -689,12 +699,12 @@
     width: 22px;
     height: 22px;
     border-radius: 7px;
-    background: rgba(22, 193, 114, 0.18);
+    background: rgba(var(--action-rgb), 0.18);
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--green-light);
+    color: var(--action-light);
     font-size: 13px;
     font-weight: 800;
 }
@@ -703,16 +713,16 @@
     width: 100%;
     max-width: 300px;
     padding: 16px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     border-radius: var(--radius-md);
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
     font-family: var(--font-display);
-    box-shadow: var(--green-glow);
+    box-shadow: var(--action-glow);
 }
 
 /* A quiet decline — the design never competes with its own primary action. */
@@ -763,16 +773,16 @@
     width: 100%;
     max-width: 340px;
     padding: 0 16px;
-    background: var(--green);
+    background: var(--action);
     border: none;
     border-radius: var(--radius-md);
-    color: var(--green-ink);
+    color: var(--action-ink);
     font-size: 20px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 14px;
     font-family: var(--font-display);
-    box-shadow: var(--green-glow);
+    box-shadow: var(--action-glow);
     height: 62px;
 }
 
@@ -806,7 +816,7 @@
 }
 
 .ob-hand-row--highlight .ob-hand-payout {
-    color: var(--green-light);
+    color: var(--action-light);
 }
 
 /* ── Language chip (welcome step) ──
@@ -823,7 +833,7 @@
     gap: 6px;
     max-width: 46vw;
     padding: 7px 12px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--surface-raised);
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 999px;
     color: var(--text);
@@ -838,7 +848,7 @@
 }
 
 .ob-lang-chip:active {
-    background: rgba(255, 255, 255, 0.14);
+    background: var(--surface-hover);
 }
 
 .ob-lang-globe {

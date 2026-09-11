@@ -94,7 +94,9 @@ vpRegisterLang('ru', {
     'settings.announcements': 'Объявления',
     'settings.enableNotifications': 'Включить уведомления',
     'settings.resetStats': 'Сбросить статистику',
-    'settings.footer': 'Видеопокер · v2.1',
+    'settings.rateGame': 'Оценить игру',
+    'settings.moreGames': 'Другие игры от Orlov Games',
+    'settings.footer': 'Видеопокер · v2.5',
 
     'variant.jacks': 'Валеты или лучше',
     'variant.deuces': 'Deuces Wild',
@@ -279,6 +281,7 @@ vpRegisterLang('ru', {
     'room.membersMeta': '{{count}}/{{capacity}} друзей · Ставка {{stake}}',
     'room.sendInvites': 'Отправить приглашения',
     'room.sendInvitesCount': 'Отправить приглашения ({{count}})',
+    'room.onlineNowCount': '{{n}} сейчас онлайн',
 
     'champ.resetsPlaceholder': 'Сброс через —мин',
     'champ.noChampionsYet': 'В этом часе чемпионов ещё нет — будьте первым!',
@@ -308,6 +311,7 @@ vpRegisterLang('ru', {
     'toast.unlockLevel': '🔒 Откроется на уровне {{level}}',
     'toast.multiHandUnlock': '🔒 Мультираздача откроется на уровне {{level}}',
     'toast.rebuy': '♻ +{{amount}} кредитов',
+    'toast.dailyBonus': 'Ежедневный бонус: +{{amount}} бесплатных фишек!',
     'toast.noAllInLeft': '⛔ Ва-банк закончился — возвращайтесь завтра!',
     'toast.allInGoodLuck': '🔥 ВА-БАНК — удачи!',
     'toast.statsReset': 'Статистика сброшена',
