@@ -166,6 +166,16 @@ function initPushListeners() {
     // default — on the rooms sub-tab, where invites and room activity live.
     PushNotifications.addListener('pushNotificationActionPerformed', function(action) {
         var data = (action && action.notification && action.notification.data) || {};
+        if (typeof db !== 'undefined' && window.egUser) {
+            var attrUpdate = {
+                pushOpenCount:  firebase.firestore.FieldValue.increment(1),
+                lastPushOpenAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastOpenSource: 'push'
+            };
+            if (data.deepLink) attrUpdate.lastPushDeepLink = data.deepLink;
+            db.collection('users').doc(window.egUser.uid).update(attrUpdate).catch(function() {});
+        }
+        if (window.logVpEvent) logVpEvent('push_opened', { deepLink: data.deepLink || 'default' });
         if (data.deepLink && window.showScreen) {
             showScreen(data.deepLink);
             return;

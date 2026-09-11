@@ -238,6 +238,7 @@
                     <div class="stat-card"><div class="label">Active 30d (MAU)</div><div class="value" id="s-mau">—</div></div>
                     <div class="stat-card"><div class="label">Churned (&gt;7d)</div><div class="value" id="s-churned" style="cursor:pointer" onclick="switchTabById('users','churned')" title="Click to filter churned users">—</div></div>
                     <div class="stat-card"><div class="label">Avg Hands Played</div><div class="value" id="s-avg-hands">—</div></div>
+                    <div class="stat-card"><div class="label">Push Re-engaged</div><div class="value" id="s-push-reengaged">—</div></div>
                 </div>
 
                 <div class="panel">
@@ -293,9 +294,12 @@
                             <th onclick="sortUsers('_avgSessionMin')">Avg Session ↕</th>
                             <th onclick="sortUsers('_handsPerSession')">Hands/Session ↕</th>
                             <th onclick="sortUsers('_favHour')">Fav Hour ↕</th>
+                            <th onclick="sortUsers('_totalPlaytime')">Total Playtime ↕</th>
+                            <th onclick="sortUsers('_timezone')">Timezone ↕</th>
+                            <th onclick="sortUsers('_pushOpens')">Push Opens ↕</th>
                             <th>Status</th>
                         </tr></thead>
-                        <tbody id="all-users-body"><tr><td colspan="13" class="empty-state">Loading...</td></tr></tbody>
+                        <tbody id="all-users-body"><tr><td colspan="16" class="empty-state">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -418,9 +422,13 @@
                     <div class="panel-header"><h2>💰 Balance Histogram</h2></div>
                     <div id="chart-histogram" style="padding:16px 20px"></div>
                 </div>
-                <div class="panel">
+                <div class="panel" style="margin-bottom:16px">
                     <div class="panel-header"><h2>⏰ When Users Play</h2></div>
                     <div id="chart-playhours" style="padding:16px 20px"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h2>📲 Push Attribution</h2></div>
+                    <div id="chart-push-attr" style="padding:16px 20px"></div>
                 </div>
             </div>
             </div>
@@ -655,7 +663,7 @@
             var now = Date.now();
             var todayStr = new Date().toISOString().slice(0, 10);
             var day = 24 * 60 * 60 * 1000;
-            var todayCount = 0, wau = 0, mau = 0, churned = 0, totalHands = 0, handCount = 0;
+            var todayCount = 0, wau = 0, mau = 0, churned = 0, totalHands = 0, handCount = 0, pushReengaged = 0;
             snap.forEach(function(doc) {
                 var d = doc.data();
                 var activity = d.lastSeen ? d.lastSeen.toDate().getTime()
@@ -666,12 +674,14 @@
                 if (activity && activity < now - 7 * day) churned++;
                 var h = d.cloudState && d.cloudState.handsPlayed ? parseInt(d.cloudState.handsPlayed) : 0;
                 if (h > 0) { totalHands += h; handCount++; }
+                if (d.pushOpenCount && d.pushOpenCount > 0) pushReengaged++;
             });
             document.getElementById('s-today').textContent = todayCount;
             document.getElementById('s-wau').textContent = wau;
             document.getElementById('s-mau').textContent = mau;
             document.getElementById('s-churned').textContent = churned;
             document.getElementById('s-avg-hands').textContent = handCount ? Math.round(totalHands / handCount) : '—';
+            document.getElementById('s-push-reengaged').textContent = pushReengaged;
         });
     }
 
@@ -767,6 +777,16 @@
                     var fh = parseInt(bestKey.replace('h', ''), 10);
                     d._favHour = (fh % 12 || 12) + (fh < 12 ? ' AM' : ' PM');
                 } else { d._favHour = '—'; }
+                var ms = d.totalPlayTimeMs || 0;
+                var totalH = Math.floor(ms / 3600000);
+                var totalM = Math.floor((ms % 3600000) / 60000);
+                d._totalPlaytime = ms ? (totalH ? totalH + 'h ' + totalM + 'm' : totalM + 'm') : '—';
+                if (d.timezoneOffset != null) {
+                    var tz = -d.timezoneOffset;
+                    d._timezone = 'UTC' + (tz >= 0 ? '+' : '') + Math.floor(Math.abs(tz) / 60) +
+                        (tz % 60 ? ':' + String(Math.abs(tz % 60)).padStart(2, '0') : '');
+                } else { d._timezone = '—'; }
+                d._pushOpens = d.pushOpenCount || 0;
                 allUsersData.push(d);
             });
             document.getElementById('users-count').textContent = allUsersData.length;
@@ -802,7 +822,7 @@
         });
         var tbody = document.getElementById('all-users-body');
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="13" class="empty-state">No users found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="16" class="empty-state">No users found</td></tr>';
             return;
         }
         tbody.innerHTML = '';
@@ -832,6 +852,9 @@
                 '<td>' + (d._avgSessionMin ? d._avgSessionMin + ' min' : '—') + '</td>' +
                 '<td>' + (d._handsPerSession || '—') + '</td>' +
                 '<td>' + d._favHour + '</td>' +
+                '<td>' + d._totalPlaytime + '</td>' +
+                '<td>' + d._timezone + '</td>' +
+                '<td>' + (d._pushOpens || '—') + '</td>' +
                 '<td>' + badge + '</td>';
             tbody.appendChild(tr);
         });
@@ -973,6 +996,7 @@
             renderTopReferrers(users);
             renderBalanceHistogram(users);
             renderPlayHours(users);
+            renderPushAttribution(users);
         });
     }
 
@@ -1080,6 +1104,28 @@
             return barHtml((u.displayName || '—') + ' [' + code + ']', u.cloudState.referralBonus, max, '#8b5cf6');
         }).join('');
         document.getElementById('chart-referrers').innerHTML = html;
+    }
+
+    function renderPushAttribution(users) {
+        var totalOpens = 0, reengaged = 0;
+        var top = [];
+        users.forEach(function(u) {
+            var c = u.pushOpenCount || 0;
+            totalOpens += c;
+            if (c > 0) { reengaged++; top.push({ name: u.displayName || '—', count: c }); }
+        });
+        top.sort(function(a, b) { return b.count - a.count; });
+        top = top.slice(0, 10);
+        var pct = users.length ? Math.round(reengaged / users.length * 100) : 0;
+        var summary = '<div style="display:flex;gap:32px;margin-bottom:16px">' +
+            '<div><div style="font-size:28px;font-weight:700;color:#fbbf24">' + totalOpens + '</div><div style="font-size:12px;color:#64748b;text-transform:uppercase">Total Push Opens</div></div>' +
+            '<div><div style="font-size:28px;font-weight:700;color:#4ade80">' + reengaged + '</div><div style="font-size:12px;color:#64748b;text-transform:uppercase">Users Re-engaged</div></div>' +
+            '<div><div style="font-size:28px;font-weight:700;color:#60a5fa">' + pct + '%</div><div style="font-size:12px;color:#64748b;text-transform:uppercase">Re-engagement Rate</div></div>' +
+            '</div>';
+        var max = top.length ? top[0].count : 1;
+        var bars = top.map(function(u) { return barHtml(u.name, u.count, max, '#f97316'); }).join('');
+        document.getElementById('chart-push-attr').innerHTML = summary +
+            (bars || '<p style="color:#64748b">No push opens yet — data appears after users tap a notification</p>');
     }
 
     function renderPlayHours(users) {
