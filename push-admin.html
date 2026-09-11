@@ -110,6 +110,18 @@ tr:last-child td { border-bottom: none; }
 .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: #16a34a; color: #fff; padding: 11px 22px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 300; }
 .toast.show { opacity: 1; }
 .toast.err { background: #dc2626; }
+
+.tpl-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; padding: 14px 20px 6px; }
+.tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; padding: 0 20px 16px; }
+.tpl-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: border-color 0.18s; }
+.tpl-card:hover { border-color: #fbbf24; }
+.tpl-badge { display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 7px; border-radius: 10px; margin-bottom: 7px; }
+.tpl-card .tpl-title { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+.tpl-card .tpl-body-text { font-size: 12px; color: #64748b; line-height: 1.4; }
+.badge-reengagement { background: rgba(248,113,113,0.15); color: #f87171; }
+.badge-habit { background: rgba(251,191,36,0.15); color: #fbbf24; }
+.badge-social { background: rgba(96,165,250,0.15); color: #60a5fa; }
+.badge-milestone { background: rgba(74,222,128,0.15); color: #4ade80; }
 </style>
 </head>
 <body>
@@ -165,6 +177,13 @@ tr:last-child td { border-bottom: none; }
 
     <!-- ================= COMPOSE ================= -->
     <div class="tab-content active" id="tab-compose">
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-header" style="cursor:pointer;" onclick="toggleTemplates()">
+          <h2>📋 Message templates</h2>
+          <span id="tpl-toggle-btn" class="btn-ghost">Show ▾</span>
+        </div>
+        <div id="tpl-container" style="display:none;"></div>
+      </div>
       <div class="row" style="align-items:flex-start;">
         <div style="flex:2; min-width:330px;">
           <div class="panel">
@@ -238,8 +257,13 @@ tr:last-child td { border-bottom: none; }
               <div class="field" id="aud-segment-wrap" style="display:none; margin-top:14px;">
                 <label for="aud-segment">Segment</label>
                 <select id="aud-segment" onchange="estimateAudience()">
-                  <option value="activeLast7d">Played in the last 7 days</option>
-                  <option value="inactive3d">Inactive 3+ days</option>
+                  <option value="activeLast7d">Active — played in the last 7 days</option>
+                  <option value="inactive3d">Lapsing — inactive 3+ days</option>
+                  <option value="inactive7d">Lapsing — inactive 7+ days</option>
+                  <option value="inactive14d">At risk — inactive 14+ days</option>
+                  <option value="inactive30d">Churned — inactive 30+ days</option>
+                  <option value="lowBalance">Low balance (under 1,000 coins)</option>
+                  <option value="highHands">High engagement (top 10% by hands)</option>
                   <option value="hasFriends">Has at least one friend</option>
                   <option value="neverPlayed">Never played a hand</option>
                 </select>
@@ -440,10 +464,11 @@ var SETTINGS_DOC = 'config/pushSettings';
 // the poller falls back to its own copy, so a mismatch shows stale values here
 // rather than changing behaviour.
 var TRIGGER_META = [
-    { key: 'hourlyTop5',  title: 'Hourly top 5',            desc: 'Bumped out of this hour’s top 5 champions.', cooldown: 6 },
-    { key: 'friendRank',  title: 'Friends leaderboard',     desc: 'Passed by a friend, or the #1 spot changed hands.', cooldown: 6 },
-    { key: 'dailyProfit', title: 'Daily net profit',        desc: 'Dropped out of today’s top N by profit.', cooldown: 12, topN: 10 },
-    { key: 'globalRank',  title: 'All-time global rank',    desc: 'Fell out of the all-time top N. Runs hourly, not every poll.', cooldown: 24, topN: 200 }
+    { key: ‘hourlyTop5’,  title: ‘Hourly top 5’,            desc: ‘Bumped out of this hour’s top 5 champions.’, cooldown: 6 },
+    { key: ‘friendRank’,  title: ‘Friends leaderboard’,     desc: ‘Passed by a friend, or the #1 spot changed hands.’, cooldown: 6 },
+    { key: ‘dailyProfit’, title: ‘Daily net profit’,        desc: ‘Dropped out of today’s top N by profit.’, cooldown: 12, topN: 10 },
+    { key: ‘globalRank’,  title: ‘All-time global rank’,    desc: ‘Fell out of the all-time top N. Runs hourly, not every poll.’, cooldown: 24, topN: 200 },
+    { key: ‘lapsedPlayer’, title: ‘Lapsed player win-back’, desc: ‘Fires once when a player hasn’t played in N days. Silent for the cooldown period after.’, cooldown: 72, thresholdDays: 7 }
 ];
 var DEFAULT_QUIET = { enabled: false, startHour: 23, endHour: 8, mode: 'drop' };
 
@@ -525,7 +550,9 @@ function loadDirectory() {
                 displayName: d.displayName || d.email || '(no name)',
                 email: d.email || '',
                 lastPlayedDate: d.lastPlayedDate || null,
-                notificationPrefs: d.notificationPrefs || {}
+                notificationPrefs: d.notificationPrefs || {},
+                balance: typeof d._balance === 'number' ? d._balance : null,
+                hands: typeof d._hands === 'number' ? d._hands : null
             };
         });
     });
@@ -621,6 +648,28 @@ function uidsInSegment(segment) {
     if (segment === 'inactive3d') {
         var cutoff = daysAgoKey(3);
         return allUsers.filter(function(u) { return u.lastPlayedDate && u.lastPlayedDate < cutoff; }).map(function(u) { return u.uid; });
+    }
+    if (segment === 'inactive7d') {
+        var cutoff7 = daysAgoKey(7);
+        return allUsers.filter(function(u) { return u.lastPlayedDate && u.lastPlayedDate < cutoff7; }).map(function(u) { return u.uid; });
+    }
+    if (segment === 'inactive14d') {
+        var cutoff14 = daysAgoKey(14);
+        return allUsers.filter(function(u) { return u.lastPlayedDate && u.lastPlayedDate < cutoff14; }).map(function(u) { return u.uid; });
+    }
+    if (segment === 'inactive30d') {
+        var cutoff30 = daysAgoKey(30);
+        return allUsers.filter(function(u) { return u.lastPlayedDate && u.lastPlayedDate < cutoff30; }).map(function(u) { return u.uid; });
+    }
+    if (segment === 'lowBalance') {
+        return allUsers.filter(function(u) { return u.balance !== null && u.balance < 1000; }).map(function(u) { return u.uid; });
+    }
+    if (segment === 'highHands') {
+        var withHands = allUsers.filter(function(u) { return u.hands !== null && u.hands > 0; });
+        if (!withHands.length) return [];
+        var sorted = withHands.slice().sort(function(a, b) { return a.hands - b.hands; });
+        var p90 = sorted[Math.floor(sorted.length * 0.9)].hands;
+        return withHands.filter(function(u) { return u.hands >= p90; }).map(function(u) { return u.uid; });
     }
     if (segment === 'neverPlayed') {
         return allUsers.filter(function(u) { return !u.lastPlayedDate; }).map(function(u) { return u.uid; });
@@ -865,6 +914,9 @@ function loadCampaigns() {
                 var actions = document.createElement('td');
                 if (c.status === 'scheduled') actions.appendChild(actionButton('Pause', 'btn-ghost', function() { setCampaignStatus(doc.id, 'paused'); }));
                 if (c.status === 'paused') actions.appendChild(actionButton('Resume', 'btn-ghost', function() { setCampaignStatus(doc.id, 'scheduled'); }));
+                (function(cSnapshot) {
+                    actions.appendChild(actionButton('Duplicate', 'btn-ghost', function() { prefillCompose(cSnapshot); }));
+                })(c);
                 actions.appendChild(actionButton('Delete', 'btn-danger', function() { deleteCampaign(doc.id, c.title); }));
                 actions.style.whiteSpace = 'nowrap';
                 tr.appendChild(actions);
@@ -934,6 +986,9 @@ function renderSettings() {
         if (meta.topN !== undefined) {
             row.appendChild(numberField('t-topn-' + meta.key, 'Top N', stored.topN !== undefined ? stored.topN : meta.topN, 1, 1000));
         }
+        if (meta.thresholdDays !== undefined) {
+            row.appendChild(numberField('t-days-' + meta.key, 'Days inactive', stored.thresholdDays !== undefined ? stored.thresholdDays : meta.thresholdDays, 1, 365));
+        }
         row.appendChild(numberField('t-cd-' + meta.key, 'Cooldown (h)', stored.cooldownHours !== undefined ? stored.cooldownHours : meta.cooldown, 0, 720));
 
         var toggle = document.createElement('div');
@@ -991,6 +1046,7 @@ function saveSettings() {
             cooldownHours: readNumber('t-cd-' + meta.key, meta.cooldown)
         };
         if (meta.topN !== undefined) triggers[meta.key].topN = readNumber('t-topn-' + meta.key, meta.topN);
+        if (meta.thresholdDays !== undefined) triggers[meta.key].thresholdDays = readNumber('t-days-' + meta.key, meta.thresholdDays);
     });
 
     // globalRank's throttle is not surfaced as a control — it is a cost guard,
@@ -1101,6 +1157,139 @@ function loadPollStatus() {
 
 document.getElementById('c-category').addEventListener('change', estimateAudience);
 document.getElementById('c-respect').addEventListener('change', estimateAudience);
+
+// ---------- message templates ----------
+
+var TEMPLATES = [
+    // Re-engagement — lapsed players
+    { section: 'Re-engagement — lapsed players', badge: 'badge-reengagement',
+      title: 'Your coins are waiting', body: 'You\'ve got chips on the table. Come deal a hand.',
+      category: 'dailyReminder', segment: 'inactive3d', deeplink: 'play' },
+    { section: 'Re-engagement — lapsed players', badge: 'badge-reengagement',
+      title: 'It\'s been a few days…', body: 'Your stack is untouched. Jump back in — no catch.',
+      category: 'dailyReminder', segment: 'inactive7d', deeplink: 'play' },
+    { section: 'Re-engagement — lapsed players', badge: 'badge-reengagement',
+      title: 'Still here when you are', body: 'Your last session ended mid-run. Pick up where you left off.',
+      category: 'dailyReminder', segment: 'inactive7d', deeplink: 'play' },
+    { section: 'Re-engagement — lapsed players', badge: 'badge-reengagement',
+      title: 'Free chips — 48 hrs only', body: 'We topped up your account. Play a hand to claim them.',
+      category: 'announcement', segment: 'inactive14d', deeplink: 'play' },
+    { section: 'Re-engagement — lapsed players', badge: 'badge-reengagement',
+      title: 'We miss seeing you at the table', body: 'It\'s been a while. A gift is waiting in your account.',
+      category: 'announcement', segment: 'inactive30d', deeplink: 'play' },
+    // Daily habit
+    { section: 'Daily habit & login', badge: 'badge-habit',
+      title: 'Your daily bonus is ready', body: 'Log in now to collect today\'s free chips.',
+      category: 'dailyReminder', segment: 'all', deeplink: 'play' },
+    { section: 'Daily habit & login', badge: 'badge-habit',
+      title: 'Tonight\'s tournament starts in 1 hour', body: '50,000 chips on the line. Are you in?',
+      category: 'leaderboard', segment: 'activeLast7d', deeplink: 'play' },
+    { section: 'Daily habit & login', badge: 'badge-habit',
+      title: 'Don\'t break your streak', body: 'You\'re on a roll. Keep it going tonight.',
+      category: 'dailyReminder', segment: 'activeLast7d', deeplink: 'play' },
+    // Social / leaderboard
+    { section: 'Social & leaderboard', badge: 'badge-social',
+      title: 'You slipped on the leaderboard', body: 'Someone just passed you. Reclaim your spot — one hand can do it.',
+      category: 'leaderboard', segment: 'activeLast7d', deeplink: 'play' },
+    { section: 'Social & leaderboard', badge: 'badge-social',
+      title: 'A friend is ahead of you', body: 'They pulled ahead since your last session. Show them who\'s boss.',
+      category: 'social', segment: 'hasFriends', deeplink: 'friends' },
+    { section: 'Social & leaderboard', badge: 'badge-social',
+      title: 'Weekend tournament is live', body: 'Compete against all players for the top prize this weekend.',
+      category: 'leaderboard', segment: 'all', deeplink: 'play' },
+    // Milestone / low balance
+    { section: 'Milestone & balance', badge: 'badge-milestone',
+      title: 'Running low? Here\'s a boost', body: 'Your balance is getting thin. We added chips to keep you in the game.',
+      category: 'announcement', segment: 'lowBalance', deeplink: 'play' },
+    { section: 'Milestone & balance', badge: 'badge-milestone',
+      title: 'Royal Flush waiting — or is it?', body: 'One hand away from glory. Your chips are ready.',
+      category: 'announcement', segment: 'inactive7d', deeplink: 'play' },
+    { section: 'Milestone & balance', badge: 'badge-milestone',
+      title: 'New this week: Double Bonus mode', body: 'Play now and earn 2× on every winning hand through Sunday.',
+      category: 'announcement', segment: 'all', deeplink: 'play' }
+];
+
+var templatesVisible = false;
+
+function toggleTemplates() {
+    templatesVisible = !templatesVisible;
+    document.getElementById('tpl-container').style.display = templatesVisible ? 'block' : 'none';
+    document.getElementById('tpl-toggle-btn').textContent = templatesVisible ? 'Hide ▴' : 'Show ▾';
+    if (templatesVisible && !document.getElementById('tpl-container').children.length) {
+        renderTemplates();
+    }
+}
+
+function renderTemplates() {
+    var container = document.getElementById('tpl-container');
+    container.innerHTML = '';
+    var sections = [];
+    var seen = {};
+    TEMPLATES.forEach(function(t) {
+        if (!seen[t.section]) { seen[t.section] = true; sections.push(t.section); }
+    });
+    sections.forEach(function(section) {
+        var label = document.createElement('div');
+        label.className = 'tpl-section-label';
+        label.textContent = section;
+        container.appendChild(label);
+        var grid = document.createElement('div');
+        grid.className = 'tpl-grid';
+        TEMPLATES.filter(function(t) { return t.section === section; }).forEach(function(t) {
+            var card = document.createElement('div');
+            card.className = 'tpl-card';
+            card.innerHTML =
+                '<span class="tpl-badge ' + t.badge + '">' + t.category + '</span>' +
+                '<div class="tpl-title"></div>' +
+                '<div class="tpl-body-text"></div>';
+            card.children[1].textContent = t.title;
+            card.children[2].textContent = t.body;
+            card.onclick = function() { applyTemplate(t); };
+            grid.appendChild(card);
+        });
+        container.appendChild(grid);
+    });
+}
+
+function applyTemplate(t) {
+    document.getElementById('c-title').value = t.title;
+    document.getElementById('c-body').value = t.body;
+    document.getElementById('c-category').value = t.category;
+    if (t.deeplink) document.getElementById('c-deeplink').value = t.deeplink;
+    // Switch audience to segment and select the matching segment
+    var segRadio = document.querySelector('input[name="aud"][value="segment"]');
+    if (segRadio && t.segment && t.segment !== 'all') {
+        segRadio.checked = true;
+        syncRadioStyles('aud-radios', 'aud');
+        onAudienceChange();
+        var segSelect = document.getElementById('aud-segment');
+        if (segSelect) segSelect.value = t.segment;
+    }
+    renderPreview();
+    // Scroll to compose form
+    document.getElementById('c-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast('Template applied — review and queue');
+}
+
+function prefillCompose(c) {
+    document.getElementById('c-title').value = c.title || '';
+    document.getElementById('c-body').value = c.body || '';
+    document.getElementById('c-category').value = c.category || 'announcement';
+    document.getElementById('c-deeplink').value = c.deepLink || '';
+    // Restore audience type
+    var aud = c.audience || {};
+    var audRadio = document.querySelector('input[name="aud"][value="' + (aud.type || 'all') + '"]');
+    if (audRadio) { audRadio.checked = true; syncRadioStyles('aud-radios', 'aud'); onAudienceChange(); }
+    if (aud.type === 'segment' && aud.segment) document.getElementById('aud-segment').value = aud.segment;
+    if (aud.type === 'platform' && aud.platform) document.getElementById('aud-platform').value = aud.platform;
+    if (aud.type === 'user' && aud.uid) document.getElementById('aud-user').value = aud.uid;
+    // Reset schedule to now
+    var nowRadio = document.querySelector('input[name="sched"][value="now"]');
+    if (nowRadio) { nowRadio.checked = true; syncRadioStyles('sched-radios', 'sched'); onScheduleChange(); }
+    renderPreview();
+    switchTab('compose');
+    toast('Campaign duplicated — edit and queue');
+}
 </script>
 </body>
 </html>
