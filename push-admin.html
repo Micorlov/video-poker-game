@@ -464,11 +464,11 @@ var SETTINGS_DOC = 'config/pushSettings';
 // the poller falls back to its own copy, so a mismatch shows stale values here
 // rather than changing behaviour.
 var TRIGGER_META = [
-    { key: ‘hourlyTop5’,  title: ‘Hourly top 5’,            desc: ‘Bumped out of this hour’s top 5 champions.’, cooldown: 6 },
-    { key: ‘friendRank’,  title: ‘Friends leaderboard’,     desc: ‘Passed by a friend, or the #1 spot changed hands.’, cooldown: 6 },
-    { key: ‘dailyProfit’, title: ‘Daily net profit’,        desc: ‘Dropped out of today’s top N by profit.’, cooldown: 12, topN: 10 },
-    { key: ‘globalRank’,  title: ‘All-time global rank’,    desc: ‘Fell out of the all-time top N. Runs hourly, not every poll.’, cooldown: 24, topN: 200 },
-    { key: ‘lapsedPlayer’, title: ‘Lapsed player win-back’, desc: ‘Fires once when a player hasn’t played in N days. Silent for the cooldown period after.’, cooldown: 72, thresholdDays: 7 }
+    { key: 'hourlyTop5',  title: 'Hourly top 5',            desc: 'Bumped out of this hour\'s top 5 champions.', cooldown: 6 },
+    { key: 'friendRank',  title: 'Friends leaderboard',     desc: 'Passed by a friend, or the #1 spot changed hands.', cooldown: 6 },
+    { key: 'dailyProfit', title: 'Daily net profit',        desc: 'Dropped out of today\'s top N by profit.', cooldown: 12, topN: 10 },
+    { key: 'globalRank',  title: 'All-time global rank',    desc: 'Fell out of the all-time top N. Runs hourly, not every poll.', cooldown: 24, topN: 200 },
+    { key: 'lapsedPlayer', title: 'Lapsed player win-back', desc: 'Fires once when a player hasn\'t played in N days. Silent for the cooldown period after.', cooldown: 72, thresholdDays: 7 }
 ];
 var DEFAULT_QUIET = { enabled: false, startHour: 23, endHour: 8, mode: 'drop' };
 
