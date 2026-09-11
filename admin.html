@@ -224,6 +224,7 @@
                 <button class="tab" onclick="switchTab('competitions')">Competitions</button>
                 <button class="tab" onclick="switchTab('features')">Features</button>
                 <button class="tab" onclick="switchTab('push')">Push</button>
+                <button class="tab" onclick="switchTab('analytics')">Analytics</button>
             </div>
 
             <!-- OVERVIEW -->
@@ -233,6 +234,10 @@
                     <div class="stat-card"><div class="label">Active Today</div><div class="value" id="s-today">—</div></div>
                     <div class="stat-card"><div class="label" id="live-stat-label">Current Hour Players</div><div class="value" id="s-hour-players">—</div><div class="sub"><span class="live-dot"></span>Live</div></div>
                     <div class="stat-card"><div class="label" id="rebuy-stat-label">Total Rebuys (this hour)</div><div class="value" id="s-hour-rebuys">—</div></div>
+                    <div class="stat-card"><div class="label">Active 7d (WAU)</div><div class="value" id="s-wau">—</div></div>
+                    <div class="stat-card"><div class="label">Active 30d (MAU)</div><div class="value" id="s-mau">—</div></div>
+                    <div class="stat-card"><div class="label">Churned (&gt;7d)</div><div class="value" id="s-churned" style="cursor:pointer" onclick="switchTabById('users','churned')" title="Click to filter churned users">—</div></div>
+                    <div class="stat-card"><div class="label">Avg Hands Played</div><div class="value" id="s-avg-hands">—</div></div>
                 </div>
 
                 <div class="panel">
@@ -278,10 +283,16 @@
                         <thead><tr>
                             <th onclick="sortUsers('displayName')">Name ↕</th>
                             <th onclick="sortUsers('email')">Email ↕</th>
+                            <th onclick="sortUsers('country')">Country ↕</th>
+                            <th onclick="sortUsers('_balance')">Balance ↕</th>
+                            <th onclick="sortUsers('_hands')">Hands ↕</th>
+                            <th onclick="sortUsers('bestStreak')">Streak ↕</th>
+                            <th onclick="sortUsers('netProfit')">Net P&amp;L ↕</th>
                             <th onclick="sortUsers('firstSeen')">First Seen ↕</th>
                             <th onclick="sortUsers('lastLogin')">Last Login ↕</th>
+                            <th>Status</th>
                         </tr></thead>
-                        <tbody id="all-users-body"><tr><td colspan="4" class="empty-state">Loading...</td></tr></tbody>
+                        <tbody id="all-users-body"><tr><td colspan="10" class="empty-state">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -380,6 +391,29 @@
                         </p>
                         <a href="push-admin.html" style="display:inline-block; background:#16a34a; color:#fff; text-decoration:none; padding:11px 24px; border-radius:8px; font-size:14px; font-weight:600;">Open Push Center →</a>
                     </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-analytics">
+                <div class="panel" style="margin-bottom:16px">
+                    <div class="panel-header"><h2>🌍 Country Breakdown</h2></div>
+                    <div id="chart-countries" style="padding:16px 20px"></div>
+                </div>
+                <div class="panel" style="margin-bottom:16px">
+                    <div class="panel-header"><h2>📅 Retention Snapshot</h2></div>
+                    <div id="chart-retention" style="padding:16px 20px"></div>
+                </div>
+                <div class="panel" style="margin-bottom:16px">
+                    <div class="panel-header"><h2>🏆 Best Hands Gallery</h2></div>
+                    <div id="chart-besthands" style="padding:16px 20px"></div>
+                </div>
+                <div class="panel" style="margin-bottom:16px">
+                    <div class="panel-header"><h2>🎯 Top Referrers</h2></div>
+                    <div id="chart-referrers" style="padding:16px 20px"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h2>💰 Balance Histogram</h2></div>
+                    <div id="chart-histogram" style="padding:16px 20px"></div>
                 </div>
             </div>
             </div>
@@ -611,26 +645,41 @@
     function loadOverviewStats() {
         db.collection('users').get().then(function(snap) {
             document.getElementById('s-total-users').textContent = snap.size;
+            var now = Date.now();
             var todayStr = new Date().toISOString().slice(0, 10);
-            var todayCount = 0;
+            var day = 24 * 60 * 60 * 1000;
+            var todayCount = 0, wau = 0, mau = 0, churned = 0, totalHands = 0, handCount = 0;
             snap.forEach(function(doc) {
                 var d = doc.data();
+                var activity = d.lastSeen ? d.lastSeen.toDate().getTime()
+                    : (d.lastLogin ? d.lastLogin.toDate().getTime() : 0);
                 if (d.lastLogin && d.lastLogin.toDate().toISOString().slice(0, 10) === todayStr) todayCount++;
+                if (activity > now - 7 * day) wau++;
+                if (activity > now - 30 * day) mau++;
+                if (activity && activity < now - 7 * day) churned++;
+                var h = d.cloudState && d.cloudState.handsPlayed ? parseInt(d.cloudState.handsPlayed) : 0;
+                if (h > 0) { totalHands += h; handCount++; }
             });
             document.getElementById('s-today').textContent = todayCount;
+            document.getElementById('s-wau').textContent = wau;
+            document.getElementById('s-mau').textContent = mau;
+            document.getElementById('s-churned').textContent = churned;
+            document.getElementById('s-avg-hands').textContent = handCount ? Math.round(totalHands / handCount) : '—';
         });
     }
 
     function loadCurrentHour() {
         var isDaily = adminOverviewTab === 'daily';
-        var col = isDaily ? 'daily_scores' : 'hourly_scores';
-        var keyField = isDaily ? 'dayKey' : 'hourKey';
         var keyValue = isDaily ? getDayKey(0) : getHourKey(0);
+        var tbody = document.getElementById('live-body');
 
-        db.collection(col).where(keyField, '==', keyValue).orderBy('score', 'desc').get().then(function(snap) {
+        var query = isDaily
+            ? db.collection('daily_scores').where('dayKey', '==', keyValue).orderBy('score', 'desc')
+            : db.collection('hourly').doc(keyValue).collection('entries').orderBy('points', 'desc');
+
+        query.get().then(function(snap) {
             document.getElementById('s-hour-players').textContent = snap.size;
             var totalRebuys = 0;
-            var tbody = document.getElementById('live-body');
             if (snap.empty) {
                 tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No players this ' + (isDaily ? 'day' : 'hour') + ' yet</td></tr>';
                 document.getElementById('s-hour-rebuys').textContent = '0';
@@ -641,24 +690,25 @@
             snap.forEach(function(doc) {
                 rank++;
                 var d = doc.data();
+                var uid = d.uid || doc.id;
+                var s = isDaily ? (d.score || 0) : (d.points || 0);
                 totalRebuys += d.rebuys || 0;
-                var s = d.score || 0;
                 var medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
                 var scoreClass = s > 0 ? 'positive' : s < 0 ? 'negative' : '';
                 var scoreText = s > 0 ? '+' + s : '' + s;
                 var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+                var rowKey = keyValue;
                 var tr = document.createElement('tr');
-                var rowKey = isDaily ? d.dayKey : d.hourKey;
                 tr.innerHTML =
                     '<td>' + medal + '</td>' +
                     '<td>' + photo + (d.displayName || '—') + '</td>' +
                     '<td class="' + scoreClass + '">' + scoreText + '</td>' +
-                    '<td>' + (d.hands || 0) + '</td>' +
-                    '<td>' + (d.rebuys || 0) + '</td>' +
-                    '<td>' + (d.bestHand || '—') + '</td>' +
+                    '<td>' + (isDaily ? (d.hands || 0) : '—') + '</td>' +
+                    '<td>' + (isDaily ? (d.rebuys || 0) : '—') + '</td>' +
+                    '<td>' + (isDaily ? (d.bestHand || '—') : '—') + '</td>' +
                     '<td>' +
-                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + rowKey + '\', \'' + d.uid + '\')">Reset</button>' +
-                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + rowKey + '\', \'' + d.uid + '\')">Delete</button>' +
+                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + rowKey + '\', \'' + uid + '\')">Reset</button>' +
+                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + rowKey + '\', \'' + uid + '\')">Delete</button>' +
                     '</td>';
                 tbody.appendChild(tr);
             });
@@ -685,10 +735,23 @@
         });
     }
 
+    var usersChurnFilter = false;
+
+    function countryFlag(code) {
+        if (!code) return '🌐';
+        try { return code.toUpperCase().replace(/./g, function(c) { return String.fromCodePoint(c.charCodeAt(0) + 127397); }); }
+        catch(e) { return code; }
+    }
+
     function loadAllUsers() {
         db.collection('users').get().then(function(snap) {
             allUsersData = [];
-            snap.forEach(function(doc) { allUsersData.push(doc.data()); });
+            snap.forEach(function(doc) {
+                var d = doc.data();
+                d._balance = (d.cloudState && d.cloudState.balance) ? parseInt(d.cloudState.balance) : 0;
+                d._hands = (d.cloudState && d.cloudState.handsPlayed) ? parseInt(d.cloudState.handsPlayed) : 0;
+                allUsersData.push(d);
+            });
             document.getElementById('users-count').textContent = allUsersData.length;
             renderUsers();
         });
@@ -696,10 +759,17 @@
 
     function renderUsers() {
         var query = (document.getElementById('user-search').value || '').toLowerCase();
+        var now = Date.now();
+        var sevenDays = 7 * 24 * 60 * 60 * 1000;
         var filtered = allUsersData.filter(function(u) {
+            if (usersChurnFilter) {
+                var activity = u.lastSeen ? u.lastSeen.toDate().getTime() : (u.lastLogin ? u.lastLogin.toDate().getTime() : 0);
+                if (!activity || (now - activity) <= sevenDays) return false;
+            }
             if (!query) return true;
             return (u.displayName || '').toLowerCase().includes(query) ||
-                   (u.email || '').toLowerCase().includes(query);
+                   (u.email || '').toLowerCase().includes(query) ||
+                   (u.country || '').toLowerCase().includes(query);
         });
         filtered.sort(function(a, b) {
             var va = a[usersSortField], vb = b[usersSortField];
@@ -707,13 +777,15 @@
             if (vb && vb.toDate) vb = vb.toDate().getTime();
             if (typeof va === 'string') va = va.toLowerCase();
             if (typeof vb === 'string') vb = vb.toLowerCase();
+            va = va == null ? -Infinity : va;
+            vb = vb == null ? -Infinity : vb;
             if (va < vb) return -1 * usersSortDir;
             if (va > vb) return 1 * usersSortDir;
             return 0;
         });
         var tbody = document.getElementById('all-users-body');
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No users found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No users found</td></tr>';
             return;
         }
         tbody.innerHTML = '';
@@ -721,23 +793,37 @@
             var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
             var fs = d.firstSeen ? d.firstSeen.toDate().toLocaleDateString() : '—';
             var ll = d.lastLogin ? d.lastLogin.toDate().toLocaleString() : '—';
+            var netP = d.netProfit || 0;
+            var netClass = netP > 0 ? 'positive' : netP < 0 ? 'negative' : '';
+            var netText = netP > 0 ? '+' + netP : '' + netP;
+            var activity = d.lastSeen ? d.lastSeen.toDate().getTime() : (d.lastLogin ? d.lastLogin.toDate().getTime() : 0);
+            var churned = activity && (now - activity) > sevenDays;
+            var badge = churned
+                ? '<span style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Churned</span>'
+                : '<span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Active</span>';
             var tr = document.createElement('tr');
             tr.innerHTML =
                 '<td>' + photo + (d.displayName || '—') + '</td>' +
                 '<td>' + (d.email || '—') + '</td>' +
+                '<td>' + countryFlag(d.country) + ' ' + (d.country || '—') + '</td>' +
+                '<td>' + (d._balance ? d._balance.toLocaleString() : '—') + '</td>' +
+                '<td>' + (d._hands || '—') + '</td>' +
+                '<td>' + (d.bestStreak || '—') + '</td>' +
+                '<td class="' + netClass + '">' + (d.netProfit != null ? netText : '—') + '</td>' +
                 '<td>' + fs + '</td>' +
-                '<td>' + ll + '</td>';
+                '<td>' + ll + '</td>' +
+                '<td>' + badge + '</td>';
             tbody.appendChild(tr);
         });
     }
 
     function sortUsers(field) {
         if (usersSortField === field) { usersSortDir *= -1; }
-        else { usersSortField = field; usersSortDir = 1; }
+        else { usersSortField = field; usersSortDir = -1; }
         renderUsers();
     }
 
-    function filterUsers() { renderUsers(); }
+    function filterUsers() { usersChurnFilter = false; renderUsers(); }
 
     function navHour(dir) {
         compHourOffset += dir;
@@ -747,17 +833,15 @@
 
     function loadCompetition(offset) {
         var isDaily = adminCompTab === 'daily';
-        var col = isDaily ? 'daily_scores' : 'hourly_scores';
-        var keyField = isDaily ? 'dayKey' : 'hourKey';
         var keyValue = isDaily ? getDayKey(offset) : getHourKey(offset);
 
-        if (isDaily) {
-            document.getElementById('comp-hour-label').textContent = keyValue;
-        } else {
-            document.getElementById('comp-hour-label').textContent = formatHourLabel(keyValue);
-        }
+        document.getElementById('comp-hour-label').textContent = isDaily ? keyValue : formatHourLabel(keyValue);
 
-        db.collection(col).where(keyField, '==', keyValue).orderBy('score', 'desc').get().then(function(snap) {
+        var query = isDaily
+            ? db.collection('daily_scores').where('dayKey', '==', keyValue).orderBy('score', 'desc')
+            : db.collection('hourly').doc(keyValue).collection('entries').orderBy('points', 'desc');
+
+        query.get().then(function(snap) {
             document.getElementById('comp-count').textContent = snap.size + ' players';
             var tbody = document.getElementById('comp-body');
             if (snap.empty) {
@@ -769,23 +853,24 @@
             snap.forEach(function(doc) {
                 rank++;
                 var d = doc.data();
-                var s = d.score || 0;
+                var uid = d.uid || doc.id;
+                var s = isDaily ? (d.score || 0) : (d.points || 0);
                 var medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
                 var scoreClass = s > 0 ? 'positive' : s < 0 ? 'negative' : '';
                 var scoreText = s > 0 ? '+' + s : '' + s;
                 var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+                var rowKey = keyValue;
                 var tr = document.createElement('tr');
-                var rowKey = isDaily ? d.dayKey : d.hourKey;
                 tr.innerHTML =
                     '<td>' + medal + '</td>' +
                     '<td>' + photo + (d.displayName || '—') + '</td>' +
                     '<td class="' + scoreClass + '">' + scoreText + '</td>' +
-                    '<td>' + (d.hands || 0) + '</td>' +
-                    '<td>' + (d.rebuys || 0) + '</td>' +
-                    '<td>' + (d.bestHand || '—') + '</td>' +
+                    '<td>' + (isDaily ? (d.hands || 0) : '—') + '</td>' +
+                    '<td>' + (isDaily ? (d.rebuys || 0) : '—') + '</td>' +
+                    '<td>' + (isDaily ? (d.bestHand || '—') : '—') + '</td>' +
                     '<td>' +
-                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + rowKey + '\', \'' + d.uid + '\')">Reset</button>' +
-                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + rowKey + '\', \'' + d.uid + '\')">Delete</button>' +
+                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + rowKey + '\', \'' + uid + '\')">Reset</button>' +
+                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + rowKey + '\', \'' + uid + '\')">Delete</button>' +
                     '</td>';
                 tbody.appendChild(tr);
             });
@@ -795,15 +880,14 @@
     function deleteScore(key, uid) {
         if (!confirm('Are you sure you want to delete this score entry?')) return;
         var isDaily = !key.includes('T');
-        var col = isDaily ? 'daily_scores' : 'hourly_scores';
-        var docId = key + '_' + uid;
-        db.collection(col).doc(docId).delete().then(function() {
+        var ref = isDaily
+            ? db.collection('daily_scores').doc(key + '_' + uid)
+            : db.collection('hourly').doc(key).collection('entries').doc(uid);
+        ref.delete().then(function() {
             alert('Score deleted successfully!');
             loadOverviewStats();
             loadCurrentHour();
-            if (typeof compHourOffset !== 'undefined') {
-                loadCompetition(compHourOffset);
-            }
+            if (typeof compHourOffset !== 'undefined') loadCompetition(compHourOffset);
         }).catch(function(err) {
             alert('Error deleting score: ' + err.message);
         });
@@ -812,21 +896,17 @@
     function resetScore(key, uid) {
         if (!confirm('Are you sure you want to reset this score to 0?')) return;
         var isDaily = !key.includes('T');
-        var col = isDaily ? 'daily_scores' : 'hourly_scores';
-        var docId = key + '_' + uid;
-        db.collection(col).doc(docId).update({
-            score: 0,
-            hands: 0,
-            rebuys: 0,
-            bestHand: 'Nothing',
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(function() {
+        var ref = isDaily
+            ? db.collection('daily_scores').doc(key + '_' + uid)
+            : db.collection('hourly').doc(key).collection('entries').doc(uid);
+        var updates = isDaily
+            ? { score: 0, hands: 0, rebuys: 0, bestHand: 'Nothing', updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
+            : { points: 0, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+        ref.update(updates).then(function() {
             alert('Score reset successfully!');
             loadOverviewStats();
             loadCurrentHour();
-            if (typeof compHourOffset !== 'undefined') {
-                loadCompetition(compHourOffset);
-            }
+            if (typeof compHourOffset !== 'undefined') loadCompetition(compHourOffset);
         }).catch(function(err) {
             alert('Error resetting score: ' + err.message);
         });
@@ -841,6 +921,167 @@
         if (name === 'competitions') loadCompetition(compHourOffset);
         if (name === 'overview') { loadCurrentHour(); loadRecentLogins(); }
         if (name === 'features') loadFeatures();
+        if (name === 'analytics') loadAnalytics();
+    }
+
+    function switchTabById(tabName, filter) {
+        document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+        document.getElementById('tab-' + tabName).classList.add('active');
+        var btn = document.querySelector('.tab[onclick="switchTab(\'' + tabName + '\')"]');
+        if (btn) btn.classList.add('active');
+        if (tabName === 'users') {
+            if (filter === 'churned') {
+                usersChurnFilter = true;
+                if (!allUsersData.length) { loadAllUsers(); } else { renderUsers(); }
+            } else {
+                loadAllUsers();
+            }
+        }
+    }
+
+    var analyticsLoaded = false;
+    function loadAnalytics() {
+        if (analyticsLoaded) return;
+        analyticsLoaded = true;
+        db.collection('users').get().then(function(snap) {
+            var users = [];
+            snap.forEach(function(doc) { users.push(doc.data()); });
+            renderCountryChart(users);
+            renderRetentionSnapshot(users);
+            renderBestHands(users);
+            renderTopReferrers(users);
+            renderBalanceHistogram(users);
+        });
+    }
+
+    function barHtml(label, value, max, color) {
+        var pct = max ? Math.round(value / max * 100) : 0;
+        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
+            '<div style="width:120px;font-size:13px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + label + '</div>' +
+            '<div style="flex:1;background:#1e293b;border-radius:4px;height:18px;overflow:hidden">' +
+              '<div style="width:' + pct + '%;background:' + color + ';height:100%;border-radius:4px;transition:width .4s"></div>' +
+            '</div>' +
+            '<div style="width:36px;text-align:right;font-size:13px;color:#e2e8f0">' + value + '</div>' +
+          '</div>';
+    }
+
+    function renderCountryChart(users) {
+        var counts = {};
+        users.forEach(function(u) { var c = u.country || 'Unknown'; counts[c] = (counts[c] || 0) + 1; });
+        var sorted = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; }).slice(0, 15);
+        var max = sorted.length ? counts[sorted[0]] : 1;
+        var html = sorted.map(function(c) {
+            return barHtml(countryFlag(c !== 'Unknown' ? c : null) + ' ' + c, counts[c], max, '#3b82f6');
+        }).join('');
+        document.getElementById('chart-countries').innerHTML = html || '<p style="color:#64748b">No country data yet</p>';
+    }
+
+    function renderRetentionSnapshot(users) {
+        var now = Date.now();
+        var day = 86400000;
+        var week = 7 * day;
+        var month = 30 * day;
+        var newThisWeek = 0, newThisMonth = 0, d1Week = 0, d7Week = 0, d1Month = 0, d7Month = 0;
+        users.forEach(function(u) {
+            var fs = u.firstSeen ? u.firstSeen.toDate().getTime() : 0;
+            var ls = u.lastSeen ? u.lastSeen.toDate().getTime() : (u.lastLogin ? u.lastLogin.toDate().getTime() : 0);
+            if (fs && (now - fs) <= week) {
+                newThisWeek++;
+                if (ls && (ls - fs) > day) d1Week++;
+                if (ls && (ls - fs) > week) d7Week++;
+            }
+            if (fs && (now - fs) <= month) {
+                newThisMonth++;
+                if (ls && (ls - fs) > day) d1Month++;
+                if (ls && (ls - fs) > week) d7Month++;
+            }
+        });
+        function pct(n, d) { return d ? Math.round(n / d * 100) + '%' : '—'; }
+        document.getElementById('chart-retention').innerHTML =
+            '<table style="border-collapse:collapse;width:100%;font-size:13px">' +
+            '<thead><tr style="color:#64748b">' +
+            '<th style="text-align:left;padding:6px 8px">Cohort</th>' +
+            '<th style="padding:6px 8px">New users</th>' +
+            '<th style="padding:6px 8px">Day-1 retained</th>' +
+            '<th style="padding:6px 8px">Day-7 retained</th>' +
+            '</tr></thead><tbody>' +
+            '<tr style="border-top:1px solid #1e293b">' +
+            '<td style="padding:6px 8px;color:#94a3b8">This week</td>' +
+            '<td style="padding:6px 8px;text-align:center">' + newThisWeek + '</td>' +
+            '<td style="padding:6px 8px;text-align:center;color:#4ade80">' + pct(d1Week, newThisWeek) + '</td>' +
+            '<td style="padding:6px 8px;text-align:center;color:#f59e0b">' + pct(d7Week, newThisWeek) + '</td>' +
+            '</tr>' +
+            '<tr style="border-top:1px solid #1e293b">' +
+            '<td style="padding:6px 8px;color:#94a3b8">This month</td>' +
+            '<td style="padding:6px 8px;text-align:center">' + newThisMonth + '</td>' +
+            '<td style="padding:6px 8px;text-align:center;color:#4ade80">' + pct(d1Month, newThisMonth) + '</td>' +
+            '<td style="padding:6px 8px;text-align:center;color:#f59e0b">' + pct(d7Month, newThisMonth) + '</td>' +
+            '</tr></tbody></table>';
+    }
+
+    function renderBestHands(users) {
+        var hands = [];
+        users.forEach(function(u) {
+            if (u.bestHand && u.bestHand.handName) {
+                hands.push({ name: u.displayName || '—', photo: u.photoURL, hand: u.bestHand.handName, payout: u.bestHand.payout || 0 });
+            }
+        });
+        hands.sort(function(a, b) { return b.payout - a.payout; });
+        hands = hands.slice(0, 10);
+        if (!hands.length) {
+            document.getElementById('chart-besthands').innerHTML = '<p style="color:#64748b">No best-hand data yet</p>';
+            return;
+        }
+        var html = hands.map(function(h, i) {
+            var photo = h.photo ? '<img src="' + h.photo + '" style="width:28px;height:28px;border-radius:50%;margin-right:8px;vertical-align:middle">' : '';
+            return '<div style="display:flex;align-items:center;padding:8px 0;border-top:' + (i ? '1px solid #1e293b' : 'none') + '">' +
+                '<span style="width:22px;color:#64748b;font-size:12px">' + (i + 1) + '</span>' +
+                photo + '<span style="flex:1;font-size:13px">' + h.name + '</span>' +
+                '<span style="color:#a78bfa;margin-right:16px;font-size:13px">' + h.hand + '</span>' +
+                '<span style="color:#fbbf24;font-size:13px">+' + h.payout.toLocaleString() + '</span>' +
+                '</div>';
+        }).join('');
+        document.getElementById('chart-besthands').innerHTML = html;
+    }
+
+    function renderTopReferrers(users) {
+        var list = users.filter(function(u) { return u.cloudState && u.cloudState.referralBonus > 0; });
+        list.sort(function(a, b) { return (b.cloudState.referralBonus || 0) - (a.cloudState.referralBonus || 0); });
+        list = list.slice(0, 10);
+        if (!list.length) {
+            document.getElementById('chart-referrers').innerHTML = '<p style="color:#64748b">No referral data yet</p>';
+            return;
+        }
+        var max = list[0].cloudState.referralBonus;
+        var html = list.map(function(u) {
+            var code = u.referralCode || '—';
+            return barHtml((u.displayName || '—') + ' [' + code + ']', u.cloudState.referralBonus, max, '#8b5cf6');
+        }).join('');
+        document.getElementById('chart-referrers').innerHTML = html;
+    }
+
+    function renderBalanceHistogram(users) {
+        var buckets = [
+            { label: '0–500',   min: 0,    max: 500   },
+            { label: '500–1k',  min: 500,  max: 1000  },
+            { label: '1k–2k',   min: 1000, max: 2000  },
+            { label: '2k–5k',   min: 2000, max: 5000  },
+            { label: '5k+',     min: 5000, max: Infinity }
+        ];
+        buckets.forEach(function(b) { b.count = 0; });
+        users.forEach(function(u) {
+            var bal = u.cloudState && u.cloudState.balance ? parseInt(u.cloudState.balance) : 0;
+            for (var i = 0; i < buckets.length; i++) {
+                if (bal >= buckets[i].min && bal < buckets[i].max) { buckets[i].count++; break; }
+            }
+        });
+        var maxCount = Math.max.apply(null, buckets.map(function(b) { return b.count; })) || 1;
+        var colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6'];
+        var html = buckets.map(function(b, i) {
+            return barHtml(b.label, b.count, maxCount, colors[i]);
+        }).join('');
+        document.getElementById('chart-histogram').innerHTML = html;
     }
 
     setInterval(loadCurrentHour, 15000);
