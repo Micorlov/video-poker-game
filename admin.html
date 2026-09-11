@@ -225,6 +225,7 @@
                 <button class="tab" onclick="switchTab('features')">Features</button>
                 <button class="tab" onclick="switchTab('push')">Push</button>
                 <button class="tab" onclick="switchTab('analytics')">Analytics</button>
+                <button class="tab" onclick="switchTab('acquisition')">Acquisition</button>
             </div>
 
             <!-- OVERVIEW -->
@@ -401,6 +402,39 @@
                 </div>
             </div>
 
+            <div class="tab-content" id="tab-acquisition">
+                <div class="stats-grid" style="margin-bottom:24px">
+                    <div class="stat-card">
+                        <div class="label">TikTok Users</div>
+                        <div class="value" id="acq-tiktok-count">—</div>
+                        <div class="sub" id="acq-tiktok-pct"></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Organic Users</div>
+                        <div class="value" id="acq-organic-count">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Referral Users</div>
+                        <div class="value" id="acq-referral-count">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">TikTok D1 Retention</div>
+                        <div class="value" id="acq-tiktok-d1">—</div>
+                    </div>
+                </div>
+                <div class="panel" style="margin-bottom:16px">
+                    <div class="panel-header"><h2>📱 Acquisition Source Breakdown</h2></div>
+                    <div id="chart-acquisition-sources" style="padding:16px 20px"></div>
+                </div>
+                <div class="panel" style="margin-bottom:16px">
+                    <div class="panel-header"><h2>🎯 TikTok Campaign Performance</h2></div>
+                    <div id="chart-tiktok-campaigns" style="padding:16px 20px"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h2>📊 Source Quality (Retention &amp; Engagement)</h2></div>
+                    <div id="chart-source-quality" style="padding:16px 20px"></div>
+                </div>
+            </div>
             <div class="tab-content" id="tab-analytics">
                 <div class="panel" style="margin-bottom:16px">
                     <div class="panel-header"><h2>🌍 Country Breakdown</h2></div>
@@ -965,6 +999,7 @@
         if (name === 'overview') { loadCurrentHour(); loadRecentLogins(); }
         if (name === 'features') loadFeatures();
         if (name === 'analytics') loadAnalytics();
+        if (name === 'acquisition') loadAcquisition();
     }
 
     function switchTabById(tabName, filter) {
@@ -998,6 +1033,118 @@
             renderPlayHours(users);
             renderPushAttribution(users);
         });
+    }
+
+    var acquisitionLoaded = false;
+    function loadAcquisition() {
+        if (acquisitionLoaded) return;
+        acquisitionLoaded = true;
+        db.collection('users').get().then(function(snap) {
+            var users = [];
+            snap.forEach(function(doc) { users.push(doc.data()); });
+            renderAcquisitionSources(users);
+            renderTikTokCampaigns(users);
+            renderSourceQuality(users);
+        });
+    }
+
+    function renderAcquisitionSources(users) {
+        var counts = {};
+        users.forEach(function(u) {
+            var src = u.acquisitionSource || 'organic';
+            counts[src] = (counts[src] || 0) + 1;
+        });
+        var total = users.length;
+        var tiktokCount = counts['tiktok'] || 0;
+        var organicCount = counts['organic'] || 0;
+        var referralCount = counts['referral'] || 0;
+
+        document.getElementById('acq-tiktok-count').textContent = tiktokCount;
+        document.getElementById('acq-tiktok-pct').textContent = total ? Math.round(tiktokCount / total * 100) + '% of total' : '';
+        document.getElementById('acq-organic-count').textContent = organicCount;
+        document.getElementById('acq-referral-count').textContent = referralCount;
+
+        var sorted = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; });
+        var max = sorted.length ? counts[sorted[0]] : 1;
+        var sourceColors = { tiktok: '#ee1d52', organic: '#3b82f6', referral: '#4ade80', google: '#f59e0b', facebook: '#6366f1' };
+        var html = sorted.map(function(src) {
+            var color = sourceColors[src] || '#94a3b8';
+            var pct = total ? Math.round(counts[src] / total * 100) : 0;
+            return barHtml(src + ' (' + pct + '%)', counts[src], max, color);
+        }).join('');
+        document.getElementById('chart-acquisition-sources').innerHTML = html ||
+            '<p style="color:#64748b">No acquisition data yet — appears after users sign up via tagged links</p>';
+    }
+
+    function renderTikTokCampaigns(users) {
+        var tiktokUsers = users.filter(function(u) { return u.acquisitionSource === 'tiktok'; });
+        if (!tiktokUsers.length) {
+            document.getElementById('chart-tiktok-campaigns').innerHTML =
+                '<p style="color:#64748b">No TikTok users yet — run your first campaign with <code>utm_source=tiktok</code></p>';
+            return;
+        }
+        var campaigns = {};
+        tiktokUsers.forEach(function(u) {
+            var c = u.firstUtmCampaign || '(no campaign tag)';
+            campaigns[c] = (campaigns[c] || 0) + 1;
+        });
+        var sorted = Object.keys(campaigns).sort(function(a, b) { return campaigns[b] - campaigns[a]; });
+        var max = campaigns[sorted[0]] || 1;
+        var html = sorted.map(function(c) { return barHtml(c, campaigns[c], max, '#ee1d52'); }).join('');
+        document.getElementById('chart-tiktok-campaigns').innerHTML = html;
+    }
+
+    function renderSourceQuality(users) {
+        var now = Date.now();
+        var day = 86400000;
+        var sources = {};
+        users.forEach(function(u) {
+            var src = u.acquisitionSource || 'organic';
+            if (!sources[src]) sources[src] = { count: 0, d1Eligible: 0, d1Retained: 0, hands: 0, sessionMs: 0 };
+            var s = sources[src];
+            s.count++;
+            var firstSeen = u.firstSeen && u.firstSeen.toMillis ? u.firstSeen.toMillis() : (u.firstSeen ? new Date(u.firstSeen).getTime() : 0);
+            var lastSeen = u.lastSeen && u.lastSeen.toMillis ? u.lastSeen.toMillis() : (u.lastSeen ? new Date(u.lastSeen).getTime() : firstSeen);
+            if (firstSeen && (now - firstSeen) > day) {
+                s.d1Eligible++;
+                if ((lastSeen - firstSeen) > day) s.d1Retained++;
+            }
+            s.hands += (u.cloudState && u.cloudState.handsPlayed) ? u.cloudState.handsPlayed : 0;
+            s.sessionMs += u.lastSessionMs || 0;
+        });
+
+        var rows = Object.keys(sources).sort(function(a, b) { return sources[b].count - sources[a].count; }).map(function(src) {
+            var s = sources[src];
+            var d1 = s.d1Eligible ? Math.round(s.d1Retained / s.d1Eligible * 100) + '%' : '—';
+            var avgHands = s.count ? Math.round(s.hands / s.count) : 0;
+            var avgMin = s.count ? Math.round(s.sessionMs / s.count / 60000) : 0;
+            return '<tr>' +
+                '<td style="padding:8px 12px;color:#e2e8f0;font-weight:600">' + src + '</td>' +
+                '<td style="padding:8px 12px;color:#94a3b8;text-align:center">' + s.count + '</td>' +
+                '<td style="padding:8px 12px;color:#4ade80;text-align:center">' + d1 + '</td>' +
+                '<td style="padding:8px 12px;color:#60a5fa;text-align:center">' + avgHands + '</td>' +
+                '<td style="padding:8px 12px;color:#fbbf24;text-align:center">' + avgMin + ' min</td>' +
+                '</tr>';
+        }).join('');
+
+        document.getElementById('chart-source-quality').innerHTML = rows
+            ? '<table style="width:100%;border-collapse:collapse">' +
+              '<thead><tr style="border-bottom:1px solid #1e293b">' +
+              '<th style="padding:8px 12px;text-align:left;color:#64748b;font-size:12px;text-transform:uppercase">Source</th>' +
+              '<th style="padding:8px 12px;text-align:center;color:#64748b;font-size:12px;text-transform:uppercase">Users</th>' +
+              '<th style="padding:8px 12px;text-align:center;color:#64748b;font-size:12px;text-transform:uppercase">D1 Ret.</th>' +
+              '<th style="padding:8px 12px;text-align:center;color:#64748b;font-size:12px;text-transform:uppercase">Avg Hands</th>' +
+              '<th style="padding:8px 12px;text-align:center;color:#64748b;font-size:12px;text-transform:uppercase">Avg Session</th>' +
+              '</tr></thead><tbody>' + rows + '</tbody></table>'
+            : '<p style="color:#64748b">No data yet</p>';
+
+        // D1 stat card for TikTok specifically
+        var tk = sources['tiktok'];
+        if (tk && tk.d1Eligible) {
+            document.getElementById('acq-tiktok-d1').textContent = Math.round(tk.d1Retained / tk.d1Eligible * 100) + '%';
+        } else {
+            document.getElementById('acq-tiktok-d1').textContent = '—';
+        }
     }
 
     function barHtml(label, value, max, color) {

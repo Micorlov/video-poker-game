@@ -233,7 +233,34 @@ function logUserToFirestore(user) {
         if (window.maybeRestoreCloudState) maybeRestoreCloudState(data);
         const updates = {};
         // firstSeen is written once on first login and never overwritten.
-        if (!data.firstSeen) updates.firstSeen = firebase.firestore.FieldValue.serverTimestamp();
+        if (!data.firstSeen) {
+            updates.firstSeen = firebase.firestore.FieldValue.serverTimestamp();
+
+            // Attribution: resolve acquisition source from first-touch UTM stored in
+            // localStorage. Written exactly once alongside firstSeen so it is
+            // immutable for the lifetime of the user record.
+            // Note: Android attribution comes from Play Install Referrer → Firebase
+            // Analytics / Play Console; acquisitionSource will be 'organic' for
+            // Android installs where the UTM never reaches the WebView.
+            var storedUtm = (typeof getStoredUtmContext === 'function') ? getStoredUtmContext() : null;
+            var acquisitionSource = 'organic';
+            if (storedUtm && storedUtm.utm_source) {
+                acquisitionSource = storedUtm.utm_source;
+            } else {
+                try {
+                    if (localStorage.getItem('vp_referral_invited')) acquisitionSource = 'referral';
+                } catch (e) {}
+            }
+            updates.acquisitionSource = acquisitionSource;
+            if (storedUtm) {
+                if (storedUtm.utm_medium)   updates.firstUtmMedium   = storedUtm.utm_medium;
+                if (storedUtm.utm_campaign) updates.firstUtmCampaign = storedUtm.utm_campaign;
+                if (storedUtm.utm_content)  updates.firstUtmContent  = storedUtm.utm_content;
+            }
+
+            // Fire TikTok CompleteRegistration conversion event for new sign-ups
+            if (typeof ttqTrack === 'function') ttqTrack('CompleteRegistration', { content_type: 'app' });
+        }
         if (!data.referralCode) updates.referralCode = generateRoomCode();
         if (Object.keys(updates).length > 0) {
             return db.collection('users').doc(user.uid).update(updates).then(function() {
