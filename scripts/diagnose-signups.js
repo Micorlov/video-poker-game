@@ -100,6 +100,32 @@ async function main() {
     histogram('  docs by firstSeen week (newest first):', first, now);
 
     if (authUsers) {
+        // The decisive cross-reference: for each week, how many accounts
+        // created then actually ended up with a Firestore doc. A count that
+        // "stopped moving" means recent weeks losing their docs; an even
+        // sprinkle of losses across all weeks means something else froze.
+        const docIds = new Set();
+        snap.forEach(doc => docIds.add(doc.id));
+        const perWeek = {};
+        const missingWeeks = {};
+        authUsers.forEach(u => {
+            const i = weekIndex(Date.parse(u.metadata.creationTime), now);
+            if (i < 0 || i >= WEEKS) return;
+            if (!perWeek[i]) perWeek[i] = { total: 0, withDoc: 0 };
+            perWeek[i].total++;
+            if (docIds.has(u.uid)) perWeek[i].withDoc++;
+            else missingWeeks[i] = (missingWeeks[i] || 0) + 1;
+        });
+        console.log('\n=== ACCOUNTS CREATED vs DOC WRITTEN (per week, newest first) ===');
+        for (let i = 0; i < WEEKS; i++) {
+            const w = perWeek[i] || { total: 0, withDoc: 0 };
+            const start = new Date(now - (i + 1) * WEEK_MS).toISOString().slice(0, 10);
+            const end = new Date(now - i * WEEK_MS).toISOString().slice(0, 10);
+            const lost = w.total - w.withDoc;
+            console.log(`  ${start} → ${end}  created ${String(w.total).padStart(3)}  with doc ${String(w.withDoc).padStart(3)}  MISSING ${lost}`);
+        }
+        console.log(`  missing by week: ${JSON.stringify(missingWeeks)}`);
+
         console.log('\n=== VERDICT ===');
         const missing = authUsers.length - snap.size;
         console.log(`  Auth accounts ${authUsers.length} vs Firestore docs ${snap.size} → ${missing} account(s) with no doc`);
