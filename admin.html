@@ -231,6 +231,10 @@
 
             <!-- OVERVIEW -->
             <div class="tab-content active" id="tab-overview">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                    <span id="stats-updated" style="color:#64748b;font-size:12px">—</span>
+                    <button onclick="refreshOverview()">↻ Refresh</button>
+                </div>
                 <div class="stats-grid">
                     <div class="stat-card"><div class="label">Total Users</div><div class="value" id="s-total-users">—</div></div>
                     <div class="stat-card"><div class="label">Active Today</div><div class="value" id="s-today">—</div></div>
@@ -599,6 +603,27 @@
         }
     });
 
+    var statsUpdatedAt = 0;
+
+    function refreshOverview() {
+        loadOverviewStats();
+        loadCurrentHour();
+        loadRecentLogins();
+    }
+
+    // A dashboard left open for days used to keep showing the totals from the
+    // moment it was signed into. Recompute when the tab is looked at again,
+    // throttled so flicking between windows does not re-read the collection.
+    function refreshOverviewIfStale() {
+        if (!document.getElementById('app').classList.contains('visible')) return;
+        if (Date.now() - statsUpdatedAt < 60000) return;
+        refreshOverview();
+    }
+    window.addEventListener('focus', refreshOverviewIfStale);
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') refreshOverviewIfStale();
+    });
+
     function loadAll() {
         loadBuildInfo();
         loadOverviewStats();
@@ -807,6 +832,9 @@
             document.getElementById('s-churned').textContent = churned;
             document.getElementById('s-avg-hands').textContent = handCount ? Math.round(totalHands / handCount) : '—';
             document.getElementById('s-push-reengaged').textContent = pushReengaged;
+            statsUpdatedAt = Date.now();
+            var stamp = document.getElementById('stats-updated');
+            if (stamp) stamp.textContent = 'Figures as of ' + new Date().toLocaleTimeString();
             document.getElementById('s-new-7d').textContent = new7d;
             document.getElementById('s-new-today').textContent = newToday + ' today';
             document.getElementById('s-new-30d').textContent = new30d;
@@ -1121,7 +1149,7 @@
         event.target.classList.add('active');
         if (name === 'users') loadAllUsers();
         if (name === 'competitions') loadCompetition(compHourOffset);
-        if (name === 'overview') { loadCurrentHour(); loadRecentLogins(); }
+        if (name === 'overview') refreshOverview();
         if (name === 'features') loadFeatures();
         if (name === 'analytics') loadAnalytics();
         if (name === 'acquisition') loadAcquisition();

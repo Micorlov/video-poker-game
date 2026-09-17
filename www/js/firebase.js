@@ -215,8 +215,24 @@ function detectPlatform() {
     return 'web';
 }
 
+// A failed user-doc write used to be swallowed by firebaseSafe() and never
+// retried, so a sign-in that hit a flaky network left an account with no
+// Firestore doc at all — invisible to the admin panel, and only ever repaired
+// if that player came back. Diagnosed at 6 of 80 accounts. Retry instead.
+function setWithRetry(ref, payload, attempt) {
+    attempt = attempt || 0;
+    return ref.set(payload, { merge: true }).catch(function(err) {
+        if (attempt >= 3) {
+            console.warn('user doc write failed after retries:', err && err.code);
+            throw err;
+        }
+        return new Promise(function(resolve) { setTimeout(resolve, 500 * Math.pow(2, attempt)); })
+            .then(function() { return setWithRetry(ref, payload, attempt + 1); });
+    });
+}
+
 function logUserToFirestore(user) {
-    return db.collection('users').doc(user.uid).set({
+    return setWithRetry(db.collection('users').doc(user.uid), {
         uid: user.uid,
         displayName: user.displayName || '',
         photoURL: user.photoURL || '',
@@ -228,7 +244,7 @@ function logUserToFirestore(user) {
         // a player is actually running — and therefore which fields their
         // client is capable of reporting.
         appVersion: window.VP_APP_VERSION || 'unknown'
-    }, { merge: true }).then(function() {
+    }).then(function() {
         return db.collection('users').doc(user.uid).get();
     }).then(function(doc) {
         const data = doc.exists ? doc.data() : {};
