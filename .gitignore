@@ -13,3 +13,6 @@ android/keystore.properties
 android/app/*.jks
 android/app/google-services.json
 android/app/google-services.json.bak
+# Generated per build by build.js; the deploy ships its own copy
+build-info.json
+www/build-info.json

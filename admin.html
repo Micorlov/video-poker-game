@@ -212,7 +212,7 @@
             <div class="topbar-right">
                 <img id="topbar-photo" src="" alt="">
                 <span id="topbar-name"></span>
-                <span style="color:#64748b;font-size:12px" title="Latest client build. Players on an older build show amber in the Users tab and report fewer fields.">app v<span id="topbar-version">—</span></span>
+                <span id="topbar-build" style="color:#64748b;font-size:12px" title="Latest client build. Players on an older build show amber in the Users tab and report fewer fields.">app v<span id="topbar-version">—</span></span>
                 <a href="video_poker.html">← Game</a>
                 <button onclick="firebase.auth().signOut()">Sign Out</button>
             </div>
@@ -243,6 +243,7 @@
                     <div class="stat-card"><div class="label">Churned (&gt;7d)</div><div class="value" id="s-churned" style="cursor:pointer" onclick="switchTabById('users','churned')" title="Click to filter churned users">—</div></div>
                     <div class="stat-card"><div class="label">Avg Hands Played</div><div class="value" id="s-avg-hands">—</div></div>
                     <div class="stat-card"><div class="label">Push Re-engaged</div><div class="value" id="s-push-reengaged">—</div></div>
+                    <div class="stat-card"><div class="label">Panel Deployed</div><div class="value" id="s-deployed" style="font-size:22px">—</div><div class="sub" id="s-deployed-sub">—</div></div>
                 </div>
 
                 <div class="panel">
@@ -499,9 +500,66 @@
     var auth = firebase.auth();
     var db = firebase.firestore();
     var ADMIN_EMAIL = 'micorlov@gmail.com';
-    // Keep in step with VP_APP_VERSION in js/analytics.js — it is only used to
-    // mark which users are already on the newest build.
-    var CURRENT_APP_VERSION = '2.5';
+    // Fallback only. The real value arrives from build-info.json, which the
+    // deploy writes, so the panel reports the build it is actually serving
+    // rather than a constant someone has to remember to edit.
+    var CURRENT_APP_VERSION = '2.6';
+    var BUILD_INFO = null;
+
+    function relativeTime(iso) {
+        var ms = Date.now() - new Date(iso).getTime();
+        if (isNaN(ms)) return '—';
+        var min = Math.round(ms / 60000);
+        if (min < 1) return 'just now';
+        if (min < 60) return min + 'm ago';
+        var hr = Math.round(min / 60);
+        if (hr < 24) return hr + 'h ago';
+        return Math.round(hr / 24) + 'd ago';
+    }
+
+    function renderBuildInfo() {
+        var vEl = document.getElementById('topbar-version');
+        var dEl = document.getElementById('s-deployed');
+        var sEl = document.getElementById('s-deployed-sub');
+        if (!BUILD_INFO) {
+            if (vEl) vEl.textContent = CURRENT_APP_VERSION;
+            if (dEl) dEl.textContent = '—';
+            if (sEl) sEl.textContent = 'no build-info.json';
+            return;
+        }
+        var b = BUILD_INFO;
+        if (vEl) vEl.textContent = b.version + ' · b' + b.build;
+        if (dEl) dEl.textContent = relativeTime(b.builtAt);
+        if (sEl) sEl.textContent = 'v' + b.version + ' · b' + b.build + ' · ' + (b.shortCommit || '');
+        var host = document.getElementById('topbar-build');
+        if (host) host.title = 'Deployed ' + new Date(b.builtAt).toLocaleString() +
+            '\ncommit ' + (b.commit || '?') + '\nbranch ' + (b.branch || '?');
+    }
+
+    // Served next to this page by the same deploy, so a stale cache would
+    // defeat the point — always ask the network for it.
+    function loadBuildInfo() {
+        try {
+            return fetchBuildInfo();
+        } catch (e) {
+            renderBuildInfo();
+            return Promise.resolve();
+        }
+    }
+
+    function fetchBuildInfo() {
+        return fetch('build-info.json', { cache: 'no-store' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .catch(function() { return null; })
+            .then(function(info) {
+                if (info && info.version) {
+                    BUILD_INFO = info;
+                    CURRENT_APP_VERSION = info.version;
+                }
+                renderBuildInfo();
+            });
+    }
+    loadBuildInfo();
 
     var allUsersData = [];
     var usersSortField = 'lastLogin';
@@ -535,7 +593,6 @@
             document.getElementById('app').classList.add('visible');
             document.getElementById('topbar-photo').src = user.photoURL || '';
             document.getElementById('topbar-name').textContent = user.displayName || user.email;
-            document.getElementById('topbar-version').textContent = CURRENT_APP_VERSION;
             loadAll();
         } else if (user) {
             document.getElementById('denied-msg').style.display = 'block';
@@ -543,6 +600,7 @@
     });
 
     function loadAll() {
+        loadBuildInfo();
         loadOverviewStats();
         loadCurrentHour();
         loadRecentLogins();
@@ -854,7 +912,7 @@
     // Anything behind the current build is worth spotting at a glance: an old
     // client silently stops reporting whatever newer fields the panel reads.
     function versionCell(v) {
-        if (!v) return '<span style="color:#64748b">pre-2.5</span>';
+        if (!v) return '<span style="color:#64748b">pre-' + CURRENT_APP_VERSION + '</span>';
         var color = v === CURRENT_APP_VERSION ? '#4ade80' : '#fbbf24';
         return '<span style="color:' + color + '">' + v + '</span>';
     }

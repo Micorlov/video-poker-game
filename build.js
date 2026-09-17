@@ -106,6 +106,28 @@ indexHtml = indexHtml.replace('<!-- BUILD_JS_PLACEHOLDER -->', combinedJs);
 fs.writeFileSync(outputPath, indexHtml, 'utf8');
 console.log('🎉 Successfully built video_poker.html!');
 
+// build-info.json travels with the deploy so the admin panel can report which
+// build it is actually serving, instead of trusting a constant that has to be
+// remembered and edited by hand.
+const { execSync } = require('child_process');
+function gitOut(cmd, fallback) {
+    try { return execSync(cmd, { cwd: projectDir, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); }
+    catch (e) { return fallback; }
+}
+const commit = process.env.GITHUB_SHA || gitOut('git rev-parse HEAD', '');
+const buildInfo = {
+    version: bundleVersion || 'unknown',
+    // Increments on its own with every Actions run, so a redeploy of the same
+    // version is still distinguishable in the panel.
+    build: process.env.GITHUB_RUN_NUMBER || gitOut('git rev-list --count HEAD', '0'),
+    commit: commit,
+    shortCommit: commit ? commit.slice(0, 7) : '',
+    branch: process.env.GITHUB_REF_NAME || gitOut('git rev-parse --abbrev-ref HEAD', ''),
+    builtAt: new Date().toISOString()
+};
+fs.writeFileSync(path.join(projectDir, 'build-info.json'), JSON.stringify(buildInfo, null, 2) + '\n', 'utf8');
+console.log(`🏷️  build-info.json: v${buildInfo.version} build ${buildInfo.build} (${buildInfo.shortCommit})`);
+
 // Copy to Capacitor www/ directory for Android app
 const wwwDir = path.join(projectDir, 'www');
 if (fs.existsSync(wwwDir)) {
@@ -121,7 +143,7 @@ if (fs.existsSync(wwwDir)) {
         }
     });
     // Copy root files
-    const rootFiles = ['manifest.json', 'icon.svg', 'sw.js'];
+    const rootFiles = ['manifest.json', 'icon.svg', 'sw.js', 'build-info.json'];
     rootFiles.forEach(function(file) {
         const src = path.join(projectDir, file);
         if (fs.existsSync(src)) {
