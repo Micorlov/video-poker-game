@@ -4501,6 +4501,41 @@ body:not(.ob-step-welcome) .ob-lang-chip {
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+    <!-- TikTok Pixel — web only; Android attribution uses Play Install Referrer.
+         Replace REPLACE_WITH_YOUR_PIXEL_ID with your Pixel ID from:
+         TikTok Ads Manager → Assets → Events → Web Events → Set Up Web SDK -->
+    <script>
+    (function() {
+        // Skip inside the native Capacitor app — the WebView loads from a local
+        // bundle, so the Pixel CDN request would fail and Play attribution is
+        // handled by the Play Install Referrer API instead.
+        if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) return;
+        !function (w, d, t) {
+            w.TiktokAnalyticsObject = t;
+            var ttq = w[t] = w[t] || [];
+            ttq.methods = ["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"];
+            ttq.setAndDefer = function(t, e) { t[e] = function() { t.push([e].concat(Array.prototype.slice.call(arguments, 0))); }; };
+            for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+            ttq.instance = function(t) {
+                for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++) ttq.setAndDefer(e, ttq.methods[n]);
+                return e;
+            };
+            ttq.load = function(e, n) {
+                var i = "https://analytics.tiktok.com/i18n/pixel/events.js";
+                ttq._i = ttq._i || {}; ttq._i[e] = []; ttq._i[e]._u = i;
+                ttq._t = ttq._t || {}; ttq._t[e] = +new Date;
+                ttq._o = ttq._o || {}; ttq._o[e] = n || {};
+                var o = document.createElement("script");
+                o.type = "text/javascript"; o.async = true;
+                o.src = i + "?sdkid=" + e + "&lib=" + t;
+                var a = document.getElementsByTagName("script")[0];
+                a.parentNode.insertBefore(o, a);
+            };
+            ttq.load('REPLACE_WITH_YOUR_PIXEL_ID');
+            ttq.page();
+        }(window, document, 'ttq');
+    })();
+    </script>
 </head>
 <body>
 <div class="shell">
@@ -12343,9 +12378,52 @@ function initVpAnalytics() {
     });
 }
 
+// --- TikTok Pixel helpers ---
+
+// Thin wrapper — fires ttq.track() if Pixel is loaded, silently no-ops otherwise.
+function ttqTrack(event, params) {
+    try {
+        if (typeof ttq !== 'undefined') ttq.track(event, params || {});
+    } catch (e) { /* pixel not loaded or blocked */ }
+}
+
+// --- First-touch UTM attribution ---
+// Captures utm_* params once (on first visit with a source) and stores them in
+// localStorage so they survive sign-in redirects and SPA navigation. Never
+// overwrites an existing capture — first-touch wins.
+function captureUtmContext() {
+    try {
+        if (localStorage.getItem('vp_first_utm')) return;
+        var params = new URLSearchParams(window.location.search || '');
+        var source = params.get('utm_source');
+        if (!source) return;
+        var ctx = {
+            utm_source: source.toLowerCase().trim(),
+            utm_medium: (params.get('utm_medium') || '').toLowerCase().trim(),
+            utm_campaign: params.get('utm_campaign') || '',
+            utm_content: params.get('utm_content') || '',
+            capturedAt: Date.now()
+        };
+        localStorage.setItem('vp_first_utm', JSON.stringify(ctx));
+    } catch (e) { /* localStorage unavailable */ }
+}
+
+function getStoredUtmContext() {
+    try {
+        var raw = localStorage.getItem('vp_first_utm');
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+captureUtmContext();
+
 window.VP_ASO_EVENTS = VP_ASO_EVENTS;
 window.initVpAnalytics = initVpAnalytics;
 window.logVpEvent = logVpEvent;
+window.ttqTrack = ttqTrack;
+window.getStoredUtmContext = getStoredUtmContext;
 
 
 /* --- js/ui.js --- */
@@ -13151,12 +13229,22 @@ if (auth) {
     });
 }
 
+function detectPlatform() {
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        return /android/i.test(navigator.userAgent) ? 'android' : 'ios';
+    }
+    return 'web';
+}
+
 function logUserToFirestore(user) {
     return db.collection('users').doc(user.uid).set({
         uid: user.uid,
         displayName: user.displayName || '',
         photoURL: user.photoURL || '',
-        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        email: user.email || '',
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+        sessionCount: firebase.firestore.FieldValue.increment(1),
+        platform: detectPlatform()
     }, { merge: true }).then(function() {
         return db.collection('users').doc(user.uid).get();
     }).then(function(doc) {
@@ -13164,10 +13252,58 @@ function logUserToFirestore(user) {
         // Fresh device + existing cloud backup → restore the chip stack
         // before any UI renders a stale default balance (js/cloudsave.js).
         if (window.maybeRestoreCloudState) maybeRestoreCloudState(data);
-        if (!data.referralCode) {
-            const code = generateRoomCode();
-            return db.collection('users').doc(user.uid).update({ referralCode: code }).then(function() {
-                window.egUserDoc = Object.assign({}, data, { referralCode: code });
+        const updates = {};
+
+        // Firebase Auth knows exactly when the account was created, so a user
+        // doc written before firstSeen existed (every build shipped up to 2.5)
+        // can be backfilled with its real sign-up date instead of "now" — which
+        // would otherwise dump every returning player into the admin's
+        // new-users cohort the first time they open a build that tracks it.
+        const createdIso = (user.metadata && user.metadata.creationTime) || null;
+        const createdMs = createdIso ? new Date(createdIso).getTime() : 0;
+        // Unknown creation time → treat as new; only a known, old account is
+        // excluded from attribution below, so nothing silently loses a source.
+        const isNewAccount = !createdMs || (Date.now() - createdMs) < 24 * 60 * 60 * 1000;
+
+        // firstSeen is written once on first login and never overwritten.
+        if (!data.firstSeen) {
+            updates.firstSeen = createdMs
+                ? firebase.firestore.Timestamp.fromDate(new Date(createdMs))
+                : firebase.firestore.FieldValue.serverTimestamp();
+
+            // Attribution: resolve acquisition source from first-touch UTM stored in
+            // localStorage. Written exactly once alongside firstSeen so it is
+            // immutable for the lifetime of the user record.
+            // Note: Android attribution comes from Play Install Referrer → Firebase
+            // Analytics / Play Console; acquisitionSource will be 'organic' for
+            // Android installs where the UTM never reaches the WebView.
+            var storedUtm = (typeof getStoredUtmContext === 'function') ? getStoredUtmContext() : null;
+            if (!isNewAccount) storedUtm = null;
+            var acquisitionSource = 'organic';
+            if (storedUtm && storedUtm.utm_source) {
+                acquisitionSource = storedUtm.utm_source;
+            } else {
+                try {
+                    if (localStorage.getItem('vp_referral_invited')) acquisitionSource = 'referral';
+                } catch (e) {}
+            }
+            // A backfilled veteran has no acquisition story to tell — leaving the
+            // field unset keeps them out of the acquisition breakdown instead of
+            // inventing an "organic" install for them.
+            if (isNewAccount) updates.acquisitionSource = acquisitionSource;
+            if (storedUtm) {
+                if (storedUtm.utm_medium)   updates.firstUtmMedium   = storedUtm.utm_medium;
+                if (storedUtm.utm_campaign) updates.firstUtmCampaign = storedUtm.utm_campaign;
+                if (storedUtm.utm_content)  updates.firstUtmContent  = storedUtm.utm_content;
+            }
+
+            // Fire TikTok CompleteRegistration conversion event for new sign-ups
+            if (isNewAccount && typeof ttqTrack === 'function') ttqTrack('CompleteRegistration', { content_type: 'app' });
+        }
+        if (!data.referralCode) updates.referralCode = generateRoomCode();
+        if (Object.keys(updates).length > 0) {
+            return db.collection('users').doc(user.uid).update(updates).then(function() {
+                window.egUserDoc = Object.assign({}, data, updates);
                 if (window.renderFriendsScreen) renderFriendsScreen();
             });
         }
@@ -13175,6 +13311,36 @@ function logUserToFirestore(user) {
         if (window.renderFriendsScreen) renderFriendsScreen();
     });
 }
+
+var _vpSessionStart = Date.now();
+var _vpSessionHour  = new Date().getHours();
+
+function _vpFlushSession() {
+    if (!db || !auth || !auth.currentUser) return;
+    var dur = Date.now() - _vpSessionStart;
+    if (dur < 10000) return;
+    var uid = auth.currentUser.uid;
+    var update = {
+        totalPlayTimeMs: firebase.firestore.FieldValue.increment(dur),
+        lastSessionMs:   dur,
+        lastSessionHour: _vpSessionHour
+    };
+    update['playHourMap.h' + _vpSessionHour] = firebase.firestore.FieldValue.increment(1);
+    db.collection('users').doc(uid).update(update).catch(function() {});
+}
+
+function _vpResetSession() {
+    _vpSessionStart = Date.now();
+    _vpSessionHour  = new Date().getHours();
+}
+
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden') { _vpFlushSession(); }
+    else { _vpResetSession(); }
+});
+window.addEventListener('pagehide', _vpFlushSession);
+document.addEventListener('pause',  _vpFlushSession);
+document.addEventListener('resume', _vpResetSession);
 
 let _wasSignedIn = false;
 
@@ -13607,6 +13773,16 @@ function initPushListeners() {
     // default — on the rooms sub-tab, where invites and room activity live.
     PushNotifications.addListener('pushNotificationActionPerformed', function(action) {
         var data = (action && action.notification && action.notification.data) || {};
+        if (typeof db !== 'undefined' && window.egUser) {
+            var attrUpdate = {
+                pushOpenCount:  firebase.firestore.FieldValue.increment(1),
+                lastPushOpenAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastOpenSource: 'push'
+            };
+            if (data.deepLink) attrUpdate.lastPushDeepLink = data.deepLink;
+            db.collection('users').doc(window.egUser.uid).update(attrUpdate).catch(function() {});
+        }
+        if (window.logVpEvent) logVpEvent('push_opened', { deepLink: data.deepLink || 'default' });
         if (data.deepLink && window.showScreen) {
             showScreen(data.deepLink);
             return;

@@ -66,6 +66,49 @@ function initVpAnalytics() {
     });
 }
 
+// --- TikTok Pixel helpers ---
+
+// Thin wrapper — fires ttq.track() if Pixel is loaded, silently no-ops otherwise.
+function ttqTrack(event, params) {
+    try {
+        if (typeof ttq !== 'undefined') ttq.track(event, params || {});
+    } catch (e) { /* pixel not loaded or blocked */ }
+}
+
+// --- First-touch UTM attribution ---
+// Captures utm_* params once (on first visit with a source) and stores them in
+// localStorage so they survive sign-in redirects and SPA navigation. Never
+// overwrites an existing capture — first-touch wins.
+function captureUtmContext() {
+    try {
+        if (localStorage.getItem('vp_first_utm')) return;
+        var params = new URLSearchParams(window.location.search || '');
+        var source = params.get('utm_source');
+        if (!source) return;
+        var ctx = {
+            utm_source: source.toLowerCase().trim(),
+            utm_medium: (params.get('utm_medium') || '').toLowerCase().trim(),
+            utm_campaign: params.get('utm_campaign') || '',
+            utm_content: params.get('utm_content') || '',
+            capturedAt: Date.now()
+        };
+        localStorage.setItem('vp_first_utm', JSON.stringify(ctx));
+    } catch (e) { /* localStorage unavailable */ }
+}
+
+function getStoredUtmContext() {
+    try {
+        var raw = localStorage.getItem('vp_first_utm');
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+captureUtmContext();
+
 window.VP_ASO_EVENTS = VP_ASO_EVENTS;
 window.initVpAnalytics = initVpAnalytics;
 window.logVpEvent = logVpEvent;
+window.ttqTrack = ttqTrack;
+window.getStoredUtmContext = getStoredUtmContext;

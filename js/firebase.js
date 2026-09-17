@@ -232,9 +232,23 @@ function logUserToFirestore(user) {
         // before any UI renders a stale default balance (js/cloudsave.js).
         if (window.maybeRestoreCloudState) maybeRestoreCloudState(data);
         const updates = {};
+
+        // Firebase Auth knows exactly when the account was created, so a user
+        // doc written before firstSeen existed (every build shipped up to 2.5)
+        // can be backfilled with its real sign-up date instead of "now" — which
+        // would otherwise dump every returning player into the admin's
+        // new-users cohort the first time they open a build that tracks it.
+        const createdIso = (user.metadata && user.metadata.creationTime) || null;
+        const createdMs = createdIso ? new Date(createdIso).getTime() : 0;
+        // Unknown creation time → treat as new; only a known, old account is
+        // excluded from attribution below, so nothing silently loses a source.
+        const isNewAccount = !createdMs || (Date.now() - createdMs) < 24 * 60 * 60 * 1000;
+
         // firstSeen is written once on first login and never overwritten.
         if (!data.firstSeen) {
-            updates.firstSeen = firebase.firestore.FieldValue.serverTimestamp();
+            updates.firstSeen = createdMs
+                ? firebase.firestore.Timestamp.fromDate(new Date(createdMs))
+                : firebase.firestore.FieldValue.serverTimestamp();
 
             // Attribution: resolve acquisition source from first-touch UTM stored in
             // localStorage. Written exactly once alongside firstSeen so it is
@@ -243,6 +257,7 @@ function logUserToFirestore(user) {
             // Analytics / Play Console; acquisitionSource will be 'organic' for
             // Android installs where the UTM never reaches the WebView.
             var storedUtm = (typeof getStoredUtmContext === 'function') ? getStoredUtmContext() : null;
+            if (!isNewAccount) storedUtm = null;
             var acquisitionSource = 'organic';
             if (storedUtm && storedUtm.utm_source) {
                 acquisitionSource = storedUtm.utm_source;
@@ -251,7 +266,10 @@ function logUserToFirestore(user) {
                     if (localStorage.getItem('vp_referral_invited')) acquisitionSource = 'referral';
                 } catch (e) {}
             }
-            updates.acquisitionSource = acquisitionSource;
+            // A backfilled veteran has no acquisition story to tell — leaving the
+            // field unset keeps them out of the acquisition breakdown instead of
+            // inventing an "organic" install for them.
+            if (isNewAccount) updates.acquisitionSource = acquisitionSource;
             if (storedUtm) {
                 if (storedUtm.utm_medium)   updates.firstUtmMedium   = storedUtm.utm_medium;
                 if (storedUtm.utm_campaign) updates.firstUtmCampaign = storedUtm.utm_campaign;
@@ -259,7 +277,7 @@ function logUserToFirestore(user) {
             }
 
             // Fire TikTok CompleteRegistration conversion event for new sign-ups
-            if (typeof ttqTrack === 'function') ttqTrack('CompleteRegistration', { content_type: 'app' });
+            if (isNewAccount && typeof ttqTrack === 'function') ttqTrack('CompleteRegistration', { content_type: 'app' });
         }
         if (!data.referralCode) updates.referralCode = generateRoomCode();
         if (Object.keys(updates).length > 0) {
