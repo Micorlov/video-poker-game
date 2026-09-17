@@ -1,0 +1,26 @@
+name: Diagnose sign-ups
+
+# Manual only. Read-only: prints aggregate counts and dates for why the admin
+# panel's user total stopped moving. No personal data is written to the log.
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm ci
+
+      - name: Write Firebase service account key
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > "${{ runner.temp }}/firebase-service-account.json"
+
+      - name: Run diagnostic
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+        run: node scripts/diagnose-signups.js
