@@ -212,7 +212,7 @@
             <div class="topbar-right">
                 <img id="topbar-photo" src="" alt="">
                 <span id="topbar-name"></span>
-                <span style="color:#64748b;font-size:12px">v<span id="topbar-version">—</span></span>
+                <span style="color:#64748b;font-size:12px" title="Latest client build. Players on an older build show amber in the Users tab and report fewer fields.">app v<span id="topbar-version">—</span></span>
                 <a href="video_poker.html">← Game</a>
                 <button onclick="firebase.auth().signOut()">Sign Out</button>
             </div>
@@ -235,6 +235,7 @@
                     <div class="stat-card"><div class="label">Total Users</div><div class="value" id="s-total-users">—</div></div>
                     <div class="stat-card"><div class="label">Active Today</div><div class="value" id="s-today">—</div></div>
                     <div class="stat-card"><div class="label">New Users (7d)</div><div class="value" id="s-new-7d">—</div><div class="sub" id="s-new-today">—</div></div>
+                    <div class="stat-card"><div class="label">New Users (30d)</div><div class="value" id="s-new-30d">—</div><div class="sub" id="s-new-undated">—</div></div>
                     <div class="stat-card"><div class="label" id="live-stat-label">Current Hour Players</div><div class="value" id="s-hour-players">—</div><div class="sub"><span class="live-dot"></span>Live</div></div>
                     <div class="stat-card"><div class="label" id="rebuy-stat-label">Total Rebuys (this hour)</div><div class="value" id="s-hour-rebuys">—</div></div>
                     <div class="stat-card"><div class="label">Active 7d (WAU)</div><div class="value" id="s-wau">—</div></div>
@@ -440,6 +441,14 @@
                 </div>
             </div>
             <div class="tab-content" id="tab-analytics">
+                <div class="panel" style="margin-bottom:16px">
+                    <div class="panel-header"><h2>📈 New Users per Week</h2><span class="badge" id="signups-week-total">—</span></div>
+                    <div id="chart-signups-weekly" style="padding:16px 20px"></div>
+                </div>
+                <div class="panel" style="margin-bottom:16px">
+                    <div class="panel-header"><h2>📆 New Users per Month</h2><span class="badge" id="signups-month-total">—</span></div>
+                    <div id="chart-signups-monthly" style="padding:16px 20px"></div>
+                </div>
                 <div class="panel" style="margin-bottom:16px">
                     <div class="panel-header"><h2>📦 App Versions</h2><span class="badge" id="version-latest-pct">—</span></div>
                     <div id="chart-versions" style="padding:16px 20px"></div>
@@ -710,7 +719,7 @@
             var todayStr = new Date().toISOString().slice(0, 10);
             var day = 24 * 60 * 60 * 1000;
             var todayCount = 0, wau = 0, mau = 0, churned = 0, totalHands = 0, handCount = 0, pushReengaged = 0;
-            var new7d = 0, newToday = 0, noFirstSeen = 0;
+            var new7d = 0, new30d = 0, newToday = 0, noFirstSeen = 0;
             snap.forEach(function(doc) {
                 var d = doc.data();
                 var activity = d.lastSeen ? d.lastSeen.toDate().getTime()
@@ -728,6 +737,7 @@
                 if (d.firstSeen) {
                     var fsMs = d.firstSeen.toDate().getTime();
                     if (fsMs > now - 7 * day) new7d++;
+                    if (fsMs > now - 30 * day) new30d++;
                     if (d.firstSeen.toDate().toISOString().slice(0, 10) === todayStr) newToday++;
                 } else {
                     noFirstSeen++;
@@ -740,9 +750,13 @@
             document.getElementById('s-avg-hands').textContent = handCount ? Math.round(totalHands / handCount) : '—';
             document.getElementById('s-push-reengaged').textContent = pushReengaged;
             document.getElementById('s-new-7d').textContent = new7d;
-            document.getElementById('s-new-today').textContent = noFirstSeen
-                ? newToday + ' today · ' + noFirstSeen + ' undated'
-                : newToday + ' today';
+            document.getElementById('s-new-today').textContent = newToday + ' today';
+            document.getElementById('s-new-30d').textContent = new30d;
+            // Users with no sign-up date can't join a cohort at all — surfaced
+            // here so the new-user numbers are never read as the whole story.
+            document.getElementById('s-new-undated').textContent = noFirstSeen
+                ? noFirstSeen + ' undated'
+                : 'all dated';
         });
     }
 
@@ -1078,6 +1092,7 @@
         db.collection('users').get().then(function(snap) {
             var users = [];
             snap.forEach(function(doc) { users.push(doc.data()); });
+            renderSignupTrend(users);
             renderAppVersions(users);
             renderCountryChart(users);
             renderRetentionSnapshot(users);
@@ -1210,6 +1225,61 @@
             '</div>' +
             '<div style="width:36px;text-align:right;font-size:13px;color:#e2e8f0">' + value + '</div>' +
           '</div>';
+    }
+
+    // Sign-ups bucketed by calendar week (Monday-start) and by month. Buckets
+    // are pre-seeded so a week with no sign-ups shows as an empty bar instead
+    // of silently collapsing the timeline.
+    function renderSignupTrend(users) {
+        var WEEKS = 8, MONTHS = 6;
+        var weekKeys = [], monthKeys = [], weeks = {}, months = {};
+
+        function weekStart(d) {
+            var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); // back to Monday
+            return x;
+        }
+        function weekKey(d) { var w = weekStart(d); return w.getFullYear() + '-' + w.getMonth() + '-' + w.getDate(); }
+        function monthKey(d) { return d.getFullYear() + '-' + d.getMonth(); }
+
+        var thisWeek = weekStart(new Date());
+        for (var i = WEEKS - 1; i >= 0; i--) {
+            var w = new Date(thisWeek.getFullYear(), thisWeek.getMonth(), thisWeek.getDate() - i * 7);
+            var k = weekKey(w);
+            weekKeys.push(k);
+            weeks[k] = { label: w.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), count: 0 };
+        }
+        var today = new Date();
+        for (var j = MONTHS - 1; j >= 0; j--) {
+            var m = new Date(today.getFullYear(), today.getMonth() - j, 1);
+            var mk = monthKey(m);
+            monthKeys.push(mk);
+            months[mk] = { label: m.toLocaleDateString(undefined, { month: 'short', year: 'numeric' }), count: 0 };
+        }
+
+        var undated = 0;
+        users.forEach(function(u) {
+            if (!u.firstSeen) { undated++; return; }
+            var d = u.firstSeen.toDate();
+            var wk = weekKey(d), mk2 = monthKey(d);
+            if (weeks[wk]) weeks[wk].count++;
+            if (months[mk2]) months[mk2].count++;
+        });
+
+        function draw(keys, buckets, targetId, color) {
+            var max = 1, total = 0;
+            keys.forEach(function(k) { max = Math.max(max, buckets[k].count); total += buckets[k].count; });
+            document.getElementById(targetId).innerHTML = keys.map(function(k) {
+                return barHtml(buckets[k].label, buckets[k].count, max, color);
+            }).join('');
+            return total;
+        }
+
+        var weekTotal = draw(weekKeys, weeks, 'chart-signups-weekly', '#38bdf8');
+        var monthTotal = draw(monthKeys, months, 'chart-signups-monthly', '#a78bfa');
+        var suffix = undated ? ' · ' + undated + ' undated' : '';
+        document.getElementById('signups-week-total').textContent = weekTotal + ' in ' + WEEKS + ' weeks' + suffix;
+        document.getElementById('signups-month-total').textContent = monthTotal + ' in ' + MONTHS + ' months' + suffix;
     }
 
     function renderAppVersions(users) {
