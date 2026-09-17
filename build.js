@@ -29,6 +29,18 @@ cssFiles.forEach(file => {
     combinedCss += `\n/* --- ${file} --- */\n` + fs.readFileSync(path.join(projectDir, file), 'utf8') + '\n';
 });
 
+// Guard against the drift that hid new users from the admin dashboard: the
+// bundle's VP_APP_VERSION and the Android versionName must agree.
+const analyticsSrc = fs.readFileSync(path.join(projectDir, 'js/analytics.js'), 'utf8');
+const gradlePath = path.join(projectDir, 'android/app/build.gradle');
+const bundleVersion = (analyticsSrc.match(/const VP_APP_VERSION = '([^']+)'/) || [])[1];
+if (fs.existsSync(gradlePath)) {
+    const gradleVersion = (fs.readFileSync(gradlePath, 'utf8').match(/versionName "([^"]+)"/) || [])[1];
+    if (bundleVersion && gradleVersion && bundleVersion !== gradleVersion) {
+        console.warn(`⚠️  version drift: js/analytics.js says ${bundleVersion}, android/app/build.gradle says ${gradleVersion}`);
+    }
+}
+
 // Combine JS files in dependency order
 const jsFiles = [
     // i18n first: every module below calls t() at render time.

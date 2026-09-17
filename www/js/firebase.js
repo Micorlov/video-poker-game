@@ -223,7 +223,11 @@ function logUserToFirestore(user) {
         email: user.email || '',
         lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
         sessionCount: firebase.firestore.FieldValue.increment(1),
-        platform: detectPlatform()
+        platform: detectPlatform(),
+        // Rewritten on every login, so the admin panel always shows which build
+        // a player is actually running — and therefore which fields their
+        // client is capable of reporting.
+        appVersion: window.VP_APP_VERSION || 'unknown'
     }, { merge: true }).then(function() {
         return db.collection('users').doc(user.uid).get();
     }).then(function(doc) {

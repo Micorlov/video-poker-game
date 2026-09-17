@@ -7,6 +7,12 @@
 // step is done, firebase.analytics() throws and every call here is a silent
 // no-op — the game must never depend on analytics being available.
 
+// Single source of truth for the client build number. Must match versionName
+// in android/app/build.gradle — build.js warns when the two drift apart, since
+// a stale bundle shipped inside a newer APK is exactly how the admin dashboard
+// ended up blind to the fields newer code writes.
+const VP_APP_VERSION = '2.5';
+
 let vpAnalytics = null;
 let vpAnalyticsFailed = false;
 
@@ -60,7 +66,7 @@ function logVpEvent(name, params) {
 function initVpAnalytics() {
     if (window.__vpAnalyticsSessionStarted) return;
     window.__vpAnalyticsSessionStarted = true;
-    logVpEvent(VP_ASO_EVENTS.appOpen, { app_version: '2.5' });
+    logVpEvent(VP_ASO_EVENTS.appOpen, { app_version: VP_APP_VERSION });
     logVpEvent(VP_ASO_EVENTS.sessionStart, {
         platform: window.Capacitor && window.Capacitor.isNativePlatform ? 'native' : 'web'
     });
@@ -107,6 +113,7 @@ function getStoredUtmContext() {
 
 captureUtmContext();
 
+window.VP_APP_VERSION = VP_APP_VERSION;
 window.VP_ASO_EVENTS = VP_ASO_EVENTS;
 window.initVpAnalytics = initVpAnalytics;
 window.logVpEvent = logVpEvent;

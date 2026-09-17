@@ -212,6 +212,7 @@
             <div class="topbar-right">
                 <img id="topbar-photo" src="" alt="">
                 <span id="topbar-name"></span>
+                <span style="color:#64748b;font-size:12px">v<span id="topbar-version">—</span></span>
                 <a href="video_poker.html">← Game</a>
                 <button onclick="firebase.auth().signOut()">Sign Out</button>
             </div>
@@ -287,6 +288,8 @@
                             <th onclick="sortUsers('displayName')">Name ↕</th>
                             <th onclick="sortUsers('email')">Email ↕</th>
                             <th onclick="sortUsers('country')">Country ↕</th>
+                            <th onclick="sortUsers('platform')">Platform ↕</th>
+                            <th onclick="sortUsers('appVersion')">Version ↕</th>
                             <th onclick="sortUsers('_balance')">Balance ↕</th>
                             <th onclick="sortUsers('_hands')">Hands ↕</th>
                             <th onclick="sortUsers('bestStreak')">Streak ↕</th>
@@ -301,7 +304,7 @@
                             <th onclick="sortUsers('_pushOpens')">Push Opens ↕</th>
                             <th>Status</th>
                         </tr></thead>
-                        <tbody id="all-users-body"><tr><td colspan="16" class="empty-state">Loading...</td></tr></tbody>
+                        <tbody id="all-users-body"><tr><td colspan="18" class="empty-state">Loading...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -438,6 +441,10 @@
             </div>
             <div class="tab-content" id="tab-analytics">
                 <div class="panel" style="margin-bottom:16px">
+                    <div class="panel-header"><h2>📦 App Versions</h2><span class="badge" id="version-latest-pct">—</span></div>
+                    <div id="chart-versions" style="padding:16px 20px"></div>
+                </div>
+                <div class="panel" style="margin-bottom:16px">
                     <div class="panel-header"><h2>🌍 Country Breakdown</h2></div>
                     <div id="chart-countries" style="padding:16px 20px"></div>
                 </div>
@@ -483,6 +490,9 @@
     var auth = firebase.auth();
     var db = firebase.firestore();
     var ADMIN_EMAIL = 'micorlov@gmail.com';
+    // Keep in step with VP_APP_VERSION in js/analytics.js — it is only used to
+    // mark which users are already on the newest build.
+    var CURRENT_APP_VERSION = '2.5';
 
     var allUsersData = [];
     var usersSortField = 'lastLogin';
@@ -516,6 +526,7 @@
             document.getElementById('app').classList.add('visible');
             document.getElementById('topbar-photo').src = user.photoURL || '';
             document.getElementById('topbar-name').textContent = user.displayName || user.email;
+            document.getElementById('topbar-version').textContent = CURRENT_APP_VERSION;
             loadAll();
         } else if (user) {
             document.getElementById('denied-msg').style.display = 'block';
@@ -817,6 +828,23 @@
         catch(e) { return code; }
     }
 
+    // A user doc carries platform/appVersion only if the build that wrote it
+    // was new enough to report them — "—" here means an older client, not an
+    // unknown platform.
+    function platformLabel(p) {
+        if (!p) return '—';
+        var icons = { android: '🤖', ios: '🍏', web: '🌐' };
+        return (icons[p] || '') + ' ' + p;
+    }
+
+    // Anything behind the current build is worth spotting at a glance: an old
+    // client silently stops reporting whatever newer fields the panel reads.
+    function versionCell(v) {
+        if (!v) return '<span style="color:#64748b">pre-2.5</span>';
+        var color = v === CURRENT_APP_VERSION ? '#4ade80' : '#fbbf24';
+        return '<span style="color:' + color + '">' + v + '</span>';
+    }
+
     function loadAllUsers() {
         db.collection('users').get().then(function(snap) {
             allUsersData = [];
@@ -879,7 +907,7 @@
         });
         var tbody = document.getElementById('all-users-body');
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="16" class="empty-state">No users found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="18" class="empty-state">No users found</td></tr>';
             return;
         }
         tbody.innerHTML = '';
@@ -900,6 +928,8 @@
                 '<td>' + photo + (d.displayName || '—') + '</td>' +
                 '<td>' + (d.email || '—') + '</td>' +
                 '<td>' + countryFlag(d.country) + ' ' + (d.country || '—') + '</td>' +
+                '<td>' + platformLabel(d.platform) + '</td>' +
+                '<td>' + versionCell(d.appVersion) + '</td>' +
                 '<td>' + (d._balance ? d._balance.toLocaleString() : '—') + '</td>' +
                 '<td>' + (d._hands || '—') + '</td>' +
                 '<td>' + (d.bestStreak || '—') + '</td>' +
@@ -1048,6 +1078,7 @@
         db.collection('users').get().then(function(snap) {
             var users = [];
             snap.forEach(function(doc) { users.push(doc.data()); });
+            renderAppVersions(users);
             renderCountryChart(users);
             renderRetentionSnapshot(users);
             renderBestHands(users);
@@ -1179,6 +1210,26 @@
             '</div>' +
             '<div style="width:36px;text-align:right;font-size:13px;color:#e2e8f0">' + value + '</div>' +
           '</div>';
+    }
+
+    function renderAppVersions(users) {
+        var counts = {}, latest = 0;
+        users.forEach(function(u) {
+            // No appVersion at all = a build older than the field itself.
+            var label = (u.platform ? u.platform + ' ' : '') + (u.appVersion || 'pre-' + CURRENT_APP_VERSION);
+            counts[label] = (counts[label] || 0) + 1;
+            if (u.appVersion === CURRENT_APP_VERSION) latest++;
+        });
+        var sorted = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; });
+        var max = sorted.length ? counts[sorted[0]] : 1;
+        var html = sorted.map(function(label) {
+            var current = label.indexOf(CURRENT_APP_VERSION) !== -1 && label.indexOf('pre-') === -1;
+            return barHtml(label, counts[label], max, current ? '#4ade80' : '#fbbf24');
+        }).join('');
+        document.getElementById('chart-versions').innerHTML = html || '<p style="color:#64748b">No version data yet</p>';
+        document.getElementById('version-latest-pct').textContent = users.length
+            ? Math.round(latest / users.length * 100) + '% on ' + CURRENT_APP_VERSION
+            : '—';
     }
 
     function renderCountryChart(users) {
