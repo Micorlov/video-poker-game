@@ -5,7 +5,9 @@
 > `play-store-assets/listings.json` (the single source of truth for store text — edit that file,
 > not this one, then re-run the script). Screenshots (6 per locale), the en-US tablet sets and the
 > new 1024x500 feature graphic went up with `node scripts/store-screenshots/upload.js commit`.
-> App release 2.4 (versionCode 9) is live on the production track at 100%.
+> App release 2.6 (versionCode 11) was submitted to the production track on 2026-09-23 via
+> `node scripts/play-release-upload.js commit` (2.5 / versionCode 10 before it); rollout status "completed"
+> means Google review then 100% rollout. Release notes live in that script, 16 languages.
 >
 > **Why the rewrite:** the app had 10+ downloads and zero ratings. It already ranked #5 in the US
 > for "jacks or better" and #29 for "video poker", so discovery was not the bottleneck —
