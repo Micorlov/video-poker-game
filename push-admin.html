@@ -163,7 +163,7 @@ tr:last-child td { border-bottom: none; }
         </div>
         <div class="hint" style="flex:1; min-width:250px;">
           Campaigns are delivered by the <strong>push-poll</strong> GitHub Actions workflow, which runs
-          every 5&nbsp;minutes. The browser can never hold a service-account key, so a queued campaign
+          every 15&nbsp;minutes. The browser can never hold a service-account key, so a queued campaign
           goes out on the next poll — or immediately, via <em>Run poll now</em> above.
         </div>
       </div>
@@ -302,7 +302,7 @@ tr:last-child td { border-bottom: none; }
                 </div>
               </div>
 
-              <div class="hint" id="next-run-hint" style="margin-top:12px;">Goes out on the next poll, within 5 minutes.</div>
+              <div class="hint" id="next-run-hint" style="margin-top:12px;">Goes out on the next poll, within 15 minutes.</div>
             </div>
           </div>
 
@@ -903,7 +903,7 @@ function renderNextRun() {
     var mode = selectedScheduleMode();
     var hint = document.getElementById('next-run-hint');
     if (mode === 'now') {
-        hint.textContent = 'Goes out on the next poll, within 5 minutes.';
+        hint.textContent = 'Goes out on the next poll, within 15 minutes.';
         return;
     }
     var first = firstRunDate();
@@ -972,7 +972,7 @@ function createCampaign() {
 
     db.collection(CAMPAIGNS).add(payload).then(function() {
         button.disabled = false;
-        status.textContent = 'Queued — the poller picks it up within 5 minutes.';
+        status.textContent = 'Queued — the poller picks it up within 15 minutes.';
         status.style.color = '#4ade80';
         document.getElementById('c-title').value = '';
         document.getElementById('c-body').value = '';

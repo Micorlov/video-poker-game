@@ -1,13 +1,35 @@
 name: Push notification poll
 
+# GitHub throttles scheduled workflows on busy runners — since 2026-08-27 the
+# '*/5' cron below has fired only 2–9 times a day, which made daily campaigns
+# land hours late. So the job no longer relies on the cron for cadence: each
+# run is a ~5.5 h loop that polls every POLL_INTERVAL_SECONDS and then
+# dispatches its own successor. The cron stays as a watchdog that restarts the
+# loop if a hand-off is ever lost.
+#
+# 15 min rather than 5: the project is on the Spark plan (50k Firestore
+# reads/day, shared with the app), and ~96 passes/day stays close to the
+# ~65/day this ran at for weeks before the throttling.
 on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
+# One loop at a time. A run triggered while the loop is alive (watchdog cron
+# or a manual dispatch) waits as the single pending run and takes over when
+# the current loop ends; any older pending run is cancelled.
+concurrency:
+  group: push-poll
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: write
+
 jobs:
   poll:
     runs-on: ubuntu-latest
+    timeout-minutes: 355
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -28,7 +50,29 @@ jobs:
       - name: Write Firebase service account key
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > "${{ runner.temp }}/firebase-service-account.json"
 
-      - name: Run push poll
+      # A failed pass is logged and the loop carries on — the next pass
+      # replays from the same cursor — but the step still fails at the end so
+      # a persistently broken poll shows up red in the Actions tab.
+      - name: Run push poll loop
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
-        run: node scripts/push/poll.js
+          POLL_INTERVAL_SECONDS: 900
+          LOOP_MINUTES: 330
+        run: |
+          end=$(( $(date +%s) + LOOP_MINUTES * 60 ))
+          failures=0
+          while :; do
+            node scripts/push/poll.js || { failures=$((failures + 1)); echo "::warning::poll pass failed ($failures so far)"; }
+            [ $(( $(date +%s) + POLL_INTERVAL_SECONDS )) -lt "$end" ] || break
+            sleep "$POLL_INTERVAL_SECONDS"
+          done
+          [ "$failures" -eq 0 ]
+
+      # Runs on failure too so one bad pass never stops the chain; skipped on
+      # a manual cancel so the loop can be stopped (the watchdog cron will
+      # still restart it — disable the workflow to stop it for good).
+      - name: Hand off to the next loop
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run push-poll.yml --ref "${{ github.ref_name }}"

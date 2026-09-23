@@ -57,6 +57,19 @@ async function logCampaignDelivery(db, perUser, campaign) {
   );
 }
 
+// The next slot on the campaign's own grid (planned time + k × interval) that is
+// still in the future. Anchoring to the planned time rather than to `now` keeps
+// a "daily at 20:00" campaign at 20:00 even when a poll pass runs late, and
+// skips slots missed entirely instead of sending them back-to-back.
+function nextSlotAfter(schedule, now) {
+  const intervalMs = schedule.intervalHours * HOUR_MS;
+  const planned = schedule.nextRunAt && schedule.nextRunAt.toMillis
+    ? schedule.nextRunAt.toMillis()
+    : now.getTime();
+  const missed = Math.floor((now.getTime() - planned) / intervalMs);
+  return new Date(planned + (Math.max(0, missed) + 1) * intervalMs);
+}
+
 // A recurring campaign just books its next run — forever, unless it carries a
 // maxRuns limit ("run for N days"), in which case its last run is terminal like
 // a one-off. Terminal is what keeps it from being picked up again next poll.
@@ -76,7 +89,7 @@ function completionPatch(campaign, now, stats) {
     return {
       ...base,
       status: 'scheduled',
-      'schedule.nextRunAt': Timestamp.fromDate(new Date(now.getTime() + schedule.intervalHours * HOUR_MS)),
+      'schedule.nextRunAt': Timestamp.fromDate(nextSlotAfter(schedule, now)),
     };
   }
 

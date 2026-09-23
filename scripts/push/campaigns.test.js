@@ -364,6 +364,34 @@ test('a recurring campaign books its next run instead of completing', async () =
   assert.ok(hoursOut > 5.9 && hoursOut < 6.1, `expected ~6h, got ${hoursOut}`);
 });
 
+test('a late recurring run books the next one from its planned time, not the delivery time', async () => {
+  // Arrange — a daily send planned 5 hours ago that the poller only reaches now.
+  const planned = new Date(Date.now() - 5 * 60 * 60 * 1000);
+  const world = baseWorld({
+    schedule: { mode: 'recurring', intervalHours: 24, nextRunAt: Timestamp.fromDate(planned) },
+  });
+
+  // Act
+  const campaign = await run(world);
+
+  // Assert — exactly 24h after the planned slot, so the send time doesn't drift.
+  assert.strictEqual(campaign.schedule.nextRunAt.toMillis(), planned.getTime() + 24 * 60 * 60 * 1000);
+});
+
+test('a recurring run more than one interval late skips the missed slots', async () => {
+  // Arrange — a 6-hourly send planned 13 hours ago.
+  const planned = new Date(Date.now() - 13 * 60 * 60 * 1000);
+  const world = baseWorld({
+    schedule: { mode: 'recurring', intervalHours: 6, nextRunAt: Timestamp.fromDate(planned) },
+  });
+
+  // Act
+  const campaign = await run(world);
+
+  // Assert — next slot on the original grid that is still in the future (planned + 18h).
+  assert.strictEqual(campaign.schedule.nextRunAt.toMillis(), planned.getTime() + 18 * 60 * 60 * 1000);
+});
+
 test('a limited recurring campaign counts its runs and keeps going until the last', async () => {
   // Arrange — 3-day run, 1 already sent.
   const world = baseWorld({

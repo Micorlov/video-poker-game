@@ -1,4 +1,4 @@
-// Entrypoint run every 5 minutes by .github/workflows/push-poll.yml.
+// Entrypoint run every 15 minutes by the .github/workflows/push-poll.yml loop.
 // Replaces the Cloud Functions event triggers (friends/rooms/leaderboard/
 // bestHand) plus the bracelets scheduled functions with one polling pass:
 // read the cursor, run every check against "since", then advance the cursor.
