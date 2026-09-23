@@ -16,7 +16,7 @@
 > **Search positions at the time of the rewrite (US, 2026-09-09):** "jacks or better" #5 ·
 > "video poker" #29 · "deuces wild" not indexed. Re-check weekly and log below.
 
-> **2026-09-23 — offline-led ASO copy staged (from "ASO Plan: Video Poker & Blackjack 21").** en-US short and
+> **2026-09-23 — offline-led ASO copy LIVE on Google Play (from "ASO Plan: Video Poker & Blackjack 21").** en-US short and
 > full description below rewritten to lead with "offline" and name every variant + multi-hand in the first 250
 > characters. Claims from the plan that were dropped because the code disproves them: "9/6 Jacks or Better"
 > (`js/hand-eval.js` pays 7/5), "full-pay tables for every variant", and "portrait or landscape" (the manifest is
@@ -25,7 +25,8 @@
 > Live en-US short description at the time was "Classic video poker: Jacks or Better, Deuces Wild, multi-hand play,
 > leaderboards" (set outside this repo; the other 15 locales matched the file). A/B alternative for the short
 > description: "Offline video poker: Jacks or Better, Deuces Wild, Triple Play. No wifi needed" (78).
-> Push with `node scripts/play-listing-upload.js validate` then `commit`.
+> Pushed the same day with `node scripts/play-listing-upload.js commit` (all 16 locales in one edit; only en-US changed).
+> Blackjack 21: Big Cards got its own offline-led en-US listing the same day (source: `~/blackjack21_v2/play-assets/listing-en-US.json`).
 
 ## Rank log
 
