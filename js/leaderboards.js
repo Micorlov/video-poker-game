@@ -45,6 +45,12 @@ let hourlyBoardList = [];
 let dailyBoardList = [];
 let hourlyBoardUnsubscribe = null;
 let dailyBoardUnsubscribe = null;
+// The player's own daily_scores doc, read on its own (it may sit outside the
+// top-20 query). Once read it is the source of truth for today's net, so a
+// reset/delete from admin.html reaches the app instead of being papered over
+// by the local balance − baseline figure. null = not read yet / signed out.
+let ownDailyScore = null;
+let ownDailyUnsubscribe = null;
 let lbTimerInterval = null;
 let lbLastHourKey = '';
 let lbLastDayKey = '';
@@ -78,6 +84,7 @@ function saveDailyProgress() {
 }
 
 function ownDailyNetProfit() {
+    if (ownDailyScore && ownDailyScore.dayKey === getDayKey()) return ownDailyScore.score;
     ensureDailyBaseline();
     return balance - dailyProgress.baseline;
 }
@@ -104,6 +111,11 @@ function pushDailyScore(handType, win, totalBet) {
         dailyProgress.bestHand = handType;
         saveDailyProgress();
         fields.bestHand = handType;
+    }
+    // Mirror the increment now: pushNetProfit() runs later in the same hand,
+    // before the snapshot listener would deliver the new value.
+    if (ownDailyScore && ownDailyScore.dayKey === dayKey) {
+        ownDailyScore = { dayKey: dayKey, score: ownDailyScore.score + win - totalBet };
     }
     firebaseSafe(function() {
         return db.collection('daily_scores').doc(dayKey + '_' + user.uid).set(fields, { merge: true });
@@ -159,7 +171,24 @@ function subscribeDailyBoard() {
             snap.forEach(function(d) { dailyBoardList.push(d.data()); });
             renderLeaderboardPanel();
         }, function() { /* silently ignore — e.g. missing composite index */ });
+    subscribeOwnDailyScore(user, dayKey);
     startLeaderboardTimer();
+}
+
+function subscribeOwnDailyScore(user, dayKey) {
+    if (ownDailyUnsubscribe) ownDailyUnsubscribe();
+    ownDailyScore = null;
+    ownDailyUnsubscribe = db.collection('daily_scores').doc(dayKey + '_' + user.uid)
+        .onSnapshot(function(doc) {
+            const prevScore = ownDailyScore ? ownDailyScore.score : null;
+            const score = doc.exists ? (doc.data().score || 0) : 0;
+            ownDailyScore = { dayKey: dayKey, score: score };
+            renderLeaderboardPanel();
+            // A confirmed value we did not predict (first read, or an admin
+            // reset/delete): republish users/{uid}.dailyNetProfit so friends
+            // stop seeing the stale figure.
+            if (!doc.metadata.hasPendingWrites && prevScore !== score && window.pushNetProfit) pushNetProfit();
+        }, function(err) { console.warn('own daily score listener failed', err); });
 }
 
 function patchOwnCountry() {
@@ -219,6 +248,8 @@ function mergedDailyList() {
 function cleanupLeaderboards() {
     if (hourlyBoardUnsubscribe) { hourlyBoardUnsubscribe(); hourlyBoardUnsubscribe = null; }
     if (dailyBoardUnsubscribe) { dailyBoardUnsubscribe(); dailyBoardUnsubscribe = null; }
+    if (ownDailyUnsubscribe) { ownDailyUnsubscribe(); ownDailyUnsubscribe = null; }
+    ownDailyScore = null;
     if (lbTimerInterval) { clearInterval(lbTimerInterval); lbTimerInterval = null; }
     hourlyBoardList = [];
     dailyBoardList = [];
