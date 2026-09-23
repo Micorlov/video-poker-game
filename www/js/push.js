@@ -160,6 +160,14 @@ function initPushListeners() {
         console.warn('Push registration error:', err);
     });
 
+    // With the app in the foreground Android posts no system notification, so
+    // there is nothing to tap — a daily coin gift would be lost. The player is
+    // already here, so collect it on arrival instead.
+    PushNotifications.addListener('pushNotificationReceived', function(notification) {
+        var data = (notification && notification.data) || {};
+        if (data.giftId && window.handleIncomingGift) handleIncomingGift(data.giftId);
+    });
+
     // Campaigns composed in push-admin.html may name a destination screen in
     // their data payload. Everything else (social, leaderboard, bestHand)
     // surfaces inside the Friends/Leaderboard screen, so that stays the
