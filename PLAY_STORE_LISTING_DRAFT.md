@@ -16,6 +16,17 @@
 > **Search positions at the time of the rewrite (US, 2026-09-09):** "jacks or better" #5 ·
 > "video poker" #29 · "deuces wild" not indexed. Re-check weekly and log below.
 
+> **2026-09-23 — offline-led ASO copy staged (from "ASO Plan: Video Poker & Blackjack 21").** en-US short and
+> full description below rewritten to lead with "offline" and name every variant + multi-hand in the first 250
+> characters. Claims from the plan that were dropped because the code disproves them: "9/6 Jacks or Better"
+> (`js/hand-eval.js` pays 7/5), "full-pay tables for every variant", and "portrait or landscape" (the manifest is
+> portrait-only). The plan's short descriptions began with "Free" / "no forced ads", which is the exact wording the
+> 2026-09-09 promotion-eligibility flag below was about, so both were rewritten without price/promo words.
+> Live en-US short description at the time was "Classic video poker: Jacks or Better, Deuces Wild, multi-hand play,
+> leaderboards" (set outside this repo; the other 15 locales matched the file). A/B alternative for the short
+> description: "Offline video poker: Jacks or Better, Deuces Wild, Triple Play. No wifi needed" (78).
+> Push with `node scripts/play-listing-upload.js validate` then `commit`.
+
 ## Rank log
 
 | Date | jacks or better | video poker | deuces wild | Ratings |
@@ -38,47 +49,48 @@
 
 **Short description** (max 80 chars):
 ```
-Deuces Wild, Bonus Poker, Double Bonus, multi-hand play and live leaderboards
+Offline video poker: Jacks or Better, Deuces Wild, multi-hand. No wifi needed
 ```
 (77 chars)
 
 **Full description** (max 4000 chars):
 ```
-Video Poker: Jacks or Better is a free video poker game with no ads and no real money. Draw five cards, hold the winners, and chase the Royal Flush in Jacks or Better, Deuces Wild, Bonus Poker and Double Bonus — solo, in multi-hand Triple Play and Five Play, or against friends on live leaderboards.
+Offline video poker with four classic casino games and multi-hand play. Jacks or Better, Deuces Wild, Bonus Poker and Double Bonus, in single hand, Triple Play or Five Play. No wifi needed, no ads, no real money.
 
-FREE VIDEO POKER, NO ADS
-Every hand is played with free virtual chips. No real money, no purchases, no ads to sit through — just classic 5-card draw poker, the way the casino poker machine plays it.
+PLAY VIDEO POKER OFFLINE
+No internet? Deal anyway. Every game, paytable and daily bonus works with no wifi and no mobile data, and your chips and stats are saved on your phone after every hand.
 
-FOUR CLASSIC VIDEO POKER VARIANTS
+FOUR CLASSIC VIDEO POKER GAMES
 • Jacks or Better – the classic video poker game, ready from your first hand
-• Deuces Wild – every 2 is wild; chase Four Deuces and Wild Royals
+• Deuces Wild – every 2 is wild; chase Four Deuces and the Wild Royal Flush
 • Bonus Poker – bigger payouts for Four Aces and low quads
-• Double Bonus – the high-variance favourite with premium four-of-a-kind pays
+• Double Bonus Poker – premium four-of-a-kind pays for high-variance play
 New variants unlock as you level up, so there is always a next goal.
 
 MULTI-HAND VIDEO POKER
-Play one hand, or go big with Triple Play and Five Play: hold once, then draw three or five hands at the same time.
+Play one hand, Triple Play (3 hands) or Five Play (5 hands) from a single deal. Hold once, draw across every hand, the way the multi-hand machines in Las Vegas work.
 
-DAILY FREE CHIPS, STREAKS & LEVELS
-Come back every day for your free chip bonus and the daily ALL IN mega-bet. Build win streaks for payout bonuses up to +50%, level up to unlock new poker variants and multi-hand modes, and never go bust — free chip top-ups keep you at the table.
+REAL CASINO PAYTABLES
+A full paytable for every variant, always on screen. Turn on strategy hints to learn which cards to hold and watch your win rate climb.
 
-COMPETE ON LIVE LEADERBOARDS
-This is not solo video poker. Every winning hand moves you up the hourly and daily leaderboards against every player in the game. Watch your rank live and defend it.
+FREE CHIPS EVERY DAY
+Daily chip bonus, the daily ALL IN mega-bet, win streaks with payout bonuses up to +50%, and levels that unlock new variants and multi-hand modes. Free to play, no purchases, no ads, and a free rebuy when you run out means you never go bust.
 
-PLAY VIDEO POKER WITH FRIENDS
-Sign in with Google or Facebook, add friends, and see who is the best video poker player in your crew. Create or join a poker room to play at the same table and climb the friends leaderboard together. Invite a friend and you both earn bonus chips.
+PLAY WITH FRIENDS
+Live hourly and daily leaderboards against every player in the game, a friends leaderboard, and poker rooms where you play at the same table. Sign in with Google or Facebook, invite a friend, and you both earn bonus chips.
+
+BIG, CLEAR CARDS
+Large cards and buttons designed for phones and tablets, with one-hand portrait play.
 
 16 LANGUAGES, FULL RIGHT-TO-LEFT SUPPORT
 English, Spanish, Portuguese, German, French, Italian, Polish, Russian, Turkish, Indonesian, Hindi, Japanese, Korean, Chinese, Hebrew and Arabic. The game matches your device language automatically.
 
 YOUR PROGRESS, SAFE IN THE CLOUD
-Sign in once and your chips, levels and stats are backed up automatically. Switch phones and pick up right where you left off.
+Sign in once and your chips, levels and stats are backed up whenever you are online. Switch phones and pick up right where you left off.
 
-Download Video Poker: Jacks or Better today and play the casino card game the way it should be — free, fast, and with no ads.
+Whether you call it video poker, draw poker, 5 card draw or a poker machine, this is the classic Jacks or Better game you know from the casino floor, free and offline.
 
-Looking for a video poker app, a free poker machine, Jacks or Better, Deuces Wild or a multi-hand video poker game to play with friends? This is it.
-
-Royal Video Poker is a social casino game intended for entertainment purposes only. It does not offer real money gambling or an opportunity to win real money or prizes. Practice or success in this game does not imply future success at real money gambling.
+This game is intended for an adult audience and does not offer real money gambling or any opportunities to win real money or prizes. Practice or success at social casino gaming does not imply future success at real money gambling.
 ```
 
 **Category:** Casino (or Card, depending on how you want it classified)
