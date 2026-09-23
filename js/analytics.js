@@ -11,7 +11,7 @@
 // in android/app/build.gradle — build.js warns when the two drift apart, since
 // a stale bundle shipped inside a newer APK is exactly how the admin dashboard
 // ended up blind to the fields newer code writes.
-const VP_APP_VERSION = '2.6';
+const VP_APP_VERSION = '2.7';
 
 let vpAnalytics = null;
 let vpAnalyticsFailed = false;
