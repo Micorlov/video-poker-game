@@ -292,6 +292,40 @@ service cloud.firestore {
                          && request.auth.token.email == 'micorlov@gmail.com';
     }
 
+    // Daily coin gifts — one doc per coin-reward campaign, id = campaign id,
+    // holding only the round that is live now. Written by
+    // scripts/push/campaigns.js (Admin SDK, bypasses these rules) each time the
+    // campaign sends; readable by any signed-in player so the push tap and the
+    // share link (invite.html?gift=<id>) can both resolve it.
+    //
+    // A claim is keyed <uid>_<roundKey>, which makes it idempotent the same
+    // way referrals are: a second tap, a reinstall or another device resolves
+    // to the same id and the create is rejected as already present. The coins
+    // themselves are credited client-side only after this create succeeds.
+    match /dailyGifts/{giftId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.auth.token.email == 'micorlov@gmail.com';
+
+      match /claims/{claimId} {
+        allow read: if request.auth != null
+                    && (claimId.matches(request.auth.uid + '_.*')
+                        || request.auth.token.email == 'micorlov@gmail.com');
+        allow create: if request.auth != null && claimMatchesRound(
+                        get(/databases/$(database)/documents/dailyGifts/$(giftId)).data);
+        function claimMatchesRound(gift) {
+          return claimId == request.auth.uid + '_' + gift.roundKey
+              && request.time < gift.expiresAt
+              && request.resource.data.keys().hasOnly(['uid', 'roundKey', 'amount', 'claimedAt'])
+              && request.resource.data.uid == request.auth.uid
+              && request.resource.data.roundKey == gift.roundKey
+              && request.resource.data.amount == gift.amount
+              && request.resource.data.claimedAt == request.time;
+        }
+        allow update, delete: if false;
+      }
+    }
+
     // pushLogs/{logId} — one doc per recipient per notification. Written only
     // by scripts/lib/pushLog.js (Admin SDK, bypasses these rules); every send
     // path now runs server-side, so no client needs create access.

@@ -13,6 +13,31 @@ const { isQuietHours, quietHoursEndAt } = require('../lib/pushPolicy');
 
 const COLLECTION = 'pushCampaigns';
 const HOUR_MS = 60 * 60 * 1000;
+const GIFTS_COLLECTION = 'dailyGifts';
+const GIFT_LIFETIME_MS = 24 * HOUR_MS;
+
+// A coin-reward campaign opens one claimable round per send. The doc id is the
+// campaign id so the share link (invite.html?gift=<id>) never changes; the
+// roundKey inside it is what firestore.rules binds each player's claim to, so
+// a new round is claimable again and an old one can't be claimed twice.
+async function openGiftRound(db, campaignId, amount, now) {
+  await db.doc(`${GIFTS_COLLECTION}/${campaignId}`).set({
+    campaignId,
+    amount,
+    roundKey: now.toISOString().slice(0, 10),
+    expiresAt: Timestamp.fromDate(new Date(now.getTime() + GIFT_LIFETIME_MS)),
+    updatedAt: Timestamp.fromDate(now),
+  });
+}
+
+function payloadFor(campaign, giftId) {
+  const data = {
+    ...(campaign.deepLink ? { deepLink: campaign.deepLink } : {}),
+    ...(giftId ? { giftId } : {}),
+  };
+  // FCM rejects a message carrying an empty data map.
+  return Object.keys(data).length ? data : null;
+}
 
 async function logCampaignDelivery(db, perUser, campaign) {
   const names = await displayNamesFor(db, [...perUser.keys()]);
@@ -74,6 +99,10 @@ async function runCampaign(db, doc, settings, now) {
     entries = await filterByPrefs(db, entries, category);
   }
 
+  // Opened even when no device is eligible — the share link still pays out.
+  const coinReward = Number(campaign.coinReward) || 0;
+  if (coinReward > 0) await openGiftRound(db, doc.id, coinReward, now);
+
   if (entries.length === 0) {
     await doc.ref.update(
       completionPatch(campaign, now, { audienceSize, sent: 0, failed: 0, skipped: audienceSize })
@@ -82,7 +111,7 @@ async function runCampaign(db, doc, settings, now) {
     return;
   }
 
-  const data = campaign.deepLink ? { deepLink: campaign.deepLink } : null;
+  const data = payloadFor(campaign, coinReward > 0 ? doc.id : null);
   const perUser = await sendToEntries(entries, { title: campaign.title, body: campaign.body }, data);
   await logCampaignDelivery(db, perUser, campaign);
 
@@ -124,4 +153,4 @@ async function processCampaigns(settings) {
   }
 }
 
-module.exports = { processCampaigns, COLLECTION };
+module.exports = { processCampaigns, COLLECTION, GIFTS_COLLECTION };

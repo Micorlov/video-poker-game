@@ -79,6 +79,7 @@ const jsFiles = [
     'js/referral.js',
     'js/daily-bonus.js',
     'js/cloudsave.js',
+    'js/coin-gift.js',
     'js/rooms.js',
     'js/stories.js',
     'js/leaderboard-bots.js',

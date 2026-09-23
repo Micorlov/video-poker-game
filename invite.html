@@ -194,8 +194,12 @@ h1 { font-size: 25px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02e
     var params = new URLSearchParams(window.location.search);
     var ref = (params.get('ref') || '').trim().toUpperCase();
     var join = (params.get('join') || '').trim().toUpperCase();
-    var kind = ref ? 'ref' : (join ? 'join' : '');
-    var code = ref || join;
+    // Daily coin gift from the Push Center — a Firestore campaign id, so it
+    // keeps its case, unlike the friend and room codes above.
+    var gift = (params.get('gift') || '').trim();
+    if (!/^[A-Za-z0-9_-]{1,64}$/.test(gift)) gift = '';
+    var kind = ref ? 'ref' : (join ? 'join' : (gift ? 'gift' : ''));
+    var code = ref || join || gift;
     var query = kind ? (kind + '=' + encodeURIComponent(code)) : '';
 
     var isAndroid = /Android/i.test(navigator.userAgent);
@@ -217,7 +221,11 @@ h1 { font-size: 25px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02e
         el('code-label').textContent = 'Room code';
         el('code-hint').textContent = 'Already have the app? Open it and enter this code under Friends → Rooms.';
     }
-    if (code) {
+    if (kind === 'gift') {
+        el('headline').textContent = 'Free coins are waiting 🎁';
+        el('subline').textContent = 'Open Video Poker and sign in to collect today\'s gift.';
+    }
+    if (code && kind !== 'gift') {
         el('code-value').textContent = code;
         el('code-block').classList.remove('hidden');
         el('code-hint').classList.remove('hidden');

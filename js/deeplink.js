@@ -91,8 +91,11 @@ function _parseReferrerPayload(raw) {
         const params = new URLSearchParams(String(raw).replace(/^\?/, ''));
         const ref = params.get('ref');
         const join = params.get('join');
+        const gift = params.get('gift');
         if (ref) return { kind: 'ref', code: ref.trim().toUpperCase() };
         if (join) return { kind: 'join', code: join.trim().toUpperCase() };
+        // Gift ids are Firestore campaign ids — case-sensitive, so no upper-casing.
+        if (gift) return { kind: 'gift', code: gift.trim() };
     } catch (e) { /* malformed referrer — treat as no referrer at all */ }
     return null;
 }
@@ -121,6 +124,10 @@ function restorePendingInvite() {
 function applyInstallReferrer(raw) {
     const parsed = _parseReferrerPayload(raw);
     if (!parsed || !parsed.code) return;
+    if (parsed.kind === 'gift') {
+        if (window.handleIncomingGift) handleIncomingGift(parsed.code);
+        return;
+    }
     if (parsed.kind === 'ref') {
         persistPendingInvite(parsed.code);
         // Park it the same way a live deep link would, so the auth listener in

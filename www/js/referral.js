@@ -111,22 +111,30 @@ function recordReferralJoin(code, inviterUid) {
         || Promise.resolve(false);
 }
 
-// The invitee's side of the two-sided reward. Local credit, same bookkeeping
-// as the inviter's: the gift raises the net-profit baselines so it never
-// reads as winnings on any leaderboard.
-function creditInviteeWelcomeCoins() {
-    balance += REFERRAL_INVITEE_COINS;
-    referralBonusTotal += REFERRAL_INVITEE_COINS;
+// Every free-coin grant (referrals, daily bonus, coin gifts) goes through
+// here. The coins raise the referral-bonus and today's net-profit baselines by
+// the same amount — both were captured before the gift arrived — so gifted
+// coins never read as winnings on the all-time or daily leaderboards.
+function grantBonusCoins(amount) {
+    balance += amount;
+    referralBonusTotal += amount;
     saveReferralBonusTotal();
     if (window.ensureDailyBaseline) {
         ensureDailyBaseline();
-        dailyProgress.baseline += REFERRAL_INVITEE_COINS;
+        dailyProgress.baseline += amount;
         saveDailyProgress();
     }
     const balanceEl = document.getElementById('balance');
     if (balanceEl) balanceEl.textContent = formatNumber(balance);
     if (window.saveGameState) saveGameState();
     if (window.pushNetProfit) pushNetProfit();
+}
+
+// The invitee's side of the two-sided reward. Local credit, same bookkeeping
+// as the inviter's: the gift raises the net-profit baselines so it never
+// reads as winnings on any leaderboard.
+function creditInviteeWelcomeCoins() {
+    grantBonusCoins(REFERRAL_INVITEE_COINS);
     showToast(t('toast.referralWelcome', { amount: formatNumber(REFERRAL_INVITEE_COINS) }));
 }
 
@@ -179,26 +187,11 @@ function claimReferralRewards(pending) {
 
 function creditReferralCoins(claimed) {
     const total = claimed.reduce(function(sum, item) { return sum + item.coins; }, 0);
-    balance += total;
-    referralBonusTotal += total;
-    saveReferralBonusTotal();
-
-    // Today's baseline was captured before the gift arrived, so raise it by the
-    // same amount to keep the daily board honest as well as the all-time one.
-    if (window.ensureDailyBaseline) {
-        ensureDailyBaseline();
-        dailyProgress.baseline += total;
-        saveDailyProgress();
-    }
-
-    const balanceEl = document.getElementById('balance');
-    if (balanceEl) balanceEl.textContent = formatNumber(balance);
-    if (window.saveGameState) saveGameState();
+    grantBonusCoins(total);
 
     referralStats.coinsEarned += total;
     renderInviteRewardLine();
     if (window.renderFriendsScreen) renderFriendsScreen();
-    if (window.pushNetProfit) pushNetProfit();
 
     const who = claimed.length === 1
         ? t('referral.oneJoined', { name: claimed[0].name })

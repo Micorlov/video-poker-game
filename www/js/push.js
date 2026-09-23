@@ -176,6 +176,12 @@ function initPushListeners() {
             db.collection('users').doc(window.egUser.uid).update(attrUpdate).catch(function() {});
         }
         if (window.logVpEvent) logVpEvent('push_opened', { deepLink: data.deepLink || 'default' });
+        // Daily coin-gift campaign: collect it, then land on the table.
+        if (data.giftId && window.handleIncomingGift) {
+            handleIncomingGift(data.giftId);
+            if (window.showScreen) showScreen(data.deepLink || 'play');
+            return;
+        }
         if (data.deepLink && window.showScreen) {
             showScreen(data.deepLink);
             return;

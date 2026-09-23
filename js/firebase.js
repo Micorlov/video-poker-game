@@ -251,6 +251,9 @@ function logUserToFirestore(user) {
         // Fresh device + existing cloud backup → restore the chip stack
         // before any UI renders a stale default balance (js/cloudsave.js).
         if (window.maybeRestoreCloudState) maybeRestoreCloudState(data);
+        // After the restore on purpose — it replaces the balance wholesale and
+        // would wipe a gift credited before it (js/coin-gift.js).
+        if (window.claimPendingGift) claimPendingGift();
         const updates = {};
 
         // Firebase Auth knows exactly when the account was created, so a user
@@ -422,6 +425,11 @@ if (auth) {
             if (window._pendingJoinCode) {
                 if (window.openSignInModal) openSignInModal();
                 if (window.showToast) showToast(t('toast.signInDailyGame'));
+            } else if (window._pendingGiftPrompt) {
+                // Same for a gift link; it stays parked in localStorage.
+                window._pendingGiftPrompt = false;
+                if (window.openSignInModal) openSignInModal();
+                if (window.showToast) showToast(t('toast.giftSignIn'));
             }
             if (isNativeApp()) {
                 if (window.cleanupLeaderboards) cleanupLeaderboards();

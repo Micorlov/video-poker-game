@@ -206,6 +206,7 @@ function applyNativeDeepLinkUrl(rawUrl) {
         window.history.replaceState({}, '', target);
         if (window.handleIncomingInvite) handleIncomingInvite();
         if (window.handleJoinDeepLink) handleJoinDeepLink();
+        if (window.handleIncomingGift) handleIncomingGift();
     } catch (e) {}
 }
 
@@ -249,6 +250,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // every shared room link was silently ignored on web/PWA.
     if (window.handleIncomingInvite) handleIncomingInvite();
     if (window.handleJoinDeepLink) handleJoinDeepLink();
+    // ?gift=<campaignId> daily coin gift, or one parked by an earlier launch.
+    if (window.handleIncomingGift) handleIncomingGift();
     initNativeDeepLinkHandling();
     // An invite stored by an earlier launch that never got as far as sign-in.
     if (window.restorePendingInvite) restorePendingInvite();

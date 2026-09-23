@@ -35,27 +35,12 @@ function dailyBonusMustWaitForCloud() {
     return !!(window.localStateIsFresh && localStateIsFresh());
 }
 
-function grantDailyBonus(amount) {
-    balance += amount;
-    referralBonusTotal += amount;
-    saveReferralBonusTotal();
-    if (window.ensureDailyBaseline) {
-        ensureDailyBaseline();
-        dailyProgress.baseline += amount;
-        saveDailyProgress();
-    }
-    const balanceEl = document.getElementById('balance');
-    if (balanceEl) balanceEl.textContent = formatNumber(balance);
-    if (window.saveGameState) saveGameState();
-    if (window.pushNetProfit) pushNetProfit();
-}
-
 // Idempotent per day: safe to call at boot and again after a cloud restore.
 function maybeGrantDailyBonus() {
     const today = vpTodayKey();
     if (loadDailyBonusDate() === today) return false;
     if (dailyBonusMustWaitForCloud()) return false;
-    grantDailyBonus(DAILY_BONUS_CHIPS);
+    grantBonusCoins(DAILY_BONUS_CHIPS);
     saveDailyBonusDate(today);
     if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.dailyBonusClaimed, { amount: DAILY_BONUS_CHIPS });
     showToast(t('toast.dailyBonus', { amount: formatNumber(DAILY_BONUS_CHIPS) }));

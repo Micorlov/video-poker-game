@@ -167,6 +167,14 @@ function fakeDb(world) {
     },
 
     doc(docPath) {
+      const giftMatch = /^dailyGifts\/([^/]+)$/.exec(docPath);
+      if (giftMatch) {
+        return {
+          set: async (fields) => {
+            world.gifts = { ...(world.gifts || {}), [giftMatch[1]]: fields };
+          },
+        };
+      }
       const match = /^users\/([^/]+)$/.exec(docPath);
       if (!match) throw new Error(`fakeDb: unexpected doc ${docPath}`);
       return { get: async () => userSnap(match[1]) };
@@ -311,6 +319,35 @@ test('omits the data payload entirely when there is no deep link', async () => {
   await run(world);
 
   // Assert
+  assert.strictEqual('data' in sentMessages[0], false);
+});
+
+test('a coin-reward campaign opens a fresh gift round and tags the push with it', async () => {
+  // Arrange
+  const world = baseWorld({ deepLink: 'play', coinReward: 500 });
+
+  // Act
+  await run(world);
+
+  // Assert — one round keyed by today's date, expiring a day out.
+  const gift = world.gifts.c1;
+  assert.strictEqual(gift.amount, 500);
+  assert.strictEqual(gift.campaignId, 'c1');
+  assert.strictEqual(gift.roundKey, new Date().toISOString().slice(0, 10));
+  const hoursOut = (gift.expiresAt.toMillis() - Date.now()) / (60 * 60 * 1000);
+  assert.ok(hoursOut > 23.9 && hoursOut < 24.1, `expected ~24h, got ${hoursOut}`);
+  assert.deepStrictEqual(sentMessages[0].data, { deepLink: 'play', giftId: 'c1' });
+});
+
+test('a campaign without a coin reward opens no gift round', async () => {
+  // Arrange
+  const world = baseWorld({ coinReward: 0 });
+
+  // Act
+  await run(world);
+
+  // Assert
+  assert.strictEqual(world.gifts, undefined);
   assert.strictEqual('data' in sentMessages[0], false);
 });
 
