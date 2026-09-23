@@ -376,6 +376,11 @@ tr:last-child td { border-bottom: none; }
                 </div>
               </div>
               <div class="field">
+                <label for="d-reward">🎁 Coin reward per player</label>
+                <input type="number" id="d-reward" min="0" max="10000" step="100" value="0" oninput="renderDailyPreview()">
+                <div class="hint">0 = no gift. Otherwise each signed-in player can collect this once per daily send — by tapping the push or opening the share link. Expires after 24 h.</div>
+              </div>
+              <div class="field">
                 <label for="d-segment">Audience</label>
                 <select id="d-segment" onchange="renderDailyEstimate()">
                   <option value="all">Everyone</option>
@@ -422,6 +427,7 @@ tr:last-child td { border-bottom: none; }
                   <div class="b" id="d-pv-body">Your message body appears here.</div>
                 </div>
               </div>
+              <div class="hint" id="d-pv-reward" style="color:#fbbf24; display:none;"></div>
               <div class="hint">Sent every day at the chosen time, indefinitely until paused.</div>
             </div>
           </div>
@@ -1392,6 +1398,7 @@ function applyTemplate(t) {
 // ---------- daily campaign ----------
 
 var DAILY_TEMPLATES = [
+    { title: 'Your daily gift is here 🎁', body: 'Tap to collect 500 free coins — today only.', category: 'dailyReminder', segment: 'all', coinReward: 500 },
     { title: 'Your daily bonus is ready', body: 'Log in now to collect today\'s free chips.', category: 'dailyReminder', segment: 'all' },
     { title: 'Don\'t break your streak', body: 'You\'re on a roll — keep it going tonight.', category: 'dailyReminder', segment: 'activeLast7d' },
     { title: 'Tonight\'s tournament is live', body: '50,000 chips on the line. Are you in?', category: 'leaderboard', segment: 'activeLast7d' },
@@ -1415,6 +1422,7 @@ function renderDailyTemplates() {
             document.getElementById('d-body').value = t.body;
             document.getElementById('d-category').value = t.category;
             if (t.segment !== 'all') document.getElementById('d-segment').value = t.segment;
+            document.getElementById('d-reward').value = t.coinReward || 0;
             renderDailyPreview();
             renderDailyEstimate();
             toast('Template applied');
@@ -1428,6 +1436,10 @@ function renderDailyPreview() {
     var body = document.getElementById('d-body').value.trim();
     document.getElementById('d-pv-title').textContent = title || 'Your title';
     document.getElementById('d-pv-body').textContent = body || 'Your message body appears here.';
+    var reward = readDailyReward();
+    var rewardHint = document.getElementById('d-pv-reward');
+    rewardHint.style.display = reward > 0 ? '' : 'none';
+    rewardHint.textContent = '🎁 +' + reward.toLocaleString() + ' coins on tap — once per player per day.';
     renderDailyEstimate();
 }
 
@@ -1477,6 +1489,40 @@ function calcNextDailyRunAt() {
     return target;
 }
 
+var MAX_COIN_REWARD = 10000;
+var GIFT_LINK_BASE = 'https://micorlov.github.io/video-poker-game/invite.html?gift=';
+
+// Clamped rather than rejected: the rules don't cap the amount, so this is
+// the one place a typo like 50000 gets caught.
+function readDailyReward() {
+    var n = Math.floor(Number(document.getElementById('d-reward').value) || 0);
+    return Math.max(0, Math.min(MAX_COIN_REWARD, n));
+}
+
+function copyGiftLink(campaignId) {
+    var link = GIFT_LINK_BASE + encodeURIComponent(campaignId);
+    navigator.clipboard.writeText(link).then(function() {
+        toast('Share link copied');
+    }).catch(function() {
+        window.prompt('Copy the share link:', link);
+    });
+}
+
+// Claims for the round that is live right now; a round that has not opened
+// yet (campaign never sent) has no gift doc and shows "not sent yet".
+function renderGiftClaims(campaignId, el) {
+    var giftRef = db.collection('dailyGifts').doc(campaignId);
+    giftRef.get().then(function(gift) {
+        if (!gift.exists) { el.textContent = 'no round sent yet'; return null; }
+        var g = gift.data();
+        return giftRef.collection('claims').where('roundKey', '==', g.roundKey).get().then(function(snap) {
+            el.textContent = snap.size + ' claimed (' + g.roundKey + ')';
+        });
+    }).catch(function(err) {
+        el.textContent = 'claims: ' + (err.code || err.message);
+    });
+}
+
 function createDailyCampaign() {
     var title = document.getElementById('d-title').value.trim();
     var body = document.getElementById('d-body').value.trim();
@@ -1504,6 +1550,7 @@ function createDailyCampaign() {
             lastRunAt: null
         },
         respectPrefs: document.getElementById('d-respect').checked,
+        coinReward: readDailyReward(),
         status: 'scheduled',
         stats: { audienceSize: 0, sent: 0, failed: 0, skipped: 0 },
         createdBy: (auth.currentUser || {}).email || null,
@@ -1522,6 +1569,7 @@ function createDailyCampaign() {
         status.style.color = '#4ade80';
         document.getElementById('d-title').value = '';
         document.getElementById('d-body').value = '';
+        document.getElementById('d-reward').value = 0;
         renderDailyPreview();
         toast('Daily campaign created');
         loadDailyCampaigns();
@@ -1561,6 +1609,16 @@ function loadDailyCampaigns() {
                 tdMsg.innerHTML = '<div style="font-weight:500;"></div><div style="color:#64748b;font-size:12px;"></div>';
                 tdMsg.children[0].textContent = c.title || '—';
                 tdMsg.children[1].textContent = c.body || '';
+                if (c.coinReward > 0) {
+                    var gift = document.createElement('div');
+                    gift.style.cssText = 'color:#fbbf24;font-size:12px;margin-top:4px;';
+                    gift.textContent = '🎁 ' + c.coinReward.toLocaleString() + ' coins · ';
+                    var claims = document.createElement('span');
+                    claims.textContent = '…';
+                    gift.appendChild(claims);
+                    tdMsg.appendChild(gift);
+                    renderGiftClaims(doc.id, claims);
+                }
                 tr.appendChild(tdMsg);
                 tr.appendChild(cell(audienceLabel(c.audience)));
                 tr.appendChild(cell(c.status || '—', STATUS_COLORS[c.status] || '#94a3b8'));
@@ -1568,6 +1626,7 @@ function loadDailyCampaigns() {
                 tdAct.style.whiteSpace = 'nowrap';
                 if (c.status === 'scheduled') tdAct.appendChild(actionButton('Pause', 'btn-ghost', function() { setCampaignStatus(doc.id, 'paused'); }));
                 if (c.status === 'paused')    tdAct.appendChild(actionButton('Resume', 'btn-ghost', function() { setCampaignStatus(doc.id, 'scheduled'); }));
+                if (c.coinReward > 0) tdAct.appendChild(actionButton('Copy link', 'btn-ghost', function() { copyGiftLink(doc.id); }));
                 tdAct.appendChild(actionButton('Delete', 'btn-danger', function() { deleteCampaign(doc.id, c.title); }));
                 tr.appendChild(tdAct);
                 rows.appendChild(tr);
