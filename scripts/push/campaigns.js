@@ -57,17 +57,22 @@ async function logCampaignDelivery(db, perUser, campaign) {
   );
 }
 
-// A recurring campaign never completes — it just books its next run. A one-off
-// is terminal, which is what keeps it from being picked up again next poll.
+// A recurring campaign just books its next run — forever, unless it carries a
+// maxRuns limit ("run for N days"), in which case its last run is terminal like
+// a one-off. Terminal is what keeps it from being picked up again next poll.
 function completionPatch(campaign, now, stats) {
   const schedule = campaign.schedule || {};
+  const runCount = (Number(schedule.runCount) || 0) + 1;
+  const maxRuns = Number(schedule.maxRuns) || 0;
   const base = {
     stats,
     error: null,
     'schedule.lastRunAt': Timestamp.fromDate(now),
+    'schedule.runCount': runCount,
   };
 
-  if (schedule.mode === 'recurring' && schedule.intervalHours > 0) {
+  const hasRunsLeft = maxRuns === 0 || runCount < maxRuns;
+  if (schedule.mode === 'recurring' && schedule.intervalHours > 0 && hasRunsLeft) {
     return {
       ...base,
       status: 'scheduled',

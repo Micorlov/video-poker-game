@@ -364,6 +364,35 @@ test('a recurring campaign books its next run instead of completing', async () =
   assert.ok(hoursOut > 5.9 && hoursOut < 6.1, `expected ~6h, got ${hoursOut}`);
 });
 
+test('a limited recurring campaign counts its runs and keeps going until the last', async () => {
+  // Arrange — 3-day run, 1 already sent.
+  const world = baseWorld({
+    schedule: { mode: 'recurring', intervalHours: 24, nextRunAt: past(), maxRuns: 3, runCount: 1 },
+  });
+
+  // Act
+  const campaign = await run(world);
+
+  // Assert
+  assert.strictEqual(campaign.status, 'scheduled');
+  assert.strictEqual(campaign.schedule.runCount, 2);
+});
+
+test('a limited recurring campaign is terminal after its last run', async () => {
+  // Arrange — 3-day run, 2 already sent.
+  const world = baseWorld({
+    schedule: { mode: 'recurring', intervalHours: 24, nextRunAt: past(), maxRuns: 3, runCount: 2 },
+  });
+
+  // Act
+  const campaign = await run(world);
+
+  // Assert
+  assert.strictEqual(sentMessages.length, 1);
+  assert.strictEqual(campaign.status, 'sent');
+  assert.strictEqual(campaign.schedule.runCount, 3);
+});
+
 test('a one-off campaign is terminal so the next poll does not resend it', async () => {
   // Arrange
   const world = baseWorld();

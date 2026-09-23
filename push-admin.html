@@ -390,7 +390,17 @@ tr:last-child td { border-bottom: none; }
                   <option value="inactive14d">At risk — inactive 14+ days</option>
                   <option value="lowBalance">Low balance (under 1,000 coins)</option>
                   <option value="highHands">High engagement (top 10% by hands)</option>
+                  <option value="user">Single player (test run)</option>
                 </select>
+              </div>
+              <div class="field" id="d-user-wrap" style="display:none;">
+                <label for="d-user">Player</label>
+                <select id="d-user" onchange="renderDailyEstimate()"><option value="">— select player —</option></select>
+              </div>
+              <div class="field">
+                <label for="d-days">Run for (days)</label>
+                <input type="number" id="d-days" min="0" max="365" step="1" value="0" oninput="renderDailyNextRun()">
+                <div class="hint">0 = every day until paused. Otherwise the campaign completes after this many daily sends.</div>
               </div>
               <div class="checkline" style="margin-bottom:12px;">
                 <input type="checkbox" id="d-respect" checked onchange="renderDailyEstimate()">
@@ -733,6 +743,12 @@ function renderUserOptions() {
         select.appendChild(opt);
     });
     if (previous) select.value = previous;
+
+    // The Daily tab's test-run picker mirrors the same (search-filtered) list.
+    var dSelect = document.getElementById('d-user');
+    var dPrevious = dSelect.value;
+    dSelect.innerHTML = select.innerHTML;
+    if (dPrevious) dSelect.value = dPrevious;
 }
 
 // ---------- audience ----------
@@ -1449,9 +1465,14 @@ function renderDailyEstimate() {
     var respect = document.getElementById('d-respect').checked;
     var box = document.getElementById('d-estimate');
 
+    document.getElementById('d-user-wrap').style.display = segVal === 'user' ? 'block' : 'none';
+
     var entries;
     if (segVal === 'all') {
         entries = tokenIndex;
+    } else if (segVal === 'user') {
+        var uid = document.getElementById('d-user').value;
+        entries = tokenIndex.filter(function(t) { return t.uid === uid; });
     } else {
         var uids = uidsInSegment(segVal);
         if (!uids) { box.innerHTML = '<strong>?</strong> — size resolved at send time.'; return; }
@@ -1476,7 +1497,17 @@ function renderDailyEstimate() {
 
 function renderDailyNextRun() {
     var hint = document.getElementById('d-next-run');
-    hint.textContent = 'First send: ' + calcNextDailyRunAt().toLocaleString() + '. Then every 24 h.';
+    var days = readDailyDays();
+    hint.textContent = 'First send: ' + calcNextDailyRunAt().toLocaleString() + '. Then every 24 h' +
+        (days ? ', ' + days + ' send' + (days === 1 ? '' : 's') + ' in total.' : ' until paused.');
+}
+
+var MAX_RUN_DAYS = 365;
+
+// 0 means open-ended; stored as schedule.maxRuns, counted down by the poller.
+function readDailyDays() {
+    var n = Math.floor(Number(document.getElementById('d-days').value) || 0);
+    return Math.max(0, Math.min(MAX_RUN_DAYS, n));
 }
 
 function calcNextDailyRunAt() {
@@ -1530,11 +1561,16 @@ function createDailyCampaign() {
     if (!title || !body) { status.textContent = 'Title and body are required.'; status.style.color = '#f87171'; return; }
 
     var segVal = document.getElementById('d-segment').value;
+    var testUid = document.getElementById('d-user').value;
+    if (segVal === 'user' && !testUid) { status.textContent = 'Pick a player.'; status.style.color = '#f87171'; return; }
     var audience = segVal === 'all'
         ? { type: 'all', platform: null, uid: null, segment: null }
-        : { type: 'segment', platform: null, uid: null, segment: segVal };
+        : segVal === 'user'
+            ? { type: 'user', platform: null, uid: testUid, segment: null }
+            : { type: 'segment', platform: null, uid: null, segment: segVal };
 
     var firstRun = calcNextDailyRunAt();
+    var days = readDailyDays();
 
     var payload = {
         title: title,
@@ -1547,7 +1583,9 @@ function createDailyCampaign() {
             sendAt: null,
             intervalHours: 24,
             nextRunAt: firebase.firestore.Timestamp.fromDate(firstRun),
-            lastRunAt: null
+            lastRunAt: null,
+            maxRuns: days || null,
+            runCount: 0
         },
         respectPrefs: document.getElementById('d-respect').checked,
         coinReward: readDailyReward(),
@@ -1621,7 +1659,9 @@ function loadDailyCampaigns() {
                 }
                 tr.appendChild(tdMsg);
                 tr.appendChild(cell(audienceLabel(c.audience)));
-                tr.appendChild(cell(c.status || '—', STATUS_COLORS[c.status] || '#94a3b8'));
+                var sched = c.schedule || {};
+                var progress = sched.maxRuns ? ' · ' + (sched.runCount || 0) + '/' + sched.maxRuns + ' days' : '';
+                tr.appendChild(cell((c.status || '—') + progress, STATUS_COLORS[c.status] || '#94a3b8'));
                 var tdAct = document.createElement('td');
                 tdAct.style.whiteSpace = 'nowrap';
                 if (c.status === 'scheduled') tdAct.appendChild(actionButton('Pause', 'btn-ghost', function() { setCampaignStatus(doc.id, 'paused'); }));
