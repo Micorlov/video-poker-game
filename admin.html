@@ -97,6 +97,9 @@
         .panel-header button:hover { color: #fbbf24; }
 
         table { width: 100%; border-collapse: collapse; }
+        /* Wide tables (All Users has 18 columns) scroll inside the panel instead of being clipped by its overflow:hidden. */
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-scroll th { white-space: nowrap; }
         th {
             text-align: left; padding: 10px 16px; font-size: 11px;
             text-transform: uppercase; letter-spacing: 0.5px; color: #475569;
@@ -261,10 +264,10 @@
                             <button onclick="loadCurrentHour()">↻ Refresh</button>
                         </div>
                     </div>
-                    <table>
+                    <div class="table-scroll"><table>
                         <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Hands</th><th>Rebuys</th><th>Best Hand</th><th>Actions</th></tr></thead>
                         <tbody id="live-body"><tr><td colspan="7" class="empty-state">Loading...</td></tr></tbody>
-                    </table>
+                    </table></div>
                 </div>
 
                 <div class="panel">
@@ -272,10 +275,10 @@
                         <h2>Recent Logins</h2>
                         <span class="badge" id="recent-count">0</span>
                     </div>
-                    <table>
+                    <div class="table-scroll"><table>
                         <thead><tr><th>User</th><th>Email</th><th>Signed Up</th><th>Last Login</th></tr></thead>
                         <tbody id="recent-body"><tr><td colspan="4" class="empty-state">Loading...</td></tr></tbody>
-                    </table>
+                    </table></div>
                 </div>
             </div>
 
@@ -289,7 +292,7 @@
                         <h2>All Users</h2>
                         <span class="badge" id="users-count">0</span>
                     </div>
-                    <table>
+                    <div class="table-scroll"><table>
                         <thead><tr>
                             <th onclick="sortUsers('displayName')">Name ↕</th>
                             <th onclick="sortUsers('email')">Email ↕</th>
@@ -311,7 +314,7 @@
                             <th>Status</th>
                         </tr></thead>
                         <tbody id="all-users-body"><tr><td colspan="18" class="empty-state">Loading...</td></tr></tbody>
-                    </table>
+                    </table></div>
                 </div>
             </div>
 
@@ -331,10 +334,10 @@
                         <h2>Competition Results</h2>
                         <span class="badge" id="comp-count">0</span>
                     </div>
-                    <table>
+                    <div class="table-scroll"><table>
                         <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Hands</th><th>Rebuys</th><th>Best Hand</th><th>Actions</th></tr></thead>
                         <tbody id="comp-body"><tr><td colspan="7" class="empty-state">Select an hour</td></tr></tbody>
-                    </table>
+                    </table></div>
                 </div>
 
                 <div class="panel" style="margin-top:24px;">
@@ -362,10 +365,10 @@
                         <input id="ev-end" type="datetime-local" style="padding:7px 10px;">
                         <button onclick="createEvent()" style="padding:7px 14px; cursor:pointer;">Create Event</button>
                     </div>
-                    <table>
+                    <div class="table-scroll"><table>
                         <thead><tr><th>Event</th><th>Type</th><th>×</th><th>Hand</th><th>Starts</th><th>Ends</th><th>Status</th><th>Actions</th></tr></thead>
                         <tbody id="events-body"><tr><td colspan="8" class="empty-state">No events</td></tr></tbody>
-                    </table>
+                    </table></div>
                 </div>
             </div>
 
