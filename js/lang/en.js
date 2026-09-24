@@ -329,6 +329,11 @@ vpRegisterLang('en', {
     'prompt.bigWin': 'Nice hit! You now have {{coins}} coins — saved on this device only. Lose the phone, lose the chips. Back them up free with Google.',
     'prompt.session': 'You have {{coins}} coins on this device only. Sign in once and they follow you anywhere.',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': 'Enjoying Video Poker?',
+    'review.body': 'A quick rating on Google Play helps other players find us.',
+    'review.rate': 'Rate now',
+
     // ── Outbound share copy (WhatsApp / Telegram / native) ──
     'share.appName': 'Video Poker',
     'share.inviteText': '{{name}} wants to play Video Poker with you! Join with this link:\n{{link}}',

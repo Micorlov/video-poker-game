@@ -482,6 +482,20 @@
         </div>
     </div>
 
+    <!-- Rating card: js/review.js shows it after a quality win once the native
+         Play review sheet has had its turn (7-day cooldown, 3 per install).
+         Play policy: the copy must never ask for a specific star count. -->
+    <div class="modal-backdrop hidden" id="review-prompt-modal">
+        <div class="modal-box review-prompt-box">
+            <button class="modal-close" onclick="dismissReviewPrompt()" aria-label="Close">✕</button>
+            <div class="review-stars" aria-hidden="true">★★★★★</div>
+            <div class="modal-title" data-i18n="review.title">Enjoying Video Poker?</div>
+            <div class="modal-sub" data-i18n="review.body">A quick rating on Google Play helps other players find us.</div>
+            <button class="review-rate-btn" onclick="acceptReviewPrompt()" data-i18n="review.rate">Rate now</button>
+            <button class="signin-prompt-later" onclick="dismissReviewPrompt()" data-i18n="modal.notNow">Not now</button>
+        </div>
+    </div>
+
     <div class="modal-backdrop hidden" id="room-modal">
         <div class="modal-box">
             <button class="modal-close" onclick="closeRoomModal()">✕</button>

@@ -1393,6 +1393,46 @@
     margin-top: 10px;
 }
 
+/* Rating card (js/review.js). The stars are decoration — gold as celebration —
+   and the one action is the warm button, same as everywhere else. */
+.review-prompt-box {
+    text-align: center;
+}
+
+.review-prompt-box .modal-title {
+    padding-inline: 20px;
+}
+
+.review-stars {
+    font-size: 30px;
+    line-height: 1;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-shadow: 0 2px 10px var(--gold-line);
+    margin: 4px 0 12px;
+}
+
+.review-rate-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-bottom: 3px solid var(--action-edge);
+    border-radius: var(--radius-sm);
+    background: linear-gradient(180deg, var(--action) 0%, var(--action-deep) 100%);
+    color: var(--action-ink);
+    box-shadow: var(--action-glow);
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.review-rate-btn:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+    box-shadow: none;
+}
+
 .google-btn {
     width: 100%;
     display: flex;

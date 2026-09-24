@@ -300,6 +300,11 @@ vpRegisterLang('fr', {
     'prompt.bigWin': 'Joli coup ! Vous avez maintenant {{coins}} pièces — enregistrées sur cet appareil uniquement. Téléphone perdu, jetons perdus. Sauvegardez-les gratuitement avec Google.',
     'prompt.session': 'Vous avez {{coins}} pièces sur cet appareil uniquement. Connectez-vous une fois et elles vous suivront partout.',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': 'Vous aimez Vidéo Poker ?',
+    'review.body': 'Une petite note sur Google Play aide d’autres joueurs à nous trouver.',
+    'review.rate': 'Noter maintenant',
+
     'share.appName': 'Vidéo Poker',
     'share.inviteText': '{{name}} veut jouer au Vidéo Poker avec vous ! Rejoignez via ce lien :\n{{link}}',
     'share.inviteTextShort': '{{name}} veut jouer au Vidéo Poker avec vous ! Rejoignez ici : {{link}}',

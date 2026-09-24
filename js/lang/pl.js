@@ -302,6 +302,11 @@ vpRegisterLang('pl', {
     'prompt.bigWin': 'Niezłe trafienie! Masz teraz {{coins}} monet — zapisanych tylko na tym urządzeniu. Zgubisz telefon, stracisz żetony. Zabezpiecz je za darmo przez Google.',
     'prompt.session': 'Masz {{coins}} monet tylko na tym urządzeniu. Zaloguj się raz, a pójdą z tobą wszędzie.',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': 'Podoba Ci się Wideo Poker?',
+    'review.body': 'Szybka ocena w Google Play pomaga innym graczom nas znaleźć.',
+    'review.rate': 'Oceń teraz',
+
     'share.appName': 'Wideo Poker',
     'share.inviteText': '{{name}} chce zagrać z tobą w Wideo Poker! Dołącz przez ten link:\n{{link}}',
     'share.inviteTextShort': '{{name}} chce zagrać z tobą w Wideo Poker! Dołącz tutaj: {{link}}',

@@ -311,6 +311,11 @@ vpRegisterLang('he', {
     'prompt.bigWin': 'יפה! יש לכם עכשיו {{coins}} מטבעות — שמורים רק במכשיר הזה. הטלפון אובד, הז׳יטונים איתו. גבו אותם בחינם עם Google.',
     'prompt.session': 'יש לכם {{coins}} מטבעות רק במכשיר הזה. התחברו פעם אחת והם ילכו אתכם לכל מקום.',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': 'נהנים מווידאו פוקר?',
+    'review.body': 'דירוג קצר ב-Google Play עוזר לשחקנים אחרים למצוא אותנו.',
+    'review.rate': 'דרגו עכשיו',
+
     'firebase.havingTrouble': 'יש בעיה? שחקו בינתיים כאורחים',
 
     'share.appName': 'וידאו פוקר',

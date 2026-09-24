@@ -28,6 +28,9 @@ const VP_ASO_EVENTS = Object.freeze({
     dailyBonusClaimed: 'daily_bonus_claimed',
     leaderboardViewed: 'leaderboard_viewed',
     reviewPromptEarned: 'review_prompt_earned',
+    reviewCardShown: 'review_card_shown',
+    reviewCardRate: 'review_card_rate',
+    reviewCardDismissed: 'review_card_dismissed',
     storeLinkOpened: 'store_link_opened',
     inviteShared: 'invite_shared'
 });

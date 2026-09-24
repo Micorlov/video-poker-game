@@ -302,6 +302,11 @@ vpRegisterLang('ja', {
     'prompt.bigWin': 'お見事！現在 {{coins}} コイン — この端末にしか保存されていません。スマホを失えばチップも失います。Googleで無料バックアップを。',
     'prompt.session': 'この端末だけに {{coins}} コインあります。一度ログインすれば、どこへでも一緒です。',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': 'ビデオポーカーを楽しんでいますか？',
+    'review.body': 'Google Playで評価していただくと、ほかのプレイヤーが見つけやすくなります。',
+    'review.rate': '今すぐ評価',
+
     'share.appName': 'ビデオポーカー',
     'share.inviteText': '{{name}} さんがビデオポーカーで対戦したがっています！このリンクから参加：\n{{link}}',
     'share.inviteTextShort': '{{name}} さんがビデオポーカーで対戦したがっています！参加はこちら：{{link}}',

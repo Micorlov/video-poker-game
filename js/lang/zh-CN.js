@@ -301,6 +301,11 @@ vpRegisterLang('zh-CN', {
     'prompt.bigWin': '漂亮！你现在有 {{coins}} 金币 — 只保存在这台设备上。手机丢了，筹码也没了。用 Google 免费备份吧。',
     'prompt.session': '你的 {{coins}} 金币只存在这台设备上。登录一次，它们就会跟着你走。',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': '喜欢视频扑克吗？',
+    'review.body': '在 Google Play 上给个评分，能帮助更多玩家找到我们。',
+    'review.rate': '立即评分',
+
     'share.appName': '视频扑克',
     'share.inviteText': '{{name}} 想和你一起玩视频扑克！用这个链接加入：\n{{link}}',
     'share.inviteTextShort': '{{name}} 想和你一起玩视频扑克！在这里加入：{{link}}',
