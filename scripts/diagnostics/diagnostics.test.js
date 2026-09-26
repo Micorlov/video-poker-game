@@ -267,6 +267,37 @@ test('time spent backgrounded is not counted as a stall', async () => {
     assert.strictEqual(env.outbox().filter((e) => e.fields.kind === 'stall').length, 0);
 });
 
+test('no stall is reported while the page is still hidden when the timer fires', async () => {
+    const env = makeEnv();
+    env.context.vpWatchPending(new Promise(() => {}));
+    env.document.visibilityState = 'hidden';
+    await env.advance(60000);
+    assert.strictEqual(env.outbox().filter((e) => e.fields.kind === 'stall').length, 0);
+});
+
+test('no stall is reported while offline: a pending request is the network, not quota', async () => {
+    const env = makeEnv();
+    env.context.vpWatchPending(new Promise(() => {}));
+    env.context.navigator.onLine = false;
+    await env.advance(60000);
+    assert.strictEqual(env.outbox().filter((e) => e.fields.kind === 'stall').length, 0);
+});
+
+test('the synthetic debug report carries the synthetic code and real frames', () => {
+    const env = makeEnv();
+    assert.strictEqual(env.context.vpDebugReport(), true);
+    const [entry] = env.outbox();
+    assert.strictEqual(entry.fields.kind, 'manual');
+    assert.strictEqual(entry.fields.code, 'synthetic');
+    assert.match(entry.fields.message, /debug test/);
+    assert.match(entry.fields.stack, /vpDebugReport/, 'a real Error, so the stack names its caller');
+});
+
+test('?vpdebug=1 queues a synthetic report at boot, and a plain load does not', () => {
+    assert.strictEqual(makeEnv({ search: '?vpdebug=1' }).outbox().filter((e) => e.fields.code === 'synthetic').length, 1);
+    assert.strictEqual(makeEnv({ search: '?utm_source=x' }).outbox().length, 0);
+});
+
 test('the reporter never throws, even with storage blocked', () => {
     const env = makeEnv({ storageThrows: true });
     assert.doesNotThrow(() => env.context.vpReportError(new Error('x'), 'manual'));
@@ -491,6 +522,102 @@ test('firebaseSafe reports a synchronous throw, e.g. the SDK never loaded', () =
     const result = env.context.firebaseSafe(() => { throw new TypeError("Cannot read properties of null (reading 'collection')"); });
     assert.strictEqual(result, null);
     assert.match(env.outbox()[0].fields.message, /reading 'collection'/);
+});
+
+// --- onSnapshotError ---------------------------------------------------------
+//
+// A listener never goes through firebaseSafe(): it hands failures to its own
+// error callback. Every listener passes onSnapshotError(context) there.
+
+const ON_SNAPSHOT_SRC = FIREBASE_SRC.match(/function onSnapshotError[\s\S]*?\n}\n/)[0];
+
+function loadOnSnapshotError(env) {
+    vm.runInContext(ON_SNAPSHOT_SRC, env.context);
+    env.context.window.vpReportError = env.context.vpReportError;
+    // A named caller, as every real subscribe*() function is, so the test can
+    // see whether the captured call site names it.
+    vm.runInContext('function subscribeDailyBoard() { return onSnapshotError("dailyBoard"); }', env.context);
+}
+
+test('a listener failure is reported as a listener, named by its context', () => {
+    const env = makeEnv();
+    loadOnSnapshotError(env);
+    env.context.subscribeDailyBoard()(DENIED());
+    const [entry] = env.outbox();
+    assert.strictEqual(entry.fields.kind, 'listener');
+    assert.strictEqual(entry.fields.op, 'listen dailyBoard');
+    assert.strictEqual(entry.fields.code, 'permission-denied');
+});
+
+test('the listener report names the subscribing function, not the Firestore internals', () => {
+    const env = makeEnv();
+    loadOnSnapshotError(env);
+    env.context.subscribeDailyBoard()(DENIED());
+    assert.match(env.outbox()[0].fields.stack, /subscribeDailyBoard/);
+});
+
+test('the same denial on two listeners is two reports, not one', () => {
+    const env = makeEnv();
+    loadOnSnapshotError(env);
+    env.context.onSnapshotError('dailyBoard')(DENIED());
+    env.context.onSnapshotError('roomInvites')(DENIED());
+    assert.deepStrictEqual(env.outbox().map((e) => e.fields.op), ['listen dailyBoard', 'listen roomInvites']);
+});
+
+test('a listener error callback never throws, whatever it is handed', () => {
+    const env = makeEnv();
+    loadOnSnapshotError(env);
+    const handler = env.context.onSnapshotError('bracelets');
+    assert.doesNotThrow(() => handler(Object.freeze({ code: 'unavailable', message: 'frozen' })));
+    assert.doesNotThrow(() => handler('not an object'));
+    assert.doesNotThrow(() => handler(undefined));
+    assert.strictEqual(env.outbox().length, 3);
+});
+
+// --- referral claim: the benign race vs a broken rule -------------------------
+
+const REFERRAL_SRC = fs.readFileSync(path.join(ROOT, 'js', 'referral.js'), 'utf8');
+const CLAIM_SRC = REFERRAL_SRC.match(/function claimReferralRewards[\s\S]*?\n}\n/)[0];
+
+function loadReferralClaim(env) {
+    loadFirebaseSafe(env);
+    env.context.firebase = { firestore: { FieldValue: { serverTimestamp: () => 'now' } } };
+    vm.runInContext('var referralClaimsInFlight = {}; var credited = null; function creditReferralCoins(list) { credited = list; }', env.context);
+    vm.runInContext(CLAIM_SRC, env.context);
+}
+
+function claimRow(update, claimedAtOnReread) {
+    return {
+        id: 'r1', coins: 2000,
+        ref: { update, get: () => Promise.resolve({ exists: true, data: () => ({ claimedAt: claimedAtOnReread }) }) }
+    };
+}
+
+test('a reward another device claimed first is dropped without a report', async () => {
+    const env = makeEnv();
+    loadReferralClaim(env);
+    await env.context.claimReferralRewards([claimRow(() => Promise.reject(DENIED()), 'earlier')]);
+    assert.strictEqual(env.outbox().length, 0);
+    assert.strictEqual(env.context.credited, null);
+});
+
+test('a claim denied while the row is still unclaimed is reported as a lost reward', async () => {
+    const env = makeEnv();
+    loadReferralClaim(env);
+    await env.context.claimReferralRewards([claimRow(() => Promise.reject(DENIED()), null)]);
+    assert.strictEqual(env.outbox()[0].fields.kind, 'firebase');
+    assert.strictEqual(env.outbox()[0].fields.code, 'permission-denied');
+    assert.strictEqual(env.context.credited, null);
+});
+
+test('an accepted claim is credited, and a non-denial failure is reported', async () => {
+    const env = makeEnv();
+    loadReferralClaim(env);
+    const ok = claimRow(() => Promise.resolve(), null);
+    const down = claimRow(() => Promise.reject({ code: 'unavailable', message: 'backend unavailable' }), null);
+    await env.context.claimReferralRewards([ok, down]);
+    assert.deepStrictEqual(env.context.credited.map((i) => i.id), ['r1']);
+    assert.strictEqual(env.outbox()[0].fields.code, 'unavailable');
 });
 
 // --- which operation failed --------------------------------------------------

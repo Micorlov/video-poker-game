@@ -73,7 +73,7 @@ function logVpEvent(name, params) {
             // Fire and forget: a rejected promise here must not become an
             // unhandled rejection and so an error report of its own.
             var sent = native.logEvent({ name: name, params: merged });
-            if (sent && sent.catch) sent.catch(function() {});
+            if (sent && sent.catch) sent.catch(function() { /* vp-silent: GA has its own signal (event counts); a report per event would only add noise */ });
             return;
         }
         if (vpAnalyticsFailed) return;

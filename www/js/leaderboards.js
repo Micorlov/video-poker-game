@@ -193,7 +193,7 @@ function subscribeHourlyBoard() {
             hourlyBoardList = [];
             snap.forEach(function(d) { hourlyBoardList.push(Object.assign({ uid: d.id }, d.data())); });
             renderLeaderboardPanel();
-        }, function() { /* silently ignore */ });
+        }, onSnapshotError('hourlyBoard'));
     startLeaderboardTimer();
 }
 
@@ -211,7 +211,7 @@ function subscribeDailyBoard() {
             dailyBoardList = [];
             snap.forEach(function(d) { dailyBoardList.push(d.data()); });
             renderLeaderboardPanel();
-        }, function() { /* silently ignore — e.g. missing composite index */ });
+        }, onSnapshotError('dailyBoard'));
     subscribeOwnDailyScore(user, dayKey);
     startLeaderboardTimer();
 }
@@ -229,7 +229,7 @@ function subscribeOwnDailyScore(user, dayKey) {
             // reset/delete): republish users/{uid}.dailyNetProfit so friends
             // stop seeing the stale figure.
             if (!doc.metadata.hasPendingWrites && prevScore !== score && window.pushNetProfit) pushNetProfit();
-        }, function(err) { console.warn('own daily score listener failed', err); });
+        }, onSnapshotError('ownDailyScore'));
 }
 
 function patchOwnCountry() {

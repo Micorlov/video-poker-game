@@ -390,14 +390,14 @@ function vpSendToCrashlytics(fields, stack) {
         var options = { message: label.slice(0, 300) };
         if (frames.length) options.stacktrace = frames;
         var sent = crashlytics.recordException(options);
-        if (sent && sent.catch) sent.catch(function() {});
+        if (sent && sent.catch) sent.catch(function() { /* vp-silent: the reporter must never become the error */ });
         // Screen and version make a Crashlytics issue actionable; they are the
         // two things a raw JS stack still lacks.
         if (crashlytics.setCustomKey) {
             [['screen', fields.screen], ['app_version', fields.version], ['quota', String(fields.quota)], ['op', fields.op]]
                 .forEach(function(pair) {
                     var done = crashlytics.setCustomKey({ key: pair[0], value: pair[1], type: 'string' });
-                    if (done && done.catch) done.catch(function() {});
+                    if (done && done.catch) done.catch(function() { /* vp-silent: the reporter must never become the error */ });
                 });
         }
     } catch (e) { /* diagnostics must never throw back into the caller */ }
@@ -489,8 +489,10 @@ function vpBumpQueuedCount(sig) {
     if (found) vpOutboxWrite(next);
 }
 
-// Public entry point. kind: 'error' | 'rejection' | 'firebase' | 'stall' |
-// 'quota' | 'manual'. Never throws.
+// Public entry point. kind: 'error' | 'rejection' | 'firebase' | 'listener' |
+// 'native' | 'stall' | 'quota' | 'manual'. 'listener' is a Firestore
+// onSnapshot failure (js/firebase.js onSnapshotError), 'native' a rejected
+// Capacitor plugin call. Never throws.
 function vpReportError(err, kind) {
     try {
         var fields = vpBuildErrorFields(err, kind || 'manual');
@@ -585,6 +587,30 @@ function vpWatchPending(promise) {
     } catch (e) { /* never break the caller */ }
 }
 
+// A synthetic report on demand: the one-tap proof that the whole chain —
+// outbox, REST transport, rules, Crashlytics forwarding — still works, to
+// re-run after every release. Reached by long-pressing the version label in
+// Settings (js/tabs.js) or by loading the page with ?vpdebug=1. A real Error,
+// so the report carries real frames rather than an empty stack.
+var vpDebugCount = 0;
+function vpDebugReport() {
+    try {
+        // Numbered per session: identical messages would be deduplicated into
+        // one report, and a second press would say "queued" while sending nothing.
+        vpDebugCount += 1;
+        var err = new Error('debug test #' + vpDebugCount + ': synthetic report from ' + vpCurrentScreen());
+        err.code = 'synthetic';
+        vpReportError(err, 'manual');
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function vpDebugRequested() {
+    try { return /[?&]vpdebug=1(?:&|$)/.test(String(location.search || '')); } catch (e) { return false; }
+}
+
 function vpErrorEventToError(ev) {
     if (ev.error) return ev.error;
     return { message: ev.message || 'Script error', stack: (ev.filename || '') + ':' + (ev.lineno || 0) + ':' + (ev.colno || 0) };
@@ -606,6 +632,7 @@ function vpInitErrorReporting() {
         window.addEventListener('online', function() { vpScheduleErrorFlush(VP_ERR_FLUSH_DELAY_MS); });
         // Deliver whatever an earlier session could not (quota, offline).
         vpScheduleErrorFlush(VP_ERR_STARTUP_FLUSH_MS);
+        if (vpDebugRequested()) vpDebugReport();
     } catch (e) { /* no DOM: nothing to listen to */ }
 }
 
@@ -1088,7 +1115,7 @@ button:focus:not(:focus-visible) {
     max-width: 460px;
     min-height: 100vh;
     margin: 0 auto;
-    padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(var(--nav-height) + var(--nav-gap) + 40px) max(20px, env(safe-area-inset-left));
+    padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(var(--nav-height) + var(--nav-gap) + env(safe-area-inset-bottom) + 40px) max(20px, env(safe-area-inset-left));
     position: relative;
 }
 
@@ -2328,7 +2355,13 @@ button:focus:not(:focus-visible) {
     text-align: center;
     font-size: 11.5px;
     color: var(--text-faint);
-    margin-top: 24px;
+    margin-top: 12px;
+    /* Long-press target (js/tabs.js): tall enough to hold a thumb on, and no
+       text selection or callout menu while it is held. */
+    padding: 12px 0;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 /* --- Toast --- */
@@ -5714,7 +5747,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
 
             <button class="btn-danger" id="settings-reset-stats" data-i18n="settings.resetStats">Reset Statistics</button>
 
-            <div class="settings-footer" data-i18n="settings.footer">Video Poker · v2.5</div>
+            <div class="settings-footer" id="settings-footer"><span data-i18n="settings.footer">Video Poker</span> · <span id="settings-version">v2.5</span></div>
         </section>
     </div>
 
@@ -6673,7 +6706,7 @@ vpRegisterLang('en', {
     'settings.resetStats': 'Reset Statistics',
     'settings.rateGame': 'Rate this game',
     'settings.moreGames': 'More games by Orlov Games',
-    'settings.footer': 'Video Poker · v2.5',
+    'settings.footer': 'Video Poker',
 
     // ── Game variants ──
     'variant.jacks': 'Jacks or Better',
@@ -7095,7 +7128,7 @@ vpRegisterLang('es', {
     'settings.resetStats': 'Restablecer estadísticas',
     'settings.rateGame': 'Valorar este juego',
     'settings.moreGames': 'Más juegos de Orlov Games',
-    'settings.footer': 'Video Póker · v2.5',
+    'settings.footer': 'Video Póker',
 
     'variant.jacks': 'Jotas o mejor',
     'variant.deuces': 'Deuces Wild',
@@ -7488,7 +7521,7 @@ vpRegisterLang('pt-BR', {
     'settings.resetStats': 'Zerar estatísticas',
     'settings.rateGame': 'Avaliar este jogo',
     'settings.moreGames': 'Mais jogos da Orlov Games',
-    'settings.footer': 'Video Poker · v2.5',
+    'settings.footer': 'Video Poker',
 
     'variant.jacks': 'Valetes ou melhor',
     'variant.deuces': 'Deuces Wild',
@@ -7883,7 +7916,7 @@ vpRegisterLang('de', {
     'settings.resetStats': 'Statistik zurücksetzen',
     'settings.rateGame': 'Spiel bewerten',
     'settings.moreGames': 'Mehr Spiele von Orlov Games',
-    'settings.footer': 'Video Poker · v2.5',
+    'settings.footer': 'Video Poker',
 
     'variant.jacks': 'Buben oder besser',
     'variant.deuces': 'Deuces Wild',
@@ -8276,7 +8309,7 @@ vpRegisterLang('fr', {
     'settings.resetStats': 'Réinitialiser les stats',
     'settings.rateGame': 'Noter ce jeu',
     'settings.moreGames': 'Plus de jeux par Orlov Games',
-    'settings.footer': 'Vidéo Poker · v2.5',
+    'settings.footer': 'Vidéo Poker',
 
     'variant.jacks': 'Valets ou mieux',
     'variant.deuces': 'Deuces Wild',
@@ -8669,7 +8702,7 @@ vpRegisterLang('it', {
     'settings.resetStats': 'Azzera statistiche',
     'settings.rateGame': 'Valuta questo gioco',
     'settings.moreGames': 'Altri giochi di Orlov Games',
-    'settings.footer': 'Video Poker · v2.5',
+    'settings.footer': 'Video Poker',
 
     'variant.jacks': 'Jack o superiore',
     'variant.deuces': 'Deuces Wild',
@@ -9064,7 +9097,7 @@ vpRegisterLang('pl', {
     'settings.resetStats': 'Zresetuj statystyki',
     'settings.rateGame': 'Oceń tę grę',
     'settings.moreGames': 'Więcej gier od Orlov Games',
-    'settings.footer': 'Wideo Poker · v2.5',
+    'settings.footer': 'Wideo Poker',
 
     'variant.jacks': 'Walety lub lepsze',
     'variant.deuces': 'Deuces Wild',
@@ -9459,7 +9492,7 @@ vpRegisterLang('ru', {
     'settings.resetStats': 'Сбросить статистику',
     'settings.rateGame': 'Оценить игру',
     'settings.moreGames': 'Другие игры от Orlov Games',
-    'settings.footer': 'Видеопокер · v2.5',
+    'settings.footer': 'Видеопокер',
 
     'variant.jacks': 'Валеты или лучше',
     'variant.deuces': 'Deuces Wild',
@@ -9852,7 +9885,7 @@ vpRegisterLang('tr', {
     'settings.resetStats': 'İstatistikleri sıfırla',
     'settings.rateGame': 'Bu oyunu değerlendir',
     'settings.moreGames': 'Orlov Games’ten daha fazla oyun',
-    'settings.footer': 'Video Poker · v2.5',
+    'settings.footer': 'Video Poker',
 
     'variant.jacks': 'Vale veya üstü',
     'variant.deuces': 'Deuces Wild',
@@ -10245,7 +10278,7 @@ vpRegisterLang('id', {
     'settings.resetStats': 'Setel ulang statistik',
     'settings.rateGame': 'Beri nilai game ini',
     'settings.moreGames': 'Game lain dari Orlov Games',
-    'settings.footer': 'Video Poker · v2.5',
+    'settings.footer': 'Video Poker',
 
     'variant.jacks': 'Jack atau lebih',
     'variant.deuces': 'Deuces Wild',
@@ -10640,7 +10673,7 @@ vpRegisterLang('hi', {
     'settings.resetStats': 'आँकड़े रीसेट करें',
     'settings.rateGame': 'इस गेम को रेट करें',
     'settings.moreGames': 'Orlov Games के और गेम',
-    'settings.footer': 'वीडियो पोकर · v2.5',
+    'settings.footer': 'वीडियो पोकर',
 
     'variant.jacks': 'जैक या बेहतर',
     'variant.deuces': 'ड्यूसेस वाइल्ड',
@@ -11035,7 +11068,7 @@ vpRegisterLang('ja', {
     'settings.resetStats': '成績をリセット',
     'settings.rateGame': 'このゲームを評価',
     'settings.moreGames': 'Orlov Games の他のゲーム',
-    'settings.footer': 'ビデオポーカー · v2.5',
+    'settings.footer': 'ビデオポーカー',
 
     'variant.jacks': 'ジャックス・オア・ベター',
     'variant.deuces': 'デュースワイルド',
@@ -11428,7 +11461,7 @@ vpRegisterLang('ko', {
     'settings.resetStats': '통계 초기화',
     'settings.rateGame': '이 게임 평가하기',
     'settings.moreGames': 'Orlov Games의 다른 게임',
-    'settings.footer': '비디오 포커 · v2.5',
+    'settings.footer': '비디오 포커',
 
     'variant.jacks': '잭 오어 베터',
     'variant.deuces': '듀스 와일드',
@@ -11822,7 +11855,7 @@ vpRegisterLang('zh-CN', {
     'settings.resetStats': '重置统计',
     'settings.rateGame': '给游戏评分',
     'settings.moreGames': 'Orlov Games 的更多游戏',
-    'settings.footer': '视频扑克 · v2.5',
+    'settings.footer': '视频扑克',
 
     'variant.jacks': 'J 或更好',
     'variant.deuces': '百搭 2',
@@ -12220,7 +12253,7 @@ vpRegisterLang('he', {
     'settings.resetStats': 'איפוס הסטטיסטיקה',
     'settings.rateGame': 'דרגו את המשחק',
     'settings.moreGames': 'עוד משחקים מבית Orlov Games',
-    'settings.footer': 'וידאו פוקר · v2.5',
+    'settings.footer': 'וידאו פוקר',
 
     'variant.jacks': 'נסיכים ומעלה',
     'variant.deuces': 'Deuces Wild',
@@ -12611,7 +12644,7 @@ vpRegisterLang('ar', {
     'settings.resetStats': 'إعادة ضبط الإحصائيات',
     'settings.rateGame': 'قيّم هذه اللعبة',
     'settings.moreGames': 'المزيد من الألعاب من Orlov Games',
-    'settings.footer': 'فيديو بوكر · v2.5',
+    'settings.footer': 'فيديو بوكر',
 
     'variant.jacks': 'ولد أو أفضل',
     'variant.deuces': 'Deuces Wild',
@@ -13383,7 +13416,7 @@ function logVpEvent(name, params) {
             // Fire and forget: a rejected promise here must not become an
             // unhandled rejection and so an error report of its own.
             var sent = native.logEvent({ name: name, params: merged });
-            if (sent && sent.catch) sent.catch(function() {});
+            if (sent && sent.catch) sent.catch(function() { /* vp-silent: GA has its own signal (event counts); a report per event would only add noise */ });
             return;
         }
         if (vpAnalyticsFailed) return;
@@ -13642,7 +13675,7 @@ function requestInAppReview() {
     const plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.InAppReview;
     if (!plugin || typeof plugin.requestReview !== 'function') return;
     try {
-        Promise.resolve(plugin.requestReview()).catch(function() { /* Play declined to show the sheet */ });
+        Promise.resolve(plugin.requestReview()).catch(function() { /* vp-silent: Play declining to show the sheet is normal (its own quota) */ });
     } catch (e) { /* a synchronous plugin failure must never reach the game loop */ }
 }
 
@@ -14191,7 +14224,7 @@ try {
     db = firebase.firestore();
     try { tagFirestoreFailures(); } catch (e) { /* diagnostics only */ }
     try {
-        db.enablePersistence({ synchronizeTabs: true }).catch(function() { /* multi-tab or unsupported */ });
+        db.enablePersistence({ synchronizeTabs: true }).catch(function() { /* vp-silent: expected with a second tab open or an old browser; the app just runs online-only */ });
     } catch (e) { /* older browser — online-only */ }
 } catch (e) {
     // Core game must never depend on Firebase — run fully offline/local-only.
@@ -14363,6 +14396,35 @@ function firebaseSafe(operation, fallback) {
     }
 }
 
+// onSnapshot never goes through firebaseSafe(): it hands failures to its own
+// error callback instead of rejecting, so until this helper every listener in
+// the app passed an empty one and the whole real-time read path reported
+// nothing. Every listener passes this as its second argument, so a dropped
+// composite index, a tightened rule or an exhausted read quota surfaces as a
+// report instead of rendering an empty panel forever.
+//
+// `context` names the panel or feature (dailyBoard, roomInvites, ...) and is
+// carried as the report's `op`, since ten listeners would otherwise produce
+// ten identical "Missing or insufficient permissions." reports.
+function onSnapshotError(context) {
+    // Captured when the listener is created, not when it fails: that is the
+    // only moment the originating code is still on the stack. A FirebaseError
+    // delivered to the callback has no useful frames of its own, exactly as it
+    // has none when rejecting a write.
+    let callSite = '';
+    try { callSite = new Error('vp-call-site').stack || ''; } catch (e) {}
+    const op = 'listen ' + String(context || '?');
+    return function(err) {
+        if (err && typeof err === 'object') {
+            try {
+                if (!err.__vpCallSite) err.__vpCallSite = callSite;
+                if (!err.__vpOp) err.__vpOp = op;
+            } catch (e) { /* frozen error object */ }
+        }
+        if (window.vpReportError) vpReportError(err, 'listener');
+    };
+}
+
 function isNativeApp() {
     return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 }
@@ -14455,10 +14517,24 @@ function signInWithFacebook() {
     });
 }
 
+// Every live listener reads under a rule that needs request.auth, so one
+// still attached when the token is revoked is handed "permission-denied" —
+// which, now that listeners report, would file a burst of listener reports
+// for the most routine action there is. Detach them before signing out;
+// onAuthStateChanged(null) repeats the same cleanup harmlessly.
+function unsubscribeUserListeners() {
+    ['cleanupFriendsListeners', 'cleanupRooms', 'cleanupReferrals', 'cleanupLeaderboards',
+        'cleanupChampions', 'cleanupBracelets'].forEach(function(name) {
+        if (typeof window[name] !== 'function') return;
+        try { window[name](); } catch (e) { if (window.vpReportError) vpReportError(e, 'error'); }
+    });
+}
+
 function signOutUser() {
     // Debounced score and profit deltas need their owner: once auth clears,
     // window.egUser is null and the pending delta could no longer be attributed.
     if (window.flushPendingWrites) flushPendingWrites();
+    unsubscribeUserListeners();
     if (isNativeApp()) {
         firebaseSafe(function() { return window.Capacitor.Plugins.FirebaseAuthentication.signOut(); });
     }
@@ -14594,7 +14670,7 @@ function _vpFlushSession() {
         lastSessionHour: _vpSessionHour
     };
     update['playHourMap.h' + _vpSessionHour] = firebase.firestore.FieldValue.increment(1);
-    db.collection('users').doc(uid).update(update).catch(function() {});
+    firebaseSafe(function() { return db.collection('users').doc(uid).update(update); });
 }
 
 function _vpResetSession() {
@@ -15068,7 +15144,9 @@ function initPushListeners() {
                 lastOpenSource: 'push'
             };
             if (data.deepLink) attrUpdate.lastPushDeepLink = data.deepLink;
-            db.collection('users').doc(window.egUser.uid).update(attrUpdate).catch(function() {});
+            // Reported, not swallowed: if this write never lands, push
+            // attribution reads zero and a working campaign looks dead.
+            firebaseSafe(function() { return db.collection('users').doc(window.egUser.uid).update(attrUpdate); });
         }
         if (window.logVpEvent) logVpEvent('push_opened', { deepLink: data.deepLink || 'default' });
         // Daily coin-gift campaign: collect it, then land on the table.
@@ -15243,7 +15321,7 @@ function loadFriends() {
                 return;
             }
             setupFriendScoreListeners(uids, viaLinkMap);
-        }, function() { /* silently ignore Firestore errors */ });
+        }, onSnapshotError('friendsList'));
 }
 
 function setupFriendScoreListeners(uids, viaLinkMap) {
@@ -15267,7 +15345,7 @@ function setupFriendScoreListeners(uids, viaLinkMap) {
                     .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
                 renderFriendsScreen();
                 renderPlayFriendsWidgets();
-            }, function() { /* ignore */ });
+            }, onSnapshotError('friendScores'));
         friendScoreUnsubscribers.push(unsub);
     });
 }
@@ -15812,7 +15890,7 @@ function subscribeReferralRewards() {
             if (window.updateAllInUI) updateAllInUI();
             renderInviteRewardLine();
             if (pending.length) claimReferralRewards(pending);
-        }, function() { /* ignore Firestore errors — rewards retry on next sign-in */ });
+        }, onSnapshotError('referralRewards'));
 }
 
 function claimReferralRewards(pending) {
@@ -15820,10 +15898,22 @@ function claimReferralRewards(pending) {
     return Promise.all(pending.map(function(item) {
         // Credit only what the server actually accepted. The rule rejects the
         // update once claimedAt is set, so a second device replaying the same
-        // reward drops out here instead of paying twice.
-        return item.ref.update({ claimedAt: firebase.firestore.FieldValue.serverTimestamp() })
-            .then(function() { return item; })
-            .catch(function() { return null; });
+        // reward drops out here instead of paying twice. That denial reads
+        // exactly like a broken rule — the failure that used to be invisible —
+        // so a denied row is re-read: already claimed means the benign race and
+        // resolves null; anything else is a lost reward and is rethrown for
+        // firebaseSafe() to report.
+        return firebaseSafe(function() {
+            return item.ref.update({ claimedAt: firebase.firestore.FieldValue.serverTimestamp() })
+                .then(function() { return item; })
+                .catch(function(err) {
+                    if (!err || err.code !== 'permission-denied') throw err;
+                    return item.ref.get().then(function(doc) {
+                        if (doc.exists && doc.data().claimedAt) return null;
+                        throw err;
+                    });
+                });
+        });
     })).then(function(results) {
         pending.forEach(function(item) { delete referralClaimsInFlight[item.id]; });
         const claimed = results.filter(Boolean);
@@ -16539,7 +16629,7 @@ function openRoomDetail(roomId) {
                 row.appendChild(scoreEl);
                 bodyEl.appendChild(row);
             });
-        }, function() { /* silently ignore */ });
+        }, onSnapshotError('roomDetail'));
 
     document.getElementById('room-detail-modal').classList.remove('hidden');
 }
@@ -16704,7 +16794,7 @@ function initRoomInviteListener() {
             });
             renderRoomInviteBanners();
             updateRoomInviteBadges();
-        }, function() { /* silently ignore */ });
+        }, onSnapshotError('roomInvites'));
 }
 
 function cleanupRoomInvites() {
@@ -17321,7 +17411,7 @@ function subscribeChampions() {
                 championsList.push(Object.assign({ uid: d.id }, d.data()));
             });
             renderChampionsPanel();
-        }, function() { /* silently ignore */ });
+        }, onSnapshotError('champions'));
 
     // Start countdown timer
     if (!champTimerInterval) {
@@ -17475,7 +17565,7 @@ function subscribeBracelets() {
             braceletsRecent = [];
             snap.forEach(function(d) { braceletsRecent.push(d.data()); });
             if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
-        }, function() { /* silently ignore */ });
+        }, onSnapshotError('bracelets'));
 }
 
 function latestBraceletForUid(uid) {
@@ -17687,7 +17777,7 @@ function subscribeHourlyBoard() {
             hourlyBoardList = [];
             snap.forEach(function(d) { hourlyBoardList.push(Object.assign({ uid: d.id }, d.data())); });
             renderLeaderboardPanel();
-        }, function() { /* silently ignore */ });
+        }, onSnapshotError('hourlyBoard'));
     startLeaderboardTimer();
 }
 
@@ -17705,7 +17795,7 @@ function subscribeDailyBoard() {
             dailyBoardList = [];
             snap.forEach(function(d) { dailyBoardList.push(d.data()); });
             renderLeaderboardPanel();
-        }, function() { /* silently ignore — e.g. missing composite index */ });
+        }, onSnapshotError('dailyBoard'));
     subscribeOwnDailyScore(user, dayKey);
     startLeaderboardTimer();
 }
@@ -17723,7 +17813,7 @@ function subscribeOwnDailyScore(user, dayKey) {
             // reset/delete): republish users/{uid}.dailyNetProfit so friends
             // stop seeing the stale figure.
             if (!doc.metadata.hasPendingWrites && prevScore !== score && window.pushNetProfit) pushNetProfit();
-        }, function(err) { console.warn('own daily score listener failed', err); });
+        }, onSnapshotError('ownDailyScore'));
 }
 
 function patchOwnCountry() {
@@ -18105,7 +18195,7 @@ function shareViaNative(title, message, link) {
     if (CapShare) {
         return CapShare.share({ title: title, text: message, url: link, dialogTitle: title })
             .then(function() { return true; })
-            .catch(function() { return true; /* user cancelled */ });
+            .catch(function() { return true; /* vp-silent: the sheet rejects when the user cancels, which is not an error */ });
     }
     if (navigator.share) {
         return navigator.share({ text: message + '\n' + link })
@@ -19987,6 +20077,37 @@ function initSettingsScreen() {
     document.getElementById('settings-reset-stats').onclick = resetStatistics;
 
     initNotificationSettings();
+    initVersionLabel();
+}
+
+// The footer shows the build that is actually running, and doubles as the
+// hidden diagnostics switch: a long press queues a synthetic error report
+// (js/errors.js vpDebugReport), the one-tap check that the reporting chain
+// works end to end after a release.
+const VP_DEBUG_PRESS_MS = 1500;
+
+function initVersionLabel() {
+    const versionEl = document.getElementById('settings-version');
+    if (versionEl && window.VP_APP_VERSION) versionEl.textContent = 'v' + window.VP_APP_VERSION;
+
+    const footer = document.getElementById('settings-footer');
+    if (!footer) return;
+    let pressTimer = null;
+    const cancelPress = function() {
+        if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    };
+    footer.addEventListener('pointerdown', function() {
+        cancelPress();
+        pressTimer = setTimeout(function() {
+            pressTimer = null;
+            if (!window.vpDebugReport || !vpDebugReport()) return;
+            showToast('Test error report queued (' + (window.VP_APP_VERSION || '?') + ')');
+        }, VP_DEBUG_PRESS_MS);
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function(type) {
+        footer.addEventListener(type, cancelPress);
+    });
+    footer.addEventListener('contextmenu', function(ev) { ev.preventDefault(); });
 }
 
 // 'announcement' covers campaigns composed in push-admin.html — an admin
@@ -20099,7 +20220,10 @@ function initNativeDeepLinkHandling() {
     // Cold start: app was launched directly via the custom scheme.
     CapApp.getLaunchUrl().then(function(result) {
         if (result && result.url) applyNativeDeepLinkUrl(result.url);
-    }).catch(function() {});
+    }).catch(function(err) {
+        // The invite or gift link that launched the app is lost with it.
+        if (window.vpReportError) vpReportError(err, 'native');
+    });
     // Warm start: app was already running when the scheme URL was opened.
     CapApp.addListener('appUrlOpen', function(data) {
         applyNativeDeepLinkUrl(data.url);
@@ -20194,7 +20318,7 @@ function pwaCanUseSw() {
 
 function pwaRegisterSw() {
     if (!pwaCanUseSw()) return;
-    navigator.serviceWorker.register('sw.js').catch(function() { /* offline / unsupported */ });
+    navigator.serviceWorker.register('sw.js').catch(function() { /* vp-silent: offline or unsupported; only the web install prompt is lost */ });
 }
 
 function pwaTrackVisit() {

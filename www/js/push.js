@@ -181,7 +181,9 @@ function initPushListeners() {
                 lastOpenSource: 'push'
             };
             if (data.deepLink) attrUpdate.lastPushDeepLink = data.deepLink;
-            db.collection('users').doc(window.egUser.uid).update(attrUpdate).catch(function() {});
+            // Reported, not swallowed: if this write never lands, push
+            // attribution reads zero and a working campaign looks dead.
+            firebaseSafe(function() { return db.collection('users').doc(window.egUser.uid).update(attrUpdate); });
         }
         if (window.logVpEvent) logVpEvent('push_opened', { deepLink: data.deepLink || 'default' });
         // Daily coin-gift campaign: collect it, then land on the table.

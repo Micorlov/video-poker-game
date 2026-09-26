@@ -36,7 +36,7 @@ function loadFriends() {
                 return;
             }
             setupFriendScoreListeners(uids, viaLinkMap);
-        }, function() { /* silently ignore Firestore errors */ });
+        }, onSnapshotError('friendsList'));
 }
 
 function setupFriendScoreListeners(uids, viaLinkMap) {
@@ -60,7 +60,7 @@ function setupFriendScoreListeners(uids, viaLinkMap) {
                     .sort(function(a, b) { return (b.netProfit || 0) - (a.netProfit || 0); });
                 renderFriendsScreen();
                 renderPlayFriendsWidgets();
-            }, function() { /* ignore */ });
+            }, onSnapshotError('friendScores'));
         friendScoreUnsubscribers.push(unsub);
     });
 }

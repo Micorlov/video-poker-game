@@ -79,14 +79,14 @@ function vpSendToCrashlytics(fields, stack) {
         var options = { message: label.slice(0, 300) };
         if (frames.length) options.stacktrace = frames;
         var sent = crashlytics.recordException(options);
-        if (sent && sent.catch) sent.catch(function() {});
+        if (sent && sent.catch) sent.catch(function() { /* vp-silent: the reporter must never become the error */ });
         // Screen and version make a Crashlytics issue actionable; they are the
         // two things a raw JS stack still lacks.
         if (crashlytics.setCustomKey) {
             [['screen', fields.screen], ['app_version', fields.version], ['quota', String(fields.quota)], ['op', fields.op]]
                 .forEach(function(pair) {
                     var done = crashlytics.setCustomKey({ key: pair[0], value: pair[1], type: 'string' });
-                    if (done && done.catch) done.catch(function() {});
+                    if (done && done.catch) done.catch(function() { /* vp-silent: the reporter must never become the error */ });
                 });
         }
     } catch (e) { /* diagnostics must never throw back into the caller */ }
@@ -178,8 +178,10 @@ function vpBumpQueuedCount(sig) {
     if (found) vpOutboxWrite(next);
 }
 
-// Public entry point. kind: 'error' | 'rejection' | 'firebase' | 'stall' |
-// 'quota' | 'manual'. Never throws.
+// Public entry point. kind: 'error' | 'rejection' | 'firebase' | 'listener' |
+// 'native' | 'stall' | 'quota' | 'manual'. 'listener' is a Firestore
+// onSnapshot failure (js/firebase.js onSnapshotError), 'native' a rejected
+// Capacitor plugin call. Never throws.
 function vpReportError(err, kind) {
     try {
         var fields = vpBuildErrorFields(err, kind || 'manual');
@@ -274,6 +276,30 @@ function vpWatchPending(promise) {
     } catch (e) { /* never break the caller */ }
 }
 
+// A synthetic report on demand: the one-tap proof that the whole chain —
+// outbox, REST transport, rules, Crashlytics forwarding — still works, to
+// re-run after every release. Reached by long-pressing the version label in
+// Settings (js/tabs.js) or by loading the page with ?vpdebug=1. A real Error,
+// so the report carries real frames rather than an empty stack.
+var vpDebugCount = 0;
+function vpDebugReport() {
+    try {
+        // Numbered per session: identical messages would be deduplicated into
+        // one report, and a second press would say "queued" while sending nothing.
+        vpDebugCount += 1;
+        var err = new Error('debug test #' + vpDebugCount + ': synthetic report from ' + vpCurrentScreen());
+        err.code = 'synthetic';
+        vpReportError(err, 'manual');
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function vpDebugRequested() {
+    try { return /[?&]vpdebug=1(?:&|$)/.test(String(location.search || '')); } catch (e) { return false; }
+}
+
 function vpErrorEventToError(ev) {
     if (ev.error) return ev.error;
     return { message: ev.message || 'Script error', stack: (ev.filename || '') + ':' + (ev.lineno || 0) + ':' + (ev.colno || 0) };
@@ -295,6 +321,7 @@ function vpInitErrorReporting() {
         window.addEventListener('online', function() { vpScheduleErrorFlush(VP_ERR_FLUSH_DELAY_MS); });
         // Deliver whatever an earlier session could not (quota, offline).
         vpScheduleErrorFlush(VP_ERR_STARTUP_FLUSH_MS);
+        if (vpDebugRequested()) vpDebugReport();
     } catch (e) { /* no DOM: nothing to listen to */ }
 }
 

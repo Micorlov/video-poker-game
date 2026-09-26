@@ -166,7 +166,7 @@ function subscribeReferralRewards() {
             if (window.updateAllInUI) updateAllInUI();
             renderInviteRewardLine();
             if (pending.length) claimReferralRewards(pending);
-        }, function() { /* ignore Firestore errors — rewards retry on next sign-in */ });
+        }, onSnapshotError('referralRewards'));
 }
 
 function claimReferralRewards(pending) {
@@ -174,10 +174,22 @@ function claimReferralRewards(pending) {
     return Promise.all(pending.map(function(item) {
         // Credit only what the server actually accepted. The rule rejects the
         // update once claimedAt is set, so a second device replaying the same
-        // reward drops out here instead of paying twice.
-        return item.ref.update({ claimedAt: firebase.firestore.FieldValue.serverTimestamp() })
-            .then(function() { return item; })
-            .catch(function() { return null; });
+        // reward drops out here instead of paying twice. That denial reads
+        // exactly like a broken rule — the failure that used to be invisible —
+        // so a denied row is re-read: already claimed means the benign race and
+        // resolves null; anything else is a lost reward and is rethrown for
+        // firebaseSafe() to report.
+        return firebaseSafe(function() {
+            return item.ref.update({ claimedAt: firebase.firestore.FieldValue.serverTimestamp() })
+                .then(function() { return item; })
+                .catch(function(err) {
+                    if (!err || err.code !== 'permission-denied') throw err;
+                    return item.ref.get().then(function(doc) {
+                        if (doc.exists && doc.data().claimedAt) return null;
+                        throw err;
+                    });
+                });
+        });
     })).then(function(results) {
         pending.forEach(function(item) { delete referralClaimsInFlight[item.id]; });
         const claimed = results.filter(Boolean);

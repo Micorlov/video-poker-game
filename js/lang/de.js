@@ -96,7 +96,7 @@ vpRegisterLang('de', {
     'settings.resetStats': 'Statistik zurücksetzen',
     'settings.rateGame': 'Spiel bewerten',
     'settings.moreGames': 'Mehr Spiele von Orlov Games',
-    'settings.footer': 'Video Poker · v2.5',
+    'settings.footer': 'Video Poker',
 
     'variant.jacks': 'Buben oder besser',
     'variant.deuces': 'Deuces Wild',

@@ -60,7 +60,7 @@ function subscribeChampions() {
                 championsList.push(Object.assign({ uid: d.id }, d.data()));
             });
             renderChampionsPanel();
-        }, function() { /* silently ignore */ });
+        }, onSnapshotError('champions'));
 
     // Start countdown timer
     if (!champTimerInterval) {

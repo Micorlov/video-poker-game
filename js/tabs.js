@@ -104,6 +104,37 @@ function initSettingsScreen() {
     document.getElementById('settings-reset-stats').onclick = resetStatistics;
 
     initNotificationSettings();
+    initVersionLabel();
+}
+
+// The footer shows the build that is actually running, and doubles as the
+// hidden diagnostics switch: a long press queues a synthetic error report
+// (js/errors.js vpDebugReport), the one-tap check that the reporting chain
+// works end to end after a release.
+const VP_DEBUG_PRESS_MS = 1500;
+
+function initVersionLabel() {
+    const versionEl = document.getElementById('settings-version');
+    if (versionEl && window.VP_APP_VERSION) versionEl.textContent = 'v' + window.VP_APP_VERSION;
+
+    const footer = document.getElementById('settings-footer');
+    if (!footer) return;
+    let pressTimer = null;
+    const cancelPress = function() {
+        if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    };
+    footer.addEventListener('pointerdown', function() {
+        cancelPress();
+        pressTimer = setTimeout(function() {
+            pressTimer = null;
+            if (!window.vpDebugReport || !vpDebugReport()) return;
+            showToast('Test error report queued (' + (window.VP_APP_VERSION || '?') + ')');
+        }, VP_DEBUG_PRESS_MS);
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function(type) {
+        footer.addEventListener(type, cancelPress);
+    });
+    footer.addEventListener('contextmenu', function(ev) { ev.preventDefault(); });
 }
 
 // 'announcement' covers campaigns composed in push-admin.html — an admin
@@ -216,7 +247,10 @@ function initNativeDeepLinkHandling() {
     // Cold start: app was launched directly via the custom scheme.
     CapApp.getLaunchUrl().then(function(result) {
         if (result && result.url) applyNativeDeepLinkUrl(result.url);
-    }).catch(function() {});
+    }).catch(function(err) {
+        // The invite or gift link that launched the app is lost with it.
+        if (window.vpReportError) vpReportError(err, 'native');
+    });
     // Warm start: app was already running when the scheme URL was opened.
     CapApp.addListener('appUrlOpen', function(data) {
         applyNativeDeepLinkUrl(data.url);

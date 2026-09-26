@@ -83,7 +83,7 @@ function shareViaNative(title, message, link) {
     if (CapShare) {
         return CapShare.share({ title: title, text: message, url: link, dialogTitle: title })
             .then(function() { return true; })
-            .catch(function() { return true; /* user cancelled */ });
+            .catch(function() { return true; /* vp-silent: the sheet rejects when the user cancels, which is not an error */ });
     }
     if (navigator.share) {
         return navigator.share({ text: message + '\n' + link })

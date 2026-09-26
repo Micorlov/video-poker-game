@@ -2,7 +2,7 @@
     max-width: 460px;
     min-height: 100vh;
     margin: 0 auto;
-    padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(var(--nav-height) + var(--nav-gap) + 40px) max(20px, env(safe-area-inset-left));
+    padding: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) calc(var(--nav-height) + var(--nav-gap) + env(safe-area-inset-bottom) + 40px) max(20px, env(safe-area-inset-left));
     position: relative;
 }
 

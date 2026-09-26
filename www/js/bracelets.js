@@ -61,7 +61,7 @@ function subscribeBracelets() {
             braceletsRecent = [];
             snap.forEach(function(d) { braceletsRecent.push(d.data()); });
             if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
-        }, function() { /* silently ignore */ });
+        }, onSnapshotError('bracelets'));
 }
 
 function latestBraceletForUid(uid) {

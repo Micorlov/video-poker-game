@@ -11,7 +11,7 @@ function pwaCanUseSw() {
 
 function pwaRegisterSw() {
     if (!pwaCanUseSw()) return;
-    navigator.serviceWorker.register('sw.js').catch(function() { /* offline / unsupported */ });
+    navigator.serviceWorker.register('sw.js').catch(function() { /* vp-silent: offline or unsupported; only the web install prompt is lost */ });
 }
 
 function pwaTrackVisit() {

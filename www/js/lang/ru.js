@@ -96,7 +96,7 @@ vpRegisterLang('ru', {
     'settings.resetStats': 'Сбросить статистику',
     'settings.rateGame': 'Оценить игру',
     'settings.moreGames': 'Другие игры от Orlov Games',
-    'settings.footer': 'Видеопокер · v2.5',
+    'settings.footer': 'Видеопокер',
 
     'variant.jacks': 'Валеты или лучше',
     'variant.deuces': 'Deuces Wild',

@@ -350,7 +350,7 @@ function openRoomDetail(roomId) {
                 row.appendChild(scoreEl);
                 bodyEl.appendChild(row);
             });
-        }, function() { /* silently ignore */ });
+        }, onSnapshotError('roomDetail'));
 
     document.getElementById('room-detail-modal').classList.remove('hidden');
 }
@@ -515,7 +515,7 @@ function initRoomInviteListener() {
             });
             renderRoomInviteBanners();
             updateRoomInviteBadges();
-        }, function() { /* silently ignore */ });
+        }, onSnapshotError('roomInvites'));
 }
 
 function cleanupRoomInvites() {

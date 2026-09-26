@@ -96,7 +96,7 @@ vpRegisterLang('ja', {
     'settings.resetStats': '成績をリセット',
     'settings.rateGame': 'このゲームを評価',
     'settings.moreGames': 'Orlov Games の他のゲーム',
-    'settings.footer': 'ビデオポーカー · v2.5',
+    'settings.footer': 'ビデオポーカー',
 
     'variant.jacks': 'ジャックス・オア・ベター',
     'variant.deuces': 'デュースワイルド',

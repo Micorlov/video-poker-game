@@ -69,7 +69,7 @@ function requestInAppReview() {
     const plugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.InAppReview;
     if (!plugin || typeof plugin.requestReview !== 'function') return;
     try {
-        Promise.resolve(plugin.requestReview()).catch(function() { /* Play declined to show the sheet */ });
+        Promise.resolve(plugin.requestReview()).catch(function() { /* vp-silent: Play declining to show the sheet is normal (its own quota) */ });
     } catch (e) { /* a synchronous plugin failure must never reach the game loop */ }
 }
 

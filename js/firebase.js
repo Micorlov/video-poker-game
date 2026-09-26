@@ -32,7 +32,7 @@ try {
     db = firebase.firestore();
     try { tagFirestoreFailures(); } catch (e) { /* diagnostics only */ }
     try {
-        db.enablePersistence({ synchronizeTabs: true }).catch(function() { /* multi-tab or unsupported */ });
+        db.enablePersistence({ synchronizeTabs: true }).catch(function() { /* vp-silent: expected with a second tab open or an old browser; the app just runs online-only */ });
     } catch (e) { /* older browser — online-only */ }
 } catch (e) {
     // Core game must never depend on Firebase — run fully offline/local-only.
@@ -204,6 +204,35 @@ function firebaseSafe(operation, fallback) {
     }
 }
 
+// onSnapshot never goes through firebaseSafe(): it hands failures to its own
+// error callback instead of rejecting, so until this helper every listener in
+// the app passed an empty one and the whole real-time read path reported
+// nothing. Every listener passes this as its second argument, so a dropped
+// composite index, a tightened rule or an exhausted read quota surfaces as a
+// report instead of rendering an empty panel forever.
+//
+// `context` names the panel or feature (dailyBoard, roomInvites, ...) and is
+// carried as the report's `op`, since ten listeners would otherwise produce
+// ten identical "Missing or insufficient permissions." reports.
+function onSnapshotError(context) {
+    // Captured when the listener is created, not when it fails: that is the
+    // only moment the originating code is still on the stack. A FirebaseError
+    // delivered to the callback has no useful frames of its own, exactly as it
+    // has none when rejecting a write.
+    let callSite = '';
+    try { callSite = new Error('vp-call-site').stack || ''; } catch (e) {}
+    const op = 'listen ' + String(context || '?');
+    return function(err) {
+        if (err && typeof err === 'object') {
+            try {
+                if (!err.__vpCallSite) err.__vpCallSite = callSite;
+                if (!err.__vpOp) err.__vpOp = op;
+            } catch (e) { /* frozen error object */ }
+        }
+        if (window.vpReportError) vpReportError(err, 'listener');
+    };
+}
+
 function isNativeApp() {
     return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 }
@@ -296,10 +325,24 @@ function signInWithFacebook() {
     });
 }
 
+// Every live listener reads under a rule that needs request.auth, so one
+// still attached when the token is revoked is handed "permission-denied" —
+// which, now that listeners report, would file a burst of listener reports
+// for the most routine action there is. Detach them before signing out;
+// onAuthStateChanged(null) repeats the same cleanup harmlessly.
+function unsubscribeUserListeners() {
+    ['cleanupFriendsListeners', 'cleanupRooms', 'cleanupReferrals', 'cleanupLeaderboards',
+        'cleanupChampions', 'cleanupBracelets'].forEach(function(name) {
+        if (typeof window[name] !== 'function') return;
+        try { window[name](); } catch (e) { if (window.vpReportError) vpReportError(e, 'error'); }
+    });
+}
+
 function signOutUser() {
     // Debounced score and profit deltas need their owner: once auth clears,
     // window.egUser is null and the pending delta could no longer be attributed.
     if (window.flushPendingWrites) flushPendingWrites();
+    unsubscribeUserListeners();
     if (isNativeApp()) {
         firebaseSafe(function() { return window.Capacitor.Plugins.FirebaseAuthentication.signOut(); });
     }
@@ -435,7 +478,7 @@ function _vpFlushSession() {
         lastSessionHour: _vpSessionHour
     };
     update['playHourMap.h' + _vpSessionHour] = firebase.firestore.FieldValue.increment(1);
-    db.collection('users').doc(uid).update(update).catch(function() {});
+    firebaseSafe(function() { return db.collection('users').doc(uid).update(update); });
 }
 
 function _vpResetSession() {
