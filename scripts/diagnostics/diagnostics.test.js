@@ -27,12 +27,21 @@ async function drain(times = 6) {
     for (let i = 0; i < times; i++) await settle();
 }
 
-function makeEnv({ storage = {}, fetchStatus = 200, platform = 'android', storageThrows = false } = {}) {
+const COUNTRY_LOOKUP = /ipapi\.co|api\.country\.is|ipwho\.is/;
+
+// country: what the IP lookups answer — a code, null when every provider
+// fails, or 'pending' when none of them ever answers.
+// referrer: the raw Play install referrer MainActivity parks on window.
+function makeEnv({
+    storage = {}, fetchStatus = 200, platform = 'android', storageThrows = false,
+    country = 'IL', referrer = null, search = ''
+} = {}) {
     const store = new Map(Object.entries(storage));
     const clock = { now: 1_900_000_000_000 };
     let timers = [];
     const listeners = { window: {}, document: {} };
     const requests = [];
+    const countryLookups = [];
     const status = { value: fetchStatus };
 
     const localStorage = {
@@ -54,8 +63,23 @@ function makeEnv({ storage = {}, fetchStatus = 200, platform = 'android', storag
         addEventListener: on('window'),
         Capacitor: platform === 'web' ? undefined : { isNativePlatform: () => true }
     };
+    if (referrer) window.__installReferrerRaw = referrer;
+
+    const answerCountry = () => {
+        if (country === 'pending') return new Promise(() => {});
+        if (!country) return Promise.reject(new TypeError('Failed to fetch'));
+        return Promise.resolve({
+            ok: true, status: 200,
+            text: () => Promise.resolve(country + '\n'),
+            json: () => Promise.resolve({ country, country_code: country })
+        });
+    };
 
     const fetch = (url, opts) => {
+        if (COUNTRY_LOOKUP.test(url)) {
+            countryLookups.push(url);
+            return answerCountry();
+        }
         requests.push({ url, body: JSON.parse(opts.body) });
         if (status.value === 'offline') return Promise.reject(new TypeError('Failed to fetch'));
         return Promise.resolve({ ok: status.value >= 200 && status.value < 300, status: status.value });
@@ -63,6 +87,7 @@ function makeEnv({ storage = {}, fetchStatus = 200, platform = 'android', storag
 
     const context = vm.createContext({
         window, document, localStorage, fetch,
+        location: { search },
         navigator: { userAgent: 'Mozilla/5.0 (Linux; Android 13) Chrome/120.0 Mobile', language: 'en-GB', onLine: true },
         setTimeout: (fn, ms) => { const t = { fn, due: clock.now + ms }; timers.push(t); return t; },
         clearTimeout: (t) => { timers = timers.filter((x) => x !== t); },
@@ -74,7 +99,7 @@ function makeEnv({ storage = {}, fetchStatus = 200, platform = 'android', storag
     vm.runInContext(EARLY_SRC, context);
 
     return {
-        context, store, requests, status, document, listeners,
+        context, store, requests, countryLookups, status, document, listeners,
         async advance(ms) {
             clock.now += ms;
             const due = timers.filter((t) => t.due <= clock.now);
@@ -92,8 +117,16 @@ function makeEnv({ storage = {}, fetchStatus = 200, platform = 'android', storag
                 && r.body.writes[0].update.name.includes('/' + collection + '/'));
         },
         errorWrites() { return this.docWrites('errors'); },
-        installWrites() { return this.docWrites('installs'); }
+        installWrites() { return this.docWrites('installs'); },
+        installCreates() { return this.installWrites().filter((r) => r.body.writes[0].currentDocument.exists === false); },
+        installUpdates() { return this.installWrites().filter((r) => r.body.writes[0].currentDocument.exists === true); }
     };
+}
+
+// The next launch of the same install: a fresh page with the storage the last
+// one left behind.
+function relaunch(previous, options = {}) {
+    return makeEnv(Object.assign({ storage: Object.fromEntries(previous.store) }, options));
 }
 
 function fieldsOf(request) {
@@ -242,14 +275,16 @@ test('the reporter never throws, even with storage blocked', () => {
 
 // --- installs.js -------------------------------------------------------------
 
-test('a fresh install reports its open immediately, marked as new', async () => {
+test('a fresh install reports its open once the country is known, marked as new', async () => {
     const env = makeEnv();
     await drain();
-    const [open] = env.installWrites();
+    const [open] = env.installCreates();
     const f = fieldsOf(open);
     assert.match(open.body.writes[0].update.name, new RegExp('/installs/' + env.install().id + '_open$'));
     assert.strictEqual(f.stage, 'open');
     assert.strictEqual(f.existing, false);
+    assert.strictEqual(f.opens, 1);
+    assert.strictEqual(f.country, 'IL');
     assert.strictEqual(f.android, 13);
     assert.strictEqual(f.chrome, 120);
     assert.strictEqual(env.install().openSent, true);
@@ -258,7 +293,79 @@ test('a fresh install reports its open immediately, marked as new', async () => 
 test('an install that already had a saved game reports as existing', async () => {
     const env = makeEnv({ storage: { vp_game_state: '{"balance":1000}' } });
     await drain();
-    assert.strictEqual(fieldsOf(env.installWrites()[0]).existing, true);
+    assert.strictEqual(fieldsOf(env.installCreates()[0]).existing, true);
+});
+
+// en-GB on a phone in Israel was reported as GB by the open stage and IL by
+// the boot stage two seconds later. A guess from the device language is worse
+// than no answer: it silently skews every country breakdown.
+test('the country is never guessed from the device language', async () => {
+    const env = makeEnv({ country: null });
+    await drain();
+    assert.strictEqual(fieldsOf(env.installCreates()[0]).country, '');
+});
+
+test('the open stage waits for the country lookup, but not for ever', async () => {
+    const env = makeEnv({ country: 'pending' });
+    await drain();
+    assert.strictEqual(env.installWrites().length, 0, 'held while the lookup is in flight');
+    await env.advance(5000);
+    const [open] = env.installCreates();
+    assert.strictEqual(fieldsOf(open).country, '');
+});
+
+test('the country is looked up once per launch, however many stages need it', async () => {
+    const env = makeEnv();
+    await drain();
+    env.context.vpMarkBooted();
+    await env.advance(3000);
+    assert.strictEqual(env.installCreates().length, 2);
+    assert.strictEqual(env.countryLookups.length, 1);
+});
+
+test('an invite install is attributed from the install referrer at the open stage', async () => {
+    const env = makeEnv({ referrer: 'ref=AB12CD' });
+    await drain();
+    assert.strictEqual(fieldsOf(env.installCreates()[0]).source, 'referral');
+});
+
+test('a Play organic install is attributed as organic', async () => {
+    const env = makeEnv({ referrer: 'utm_source=google-play&utm_medium=organic' });
+    await drain();
+    assert.strictEqual(fieldsOf(env.installCreates()[0]).source, 'organic');
+});
+
+test('a campaign install keeps its campaign source', async () => {
+    const env = makeEnv({ referrer: 'utm_source=tiktok&utm_medium=cpc' });
+    await drain();
+    assert.strictEqual(fieldsOf(env.installCreates()[0]).source, 'tiktok');
+});
+
+test('on the web a utm_source in the URL is the source, and no signal is organic', async () => {
+    const tagged = makeEnv({ platform: 'web', search: '?utm_source=reddit&utm_medium=social' });
+    const plain = makeEnv({ platform: 'web' });
+    await drain();
+    assert.strictEqual(fieldsOf(tagged.installCreates()[0]).source, 'reddit');
+    assert.strictEqual(fieldsOf(plain.installCreates()[0]).source, 'organic');
+});
+
+// On Android, Play answers the install referrer asynchronously on the first
+// launch only. Before it answers the source is unknown — not organic.
+test('a native install with no referrer yet is left unattributed rather than called organic', async () => {
+    const env = makeEnv();
+    await drain();
+    assert.strictEqual(fieldsOf(env.installCreates()[0]).source, '');
+});
+
+test('a source learned once is remembered for later launches', async () => {
+    const first = makeEnv({ referrer: 'utm_source=google-play&utm_medium=organic' });
+    await drain();
+    first.context.vpMarkBooted();
+    await first.advance(3000);
+    // MainActivity asks Play only once, so a later launch has no referrer.
+    const later = relaunch(first);
+    await drain();
+    assert.strictEqual(later.install().source, 'organic');
 });
 
 test('booting sends the boot stage once, with launches and boot time', async () => {
@@ -268,34 +375,88 @@ test('booting sends the boot stage once, with launches and boot time', async () 
     env.context.vpMarkBooted();
     env.context.vpMarkBooted();
     await env.advance(3000);
-    const boots = env.installWrites().filter((r) => fieldsOf(r).stage === 'boot');
+    const boots = env.installCreates().filter((r) => fieldsOf(r).stage === 'boot');
     assert.strictEqual(boots.length, 1);
     const f = fieldsOf(boots[0]);
     assert.strictEqual(f.bootMs, 1200);
     assert.strictEqual(f.opens, 1);
     assert.strictEqual(f.source, 'referral');
+    assert.strictEqual(f.country, 'IL');
     assert.strictEqual(env.install().bootSent, true);
 });
 
 test('a launch that died before boot shows up as extra opens on the eventual boot', async () => {
     const first = makeEnv();
     await drain();
-    const second = makeEnv({ storage: Object.fromEntries(first.store) });
+    const second = relaunch(first);
     await drain();
-    assert.strictEqual(second.installWrites().length, 0, 'open is sent only once per install');
+    assert.strictEqual(second.installCreates().length, 0, 'the open stage is created only once per install');
     second.context.vpMarkBooted();
     await second.advance(3000);
-    assert.strictEqual(fieldsOf(second.installWrites()[0]).opens, 2);
+    assert.strictEqual(fieldsOf(second.installCreates()[0]).opens, 2);
 });
 
-test('once booted, later launches send nothing', async () => {
+// `opens` used to be frozen at 1: the open doc was create-only, so no later
+// launch could move it. Launch frequency is exactly what retention lacks.
+test('every later launch moves the open stage\'s counter forward, stamped by the server', async () => {
     const first = makeEnv();
+    await drain();
     first.context.vpMarkBooted();
     await first.advance(3000);
-    const later = makeEnv({ storage: Object.fromEntries(first.store) });
-    later.context.vpMarkBooted();
-    await later.advance(3000);
-    assert.strictEqual(later.installWrites().length, 0);
+
+    const second = relaunch(first);
+    await drain();
+    const third = relaunch(second);
+    await drain();
+
+    const [update] = third.installUpdates();
+    const write = update.body.writes[0];
+    assert.match(write.update.name, new RegExp('/installs/' + first.install().id + '_open$'));
+    assert.deepStrictEqual(write.updateMask.fieldPaths, ['opens']);
+    assert.deepStrictEqual(write.updateTransforms, [{ fieldPath: 'lastOpenAt', setToServerValue: 'REQUEST_TIME' }]);
+    assert.strictEqual(fieldsOf(update).opens, 3);
+    assert.strictEqual(third.installCreates().length, 0);
+});
+
+// Absolute counts, not increments: a launch whose send failed is folded into
+// the next one instead of being lost, and a resend can never double-count.
+test('a launch that could not be sent is carried by the next one', async () => {
+    const first = makeEnv();
+    await drain();
+    const offline = relaunch(first, { fetchStatus: 'offline' });
+    await drain();
+    const next = relaunch(offline);
+    await drain();
+    assert.strictEqual(fieldsOf(next.installUpdates()[0]).opens, 3);
+});
+
+test('a later launch fills in the country and source the open stage could not know', async () => {
+    const first = makeEnv({ country: null });
+    await drain();
+    first.store.set('vp_referral_invited', 'AB12CD');
+    const second = relaunch(first);
+    await drain();
+    const [update] = second.installUpdates();
+    assert.deepStrictEqual(update.body.writes[0].updateMask.fieldPaths.slice().sort(), ['country', 'opens', 'source']);
+    assert.strictEqual(fieldsOf(update).country, 'IL');
+    assert.strictEqual(fieldsOf(update).source, 'referral');
+
+    // Filled once: the launch after that sends only the count.
+    const third = relaunch(second);
+    await drain();
+    assert.deepStrictEqual(third.installUpdates()[0].body.writes[0].updateMask.fieldPaths, ['opens']);
+});
+
+// Installs first tracked by the earlier build already sent a country that may
+// be a language guess. The rules only let an empty country be filled, so
+// trying to correct one would get the whole launch refused.
+test('an install tracked by an earlier build only ever sends its count', async () => {
+    const legacy = { id: 'FkVrnzB350K8hllAG8ST', existing: true, openSent: true, bootSent: true, opens: 1 };
+    const env = makeEnv({ storage: { vp_install: JSON.stringify(legacy), vp_referral_invited: 'AB12CD' } });
+    await drain();
+    const [update] = env.installUpdates();
+    assert.deepStrictEqual(update.body.writes[0].updateMask.fieldPaths, ['opens']);
+    assert.strictEqual(fieldsOf(update).opens, 2);
 });
 
 // --- firebaseSafe ------------------------------------------------------------
@@ -330,4 +491,112 @@ test('firebaseSafe reports a synchronous throw, e.g. the SDK never loaded', () =
     const result = env.context.firebaseSafe(() => { throw new TypeError("Cannot read properties of null (reading 'collection')"); });
     assert.strictEqual(result, null);
     assert.match(env.outbox()[0].fields.message, /reading 'collection'/);
+});
+
+// --- which operation failed --------------------------------------------------
+//
+// A permission-denied from Firestore names neither the collection nor the
+// operation, so the one real bug found so far took reading the deployed rules
+// line by line. Every Firestore entry point now tags its own failures.
+
+const TAGGING_SRC = FIREBASE_SRC
+    .match(/function vpCollectionPattern[\s\S]*?\nfunction tagFirestoreFailures\(\) \{[\s\S]*?\n}\n/)[0];
+
+const DENIED = () => ({ code: 'permission-denied', message: 'Missing or insufficient permissions.' });
+
+// Stand-ins for the compat SDK classes, each failing or succeeding on demand.
+function fakeFirestoreSdk() {
+    class Query {
+        constructor(delegate) { this._delegate = delegate; }
+        get() { return this.outcome === 'ok' ? Promise.resolve('snapshot') : Promise.reject(DENIED()); }
+    }
+    class CollectionReference extends Query {
+        constructor(path) { super(null); this.path = path; }
+        add() { return Promise.reject(DENIED()); }
+    }
+    class DocumentReference {
+        constructor(path, outcome) { this.path = path; this.outcome = outcome; }
+        get() { return Promise.reject(DENIED()); }
+        set() { return this.outcome === 'ok' ? Promise.resolve(undefined) : Promise.reject(DENIED()); }
+        update() { return Promise.reject(DENIED()); }
+        delete() { return Promise.reject(DENIED()); }
+    }
+    class WriteBatch { commit() { return Promise.reject(DENIED()); } }
+    class Firestore { runTransaction() { return Promise.reject(DENIED()); } }
+    return { Query, CollectionReference, DocumentReference, WriteBatch, Firestore };
+}
+
+function loadTagging(env) {
+    const sdk = fakeFirestoreSdk();
+    env.context.firebase = { firestore: sdk };
+    vm.runInContext(TAGGING_SRC, env.context);
+    env.context.tagFirestoreFailures();
+    return sdk;
+}
+
+const rejectionOf = (promise) => promise.then(() => assert.fail('expected a rejection'), (err) => err);
+
+test('a failed write names its operation and collection, not the document ids', async () => {
+    const env = makeEnv();
+    const sdk = loadTagging(env);
+    const err = await rejectionOf(new sdk.DocumentReference('daily_scores/2026-09-27_u1').set({}));
+    assert.strictEqual(err.__vpOp, 'set daily_scores/*');
+    assert.strictEqual(err.code, 'permission-denied', 'the error itself is passed through untouched');
+});
+
+test('nested paths keep every collection name', async () => {
+    const env = makeEnv();
+    const sdk = loadTagging(env);
+    const err = await rejectionOf(new sdk.DocumentReference('hourly/2026092712/entries/u1').update({}));
+    assert.strictEqual(err.__vpOp, 'update hourly/*/entries/*');
+});
+
+test('reads, adds, queries, batches and transactions are tagged too', async () => {
+    const env = makeEnv();
+    const sdk = loadTagging(env);
+    const q = new sdk.Query({ _query: { collectionGroup: 'entries' } });
+    const ops = await Promise.all([
+        rejectionOf(new sdk.DocumentReference('users/u1').get()),
+        rejectionOf(new sdk.DocumentReference('users/u1').delete()),
+        rejectionOf(new sdk.CollectionReference('rooms').add({})),
+        rejectionOf(new sdk.CollectionReference('rooms').get()),
+        rejectionOf(q.get()),
+        rejectionOf(new sdk.WriteBatch().commit()),
+        rejectionOf(new sdk.Firestore().runTransaction(() => {}))
+    ]);
+    assert.deepStrictEqual(ops.map((e) => e.__vpOp), [
+        'get users/*', 'delete users/*', 'add rooms', 'query rooms', 'query entries (group)',
+        'batch commit', 'transaction'
+    ]);
+});
+
+test('a successful operation resolves exactly as before', async () => {
+    const env = makeEnv();
+    const sdk = loadTagging(env);
+    assert.strictEqual(await new sdk.DocumentReference('users/u1', 'ok').set({}), undefined);
+});
+
+test('the report carries the operation that failed', async () => {
+    const env = makeEnv();
+    loadFirebaseSafe(env);
+    const sdk = loadTagging(env);
+    await env.context.firebaseSafe(() => new sdk.DocumentReference('daily_scores/2026-09-27_u1').set({}));
+    assert.strictEqual(env.outbox()[0].fields.op, 'set daily_scores/*');
+    await env.advance(4000);
+    assert.strictEqual(fieldsOf(env.errorWrites()[0]).op, 'set daily_scores/*');
+});
+
+test('an error that is not a Firestore operation reports an empty op', () => {
+    const env = makeEnv();
+    env.fire('window', 'error', { error: new TypeError('x is undefined') });
+    assert.strictEqual(env.outbox()[0].fields.op, '');
+});
+
+test('the same denial on two collections is two reports, not one', async () => {
+    const env = makeEnv();
+    loadFirebaseSafe(env);
+    const sdk = loadTagging(env);
+    await env.context.firebaseSafe(() => new sdk.DocumentReference('daily_scores/d_u1').set({}));
+    await env.context.firebaseSafe(() => new sdk.DocumentReference('users/u1').set({}));
+    assert.deepStrictEqual(env.outbox().map((e) => e.fields.op), ['set daily_scores/*', 'set users/*']);
 });

@@ -28,6 +28,7 @@ const SRC = [
     extract(/function median\(values\)[\s\S]*?\n    }/),
     extract(/function groupErrors\(reports\)[\s\S]*?\n    }/),
     extract(/function collectInstalls\(docs\)[\s\S]*?\n    }/),
+    extract(/function hasComeBack\(row\)[\s\S]*?\n    }/),
     extract(/function isNeverBooted\(row\)[\s\S]*?\n    }/)
 ].join('\n');
 
@@ -108,6 +109,22 @@ test('one device reporting repeatedly is not counted as many devices', () => {
     assert.strictEqual(Object.keys(groups[0].devices).length, 2);
 });
 
+// "Missing or insufficient permissions." on two collections is two bugs.
+test('the same message from two failed operations stays two rows', () => {
+    const env = load();
+    const groups = env.groupErrors([
+        report({ op: 'set daily_scores/*' }), report({ op: 'set users/*' }), report({ op: 'set users/*' })
+    ]);
+    assert.deepStrictEqual(groups.map((g) => [g.op, g.hits]), [['set users/*', 2], ['set daily_scores/*', 1]]);
+});
+
+test('reports from builds without op still group together', () => {
+    const env = load();
+    const groups = env.groupErrors([report(), report()]);
+    assert.strictEqual(groups.length, 1);
+    assert.strictEqual(groups[0].op, '');
+});
+
 test('a group is flagged for quota if any of its reports was', () => {
     const env = load();
     const groups = env.groupErrors([report(), report({ quota: true })]);
@@ -182,4 +199,14 @@ test('a missing timestamp reads as zero rather than throwing', () => {
     assert.strictEqual(env.tsMillis(null), 0);
     assert.strictEqual(env.tsMillis({}), 0);
     assert.strictEqual(env.tsMillis(ts(1234)), 1234);
+});
+
+// --- launches ----------------------------------------------------------------
+
+test('an install has come back once its open doc counts a second launch', () => {
+    const env = load();
+    assert.strictEqual(env.hasComeBack({ open: openDoc('a', { opens: 2 }), boot: null }), true);
+    assert.strictEqual(env.hasComeBack({ open: openDoc('a'), boot: bootDoc('a') }), false);
+    assert.strictEqual(env.hasComeBack({ open: null, boot: bootDoc('a', { opens: 3 }) }), false,
+        'the boot doc counts launches until boot, not launches since');
 });

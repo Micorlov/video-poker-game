@@ -31,12 +31,11 @@ function pushChampionPoints(handType, win) {
     const points = Math.max(1, Math.floor(win / 10));
     const hourKey = getHourKey();
     firebaseSafe(function() {
-        return db.collection('hourly').doc(hourKey).collection('entries').doc(user.uid).set({
+        return db.collection('hourly').doc(hourKey).collection('entries').doc(user.uid).set(withCountry({
             displayName: user.displayName || t('common.player'),
-            country: getCountry(),
             points: firebase.firestore.FieldValue.increment(points),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
+        }), { merge: true });
     });
 }
 

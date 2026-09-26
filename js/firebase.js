@@ -30,6 +30,7 @@ try {
     firebase.initializeApp(firebaseConfig);
     auth = firebase.auth();
     db = firebase.firestore();
+    try { tagFirestoreFailures(); } catch (e) { /* diagnostics only */ }
     try {
         db.enablePersistence({ synchronizeTabs: true }).catch(function() { /* multi-tab or unsupported */ });
     } catch (e) { /* older browser — online-only */ }
@@ -96,6 +97,71 @@ function generateRoomCode() {
         code += ROOM_CODE_CHARS[Math.floor(Math.random() * ROOM_CODE_CHARS.length)];
     }
     return code;
+}
+
+// --- Which operation failed ---------------------------------------------------
+//
+// A FirebaseError says "Missing or insufficient permissions." and nothing else:
+// not the collection, not whether it was a read or a write. The first real
+// denial the error reports caught took reading the deployed rules line by line
+// to pin down. So every Firestore entry point tags its own rejections with the
+// operation and collection ("set daily_scores/*"), and js/errors.js reports the
+// tag as `op`. Covers every call, inside firebaseSafe() or not.
+//
+// Document ids become '*': they are uids and dates, and would split one bug
+// into a separate report per player per day.
+function vpCollectionPattern(path) {
+    return String(path || '').split('/').map(function(segment, i) {
+        return i % 2 ? '*' : segment;
+    }).join('/');
+}
+
+// A CollectionReference knows its path; a filtered query only knows it inside
+// the SDK's delegate, which is read defensively since it is not public API.
+function vpQueryPattern(query) {
+    try {
+        if (query.path) return vpCollectionPattern(query.path);
+        var inner = query._delegate && query._delegate._query;
+        if (inner && inner.collectionGroup) return inner.collectionGroup + ' (group)';
+        if (inner && inner.path) return vpCollectionPattern(inner.path.canonicalString());
+    } catch (e) { /* SDK internals changed: fall through */ }
+    return '?';
+}
+
+// Wraps proto[method] so a rejection carries err.__vpOp. The resolved value
+// and the error itself pass through untouched.
+function vpTagFailures(proto, method, describe) {
+    var original = proto && proto[method];
+    if (typeof original !== 'function') return;
+    proto[method] = function() {
+        var target = this;
+        var result = original.apply(this, arguments);
+        if (!result || typeof result.catch !== 'function') return result;
+        return result.catch(function(err) {
+            if (err && typeof err === 'object' && !err.__vpOp) {
+                try { err.__vpOp = describe(target); } catch (e) { /* frozen error object */ }
+            }
+            throw err;
+        });
+    };
+}
+
+function tagFirestoreFailures() {
+    var sdk = firebase.firestore;
+    ['get', 'set', 'update', 'delete'].forEach(function(method) {
+        vpTagFailures(sdk.DocumentReference && sdk.DocumentReference.prototype, method, function(ref) {
+            return method + ' ' + vpCollectionPattern(ref.path);
+        });
+    });
+    vpTagFailures(sdk.CollectionReference && sdk.CollectionReference.prototype, 'add', function(ref) {
+        return 'add ' + vpCollectionPattern(ref.path);
+    });
+    // CollectionReference inherits get() from Query, so this covers both.
+    vpTagFailures(sdk.Query && sdk.Query.prototype, 'get', function(query) {
+        return 'query ' + vpQueryPattern(query);
+    });
+    vpTagFailures(sdk.WriteBatch && sdk.WriteBatch.prototype, 'commit', function() { return 'batch commit'; });
+    vpTagFailures(sdk.Firestore && sdk.Firestore.prototype, 'runTransaction', function() { return 'transaction'; });
 }
 
 // With no fallback, a failure is reported (js/errors.js) instead of being

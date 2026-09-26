@@ -6,7 +6,8 @@
 // WebView or throws during boot. Hence ES5 only (var/function, no arrows), and
 // hence Firestore's REST API instead of the SDK: the SDK may never have loaded,
 // and signed-out guests have no auth token. The `errors` and `installs` rules
-// accept unauthenticated creates in one exact shape (firestore.rules).
+// accept unauthenticated creates in one exact shape, plus one narrow update of
+// an install's launch count (firestore.rules).
 
 var VP_REST_PROJECT = 'video-poker-6d665';
 // The public web key, same as firebaseConfig in js/firebase.js. Duplicated on
@@ -39,26 +40,20 @@ function vpRestFields(obj) {
     return fields;
 }
 
-// Creates collection/docId with a server `at` timestamp. Resolves to:
+// Sends one write and says what became of it. Resolves to:
 //   'ok'       — stored
 //   'quota'    — HTTP 429, the project's daily quota is spent; retry later
 //   'retry'    — offline or a server error; retry later
-//   'rejected' — rules refused it or it already exists; retrying cannot help
+//   'rejected' — the rules refused it or its precondition failed; retrying the
+//                same write cannot help
 // Never rejects.
-function vpRestCreate(collection, docId, data) {
+function vpRestCommit(write) {
     if (typeof fetch !== 'function') return Promise.resolve('retry');
-    var body = {
-        writes: [{
-            update: { name: VP_REST_DOCS + '/' + collection + '/' + docId, fields: vpRestFields(data) },
-            updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
-            currentDocument: { exists: false }
-        }]
-    };
     try {
         return fetch(VP_REST_COMMIT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify({ writes: [write] })
         }).then(function(res) {
             // Every response carries the server's clock; a wrong device clock
             // otherwise mis-dates the player's daily score.
@@ -73,6 +68,32 @@ function vpRestCreate(collection, docId, data) {
     } catch (e) {
         return Promise.resolve('retry');
     }
+}
+
+function vpRestDocName(collection, docId) {
+    return VP_REST_DOCS + '/' + collection + '/' + docId;
+}
+
+// Creates collection/docId with a server `at` timestamp. 'rejected' also
+// covers a document that already exists.
+function vpRestCreate(collection, docId, data) {
+    return vpRestCommit({
+        update: { name: vpRestDocName(collection, docId), fields: vpRestFields(data) },
+        updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
+        currentDocument: { exists: false }
+    });
+}
+
+// Changes only the fields in `data` on an existing document and stamps
+// `timeField` with the server's clock. 'rejected' also covers a document that
+// does not exist.
+function vpRestUpdate(collection, docId, data, timeField) {
+    return vpRestCommit({
+        update: { name: vpRestDocName(collection, docId), fields: vpRestFields(data) },
+        updateMask: { fieldPaths: Object.keys(data) },
+        updateTransforms: [{ fieldPath: timeField, setToServerValue: 'REQUEST_TIME' }],
+        currentDocument: { exists: true }
+    });
 }
 
 // Per-install state: a random id (no account needed) plus whether this
@@ -214,15 +235,61 @@ function vpProbeServerClock() {
 
 vpProbeServerClock();
 
-// getCountry() lives in the main bundle (js/presence.js) and may not have run;
-// fall back to the region part of the browser language.
-function vpCountry() {
-    try {
-        if (typeof getCountry === 'function') {
-            var c = getCountry();
-            if (c) return String(c).slice(0, 8);
-        }
-    } catch (e) { /* main bundle not initialised */ }
-    var m = String(navigator.language || '').match(/-([A-Za-z]{2})$/);
-    return m ? m[1].toUpperCase() : '';
+// --- Country ------------------------------------------------------------------
+//
+// Resolved from the IP address, once per launch, for every consumer: the
+// install funnel here and presence, leaderboards and champions in the main
+// bundle (js/presence.js asks this rather than looking it up again). It lives
+// in the early script so the first install stage can carry it even when the
+// main bundle never boots.
+//
+// There is deliberately no fallback to the device language. It used to answer
+// while the lookup was in flight: an en-GB phone in Israel reported GB from the
+// open stage and IL from the boot stage two seconds later, and every country
+// breakdown quietly mixed IP locations with language settings. Unknown is ''.
+var VP_COUNTRY_LOOKUPS = [
+    { url: 'https://ipapi.co/country_code/' },
+    { url: 'https://api.country.is/', field: 'country' },
+    { url: 'https://ipwho.is/?fields=country_code', field: 'country_code' }
+];
+var vpIpCountry = '';
+var vpCountryLookup = null;
+
+function vpFetchCountryFrom(lookup) {
+    return fetch(lookup.url, { cache: 'no-cache' }).then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return lookup.field ? res.json() : res.text();
+    }).then(function(data) {
+        var code = String((lookup.field ? data && data[lookup.field] : data) || '').trim().toUpperCase();
+        if (!/^[A-Z]{2}$/.test(code)) throw new Error('no country in the response');
+        return code;
+    });
 }
+
+// Resolves to the two-letter country, or '' once every provider has failed.
+// Never rejects; one lookup per launch however many callers ask.
+function vpResolveCountry() {
+    if (vpCountryLookup) return vpCountryLookup;
+    if (typeof fetch !== 'function') {
+        vpCountryLookup = Promise.resolve('');
+        return vpCountryLookup;
+    }
+    var attempt = Promise.reject(new Error('not tried yet'));
+    VP_COUNTRY_LOOKUPS.forEach(function(lookup) {
+        attempt = attempt.then(null, function() { return vpFetchCountryFrom(lookup); });
+    });
+    vpCountryLookup = attempt.then(function(code) {
+        vpIpCountry = code;
+        return code;
+    }, function() {
+        return '';
+    });
+    return vpCountryLookup;
+}
+
+// The IP country if the lookup has answered, otherwise ''.
+function vpCountry() {
+    return vpIpCountry;
+}
+
+vpResolveCountry();

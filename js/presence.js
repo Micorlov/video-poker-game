@@ -1,5 +1,9 @@
 // Presence — heartbeat + country detection.
-// Country resolved from IP via ipapi.co; falls back to navigator.language.
+// Country comes from the IP lookup in js/telemetry.js (one per launch, shared
+// with the install funnel). Unknown is '' — never a guess from the device
+// language, which used to fill the geography figures with language settings
+// (an en-GB phone in Israel counted as GB). Writers leave the field out while
+// it is ''.
 //
 // The heartbeat used to write lastSeen every 60s regardless of whether the app
 // was even on screen: 60 writes/hour/user, the single largest source of
@@ -18,48 +22,25 @@ const PRESENCE_ONLINE_GRACE_MS = PRESENCE_INTERVAL_MS + 2 * 60 * 1000;
 
 let presenceInterval = null;
 let presenceVisibilityBound = false;
-let userCountry = '';
-let countryResolved = false;
 
-function _countryFromLanguage() {
-    try {
-        const lang = navigator.language || 'en-US';
-        const parts = lang.split('-');
-        return (parts.length > 1 ? parts[1] : lang).toUpperCase();
-    } catch (e) {
-        return 'US';
-    }
-}
-
+// The IP country once the lookup has answered, otherwise ''.
 function getCountry() {
-    return userCountry || _countryFromLanguage();
+    return typeof vpCountry === 'function' ? vpCountry() : '';
 }
 
-function _fetchCountryFrom(url, jsonField) {
-    return fetch(url, { cache: 'no-cache' })
-        .then(function(r) { return r.ok ? (jsonField ? r.json() : r.text()) : Promise.reject(); })
-        .then(function(data) {
-            var code = ((jsonField ? data[jsonField] : data) || '').trim().toUpperCase();
-            if (/^[A-Z]{2}$/.test(code)) return code;
-            return Promise.reject();
-        });
-}
-
+// Resolves once the lookup has answered or given up; getCountry() is final
+// from then on.
 function resolveCountryFromIP() {
-    if (countryResolved) return Promise.resolve(userCountry);
-    return _fetchCountryFrom('https://ipapi.co/country_code/')
-        .catch(function() { return _fetchCountryFrom('https://api.country.is/', 'country'); })
-        .catch(function() { return _fetchCountryFrom('https://ipwho.is/?fields=country_code', 'country_code'); })
-        .then(function(code) { userCountry = code; })
-        .catch(function() {})
-        .finally(function() {
-            if (!userCountry) userCountry = _countryFromLanguage();
-            countryResolved = true;
-        });
+    if (typeof vpResolveCountry !== 'function') return Promise.resolve('');
+    return vpResolveCountry();
 }
 
-// Kick off IP lookup immediately so it's ready before first game hand.
-resolveCountryFromIP();
+// `fields` plus the country when it is known. Merge writes then keep whatever
+// country the document already has instead of blanking it.
+function withCountry(fields) {
+    const country = getCountry();
+    return country ? Object.assign({}, fields, { country: country }) : fields;
+}
 
 function startPresence() {
     const user = window.egUser;
@@ -67,10 +48,9 @@ function startPresence() {
 
     resolveCountryFromIP().then(function() {
         firebaseSafe(function() {
-            return db.collection('users').doc(user.uid).set({
-                country: getCountry(),
+            return db.collection('users').doc(user.uid).set(withCountry({
                 lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            }), { merge: true });
         });
     });
 

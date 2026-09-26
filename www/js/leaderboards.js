@@ -148,13 +148,16 @@ function flushDailyScore() {
         uid: user.uid,
         displayName: user.displayName || t('common.player'),
         photoURL: user.photoURL || null,
-        country: (typeof getCountry === 'function' ? getCountry() : null),
         dayKey: pending.dayKey,
         score: firebase.firestore.FieldValue.increment(pending.score),
         hands: firebase.firestore.FieldValue.increment(pending.hands),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     if (pending.bestHand) fields.bestHand = pending.bestHand;
+    // Left out while the IP lookup has no answer, so a hand played in the first
+    // second of a launch cannot blank the country patchOwnCountry() set.
+    const country = typeof getCountry === 'function' ? getCountry() : '';
+    if (country) fields.country = country;
     firebaseSafe(function() {
         return db.collection('daily_scores').doc(pending.dayKey + '_' + user.uid).set(fields, { merge: true });
     });

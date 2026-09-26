@@ -19,7 +19,8 @@ var VP_BUILD_VERSION = "2.8";
 // WebView or throws during boot. Hence ES5 only (var/function, no arrows), and
 // hence Firestore's REST API instead of the SDK: the SDK may never have loaded,
 // and signed-out guests have no auth token. The `errors` and `installs` rules
-// accept unauthenticated creates in one exact shape (firestore.rules).
+// accept unauthenticated creates in one exact shape, plus one narrow update of
+// an install's launch count (firestore.rules).
 
 var VP_REST_PROJECT = 'video-poker-6d665';
 // The public web key, same as firebaseConfig in js/firebase.js. Duplicated on
@@ -52,26 +53,20 @@ function vpRestFields(obj) {
     return fields;
 }
 
-// Creates collection/docId with a server `at` timestamp. Resolves to:
+// Sends one write and says what became of it. Resolves to:
 //   'ok'       — stored
 //   'quota'    — HTTP 429, the project's daily quota is spent; retry later
 //   'retry'    — offline or a server error; retry later
-//   'rejected' — rules refused it or it already exists; retrying cannot help
+//   'rejected' — the rules refused it or its precondition failed; retrying the
+//                same write cannot help
 // Never rejects.
-function vpRestCreate(collection, docId, data) {
+function vpRestCommit(write) {
     if (typeof fetch !== 'function') return Promise.resolve('retry');
-    var body = {
-        writes: [{
-            update: { name: VP_REST_DOCS + '/' + collection + '/' + docId, fields: vpRestFields(data) },
-            updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
-            currentDocument: { exists: false }
-        }]
-    };
     try {
         return fetch(VP_REST_COMMIT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify({ writes: [write] })
         }).then(function(res) {
             // Every response carries the server's clock; a wrong device clock
             // otherwise mis-dates the player's daily score.
@@ -86,6 +81,32 @@ function vpRestCreate(collection, docId, data) {
     } catch (e) {
         return Promise.resolve('retry');
     }
+}
+
+function vpRestDocName(collection, docId) {
+    return VP_REST_DOCS + '/' + collection + '/' + docId;
+}
+
+// Creates collection/docId with a server `at` timestamp. 'rejected' also
+// covers a document that already exists.
+function vpRestCreate(collection, docId, data) {
+    return vpRestCommit({
+        update: { name: vpRestDocName(collection, docId), fields: vpRestFields(data) },
+        updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
+        currentDocument: { exists: false }
+    });
+}
+
+// Changes only the fields in `data` on an existing document and stamps
+// `timeField` with the server's clock. 'rejected' also covers a document that
+// does not exist.
+function vpRestUpdate(collection, docId, data, timeField) {
+    return vpRestCommit({
+        update: { name: vpRestDocName(collection, docId), fields: vpRestFields(data) },
+        updateMask: { fieldPaths: Object.keys(data) },
+        updateTransforms: [{ fieldPath: timeField, setToServerValue: 'REQUEST_TIME' }],
+        currentDocument: { exists: true }
+    });
 }
 
 // Per-install state: a random id (no account needed) plus whether this
@@ -227,18 +248,64 @@ function vpProbeServerClock() {
 
 vpProbeServerClock();
 
-// getCountry() lives in the main bundle (js/presence.js) and may not have run;
-// fall back to the region part of the browser language.
-function vpCountry() {
-    try {
-        if (typeof getCountry === 'function') {
-            var c = getCountry();
-            if (c) return String(c).slice(0, 8);
-        }
-    } catch (e) { /* main bundle not initialised */ }
-    var m = String(navigator.language || '').match(/-([A-Za-z]{2})$/);
-    return m ? m[1].toUpperCase() : '';
+// --- Country ------------------------------------------------------------------
+//
+// Resolved from the IP address, once per launch, for every consumer: the
+// install funnel here and presence, leaderboards and champions in the main
+// bundle (js/presence.js asks this rather than looking it up again). It lives
+// in the early script so the first install stage can carry it even when the
+// main bundle never boots.
+//
+// There is deliberately no fallback to the device language. It used to answer
+// while the lookup was in flight: an en-GB phone in Israel reported GB from the
+// open stage and IL from the boot stage two seconds later, and every country
+// breakdown quietly mixed IP locations with language settings. Unknown is ''.
+var VP_COUNTRY_LOOKUPS = [
+    { url: 'https://ipapi.co/country_code/' },
+    { url: 'https://api.country.is/', field: 'country' },
+    { url: 'https://ipwho.is/?fields=country_code', field: 'country_code' }
+];
+var vpIpCountry = '';
+var vpCountryLookup = null;
+
+function vpFetchCountryFrom(lookup) {
+    return fetch(lookup.url, { cache: 'no-cache' }).then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return lookup.field ? res.json() : res.text();
+    }).then(function(data) {
+        var code = String((lookup.field ? data && data[lookup.field] : data) || '').trim().toUpperCase();
+        if (!/^[A-Z]{2}$/.test(code)) throw new Error('no country in the response');
+        return code;
+    });
 }
+
+// Resolves to the two-letter country, or '' once every provider has failed.
+// Never rejects; one lookup per launch however many callers ask.
+function vpResolveCountry() {
+    if (vpCountryLookup) return vpCountryLookup;
+    if (typeof fetch !== 'function') {
+        vpCountryLookup = Promise.resolve('');
+        return vpCountryLookup;
+    }
+    var attempt = Promise.reject(new Error('not tried yet'));
+    VP_COUNTRY_LOOKUPS.forEach(function(lookup) {
+        attempt = attempt.then(null, function() { return vpFetchCountryFrom(lookup); });
+    });
+    vpCountryLookup = attempt.then(function(code) {
+        vpIpCountry = code;
+        return code;
+    }, function() {
+        return '';
+    });
+    return vpCountryLookup;
+}
+
+// The IP country if the lookup has answered, otherwise ''.
+function vpCountry() {
+    return vpIpCountry;
+}
+
+vpResolveCountry();
 
 
 /* --- js/errors.js --- */
@@ -317,7 +384,8 @@ function vpSendToCrashlytics(fields, stack) {
     var crashlytics = vpCrashlytics();
     if (!crashlytics) return;
     try {
-        var label = fields.kind + ': ' + (fields.code ? '[' + fields.code + '] ' : '') + fields.message;
+        var label = fields.kind + ': ' + (fields.code ? '[' + fields.code + '] ' : '') +
+            (fields.op ? fields.op + ': ' : '') + fields.message;
         var frames = vpStackFrames(stack);
         var options = { message: label.slice(0, 300) };
         if (frames.length) options.stacktrace = frames;
@@ -326,7 +394,7 @@ function vpSendToCrashlytics(fields, stack) {
         // Screen and version make a Crashlytics issue actionable; they are the
         // two things a raw JS stack still lacks.
         if (crashlytics.setCustomKey) {
-            [['screen', fields.screen], ['app_version', fields.version], ['quota', String(fields.quota)]]
+            [['screen', fields.screen], ['app_version', fields.version], ['quota', String(fields.quota)], ['op', fields.op]]
                 .forEach(function(pair) {
                     var done = crashlytics.setCustomKey({ key: pair[0], value: pair[1], type: 'string' });
                     if (done && done.catch) done.catch(function() {});
@@ -374,6 +442,10 @@ function vpBuildErrorFields(err, kind) {
         kind: String(kind).slice(0, 20),
         message: String(message).slice(0, 300),
         code: (err && typeof err.code === 'string') ? err.code.slice(0, 60) : '',
+        // Which Firestore operation failed, on which collection — tagged by
+        // js/firebase.js, since "Missing or insufficient permissions." names
+        // neither. '' for anything that was not a Firestore operation.
+        op: (err && typeof err.__vpOp === 'string') ? err.__vpOp.slice(0, 80) : '',
         stack: vpTrimStack(stack),
         quota: vpIsQuotaError(err),
         count: 1,
@@ -388,7 +460,7 @@ function vpBuildErrorFields(err, kind) {
 }
 
 function vpErrSignature(fields) {
-    return fields.kind + '|' + fields.code + '|' + fields.message.slice(0, 120);
+    return fields.kind + '|' + fields.code + '|' + fields.op + '|' + fields.message.slice(0, 120);
 }
 
 function vpOutboxRead() {
@@ -541,37 +613,94 @@ vpInitErrorReporting();
 
 
 /* --- js/installs.js --- */
-// First-party install funnel: did this install open, and did it boot?
+// First-party install funnel: did this install open, did it boot, and does it
+// keep coming back?
 //
 // Play Console showed 96 device acquisitions in 28 days against 33 first
 // opens, and nothing we controlled could say which side of "open" the
 // missing two thirds fell on. Two docs per install answer it:
-//   installs/{id}_open — sent the moment this early script runs, before the
-//                        main bundle can fail to parse or throw during init
+//   installs/{id}_open — sent on the first launch from this early script,
+//                        before the main bundle can fail to parse or throw
+//                        during init
 //   installs/{id}_boot — sent once js/tabs.js finishes its DOMContentLoaded
 //                        init and calls vpMarkBooted()
 // An open with no boot is an install that launched and died during init.
-// `opens` on the boot doc counts the launches it took to get there, so a
-// first launch that died and a second that worked still shows up.
-// `existing` marks upgrades from builds that predate this file — they report
-// once too, and the admin panel keeps them out of the new-install figures.
+//
+// `opens` on the open doc is the install's launch count: every later launch
+// moves it forward and stamps `lastOpenAt`, which is what retention needs. It
+// is an absolute count, not an increment, so a launch that could not be sent
+// is folded into the next one and a resend can never double-count. `opens` on
+// the boot doc is the launches it took to boot, so a first launch that died
+// and a second that worked still shows up.
+// `existing` marks upgrades from builds that predate this file, and the admin
+// panel keeps them out of the new-install figures.
 
-var VP_BOOT_SEND_DELAY_MS = 3000; // lets country and install referrer resolve
+var VP_BOOT_SEND_DELAY_MS = 3000; // lets the install referrer arrive
+var VP_COUNTRY_WAIT_MS = 5000; // a stage never waits longer for the IP lookup
 var VP_MAX_BOOT_MS = 24 * 60 * 60 * 1000; // firestore.rules caps bootMs here
 var vpScriptStartedAt = Date.now();
 var vpBootedAt = 0;
 
+function vpQueryParam(query, key) {
+    var m = String(query || '').replace(/^\?/, '').match(new RegExp('(?:^|&)' + key + '=([^&]*)'));
+    if (!m) return '';
+    try { return decodeURIComponent(m[1].replace(/\+/g, ' ')).slice(0, 40); } catch (e) { return ''; }
+}
+
+function vpStoredUtmSource() {
+    try {
+        var utm = JSON.parse(localStorage.getItem('vp_first_utm') || 'null');
+        return utm && utm.utm_source ? String(utm.utm_source).slice(0, 40) : '';
+    } catch (e) {
+        return '';
+    }
+}
+
+function vpUrlUtmSource() {
+    try { return vpQueryParam(location.search, 'utm_source'); } catch (e) { return ''; }
+}
+
+// An invite link sets one of these: js/deeplink.js parks a pending invite from
+// the install referrer, js/referral.js marks one it has applied.
+function vpWasInvited() {
+    try {
+        return !!(localStorage.getItem('vp_referral_invited') || localStorage.getItem('vp_pending_invite'));
+    } catch (e) {
+        return false;
+    }
+}
+
+// Play's install referrer, as MainActivity parks it on window, e.g.
+// "ref=AB12CD" for an invite or "utm_source=google-play&utm_medium=organic".
+function vpReferrerSource(raw) {
+    if (vpQueryParam(raw, 'ref') || vpQueryParam(raw, 'join')) return 'referral';
+    var source = vpQueryParam(raw, 'utm_source');
+    if (!source || vpQueryParam(raw, 'utm_medium') === 'organic') return 'organic';
+    return source;
+}
+
+// Reads only what this early script can see, so the open stage is attributed
+// even when the main bundle never boots. '' means not known yet.
+function vpDetectSource() {
+    var utm = vpStoredUtmSource() || vpUrlUtmSource();
+    if (utm) return utm;
+    if (vpWasInvited()) return 'referral';
+    var raw = '';
+    try { raw = window.__installReferrerRaw || ''; } catch (e) { /* no bridge */ }
+    if (raw) return vpReferrerSource(raw);
+    // The web has no install referrer, so no signal there means organic. On
+    // native, Play answers asynchronously and only on the first launch: no
+    // answer yet is unknown, not organic.
+    return vpPlatform() === 'web' ? 'organic' : '';
+}
+
+// The first answer is kept, because MainActivity asks Play only once.
 function vpAcquisitionSource() {
-    try {
-        if (typeof getStoredUtmContext === 'function') {
-            var utm = getStoredUtmContext();
-            if (utm && utm.utm_source) return String(utm.utm_source).slice(0, 40);
-        }
-    } catch (e) { /* main bundle not initialised */ }
-    try {
-        if (localStorage.getItem('vp_referral_invited')) return 'referral';
-    } catch (e) { /* storage blocked */ }
-    return 'organic';
+    var known = vpInstallState().source;
+    if (known) return known;
+    var source = vpDetectSource();
+    if (source) vpUpdateInstall({ source: source });
+    return source;
 }
 
 function vpInstallRecord(stage) {
@@ -589,22 +718,66 @@ function vpInstallRecord(stage) {
         chrome: device.chrome,
         lang: device.lang,
         country: vpCountry(),
-        source: isBoot ? vpAcquisitionSource() : '',
+        source: vpAcquisitionSource(),
         bootMs: isBoot && vpBootedAt ? Math.max(0, Math.min(VP_MAX_BOOT_MS, vpBootedAt - vpScriptStartedAt)) : 0
     };
+}
+
+// Runs `send` once the IP country is known, or after VP_COUNTRY_WAIT_MS with
+// the country left empty — a stage is never held back for good by a lookup.
+function vpWhenCountryKnown(send) {
+    var sent = false;
+    var go = function() {
+        if (sent) return;
+        sent = true;
+        send();
+    };
+    vpResolveCountry().then(go);
+    setTimeout(go, VP_COUNTRY_WAIT_MS);
 }
 
 // Sends one stage at most once per install. A 'rejected' result means the doc
 // already exists (an earlier send landed but its response was lost) or the
 // rules refused the shape — either way resending cannot help.
+// The open stage remembers what country and source it sent, so a later launch
+// can fill in whichever of the two it did not know.
 function vpSendInstallStage(stage) {
     var flag = stage === 'open' ? 'openSent' : 'bootSent';
     if (vpInstallState()[flag]) return Promise.resolve('done');
-    return vpRestCreate('installs', vpInstallId() + '_' + stage, vpInstallRecord(stage)).then(function(result) {
+    var record = vpInstallRecord(stage);
+    return vpRestCreate('installs', vpInstallId() + '_' + stage, record).then(function(result) {
         if (result === 'ok' || result === 'rejected') {
             var patch = {};
             patch[flag] = true;
+            if (stage === 'open') {
+                patch.sentCountry = record.country;
+                patch.sentSource = record.source;
+            }
             vpUpdateInstall(patch);
+        }
+        return result;
+    });
+}
+
+// A later launch: the open doc's count moves forward, and a country or source
+// that was unknown at the open stage is filled in once. firestore.rules allows
+// exactly this change and nothing else. Installs first tracked by an earlier
+// build never recorded what they sent (sentCountry is undefined), and theirs
+// may be a language guess the rules will not let us overwrite — so they only
+// ever send the count.
+function vpSendLaunch() {
+    var install = vpInstallState();
+    var patch = { opens: install.opens };
+    var country = vpCountry();
+    var source = vpAcquisitionSource();
+    if (install.sentCountry === '' && country) patch.country = country;
+    if (install.sentSource === '' && source) patch.source = source;
+    return vpRestUpdate('installs', install.id + '_open', patch, 'lastOpenAt').then(function(result) {
+        if (result === 'ok') {
+            vpUpdateInstall({
+                sentCountry: patch.country || install.sentCountry,
+                sentSource: patch.source || install.sentSource
+            });
         }
         return result;
     });
@@ -613,15 +786,18 @@ function vpSendInstallStage(stage) {
 function vpMarkBooted() {
     if (vpBootedAt) return;
     vpBootedAt = Date.now();
-    setTimeout(function() { vpSendInstallStage('boot'); }, VP_BOOT_SEND_DELAY_MS);
+    setTimeout(function() {
+        vpWhenCountryKnown(function() { vpSendInstallStage('boot'); });
+    }, VP_BOOT_SEND_DELAY_MS);
 }
 
 (function vpInitInstallTracking() {
     try {
-        var install = vpInstallState();
-        if (install.bootSent) return;
-        vpUpdateInstall({ opens: (install.opens || 0) + 1 });
-        vpSendInstallStage('open');
+        var install = vpUpdateInstall({ opens: (vpInstallState().opens || 0) + 1 });
+        vpWhenCountryKnown(function() {
+            if (install.openSent) vpSendLaunch();
+            else vpSendInstallStage('open');
+        });
     } catch (e) { /* diagnostics must never break boot */ }
 })();
 
@@ -14013,6 +14189,7 @@ try {
     firebase.initializeApp(firebaseConfig);
     auth = firebase.auth();
     db = firebase.firestore();
+    try { tagFirestoreFailures(); } catch (e) { /* diagnostics only */ }
     try {
         db.enablePersistence({ synchronizeTabs: true }).catch(function() { /* multi-tab or unsupported */ });
     } catch (e) { /* older browser — online-only */ }
@@ -14079,6 +14256,71 @@ function generateRoomCode() {
         code += ROOM_CODE_CHARS[Math.floor(Math.random() * ROOM_CODE_CHARS.length)];
     }
     return code;
+}
+
+// --- Which operation failed ---------------------------------------------------
+//
+// A FirebaseError says "Missing or insufficient permissions." and nothing else:
+// not the collection, not whether it was a read or a write. The first real
+// denial the error reports caught took reading the deployed rules line by line
+// to pin down. So every Firestore entry point tags its own rejections with the
+// operation and collection ("set daily_scores/*"), and js/errors.js reports the
+// tag as `op`. Covers every call, inside firebaseSafe() or not.
+//
+// Document ids become '*': they are uids and dates, and would split one bug
+// into a separate report per player per day.
+function vpCollectionPattern(path) {
+    return String(path || '').split('/').map(function(segment, i) {
+        return i % 2 ? '*' : segment;
+    }).join('/');
+}
+
+// A CollectionReference knows its path; a filtered query only knows it inside
+// the SDK's delegate, which is read defensively since it is not public API.
+function vpQueryPattern(query) {
+    try {
+        if (query.path) return vpCollectionPattern(query.path);
+        var inner = query._delegate && query._delegate._query;
+        if (inner && inner.collectionGroup) return inner.collectionGroup + ' (group)';
+        if (inner && inner.path) return vpCollectionPattern(inner.path.canonicalString());
+    } catch (e) { /* SDK internals changed: fall through */ }
+    return '?';
+}
+
+// Wraps proto[method] so a rejection carries err.__vpOp. The resolved value
+// and the error itself pass through untouched.
+function vpTagFailures(proto, method, describe) {
+    var original = proto && proto[method];
+    if (typeof original !== 'function') return;
+    proto[method] = function() {
+        var target = this;
+        var result = original.apply(this, arguments);
+        if (!result || typeof result.catch !== 'function') return result;
+        return result.catch(function(err) {
+            if (err && typeof err === 'object' && !err.__vpOp) {
+                try { err.__vpOp = describe(target); } catch (e) { /* frozen error object */ }
+            }
+            throw err;
+        });
+    };
+}
+
+function tagFirestoreFailures() {
+    var sdk = firebase.firestore;
+    ['get', 'set', 'update', 'delete'].forEach(function(method) {
+        vpTagFailures(sdk.DocumentReference && sdk.DocumentReference.prototype, method, function(ref) {
+            return method + ' ' + vpCollectionPattern(ref.path);
+        });
+    });
+    vpTagFailures(sdk.CollectionReference && sdk.CollectionReference.prototype, 'add', function(ref) {
+        return 'add ' + vpCollectionPattern(ref.path);
+    });
+    // CollectionReference inherits get() from Query, so this covers both.
+    vpTagFailures(sdk.Query && sdk.Query.prototype, 'get', function(query) {
+        return 'query ' + vpQueryPattern(query);
+    });
+    vpTagFailures(sdk.WriteBatch && sdk.WriteBatch.prototype, 'commit', function() { return 'batch commit'; });
+    vpTagFailures(sdk.Firestore && sdk.Firestore.prototype, 'runTransaction', function() { return 'transaction'; });
 }
 
 // With no fallback, a failure is reported (js/errors.js) instead of being
@@ -14848,7 +15090,11 @@ initPushListeners();
 
 /* --- js/presence.js --- */
 // Presence — heartbeat + country detection.
-// Country resolved from IP via ipapi.co; falls back to navigator.language.
+// Country comes from the IP lookup in js/telemetry.js (one per launch, shared
+// with the install funnel). Unknown is '' — never a guess from the device
+// language, which used to fill the geography figures with language settings
+// (an en-GB phone in Israel counted as GB). Writers leave the field out while
+// it is ''.
 //
 // The heartbeat used to write lastSeen every 60s regardless of whether the app
 // was even on screen: 60 writes/hour/user, the single largest source of
@@ -14867,48 +15113,25 @@ const PRESENCE_ONLINE_GRACE_MS = PRESENCE_INTERVAL_MS + 2 * 60 * 1000;
 
 let presenceInterval = null;
 let presenceVisibilityBound = false;
-let userCountry = '';
-let countryResolved = false;
 
-function _countryFromLanguage() {
-    try {
-        const lang = navigator.language || 'en-US';
-        const parts = lang.split('-');
-        return (parts.length > 1 ? parts[1] : lang).toUpperCase();
-    } catch (e) {
-        return 'US';
-    }
-}
-
+// The IP country once the lookup has answered, otherwise ''.
 function getCountry() {
-    return userCountry || _countryFromLanguage();
+    return typeof vpCountry === 'function' ? vpCountry() : '';
 }
 
-function _fetchCountryFrom(url, jsonField) {
-    return fetch(url, { cache: 'no-cache' })
-        .then(function(r) { return r.ok ? (jsonField ? r.json() : r.text()) : Promise.reject(); })
-        .then(function(data) {
-            var code = ((jsonField ? data[jsonField] : data) || '').trim().toUpperCase();
-            if (/^[A-Z]{2}$/.test(code)) return code;
-            return Promise.reject();
-        });
-}
-
+// Resolves once the lookup has answered or given up; getCountry() is final
+// from then on.
 function resolveCountryFromIP() {
-    if (countryResolved) return Promise.resolve(userCountry);
-    return _fetchCountryFrom('https://ipapi.co/country_code/')
-        .catch(function() { return _fetchCountryFrom('https://api.country.is/', 'country'); })
-        .catch(function() { return _fetchCountryFrom('https://ipwho.is/?fields=country_code', 'country_code'); })
-        .then(function(code) { userCountry = code; })
-        .catch(function() {})
-        .finally(function() {
-            if (!userCountry) userCountry = _countryFromLanguage();
-            countryResolved = true;
-        });
+    if (typeof vpResolveCountry !== 'function') return Promise.resolve('');
+    return vpResolveCountry();
 }
 
-// Kick off IP lookup immediately so it's ready before first game hand.
-resolveCountryFromIP();
+// `fields` plus the country when it is known. Merge writes then keep whatever
+// country the document already has instead of blanking it.
+function withCountry(fields) {
+    const country = getCountry();
+    return country ? Object.assign({}, fields, { country: country }) : fields;
+}
 
 function startPresence() {
     const user = window.egUser;
@@ -14916,10 +15139,9 @@ function startPresence() {
 
     resolveCountryFromIP().then(function() {
         firebaseSafe(function() {
-            return db.collection('users').doc(user.uid).set({
-                country: getCountry(),
+            return db.collection('users').doc(user.uid).set(withCountry({
                 lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            }), { merge: true });
         });
     });
 
@@ -17070,12 +17292,11 @@ function pushChampionPoints(handType, win) {
     const points = Math.max(1, Math.floor(win / 10));
     const hourKey = getHourKey();
     firebaseSafe(function() {
-        return db.collection('hourly').doc(hourKey).collection('entries').doc(user.uid).set({
+        return db.collection('hourly').doc(hourKey).collection('entries').doc(user.uid).set(withCountry({
             displayName: user.displayName || t('common.player'),
-            country: getCountry(),
             points: firebase.firestore.FieldValue.increment(points),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
+        }), { merge: true });
     });
 }
 
@@ -17224,11 +17445,10 @@ function pushBraceletProgress(handType, win) {
             return Promise.all([tx.get(hourRef), tx.get(dayRef)]).then(function(snaps) {
                 const hourMax = (snaps[0].exists && snaps[0].data().maxWin) || 0;
                 const dayMax = (snaps[1].exists && snaps[1].data().maxWin) || 0;
-                const meta = {
+                const meta = withCountry({
                     displayName: user.displayName || t('common.player'),
-                    country: getCountry(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
+                });
                 if (win > hourMax) {
                     tx.set(hourRef, Object.assign({}, meta, { maxWin: win, maxWinHandType: handType }), { merge: true });
                 }
@@ -17422,13 +17642,16 @@ function flushDailyScore() {
         uid: user.uid,
         displayName: user.displayName || t('common.player'),
         photoURL: user.photoURL || null,
-        country: (typeof getCountry === 'function' ? getCountry() : null),
         dayKey: pending.dayKey,
         score: firebase.firestore.FieldValue.increment(pending.score),
         hands: firebase.firestore.FieldValue.increment(pending.hands),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     if (pending.bestHand) fields.bestHand = pending.bestHand;
+    // Left out while the IP lookup has no answer, so a hand played in the first
+    // second of a launch cannot blank the country patchOwnCountry() set.
+    const country = typeof getCountry === 'function' ? getCountry() : '';
+    if (country) fields.country = country;
     firebaseSafe(function() {
         return db.collection('daily_scores').doc(pending.dayKey + '_' + user.uid).set(fields, { merge: true });
     });

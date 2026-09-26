@@ -516,8 +516,8 @@
                 <div class="panel" style="margin-bottom:16px">
                     <div class="panel-header"><h2>📲 New installs by version and platform (28d)</h2></div>
                     <div class="table-scroll"><table>
-                        <thead><tr><th>Version</th><th>Platform</th><th>Opened</th><th>Booted</th><th>Never booted</th><th>Needed &gt;1 launch</th><th>Median boot</th></tr></thead>
-                        <tbody id="health-installs-body"><tr><td colspan="7" class="empty-state">Loading...</td></tr></tbody>
+                        <thead><tr><th>Version</th><th>Platform</th><th>Opened</th><th>Booted</th><th>Never booted</th><th>Needed &gt;1 launch</th><th>Came back</th><th>Median boot</th></tr></thead>
+                        <tbody id="health-installs-body"><tr><td colspan="8" class="empty-state">Loading...</td></tr></tbody>
                     </table></div>
                 </div>
                 <div class="panel">
@@ -1224,9 +1224,11 @@
     function groupErrors(reports) {
         var groups = {};
         reports.forEach(function(r) {
-            var key = r.message + '|' + r.version;
+            // The same "Missing or insufficient permissions." on two
+            // collections is two bugs, so the failed operation splits rows.
+            var key = (r.op || '') + '|' + r.message + '|' + r.version;
             var g = groups[key] || (groups[key] = {
-                message: r.message, version: r.version, code: r.code, kinds: {}, screens: {},
+                message: r.message, version: r.version, code: r.code, op: r.op || '', kinds: {}, screens: {},
                 devices: {}, hits: 0, lastAt: 0, quota: false, stack: r.stack
             });
             g.hits += r.count || 1;
@@ -1264,7 +1266,8 @@
             return;
         }
         body.innerHTML = groups.slice(0, 100).map(function(g) {
-            var label = (g.quota ? '⛔ ' : '') + (g.code ? '[' + g.code + '] ' : '') + g.message;
+            var label = (g.quota ? '⛔ ' : '') + (g.code ? '[' + g.code + '] ' : '') +
+                (g.op ? g.op + ' — ' : '') + g.message;
             return '<tr title="' + escapeHtml(g.stack) + '">' +
                 '<td style="max-width:420px; white-space:normal; word-break:break-word">' + escapeHtml(label) + '</td>' +
                 '<td>' + escapeHtml(g.version) + '</td>' +
@@ -1286,6 +1289,12 @@
         });
         return Object.keys(byId).map(function(k) { return byId[k]; })
             .filter(function(row) { return !(row.open || row.boot).existing; });
+    }
+
+    // The open doc's `opens` is the install's launch count; every launch after
+    // the first moves it forward.
+    function hasComeBack(row) {
+        return !!row.open && row.open.opens > 1;
     }
 
     function isNeverBooted(row) {
@@ -1312,8 +1321,9 @@
         rows.forEach(function(r) {
             var d = r.open || r.boot;
             var key = d.version + '|' + d.platform;
-            var g = groups[key] || (groups[key] = { version: d.version, platform: d.platform, opened: 0, booted: 0, dead: 0, retried: 0, bootMs: [] });
+            var g = groups[key] || (groups[key] = { version: d.version, platform: d.platform, opened: 0, booted: 0, dead: 0, retried: 0, returned: 0, bootMs: [] });
             g.opened += 1;
+            if (hasComeBack(r)) g.returned += 1;
             if (r.boot) {
                 g.booted += 1;
                 if (r.boot.opens > 1) g.retried += 1;
@@ -1326,8 +1336,9 @@
         document.getElementById('health-installs-body').innerHTML = list.length ? list.map(function(g) {
             return '<tr><td>' + escapeHtml(g.version) + '</td><td>' + escapeHtml(g.platform) + '</td>' +
                 '<td>' + g.opened + '</td><td>' + g.booted + '</td><td>' + g.dead + '</td><td>' + g.retried + '</td>' +
+                '<td>' + g.returned + '</td>' +
                 '<td>' + (g.bootMs.length ? (median(g.bootMs) / 1000).toFixed(1) + 's' : '—') + '</td></tr>';
-        }).join('') : '<tr><td colspan="7" class="empty-state">No installs reported yet — needs a 2.9+ build</td></tr>';
+        }).join('') : '<tr><td colspan="8" class="empty-state">No installs reported yet — needs a 2.9+ build</td></tr>';
 
         document.getElementById('health-dead-body').innerHTML = dead.length ? dead.slice(0, 100).map(function(r) {
             var o = r.open;

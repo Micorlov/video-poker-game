@@ -31,11 +31,10 @@ function pushBraceletProgress(handType, win) {
             return Promise.all([tx.get(hourRef), tx.get(dayRef)]).then(function(snaps) {
                 const hourMax = (snaps[0].exists && snaps[0].data().maxWin) || 0;
                 const dayMax = (snaps[1].exists && snaps[1].data().maxWin) || 0;
-                const meta = {
+                const meta = withCountry({
                     displayName: user.displayName || t('common.player'),
-                    country: getCountry(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
+                });
                 if (win > hourMax) {
                     tx.set(hourRef, Object.assign({}, meta, { maxWin: win, maxWinHandType: handType }), { merge: true });
                 }

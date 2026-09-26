@@ -73,7 +73,8 @@ function vpSendToCrashlytics(fields, stack) {
     var crashlytics = vpCrashlytics();
     if (!crashlytics) return;
     try {
-        var label = fields.kind + ': ' + (fields.code ? '[' + fields.code + '] ' : '') + fields.message;
+        var label = fields.kind + ': ' + (fields.code ? '[' + fields.code + '] ' : '') +
+            (fields.op ? fields.op + ': ' : '') + fields.message;
         var frames = vpStackFrames(stack);
         var options = { message: label.slice(0, 300) };
         if (frames.length) options.stacktrace = frames;
@@ -82,7 +83,7 @@ function vpSendToCrashlytics(fields, stack) {
         // Screen and version make a Crashlytics issue actionable; they are the
         // two things a raw JS stack still lacks.
         if (crashlytics.setCustomKey) {
-            [['screen', fields.screen], ['app_version', fields.version], ['quota', String(fields.quota)]]
+            [['screen', fields.screen], ['app_version', fields.version], ['quota', String(fields.quota)], ['op', fields.op]]
                 .forEach(function(pair) {
                     var done = crashlytics.setCustomKey({ key: pair[0], value: pair[1], type: 'string' });
                     if (done && done.catch) done.catch(function() {});
@@ -130,6 +131,10 @@ function vpBuildErrorFields(err, kind) {
         kind: String(kind).slice(0, 20),
         message: String(message).slice(0, 300),
         code: (err && typeof err.code === 'string') ? err.code.slice(0, 60) : '',
+        // Which Firestore operation failed, on which collection — tagged by
+        // js/firebase.js, since "Missing or insufficient permissions." names
+        // neither. '' for anything that was not a Firestore operation.
+        op: (err && typeof err.__vpOp === 'string') ? err.__vpOp.slice(0, 80) : '',
         stack: vpTrimStack(stack),
         quota: vpIsQuotaError(err),
         count: 1,
@@ -144,7 +149,7 @@ function vpBuildErrorFields(err, kind) {
 }
 
 function vpErrSignature(fields) {
-    return fields.kind + '|' + fields.code + '|' + fields.message.slice(0, 120);
+    return fields.kind + '|' + fields.code + '|' + fields.op + '|' + fields.message.slice(0, 120);
 }
 
 function vpOutboxRead() {

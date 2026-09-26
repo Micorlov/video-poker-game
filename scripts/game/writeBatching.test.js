@@ -196,6 +196,23 @@ test('the write carries the identity fields the leaderboard and rules need', asy
     assert.deepStrictEqual(write.fields.updatedAt, { __serverTimestamp: true });
 });
 
+// Before the IP lookup answers the country is unknown. Writing '' (or the old
+// device-language guess) would overwrite the real one on this merge write.
+test('a score written before the country is known leaves the country alone', async () => {
+    // Arrange
+    const env = makeEnv();
+    env.context.getCountry = () => '';
+
+    // Act
+    env.context.pushDailyScore('Nothing', 0, 5);
+    await env.advance(10000);
+
+    // Assert
+    const [write] = env.dailyWrites();
+    assert.ok(!('country' in write.fields));
+    assert.strictEqual(write.fields.uid, 'u1');
+});
+
 // The UI reads ownDailyScore, and pushNetProfit reads it later in the same hand,
 // so it cannot wait for the debounce.
 test('the local score mirror updates on every hand, not on the flush', () => {

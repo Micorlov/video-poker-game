@@ -340,9 +340,10 @@ service cloud.firestore {
     // (js/installs.js). Both are sent over the REST API from an early script
     // that runs before sign-in and even when the main bundle never boots, so
     // create is open without auth — but only in one exact shape, with size
-    // caps and a server timestamp. Create-only: nothing edits a report, and a
-    // repeated install stage is rejected as already present. The client caps
-    // itself at 15 error reports per session; rules cannot rate-limit.
+    // caps and a server timestamp. Nothing edits a report, and a repeated
+    // install stage is rejected as already present; the one update allowed is
+    // an install's launch count (below). The client caps itself at 15 error
+    // reports per session; rules cannot rate-limit.
     match /errors/{reportId} {
       allow create: if reportId.matches('^[A-Za-z0-9]{20}$')
                     && validErrorReport(request.resource.data);
@@ -352,7 +353,7 @@ service cloud.firestore {
       function validErrorReport(d) {
         return d.keys().hasOnly(['kind', 'message', 'code', 'stack', 'quota', 'count', 'screen',
                                  'version', 'platform', 'country', 'uid', 'installId', 'online',
-                                 'ageSec', 'at'])
+                                 'ageSec', 'op', 'at'])
             && d.kind is string && d.kind.size() <= 20
             && d.message is string && d.message.size() <= 300
             && d.code is string && d.code.size() <= 60
@@ -367,15 +368,36 @@ service cloud.firestore {
             && d.installId is string && d.installId.size() <= 20
             && d.online is bool
             && d.ageSec is int && d.ageSec >= 0 && d.ageSec <= 2592000
+            // Which Firestore operation failed ("set daily_scores/*").
+            // Optional: builds before it was added do not send it.
+            && (!('op' in d) || (d.op is string && d.op.size() <= 80))
             && d.at == request.time;
       }
     }
 
     // Doc id is `{installId}_{stage}`, stage 'open' or 'boot'.
+    //
+    // Each later launch updates the open doc: `opens` only ever grows (an
+    // absolute count, so a stale resend is refused rather than double-counted),
+    // `lastOpenAt` is the server's clock, and a country or source that was
+    // unknown ('') at the open stage may be filled in once — never changed.
+    // Nothing else on the doc can move.
     match /installs/{docId} {
       allow create: if validInstallStage(request.resource.data);
+      allow update: if docId.matches('^[A-Za-z0-9]{20}_open$')
+                    && validInstallLaunch(resource.data, request.resource.data);
       allow read, delete: if request.auth != null
                           && request.auth.token.email == 'micorlov@gmail.com';
+
+      function validInstallLaunch(before, after) {
+        return after.diff(before).affectedKeys().hasOnly(['opens', 'lastOpenAt', 'country', 'source'])
+            && after.opens is int && after.opens > before.opens && after.opens <= 100000
+            && after.lastOpenAt == request.time
+            && (after.country == before.country
+                || (before.country == '' && after.country is string && after.country.size() <= 8))
+            && (after.source == before.source
+                || (before.source == '' && after.source is string && after.source.size() <= 40));
+      }
 
       function validInstallStage(d) {
         return d.keys().hasOnly(['stage', 'installId', 'existing', 'opens', 'version', 'platform',
