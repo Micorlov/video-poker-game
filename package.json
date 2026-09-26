@@ -24,7 +24,9 @@
   "dependencies": {
     "@capacitor-community/apple-sign-in": "^7.1.0",
     "@capacitor-community/in-app-review": "^8.0.0",
+    "@capacitor-firebase/analytics": "^8.5.2",
     "@capacitor-firebase/authentication": "^8.3.0",
+    "@capacitor-firebase/crashlytics": "^8.5.2",
     "@capacitor/android": "^8.4.1",
     "@capacitor/app": "^8.1.0",
     "@capacitor/browser": "^8.0.3",

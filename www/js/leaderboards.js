@@ -237,8 +237,14 @@ function patchOwnCountry() {
         if (!country || country.length !== 2) return;
         var dayKey = getDayKey();
         firebaseSafe(function() {
+            // uid is required by the daily_scores rule, which checks
+            // request.resource.data.uid == request.auth.uid. On a merge that
+            // creates the document — every player who opens the app before
+            // playing their first hand of the day — a country-only payload has
+            // no uid and the write is denied, so the flag was silently never
+            // set for them. Found by the error reporting in js/errors.js.
             return db.collection('daily_scores').doc(dayKey + '_' + user.uid)
-                .set({ country: country }, { merge: true });
+                .set({ uid: user.uid, country: country }, { merge: true });
         });
         var hourKey = typeof getHourKey === 'function' ? getHourKey() : null;
         if (hourKey) {

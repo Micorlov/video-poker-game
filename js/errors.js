@@ -37,6 +37,60 @@ var vpErrQuotaQueued = false;
 var vpErrStallReported = false;
 var vpErrLastHiddenAt = 0;
 
+// Crashlytics, on native only. It exists to catch native crashes, which this
+// app does not have — it breaks in JavaScript and the WebView survives — so
+// every report is also recorded there as a non-fatal exception. Without this
+// forwarding, Crashlytics would report zero for the same reason Android vitals
+// does. The Firestore `errors` collection stays the primary record: it covers
+// web, works for signed-out guests, and is queryable from the admin panel.
+function vpCrashlytics() {
+    try {
+        var cap = window.Capacitor;
+        if (!cap || !cap.isNativePlatform || !cap.isNativePlatform()) return null;
+        return (cap.Plugins && cap.Plugins.FirebaseCrashlytics) || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+// Crashlytics groups non-fatals by their stack, so the frames are parsed out of
+// the string rather than passed as one blob. Anything unparseable still travels
+// as the message.
+function vpStackFrames(stack) {
+    if (!stack) return [];
+    return String(stack).split('\n').slice(0, 8).map(function(line) {
+        var m = line.match(/at\s+(?:(.+?)\s+\()?(.+?):(\d+):(\d+)\)?\s*$/);
+        if (!m) return null;
+        return {
+            methodName: (m[1] || '<anonymous>').slice(0, 120),
+            fileName: m[2].replace(/https?:\/\/[^\s)]*\//g, '').slice(0, 160),
+            lineNumber: parseInt(m[3], 10) || 0
+        };
+    }).filter(function(frame) { return !!frame; });
+}
+
+function vpSendToCrashlytics(fields, stack) {
+    var crashlytics = vpCrashlytics();
+    if (!crashlytics) return;
+    try {
+        var label = fields.kind + ': ' + (fields.code ? '[' + fields.code + '] ' : '') + fields.message;
+        var frames = vpStackFrames(stack);
+        var options = { message: label.slice(0, 300) };
+        if (frames.length) options.stacktrace = frames;
+        var sent = crashlytics.recordException(options);
+        if (sent && sent.catch) sent.catch(function() {});
+        // Screen and version make a Crashlytics issue actionable; they are the
+        // two things a raw JS stack still lacks.
+        if (crashlytics.setCustomKey) {
+            [['screen', fields.screen], ['app_version', fields.version], ['quota', String(fields.quota)]]
+                .forEach(function(pair) {
+                    var done = crashlytics.setCustomKey({ key: pair[0], value: pair[1], type: 'string' });
+                    if (done && done.catch) done.catch(function() {});
+                });
+        }
+    } catch (e) { /* diagnostics must never throw back into the caller */ }
+}
+
 function vpIsQuotaError(err) {
     if (!err) return false;
     if (err.code === 'resource-exhausted') return true;
@@ -69,11 +123,14 @@ function vpErrUid() {
 function vpBuildErrorFields(err, kind) {
     var device = vpDeviceInfo();
     var message = (err && (err.message || err.reason)) || err || 'unknown';
+    // A FirebaseError carries no frames of its own, so firebaseSafe() attaches
+    // the stack of whichever caller made the request.
+    var stack = (err && err.__vpCallSite) || (err && err.stack);
     return {
         kind: String(kind).slice(0, 20),
         message: String(message).slice(0, 300),
         code: (err && typeof err.code === 'string') ? err.code.slice(0, 60) : '',
-        stack: vpTrimStack(err && err.stack),
+        stack: vpTrimStack(stack),
         quota: vpIsQuotaError(err),
         count: 1,
         screen: vpCurrentScreen(),
@@ -131,6 +188,9 @@ function vpReportError(err, kind) {
         vpErrSeen[sig] = 1;
         vpErrSessionCount += 1;
         vpOutboxWrite(vpOutboxRead().concat([{ id: vpRandomId(), sig: sig, queuedAt: Date.now(), fields: fields }]));
+        // Crashlytics gets the untrimmed stack, since it symbolicates its own
+        // frames; the Firestore copy keeps the trimmed one for the admin table.
+        vpSendToCrashlytics(fields, (err && err.stack) || fields.stack);
         vpScheduleErrorFlush(VP_ERR_FLUSH_DELAY_MS);
     } catch (e) { /* the reporter must never become the error */ }
 }

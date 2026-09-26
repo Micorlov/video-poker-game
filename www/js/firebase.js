@@ -101,12 +101,25 @@ function generateRoomCode() {
 // With no fallback, a failure is reported (js/errors.js) instead of being
 // dropped: almost no caller passes one, so this used to make every Firestore
 // failure — rules drift, quota, a missing SDK — invisible by design.
-function handleFirebaseFailure(err, fallback) {
-    if (typeof fallback === 'function') fallback(err);
-    else if (window.vpReportError) vpReportError(err, 'firebase');
+//
+// A FirebaseError's own stack is just "FirebaseError: Missing or insufficient
+// permissions." with no frames, which names neither the collection nor the
+// caller — useless for finding which of ~36 call sites failed. The call site is
+// captured here instead and travels with the report.
+function handleFirebaseFailure(err, fallback, callSite) {
+    if (typeof fallback === 'function') { fallback(err); return; }
+    if (!window.vpReportError) return;
+    if (callSite && err && !err.__vpCallSite) {
+        try { err.__vpCallSite = callSite; } catch (e) { /* frozen error object */ }
+    }
+    vpReportError(err, 'firebase');
 }
 
 function firebaseSafe(operation, fallback) {
+    // One Error per Firestore operation, which is negligible next to the
+    // network round trip it is about to make.
+    let callSite = '';
+    try { callSite = new Error('vp-call-site').stack || ''; } catch (e) {}
     try {
         const result = operation();
         if (result && typeof result.catch === 'function') {
@@ -114,13 +127,13 @@ function firebaseSafe(operation, fallback) {
             // pending — so pending time is watched separately.
             if (window.vpWatchPending) vpWatchPending(result);
             return result.catch(function(err) {
-                handleFirebaseFailure(err, fallback);
+                handleFirebaseFailure(err, fallback, callSite);
                 return null;
             });
         }
         return result;
     } catch (err) {
-        handleFirebaseFailure(err, fallback);
+        handleFirebaseFailure(err, fallback, callSite);
         return null;
     }
 }

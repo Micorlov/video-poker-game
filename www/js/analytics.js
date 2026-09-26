@@ -50,8 +50,32 @@ function vpMarketingContext() {
     }
 }
 
+// On Android/iOS the native Firebase Analytics SDK (@capacitor-firebase/
+// analytics) is used in preference to the web SDK. It reports against the app's
+// own GA4 data stream, which is what gives install attribution and Play Console
+// integration, and it needs no measurementId — the web SDK path would otherwise
+// file app events as web traffic.
+function vpNativeAnalytics() {
+    try {
+        var cap = window.Capacitor;
+        if (!cap || !cap.isNativePlatform || !cap.isNativePlatform()) return null;
+        return (cap.Plugins && cap.Plugins.FirebaseAnalytics) || null;
+    } catch (e) {
+        return null;
+    }
+}
+
 function logVpEvent(name, params) {
     try {
+        var merged = Object.assign({}, vpMarketingContext(), params || {});
+        var native = vpNativeAnalytics();
+        if (native) {
+            // Fire and forget: a rejected promise here must not become an
+            // unhandled rejection and so an error report of its own.
+            var sent = native.logEvent({ name: name, params: merged });
+            if (sent && sent.catch) sent.catch(function() {});
+            return;
+        }
         if (vpAnalyticsFailed) return;
         if (!vpAnalytics) {
             if (typeof firebase === 'undefined' || !firebase.analytics) {
@@ -60,15 +84,17 @@ function logVpEvent(name, params) {
             }
             vpAnalytics = firebase.analytics();
         }
-        vpAnalytics.logEvent(name, Object.assign({}, vpMarketingContext(), params || {}));
+        vpAnalytics.logEvent(name, merged);
     } catch (e) {
         vpAnalyticsFailed = true;
     }
 }
 
-// True once the SDK has been asked for and refused, i.e. GA is not enabled on
-// the project. Surfaced so the gap is visible rather than looking like silence.
+// Whether events are actually going anywhere: the native SDK if this is a
+// native build, otherwise the web SDK, which needs a measurementId. Surfaced so
+// the gap is visible rather than looking like silence.
 function vpAnalyticsEnabled() {
+    if (vpNativeAnalytics()) return true;
     return !!vpAnalytics && !vpAnalyticsFailed;
 }
 

@@ -281,6 +281,60 @@ var vpErrQuotaQueued = false;
 var vpErrStallReported = false;
 var vpErrLastHiddenAt = 0;
 
+// Crashlytics, on native only. It exists to catch native crashes, which this
+// app does not have — it breaks in JavaScript and the WebView survives — so
+// every report is also recorded there as a non-fatal exception. Without this
+// forwarding, Crashlytics would report zero for the same reason Android vitals
+// does. The Firestore `errors` collection stays the primary record: it covers
+// web, works for signed-out guests, and is queryable from the admin panel.
+function vpCrashlytics() {
+    try {
+        var cap = window.Capacitor;
+        if (!cap || !cap.isNativePlatform || !cap.isNativePlatform()) return null;
+        return (cap.Plugins && cap.Plugins.FirebaseCrashlytics) || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+// Crashlytics groups non-fatals by their stack, so the frames are parsed out of
+// the string rather than passed as one blob. Anything unparseable still travels
+// as the message.
+function vpStackFrames(stack) {
+    if (!stack) return [];
+    return String(stack).split('\n').slice(0, 8).map(function(line) {
+        var m = line.match(/at\s+(?:(.+?)\s+\()?(.+?):(\d+):(\d+)\)?\s*$/);
+        if (!m) return null;
+        return {
+            methodName: (m[1] || '<anonymous>').slice(0, 120),
+            fileName: m[2].replace(/https?:\/\/[^\s)]*\//g, '').slice(0, 160),
+            lineNumber: parseInt(m[3], 10) || 0
+        };
+    }).filter(function(frame) { return !!frame; });
+}
+
+function vpSendToCrashlytics(fields, stack) {
+    var crashlytics = vpCrashlytics();
+    if (!crashlytics) return;
+    try {
+        var label = fields.kind + ': ' + (fields.code ? '[' + fields.code + '] ' : '') + fields.message;
+        var frames = vpStackFrames(stack);
+        var options = { message: label.slice(0, 300) };
+        if (frames.length) options.stacktrace = frames;
+        var sent = crashlytics.recordException(options);
+        if (sent && sent.catch) sent.catch(function() {});
+        // Screen and version make a Crashlytics issue actionable; they are the
+        // two things a raw JS stack still lacks.
+        if (crashlytics.setCustomKey) {
+            [['screen', fields.screen], ['app_version', fields.version], ['quota', String(fields.quota)]]
+                .forEach(function(pair) {
+                    var done = crashlytics.setCustomKey({ key: pair[0], value: pair[1], type: 'string' });
+                    if (done && done.catch) done.catch(function() {});
+                });
+        }
+    } catch (e) { /* diagnostics must never throw back into the caller */ }
+}
+
 function vpIsQuotaError(err) {
     if (!err) return false;
     if (err.code === 'resource-exhausted') return true;
@@ -313,11 +367,14 @@ function vpErrUid() {
 function vpBuildErrorFields(err, kind) {
     var device = vpDeviceInfo();
     var message = (err && (err.message || err.reason)) || err || 'unknown';
+    // A FirebaseError carries no frames of its own, so firebaseSafe() attaches
+    // the stack of whichever caller made the request.
+    var stack = (err && err.__vpCallSite) || (err && err.stack);
     return {
         kind: String(kind).slice(0, 20),
         message: String(message).slice(0, 300),
         code: (err && typeof err.code === 'string') ? err.code.slice(0, 60) : '',
-        stack: vpTrimStack(err && err.stack),
+        stack: vpTrimStack(stack),
         quota: vpIsQuotaError(err),
         count: 1,
         screen: vpCurrentScreen(),
@@ -375,6 +432,9 @@ function vpReportError(err, kind) {
         vpErrSeen[sig] = 1;
         vpErrSessionCount += 1;
         vpOutboxWrite(vpOutboxRead().concat([{ id: vpRandomId(), sig: sig, queuedAt: Date.now(), fields: fields }]));
+        // Crashlytics gets the untrimmed stack, since it symbolicates its own
+        // frames; the Firestore copy keeps the trimmed one for the admin table.
+        vpSendToCrashlytics(fields, (err && err.stack) || fields.stack);
         vpScheduleErrorFlush(VP_ERR_FLUSH_DELAY_MS);
     } catch (e) { /* the reporter must never become the error */ }
 }
@@ -13124,8 +13184,32 @@ function vpMarketingContext() {
     }
 }
 
+// On Android/iOS the native Firebase Analytics SDK (@capacitor-firebase/
+// analytics) is used in preference to the web SDK. It reports against the app's
+// own GA4 data stream, which is what gives install attribution and Play Console
+// integration, and it needs no measurementId — the web SDK path would otherwise
+// file app events as web traffic.
+function vpNativeAnalytics() {
+    try {
+        var cap = window.Capacitor;
+        if (!cap || !cap.isNativePlatform || !cap.isNativePlatform()) return null;
+        return (cap.Plugins && cap.Plugins.FirebaseAnalytics) || null;
+    } catch (e) {
+        return null;
+    }
+}
+
 function logVpEvent(name, params) {
     try {
+        var merged = Object.assign({}, vpMarketingContext(), params || {});
+        var native = vpNativeAnalytics();
+        if (native) {
+            // Fire and forget: a rejected promise here must not become an
+            // unhandled rejection and so an error report of its own.
+            var sent = native.logEvent({ name: name, params: merged });
+            if (sent && sent.catch) sent.catch(function() {});
+            return;
+        }
         if (vpAnalyticsFailed) return;
         if (!vpAnalytics) {
             if (typeof firebase === 'undefined' || !firebase.analytics) {
@@ -13134,15 +13218,17 @@ function logVpEvent(name, params) {
             }
             vpAnalytics = firebase.analytics();
         }
-        vpAnalytics.logEvent(name, Object.assign({}, vpMarketingContext(), params || {}));
+        vpAnalytics.logEvent(name, merged);
     } catch (e) {
         vpAnalyticsFailed = true;
     }
 }
 
-// True once the SDK has been asked for and refused, i.e. GA is not enabled on
-// the project. Surfaced so the gap is visible rather than looking like silence.
+// Whether events are actually going anywhere: the native SDK if this is a
+// native build, otherwise the web SDK, which needs a measurementId. Surfaced so
+// the gap is visible rather than looking like silence.
 function vpAnalyticsEnabled() {
+    if (vpNativeAnalytics()) return true;
     return !!vpAnalytics && !vpAnalyticsFailed;
 }
 
@@ -13998,12 +14084,25 @@ function generateRoomCode() {
 // With no fallback, a failure is reported (js/errors.js) instead of being
 // dropped: almost no caller passes one, so this used to make every Firestore
 // failure — rules drift, quota, a missing SDK — invisible by design.
-function handleFirebaseFailure(err, fallback) {
-    if (typeof fallback === 'function') fallback(err);
-    else if (window.vpReportError) vpReportError(err, 'firebase');
+//
+// A FirebaseError's own stack is just "FirebaseError: Missing or insufficient
+// permissions." with no frames, which names neither the collection nor the
+// caller — useless for finding which of ~36 call sites failed. The call site is
+// captured here instead and travels with the report.
+function handleFirebaseFailure(err, fallback, callSite) {
+    if (typeof fallback === 'function') { fallback(err); return; }
+    if (!window.vpReportError) return;
+    if (callSite && err && !err.__vpCallSite) {
+        try { err.__vpCallSite = callSite; } catch (e) { /* frozen error object */ }
+    }
+    vpReportError(err, 'firebase');
 }
 
 function firebaseSafe(operation, fallback) {
+    // One Error per Firestore operation, which is negligible next to the
+    // network round trip it is about to make.
+    let callSite = '';
+    try { callSite = new Error('vp-call-site').stack || ''; } catch (e) {}
     try {
         const result = operation();
         if (result && typeof result.catch === 'function') {
@@ -14011,13 +14110,13 @@ function firebaseSafe(operation, fallback) {
             // pending — so pending time is watched separately.
             if (window.vpWatchPending) vpWatchPending(result);
             return result.catch(function(err) {
-                handleFirebaseFailure(err, fallback);
+                handleFirebaseFailure(err, fallback, callSite);
                 return null;
             });
         }
         return result;
     } catch (err) {
-        handleFirebaseFailure(err, fallback);
+        handleFirebaseFailure(err, fallback, callSite);
         return null;
     }
 }
@@ -17412,8 +17511,14 @@ function patchOwnCountry() {
         if (!country || country.length !== 2) return;
         var dayKey = getDayKey();
         firebaseSafe(function() {
+            // uid is required by the daily_scores rule, which checks
+            // request.resource.data.uid == request.auth.uid. On a merge that
+            // creates the document — every player who opens the app before
+            // playing their first hand of the day — a country-only payload has
+            // no uid and the write is denied, so the flag was silently never
+            // set for them. Found by the error reporting in js/errors.js.
             return db.collection('daily_scores').doc(dayKey + '_' + user.uid)
-                .set({ country: country }, { merge: true });
+                .set({ uid: user.uid, country: country }, { merge: true });
         });
         var hourKey = typeof getHourKey === 'function' ? getHourKey() : null;
         if (hourKey) {
