@@ -84,18 +84,29 @@ function generateRoomCode() {
     return code;
 }
 
+// With no fallback, a failure is reported (js/errors.js) instead of being
+// dropped: almost no caller passes one, so this used to make every Firestore
+// failure — rules drift, quota, a missing SDK — invisible by design.
+function handleFirebaseFailure(err, fallback) {
+    if (typeof fallback === 'function') fallback(err);
+    else if (window.vpReportError) vpReportError(err, 'firebase');
+}
+
 function firebaseSafe(operation, fallback) {
     try {
         const result = operation();
         if (result && typeof result.catch === 'function') {
+            // Quota exhaustion never rejects an SDK write — it just stays
+            // pending — so pending time is watched separately.
+            if (window.vpWatchPending) vpWatchPending(result);
             return result.catch(function(err) {
-                if (typeof fallback === 'function') fallback(err);
+                handleFirebaseFailure(err, fallback);
                 return null;
             });
         }
         return result;
     } catch (err) {
-        if (typeof fallback === 'function') fallback(err);
+        handleFirebaseFailure(err, fallback);
         return null;
     }
 }

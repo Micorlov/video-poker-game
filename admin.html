@@ -230,6 +230,7 @@
                 <button class="tab" onclick="switchTab('push')">Push</button>
                 <button class="tab" onclick="switchTab('analytics')">Analytics</button>
                 <button class="tab" onclick="switchTab('acquisition')">Acquisition</button>
+                <button class="tab" onclick="switchTab('health')">Health</button>
             </div>
 
             <!-- OVERVIEW -->
@@ -488,6 +489,43 @@
                 <div class="panel">
                     <div class="panel-header"><h2>📲 Push Attribution</h2></div>
                     <div id="chart-push-attr" style="padding:16px 20px"></div>
+                </div>
+            </div>
+
+            <!-- HEALTH: client error reports (js/errors.js) and the first-party
+                 install funnel (js/installs.js). Both collections are written
+                 by unauthenticated clients, so every value is escaped. -->
+            <div class="tab-content" id="tab-health">
+                <div id="health-quota-banner" style="display:none; background:#7f1d1d; color:#fecaca; border-radius:10px; padding:14px 18px; margin-bottom:16px; font-size:14px;"></div>
+                <div class="stats-grid" style="margin-bottom:24px">
+                    <div class="stat-card"><div class="label">New installs opened (28d)</div><div class="value" id="h-opened">—</div><div class="sub" id="h-opened-sub">—</div></div>
+                    <div class="stat-card"><div class="label">Booted</div><div class="value" id="h-booted">—</div><div class="sub" id="h-booted-sub">—</div></div>
+                    <div class="stat-card"><div class="label">Opened, never booted</div><div class="value" id="h-dead">—</div><div class="sub" id="h-dead-sub">—</div></div>
+                    <div class="stat-card"><div class="label">Error reports (7d)</div><div class="value" id="h-errors">—</div><div class="sub" id="h-errors-sub">—</div></div>
+                </div>
+                <div class="panel" style="margin-bottom:16px">
+                    <div class="panel-header">
+                        <h2>🐞 Errors by message × version (7d)</h2>
+                        <button onclick="loadHealth()">↻ Refresh</button>
+                    </div>
+                    <div class="table-scroll"><table>
+                        <thead><tr><th>Message</th><th>Version</th><th>Kind</th><th>Hits</th><th>Devices</th><th>Screens</th><th>Last</th></tr></thead>
+                        <tbody id="health-errors-body"><tr><td colspan="7" class="empty-state">Loading...</td></tr></tbody>
+                    </table></div>
+                </div>
+                <div class="panel" style="margin-bottom:16px">
+                    <div class="panel-header"><h2>📲 New installs by version and platform (28d)</h2></div>
+                    <div class="table-scroll"><table>
+                        <thead><tr><th>Version</th><th>Platform</th><th>Opened</th><th>Booted</th><th>Never booted</th><th>Needed &gt;1 launch</th><th>Median boot</th></tr></thead>
+                        <tbody id="health-installs-body"><tr><td colspan="7" class="empty-state">Loading...</td></tr></tbody>
+                    </table></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h2>💀 Opened but never booted (28d)</h2><span class="badge" id="health-dead-count">0</span></div>
+                    <div class="table-scroll"><table>
+                        <thead><tr><th>Opened</th><th>Version</th><th>Platform</th><th>Android</th><th>WebView</th><th>Lang</th><th>Country</th></tr></thead>
+                        <tbody id="health-dead-body"><tr><td colspan="7" class="empty-state">Loading...</td></tr></tbody>
+                    </table></div>
                 </div>
             </div>
             </div>
@@ -1145,6 +1183,160 @@
         });
     }
 
+    // --- Health tab: errors + install funnel -------------------------------
+    var HEALTH_ERROR_DAYS = 7;
+    var HEALTH_INSTALL_DAYS = 28;
+    // An open younger than this may still be booting or sending its boot doc.
+    var HEALTH_BOOT_GRACE_MS = 10 * 60 * 1000;
+
+    function escapeHtml(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function(c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    function tsMillis(ts) {
+        return ts && typeof ts.toMillis === 'function' ? ts.toMillis() : 0;
+    }
+
+    function median(values) {
+        if (!values.length) return 0;
+        var sorted = values.slice().sort(function(a, b) { return a - b; });
+        return sorted[Math.floor(sorted.length / 2)];
+    }
+
+    function loadHealth() {
+        var errorsSince = firebase.firestore.Timestamp.fromMillis(Date.now() - HEALTH_ERROR_DAYS * 86400000);
+        var installsSince = firebase.firestore.Timestamp.fromMillis(Date.now() - HEALTH_INSTALL_DAYS * 86400000);
+        db.collection('errors').where('at', '>=', errorsSince).orderBy('at', 'desc').limit(1000).get()
+            .then(function(snap) { renderHealthErrors(snap.docs.map(function(d) { return d.data(); })); })
+            .catch(function(e) { showHealthLoadError('health-errors-body', e); });
+        db.collection('installs').where('at', '>=', installsSince).orderBy('at', 'desc').limit(2000).get()
+            .then(function(snap) { renderHealthInstalls(snap.docs.map(function(d) { return d.data(); })); })
+            .catch(function(e) { showHealthLoadError('health-installs-body', e); });
+    }
+
+    function showHealthLoadError(bodyId, e) {
+        document.getElementById(bodyId).innerHTML =
+            '<tr><td colspan="7" class="empty-state">Could not load: ' + escapeHtml(e.code || e.message) + '</td></tr>';
+    }
+
+    function groupErrors(reports) {
+        var groups = {};
+        reports.forEach(function(r) {
+            var key = r.message + '|' + r.version;
+            var g = groups[key] || (groups[key] = {
+                message: r.message, version: r.version, code: r.code, kinds: {}, screens: {},
+                devices: {}, hits: 0, lastAt: 0, quota: false, stack: r.stack
+            });
+            g.hits += r.count || 1;
+            g.kinds[r.kind] = true;
+            g.screens[r.screen] = true;
+            g.devices[r.installId] = true;
+            g.quota = g.quota || !!r.quota;
+            g.lastAt = Math.max(g.lastAt, tsMillis(r.at));
+        });
+        return Object.keys(groups).map(function(k) { return groups[k]; })
+            .sort(function(a, b) { return b.hits - a.hits; });
+    }
+
+    function renderHealthErrors(reports) {
+        var groups = groupErrors(reports);
+        var devices = {};
+        reports.forEach(function(r) { devices[r.installId] = true; });
+        document.getElementById('h-errors').textContent = reports.length;
+        document.getElementById('h-errors-sub').textContent =
+            groups.length + ' distinct · ' + Object.keys(devices).length + ' devices';
+
+        var quota = reports.filter(function(r) { return r.quota; });
+        var banner = document.getElementById('health-quota-banner');
+        banner.style.display = quota.length ? '' : 'none';
+        if (quota.length) {
+            var latest = Math.max.apply(null, quota.map(function(r) { return tsMillis(r.at); }));
+            banner.innerHTML = '<strong>Firestore quota exhaustion seen.</strong> ' + quota.length +
+                ' report(s) in ' + HEALTH_ERROR_DAYS + ' days, latest ' + escapeHtml(relativeTime(new Date(latest).toISOString())) +
+                '. Reports held for quota arrive after the midnight-UTC reset — their age is in the tooltip.';
+        }
+
+        var body = document.getElementById('health-errors-body');
+        if (!groups.length) {
+            body.innerHTML = '<tr><td colspan="7" class="empty-state">No error reports in ' + HEALTH_ERROR_DAYS + ' days</td></tr>';
+            return;
+        }
+        body.innerHTML = groups.slice(0, 100).map(function(g) {
+            var label = (g.quota ? '⛔ ' : '') + (g.code ? '[' + g.code + '] ' : '') + g.message;
+            return '<tr title="' + escapeHtml(g.stack) + '">' +
+                '<td style="max-width:420px; white-space:normal; word-break:break-word">' + escapeHtml(label) + '</td>' +
+                '<td>' + escapeHtml(g.version) + '</td>' +
+                '<td>' + escapeHtml(Object.keys(g.kinds).join(', ')) + '</td>' +
+                '<td>' + g.hits + '</td>' +
+                '<td>' + Object.keys(g.devices).length + '</td>' +
+                '<td>' + escapeHtml(Object.keys(g.screens).join(', ')) + '</td>' +
+                '<td>' + escapeHtml(relativeTime(new Date(g.lastAt).toISOString())) + '</td></tr>';
+        }).join('');
+    }
+
+    // One row per install: its open and boot docs, new installs only.
+    // `existing` installs are upgrades from builds before 2.9 reporting once.
+    function collectInstalls(docs) {
+        var byId = {};
+        docs.forEach(function(d) {
+            var row = byId[d.installId] || (byId[d.installId] = { id: d.installId, open: null, boot: null });
+            row[d.stage] = d;
+        });
+        return Object.keys(byId).map(function(k) { return byId[k]; })
+            .filter(function(row) { return !(row.open || row.boot).existing; });
+    }
+
+    function isNeverBooted(row) {
+        return row.open && !row.boot && Date.now() - tsMillis(row.open.at) > HEALTH_BOOT_GRACE_MS;
+    }
+
+    function renderHealthInstalls(docs) {
+        var rows = collectInstalls(docs);
+        var booted = rows.filter(function(r) { return r.boot; });
+        var dead = rows.filter(isNeverBooted);
+        var upgrades = docs.filter(function(d) { return d.existing && d.stage === 'open'; }).length;
+        var pct = function(n) { return rows.length ? Math.round(n / rows.length * 100) + '%' : '—'; };
+
+        document.getElementById('h-opened').textContent = rows.length;
+        document.getElementById('h-opened-sub').textContent = upgrades + ' upgrades from older builds excluded';
+        document.getElementById('h-booted').textContent = booted.length;
+        document.getElementById('h-booted-sub').textContent = pct(booted.length) + ' of opened';
+        document.getElementById('h-dead').textContent = dead.length;
+        document.getElementById('h-dead-sub').textContent = pct(dead.length) + ' of opened';
+        document.getElementById('health-dead-count').textContent = dead.length;
+
+        var groups = {};
+        rows.forEach(function(r) {
+            var d = r.open || r.boot;
+            var key = d.version + '|' + d.platform;
+            var g = groups[key] || (groups[key] = { version: d.version, platform: d.platform, opened: 0, booted: 0, dead: 0, retried: 0, bootMs: [] });
+            g.opened += 1;
+            if (r.boot) {
+                g.booted += 1;
+                if (r.boot.opens > 1) g.retried += 1;
+                g.bootMs.push(r.boot.bootMs);
+            }
+            if (isNeverBooted(r)) g.dead += 1;
+        });
+        var list = Object.keys(groups).map(function(k) { return groups[k]; })
+            .sort(function(a, b) { return b.opened - a.opened; });
+        document.getElementById('health-installs-body').innerHTML = list.length ? list.map(function(g) {
+            return '<tr><td>' + escapeHtml(g.version) + '</td><td>' + escapeHtml(g.platform) + '</td>' +
+                '<td>' + g.opened + '</td><td>' + g.booted + '</td><td>' + g.dead + '</td><td>' + g.retried + '</td>' +
+                '<td>' + (g.bootMs.length ? (median(g.bootMs) / 1000).toFixed(1) + 's' : '—') + '</td></tr>';
+        }).join('') : '<tr><td colspan="7" class="empty-state">No installs reported yet — needs a 2.9+ build</td></tr>';
+
+        document.getElementById('health-dead-body').innerHTML = dead.length ? dead.slice(0, 100).map(function(r) {
+            var o = r.open;
+            return '<tr><td>' + escapeHtml(relativeTime(new Date(tsMillis(o.at)).toISOString())) + '</td>' +
+                '<td>' + escapeHtml(o.version) + '</td><td>' + escapeHtml(o.platform) + '</td>' +
+                '<td>' + (o.android || '—') + '</td><td>' + (o.chrome ? 'Chrome ' + o.chrome : '—') + '</td>' +
+                '<td>' + escapeHtml(o.lang) + '</td><td>' + escapeHtml(o.country) + '</td></tr>';
+        }).join('') : '<tr><td colspan="7" class="empty-state">None — every install that opened also booted</td></tr>';
+    }
+
     function switchTab(name) {
         document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
         document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
@@ -1156,6 +1348,7 @@
         if (name === 'features') loadFeatures();
         if (name === 'analytics') loadAnalytics();
         if (name === 'acquisition') loadAcquisition();
+        if (name === 'health') loadHealth();
     }
 
     function switchTabById(tabName, filter) {

@@ -43,6 +43,18 @@ if (fs.existsSync(gradlePath)) {
     }
 }
 
+// Diagnostics go in their own <script> ahead of the main bundle, so a bundle
+// that fails to parse or throws during boot is still reported. ES5 only.
+const earlyJsFiles = [
+    'js/telemetry.js',
+    'js/errors.js',
+    'js/installs.js'
+];
+let earlyJs = `\nvar VP_BUILD_VERSION = ${JSON.stringify(bundleVersion || 'unknown')};\n`;
+earlyJsFiles.forEach(file => {
+    earlyJs += `\n/* --- ${file} --- */\n` + fs.readFileSync(path.join(projectDir, file), 'utf8') + '\n';
+});
+
 // Combine JS files in dependency order
 const jsFiles = [
     // i18n first: every module below calls t() at render time.
@@ -102,9 +114,20 @@ jsFiles.forEach(file => {
     combinedJs += `\n/* --- ${file} --- */\n` + fs.readFileSync(path.join(projectDir, file), 'utf8') + '\n';
 });
 
-// Replace placeholders
-indexHtml = indexHtml.replace('<!-- BUILD_CSS_PLACEHOLDER -->', combinedCss);
-indexHtml = indexHtml.replace('<!-- BUILD_JS_PLACEHOLDER -->', combinedJs);
+// Replace placeholders. A function replacement, because a string one would
+// expand `$&`-style patterns that occur in the bundled code.
+const placeholders = {
+    '<!-- BUILD_CSS_PLACEHOLDER -->': combinedCss,
+    '<!-- BUILD_EARLY_JS_PLACEHOLDER -->': earlyJs,
+    '<!-- BUILD_JS_PLACEHOLDER -->': combinedJs
+};
+Object.keys(placeholders).forEach(marker => {
+    if (!indexHtml.includes(marker)) {
+        console.error(`❌ index.html is missing ${marker}`);
+        process.exit(1);
+    }
+    indexHtml = indexHtml.replace(marker, () => placeholders[marker]);
+});
 
 fs.writeFileSync(outputPath, indexHtml, 'utf8');
 console.log('🎉 Successfully built video_poker.html!');

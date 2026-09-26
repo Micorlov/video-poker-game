@@ -34,8 +34,19 @@ stub(adminPath, {
     sendEachForMulticast: async (message) => {
       sentMessages.push(message);
       // Any token beginning with "bad-" fails, which is how the delivery-log
-      // and stats assertions below distinguish sent from failed.
-      const responses = message.tokens.map((t) => ({ success: !t.startsWith('bad-') }));
+      // and stats assertions below distinguish sent from failed. "dead-" fails
+      // the way FCM reports an uninstalled app, which is what the token purge
+      // in scripts/lib/deadTokens.js keys on; "bad-" is a transient failure
+      // and its token must survive.
+      const responses = message.tokens.map((t) => {
+        if (t.startsWith('dead-')) {
+          return { success: false, error: { code: 'messaging/registration-token-not-registered' } };
+        }
+        if (t.startsWith('bad-')) {
+          return { success: false, error: { code: 'messaging/internal-error' } };
+        }
+        return { success: true };
+      });
       return {
         responses,
         successCount: responses.filter((r) => r.success).length,
@@ -172,6 +183,17 @@ function fakeDb(world) {
         return {
           set: async (fields) => {
             world.gifts = { ...(world.gifts || {}), [giftMatch[1]]: fields };
+          },
+        };
+      }
+      // Token purge after a permanent send failure (scripts/lib/multicast.js).
+      const tokenMatch = /^users\/([^/]+)\/fcmTokens\/(.+)$/.exec(docPath);
+      if (tokenMatch) {
+        const [, uid, token] = tokenMatch;
+        return {
+          delete: async () => {
+            delete (world.users[uid].tokens || {})[token];
+            world.purged = [...(world.purged || []), docPath];
           },
         };
       }
@@ -492,6 +514,38 @@ test('counts partial delivery failures without failing the campaign', async () =
   assert.strictEqual(campaign.stats.failed, 1);
   assert.strictEqual(pushLogs.find((l) => l.uid === 'alice').status, 'failed');
   assert.strictEqual(pushLogs.find((l) => l.uid === 'bob').status, 'sent');
+});
+
+// A third of this app's tokens were dead and every daily send re-tried them,
+// because only the per-user trigger path purged and the campaign path did not.
+test('a token FCM reports as unregistered is deleted, so the next send skips it', async () => {
+  // Arrange
+  const world = baseWorld();
+  world.users.alice.tokens = { 'dead-tok-a': 'android' };
+
+  // Act
+  await run(world);
+
+  // Assert
+  assert.deepStrictEqual(world.purged, ['users/alice/fcmTokens/dead-tok-a']);
+  assert.deepStrictEqual(world.users.alice.tokens, {});
+  assert.deepStrictEqual(pushLogs.find((l) => l.uid === 'alice').errorCodes,
+    { 'messaging/registration-token-not-registered': 1 });
+});
+
+test('a transient failure keeps the token for the next attempt', async () => {
+  // Arrange
+  const world = baseWorld();
+  world.users.alice.tokens = { 'bad-tok-a': 'android' };
+
+  // Act
+  await run(world);
+
+  // Assert
+  assert.strictEqual(world.purged, undefined);
+  assert.deepStrictEqual(world.users.alice.tokens, { 'bad-tok-a': 'android' });
+  assert.deepStrictEqual(pushLogs.find((l) => l.uid === 'alice').errorCodes,
+    { 'messaging/internal-error': 1 });
 });
 
 test('a campaign that throws is marked failed rather than retried forever', async () => {

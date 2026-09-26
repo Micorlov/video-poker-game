@@ -23,6 +23,9 @@ async function logPush(entry) {
       failureCount: entry.failureCount || 0,
       platforms: entry.platforms || [],
       error: entry.error || null,
+      // Why tokens failed, e.g. { 'messaging/registration-token-not-registered': 1 }.
+      // Without it a "failed" row could not say whether the token was dead.
+      errorCodes: entry.errorCodes && Object.keys(entry.errorCodes).length ? entry.errorCodes : null,
       sentAt: new Date(),
     });
   } catch (err) {

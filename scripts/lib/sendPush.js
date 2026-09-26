@@ -12,6 +12,7 @@
 const { getFirestore, getMessaging } = require('./firebaseAdmin');
 const { logPush } = require('./pushLog');
 const { withinCooldown, isQuietHours, cooldownPatch } = require('./pushPolicy');
+const { isDeadTokenError, errorCodeCounts, purgeDeadTokens } = require('./deadTokens');
 
 async function sendPushToUser(uid, category, notification, options = {}) {
   const { trigger = null, cooldownHours = 0, settings = null } = options;
@@ -70,6 +71,7 @@ async function sendPushToUser(uid, category, notification, options = {}) {
     successCount: response.successCount,
     failureCount: response.failureCount,
     platforms,
+    errorCodes: errorCodeCounts(response.responses),
   });
 
   // Only a delivery that actually reached a device starts the cooldown —
@@ -79,16 +81,10 @@ async function sendPushToUser(uid, category, notification, options = {}) {
     await db.doc(`users/${uid}`).set(cooldownPatch(trigger, now), { merge: true });
   }
 
-  const staleTokens = [];
-  response.responses.forEach((result, index) => {
-    if (!result.success && result.error.code === 'messaging/registration-token-not-registered') {
-      staleTokens.push(tokens[index]);
-    }
-  });
-
-  await Promise.all(
-    staleTokens.map((token) => db.doc(`users/${uid}/fcmTokens/${token}`).delete())
-  );
+  const deadEntries = response.responses
+    .map((result, index) => ({ result, uid, token: tokens[index] }))
+    .filter(({ result }) => !result.success && isDeadTokenError(result.error));
+  await purgeDeadTokens(db, deadEntries);
 }
 
 module.exports = { sendPushToUser };

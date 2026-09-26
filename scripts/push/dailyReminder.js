@@ -30,10 +30,19 @@ async function dailyComebackReminder() {
   const staleUsersSnap = await db.collection('users').where('lastPlayedDate', '<', today).get();
   const dueUsers = staleUsersSnap.docs.filter((doc) => doc.get('lastDailyReminderSent') !== today);
 
+  // A reason to come back beats a restated feature: the daily board resets at
+  // the player's own midnight (getDayKey() in js/leaderboards.js uses the
+  // device's local date), so "still open today" is true for every timezone
+  // without promising a countdown this once-a-day job cannot know.
+  //
+  // This job stays on server time by design — see the quota note above, which
+  // is why it cannot run hourly. A campaign that needs each player's own
+  // evening goes through the Push Center's localDaily mode instead
+  // (scripts/lib/localHour.js).
   await Promise.all(dueUsers.map(async (doc) => {
     await sendPushToUser(doc.id, 'dailyReminder', {
-      title: 'Your ALL IN reset is ready',
-      body: 'Come back and claim it before it resets again!',
+      title: "Today's leaderboard is still open",
+      body: 'It resets at midnight and your ALL IN is waiting. One hand puts you on the board.',
     }, { settings });
     await doc.ref.set({ lastDailyReminderSent: today }, { merge: true });
   }));

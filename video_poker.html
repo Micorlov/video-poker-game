@@ -3,6 +3,504 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Diagnostics (js/telemetry.js, js/errors.js, js/installs.js) in their
+         own script, first, so they still report when the main bundle fails to
+         parse on an old WebView or throws during boot. -->
+    <script>
+
+var VP_BUILD_VERSION = "2.8";
+
+/* --- js/telemetry.js --- */
+// Shared transport for the early diagnostics scripts (js/errors.js,
+// js/installs.js).
+//
+// build.js inlines these files into their own <script> ahead of the main
+// bundle, so they must keep working when that bundle fails to parse on an old
+// WebView or throws during boot. Hence ES5 only (var/function, no arrows), and
+// hence Firestore's REST API instead of the SDK: the SDK may never have loaded,
+// and signed-out guests have no auth token. The `errors` and `installs` rules
+// accept unauthenticated creates in one exact shape (firestore.rules).
+
+var VP_REST_PROJECT = 'video-poker-6d665';
+// The public web key, same as firebaseConfig in js/firebase.js. Duplicated on
+// purpose: this script must work when firebase.js never ran.
+var VP_REST_API_KEY = 'AIzaSyB6m0Yis89jxvm06OFBqxs8P_vADjRXk0U';
+var VP_REST_DOCS = 'projects/' + VP_REST_PROJECT + '/databases/(default)/documents';
+var VP_REST_COMMIT_URL = 'https://firestore.googleapis.com/v1/' + VP_REST_DOCS + ':commit?key=' + VP_REST_API_KEY;
+var VP_INSTALL_KEY = 'vp_install';
+var VP_INSTALL_ID_LENGTH = 20;
+var VP_ID_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+function vpRandomId() {
+    var id = '';
+    for (var i = 0; i < VP_INSTALL_ID_LENGTH; i++) {
+        id += VP_ID_CHARS.charAt(Math.floor(Math.random() * VP_ID_CHARS.length));
+    }
+    return id;
+}
+
+// Encodes a flat object as Firestore REST fields. Numbers are sent as
+// integers — every numeric field in these reports is a count or a duration.
+function vpRestFields(obj) {
+    var fields = {};
+    Object.keys(obj).forEach(function(key) {
+        var v = obj[key];
+        if (typeof v === 'boolean') fields[key] = { booleanValue: v };
+        else if (typeof v === 'number') fields[key] = { integerValue: String(Math.round(v)) };
+        else fields[key] = { stringValue: String(v == null ? '' : v) };
+    });
+    return fields;
+}
+
+// Creates collection/docId with a server `at` timestamp. Resolves to:
+//   'ok'       — stored
+//   'quota'    — HTTP 429, the project's daily quota is spent; retry later
+//   'retry'    — offline or a server error; retry later
+//   'rejected' — rules refused it or it already exists; retrying cannot help
+// Never rejects.
+function vpRestCreate(collection, docId, data) {
+    if (typeof fetch !== 'function') return Promise.resolve('retry');
+    var body = {
+        writes: [{
+            update: { name: VP_REST_DOCS + '/' + collection + '/' + docId, fields: vpRestFields(data) },
+            updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
+            currentDocument: { exists: false }
+        }]
+    };
+    try {
+        return fetch(VP_REST_COMMIT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        }).then(function(res) {
+            if (res.ok) return 'ok';
+            if (res.status === 429) return 'quota';
+            if (res.status >= 500) return 'retry';
+            return 'rejected';
+        }, function() {
+            return 'retry';
+        });
+    } catch (e) {
+        return Promise.resolve('retry');
+    }
+}
+
+// Per-install state: a random id (no account needed) plus whether this
+// install already had a saved game when these scripts first ran — i.e. an
+// upgrade from a build that predates install tracking, not a new install.
+function vpReadInstall() {
+    try {
+        var raw = localStorage.getItem(VP_INSTALL_KEY);
+        var parsed = raw ? JSON.parse(raw) : null;
+        if (parsed && typeof parsed.id === 'string' && parsed.id.length === VP_INSTALL_ID_LENGTH) return parsed;
+    } catch (e) { /* corrupt or blocked storage: start fresh */ }
+    return null;
+}
+
+function vpWriteInstall(state) {
+    try { localStorage.setItem(VP_INSTALL_KEY, JSON.stringify(state)); } catch (e) { /* storage blocked */ }
+    return state;
+}
+
+function vpHadSavedGame() {
+    try { return !!localStorage.getItem('vp_game_state'); } catch (e) { return false; }
+}
+
+function vpInstallState() {
+    return vpReadInstall() || vpWriteInstall({
+        id: vpRandomId(),
+        existing: vpHadSavedGame(),
+        openSent: false,
+        bootSent: false
+    });
+}
+
+function vpUpdateInstall(patch) {
+    var next = {};
+    var current = vpInstallState();
+    Object.keys(current).forEach(function(k) { next[k] = current[k]; });
+    Object.keys(patch).forEach(function(k) { next[k] = patch[k]; });
+    return vpWriteInstall(next);
+}
+
+function vpInstallId() {
+    return vpInstallState().id;
+}
+
+function vpPlatform() {
+    try {
+        var cap = window.Capacitor;
+        if (cap && cap.isNativePlatform && cap.isNativePlatform()) {
+            return /android/i.test(navigator.userAgent) ? 'android' : 'ios';
+        }
+    } catch (e) { /* no bridge */ }
+    return 'web';
+}
+
+// VP_BUILD_VERSION is written by build.js ahead of these files, so the version
+// is known even when the main bundle (and its VP_APP_VERSION) never ran.
+function vpBuildVersion() {
+    return typeof VP_BUILD_VERSION === 'string' ? VP_BUILD_VERSION : 'unknown';
+}
+
+function vpUaVersion(pattern) {
+    var m = (navigator.userAgent || '').match(pattern);
+    return m ? parseInt(m[1], 10) : 0;
+}
+
+// Old Android System WebViews that cannot parse the bundle are a prime suspect
+// for installs that open once and never come back, so both versions travel
+// with every report. Numbers only — never the full user-agent string.
+function vpDeviceInfo() {
+    return {
+        version: vpBuildVersion(),
+        platform: vpPlatform(),
+        android: vpUaVersion(/Android (\d+)/),
+        chrome: vpUaVersion(/Chrome\/(\d+)/),
+        lang: String(navigator.language || '').slice(0, 16)
+    };
+}
+
+// getCountry() lives in the main bundle (js/presence.js) and may not have run;
+// fall back to the region part of the browser language.
+function vpCountry() {
+    try {
+        if (typeof getCountry === 'function') {
+            var c = getCountry();
+            if (c) return String(c).slice(0, 8);
+        }
+    } catch (e) { /* main bundle not initialised */ }
+    var m = String(navigator.language || '').match(/-([A-Za-z]{2})$/);
+    return m ? m[1].toUpperCase() : '';
+}
+
+
+/* --- js/errors.js --- */
+// Client error reporting — the app's only crash signal.
+//
+// This is a Capacitor app: it never crashes natively, it breaks in JavaScript
+// and the WebView survives, so Android vitals reports 0 crashes forever.
+// Before this file nothing listened for window errors, and firebaseSafe()
+// (js/firebase.js) swallowed every Firestore rejection.
+//
+// Reports travel over js/telemetry.js (REST, no auth) and wait in a
+// localStorage outbox until the server accepts them. That matters for the
+// main suspect, an exhausted Firestore write quota: the report of it is
+// rejected for the same reason (HTTP 429), so it is held and delivered after
+// the midnight-UTC reset instead of being lost.
+//
+// Hard limits, because a reporter that loops is the very failure it hunts:
+// at most VP_ERR_MAX_PER_SESSION distinct reports per session, one per
+// distinct error (repeats only bump its count while it is still queued), and
+// nothing in here may throw back into the caller.
+
+var VP_ERR_MAX_PER_SESSION = 15;
+var VP_ERR_OUTBOX_KEY = 'vp_error_outbox';
+var VP_ERR_OUTBOX_MAX = 20;
+var VP_ERR_FLUSH_DELAY_MS = 4000;
+var VP_ERR_STARTUP_FLUSH_MS = 8000;
+// A Firestore SDK write never rejects on quota: RESOURCE_EXHAUSTED is a
+// retryable code, so the SDK backs off and the promise just stays pending.
+// A request still pending this long while online and visible is reported as
+// a stall — and that report's own REST send says whether quota is the cause.
+var VP_ERR_STALL_MS = 60000;
+var VP_ERR_MAX_AGE_SEC = 30 * 24 * 60 * 60;
+
+var vpErrSeen = {};
+var vpErrSessionCount = 0;
+var vpErrFlushTimer = null;
+var vpErrFlushDueAt = 0;
+var vpErrFlushing = false;
+var vpErrQuotaQueued = false;
+var vpErrStallReported = false;
+var vpErrLastHiddenAt = 0;
+
+function vpIsQuotaError(err) {
+    if (!err) return false;
+    if (err.code === 'resource-exhausted') return true;
+    return /resource[ _-]?exhausted|quota/i.test(String(err.message || err));
+}
+
+function vpTrimStack(stack) {
+    if (!stack) return '';
+    return String(stack).split('\n').slice(0, 6).map(function(line) {
+        // Keep "video_poker.html:1234:56", drop the origin and path before it.
+        return line.trim().replace(/https?:\/\/[^\s)]*\//g, '').slice(0, 160);
+    }).join('\n').slice(0, 1000);
+}
+
+function vpCurrentScreen() {
+    try {
+        var overlay = document.getElementById('onboarding-overlay');
+        if (overlay && !overlay.classList.contains('hidden')) return 'onboarding';
+        var active = document.querySelector('[id^="screen-"].active');
+        return active ? active.id.slice('screen-'.length, 'screen-'.length + 30) : 'boot';
+    } catch (e) {
+        return 'unknown';
+    }
+}
+
+function vpErrUid() {
+    try { return (window.egUser && window.egUser.uid) ? String(window.egUser.uid).slice(0, 128) : ''; } catch (e) { return ''; }
+}
+
+function vpBuildErrorFields(err, kind) {
+    var device = vpDeviceInfo();
+    var message = (err && (err.message || err.reason)) || err || 'unknown';
+    return {
+        kind: String(kind).slice(0, 20),
+        message: String(message).slice(0, 300),
+        code: (err && typeof err.code === 'string') ? err.code.slice(0, 60) : '',
+        stack: vpTrimStack(err && err.stack),
+        quota: vpIsQuotaError(err),
+        count: 1,
+        screen: vpCurrentScreen(),
+        version: device.version,
+        platform: device.platform,
+        country: vpCountry(),
+        uid: vpErrUid(),
+        installId: vpInstallId(),
+        online: navigator.onLine !== false
+    };
+}
+
+function vpErrSignature(fields) {
+    return fields.kind + '|' + fields.code + '|' + fields.message.slice(0, 120);
+}
+
+function vpOutboxRead() {
+    try {
+        var list = JSON.parse(localStorage.getItem(VP_ERR_OUTBOX_KEY) || '[]');
+        return Array.isArray(list) ? list : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function vpOutboxWrite(list) {
+    try { localStorage.setItem(VP_ERR_OUTBOX_KEY, JSON.stringify(list.slice(-VP_ERR_OUTBOX_MAX))); } catch (e) { /* storage full or blocked */ }
+}
+
+function vpBumpQueuedCount(sig) {
+    var found = false;
+    var next = vpOutboxRead().map(function(entry) {
+        if (entry.sig !== sig) return entry;
+        found = true;
+        var fields = {};
+        Object.keys(entry.fields).forEach(function(k) { fields[k] = entry.fields[k]; });
+        fields.count = (fields.count || 1) + 1;
+        return { id: entry.id, sig: entry.sig, queuedAt: entry.queuedAt, fields: fields };
+    });
+    if (found) vpOutboxWrite(next);
+}
+
+// Public entry point. kind: 'error' | 'rejection' | 'firebase' | 'stall' |
+// 'quota' | 'manual'. Never throws.
+function vpReportError(err, kind) {
+    try {
+        var fields = vpBuildErrorFields(err, kind || 'manual');
+        var sig = vpErrSignature(fields);
+        if (vpErrSeen[sig]) {
+            vpErrSeen[sig] += 1;
+            vpBumpQueuedCount(sig);
+            return;
+        }
+        if (vpErrSessionCount >= VP_ERR_MAX_PER_SESSION) return;
+        vpErrSeen[sig] = 1;
+        vpErrSessionCount += 1;
+        vpOutboxWrite(vpOutboxRead().concat([{ id: vpRandomId(), sig: sig, queuedAt: Date.now(), fields: fields }]));
+        vpScheduleErrorFlush(VP_ERR_FLUSH_DELAY_MS);
+    } catch (e) { /* the reporter must never become the error */ }
+}
+
+// Keeps the soonest requested flush: a new error must not wait behind the
+// longer startup delay.
+function vpScheduleErrorFlush(delayMs) {
+    var dueAt = Date.now() + delayMs;
+    if (vpErrFlushTimer && vpErrFlushDueAt <= dueAt) return;
+    if (vpErrFlushTimer) clearTimeout(vpErrFlushTimer);
+    vpErrFlushDueAt = dueAt;
+    vpErrFlushTimer = setTimeout(function() {
+        vpErrFlushTimer = null;
+        vpFlushErrors();
+    }, delayMs);
+}
+
+function vpDropFromOutbox(id) {
+    vpOutboxWrite(vpOutboxRead().filter(function(entry) { return entry.id !== id; }));
+}
+
+// The quota signal is the one this whole module exists to catch: record it as
+// its own report, which waits in the outbox until the quota resets.
+function vpNoteQuotaHit() {
+    if (vpErrQuotaQueued) return;
+    vpErrQuotaQueued = true;
+    vpReportError({ code: 'resource-exhausted', message: 'Firestore quota exhausted: an error report was rejected with HTTP 429' }, 'quota');
+}
+
+function vpSendNext(queue) {
+    if (!queue.length) return Promise.resolve();
+    var entry = queue[0];
+    var age = Math.round((Date.now() - entry.queuedAt) / 1000);
+    var data = {};
+    Object.keys(entry.fields).forEach(function(k) { data[k] = entry.fields[k]; });
+    data.ageSec = Math.max(0, Math.min(VP_ERR_MAX_AGE_SEC, age || 0));
+    return vpRestCreate('errors', entry.id, data).then(function(result) {
+        if (result === 'ok' || result === 'rejected') {
+            vpDropFromOutbox(entry.id);
+            return vpSendNext(queue.slice(1));
+        }
+        // 'quota' or 'retry': the rest would fail the same way. Keep them all.
+        if (result === 'quota') vpNoteQuotaHit();
+        return null;
+    });
+}
+
+function vpFlushErrors() {
+    if (vpErrFlushing) return Promise.resolve();
+    var queue = vpOutboxRead();
+    if (!queue.length) return Promise.resolve();
+    vpErrFlushing = true;
+    return vpSendNext(queue).then(function() {
+        vpErrFlushing = false;
+    }, function() {
+        vpErrFlushing = false;
+    });
+}
+
+// Called by firebaseSafe() for every Firestore promise it wraps.
+function vpWatchPending(promise) {
+    try {
+        if (vpErrStallReported || !promise || typeof promise.then !== 'function') return;
+        var startedAt = Date.now();
+        var settled = false;
+        var timer = setTimeout(function() {
+            if (settled || vpErrStallReported) return;
+            // Backgrounded WebViews suspend the network; that is not a stall.
+            if (navigator.onLine === false || vpErrLastHiddenAt >= startedAt) return;
+            if (document.visibilityState === 'hidden') return;
+            vpErrStallReported = true;
+            vpReportError({ code: 'stalled', message: 'Firestore request still pending after ' + (VP_ERR_STALL_MS / 1000) + 's while online' }, 'stall');
+        }, VP_ERR_STALL_MS);
+        var done = function() { settled = true; clearTimeout(timer); };
+        promise.then(done, done);
+    } catch (e) { /* never break the caller */ }
+}
+
+function vpErrorEventToError(ev) {
+    if (ev.error) return ev.error;
+    return { message: ev.message || 'Script error', stack: (ev.filename || '') + ':' + (ev.lineno || 0) + ':' + (ev.colno || 0) };
+}
+
+function vpInitErrorReporting() {
+    try {
+        window.addEventListener('error', function(ev) {
+            vpReportError(vpErrorEventToError(ev), 'error');
+        });
+        window.addEventListener('unhandledrejection', function(ev) {
+            var reason = ev.reason;
+            vpReportError(reason && typeof reason === 'object' ? reason : { message: String(reason) }, 'rejection');
+        });
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') vpErrLastHiddenAt = Date.now();
+            else vpScheduleErrorFlush(VP_ERR_FLUSH_DELAY_MS);
+        });
+        window.addEventListener('online', function() { vpScheduleErrorFlush(VP_ERR_FLUSH_DELAY_MS); });
+        // Deliver whatever an earlier session could not (quota, offline).
+        vpScheduleErrorFlush(VP_ERR_STARTUP_FLUSH_MS);
+    } catch (e) { /* no DOM: nothing to listen to */ }
+}
+
+vpInitErrorReporting();
+
+
+/* --- js/installs.js --- */
+// First-party install funnel: did this install open, and did it boot?
+//
+// Play Console showed 96 device acquisitions in 28 days against 33 first
+// opens, and nothing we controlled could say which side of "open" the
+// missing two thirds fell on. Two docs per install answer it:
+//   installs/{id}_open — sent the moment this early script runs, before the
+//                        main bundle can fail to parse or throw during init
+//   installs/{id}_boot — sent once js/tabs.js finishes its DOMContentLoaded
+//                        init and calls vpMarkBooted()
+// An open with no boot is an install that launched and died during init.
+// `opens` on the boot doc counts the launches it took to get there, so a
+// first launch that died and a second that worked still shows up.
+// `existing` marks upgrades from builds that predate this file — they report
+// once too, and the admin panel keeps them out of the new-install figures.
+
+var VP_BOOT_SEND_DELAY_MS = 3000; // lets country and install referrer resolve
+var VP_MAX_BOOT_MS = 24 * 60 * 60 * 1000; // firestore.rules caps bootMs here
+var vpScriptStartedAt = Date.now();
+var vpBootedAt = 0;
+
+function vpAcquisitionSource() {
+    try {
+        if (typeof getStoredUtmContext === 'function') {
+            var utm = getStoredUtmContext();
+            if (utm && utm.utm_source) return String(utm.utm_source).slice(0, 40);
+        }
+    } catch (e) { /* main bundle not initialised */ }
+    try {
+        if (localStorage.getItem('vp_referral_invited')) return 'referral';
+    } catch (e) { /* storage blocked */ }
+    return 'organic';
+}
+
+function vpInstallRecord(stage) {
+    var install = vpInstallState();
+    var device = vpDeviceInfo();
+    var isBoot = stage === 'boot';
+    return {
+        stage: stage,
+        installId: install.id,
+        existing: !!install.existing,
+        opens: install.opens || 1,
+        version: device.version,
+        platform: device.platform,
+        android: device.android,
+        chrome: device.chrome,
+        lang: device.lang,
+        country: vpCountry(),
+        source: isBoot ? vpAcquisitionSource() : '',
+        bootMs: isBoot && vpBootedAt ? Math.max(0, Math.min(VP_MAX_BOOT_MS, vpBootedAt - vpScriptStartedAt)) : 0
+    };
+}
+
+// Sends one stage at most once per install. A 'rejected' result means the doc
+// already exists (an earlier send landed but its response was lost) or the
+// rules refused the shape — either way resending cannot help.
+function vpSendInstallStage(stage) {
+    var flag = stage === 'open' ? 'openSent' : 'bootSent';
+    if (vpInstallState()[flag]) return Promise.resolve('done');
+    return vpRestCreate('installs', vpInstallId() + '_' + stage, vpInstallRecord(stage)).then(function(result) {
+        if (result === 'ok' || result === 'rejected') {
+            var patch = {};
+            patch[flag] = true;
+            vpUpdateInstall(patch);
+        }
+        return result;
+    });
+}
+
+function vpMarkBooted() {
+    if (vpBootedAt) return;
+    vpBootedAt = Date.now();
+    setTimeout(function() { vpSendInstallStage('boot'); }, VP_BOOT_SEND_DELAY_MS);
+}
+
+(function vpInitInstallTracking() {
+    try {
+        var install = vpInstallState();
+        if (install.bootSent) return;
+        vpUpdateInstall({ opens: (install.opens || 0) + 1 });
+        vpSendInstallStage('open');
+    } catch (e) { /* diagnostics must never break boot */ }
+})();
+
+
+    </script>
     <title>Video Poker: Jacks or Better — Free, No Ads</title>
     <!-- Search and link-preview metadata for the GitHub Pages build. -->
     <meta name="description" content="Free video poker with no ads and no real money: Jacks or Better, Deuces Wild, Bonus Poker and Double Bonus, multi-hand Triple Play and Five Play, and live leaderboards you can play against friends.">
@@ -13405,18 +13903,29 @@ function generateRoomCode() {
     return code;
 }
 
+// With no fallback, a failure is reported (js/errors.js) instead of being
+// dropped: almost no caller passes one, so this used to make every Firestore
+// failure — rules drift, quota, a missing SDK — invisible by design.
+function handleFirebaseFailure(err, fallback) {
+    if (typeof fallback === 'function') fallback(err);
+    else if (window.vpReportError) vpReportError(err, 'firebase');
+}
+
 function firebaseSafe(operation, fallback) {
     try {
         const result = operation();
         if (result && typeof result.catch === 'function') {
+            // Quota exhaustion never rejects an SDK write — it just stays
+            // pending — so pending time is watched separately.
+            if (window.vpWatchPending) vpWatchPending(result);
             return result.catch(function(err) {
-                if (typeof fallback === 'function') fallback(err);
+                handleFirebaseFailure(err, fallback);
                 return null;
             });
         }
         return result;
     } catch (err) {
-        if (typeof fallback === 'function') fallback(err);
+        handleFirebaseFailure(err, fallback);
         return null;
     }
 }
@@ -19100,6 +19609,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         if (window.maybeShowSigninPrompt) maybeShowSigninPrompt('session_start');
     }, 3000);
+    // Last on purpose: reaching this line is what "booted" means for the
+    // install funnel (js/installs.js). Anything above that throws skips it.
+    if (window.vpMarkBooted) vpMarkBooted();
 });
 
 if (window.vpOnLanguageChange) {

@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Diagnostics (js/telemetry.js, js/errors.js, js/installs.js) in their
+         own script, first, so they still report when the main bundle fails to
+         parse on an old WebView or throws during boot. -->
+    <script>
+<!-- BUILD_EARLY_JS_PLACEHOLDER -->
+    </script>
     <title>Video Poker: Jacks or Better — Free, No Ads</title>
     <!-- Search and link-preview metadata for the GitHub Pages build. -->
     <meta name="description" content="Free video poker with no ads and no real money: Jacks or Better, Deuces Wild, Bonus Poker and Double Bonus, multi-hand Triple Play and Five Play, and live leaderboards you can play against friends.">

@@ -262,6 +262,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         if (window.maybeShowSigninPrompt) maybeShowSigninPrompt('session_start');
     }, 3000);
+    // Last on purpose: reaching this line is what "booted" means for the
+    // install funnel (js/installs.js). Anything above that throws skips it.
+    if (window.vpMarkBooted) vpMarkBooted();
 });
 
 if (window.vpOnLanguageChange) {

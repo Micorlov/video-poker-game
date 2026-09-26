@@ -343,16 +343,25 @@ tr:last-child td { border-bottom: none; }
               <div class="row">
                 <div class="field">
                   <label for="d-title">Title</label>
-                  <input type="text" id="d-title" maxlength="60" placeholder="Your daily bonus is ready" oninput="renderDailyPreview()">
+                  <input type="text" id="d-title" maxlength="60" placeholder="Today's leaderboard is still open" oninput="renderDailyPreview()">
                 </div>
                 <div class="field" style="flex:0 0 145px;">
-                  <label for="d-time">Send time (your local)</label>
-                  <input type="time" id="d-time" value="20:00" onchange="renderDailyNextRun()">
+                  <label for="d-time">Send time</label>
+                  <input type="time" id="d-time" value="21:00" onchange="renderDailyNextRun()">
+                </div>
+                <div class="field" style="flex:0 0 190px;">
+                  <label for="d-tz">In whose time</label>
+                  <select id="d-tz" onchange="renderDailyNextRun()">
+                    <option value="local" selected>Each player's own</option>
+                    <option value="server">Yours (one fixed hour)</option>
+                  </select>
                 </div>
               </div>
               <div class="field">
                 <label for="d-body">Body</label>
-                <textarea id="d-body" maxlength="180" placeholder="Log in now to collect today's free chips." oninput="renderDailyPreview()"></textarea>
+                <!-- A reason to return beats restating a feature: "100 free coins"
+                     earned zero opens across 139 sends. Name the stake. -->
+                <textarea id="d-body" maxlength="180" placeholder="It resets at midnight — one hand puts you back on the board." oninput="renderDailyPreview()"></textarea>
               </div>
               <div class="row">
                 <div class="field">
@@ -1004,6 +1013,9 @@ function audienceLabel(audience) {
 function scheduleLabel(schedule) {
     var s = schedule || {};
     var next = s.nextRunAt && s.nextRunAt.toDate ? s.nextRunAt.toDate().toLocaleString() : '—';
+    if (s.mode === 'localDaily') {
+        return 'Daily at ' + String(s.localHour == null ? 0 : s.localHour).padStart(2, '0') + ':00 each player\'s time';
+    }
     if (s.mode === 'recurring') return 'Every ' + s.intervalHours + 'h · next ' + next;
     if (s.mode === 'at') return 'Once at ' + next;
     return 'Immediate · queued ' + next;
@@ -1495,9 +1507,31 @@ function renderDailyEstimate() {
         'Audience re-resolved fresh at each daily send.</div>';
 }
 
+// "Each player's own" delivers at the chosen hour in each player's timezone:
+// the poller runs hourly and each run reaches only the timezones whose local
+// hour has just arrived (scripts/lib/localHour.js). 20:00 server time was the
+// middle of the night for most of this app's players.
+function usesPlayerLocalTime() {
+    var el = document.getElementById('d-tz');
+    return !el || el.value === 'local';
+}
+
+function readDailyHour() {
+    var parts = (document.getElementById('d-time').value || '21:00').split(':');
+    var hour = parseInt(parts[0], 10);
+    return isNaN(hour) ? 21 : Math.max(0, Math.min(23, hour));
+}
+
 function renderDailyNextRun() {
     var hint = document.getElementById('d-next-run');
     var days = readDailyDays();
+    if (usesPlayerLocalTime()) {
+        var hour = readDailyHour();
+        hint.textContent = 'Each player gets it at ' + String(hour).padStart(2, '0') + ':00 their own time, ' +
+            'once a day' + (days ? ', for ' + days + ' day' + (days === 1 ? '' : 's') : ' until paused') +
+            '. Checked hourly, so the first players hear within the hour.';
+        return;
+    }
     hint.textContent = 'First send: ' + calcNextDailyRunAt().toLocaleString() + '. Then every 24 h' +
         (days ? ', ' + days + ' send' + (days === 1 ? '' : 's') + ' in total.' : ' until paused.');
 }
@@ -1508,6 +1542,13 @@ var MAX_RUN_DAYS = 365;
 function readDailyDays() {
     var n = Math.floor(Number(document.getElementById('d-days').value) || 0);
     return Math.max(0, Math.min(MAX_RUN_DAYS, n));
+}
+
+function nextHourBoundary() {
+    var next = new Date();
+    next.setMinutes(0, 0, 0);
+    next.setHours(next.getHours() + 1);
+    return next;
 }
 
 function calcNextDailyRunAt() {
@@ -1569,8 +1610,11 @@ function createDailyCampaign() {
             ? { type: 'user', platform: null, uid: testUid, segment: null }
             : { type: 'segment', platform: null, uid: null, segment: segVal };
 
-    var firstRun = calcNextDailyRunAt();
     var days = readDailyDays();
+    var playerLocal = usesPlayerLocalTime();
+    // localDaily runs hourly and filters by each player's clock, so its first
+    // run is the next UTC hour rather than a single chosen instant.
+    var firstRun = playerLocal ? nextHourBoundary() : calcNextDailyRunAt();
 
     var payload = {
         title: title,
@@ -1578,7 +1622,16 @@ function createDailyCampaign() {
         deepLink: document.getElementById('d-deeplink').value || null,
         category: document.getElementById('d-category').value,
         audience: audience,
-        schedule: {
+        schedule: playerLocal ? {
+            mode: 'localDaily',
+            sendAt: null,
+            localHour: readDailyHour(),
+            intervalHours: 1,
+            nextRunAt: firebase.firestore.Timestamp.fromDate(firstRun),
+            lastRunAt: null,
+            maxRuns: days || null,
+            runCount: 0
+        } : {
             mode: 'recurring',
             sendAt: null,
             intervalHours: 24,
@@ -1623,21 +1676,31 @@ var dailyCampaignsUnsub = null;
 function loadDailyCampaigns() {
     if (dailyCampaignsUnsub) dailyCampaignsUnsub();
     var rows = document.getElementById('daily-rows');
+    // Both daily shapes: 'recurring' every 24h at one fixed instant, and
+    // 'localDaily' which runs hourly and picks the players whose own clock has
+    // reached schedule.localHour. intervalHours is filtered below rather than in
+    // the query, since the two modes use different values for it.
     dailyCampaignsUnsub = db.collection(CAMPAIGNS)
-        .where('schedule.mode', '==', 'recurring')
-        .where('schedule.intervalHours', '==', 24)
+        .where('schedule.mode', 'in', ['recurring', 'localDaily'])
         .orderBy('createdAt', 'desc')
         .onSnapshot(function(snap) {
             rows.innerHTML = '';
-            if (snap.empty) {
+            var docs = snap.docs.filter(function(doc) {
+                var s = doc.data().schedule || {};
+                return s.mode === 'localDaily' || s.intervalHours === 24;
+            });
+            if (!docs.length) {
                 rows.innerHTML = '<tr><td colspan="5" class="empty-state">No daily campaigns yet</td></tr>';
                 return;
             }
-            snap.docs.forEach(function(doc) {
+            docs.forEach(function(doc) {
                 var c = doc.data();
-                var next = c.schedule && c.schedule.nextRunAt && c.schedule.nextRunAt.toDate
-                    ? c.schedule.nextRunAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    : '—';
+                var sc = c.schedule || {};
+                var next = sc.mode === 'localDaily'
+                    ? String(sc.localHour == null ? 0 : sc.localHour).padStart(2, '0') + ':00 local'
+                    : (sc.nextRunAt && sc.nextRunAt.toDate
+                        ? sc.nextRunAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : '—');
                 var tr = document.createElement('tr');
                 var tdTime = document.createElement('td');
                 tdTime.textContent = next;
@@ -1660,7 +1723,11 @@ function loadDailyCampaigns() {
                 tr.appendChild(tdMsg);
                 tr.appendChild(cell(audienceLabel(c.audience)));
                 var sched = c.schedule || {};
-                var progress = sched.maxRuns ? ' · ' + (sched.runCount || 0) + '/' + sched.maxRuns + ' days' : '';
+                // localDaily counts hourly runs, so 24 of them are one day.
+                var elapsed = sched.mode === 'localDaily'
+                    ? Math.floor((sched.runCount || 0) / 24)
+                    : (sched.runCount || 0);
+                var progress = sched.maxRuns ? ' · ' + elapsed + '/' + sched.maxRuns + ' days' : '';
                 tr.appendChild(cell((c.status || '—') + progress, STATUS_COLORS[c.status] || '#94a3b8'));
                 var tdAct = document.createElement('td');
                 tdAct.style.whiteSpace = 'nowrap';

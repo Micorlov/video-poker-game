@@ -335,5 +335,66 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.token.email == 'micorlov@gmail.com';
       allow write: if false;
     }
+
+    // Client error reports (js/errors.js) and the install funnel
+    // (js/installs.js). Both are sent over the REST API from an early script
+    // that runs before sign-in and even when the main bundle never boots, so
+    // create is open without auth — but only in one exact shape, with size
+    // caps and a server timestamp. Create-only: nothing edits a report, and a
+    // repeated install stage is rejected as already present. The client caps
+    // itself at 15 error reports per session; rules cannot rate-limit.
+    match /errors/{reportId} {
+      allow create: if reportId.matches('^[A-Za-z0-9]{20}$')
+                    && validErrorReport(request.resource.data);
+      allow read, delete: if request.auth != null
+                          && request.auth.token.email == 'micorlov@gmail.com';
+
+      function validErrorReport(d) {
+        return d.keys().hasOnly(['kind', 'message', 'code', 'stack', 'quota', 'count', 'screen',
+                                 'version', 'platform', 'country', 'uid', 'installId', 'online',
+                                 'ageSec', 'at'])
+            && d.kind is string && d.kind.size() <= 20
+            && d.message is string && d.message.size() <= 300
+            && d.code is string && d.code.size() <= 60
+            && d.stack is string && d.stack.size() <= 1000
+            && d.quota is bool
+            && d.count is int && d.count >= 1 && d.count <= 1000000
+            && d.screen is string && d.screen.size() <= 30
+            && d.version is string && d.version.size() <= 20
+            && d.platform is string && d.platform.size() <= 10
+            && d.country is string && d.country.size() <= 8
+            && d.uid is string && d.uid.size() <= 128
+            && d.installId is string && d.installId.size() <= 20
+            && d.online is bool
+            && d.ageSec is int && d.ageSec >= 0 && d.ageSec <= 2592000
+            && d.at == request.time;
+      }
+    }
+
+    // Doc id is `{installId}_{stage}`, stage 'open' or 'boot'.
+    match /installs/{docId} {
+      allow create: if validInstallStage(request.resource.data);
+      allow read, delete: if request.auth != null
+                          && request.auth.token.email == 'micorlov@gmail.com';
+
+      function validInstallStage(d) {
+        return d.keys().hasOnly(['stage', 'installId', 'existing', 'opens', 'version', 'platform',
+                                 'android', 'chrome', 'lang', 'country', 'source', 'bootMs', 'at'])
+            && d.stage in ['open', 'boot']
+            && d.installId is string && d.installId.matches('^[A-Za-z0-9]{20}$')
+            && docId == d.installId + '_' + d.stage
+            && d.existing is bool
+            && d.opens is int && d.opens >= 1 && d.opens <= 100000
+            && d.version is string && d.version.size() <= 20
+            && d.platform is string && d.platform.size() <= 10
+            && d.android is int && d.android >= 0 && d.android <= 1000
+            && d.chrome is int && d.chrome >= 0 && d.chrome <= 10000
+            && d.lang is string && d.lang.size() <= 16
+            && d.country is string && d.country.size() <= 8
+            && d.source is string && d.source.size() <= 40
+            && d.bootMs is int && d.bootMs >= 0 && d.bootMs <= 86400000
+            && d.at == request.time;
+      }
+    }
   }
 }

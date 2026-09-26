@@ -105,6 +105,15 @@ async function filterByPrefs(db, entries, category) {
   return entries.filter((entry) => !muted.has(entry.uid));
 }
 
+// Map<uid, userData> for the owners of `entries`, one read per distinct uid.
+// A local-hour campaign needs each owner's timezoneOffset, and reading the
+// docs once here keeps that off the hot path in scripts/lib/localHour.js.
+async function usersFor(db, entries) {
+  const uids = [...new Set(entries.map((entry) => entry.uid))];
+  const snaps = await Promise.all(uids.map((uid) => db.doc(`users/${uid}`).get()));
+  return new Map(snaps.map((snap) => [snap.id, (typeof snap.data === 'function' ? snap.data() : null) || {}]));
+}
+
 // uid -> display name, for attributing delivery-log rows.
 async function displayNamesFor(db, uids) {
   const snaps = await Promise.all(uids.map((uid) => db.doc(`users/${uid}`).get()));
@@ -114,6 +123,7 @@ async function displayNamesFor(db, uids) {
 module.exports = {
   resolveAudience,
   filterByPrefs,
+  usersFor,
   displayNamesFor,
   tokenEntries,
   chunk,

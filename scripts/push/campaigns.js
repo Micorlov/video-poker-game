@@ -6,10 +6,11 @@
 // performs the actual delivery and writes the result back. That split is why
 // a campaign takes up to one poll interval to go out.
 const { getFirestore, Timestamp } = require('../lib/firebaseAdmin');
-const { resolveAudience, filterByPrefs, displayNamesFor } = require('../lib/audience');
+const { resolveAudience, filterByPrefs, usersFor, displayNamesFor } = require('../lib/audience');
 const { sendToEntries, totalsOf } = require('../lib/multicast');
 const { logPush } = require('../lib/pushLog');
 const { isQuietHours, quietHoursEndAt } = require('../lib/pushPolicy');
+const { isLocalHourMode, nextUtcHour, entriesInLocalHour } = require('../lib/localHour');
 
 const COLLECTION = 'pushCampaigns';
 const HOUR_MS = 60 * 60 * 1000;
@@ -84,6 +85,18 @@ function completionPatch(campaign, now, stats) {
     'schedule.runCount': runCount,
   };
 
+  // A local-hour campaign books the next UTC hour, forever: each run reaches
+  // only the timezones whose local hour is the target one, so "one send per
+  // player per day" comes from 24 hourly runs, not from one daily run. runCount
+  // therefore counts hours, and maxRuns ("run for N days") counts days.
+  if (isLocalHourMode(schedule)) {
+    const dayRuns = Math.floor(runCount / 24);
+    const localDone = maxRuns > 0 && dayRuns >= maxRuns;
+    return localDone
+      ? { ...base, status: 'sent' }
+      : { ...base, status: 'scheduled', 'schedule.nextRunAt': Timestamp.fromDate(nextUtcHour(now)) };
+  }
+
   const hasRunsLeft = maxRuns === 0 || runCount < maxRuns;
   if (schedule.mode === 'recurring' && schedule.intervalHours > 0 && hasRunsLeft) {
     return {
@@ -99,9 +112,13 @@ function completionPatch(campaign, now, stats) {
 async function runCampaign(db, doc, settings, now) {
   const campaign = doc.data();
 
+  // A local-hour campaign picks its own hour in each player's own time, so the
+  // server-time quiet window below would only fight it.
+  const localHourMode = isLocalHourMode(campaign.schedule);
+
   // Quiet hours hold a composed campaign rather than dropping it: unlike a
   // rank-change alert, an announcement is just as true in the morning.
-  if ((settings.quietHours || {}).mode === 'hold' && isQuietHours({}, settings, now)) {
+  if (!localHourMode && (settings.quietHours || {}).mode === 'hold' && isQuietHours({}, settings, now)) {
     await doc.ref.update({ 'schedule.nextRunAt': Timestamp.fromDate(quietHoursEndAt(settings, now)) });
     console.log(`Campaign ${doc.id} held until quiet hours end.`);
     return;
@@ -117,7 +134,16 @@ async function runCampaign(db, doc, settings, now) {
     entries = await filterByPrefs(db, entries, category);
   }
 
+  // Only the players whose own clock has just reached the target hour.
+  if (localHourMode) {
+    const users = await usersFor(db, entries);
+    entries = entriesInLocalHour(entries, users, Number(campaign.schedule.localHour) || 0, now);
+  }
+
   // Opened even when no device is eligible — the share link still pays out.
+  // A local-hour campaign re-opens it every hourly run; roundKey is the UTC
+  // date, so that is the same round re-written, and every timezone claims
+  // against one round per UTC day.
   const coinReward = Number(campaign.coinReward) || 0;
   if (coinReward > 0) await openGiftRound(db, doc.id, coinReward, now);
 
