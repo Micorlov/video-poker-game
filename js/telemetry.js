@@ -186,16 +186,27 @@ function vpClockSkewSeconds() {
     return Math.round(vpClockSkewMs / 1000);
 }
 
-// One HEAD per launch, so the correction is known even for an install that has
-// nothing else to report. It is not a Firestore document read, so it costs no
-// quota, and a failure just leaves the device clock in charge as before.
+// One probe per launch, so the correction is known even for an install that has
+// nothing else to report — which is most of them, and exactly the population
+// whose clocks are wrong.
+//
+// A commit carrying no writes: it returns 200 with the server's Date header,
+// writes nothing, and reads no document, so it costs no quota. It has to be this
+// endpoint rather than a plain request to the host — the WebView runs on the
+// https://localhost origin, and only the API paths send
+// Access-Control-Allow-Origin, so anything else is refused by CORS before the
+// headers can be read. A failure just leaves the device clock in charge, as
+// before.
 function vpProbeServerClock() {
     if (typeof fetch !== 'function') return Promise.resolve();
     try {
-        return fetch('https://firestore.googleapis.com/', { method: 'HEAD' })
-            .then(function(res) {
-                try { vpNoteServerDate(res.headers && res.headers.get('date')); } catch (e) {}
-            }, function() { /* offline: the device clock stands */ });
+        return fetch(VP_REST_COMMIT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: '{"writes":[]}'
+        }).then(function(res) {
+            try { vpNoteServerDate(res.headers && res.headers.get('date')); } catch (e) {}
+        }, function() { /* offline: the device clock stands */ });
     } catch (e) {
         return Promise.resolve();
     }

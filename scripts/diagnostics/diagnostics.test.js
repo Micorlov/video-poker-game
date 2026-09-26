@@ -85,8 +85,14 @@ function makeEnv({ storage = {}, fetchStatus = 200, platform = 'android', storag
         fire(bucket, type, ev) { (listeners[bucket][type] || []).forEach((fn) => fn(ev)); },
         outbox() { return JSON.parse(store.get('vp_error_outbox') || '[]'); },
         install() { return JSON.parse(store.get('vp_install') || 'null'); },
-        errorWrites() { return requests.filter((r) => r.body.writes[0].update.name.includes('/errors/')); },
-        installWrites() { return requests.filter((r) => r.body.writes[0].update.name.includes('/installs/')); }
+        // The server-clock probe posts a commit carrying no writes, so document
+        // writes are the requests that actually name a document.
+        docWrites(collection) {
+            return requests.filter((r) => (r.body.writes || []).length
+                && r.body.writes[0].update.name.includes('/' + collection + '/'));
+        },
+        errorWrites() { return this.docWrites('errors'); },
+        installWrites() { return this.docWrites('installs'); }
     };
 }
 

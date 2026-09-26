@@ -1289,7 +1289,8 @@
     }
 
     function isNeverBooted(row) {
-        return row.open && !row.boot && Date.now() - tsMillis(row.open.at) > HEALTH_BOOT_GRACE_MS;
+        if (!row.open || row.boot) return false;
+        return Date.now() - tsMillis(row.open.at) > HEALTH_BOOT_GRACE_MS;
     }
 
     function renderHealthInstalls(docs) {
