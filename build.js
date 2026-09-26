@@ -30,14 +30,16 @@ cssFiles.forEach(file => {
 });
 
 // Guard against the drift that hid new users from the admin dashboard: the
-// bundle's VP_APP_VERSION and the Android versionName must agree.
+// bundle's VP_APP_VERSION and the Android versionName must agree. This used to
+// only warn, and a warning scrolls past unread in a release build.
 const analyticsSrc = fs.readFileSync(path.join(projectDir, 'js/analytics.js'), 'utf8');
 const gradlePath = path.join(projectDir, 'android/app/build.gradle');
 const bundleVersion = (analyticsSrc.match(/const VP_APP_VERSION = '([^']+)'/) || [])[1];
 if (fs.existsSync(gradlePath)) {
     const gradleVersion = (fs.readFileSync(gradlePath, 'utf8').match(/versionName "([^"]+)"/) || [])[1];
     if (bundleVersion && gradleVersion && bundleVersion !== gradleVersion) {
-        console.warn(`⚠️  version drift: js/analytics.js says ${bundleVersion}, android/app/build.gradle says ${gradleVersion}`);
+        console.error(`❌ version drift: js/analytics.js says ${bundleVersion}, android/app/build.gradle says ${gradleVersion}`);
+        process.exit(1);
     }
 }
 

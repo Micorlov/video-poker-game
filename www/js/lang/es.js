@@ -300,6 +300,11 @@ vpRegisterLang('es', {
     'prompt.bigWin': '¡Buen golpe! Ahora tienes {{coins}} monedas — guardadas solo en este dispositivo. Si pierdes el móvil, pierdes las fichas. Respáldalas gratis con Google.',
     'prompt.session': 'Tienes {{coins}} monedas solo en este dispositivo. Inicia sesión una vez y te acompañarán a todas partes.',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': '¿Te gusta Video Póker?',
+    'review.body': 'Una valoración rápida en Google Play ayuda a otros jugadores a encontrarnos.',
+    'review.rate': 'Valorar ahora',
+
     'share.appName': 'Video Póker',
     'share.inviteText': '¡{{name}} quiere jugar al Video Póker contigo! Únete con este enlace:\n{{link}}',
     'share.inviteTextShort': '¡{{name}} quiere jugar al Video Póker contigo! Únete aquí: {{link}}',

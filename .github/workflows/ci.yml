@@ -1,0 +1,35 @@
+name: CI
+
+# Unit tests, plus a check that the committed web bundle (www/ and
+# video_poker.html) is what build.js produces from the current sources.
+# A stale www/ is what the Android app ships after a `npx cap sync android`
+# without `npm run build` first — the 2.8 sources sat beside a 2.6 bundle in
+# git for two days before this check existed.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      # --ignore-scripts: skips chromedriver's binary download, which the
+      # unit tests never use.
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - name: Committed bundle matches sources
+        run: |
+          node build.js
+          stale=$(git status --porcelain -- www video_poker.html)
+          if [ -n "$stale" ]; then
+            echo "::error::www/ or video_poker.html is stale. Run 'npm run build' and commit the result."
+            echo "$stale"
+            exit 1
+          fi

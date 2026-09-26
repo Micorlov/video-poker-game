@@ -300,6 +300,11 @@ vpRegisterLang('ko', {
     'prompt.bigWin': '멋진 한 방! 지금 {{coins}} 코인이 있어요 — 이 기기에만 저장돼 있습니다. 휴대폰을 잃으면 칩도 사라져요. Google로 무료 백업하세요.',
     'prompt.session': '이 기기에만 {{coins}} 코인이 있어요. 한 번 로그인하면 어디서든 따라옵니다.',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': '비디오 포커 재미있으신가요?',
+    'review.body': 'Google Play에 간단히 평점을 남겨 주시면 다른 플레이어들이 저희를 찾는 데 도움이 됩니다.',
+    'review.rate': '지금 평가하기',
+
     'share.appName': '비디오 포커',
     'share.inviteText': '{{name}}님이 비디오 포커를 함께 하고 싶어 해요! 이 링크로 참여하세요:\n{{link}}',
     'share.inviteTextShort': '{{name}}님이 비디오 포커를 함께 하고 싶어 해요! 여기서 참여: {{link}}',

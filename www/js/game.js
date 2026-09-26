@@ -678,7 +678,7 @@ function draw() {
     handsPlayed++;
     addLifetimeHand();
     recordAllTimeHand(win, totalBet, winStreak > bestStreak ? winStreak : bestStreak);
-    // A Straight or better counts toward the one-time in-app review ask (js/review.js).
+    // A Straight or better counts toward the rating ask (js/review.js).
     if (win > 0 && (HAND_RANK[bestType] || 0) >= 4 && window.vpOnQualityWin) vpOnQualityWin();
 
     if (win > 0) {

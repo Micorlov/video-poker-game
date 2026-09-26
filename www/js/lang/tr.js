@@ -300,6 +300,11 @@ vpRegisterLang('tr', {
     'prompt.bigWin': 'Güzel vuruş! Artık {{coins}} jetonun var — yalnızca bu cihazda kayıtlı. Telefonu kaybedersen jetonları da kaybedersin. Google ile ücretsiz yedekle.',
     'prompt.session': 'Yalnızca bu cihazda {{coins}} jetonun var. Bir kez giriş yap, her yerde seninle olsunlar.',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': 'Video Poker hoşuna gidiyor mu?',
+    'review.body': 'Google Play’de kısa bir puan, diğer oyuncuların bizi bulmasına yardımcı olur.',
+    'review.rate': 'Şimdi puanla',
+
     'share.appName': 'Video Poker',
     'share.inviteText': '{{name}} seninle Video Poker oynamak istiyor! Bu bağlantıyla katıl:\n{{link}}',
     'share.inviteTextShort': '{{name}} seninle Video Poker oynamak istiyor! Buradan katıl: {{link}}',

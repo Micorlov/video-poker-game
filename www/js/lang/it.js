@@ -300,6 +300,11 @@ vpRegisterLang('it', {
     'prompt.bigWin': 'Bel colpo! Ora hai {{coins}} monete — salvate solo su questo dispositivo. Se perdi il telefono, perdi le fiche. Salvale gratis con Google.',
     'prompt.session': 'Hai {{coins}} monete solo su questo dispositivo. Accedi una volta e ti seguiranno ovunque.',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': 'Ti piace Video Poker?',
+    'review.body': 'Una valutazione veloce su Google Play aiuta altri giocatori a trovarci.',
+    'review.rate': 'Valuta ora',
+
     'share.appName': 'Video Poker',
     'share.inviteText': '{{name}} vuole giocare a Video Poker con te! Entra con questo link:\n{{link}}',
     'share.inviteTextShort': '{{name}} vuole giocare a Video Poker con te! Entra qui: {{link}}',

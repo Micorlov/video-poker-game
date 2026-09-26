@@ -311,6 +311,11 @@ vpRegisterLang('ar', {
     'prompt.bigWin': 'ضربة موفقة! لديك الآن {{coins}} عملة — محفوظة على هذا الجهاز فقط. إن ضاع الهاتف ضاعت الرقائق. احفظها مجانًا عبر Google.',
     'prompt.session': 'لديك {{coins}} عملة على هذا الجهاز فقط. سجّل الدخول مرة واحدة وستذهب معك أينما كنت.',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': 'هل تستمتع بلعبة فيديو بوكر؟',
+    'review.body': 'تقييم سريع على Google Play يساعد لاعبين آخرين في العثور علينا.',
+    'review.rate': 'قيّم الآن',
+
     'firebase.havingTrouble': 'تواجه مشكلة؟ العب كضيف في الوقت الحالي',
 
     'share.appName': 'فيديو بوكر',

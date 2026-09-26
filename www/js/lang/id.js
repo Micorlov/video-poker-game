@@ -300,6 +300,11 @@ vpRegisterLang('id', {
     'prompt.bigWin': 'Mantap! Sekarang kamu punya {{coins}} koin — tersimpan hanya di perangkat ini. Ponsel hilang, chip hilang. Cadangkan gratis dengan Google.',
     'prompt.session': 'Kamu punya {{coins}} koin hanya di perangkat ini. Masuk sekali dan koin ikut ke mana pun.',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': 'Suka Video Poker?',
+    'review.body': 'Rating singkat di Google Play membantu pemain lain menemukan kami.',
+    'review.rate': 'Beri rating',
+
     'share.appName': 'Video Poker',
     'share.inviteText': '{{name}} ingin main Video Poker denganmu! Gabung lewat tautan ini:\n{{link}}',
     'share.inviteTextShort': '{{name}} ingin main Video Poker denganmu! Gabung di sini: {{link}}',

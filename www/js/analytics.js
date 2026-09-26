@@ -11,7 +11,7 @@
 // in android/app/build.gradle — build.js warns when the two drift apart, since
 // a stale bundle shipped inside a newer APK is exactly how the admin dashboard
 // ended up blind to the fields newer code writes.
-const VP_APP_VERSION = '2.6';
+const VP_APP_VERSION = '2.8';
 
 let vpAnalytics = null;
 let vpAnalyticsFailed = false;
@@ -28,6 +28,9 @@ const VP_ASO_EVENTS = Object.freeze({
     dailyBonusClaimed: 'daily_bonus_claimed',
     leaderboardViewed: 'leaderboard_viewed',
     reviewPromptEarned: 'review_prompt_earned',
+    reviewCardShown: 'review_card_shown',
+    reviewCardRate: 'review_card_rate',
+    reviewCardDismissed: 'review_card_dismissed',
     storeLinkOpened: 'store_link_opened',
     inviteShared: 'invite_shared'
 });

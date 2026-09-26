@@ -302,6 +302,11 @@ vpRegisterLang('hi', {
     'prompt.bigWin': 'बढ़िया! अब आपके पास {{coins}} सिक्के हैं — सिर्फ़ इसी डिवाइस पर सेव। फ़ोन गया तो चिप्स भी गईं। Google से मुफ़्त बैकअप लें।',
     'prompt.session': 'आपके {{coins}} सिक्के सिर्फ़ इसी डिवाइस पर हैं। एक बार साइन इन करें और वे हर जगह आपके साथ रहेंगे।',
 
+    // ── Rating card (js/review.js) — never name a star count (Play policy) ──
+    'review.title': 'वीडियो पोकर पसंद आ रहा है?',
+    'review.body': 'Google Play पर एक छोटी-सी रेटिंग दूसरे खिलाड़ियों को हमें ढूँढने में मदद करती है।',
+    'review.rate': 'अभी रेट करें',
+
     'share.appName': 'वीडियो पोकर',
     'share.inviteText': '{{name}} आपके साथ वीडियो पोकर खेलना चाहते हैं! इस लिंक से जुड़ें:\n{{link}}',
     'share.inviteTextShort': '{{name}} आपके साथ वीडियो पोकर खेलना चाहते हैं! यहाँ जुड़ें: {{link}}',

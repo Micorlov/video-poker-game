@@ -10,7 +10,9 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 const { JWT } = require('google-auth-library');
+const { checkAabBundle } = require('./lib/bundleFreshness');
 
 const PKG = 'com.micorlov.videopoker';
 const TRACK = 'production';
@@ -70,6 +72,14 @@ async function api(token, method, url, body, contentType) {
     for (const [lang, text] of Object.entries(RELEASE_NOTES)) {
         if (text.length > 500) throw new Error(`release notes for ${lang} are ${text.length} chars, over the 500 cap`);
     }
+
+    // Refuse to upload an AAB whose web bundle predates the sources: rebuild
+    // video_poker.html from js/ + styles/ and require the AAB to match it.
+    const root = path.join(__dirname, '..');
+    execFileSync('node', ['build.js'], { cwd: root, stdio: 'ignore' });
+    const freshness = checkAabBundle(AAB_PATH, path.join(root, 'video_poker.html'));
+    if (!freshness.ok) throw new Error('stale bundle: ' + freshness.reason);
+    console.log('bundle check ok — AAB matches the current sources');
 
     const key = JSON.parse(fs.readFileSync(KEY_FILE, 'utf8'));
     const jwt = new JWT({
