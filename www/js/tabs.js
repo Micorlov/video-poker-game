@@ -262,10 +262,32 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         if (window.maybeShowSigninPrompt) maybeShowSigninPrompt('session_start');
     }, 3000);
+    initPendingWriteFlush();
     // Last on purpose: reaching this line is what "booted" means for the
     // install funnel (js/installs.js). Anything above that throws skips it.
     if (window.vpMarkBooted) vpMarkBooted();
 });
+
+// The per-hand Firestore writes are debounced (js/leaderboards.js, js/rooms.js,
+// js/cloudsave.js) to cut write volume roughly tenfold. The cost of a debounce
+// is a window where the app can be backgrounded or closed with a delta still
+// pending, so every exit path flushes.
+//
+// visibilitychange is the reliable one on Android; pagehide covers a web tab
+// being closed outright. Both can fire for one exit, and each flush is a no-op
+// when nothing is pending, so that is harmless.
+function flushPendingWrites() {
+    if (window.flushDailyScore) flushDailyScore();
+    if (window.flushNetProfit) flushNetProfit();
+    if (window.flushCloudState) flushCloudState();
+}
+
+function initPendingWriteFlush() {
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') flushPendingWrites();
+    });
+    window.addEventListener('pagehide', flushPendingWrites);
+}
 
 if (window.vpOnLanguageChange) {
     vpOnLanguageChange(function() {

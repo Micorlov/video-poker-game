@@ -8,6 +8,20 @@ const firebaseConfig = {
     storageBucket: "video-poker-6d665.firebasestorage.app",
     messagingSenderId: "53702406091",
     appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e"
+    // measurementId: "G-XXXXXXXXXX"
+    //
+    // The whole GA4 event vocabulary in js/analytics.js is dead code until this
+    // field exists: without it firebase.analytics() throws and logVpEvent() is a
+    // silent no-op. It appears only once Google Analytics is enabled on the
+    // Firebase project, which is a console action (Project settings →
+    // Integrations → Google Analytics) — the Firebase CLI token has no Analytics
+    // Admin scope, so it cannot be scripted. After enabling it, copy
+    // measurementId from Project settings → Your apps → Web app config to here
+    // and nothing else needs to change.
+    //
+    // Independent of this, js/installs.js answers the 96-acquisitions-vs-33-
+    // first-opens question on its own and counts signed-out guests, which GA4
+    // keyed to a Firebase app would still miss on native.
 };
 let auth = null;
 let db = null;
@@ -204,6 +218,9 @@ function signInWithFacebook() {
 }
 
 function signOutUser() {
+    // Debounced score and profit deltas need their owner: once auth clears,
+    // window.egUser is null and the pending delta could no longer be attributed.
+    if (window.flushPendingWrites) flushPendingWrites();
     if (isNativeApp()) {
         firebaseSafe(function() { return window.Capacitor.Plugins.FirebaseAuthentication.signOut(); });
     }

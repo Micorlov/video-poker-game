@@ -73,6 +73,9 @@ function vpRestCreate(collection, docId, data) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         }).then(function(res) {
+            // Every response carries the server's clock; a wrong device clock
+            // otherwise mis-dates the player's daily score.
+            try { vpNoteServerDate(res.headers && res.headers.get('date')); } catch (e) {}
             if (res.ok) return 'ok';
             if (res.status === 429) return 'quota';
             if (res.status >= 500) return 'retry';
@@ -160,6 +163,58 @@ function vpDeviceInfo() {
         lang: String(navigator.language || '').slice(0, 16)
     };
 }
+
+// --- Device clock skew ------------------------------------------------------
+//
+// daily_scores documents exist dated four days in the future, because
+// getDayKey() (js/leaderboards.js) builds its key from the device's own local
+// date and some devices' clocks are simply wrong. A player with a fast clock
+// writes to a day nobody is reading, so their score silently never appears.
+//
+// A timezone can only ever move the date by one day, so anything beyond that is
+// skew, not travel. The correction comes from the Date header on a real
+// response — no extra request, no API — and only the offset from UTC is kept,
+// so the player's own timezone still decides which local day it is.
+var vpClockSkewMs = 0;
+var VP_MAX_TRUSTED_SKEW_MS = 60 * 1000;
+
+// Called with the `date` header of any response this file already makes.
+function vpNoteServerDate(headerValue) {
+    if (!headerValue) return;
+    var serverMs = Date.parse(headerValue);
+    if (!serverMs) return;
+    var skew = serverMs - Date.now();
+    // Sub-minute differences are latency and rounding, not a broken clock.
+    vpClockSkewMs = Math.abs(skew) > VP_MAX_TRUSTED_SKEW_MS ? skew : 0;
+}
+
+// Now, as the server would date it. Everything that keys data by date uses this
+// rather than Date.now() so one bad device clock cannot file a score under a day
+// that no leaderboard query covers.
+function vpServerNow() {
+    return new Date(Date.now() + vpClockSkewMs);
+}
+
+function vpClockSkewSeconds() {
+    return Math.round(vpClockSkewMs / 1000);
+}
+
+// One HEAD per launch, so the correction is known even for an install that has
+// nothing else to report. It is not a Firestore document read, so it costs no
+// quota, and a failure just leaves the device clock in charge as before.
+function vpProbeServerClock() {
+    if (typeof fetch !== 'function') return Promise.resolve();
+    try {
+        return fetch('https://firestore.googleapis.com/', { method: 'HEAD' })
+            .then(function(res) {
+                try { vpNoteServerDate(res.headers && res.headers.get('date')); } catch (e) {}
+            }, function() { /* offline: the device clock stands */ });
+    } catch (e) {
+        return Promise.resolve();
+    }
+}
+
+vpProbeServerClock();
 
 // getCountry() lives in the main bundle (js/presence.js) and may not have run;
 // fall back to the region part of the browser language.
@@ -13074,10 +13129,21 @@ function logVpEvent(name, params) {
     }
 }
 
+// True once the SDK has been asked for and refused, i.e. GA is not enabled on
+// the project. Surfaced so the gap is visible rather than looking like silence.
+function vpAnalyticsEnabled() {
+    return !!vpAnalytics && !vpAnalyticsFailed;
+}
+
 function initVpAnalytics() {
     if (window.__vpAnalyticsSessionStarted) return;
     window.__vpAnalyticsSessionStarted = true;
     logVpEvent(VP_ASO_EVENTS.appOpen, { app_version: VP_APP_VERSION });
+    if (!vpAnalyticsEnabled()) {
+        // Not an error report: this is a known configuration gap, and routing it
+        // to js/errors.js would bury real errors under one per session.
+        console.info('Firebase Analytics is not enabled (no measurementId) — funnel events are no-ops.');
+    }
     logVpEvent(VP_ASO_EVENTS.sessionStart, {
         platform: window.Capacitor && window.Capacitor.isNativePlatform ? 'native' : 'web'
     });
@@ -13124,6 +13190,7 @@ function getStoredUtmContext() {
 
 captureUtmContext();
 
+window.vpAnalyticsEnabled = vpAnalyticsEnabled;
 window.VP_APP_VERSION = VP_APP_VERSION;
 window.VP_ASO_EVENTS = VP_ASO_EVENTS;
 window.initVpAnalytics = initVpAnalytics;
@@ -13827,6 +13894,20 @@ const firebaseConfig = {
     storageBucket: "video-poker-6d665.firebasestorage.app",
     messagingSenderId: "53702406091",
     appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e"
+    // measurementId: "G-XXXXXXXXXX"
+    //
+    // The whole GA4 event vocabulary in js/analytics.js is dead code until this
+    // field exists: without it firebase.analytics() throws and logVpEvent() is a
+    // silent no-op. It appears only once Google Analytics is enabled on the
+    // Firebase project, which is a console action (Project settings →
+    // Integrations → Google Analytics) — the Firebase CLI token has no Analytics
+    // Admin scope, so it cannot be scripted. After enabling it, copy
+    // measurementId from Project settings → Your apps → Web app config to here
+    // and nothing else needs to change.
+    //
+    // Independent of this, js/installs.js answers the 96-acquisitions-vs-33-
+    // first-opens question on its own and counts signed-out guests, which GA4
+    // keyed to a Firebase app would still miss on native.
 };
 let auth = null;
 let db = null;
@@ -14023,6 +14104,9 @@ function signInWithFacebook() {
 }
 
 function signOutUser() {
+    // Debounced score and profit deltas need their owner: once auth clears,
+    // window.egUser is null and the pending delta could no longer be attributed.
+    if (window.flushPendingWrites) flushPendingWrites();
     if (isNativeApp()) {
         firebaseSafe(function() { return window.Capacitor.Plugins.FirebaseAuthentication.signOut(); });
     }
@@ -14654,10 +14738,25 @@ initPushListeners();
 
 /* --- js/presence.js --- */
 // Presence — heartbeat + country detection.
-// Every 60s while signed in, write lastSeen timestamp to Firestore.
 // Country resolved from IP via ipapi.co; falls back to navigator.language.
+//
+// The heartbeat used to write lastSeen every 60s regardless of whether the app
+// was even on screen: 60 writes/hour/user, the single largest source of
+// Firestore writes in the app, and it kept running while backgrounded. At
+// 5 minutes and skipped while hidden it is 12/hour at most, and 0 while the
+// app is in the background.
+//
+// isOnline() treats a player as online for 2 minutes after lastSeen, so the
+// interval alone would make everyone look offline between beats. A write on
+// becoming visible plus the grace period below keeps "online" honest without
+// paying for a 60s beat.
+const PRESENCE_INTERVAL_MS = 5 * 60 * 1000;
+// Covers PRESENCE_INTERVAL_MS plus a slow write, so a player who is genuinely
+// present is never shown as offline between two beats.
+const PRESENCE_ONLINE_GRACE_MS = PRESENCE_INTERVAL_MS + 2 * 60 * 1000;
 
 let presenceInterval = null;
+let presenceVisibilityBound = false;
 let userCountry = '';
 let countryResolved = false;
 
@@ -14714,17 +14813,29 @@ function startPresence() {
         });
     });
 
-    // Heartbeat every 60s
     if (presenceInterval) clearInterval(presenceInterval);
-    presenceInterval = setInterval(function() {
-        const user = window.egUser;
-        if (!user) { stopPresence(); return; }
-        firebaseSafe(function() {
-            return db.collection('users').doc(user.uid).set({
-                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+    presenceInterval = setInterval(beatPresence, PRESENCE_INTERVAL_MS);
+    if (!presenceVisibilityBound) {
+        // A returning player should show as online immediately rather than
+        // waiting up to 5 minutes for the next beat.
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && presenceInterval) beatPresence();
         });
-    }, 60000);
+        presenceVisibilityBound = true;
+    }
+}
+
+function beatPresence() {
+    const user = window.egUser;
+    if (!user) { stopPresence(); return; }
+    // A backgrounded WebView is not presence: nobody is looking at the app, and
+    // on Android the write would often be queued until it resumes anyway.
+    if (document.visibilityState === 'hidden') return;
+    firebaseSafe(function() {
+        return db.collection('users').doc(user.uid).set({
+            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+    });
 }
 
 function stopPresence() {
@@ -14739,7 +14850,7 @@ function isOnline(lastSeen) {
     if (lastSeen.toDate) lastSeen = lastSeen.toDate();
     if (typeof lastSeen === 'number' || lastSeen instanceof Date) {
         const ms = typeof lastSeen === 'number' ? lastSeen : lastSeen.getTime();
-        return (Date.now() - ms) < 120000; // 2 minutes
+        return (Date.now() - ms) < PRESENCE_ONLINE_GRACE_MS;
     }
     return false;
 }
@@ -15593,7 +15704,17 @@ function maybeRestoreCloudState(userDoc) {
     if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
 }
 
+// Sends a pending debounced save immediately. Firestore's local persistence
+// queues the write if the app is already backgrounded, so it survives even when
+// the WebView is suspended before it reaches the network.
+function flushCloudState() {
+    if (!cloudSaveTimer) return;
+    clearTimeout(cloudSaveTimer);
+    pushCloudState();
+}
+
 window.schedulePushCloudState = schedulePushCloudState;
+window.flushCloudState = flushCloudState;
 window.maybeRestoreCloudState = maybeRestoreCloudState;
 window.localStateIsFresh = localStateIsFresh;
 
@@ -15757,7 +15878,34 @@ function getRoomStatus(room) {
     return count > 1 ? 'playing' : 'open';
 }
 
+// Every hand used to write users/{uid} plus one doc per joined room. Play in a
+// room and a single hand cost several writes. The per-hand caller now goes
+// through schedulePushNetProfit(); callers where the value must land at once —
+// sign-in, a referral payout, a cloud restore, an admin reset arriving — still
+// call pushNetProfit() directly.
+const NET_PROFIT_DEBOUNCE_MS = 10000;
+let netProfitTimer = null;
+
+function schedulePushNetProfit() {
+    if (!window.egUser) return;
+    if (netProfitTimer) clearTimeout(netProfitTimer);
+    netProfitTimer = setTimeout(function() {
+        netProfitTimer = null;
+        pushNetProfit();
+    }, NET_PROFIT_DEBOUNCE_MS);
+}
+
+function flushNetProfit() {
+    if (!netProfitTimer) return;
+    clearTimeout(netProfitTimer);
+    netProfitTimer = null;
+    pushNetProfit();
+}
+
 function pushNetProfit() {
+    // Whatever the reason for writing now, a pending debounce would only
+    // rewrite the same fields a moment later.
+    if (netProfitTimer) { clearTimeout(netProfitTimer); netProfitTimer = null; }
     const user = window.egUser;
     if (!user) return;
     const netProfit = balance - netProfitBaseline();
@@ -15804,6 +15952,9 @@ function loadMyRooms() {
 // Sign-out teardown. This did not exist, so myRooms and the room-detail
 // listener leaked across account switches.
 function cleanupRooms() {
+    // A queued write for the account being torn down must not fire against the
+    // next one; signOutUser() has already flushed anything worth keeping.
+    if (netProfitTimer) { clearTimeout(netProfitTimer); netProfitTimer = null; }
     if (roomDetailUnsubscribe) { roomDetailUnsubscribe(); roomDetailUnsubscribe = null; }
     myRooms = [];
     activeRoomId = null;
@@ -16792,8 +16943,10 @@ let championsList = [];
 let champTimerInterval = null;
 let champLastHourKey = '';
 
+// Server-corrected clock, same reason as getDayKey() in js/leaderboards.js: a
+// device whose clock is wrong would compete in an hour nobody else is in.
 function getHourKey() {
-    const d = new Date();
+    const d = window.vpServerNow ? vpServerNow() : new Date(Date.now());
     const yyyy = d.getUTCFullYear();
     const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
     const dd = String(d.getUTCDate()).padStart(2, '0');
@@ -17066,8 +17219,12 @@ let lbTimerInterval = null;
 let lbLastHourKey = '';
 let lbLastDayKey = '';
 
+// Keyed off the server-corrected clock (js/telemetry.js), not the raw device
+// clock: daily_scores documents exist dated days in the future because some
+// devices' clocks are wrong, and a score filed under a future key is never read
+// by any leaderboard query. The player's own timezone still picks the local day.
 function getDayKey(offset) {
-    const d = new Date();
+    const d = window.vpServerNow ? vpServerNow() : new Date(Date.now());
     d.setDate(d.getDate() + (offset || 0));
     return d.getFullYear() + '-' +
         String(d.getMonth() + 1).padStart(2, '0') + '-' +
@@ -17101,35 +17258,69 @@ function ownDailyNetProfit() {
 }
 
 // --- Global Daily writes (daily_scores/{dayKey}_{uid}) ---
+//
+// This used to write once per hand. `score` and `hands` are both
+// FieldValue.increment, so batching is exact rather than approximate: summing
+// the per-hand deltas and sending one increment lands on the same number.
+// At ~10s that is one write per burst of play instead of one per hand.
+const DAILY_SCORE_DEBOUNCE_MS = 10000;
+let dailyScoreTimer = null;
+let pendingDailyScore = null;
+
 function pushDailyScore(handType, win, totalBet) {
     const user = window.egUser;
     if (!user) return;
     ensureDailyBaseline();
     const dayKey = getDayKey();
-    const fields = {
-        uid: user.uid,
-        displayName: user.displayName || t('common.player'),
-        photoURL: user.photoURL || null,
-        country: (typeof getCountry === 'function' ? getCountry() : null),
-        dayKey: dayKey,
-        score: firebase.firestore.FieldValue.increment(win - totalBet),
-        hands: firebase.firestore.FieldValue.increment(1),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
+
+    // Midnight mid-session: the pending deltas belong to the day they were
+    // played, so send them before starting the new day's batch.
+    if (pendingDailyScore && pendingDailyScore.dayKey !== dayKey) flushDailyScore();
+
+    const pending = pendingDailyScore || { dayKey: dayKey, score: 0, hands: 0, bestHand: null };
+    pending.score += win - totalBet;
+    pending.hands += 1;
+
     const rank = HAND_RANK[handType] || 0;
     if (win > 0 && rank > dailyProgress.bestHandRank) {
         dailyProgress.bestHandRank = rank;
         dailyProgress.bestHand = handType;
         saveDailyProgress();
-        fields.bestHand = handType;
+        pending.bestHand = handType;
     }
-    // Mirror the increment now: pushNetProfit() runs later in the same hand,
-    // before the snapshot listener would deliver the new value.
+    pendingDailyScore = pending;
+
+    // Mirror the increment now: the UI must not wait for the debounce, and
+    // pushNetProfit() reads this value later in the same hand.
     if (ownDailyScore && ownDailyScore.dayKey === dayKey) {
         ownDailyScore = { dayKey: dayKey, score: ownDailyScore.score + win - totalBet };
     }
+
+    if (dailyScoreTimer) clearTimeout(dailyScoreTimer);
+    dailyScoreTimer = setTimeout(flushDailyScore, DAILY_SCORE_DEBOUNCE_MS);
+}
+
+function flushDailyScore() {
+    if (dailyScoreTimer) { clearTimeout(dailyScoreTimer); dailyScoreTimer = null; }
+    const pending = pendingDailyScore;
+    const user = window.egUser;
+    if (!pending) return;
+    pendingDailyScore = null;
+    if (!user) return;
+
+    const fields = {
+        uid: user.uid,
+        displayName: user.displayName || t('common.player'),
+        photoURL: user.photoURL || null,
+        country: (typeof getCountry === 'function' ? getCountry() : null),
+        dayKey: pending.dayKey,
+        score: firebase.firestore.FieldValue.increment(pending.score),
+        hands: firebase.firestore.FieldValue.increment(pending.hands),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if (pending.bestHand) fields.bestHand = pending.bestHand;
     firebaseSafe(function() {
-        return db.collection('daily_scores').doc(dayKey + '_' + user.uid).set(fields, { merge: true });
+        return db.collection('daily_scores').doc(pending.dayKey + '_' + user.uid).set(fields, { merge: true });
     });
 }
 
@@ -17257,6 +17448,10 @@ function mergedDailyList() {
 }
 
 function cleanupLeaderboards() {
+    // Same reasoning as cleanupRooms(): drop a queued delta belonging to the
+    // account being torn down. signOutUser() flushes first.
+    if (dailyScoreTimer) { clearTimeout(dailyScoreTimer); dailyScoreTimer = null; }
+    pendingDailyScore = null;
     if (hourlyBoardUnsubscribe) { hourlyBoardUnsubscribe(); hourlyBoardUnsubscribe = null; }
     if (dailyBoardUnsubscribe) { dailyBoardUnsubscribe(); dailyBoardUnsubscribe = null; }
     if (ownDailyUnsubscribe) { ownDailyUnsubscribe(); ownDailyUnsubscribe = null; }
@@ -18549,7 +18744,9 @@ function draw() {
         }
     }
     saveGameState();
-    if (window.pushNetProfit) pushNetProfit();
+    // Debounced: at one write per hand (plus one per joined room) this was the
+    // second largest source of Firestore writes in the app.
+    if (window.schedulePushNetProfit) schedulePushNetProfit();
     if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
 
     const resultEl = document.getElementById('result');
@@ -19609,10 +19806,32 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         if (window.maybeShowSigninPrompt) maybeShowSigninPrompt('session_start');
     }, 3000);
+    initPendingWriteFlush();
     // Last on purpose: reaching this line is what "booted" means for the
     // install funnel (js/installs.js). Anything above that throws skips it.
     if (window.vpMarkBooted) vpMarkBooted();
 });
+
+// The per-hand Firestore writes are debounced (js/leaderboards.js, js/rooms.js,
+// js/cloudsave.js) to cut write volume roughly tenfold. The cost of a debounce
+// is a window where the app can be backgrounded or closed with a delta still
+// pending, so every exit path flushes.
+//
+// visibilitychange is the reliable one on Android; pagehide covers a web tab
+// being closed outright. Both can fire for one exit, and each flush is a no-op
+// when nothing is pending, so that is harmless.
+function flushPendingWrites() {
+    if (window.flushDailyScore) flushDailyScore();
+    if (window.flushNetProfit) flushNetProfit();
+    if (window.flushCloudState) flushCloudState();
+}
+
+function initPendingWriteFlush() {
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') flushPendingWrites();
+    });
+    window.addEventListener('pagehide', flushPendingWrites);
+}
 
 if (window.vpOnLanguageChange) {
     vpOnLanguageChange(function() {

@@ -734,7 +734,9 @@ function draw() {
         }
     }
     saveGameState();
-    if (window.pushNetProfit) pushNetProfit();
+    // Debounced: at one write per hand (plus one per joined room) this was the
+    // second largest source of Firestore writes in the app.
+    if (window.schedulePushNetProfit) schedulePushNetProfit();
     if (window.renderPlayFriendsWidgets) renderPlayFriendsWidgets();
 
     const resultEl = document.getElementById('result');

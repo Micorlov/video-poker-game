@@ -91,6 +91,16 @@ function maybeRestoreCloudState(userDoc) {
     if (window.maybeGrantDailyBonus) maybeGrantDailyBonus();
 }
 
+// Sends a pending debounced save immediately. Firestore's local persistence
+// queues the write if the app is already backgrounded, so it survives even when
+// the WebView is suspended before it reaches the network.
+function flushCloudState() {
+    if (!cloudSaveTimer) return;
+    clearTimeout(cloudSaveTimer);
+    pushCloudState();
+}
+
 window.schedulePushCloudState = schedulePushCloudState;
+window.flushCloudState = flushCloudState;
 window.maybeRestoreCloudState = maybeRestoreCloudState;
 window.localStateIsFresh = localStateIsFresh;

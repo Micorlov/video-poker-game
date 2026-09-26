@@ -66,10 +66,21 @@ function logVpEvent(name, params) {
     }
 }
 
+// True once the SDK has been asked for and refused, i.e. GA is not enabled on
+// the project. Surfaced so the gap is visible rather than looking like silence.
+function vpAnalyticsEnabled() {
+    return !!vpAnalytics && !vpAnalyticsFailed;
+}
+
 function initVpAnalytics() {
     if (window.__vpAnalyticsSessionStarted) return;
     window.__vpAnalyticsSessionStarted = true;
     logVpEvent(VP_ASO_EVENTS.appOpen, { app_version: VP_APP_VERSION });
+    if (!vpAnalyticsEnabled()) {
+        // Not an error report: this is a known configuration gap, and routing it
+        // to js/errors.js would bury real errors under one per session.
+        console.info('Firebase Analytics is not enabled (no measurementId) — funnel events are no-ops.');
+    }
     logVpEvent(VP_ASO_EVENTS.sessionStart, {
         platform: window.Capacitor && window.Capacitor.isNativePlatform ? 'native' : 'web'
     });
@@ -116,6 +127,7 @@ function getStoredUtmContext() {
 
 captureUtmContext();
 
+window.vpAnalyticsEnabled = vpAnalyticsEnabled;
 window.VP_APP_VERSION = VP_APP_VERSION;
 window.VP_ASO_EVENTS = VP_ASO_EVENTS;
 window.initVpAnalytics = initVpAnalytics;

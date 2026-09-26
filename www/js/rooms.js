@@ -21,7 +21,34 @@ function getRoomStatus(room) {
     return count > 1 ? 'playing' : 'open';
 }
 
+// Every hand used to write users/{uid} plus one doc per joined room. Play in a
+// room and a single hand cost several writes. The per-hand caller now goes
+// through schedulePushNetProfit(); callers where the value must land at once —
+// sign-in, a referral payout, a cloud restore, an admin reset arriving — still
+// call pushNetProfit() directly.
+const NET_PROFIT_DEBOUNCE_MS = 10000;
+let netProfitTimer = null;
+
+function schedulePushNetProfit() {
+    if (!window.egUser) return;
+    if (netProfitTimer) clearTimeout(netProfitTimer);
+    netProfitTimer = setTimeout(function() {
+        netProfitTimer = null;
+        pushNetProfit();
+    }, NET_PROFIT_DEBOUNCE_MS);
+}
+
+function flushNetProfit() {
+    if (!netProfitTimer) return;
+    clearTimeout(netProfitTimer);
+    netProfitTimer = null;
+    pushNetProfit();
+}
+
 function pushNetProfit() {
+    // Whatever the reason for writing now, a pending debounce would only
+    // rewrite the same fields a moment later.
+    if (netProfitTimer) { clearTimeout(netProfitTimer); netProfitTimer = null; }
     const user = window.egUser;
     if (!user) return;
     const netProfit = balance - netProfitBaseline();
@@ -68,6 +95,9 @@ function loadMyRooms() {
 // Sign-out teardown. This did not exist, so myRooms and the room-detail
 // listener leaked across account switches.
 function cleanupRooms() {
+    // A queued write for the account being torn down must not fire against the
+    // next one; signOutUser() has already flushed anything worth keeping.
+    if (netProfitTimer) { clearTimeout(netProfitTimer); netProfitTimer = null; }
     if (roomDetailUnsubscribe) { roomDetailUnsubscribe(); roomDetailUnsubscribe = null; }
     myRooms = [];
     activeRoomId = null;

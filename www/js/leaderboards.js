@@ -55,8 +55,12 @@ let lbTimerInterval = null;
 let lbLastHourKey = '';
 let lbLastDayKey = '';
 
+// Keyed off the server-corrected clock (js/telemetry.js), not the raw device
+// clock: daily_scores documents exist dated days in the future because some
+// devices' clocks are wrong, and a score filed under a future key is never read
+// by any leaderboard query. The player's own timezone still picks the local day.
 function getDayKey(offset) {
-    const d = new Date();
+    const d = window.vpServerNow ? vpServerNow() : new Date(Date.now());
     d.setDate(d.getDate() + (offset || 0));
     return d.getFullYear() + '-' +
         String(d.getMonth() + 1).padStart(2, '0') + '-' +
@@ -90,35 +94,69 @@ function ownDailyNetProfit() {
 }
 
 // --- Global Daily writes (daily_scores/{dayKey}_{uid}) ---
+//
+// This used to write once per hand. `score` and `hands` are both
+// FieldValue.increment, so batching is exact rather than approximate: summing
+// the per-hand deltas and sending one increment lands on the same number.
+// At ~10s that is one write per burst of play instead of one per hand.
+const DAILY_SCORE_DEBOUNCE_MS = 10000;
+let dailyScoreTimer = null;
+let pendingDailyScore = null;
+
 function pushDailyScore(handType, win, totalBet) {
     const user = window.egUser;
     if (!user) return;
     ensureDailyBaseline();
     const dayKey = getDayKey();
-    const fields = {
-        uid: user.uid,
-        displayName: user.displayName || t('common.player'),
-        photoURL: user.photoURL || null,
-        country: (typeof getCountry === 'function' ? getCountry() : null),
-        dayKey: dayKey,
-        score: firebase.firestore.FieldValue.increment(win - totalBet),
-        hands: firebase.firestore.FieldValue.increment(1),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
+
+    // Midnight mid-session: the pending deltas belong to the day they were
+    // played, so send them before starting the new day's batch.
+    if (pendingDailyScore && pendingDailyScore.dayKey !== dayKey) flushDailyScore();
+
+    const pending = pendingDailyScore || { dayKey: dayKey, score: 0, hands: 0, bestHand: null };
+    pending.score += win - totalBet;
+    pending.hands += 1;
+
     const rank = HAND_RANK[handType] || 0;
     if (win > 0 && rank > dailyProgress.bestHandRank) {
         dailyProgress.bestHandRank = rank;
         dailyProgress.bestHand = handType;
         saveDailyProgress();
-        fields.bestHand = handType;
+        pending.bestHand = handType;
     }
-    // Mirror the increment now: pushNetProfit() runs later in the same hand,
-    // before the snapshot listener would deliver the new value.
+    pendingDailyScore = pending;
+
+    // Mirror the increment now: the UI must not wait for the debounce, and
+    // pushNetProfit() reads this value later in the same hand.
     if (ownDailyScore && ownDailyScore.dayKey === dayKey) {
         ownDailyScore = { dayKey: dayKey, score: ownDailyScore.score + win - totalBet };
     }
+
+    if (dailyScoreTimer) clearTimeout(dailyScoreTimer);
+    dailyScoreTimer = setTimeout(flushDailyScore, DAILY_SCORE_DEBOUNCE_MS);
+}
+
+function flushDailyScore() {
+    if (dailyScoreTimer) { clearTimeout(dailyScoreTimer); dailyScoreTimer = null; }
+    const pending = pendingDailyScore;
+    const user = window.egUser;
+    if (!pending) return;
+    pendingDailyScore = null;
+    if (!user) return;
+
+    const fields = {
+        uid: user.uid,
+        displayName: user.displayName || t('common.player'),
+        photoURL: user.photoURL || null,
+        country: (typeof getCountry === 'function' ? getCountry() : null),
+        dayKey: pending.dayKey,
+        score: firebase.firestore.FieldValue.increment(pending.score),
+        hands: firebase.firestore.FieldValue.increment(pending.hands),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if (pending.bestHand) fields.bestHand = pending.bestHand;
     firebaseSafe(function() {
-        return db.collection('daily_scores').doc(dayKey + '_' + user.uid).set(fields, { merge: true });
+        return db.collection('daily_scores').doc(pending.dayKey + '_' + user.uid).set(fields, { merge: true });
     });
 }
 
@@ -246,6 +284,10 @@ function mergedDailyList() {
 }
 
 function cleanupLeaderboards() {
+    // Same reasoning as cleanupRooms(): drop a queued delta belonging to the
+    // account being torn down. signOutUser() flushes first.
+    if (dailyScoreTimer) { clearTimeout(dailyScoreTimer); dailyScoreTimer = null; }
+    pendingDailyScore = null;
     if (hourlyBoardUnsubscribe) { hourlyBoardUnsubscribe(); hourlyBoardUnsubscribe = null; }
     if (dailyBoardUnsubscribe) { dailyBoardUnsubscribe(); dailyBoardUnsubscribe = null; }
     if (ownDailyUnsubscribe) { ownDailyUnsubscribe(); ownDailyUnsubscribe = null; }

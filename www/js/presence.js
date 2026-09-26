@@ -1,8 +1,23 @@
 // Presence — heartbeat + country detection.
-// Every 60s while signed in, write lastSeen timestamp to Firestore.
 // Country resolved from IP via ipapi.co; falls back to navigator.language.
+//
+// The heartbeat used to write lastSeen every 60s regardless of whether the app
+// was even on screen: 60 writes/hour/user, the single largest source of
+// Firestore writes in the app, and it kept running while backgrounded. At
+// 5 minutes and skipped while hidden it is 12/hour at most, and 0 while the
+// app is in the background.
+//
+// isOnline() treats a player as online for 2 minutes after lastSeen, so the
+// interval alone would make everyone look offline between beats. A write on
+// becoming visible plus the grace period below keeps "online" honest without
+// paying for a 60s beat.
+const PRESENCE_INTERVAL_MS = 5 * 60 * 1000;
+// Covers PRESENCE_INTERVAL_MS plus a slow write, so a player who is genuinely
+// present is never shown as offline between two beats.
+const PRESENCE_ONLINE_GRACE_MS = PRESENCE_INTERVAL_MS + 2 * 60 * 1000;
 
 let presenceInterval = null;
+let presenceVisibilityBound = false;
 let userCountry = '';
 let countryResolved = false;
 
@@ -59,17 +74,29 @@ function startPresence() {
         });
     });
 
-    // Heartbeat every 60s
     if (presenceInterval) clearInterval(presenceInterval);
-    presenceInterval = setInterval(function() {
-        const user = window.egUser;
-        if (!user) { stopPresence(); return; }
-        firebaseSafe(function() {
-            return db.collection('users').doc(user.uid).set({
-                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+    presenceInterval = setInterval(beatPresence, PRESENCE_INTERVAL_MS);
+    if (!presenceVisibilityBound) {
+        // A returning player should show as online immediately rather than
+        // waiting up to 5 minutes for the next beat.
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && presenceInterval) beatPresence();
         });
-    }, 60000);
+        presenceVisibilityBound = true;
+    }
+}
+
+function beatPresence() {
+    const user = window.egUser;
+    if (!user) { stopPresence(); return; }
+    // A backgrounded WebView is not presence: nobody is looking at the app, and
+    // on Android the write would often be queued until it resumes anyway.
+    if (document.visibilityState === 'hidden') return;
+    firebaseSafe(function() {
+        return db.collection('users').doc(user.uid).set({
+            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+    });
 }
 
 function stopPresence() {
@@ -84,7 +111,7 @@ function isOnline(lastSeen) {
     if (lastSeen.toDate) lastSeen = lastSeen.toDate();
     if (typeof lastSeen === 'number' || lastSeen instanceof Date) {
         const ms = typeof lastSeen === 'number' ? lastSeen : lastSeen.getTime();
-        return (Date.now() - ms) < 120000; // 2 minutes
+        return (Date.now() - ms) < PRESENCE_ONLINE_GRACE_MS;
     }
     return false;
 }

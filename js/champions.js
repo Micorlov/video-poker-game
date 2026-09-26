@@ -14,8 +14,10 @@ let championsList = [];
 let champTimerInterval = null;
 let champLastHourKey = '';
 
+// Server-corrected clock, same reason as getDayKey() in js/leaderboards.js: a
+// device whose clock is wrong would compete in an hour nobody else is in.
 function getHourKey() {
-    const d = new Date();
+    const d = window.vpServerNow ? vpServerNow() : new Date(Date.now());
     const yyyy = d.getUTCFullYear();
     const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
     const dd = String(d.getUTCDate()).padStart(2, '0');

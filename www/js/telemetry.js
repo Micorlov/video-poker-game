@@ -60,6 +60,9 @@ function vpRestCreate(collection, docId, data) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         }).then(function(res) {
+            // Every response carries the server's clock; a wrong device clock
+            // otherwise mis-dates the player's daily score.
+            try { vpNoteServerDate(res.headers && res.headers.get('date')); } catch (e) {}
             if (res.ok) return 'ok';
             if (res.status === 429) return 'quota';
             if (res.status >= 500) return 'retry';
@@ -147,6 +150,58 @@ function vpDeviceInfo() {
         lang: String(navigator.language || '').slice(0, 16)
     };
 }
+
+// --- Device clock skew ------------------------------------------------------
+//
+// daily_scores documents exist dated four days in the future, because
+// getDayKey() (js/leaderboards.js) builds its key from the device's own local
+// date and some devices' clocks are simply wrong. A player with a fast clock
+// writes to a day nobody is reading, so their score silently never appears.
+//
+// A timezone can only ever move the date by one day, so anything beyond that is
+// skew, not travel. The correction comes from the Date header on a real
+// response — no extra request, no API — and only the offset from UTC is kept,
+// so the player's own timezone still decides which local day it is.
+var vpClockSkewMs = 0;
+var VP_MAX_TRUSTED_SKEW_MS = 60 * 1000;
+
+// Called with the `date` header of any response this file already makes.
+function vpNoteServerDate(headerValue) {
+    if (!headerValue) return;
+    var serverMs = Date.parse(headerValue);
+    if (!serverMs) return;
+    var skew = serverMs - Date.now();
+    // Sub-minute differences are latency and rounding, not a broken clock.
+    vpClockSkewMs = Math.abs(skew) > VP_MAX_TRUSTED_SKEW_MS ? skew : 0;
+}
+
+// Now, as the server would date it. Everything that keys data by date uses this
+// rather than Date.now() so one bad device clock cannot file a score under a day
+// that no leaderboard query covers.
+function vpServerNow() {
+    return new Date(Date.now() + vpClockSkewMs);
+}
+
+function vpClockSkewSeconds() {
+    return Math.round(vpClockSkewMs / 1000);
+}
+
+// One HEAD per launch, so the correction is known even for an install that has
+// nothing else to report. It is not a Firestore document read, so it costs no
+// quota, and a failure just leaves the device clock in charge as before.
+function vpProbeServerClock() {
+    if (typeof fetch !== 'function') return Promise.resolve();
+    try {
+        return fetch('https://firestore.googleapis.com/', { method: 'HEAD' })
+            .then(function(res) {
+                try { vpNoteServerDate(res.headers && res.headers.get('date')); } catch (e) {}
+            }, function() { /* offline: the device clock stands */ });
+    } catch (e) {
+        return Promise.resolve();
+    }
+}
+
+vpProbeServerClock();
 
 // getCountry() lives in the main bundle (js/presence.js) and may not have run;
 // fall back to the region part of the browser language.
