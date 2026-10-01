@@ -317,6 +317,29 @@
                         <tbody id="all-users-body"><tr><td colspan="18" class="empty-state">Loading...</td></tr></tbody>
                     </table></div>
                 </div>
+
+                <div class="panel" style="margin-top:20px">
+                    <div class="panel-header">
+                        <h2>👤 Guests (not signed in)</h2>
+                        <span class="badge" id="guests-count">0</span>
+                    </div>
+                    <div id="guests-note" style="color:#94a3b8;font-size:12px;padding:0 4px 10px">Loading...</div>
+                    <div class="table-scroll"><table>
+                        <thead><tr>
+                            <th onclick="sortGuests('id')">Install ↕</th>
+                            <th onclick="sortGuests('country')">Country ↕</th>
+                            <th onclick="sortGuests('platform')">Platform ↕</th>
+                            <th onclick="sortGuests('version')">Version ↕</th>
+                            <th onclick="sortGuests('lang')">Language ↕</th>
+                            <th onclick="sortGuests('source')">Source ↕</th>
+                            <th onclick="sortGuests('firstMs')">First Seen ↕</th>
+                            <th onclick="sortGuests('lastMs')">Last Open ↕</th>
+                            <th onclick="sortGuests('opens')">Launches ↕</th>
+                            <th>Status</th>
+                        </tr></thead>
+                        <tbody id="guests-body"><tr><td colspan="10" class="empty-state">Loading...</td></tr></tbody>
+                    </table></div>
+                </div>
             </div>
 
             <!-- COMPETITIONS -->
@@ -1017,7 +1040,95 @@
             });
             document.getElementById('users-count').textContent = allUsersData.length;
             renderUsers();
+            loadGuests();
         });
+    }
+
+    // Guests never get a users/ doc, so they are known only by the anonymous
+    // install record the app writes on launch (installs/{id}_open). An install
+    // is a guest when no account's `installId` points at it. Builds that predate
+    // the link don't write it, so a signed-in player on one still lists here
+    // until they update.
+    var GUEST_INSTALL_DAYS = 90;
+    var guestsData = [];
+    var guestsSortField = 'lastMs';
+    var guestsSortDir = -1;
+    var guestsStats = { installs: 0, linked: 0 };
+
+    function loadGuests() {
+        var since = firebase.firestore.Timestamp.fromMillis(Date.now() - GUEST_INSTALL_DAYS * 86400000);
+        db.collection('installs').where('at', '>=', since).orderBy('at', 'desc').limit(3000).get()
+            .then(function(snap) {
+                var linkedIds = {};
+                allUsersData.forEach(function(u) { if (u.installId) linkedIds[u.installId] = true; });
+                var opens = snap.docs.map(function(d) { return d.data(); })
+                    .filter(function(d) { return d.stage === 'open'; });
+                guestsStats = { installs: opens.length, linked: opens.filter(function(d) { return linkedIds[d.installId]; }).length };
+                guestsData = opens.filter(function(d) { return !linkedIds[d.installId]; }).map(function(d) {
+                    var firstMs = tsMillis(d.at);
+                    return {
+                        id: d.installId, country: d.country || '', platform: d.platform || '', version: d.version || '',
+                        lang: d.lang || '', source: d.source || '', existing: !!d.existing, opens: d.opens || 1,
+                        firstMs: firstMs, lastMs: tsMillis(d.lastOpenAt) || firstMs
+                    };
+                });
+                renderGuests();
+            })
+            .catch(function(e) {
+                document.getElementById('guests-note').textContent = 'Could not load: ' + (e.code || e.message);
+                document.getElementById('guests-body').innerHTML = '<tr><td colspan="10" class="empty-state">Could not load guests</td></tr>';
+            });
+    }
+
+    function sortGuests(field) {
+        guestsSortDir = guestsSortField === field ? -guestsSortDir : -1;
+        guestsSortField = field;
+        renderGuests();
+    }
+
+    function renderGuests() {
+        var query = (document.getElementById('user-search').value || '').toLowerCase();
+        var sevenDays = 7 * 86400000;
+        var now = Date.now();
+        var rows = guestsData.filter(function(g) {
+            return !query || [g.id, g.country, g.platform, g.lang, g.source, g.version].join(' ').toLowerCase().indexOf(query) !== -1;
+        });
+        rows.sort(function(a, b) {
+            var va = a[guestsSortField], vb = b[guestsSortField];
+            if (typeof va === 'string') va = va.toLowerCase();
+            if (typeof vb === 'string') vb = vb.toLowerCase();
+            if (va < vb) return -1 * guestsSortDir;
+            if (va > vb) return 1 * guestsSortDir;
+            return 0;
+        });
+        document.getElementById('guests-count').textContent = guestsData.length;
+        document.getElementById('guests-note').textContent =
+            guestsStats.installs + ' installs opened in ' + GUEST_INSTALL_DAYS + ' days · ' + guestsStats.linked +
+            ' linked to an account · ' + guestsData.length + ' guests. Guests are anonymous, so there is no name or email. ' +
+            'Signed-in players on a build older than the account link also show here until they update.';
+        var tbody = document.getElementById('guests-body');
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No guests found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = rows.slice(0, 500).map(function(g) {
+            var churned = (now - g.lastMs) > sevenDays;
+            var badge = churned
+                ? '<span style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Churned</span>'
+                : '<span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Active</span>';
+            var upgrade = g.existing ? ' <span title="Installed before install tracking began; first seen is when it first reported">↑</span>' : '';
+            return '<tr>' +
+                '<td title="' + escapeHtml(g.id) + '">' + escapeHtml(g.id.slice(0, 6)) + upgrade + '</td>' +
+                '<td>' + countryFlag(g.country) + ' ' + escapeHtml(g.country || '—') + '</td>' +
+                '<td>' + platformLabel(g.platform) + '</td>' +
+                '<td>' + versionCell(g.version) + '</td>' +
+                '<td>' + escapeHtml(g.lang || '—') + '</td>' +
+                '<td>' + escapeHtml(g.source || '—') + '</td>' +
+                '<td>' + new Date(g.firstMs).toLocaleDateString() + '</td>' +
+                '<td>' + new Date(g.lastMs).toLocaleString() + '</td>' +
+                '<td>' + g.opens + '</td>' +
+                '<td>' + badge + '</td></tr>';
+        }).join('');
     }
 
     function renderUsers() {
@@ -1094,7 +1205,7 @@
         renderUsers();
     }
 
-    function filterUsers() { usersChurnFilter = false; renderUsers(); }
+    function filterUsers() { usersChurnFilter = false; renderUsers(); renderGuests(); }
 
     function navHour(dir) {
         compHourOffset += dir;
