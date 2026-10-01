@@ -869,6 +869,7 @@
                     document.getElementById('s-total-users').textContent = signedIn + result.guests.length;
                     document.getElementById('s-total-users-sub').textContent =
                         signedIn + ' signed in · ' + result.guests.length + ' guests';
+                    document.getElementById('s-total-users-sub').title = guestTrackingNote(result.trackedSinceMs);
                 })
                 .catch(function(e) {
                     document.getElementById('s-total-users-sub').textContent =
@@ -1087,14 +1088,25 @@
                         firstMs: firstMs, lastMs: tsMillis(d.lastOpenAt) || firstMs
                     };
                 });
-                return { installs: opens.length, linked: opens.length - guests.length, guests: guests };
+                var trackedSinceMs = opens.reduce(function(min, d) {
+                    var ms = tsMillis(d.at);
+                    return ms && (!min || ms < min) ? ms : min;
+                }, 0);
+                return { installs: opens.length, linked: opens.length - guests.length, guests: guests, trackedSinceMs: trackedSinceMs };
             });
+    }
+
+    // Guests were never stored before install tracking shipped, so anyone who
+    // played signed-out and stopped before then is not in Firestore at all.
+    function guestTrackingNote(sinceMs) {
+        return 'Guests are counted from ' + (sinceMs ? new Date(sinceMs).toLocaleDateString() : 'the first tracked install') +
+            ', when install tracking began. Signed-out players before that were never recorded, so this undercounts older guests.';
     }
 
     function loadGuests() {
         fetchGuestInstalls(allUsersData)
             .then(function(result) {
-                guestsStats = { installs: result.installs, linked: result.linked };
+                guestsStats = { installs: result.installs, linked: result.linked, trackedSinceMs: result.trackedSinceMs };
                 guestsData = result.guests;
                 renderGuests();
             })
@@ -1127,9 +1139,10 @@
         });
         document.getElementById('guests-count').textContent = guestsData.length;
         document.getElementById('guests-note').textContent =
-            guestsStats.installs + ' installs opened, all time · ' + guestsStats.linked +
+            guestsStats.installs + ' installs tracked since ' + (guestsStats.trackedSinceMs ? new Date(guestsStats.trackedSinceMs).toLocaleDateString() : '—') + ' · ' + guestsStats.linked +
             ' linked to an account · ' + guestsData.length + ' guests. Guests are anonymous, so there is no name or email. ' +
-            'Signed-in players on a build older than the account link also show here until they update.';
+            'Signed-in players on a build older than the account link also show here until they update. ' +
+            'Guests who played before tracking began were never recorded, so this undercounts older guests.';
         var tbody = document.getElementById('guests-body');
         if (!rows.length) {
             tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No guests found</td></tr>';
