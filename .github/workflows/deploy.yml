@@ -36,6 +36,17 @@ jobs:
             exit 1
           fi
           cp video_poker.html index.html
+      - name: Generate Firebase portfolio data
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+        run: |
+          if [ -z "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" ]; then
+            echo '{"generatedAt":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)'"'","projects":[],"error":"Missing FIREBASE_SERVICE_ACCOUNT_KEY repository secret."}' > firebase/projects.json
+          else
+            printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > "$GOOGLE_APPLICATION_CREDENTIALS"
+            node scripts/firebase-portfolio.js
+            rm -f "$GOOGLE_APPLICATION_CREDENTIALS"
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
