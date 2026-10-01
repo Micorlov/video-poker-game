@@ -240,7 +240,7 @@
                     <button onclick="refreshOverview()">↻ Refresh</button>
                 </div>
                 <div class="stats-grid">
-                    <div class="stat-card"><div class="label">Total Users</div><div class="value" id="s-total-users">—</div></div>
+                    <div class="stat-card"><div class="label">Total Users</div><div class="value" id="s-total-users">—</div><div class="sub" id="s-total-users-sub">—</div></div>
                     <div class="stat-card"><div class="label">Active Today</div><div class="value" id="s-today">—</div></div>
                     <div class="stat-card"><div class="label">New Users (7d)</div><div class="value" id="s-new-7d">—</div><div class="sub" id="s-new-today">—</div></div>
                     <div class="stat-card"><div class="label">New Users (30d)</div><div class="value" id="s-new-30d">—</div><div class="sub" id="s-new-undated">—</div></div>
@@ -861,7 +861,19 @@
 
     function loadOverviewStats() {
         db.collection('users').get().then(function(snap) {
-            document.getElementById('s-total-users').textContent = snap.size;
+            var signedIn = snap.size;
+            document.getElementById('s-total-users').textContent = signedIn;
+            document.getElementById('s-total-users-sub').textContent = signedIn + ' signed in';
+            fetchGuestInstalls(snap.docs.map(function(doc) { return doc.data(); }))
+                .then(function(result) {
+                    document.getElementById('s-total-users').textContent = signedIn + result.guests.length;
+                    document.getElementById('s-total-users-sub').textContent =
+                        signedIn + ' signed in · ' + result.guests.length + ' guests';
+                })
+                .catch(function(e) {
+                    document.getElementById('s-total-users-sub').textContent =
+                        signedIn + ' signed in · guests unavailable (' + (e.code || e.message) + ')';
+                });
             var now = Date.now();
             var todayStr = new Date().toISOString().slice(0, 10);
             var day = 24 * 60 * 60 * 1000;
@@ -1049,22 +1061,25 @@
     // is a guest when no account's `installId` points at it. Builds that predate
     // the link don't write it, so a signed-in player on one still lists here
     // until they update.
-    var GUEST_INSTALL_DAYS = 90;
+    // Every install ever recorded; each one is two docs (open + boot), so this
+    // covers ~5000 installs before the oldest start dropping off.
+    var GUEST_INSTALL_LIMIT = 10000;
     var guestsData = [];
     var guestsSortField = 'lastMs';
     var guestsSortDir = -1;
     var guestsStats = { installs: 0, linked: 0 };
 
-    function loadGuests() {
-        var since = firebase.firestore.Timestamp.fromMillis(Date.now() - GUEST_INSTALL_DAYS * 86400000);
-        db.collection('installs').where('at', '>=', since).orderBy('at', 'desc').limit(3000).get()
+    // Anonymous installs that no account links to, over all
+    // time. Shared by the Overview total and the Guests table so
+    // both count the same people.
+    function fetchGuestInstalls(userDocs) {
+        return db.collection('installs').orderBy('at', 'desc').limit(GUEST_INSTALL_LIMIT).get()
             .then(function(snap) {
                 var linkedIds = {};
-                allUsersData.forEach(function(u) { if (u.installId) linkedIds[u.installId] = true; });
+                userDocs.forEach(function(u) { if (u.installId) linkedIds[u.installId] = true; });
                 var opens = snap.docs.map(function(d) { return d.data(); })
                     .filter(function(d) { return d.stage === 'open'; });
-                guestsStats = { installs: opens.length, linked: opens.filter(function(d) { return linkedIds[d.installId]; }).length };
-                guestsData = opens.filter(function(d) { return !linkedIds[d.installId]; }).map(function(d) {
+                var guests = opens.filter(function(d) { return !linkedIds[d.installId]; }).map(function(d) {
                     var firstMs = tsMillis(d.at);
                     return {
                         id: d.installId, country: d.country || '', platform: d.platform || '', version: d.version || '',
@@ -1072,6 +1087,15 @@
                         firstMs: firstMs, lastMs: tsMillis(d.lastOpenAt) || firstMs
                     };
                 });
+                return { installs: opens.length, linked: opens.length - guests.length, guests: guests };
+            });
+    }
+
+    function loadGuests() {
+        fetchGuestInstalls(allUsersData)
+            .then(function(result) {
+                guestsStats = { installs: result.installs, linked: result.linked };
+                guestsData = result.guests;
                 renderGuests();
             })
             .catch(function(e) {
@@ -1103,7 +1127,7 @@
         });
         document.getElementById('guests-count').textContent = guestsData.length;
         document.getElementById('guests-note').textContent =
-            guestsStats.installs + ' installs opened in ' + GUEST_INSTALL_DAYS + ' days · ' + guestsStats.linked +
+            guestsStats.installs + ' installs opened, all time · ' + guestsStats.linked +
             ' linked to an account · ' + guestsData.length + ' guests. Guests are anonymous, so there is no name or email. ' +
             'Signed-in players on a build older than the account link also show here until they update.';
         var tbody = document.getElementById('guests-body');
