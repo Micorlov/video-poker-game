@@ -39,11 +39,12 @@ jobs:
       - name: Generate Firebase portfolio data
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
         run: |
-          if [ -z "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" ]; then
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT_KEY" ]; then
             echo '{"generatedAt":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)'"'","projects":[],"error":"Missing FIREBASE_SERVICE_ACCOUNT_KEY repository secret."}' > firebase/projects.json
           else
-            printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}' > "$GOOGLE_APPLICATION_CREDENTIALS"
+            printf '%s' "$FIREBASE_SERVICE_ACCOUNT_KEY" > "$GOOGLE_APPLICATION_CREDENTIALS"
             node scripts/firebase-portfolio.js
             rm -f "$GOOGLE_APPLICATION_CREDENTIALS"
           fi
