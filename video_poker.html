@@ -14199,17 +14199,15 @@ const firebaseConfig = {
     projectId: "video-poker-6d665",
     storageBucket: "video-poker-6d665.firebasestorage.app",
     messagingSenderId: "53702406091",
-    appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e"
-    // measurementId: "G-XXXXXXXXXX"
-    //
-    // The whole GA4 event vocabulary in js/analytics.js is dead code until this
-    // field exists: without it firebase.analytics() throws and logVpEvent() is a
-    // silent no-op. It appears only once Google Analytics is enabled on the
-    // Firebase project, which is a console action (Project settings →
-    // Integrations → Google Analytics) — the Firebase CLI token has no Analytics
-    // Admin scope, so it cannot be scripted. After enabling it, copy
-    // measurementId from Project settings → Your apps → Web app config to here
-    // and nothing else needs to change.
+    appId: "1:53702406091:web:1ef4969a8cc77ebd6a504e",
+    // The GA4 "video-poker-web" data stream (stream id 15927561618) of the
+    // linked property. Until this field existed, firebase.analytics() threw and
+    // every event in js/analytics.js was a silent no-op — so the hosted game at
+    // micorlov.github.io/video-poker-game/ wrote players to Firestore (and so to
+    // the admin panel) while reporting nothing at all to GA4. That one-sided
+    // reporting is why the admin panel and GA4 never agreed: GA4 heard only from
+    // the native Android stream.
+    measurementId: "G-89XNQ4R7Y2"
     //
     // Independent of this, js/installs.js answers the 96-acquisitions-vs-33-
     // first-opens question on its own and counts signed-out guests, which GA4
