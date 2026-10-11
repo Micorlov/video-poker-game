@@ -198,6 +198,14 @@
     <string name="ob_back">Назад</string>
     <string name="ob_next">Далее</string>
     <string name="ob_start_with_chips">Начните с %1$s фишек</string>
+    <string name="settings_notifications">Уведомления</string>
+    <string name="settings_friend_activity">Активность друзей</string>
+    <string name="settings_leaderboard_updates">Обновления рейтинга</string>
+    <string name="settings_daily_bonus_reminder">Напоминание о ежедневном бонусе</string>
+    <string name="settings_friends_best_hands">Лучшие комбинации друзей</string>
+    <string name="settings_enable_notifications">Включить уведомления</string>
+    <string name="notif_daily_title">Ваш ALL IN снова доступен</string>
+    <string name="notif_daily_body">Возвращайтесь и используйте его, пока он не сбросился снова!</string>
     <string-array name="rank_names">
         <item>Туз</item>
         <item>2</item>

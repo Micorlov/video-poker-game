@@ -245,4 +245,12 @@
     <string name="ob_back">Back</string>
     <string name="ob_next">Next</string>
     <string name="ob_start_with_chips">Start with %1$s chips</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_friend_activity">Friend activity</string>
+    <string name="settings_leaderboard_updates">Leaderboard updates</string>
+    <string name="settings_daily_bonus_reminder">Daily bonus reminder</string>
+    <string name="settings_friends_best_hands">Friends\' best hands</string>
+    <string name="settings_enable_notifications">Enable Notifications</string>
+    <string name="notif_daily_title">Your ALL IN reset is ready</string>
+    <string name="notif_daily_body">Come back and claim it before it resets again!</string>
 </resources>

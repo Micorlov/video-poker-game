@@ -128,6 +128,7 @@ class GameViewModel(
         val game = _state.value.game
         val transition = if (game.phase == Phase.BET) GameEngine.deal(game, random) else GameEngine.draw(game, random)
         val finishedHand = game.phase == Phase.HOLD
+        if (finishedHand) todayKey?.invoke()?.let(repository::saveLastPlayedDay)
         commit(transition, persist = finishedHand || transition.events.any { it is GameEvent.Rebuy })
     }
 
@@ -246,6 +247,19 @@ class GameViewModel(
         repository.markOnboardingSeen()
         _state.update { it.copy(showOnboarding = false) }
     }
+
+    /** "Enable Notifications" (onboarding and Settings): every category on, as the web app does. */
+    fun onEnableNotifications() = updateSettings {
+        it.copy(notifySocial = true, notifyLeaderboard = true, dailyReminderEnabled = true, notifyBestHand = true)
+    }
+
+    fun onToggleNotifySocial() = updateSettings { it.copy(notifySocial = !it.notifySocial) }
+
+    fun onToggleNotifyLeaderboard() = updateSettings { it.copy(notifyLeaderboard = !it.notifyLeaderboard) }
+
+    fun onToggleDailyReminder() = updateSettings { it.copy(dailyReminderEnabled = !it.dailyReminderEnabled) }
+
+    fun onToggleNotifyBestHand() = updateSettings { it.copy(notifyBestHand = !it.notifyBestHand) }
 
     fun onToggleVoice() = updateSettings { it.copy(voiceEnabled = !it.voiceEnabled) }
 

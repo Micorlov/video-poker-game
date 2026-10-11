@@ -50,5 +50,7 @@
  "stats_hands_to_next": {
   "one": "mais %1$d mão para o nível %2$d",
   "other": "mais %1$d mãos para o nível %2$d"
- }
+ },
+ "notif_daily_title": "Seu ALL IN foi renovado",
+ "notif_daily_body": "Volte e aproveite antes que ele reinicie de novo!"
 }

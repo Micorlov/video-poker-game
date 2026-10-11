@@ -198,6 +198,14 @@
     <string name="ob_back">Indietro</string>
     <string name="ob_next">Avanti</string>
     <string name="ob_start_with_chips">Inizia con %1$s fiche</string>
+    <string name="settings_notifications">Notifiche</string>
+    <string name="settings_friend_activity">Attività degli amici</string>
+    <string name="settings_leaderboard_updates">Aggiornamenti classifica</string>
+    <string name="settings_daily_bonus_reminder">Promemoria bonus giornaliero</string>
+    <string name="settings_friends_best_hands">Migliori mani degli amici</string>
+    <string name="settings_enable_notifications">Attiva notifiche</string>
+    <string name="notif_daily_title">Il tuo ALL IN è di nuovo disponibile</string>
+    <string name="notif_daily_body">Torna a usarlo prima che si azzeri di nuovo!</string>
     <string-array name="rank_names">
         <item>Asso</item>
         <item>2</item>

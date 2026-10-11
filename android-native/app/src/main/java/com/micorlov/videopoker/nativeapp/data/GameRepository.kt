@@ -72,6 +72,14 @@ class GameRepository(private val store: KeyValueStore) {
         putBoolean(REVIEW_RATED, state.rated)
     }
 
+    fun loadLastPlayedDay(): String = store.getString(LAST_PLAYED_DAY).orEmpty()
+
+    fun saveLastPlayedDay(day: String) = store.write { putString(LAST_PLAYED_DAY, day) }
+
+    fun loadLastReminderDay(): String = store.getString(LAST_REMINDER_DAY).orEmpty()
+
+    fun saveLastReminderDay(day: String) = store.write { putString(LAST_REMINDER_DAY, day) }
+
     fun isOnboardingSeen(): Boolean = store.getBoolean(ONBOARDING_SEEN) ?: false
 
     fun markOnboardingSeen() = store.write { putBoolean(ONBOARDING_SEEN, true) }
@@ -99,6 +107,10 @@ class GameRepository(private val store: KeyValueStore) {
             hintsEnabled = store.getBoolean(HINTS) ?: defaults.hintsEnabled,
             voiceEnabled = store.getBoolean(VOICE) ?: defaults.voiceEnabled,
             language = AppLanguage.fromTag(store.getString(LANGUAGE)),
+            notifySocial = store.getBoolean(NOTIFY_SOCIAL) ?: defaults.notifySocial,
+            notifyLeaderboard = store.getBoolean(NOTIFY_LEADERBOARD) ?: defaults.notifyLeaderboard,
+            dailyReminderEnabled = store.getBoolean(NOTIFY_DAILY) ?: defaults.dailyReminderEnabled,
+            notifyBestHand = store.getBoolean(NOTIFY_BEST_HAND) ?: defaults.notifyBestHand,
             defaultBet = store.getInt(DEFAULT_BET)?.takeIf { it in Rules.BET_OPTIONS } ?: defaults.defaultBet,
         )
     }
@@ -112,6 +124,10 @@ class GameRepository(private val store: KeyValueStore) {
             putBoolean(HINTS, settings.hintsEnabled)
             putBoolean(VOICE, settings.voiceEnabled)
             putString(LANGUAGE, settings.language?.tag.orEmpty())
+            putBoolean(NOTIFY_SOCIAL, settings.notifySocial)
+            putBoolean(NOTIFY_LEADERBOARD, settings.notifyLeaderboard)
+            putBoolean(NOTIFY_DAILY, settings.dailyReminderEnabled)
+            putBoolean(NOTIFY_BEST_HAND, settings.notifyBestHand)
         }
     }
 
@@ -168,6 +184,12 @@ class GameRepository(private val store: KeyValueStore) {
         const val REVIEW_LAST_CARD_AT = "review.lastCardAt"
         const val REVIEW_RATED = "review.rated"
         const val ONBOARDING_SEEN = "onboarding.seen"
+        const val LAST_PLAYED_DAY = "daily.lastPlayedDay"
+        const val LAST_REMINDER_DAY = "daily.lastReminderDay"
+        const val NOTIFY_SOCIAL = "settings.notify.social"
+        const val NOTIFY_LEADERBOARD = "settings.notify.leaderboard"
+        const val NOTIFY_DAILY = "settings.notify.dailyReminder"
+        const val NOTIFY_BEST_HAND = "settings.notify.bestHand"
         const val SOUND = "settings.sound"
         const val HAPTICS = "settings.haptics"
         const val THEME = "settings.theme"

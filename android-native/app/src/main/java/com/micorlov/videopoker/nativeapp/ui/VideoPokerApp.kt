@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import com.micorlov.videopoker.nativeapp.notify.DailyReminderScheduler
 import com.micorlov.videopoker.nativeapp.ui.onboarding.OnboardingFlow
 import com.micorlov.videopoker.nativeapp.ui.settings.LanguageDialog
 import androidx.compose.foundation.layout.Box
@@ -84,6 +85,7 @@ fun VideoPokerApp(viewModel: GameViewModel) {
 
         var tab by rememberSaveable { mutableStateOf(Tab.PLAY) }
         var choosingLanguage by rememberSaveable { mutableStateOf(false) }
+        LaunchedEffect(ui.settings.dailyReminderEnabled) { DailyReminderScheduler.sync(context, ui.settings.dailyReminderEnabled) }
         val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
         val requestNotifications = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -152,6 +154,17 @@ fun VideoPokerApp(viewModel: GameViewModel) {
                 onToggleSound = viewModel::onToggleSound,
                 onToggleHaptics = viewModel::onToggleHaptics,
                 onSelectLanguage = viewModel::onSelectLanguage,
+                onEnableNotifications = {
+                    viewModel.onEnableNotifications()
+                    requestNotifications()
+                },
+                onToggleNotifySocial = viewModel::onToggleNotifySocial,
+                onToggleNotifyLeaderboard = viewModel::onToggleNotifyLeaderboard,
+                onToggleDailyReminder = {
+                    viewModel.onToggleDailyReminder()
+                    if (!viewModel.state.value.settings.dailyReminderEnabled) requestNotifications()
+                },
+                onToggleNotifyBestHand = viewModel::onToggleNotifyBestHand,
                 onToggleVoice = {
                     viewModel.onToggleVoice()
                     // Switching on gives a sample, as the web app does.
@@ -207,7 +220,10 @@ fun VideoPokerApp(viewModel: GameViewModel) {
                 OnboardingFlow(
                     language = LocaleContext.current(context),
                     onChooseLanguage = { choosingLanguage = true },
-                    onEnableNotifications = { requestNotifications() },
+                    onEnableNotifications = {
+                        viewModel.onEnableNotifications()
+                        requestNotifications()
+                    },
                     onFinished = viewModel::onOnboardingFinished,
                     modifier = Modifier.feltBackground(palette),
                 )

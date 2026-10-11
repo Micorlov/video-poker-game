@@ -49,5 +49,7 @@
  ],
  "stats_hands_to_next": {
   "other": "%1$d tangan lagi ke level %2$d"
- }
+ },
+ "notif_daily_title": "ALL IN Anda sudah direset",
+ "notif_daily_body": "Kembali dan gunakan sebelum direset lagi!"
 }

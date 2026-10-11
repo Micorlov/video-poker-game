@@ -49,5 +49,7 @@
  ],
  "stats_hands_to_next": {
   "other": "再玩 %1$d 手升到等级 %2$d"
- }
+ },
+ "notif_daily_title": "你的 ALL IN 已重置",
+ "notif_daily_body": "在再次重置前回来使用吧！"
 }

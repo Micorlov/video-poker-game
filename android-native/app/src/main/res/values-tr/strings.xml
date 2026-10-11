@@ -198,6 +198,14 @@
     <string name="ob_back">Geri</string>
     <string name="ob_next">İleri</string>
     <string name="ob_start_with_chips">%1$s jetonla başla</string>
+    <string name="settings_notifications">Bildirimler</string>
+    <string name="settings_friend_activity">Arkadaş etkinliği</string>
+    <string name="settings_leaderboard_updates">Sıralama güncellemeleri</string>
+    <string name="settings_daily_bonus_reminder">Günlük bonus hatırlatıcısı</string>
+    <string name="settings_friends_best_hands">Arkadaşların en iyi elleri</string>
+    <string name="settings_enable_notifications">Bildirimleri aç</string>
+    <string name="notif_daily_title">ALL IN hakkın yenilendi</string>
+    <string name="notif_daily_body">Tekrar sıfırlanmadan önce gel ve kullan!</string>
     <string-array name="rank_names">
         <item>As</item>
         <item>2</item>

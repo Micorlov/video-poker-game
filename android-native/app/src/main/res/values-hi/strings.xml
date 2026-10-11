@@ -198,6 +198,14 @@
     <string name="ob_back">पीछे</string>
     <string name="ob_next">आगे</string>
     <string name="ob_start_with_chips">%1$s चिप्स से शुरू करें</string>
+    <string name="settings_notifications">सूचनाएँ</string>
+    <string name="settings_friend_activity">दोस्तों की गतिविधि</string>
+    <string name="settings_leaderboard_updates">लीडरबोर्ड अपडेट</string>
+    <string name="settings_daily_bonus_reminder">रोज़ के बोनस की याद</string>
+    <string name="settings_friends_best_hands">दोस्तों के बेहतरीन हाथ</string>
+    <string name="settings_enable_notifications">सूचनाएँ चालू करें</string>
+    <string name="notif_daily_title">आपका ALL IN फिर से तैयार है</string>
+    <string name="notif_daily_body">दोबारा रीसेट होने से पहले आकर इसे इस्तेमाल करें!</string>
     <string-array name="rank_names">
         <item>इक्का</item>
         <item>2</item>

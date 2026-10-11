@@ -198,6 +198,14 @@
     <string name="ob_back">戻る</string>
     <string name="ob_next">次へ</string>
     <string name="ob_start_with_chips">%1$s チップでスタート</string>
+    <string name="settings_notifications">通知</string>
+    <string name="settings_friend_activity">フレンドの動き</string>
+    <string name="settings_leaderboard_updates">ランキング更新</string>
+    <string name="settings_daily_bonus_reminder">デイリーボーナスのお知らせ</string>
+    <string name="settings_friends_best_hands">フレンドのベストハンド</string>
+    <string name="settings_enable_notifications">通知をオンにする</string>
+    <string name="notif_daily_title">ALL INがリセットされました</string>
+    <string name="notif_daily_body">もう一度リセットされる前に戻ってきて使いましょう！</string>
     <string-array name="rank_names">
         <item>エース</item>
         <item>2</item>

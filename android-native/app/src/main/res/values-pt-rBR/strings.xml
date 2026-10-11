@@ -198,6 +198,14 @@
     <string name="ob_back">Voltar</string>
     <string name="ob_next">Avançar</string>
     <string name="ob_start_with_chips">Comece com %1$s fichas</string>
+    <string name="settings_notifications">Notificações</string>
+    <string name="settings_friend_activity">Atividade dos amigos</string>
+    <string name="settings_leaderboard_updates">Novidades do ranking</string>
+    <string name="settings_daily_bonus_reminder">Lembrete de bônus diário</string>
+    <string name="settings_friends_best_hands">Melhores mãos dos amigos</string>
+    <string name="settings_enable_notifications">Ativar notificações</string>
+    <string name="notif_daily_title">Seu ALL IN foi renovado</string>
+    <string name="notif_daily_body">Volte e aproveite antes que ele reinicie de novo!</string>
     <string-array name="rank_names">
         <item>Ás</item>
         <item>2</item>

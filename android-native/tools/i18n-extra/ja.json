@@ -49,5 +49,7 @@
  ],
  "stats_hands_to_next": {
   "other": "レベル%2$dまであと%1$dハンド"
- }
+ },
+ "notif_daily_title": "ALL INがリセットされました",
+ "notif_daily_body": "もう一度リセットされる前に戻ってきて使いましょう！"
 }

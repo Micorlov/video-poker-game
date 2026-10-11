@@ -198,6 +198,14 @@
     <string name="ob_back">返回</string>
     <string name="ob_next">下一步</string>
     <string name="ob_start_with_chips">以 %1$s 筹码开局</string>
+    <string name="settings_notifications">通知</string>
+    <string name="settings_friend_activity">好友动态</string>
+    <string name="settings_leaderboard_updates">排行榜更新</string>
+    <string name="settings_daily_bonus_reminder">每日奖励提醒</string>
+    <string name="settings_friends_best_hands">好友的最佳牌型</string>
+    <string name="settings_enable_notifications">开启通知</string>
+    <string name="notif_daily_title">你的 ALL IN 已重置</string>
+    <string name="notif_daily_body">在再次重置前回来使用吧！</string>
     <string-array name="rank_names">
         <item>A</item>
         <item>2</item>

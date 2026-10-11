@@ -198,6 +198,14 @@
     <string name="ob_back">رجوع</string>
     <string name="ob_next">التالي</string>
     <string name="ob_start_with_chips">ابدأ بـ %1$s رقاقة</string>
+    <string name="settings_notifications">الإشعارات</string>
+    <string name="settings_friend_activity">نشاط الأصدقاء</string>
+    <string name="settings_leaderboard_updates">تحديثات الترتيب</string>
+    <string name="settings_daily_bonus_reminder">تذكير المكافأة اليومية</string>
+    <string name="settings_friends_best_hands">أفضل أيدي الأصدقاء</string>
+    <string name="settings_enable_notifications">تفعيل الإشعارات</string>
+    <string name="notif_daily_title">تمت إعادة تعيين ALL IN الخاص بك</string>
+    <string name="notif_daily_body">عُد واستخدمه قبل أن تتم إعادة تعيينه مرة أخرى!</string>
     <string-array name="rank_names">
         <item>الآس</item>
         <item>2</item>

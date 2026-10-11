@@ -50,5 +50,7 @@
  "stats_hands_to_next": {
   "one": "Encore %1$d main pour le niveau %2$d",
   "other": "Encore %1$d mains pour le niveau %2$d"
- }
+ },
+ "notif_daily_title": "Votre ALL IN est de retour",
+ "notif_daily_body": "Revenez le récupérer avant qu'il ne se réinitialise !"
 }

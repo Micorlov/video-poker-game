@@ -198,6 +198,14 @@
     <string name="ob_back">Zurück</string>
     <string name="ob_next">Weiter</string>
     <string name="ob_start_with_chips">Starte mit %1$s Chips</string>
+    <string name="settings_notifications">Benachrichtigungen</string>
+    <string name="settings_friend_activity">Freundesaktivität</string>
+    <string name="settings_leaderboard_updates">Ranglisten-Updates</string>
+    <string name="settings_daily_bonus_reminder">Erinnerung an Tagesbonus</string>
+    <string name="settings_friends_best_hands">Beste Hände der Freunde</string>
+    <string name="settings_enable_notifications">Benachrichtigungen aktivieren</string>
+    <string name="notif_daily_title">Dein ALL IN ist wieder bereit</string>
+    <string name="notif_daily_body">Komm zurück und hol es dir, bevor es erneut zurückgesetzt wird!</string>
     <string-array name="rank_names">
         <item>Ass</item>
         <item>2</item>

@@ -52,5 +52,7 @@
   "few": "Jeszcze %1$d rozdania do poziomu %2$d",
   "many": "Jeszcze %1$d rozdań do poziomu %2$d",
   "other": "Jeszcze %1$d rozdania do poziomu %2$d"
- }
+ },
+ "notif_daily_title": "Twoje ALL IN jest znowu gotowe",
+ "notif_daily_body": "Wróć i skorzystaj, zanim znów się zresetuje!"
 }

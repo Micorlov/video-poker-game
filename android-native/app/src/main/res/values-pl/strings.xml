@@ -198,6 +198,14 @@
     <string name="ob_back">Wstecz</string>
     <string name="ob_next">Dalej</string>
     <string name="ob_start_with_chips">Zacznij z %1$s żetonami</string>
+    <string name="settings_notifications">Powiadomienia</string>
+    <string name="settings_friend_activity">Aktywność znajomych</string>
+    <string name="settings_leaderboard_updates">Aktualizacje rankingu</string>
+    <string name="settings_daily_bonus_reminder">Przypomnienie o bonusie dziennym</string>
+    <string name="settings_friends_best_hands">Najlepsze układy znajomych</string>
+    <string name="settings_enable_notifications">Włącz powiadomienia</string>
+    <string name="notif_daily_title">Twoje ALL IN jest znowu gotowe</string>
+    <string name="notif_daily_body">Wróć i skorzystaj, zanim znów się zresetuje!</string>
     <string-array name="rank_names">
         <item>As</item>
         <item>2</item>

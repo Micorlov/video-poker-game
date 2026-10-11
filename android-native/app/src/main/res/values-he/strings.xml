@@ -198,6 +198,14 @@
     <string name="ob_back">חזרה</string>
     <string name="ob_next">הבא</string>
     <string name="ob_start_with_chips">התחילו עם %1$s ז׳יטונים</string>
+    <string name="settings_notifications">התראות</string>
+    <string name="settings_friend_activity">פעילות חברים</string>
+    <string name="settings_leaderboard_updates">עדכוני טבלה</string>
+    <string name="settings_daily_bonus_reminder">תזכורת לבונוס היומי</string>
+    <string name="settings_friends_best_hands">הידיים הטובות של החברים</string>
+    <string name="settings_enable_notifications">הפעלת התראות</string>
+    <string name="notif_daily_title">ה-ALL IN שלך התאפס</string>
+    <string name="notif_daily_body">חזור ותנצל אותו לפני שהוא יתאפס שוב!</string>
     <string-array name="rank_names">
         <item>אס</item>
         <item>2</item>

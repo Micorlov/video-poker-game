@@ -49,5 +49,7 @@
  ],
  "stats_hands_to_next": {
   "other": "레벨 %2$d까지 %1$d핸드 남음"
- }
+ },
+ "notif_daily_title": "ALL IN이 초기화되었어요",
+ "notif_daily_body": "다시 초기화되기 전에 돌아와서 사용하세요!"
 }

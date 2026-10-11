@@ -198,6 +198,14 @@
     <string name="ob_back">뒤로</string>
     <string name="ob_next">다음</string>
     <string name="ob_start_with_chips">%1$s 칩으로 시작</string>
+    <string name="settings_notifications">알림</string>
+    <string name="settings_friend_activity">친구 활동</string>
+    <string name="settings_leaderboard_updates">순위표 업데이트</string>
+    <string name="settings_daily_bonus_reminder">일일 보너스 알림</string>
+    <string name="settings_friends_best_hands">친구의 최고 핸드</string>
+    <string name="settings_enable_notifications">알림 켜기</string>
+    <string name="notif_daily_title">ALL IN이 초기화되었어요</string>
+    <string name="notif_daily_body">다시 초기화되기 전에 돌아와서 사용하세요!</string>
     <string-array name="rank_names">
         <item>에이스</item>
         <item>2</item>

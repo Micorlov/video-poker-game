@@ -198,6 +198,14 @@
     <string name="ob_back">Atrás</string>
     <string name="ob_next">Siguiente</string>
     <string name="ob_start_with_chips">Empieza con %1$s fichas</string>
+    <string name="settings_notifications">Notificaciones</string>
+    <string name="settings_friend_activity">Actividad de amigos</string>
+    <string name="settings_leaderboard_updates">Novedades de clasificación</string>
+    <string name="settings_daily_bonus_reminder">Recordatorio de bonus diario</string>
+    <string name="settings_friends_best_hands">Mejores manos de amigos</string>
+    <string name="settings_enable_notifications">Activar notificaciones</string>
+    <string name="notif_daily_title">Tu ALL IN se ha renovado</string>
+    <string name="notif_daily_body">¡Vuelve y reclámalo antes de que se reinicie otra vez!</string>
     <string-array name="rank_names">
         <item>As</item>
         <item>2</item>

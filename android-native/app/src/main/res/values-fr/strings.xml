@@ -198,6 +198,14 @@
     <string name="ob_back">Retour</string>
     <string name="ob_next">Suivant</string>
     <string name="ob_start_with_chips">Commencez avec %1$s jetons</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_friend_activity">Activité des amis</string>
+    <string name="settings_leaderboard_updates">Mises à jour du classement</string>
+    <string name="settings_daily_bonus_reminder">Rappel du bonus quotidien</string>
+    <string name="settings_friends_best_hands">Meilleures mains des amis</string>
+    <string name="settings_enable_notifications">Activer les notifications</string>
+    <string name="notif_daily_title">Votre ALL IN est de retour</string>
+    <string name="notif_daily_body">Revenez le récupérer avant qu\'il ne se réinitialise !</string>
     <string-array name="rank_names">
         <item>As</item>
         <item>2</item>

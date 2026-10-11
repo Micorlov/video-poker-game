@@ -50,5 +50,7 @@
  "stats_hands_to_next": {
   "one": "Ancora %1$d mano al livello %2$d",
   "other": "Ancora %1$d mani al livello %2$d"
- }
+ },
+ "notif_daily_title": "Il tuo ALL IN è di nuovo disponibile",
+ "notif_daily_body": "Torna a usarlo prima che si azzeri di nuovo!"
 }

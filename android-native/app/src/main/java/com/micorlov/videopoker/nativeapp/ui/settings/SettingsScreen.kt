@@ -55,6 +55,11 @@ class SettingsActions(
     val onToggleSound: () -> Unit,
     val onToggleHaptics: () -> Unit,
     val onToggleVoice: () -> Unit,
+    val onEnableNotifications: () -> Unit,
+    val onToggleNotifySocial: () -> Unit,
+    val onToggleNotifyLeaderboard: () -> Unit,
+    val onToggleDailyReminder: () -> Unit,
+    val onToggleNotifyBestHand: () -> Unit,
     val onSelectLanguage: (AppLanguage) -> Unit,
     val onSelectTheme: (AppTheme) -> Unit,
     val onSelectDefaultBet: (Int) -> Unit,
@@ -173,6 +178,14 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
         }
 
         val context = LocalContext.current
+        Section(R.string.settings_notifications) {
+            SettingToggle(stringResource(R.string.settings_friend_activity), settings.notifySocial, actions.onToggleNotifySocial, "toggle-notify-social")
+            SettingToggle(stringResource(R.string.settings_leaderboard_updates), settings.notifyLeaderboard, actions.onToggleNotifyLeaderboard, "toggle-notify-leaderboard")
+            SettingToggle(stringResource(R.string.settings_daily_bonus_reminder), settings.dailyReminderEnabled, actions.onToggleDailyReminder, "toggle-notify-daily")
+            SettingToggle(stringResource(R.string.settings_friends_best_hands), settings.notifyBestHand, actions.onToggleNotifyBestHand, "toggle-notify-besthand")
+            LinkRow(stringResource(R.string.settings_enable_notifications), "enable-notifications", actions.onEnableNotifications)
+        }
+
         Section(R.string.settings_about) {
             LinkRow(stringResource(R.string.settings_rate_game), "rate-game") { StoreLinks.openListing(context) }
             LinkRow(stringResource(R.string.settings_more_games), "more-games") { StoreLinks.openDeveloperPage(context) }

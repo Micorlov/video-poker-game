@@ -50,5 +50,7 @@
  "stats_hands_to_next": {
   "one": "%2$d. seviyeye %1$d el kaldı",
   "other": "%2$d. seviyeye %1$d el kaldı"
- }
+ },
+ "notif_daily_title": "ALL IN hakkın yenilendi",
+ "notif_daily_body": "Tekrar sıfırlanmadan önce gel ve kullan!"
 }

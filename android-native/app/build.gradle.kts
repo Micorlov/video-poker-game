@@ -66,8 +66,11 @@ dependencies {
     testImplementation("org.json:json:20240303")
 
     implementation("com.google.android.play:review-ktx:2.0.2")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.work:work-testing:2.10.0")
+    androidTestImplementation("androidx.test:rules:1.7.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

@@ -26,4 +26,9 @@ data class UserSettings(
     val voiceEnabled: Boolean = true,
     /** The language the player picked; null follows the device. */
     val language: AppLanguage? = null,
+    /** The four push categories of js/push.js. Only the daily reminder runs on the device today; the rest apply once an account is connected. */
+    val notifySocial: Boolean = false,
+    val notifyLeaderboard: Boolean = false,
+    val dailyReminderEnabled: Boolean = false,
+    val notifyBestHand: Boolean = false,
 )

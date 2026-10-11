@@ -198,6 +198,14 @@
     <string name="ob_back">Kembali</string>
     <string name="ob_next">Lanjut</string>
     <string name="ob_start_with_chips">Mulai dengan %1$s chip</string>
+    <string name="settings_notifications">Notifikasi</string>
+    <string name="settings_friend_activity">Aktivitas teman</string>
+    <string name="settings_leaderboard_updates">Pembaruan papan peringkat</string>
+    <string name="settings_daily_bonus_reminder">Pengingat bonus harian</string>
+    <string name="settings_friends_best_hands">Tangan terbaik teman</string>
+    <string name="settings_enable_notifications">Aktifkan notifikasi</string>
+    <string name="notif_daily_title">ALL IN Anda sudah direset</string>
+    <string name="notif_daily_body">Kembali dan gunakan sebelum direset lagi!</string>
     <string-array name="rank_names">
         <item>As</item>
         <item>2</item>
