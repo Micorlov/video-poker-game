@@ -90,6 +90,7 @@ fun PlayScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Header(ui, onToggleSound = actions.onToggleSound, onToggleHints = actions.onToggleHints)
+        TournamentPill()
         BalancePanel(displayedBalance, game)
         BetRow(game, ui.allInRemaining, actions.onSelectBet, actions.onAllIn)
 

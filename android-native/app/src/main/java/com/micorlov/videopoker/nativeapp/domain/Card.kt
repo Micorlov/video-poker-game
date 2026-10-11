@@ -26,6 +26,15 @@ enum class Rank(val label: String, val value: Int) {
 
 data class Card(val rank: Rank, val suit: Suit) {
     override fun toString(): String = "${rank.label}${suit.symbol}"
+
+    companion object {
+        /** Reads "10♥" / "A♠" (the form [toString] writes); null for anything else. */
+        fun parse(text: String): Card? {
+            val suit = Suit.entries.firstOrNull { it.symbol == text.lastOrNull() } ?: return null
+            val rank = Rank.entries.firstOrNull { it.label == text.dropLast(1) } ?: return null
+            return Card(rank, suit)
+        }
+    }
 }
 
 /** Same order as the web app's createDeck(): suits outer, ranks inner. */

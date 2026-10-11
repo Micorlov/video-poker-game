@@ -24,6 +24,7 @@ class MainActivity : ComponentActivity() {
                 GameViewModel(
                     GameRepository(SharedPreferencesStore(applicationContext)),
                     todayKey = { LocalDate.now().toString() },
+                    reviewEnabled = true,
                 ) as T
         }
     }

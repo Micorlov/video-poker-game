@@ -10,6 +10,8 @@ import com.micorlov.videopoker.nativeapp.domain.GameEngine
 import com.micorlov.videopoker.nativeapp.domain.GameEvent
 import com.micorlov.videopoker.nativeapp.domain.GameState
 import com.micorlov.videopoker.nativeapp.domain.Phase
+import com.micorlov.videopoker.nativeapp.domain.ReviewAsk
+import com.micorlov.videopoker.nativeapp.domain.ReviewPolicy
 import com.micorlov.videopoker.nativeapp.domain.Rules
 import com.micorlov.videopoker.nativeapp.domain.Transition
 import com.micorlov.videopoker.nativeapp.domain.Variant
@@ -31,6 +33,8 @@ data class UiState(
     val allInRemaining: Int = Rules.ALL_IN_DAILY_LIMIT,
     /** Set while the ALL IN confirmation sheet is open. */
     val allInOffer: AllInOffer? = null,
+    /** The "Enjoying Video Poker?" card is up. */
+    val reviewCardVisible: Boolean = false,
 ) {
     /** True once the cards of the current round are face up, so results may be shown. */
     val revealed: Boolean get() = revealedRound == game.round
@@ -53,6 +57,12 @@ sealed interface ToastMessage {
 /** One-shot happenings the UI reacts to with sound, haptics and fireworks. */
 sealed interface UiEffect {
     data class HandRevealed(val outcome: DrawOutcome) : UiEffect
+
+    /** A quality win earned a rating ask: call [GameViewModel.onReviewTimer] after [ReviewPolicy.PROMPT_DELAY_MS]. */
+    data object ReviewEarned : UiEffect
+
+    /** Show Google Play's in-app review sheet. */
+    data object RequestNativeReview : UiEffect
 }
 
 /**
@@ -64,6 +74,9 @@ class GameViewModel(
     private val random: Random = Random.Default,
     /** Today's local day key; null turns the daily bonus off (tests that need exact balances). */
     private val todayKey: (() -> String)? = null,
+    private val clock: () -> Long = System::currentTimeMillis,
+    /** The review ask is for the real app only; tests leave it off. */
+    private val reviewEnabled: Boolean = false,
 ) : ViewModel() {
 
     private val effectChannel = Channel<UiEffect>(Channel.UNLIMITED)
@@ -71,6 +84,8 @@ class GameViewModel(
 
     private val _state: MutableStateFlow<UiState>
     private var allInUsed = 0
+    private var reviewAskedThisSession = false
+    private var reviewTimerPending = false
 
     /** One flow for the whole lifetime: collectors key on its identity, so it must not be rebuilt per read. */
     val state: StateFlow<UiState>
@@ -135,8 +150,53 @@ class GameViewModel(
         val current = _state.value
         if (round != current.game.round || current.revealed) return
         _state.update { it.copy(revealedRound = round) }
-        current.game.outcome?.let { effectChannel.trySend(UiEffect.HandRevealed(it)) }
+        current.game.outcome?.let {
+            effectChannel.trySend(UiEffect.HandRevealed(it))
+            if (ReviewPolicy.isQualityWin(it.bestType)) onQualityWin(current.game.level)
+        }
     }
+
+    private fun onQualityWin(level: Int) {
+        if (!reviewEnabled) return
+        val state = repository.loadReview().let { it.copy(wins = it.wins + 1) }
+        repository.saveReview(state)
+        if (reviewAskedThisSession || reviewTimerPending) return
+        if (!ReviewPolicy.earnedAsk(state, level, clock())) return
+        reviewTimerPending = true
+        effectChannel.trySend(UiEffect.ReviewEarned)
+    }
+
+    /**
+     * The ask timer fired. [blocked] is true when another prompt owns the screen: the ask is
+     * skipped, not spent, so it can come back after a later win.
+     */
+    fun onReviewTimer(blocked: Boolean) {
+        reviewTimerPending = false
+        if (reviewAskedThisSession || blocked || _state.value.allInOffer != null || _state.value.reviewCardVisible) return
+        val state = repository.loadReview()
+        val now = clock()
+        when (ReviewPolicy.decide(state, now)) {
+            ReviewAsk.NONE -> Unit
+            ReviewAsk.NATIVE_SHEET -> {
+                reviewAskedThisSession = true
+                repository.saveReview(state.copy(shown = true, shownAt = now))
+                effectChannel.trySend(UiEffect.RequestNativeReview)
+            }
+            ReviewAsk.STAR_CARD -> {
+                reviewAskedThisSession = true
+                repository.saveReview(state.copy(cardCount = state.cardCount + 1, lastCardAt = now))
+                _state.update { it.copy(reviewCardVisible = true) }
+            }
+        }
+    }
+
+    /** "Rate now" on the card: never ask again. */
+    fun onReviewRated() {
+        repository.saveReview(repository.loadReview().copy(rated = true))
+        _state.update { it.copy(reviewCardVisible = false) }
+    }
+
+    fun onReviewDismissed() = _state.update { it.copy(reviewCardVisible = false) }
 
     fun onToggleSound() = updateSettings { it.copy(soundEnabled = !it.soundEnabled) }
 
@@ -171,6 +231,8 @@ class GameViewModel(
     private fun today(): String = todayKey?.invoke().orEmpty()
 
     private fun allInRemaining(): Int = (Rules.ALL_IN_DAILY_LIMIT - allInUsed).coerceAtLeast(0)
+
+    fun onToggleVoice() = updateSettings { it.copy(voiceEnabled = !it.voiceEnabled) }
 
     fun onToggleHaptics() = updateSettings { it.copy(hapticsEnabled = !it.hapticsEnabled) }
 

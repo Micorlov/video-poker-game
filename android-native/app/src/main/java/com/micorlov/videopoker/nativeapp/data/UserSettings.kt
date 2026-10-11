@@ -21,4 +21,6 @@ data class UserSettings(
     val defaultBet: Int = Rules.DEFAULT_BET,
     /** Strategy hints: suggested holds glow blue during the hold phase. */
     val hintsEnabled: Boolean = false,
+    /** Spoken hand names after a win; on by default, as in the web app. */
+    val voiceEnabled: Boolean = true,
 )

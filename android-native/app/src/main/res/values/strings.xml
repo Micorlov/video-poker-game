@@ -189,4 +189,18 @@
     <string name="sheet_potential">Potential on Full House</string>
     <string name="sheet_slide_to_confirm">Slide to confirm</string>
     <string name="sheet_not_now">Not now</string>
+    <string name="stats_best_hand">Best hand</string>
+    <string name="stats_no_winning_hands">No winning hands yet</string>
+    <string name="stats_best_hand_payout">+%1$s credits · %2$d×</string>
+    <string name="settings_voice">Voice Announcements</string>
+    <string name="settings_about">About</string>
+    <string name="settings_rate_game">Rate this game</string>
+    <string name="settings_more_games">More games by Orlov Games</string>
+    <string name="voice_four_2s_4s">Four of a kind, twos through fours</string>
+    <string name="voice_four_5s_ks">Four of a kind, fives through kings</string>
+    <string name="play_tournament_pill">Tournament 2</string>
+    <string name="play_tournament_expand">🏆 Tournament #2</string>
+    <string name="review_title">Enjoying Video Poker?</string>
+    <string name="review_body">A quick rating on Google Play helps other players find us.</string>
+    <string name="review_rate">Rate now</string>
 </resources>

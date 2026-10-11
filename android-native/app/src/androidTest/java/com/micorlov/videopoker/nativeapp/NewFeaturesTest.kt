@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
@@ -86,5 +87,34 @@ class NewFeaturesTest {
         compose.waitForIdle()
 
         compose.onNodeWithTag("bet-allin").performScrollTo().assertTextContains("1 left", substring = true)
+    }
+
+    @Test
+    fun theTournamentPillExpandsAndCollapses() {
+        launch()
+
+        compose.onNodeWithTag("tournament-expand").assertDoesNotExist()
+        compose.onNodeWithTag("tournament-pill").performClick()
+        compose.onNodeWithTag("tournament-expand").assertIsDisplayed()
+        compose.onNodeWithTag("tournament-pill").performClick()
+        compose.onNodeWithTag("tournament-expand").assertDoesNotExist()
+    }
+
+    @Test
+    fun statsShowsAnEmptyBestHandUntilSomethingIsWon() {
+        launch()
+
+        compose.onNodeWithTag("tab-stats").performClick()
+        compose.onNodeWithText("No winning hands yet").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun settingsOffersVoiceRateAndMoreGames() {
+        launch()
+
+        compose.onNodeWithTag("tab-settings").performClick()
+        compose.onNodeWithTag("toggle-voice").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("rate-game").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("more-games").performScrollTo().assertIsDisplayed()
     }
 }

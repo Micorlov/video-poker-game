@@ -4,6 +4,7 @@ import com.micorlov.videopoker.nativeapp.data.AppTheme
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.InMemoryStore
 import com.micorlov.videopoker.nativeapp.domain.Phase
+import com.micorlov.videopoker.nativeapp.domain.ReviewState
 import com.micorlov.videopoker.nativeapp.domain.SavedGame
 import com.micorlov.videopoker.nativeapp.domain.Variant
 import kotlin.random.Random
@@ -284,5 +285,35 @@ class GameViewModelTest {
         vm.onAllInDismissed()
         assertNull(vm.state.value.allInOffer)
         assertEquals(1, vm.state.value.allInRemaining)
+    }
+
+    @Test
+    fun `the review card shows once per session and rating it ends the asks`() {
+        val week = 7L * 24 * 60 * 60 * 1000
+        repository.saveReview(ReviewState(wins = 5, shown = true, shownAt = 0))
+        repository.saveGame(SavedGame())
+        val vm = GameViewModel(repository, Random(5), clock = { 10 * week }, reviewEnabled = true)
+
+        vm.onReviewTimer(blocked = true)
+        assertFalse(vm.state.value.reviewCardVisible)
+
+        vm.onReviewTimer(blocked = false)
+        assertTrue(vm.state.value.reviewCardVisible)
+        assertEquals(1, repository.loadReview().cardCount)
+
+        vm.onReviewRated()
+        assertFalse(vm.state.value.reviewCardVisible)
+        assertTrue(repository.loadReview().rated)
+    }
+
+    @Test
+    fun `the first ask goes to Google Play's sheet and is recorded`() {
+        repository.saveGame(SavedGame())
+        val vm = GameViewModel(repository, Random(5), clock = { 5_000 }, reviewEnabled = true)
+        vm.onReviewTimer(blocked = false)
+
+        assertTrue(vm.drainEffects().any { it == UiEffect.RequestNativeReview })
+        assertTrue(repository.loadReview().shown)
+        assertFalse(vm.state.value.reviewCardVisible)
     }
 }

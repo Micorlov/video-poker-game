@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.micorlov.videopoker.nativeapp.R
+import com.micorlov.videopoker.nativeapp.domain.BestHand
 import com.micorlov.videopoker.nativeapp.domain.GameState
 import com.micorlov.videopoker.nativeapp.domain.PlayStats
 import com.micorlov.videopoker.nativeapp.domain.Rules
@@ -87,7 +88,38 @@ fun StatsScreen(game: GameState, modifier: Modifier = Modifier) {
             StatTile(stringResource(R.string.stats_best_streak), stats.bestStreak.toString(), Modifier.weight(1f).testTag("stat-streak"))
         }
 
+        BestHandPanel(game.bestHand)
         ProgressPanel(game)
+    }
+}
+
+@Composable
+private fun BestHandPanel(best: BestHand?) {
+    VpPanel(Modifier.fillMaxWidth().testTag("best-hand")) {
+        Eyebrow(stringResource(R.string.stats_best_hand))
+        if (best == null) {
+            Text(stringResource(R.string.stats_no_winning_hands), color = VpColors.TextMuted, fontSize = 14.sp)
+            return@VpPanel
+        }
+        Text(
+            text = stringResource(best.type.labelRes()),
+            color = VpColors.Text,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = best.cards.joinToString("  "),
+            modifier = Modifier.testTag("best-hand-cards"),
+            color = VpColors.TextMuted,
+            fontSize = 16.sp,
+        )
+        Text(
+            text = stringResource(R.string.stats_best_hand_payout, formatNumber(best.payout.toLong()), best.multiple),
+            modifier = Modifier.testTag("best-hand-payout"),
+            color = VpColors.Gold,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+        )
     }
 }
 

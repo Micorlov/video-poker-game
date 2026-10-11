@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -20,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -27,6 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.micorlov.videopoker.nativeapp.audio.SoundCue
 import com.micorlov.videopoker.nativeapp.audio.SoundPlayer
+import com.micorlov.videopoker.nativeapp.audio.VoiceAnnouncer
+import com.micorlov.videopoker.nativeapp.domain.HandType
+import com.micorlov.videopoker.nativeapp.domain.ReviewPolicy
+import kotlinx.coroutines.launch
+import com.micorlov.videopoker.nativeapp.ui.text.spokenRes
 import com.micorlov.videopoker.nativeapp.ui.nav.BottomNav
 import com.micorlov.videopoker.nativeapp.ui.nav.Tab
 import com.micorlov.videopoker.nativeapp.ui.play.Celebration
@@ -59,7 +66,11 @@ fun VideoPokerApp(viewModel: GameViewModel) {
         val palette = LocalPalette.current
         val view = LocalView.current
         val feedback = remember(view) { Feedback(SoundPlayer(), Haptics(view)) }
+        val context = LocalContext.current
+        val voice = remember(context) { VoiceAnnouncer(context) }
+        DisposableEffect(voice) { onDispose { voice.release() } }
         SideEffect {
+            voice.enabled = ui.settings.voiceEnabled
             feedback.sound.enabled = ui.settings.soundEnabled
             feedback.haptics.enabled = ui.settings.hapticsEnabled
         }
@@ -74,6 +85,11 @@ fun VideoPokerApp(viewModel: GameViewModel) {
             var nextCelebrationId = 0
             for (effect in viewModel.effects) {
                 when (effect) {
+                    UiEffect.ReviewEarned -> launch {
+                        delay(ReviewPolicy.PROMPT_DELAY_MS)
+                        viewModel.onReviewTimer(blocked = false)
+                    }
+                    UiEffect.RequestNativeReview -> InAppReview.request(context)
                     is UiEffect.HandRevealed -> {
                         val outcome = effect.outcome
                         if (!outcome.isWin) {
@@ -83,10 +99,21 @@ fun VideoPokerApp(viewModel: GameViewModel) {
                         val strength = outcome.bestType.strength
                         feedback.play(if (strength >= BIG_WIN_STRENGTH) SoundCue.BIG_WIN else SoundCue.WIN)
                         feedback.haptics.heavy()
+                        voice.speak(context.getString(outcome.bestType.spokenRes()))
                         celebration = Celebration(++nextCelebrationId, CelebrationTier.forStrength(strength))
                     }
                 }
             }
+        }
+
+        if (ui.reviewCardVisible) {
+            ReviewCard(
+                onRate = {
+                    viewModel.onReviewRated()
+                    StoreLinks.openListing(context)
+                },
+                onDismiss = viewModel::onReviewDismissed,
+            )
         }
 
         LaunchedEffect(celebration?.id) {
@@ -112,6 +139,14 @@ fun VideoPokerApp(viewModel: GameViewModel) {
             SettingsActions(
                 onToggleSound = viewModel::onToggleSound,
                 onToggleHaptics = viewModel::onToggleHaptics,
+                onToggleVoice = {
+                    viewModel.onToggleVoice()
+                    // Switching on gives a sample, as the web app does.
+                    if (!voice.enabled) {
+                        voice.enabled = true
+                        voice.speak(context.getString(HandType.FULL_HOUSE.spokenRes()))
+                    }
+                },
                 onSelectTheme = viewModel::onSelectTheme,
                 onSelectDefaultBet = viewModel::onSelectDefaultBet,
                 onSelectVariant = viewModel::onSelectVariant,

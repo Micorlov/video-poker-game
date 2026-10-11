@@ -18,6 +18,9 @@ data class PlayStats(
     val net: Long get() = won - lost
 }
 
+/** The highest-paying hand ever won (js/stories.js "personal best"): [multiple] is the payout over the bet. */
+data class BestHand(val type: HandType, val multiple: Int, val payout: Int, val cards: List<Card>)
+
 /** Everything that survives closing the app. A hand in progress deliberately does not. */
 data class SavedGame(
     val balance: Long = Rules.STARTING_BALANCE,
@@ -29,6 +32,7 @@ data class SavedGame(
     val lifetimeHands: Int = 0,
     val variant: Variant = Variant.JACKS,
     val handCount: Int = 1,
+    val bestHand: BestHand? = null,
 )
 
 /** One of the extra hands in Triple / Five Play. */
@@ -81,6 +85,7 @@ data class GameState(
     val round: Int,
     /** The bet in effect before ALL IN raised it; restored when the hand is done. Null when no ALL IN is active. */
     val allInRevertBet: Int? = null,
+    val bestHand: BestHand? = null,
 ) {
     val level: Int get() = Rules.level(lifetimeHands)
     val totalBet: Int get() = bet * handCount
@@ -105,5 +110,6 @@ data class GameState(
         lifetimeHands = lifetimeHands,
         variant = variant,
         handCount = handCount,
+        bestHand = bestHand,
     )
 }

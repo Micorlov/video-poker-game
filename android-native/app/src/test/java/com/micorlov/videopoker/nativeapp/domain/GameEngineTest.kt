@@ -556,4 +556,23 @@ class GameEngineTest {
     fun `an empty stack has no all in offer`() {
         assertEquals(null, GameEngine.allInOffer(betting(balance = 0)))
     }
+
+    // ---- personal best ----------------------------------------------------------------
+
+    @Test
+    fun `a winning hand becomes the personal best and only a bigger win replaces it`() {
+        val pair = holding("A♠ A♥ 4♦ 7♣ 9♠", "5♣ 8♦ 3♠", holdFirstTwo)
+        val first = GameEngine.draw(pair, random).state
+        val best = assertNotNull(first.bestHand)
+        assertEquals(first.outcome!!.totalWin, best.payout)
+        assertEquals(5, best.cards.size)
+
+        // A later, smaller win leaves the record alone.
+        val smaller = GameEngine.draw(pair.copy(bet = 5, bestHand = best), random).state
+        assertEquals(best, smaller.bestHand)
+
+        // A losing hand never touches it.
+        val loser = holding("2♠ 5♥ 8♦ 9♣ 3♠", "K♦ 4♦ 6♥ 7♠ J♣", listOf(false, false, false, false, false))
+        assertEquals(null, GameEngine.draw(loser, random).state.bestHand)
+    }
 }

@@ -38,6 +38,7 @@ import com.micorlov.videopoker.nativeapp.R
 import com.micorlov.videopoker.nativeapp.data.AppTheme
 import com.micorlov.videopoker.nativeapp.domain.Rules
 import com.micorlov.videopoker.nativeapp.domain.Variant
+import com.micorlov.videopoker.nativeapp.ui.StoreLinks
 import com.micorlov.videopoker.nativeapp.ui.UiState
 import com.micorlov.videopoker.nativeapp.ui.components.ChipButton
 import com.micorlov.videopoker.nativeapp.ui.components.Eyebrow
@@ -50,6 +51,7 @@ import com.micorlov.videopoker.nativeapp.ui.theme.VpColors
 class SettingsActions(
     val onToggleSound: () -> Unit,
     val onToggleHaptics: () -> Unit,
+    val onToggleVoice: () -> Unit,
     val onSelectTheme: (AppTheme) -> Unit,
     val onSelectDefaultBet: (Int) -> Unit,
     val onSelectVariant: (Variant) -> Unit,
@@ -81,6 +83,7 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
         Section(R.string.settings_gameplay) {
             SettingToggle(stringResource(R.string.settings_sound), settings.soundEnabled, actions.onToggleSound, "toggle-sound")
             SettingToggle(stringResource(R.string.settings_haptics), settings.hapticsEnabled, actions.onToggleHaptics, "toggle-haptics")
+            SettingToggle(stringResource(R.string.settings_voice), settings.voiceEnabled, actions.onToggleVoice, "toggle-voice")
         }
 
         Section(R.string.settings_theme) {
@@ -159,6 +162,12 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
             if (showPaytable) PaytableList(game, highlight = null, modifier = Modifier.padding(top = 8.dp))
         }
 
+        val context = LocalContext.current
+        Section(R.string.settings_about) {
+            LinkRow(stringResource(R.string.settings_rate_game), "rate-game") { StoreLinks.openListing(context) }
+            LinkRow(stringResource(R.string.settings_more_games), "more-games") { StoreLinks.openDeveloperPage(context) }
+        }
+
         Text(
             text = stringResource(R.string.settings_reset),
             modifier = Modifier
@@ -214,6 +223,22 @@ private fun Section(titleRes: Int, content: @Composable () -> Unit) {
 @Composable
 private fun ChipRow(content: @Composable RowScope.() -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), content = content)
+}
+
+@Composable
+private fun LinkRow(label: String, tag: String, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(vertical = 12.dp)
+            .testTag(tag),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, modifier = Modifier.weight(1f), color = VpColors.Text, fontSize = 16.sp)
+        Text("›", modifier = Modifier.clearAndSetSemantics { }, color = VpColors.TextMuted, fontSize = 20.sp)
+    }
 }
 
 @Composable

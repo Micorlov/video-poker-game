@@ -2,6 +2,9 @@ package com.micorlov.videopoker.nativeapp.data
 
 import com.micorlov.videopoker.nativeapp.domain.PlayStats
 import com.micorlov.videopoker.nativeapp.domain.Rules
+import com.micorlov.videopoker.nativeapp.domain.BestHand
+import com.micorlov.videopoker.nativeapp.domain.Card
+import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.SavedGame
 import com.micorlov.videopoker.nativeapp.domain.Variant
 import kotlin.test.Test
@@ -73,5 +76,15 @@ class GameRepositoryTest {
         // Zero is a real balance: the next deal grants the free rebuy, with its toast.
         repository.saveGame(SavedGame(balance = 0))
         assertEquals(0L, repository.loadGame().balance)
+    }
+
+    @Test
+    fun `the personal best survives a save and load and a corrupt one is dropped`() {
+        val best = BestHand(HandType.FLUSH, 6, 60, listOf("A♠", "K♠", "7♠", "4♠", "2♠").map { Card.parse(it)!! })
+        repository.saveGame(SavedGame(bestHand = best))
+        assertEquals(best, repository.loadGame().bestHand)
+
+        store.write { putString("best.cards", "A♠ K♠") }
+        assertEquals(null, repository.loadGame().bestHand)
     }
 }

@@ -10,6 +10,14 @@ import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.Variant
 import java.text.NumberFormat
 
+/** What the voice says: the label, except that the quad ranges are spelled out as a phrase. */
+@StringRes
+fun HandType.spokenRes(): Int = when (this) {
+    HandType.FOUR_2S_4S -> R.string.voice_four_2s_4s
+    HandType.FOUR_5S_KS -> R.string.voice_four_5s_ks
+    else -> labelRes()
+}
+
 @StringRes
 fun HandType.labelRes(): Int = when (this) {
     HandType.ROYAL_FLUSH -> R.string.hand_royal_flush

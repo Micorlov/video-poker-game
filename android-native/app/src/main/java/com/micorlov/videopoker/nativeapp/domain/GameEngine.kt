@@ -28,6 +28,7 @@ object GameEngine {
             lossStreak = saved.lossStreak,
             winStreak = saved.winStreak,
             bestBalance = saved.bestBalance,
+            bestHand = saved.bestHand,
             lifetimeHands = saved.lifetimeHands,
             today = saved.today,
             allTime = saved.allTime,
@@ -230,7 +231,20 @@ object GameEngine {
             today = today,
             allTime = allTime,
             outcome = outcome,
+            bestHand = newBestHand(state, finalHand, outcome),
             round = state.round + 1,
+        )
+    }
+
+    /** A win that out-pays the stored best replaces it, as checkAndUpdateBestHand() does. */
+    private fun newBestHand(state: GameState, finalHand: List<Card>, outcome: DrawOutcome): BestHand? {
+        val current = state.bestHand
+        if (!outcome.isWin || (current != null && current.payout >= outcome.totalWin)) return current
+        return BestHand(
+            type = outcome.bestType,
+            multiple = (outcome.totalWin.toDouble() / state.bet).roundToInt(),
+            payout = outcome.totalWin,
+            cards = finalHand,
         )
     }
 

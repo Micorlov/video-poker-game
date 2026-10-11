@@ -1,6 +1,11 @@
 package com.micorlov.videopoker.nativeapp.data
 
+import com.micorlov.videopoker.nativeapp.domain.BestHand
+import com.micorlov.videopoker.nativeapp.domain.Card
+import com.micorlov.videopoker.nativeapp.domain.HandEvaluator
+import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.PlayStats
+import com.micorlov.videopoker.nativeapp.domain.ReviewState
 import com.micorlov.videopoker.nativeapp.domain.Rules
 import com.micorlov.videopoker.nativeapp.domain.SavedGame
 import com.micorlov.videopoker.nativeapp.domain.Variant
@@ -24,6 +29,7 @@ class GameRepository(private val store: KeyValueStore) {
             lifetimeHands = nonNegativeInt(LIFETIME_HANDS),
             variant = Variant.fromStorageKey(store.getString(VARIANT)) ?: defaults.variant,
             handCount = store.getInt(HAND_COUNT)?.takeIf { it in Rules.HAND_COUNT_OPTIONS } ?: defaults.handCount,
+            bestHand = loadBestHand(),
         )
     }
 
@@ -38,7 +44,31 @@ class GameRepository(private val store: KeyValueStore) {
             putInt(LIFETIME_HANDS, game.lifetimeHands)
             putString(VARIANT, game.variant.storageKey)
             putInt(HAND_COUNT, game.handCount)
+            game.bestHand?.let {
+                putString(BEST_TYPE, it.type.key)
+                putInt(BEST_MULT, it.multiple)
+                putInt(BEST_PAYOUT, it.payout)
+                putString(BEST_CARDS, it.cards.joinToString(" "))
+            }
         }
+    }
+
+    fun loadReview(): ReviewState = ReviewState(
+        wins = nonNegativeInt(REVIEW_WINS),
+        shown = store.getBoolean(REVIEW_SHOWN) ?: false,
+        shownAt = nonNegativeLong(REVIEW_SHOWN_AT),
+        cardCount = nonNegativeInt(REVIEW_CARDS),
+        lastCardAt = nonNegativeLong(REVIEW_LAST_CARD_AT),
+        rated = store.getBoolean(REVIEW_RATED) ?: false,
+    )
+
+    fun saveReview(state: ReviewState) = store.write {
+        putInt(REVIEW_WINS, state.wins)
+        putBoolean(REVIEW_SHOWN, state.shown)
+        putLong(REVIEW_SHOWN_AT, state.shownAt)
+        putInt(REVIEW_CARDS, state.cardCount)
+        putLong(REVIEW_LAST_CARD_AT, state.lastCardAt)
+        putBoolean(REVIEW_RATED, state.rated)
     }
 
     /** The local day (yyyy-MM-dd) the daily bonus was last paid, or empty if never. */
@@ -62,6 +92,7 @@ class GameRepository(private val store: KeyValueStore) {
             hapticsEnabled = store.getBoolean(HAPTICS) ?: defaults.hapticsEnabled,
             theme = AppTheme.fromStorageKey(store.getString(THEME)) ?: defaults.theme,
             hintsEnabled = store.getBoolean(HINTS) ?: defaults.hintsEnabled,
+            voiceEnabled = store.getBoolean(VOICE) ?: defaults.voiceEnabled,
             defaultBet = store.getInt(DEFAULT_BET)?.takeIf { it in Rules.BET_OPTIONS } ?: defaults.defaultBet,
         )
     }
@@ -73,7 +104,17 @@ class GameRepository(private val store: KeyValueStore) {
             putString(THEME, settings.theme.storageKey)
             putInt(DEFAULT_BET, settings.defaultBet)
             putBoolean(HINTS, settings.hintsEnabled)
+            putBoolean(VOICE, settings.voiceEnabled)
         }
+    }
+
+    /** Stored data is untrusted: a half-written or hand-edited best hand is dropped, not trusted. */
+    private fun loadBestHand(): BestHand? {
+        val type = HandType.entries.firstOrNull { it.key == store.getString(BEST_TYPE) } ?: return null
+        val payout = store.getInt(BEST_PAYOUT)?.takeIf { it > 0 } ?: return null
+        val cards = store.getString(BEST_CARDS)?.split(" ")?.mapNotNull(Card::parse).orEmpty()
+        if (cards.size != HandEvaluator.HAND_SIZE) return null
+        return BestHand(type, store.getInt(BEST_MULT)?.coerceAtLeast(0) ?: 0, payout, cards)
     }
 
     private fun loadStats(prefix: String) = PlayStats(
@@ -104,9 +145,20 @@ class GameRepository(private val store: KeyValueStore) {
         const val VARIANT = "game.variant"
         const val HAND_COUNT = "game.handCount"
         const val DAILY_BONUS_DAY = "daily.bonusDay"
+        const val VOICE = "settings.voice"
         const val HINTS = "settings.hints"
         const val ALL_IN_DAY = "allin.day"
         const val ALL_IN_COUNT = "allin.count"
+        const val BEST_TYPE = "best.type"
+        const val BEST_MULT = "best.mult"
+        const val BEST_PAYOUT = "best.payout"
+        const val BEST_CARDS = "best.cards"
+        const val REVIEW_WINS = "review.wins"
+        const val REVIEW_SHOWN = "review.shown"
+        const val REVIEW_SHOWN_AT = "review.shownAt"
+        const val REVIEW_CARDS = "review.cardCount"
+        const val REVIEW_LAST_CARD_AT = "review.lastCardAt"
+        const val REVIEW_RATED = "review.rated"
         const val SOUND = "settings.sound"
         const val HAPTICS = "settings.haptics"
         const val THEME = "settings.theme"
