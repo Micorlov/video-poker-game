@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
                     GameRepository(SharedPreferencesStore(applicationContext)),
                     todayKey = { LocalDate.now().toString() },
                     reviewEnabled = true,
+                    onboardingEnabled = true,
                 ) as T
         }
     }

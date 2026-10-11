@@ -72,6 +72,10 @@ class GameRepository(private val store: KeyValueStore) {
         putBoolean(REVIEW_RATED, state.rated)
     }
 
+    fun isOnboardingSeen(): Boolean = store.getBoolean(ONBOARDING_SEEN) ?: false
+
+    fun markOnboardingSeen() = store.write { putBoolean(ONBOARDING_SEEN, true) }
+
     /** The local day (yyyy-MM-dd) the daily bonus was last paid, or empty if never. */
     fun loadDailyBonusDay(): String = store.getString(DAILY_BONUS_DAY).orEmpty()
 
@@ -163,6 +167,7 @@ class GameRepository(private val store: KeyValueStore) {
         const val REVIEW_CARDS = "review.cardCount"
         const val REVIEW_LAST_CARD_AT = "review.lastCardAt"
         const val REVIEW_RATED = "review.rated"
+        const val ONBOARDING_SEEN = "onboarding.seen"
         const val SOUND = "settings.sound"
         const val HAPTICS = "settings.haptics"
         const val THEME = "settings.theme"

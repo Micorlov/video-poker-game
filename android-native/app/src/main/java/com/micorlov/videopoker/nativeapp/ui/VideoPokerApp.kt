@@ -1,6 +1,13 @@
 package com.micorlov.videopoker.nativeapp.ui
 
+import android.Manifest
+import android.app.Activity
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.micorlov.videopoker.nativeapp.ui.onboarding.OnboardingFlow
+import com.micorlov.videopoker.nativeapp.ui.settings.LanguageDialog
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -76,6 +83,11 @@ fun VideoPokerApp(viewModel: GameViewModel) {
         }
 
         var tab by rememberSaveable { mutableStateOf(Tab.PLAY) }
+        var choosingLanguage by rememberSaveable { mutableStateOf(false) }
+        val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+        val requestNotifications = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
         var celebration by remember { mutableStateOf<Celebration?>(null) }
 
         // Back from Stats or Settings goes to the table; only back from the table leaves the app.
@@ -190,6 +202,28 @@ fun VideoPokerApp(viewModel: GameViewModel) {
                 modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 8.dp),
             )
             CelebrationOverlay(celebration)
+
+            if (ui.showOnboarding) {
+                OnboardingFlow(
+                    language = LocaleContext.current(context),
+                    onChooseLanguage = { choosingLanguage = true },
+                    onEnableNotifications = { requestNotifications() },
+                    onFinished = viewModel::onOnboardingFinished,
+                    modifier = Modifier.feltBackground(palette),
+                )
+            }
+        }
+
+        if (choosingLanguage) {
+            LanguageDialog(
+                current = LocaleContext.current(context),
+                onPick = { language ->
+                    choosingLanguage = false
+                    viewModel.onSelectLanguage(language)
+                    (context as? Activity)?.recreate()
+                },
+                onDismiss = { choosingLanguage = false },
+            )
         }
     }
 }

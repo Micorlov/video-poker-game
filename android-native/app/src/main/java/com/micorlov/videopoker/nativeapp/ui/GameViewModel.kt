@@ -36,6 +36,8 @@ data class UiState(
     val allInOffer: AllInOffer? = null,
     /** The "Enjoying Video Poker?" card is up. */
     val reviewCardVisible: Boolean = false,
+    /** First-run walkthrough is up. */
+    val showOnboarding: Boolean = false,
 ) {
     /** True once the cards of the current round are face up, so results may be shown. */
     val revealed: Boolean get() = revealedRound == game.round
@@ -78,6 +80,8 @@ class GameViewModel(
     private val clock: () -> Long = System::currentTimeMillis,
     /** The review ask is for the real app only; tests leave it off. */
     private val reviewEnabled: Boolean = false,
+    /** First-run onboarding is for the real app; tests leave it off. */
+    private val onboardingEnabled: Boolean = false,
 ) : ViewModel() {
 
     private val effectChannel = Channel<UiEffect>(Channel.UNLIMITED)
@@ -97,7 +101,10 @@ class GameViewModel(
         val opening = GameEngine.newGame(repository.loadGame(), settings.defaultBet, random)
         allInUsed = repository.loadAllInUsed(today())
         _state = MutableStateFlow(
-            UiState(opening.state, settings, revealedRound = -1, toast = null, allInRemaining = allInRemaining()),
+            UiState(
+                opening.state, settings, revealedRound = -1, toast = null, allInRemaining = allInRemaining(),
+                showOnboarding = onboardingEnabled && !repository.isOnboardingSeen(),
+            ),
         )
         state = _state.asStateFlow()
         // The opening deal can already carry news (a free rebuy for a player who left broke).
@@ -234,6 +241,11 @@ class GameViewModel(
     private fun allInRemaining(): Int = (Rules.ALL_IN_DAILY_LIMIT - allInUsed).coerceAtLeast(0)
 
     fun onSelectLanguage(language: AppLanguage) = updateSettings { it.copy(language = language) }
+
+    fun onOnboardingFinished() {
+        repository.markOnboardingSeen()
+        _state.update { it.copy(showOnboarding = false) }
+    }
 
     fun onToggleVoice() = updateSettings { it.copy(voiceEnabled = !it.voiceEnabled) }
 

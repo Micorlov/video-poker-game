@@ -312,7 +312,7 @@ private fun rememberVersionName(): String {
 
 /** Every shipped language, each in its own script, with the current one marked. */
 @Composable
-private fun LanguageDialog(current: AppLanguage, onPick: (AppLanguage) -> Unit, onDismiss: () -> Unit) {
+fun LanguageDialog(current: AppLanguage, onPick: (AppLanguage) -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.settings_language)) },
