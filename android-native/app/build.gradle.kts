@@ -67,6 +67,7 @@ dependencies {
 
     implementation("com.google.android.play:review-ktx:2.0.2")
     implementation("androidx.work:work-runtime-ktx:2.10.0")
+    implementation("com.android.installreferrer:installreferrer:2.2")
 
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.work:work-testing:2.10.0")

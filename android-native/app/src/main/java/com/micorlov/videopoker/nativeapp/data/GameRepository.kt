@@ -3,9 +3,11 @@ package com.micorlov.videopoker.nativeapp.data
 import com.micorlov.videopoker.nativeapp.domain.AppLanguage
 import com.micorlov.videopoker.nativeapp.domain.BestHand
 import com.micorlov.videopoker.nativeapp.domain.Card
+import com.micorlov.videopoker.nativeapp.domain.DeepLink
 import com.micorlov.videopoker.nativeapp.domain.HandEvaluator
 import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.PlayStats
+import com.micorlov.videopoker.nativeapp.domain.RemoteFlags
 import com.micorlov.videopoker.nativeapp.domain.ReviewState
 import com.micorlov.videopoker.nativeapp.domain.Rules
 import com.micorlov.videopoker.nativeapp.domain.SavedGame
@@ -79,6 +81,52 @@ class GameRepository(private val store: KeyValueStore) {
     fun loadLastReminderDay(): String = store.getString(LAST_REMINDER_DAY).orEmpty()
 
     fun saveLastReminderDay(day: String) = store.write { putString(LAST_REMINDER_DAY, day) }
+
+    /**
+     * Codes that arrived by link or install referrer, parked until the feature that consumes them
+     * (friends, rooms, gifts) can run. A friend often plays a while before signing in, and the
+     * install referrer is only ever read once, so these survive restarts.
+     */
+    fun loadPendingLink(): DeepLink? = when (store.getString(PENDING_KIND)) {
+        "invite" -> store.getString(PENDING_VALUE)?.takeIf { it.isNotBlank() }?.let(DeepLink::Invite)
+        "room" -> store.getString(PENDING_VALUE)?.takeIf { it.isNotBlank() }?.let(DeepLink::Room)
+        "gift" -> store.getString(PENDING_VALUE)?.takeIf { it.isNotBlank() }?.let(DeepLink::Gift)
+        else -> null
+    }
+
+    fun savePendingLink(link: DeepLink) = store.write {
+        when (link) {
+            is DeepLink.Invite -> { putString(PENDING_KIND, "invite"); putString(PENDING_VALUE, link.code) }
+            is DeepLink.Room -> { putString(PENDING_KIND, "room"); putString(PENDING_VALUE, link.code) }
+            is DeepLink.Gift -> { putString(PENDING_KIND, "gift"); putString(PENDING_VALUE, link.id) }
+        }
+    }
+
+    fun clearPendingLink() = store.write { putString(PENDING_KIND, ""); putString(PENDING_VALUE, "") }
+
+    /** Whether the one-time Play install referrer has been read already. */
+    fun isReferrerRead(): Boolean = store.getBoolean(REFERRER_READ) ?: false
+
+    fun markReferrerRead() = store.write { putBoolean(REFERRER_READ, true) }
+
+    /** The last flags fetched, kept so the app behaves the same offline. */
+    fun loadFlags(): RemoteFlags = RemoteFlags(
+        facebookSignIn = store.getBoolean(FLAG_FACEBOOK) ?: true,
+        champions = store.getBoolean(FLAG_CHAMPIONS) ?: true,
+        stories = store.getBoolean(FLAG_STORIES) ?: true,
+        bracelets = store.getBoolean(FLAG_BRACELETS) ?: true,
+        friendsRooms = store.getBoolean(FLAG_FRIENDS_ROOMS) ?: true,
+        allInDailyLimit = store.getInt(FLAG_ALL_IN_LIMIT)?.takeIf { it > 0 } ?: Rules.ALL_IN_DAILY_LIMIT,
+    )
+
+    fun saveFlags(flags: RemoteFlags) = store.write {
+        putBoolean(FLAG_FACEBOOK, flags.facebookSignIn)
+        putBoolean(FLAG_CHAMPIONS, flags.champions)
+        putBoolean(FLAG_STORIES, flags.stories)
+        putBoolean(FLAG_BRACELETS, flags.bracelets)
+        putBoolean(FLAG_FRIENDS_ROOMS, flags.friendsRooms)
+        putInt(FLAG_ALL_IN_LIMIT, flags.allInDailyLimit)
+    }
 
     fun isOnboardingSeen(): Boolean = store.getBoolean(ONBOARDING_SEEN) ?: false
 
@@ -190,6 +238,15 @@ class GameRepository(private val store: KeyValueStore) {
         const val NOTIFY_LEADERBOARD = "settings.notify.leaderboard"
         const val NOTIFY_DAILY = "settings.notify.dailyReminder"
         const val NOTIFY_BEST_HAND = "settings.notify.bestHand"
+        const val PENDING_KIND = "link.pendingKind"
+        const val PENDING_VALUE = "link.pendingValue"
+        const val REFERRER_READ = "link.referrerRead"
+        const val FLAG_FACEBOOK = "flags.facebookSignIn"
+        const val FLAG_CHAMPIONS = "flags.champions"
+        const val FLAG_STORIES = "flags.stories"
+        const val FLAG_BRACELETS = "flags.bracelets"
+        const val FLAG_FRIENDS_ROOMS = "flags.friendsRooms"
+        const val FLAG_ALL_IN_LIMIT = "flags.allInDailyLimit"
         const val SOUND = "settings.sound"
         const val HAPTICS = "settings.haptics"
         const val THEME = "settings.theme"

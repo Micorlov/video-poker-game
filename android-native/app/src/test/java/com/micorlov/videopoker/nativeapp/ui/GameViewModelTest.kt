@@ -4,6 +4,7 @@ import com.micorlov.videopoker.nativeapp.data.AppTheme
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.InMemoryStore
 import com.micorlov.videopoker.nativeapp.domain.Phase
+import com.micorlov.videopoker.nativeapp.domain.RemoteFlags
 import com.micorlov.videopoker.nativeapp.domain.ReviewState
 import com.micorlov.videopoker.nativeapp.domain.SavedGame
 import com.micorlov.videopoker.nativeapp.domain.Variant
@@ -315,5 +316,18 @@ class GameViewModelTest {
         assertTrue(vm.drainEffects().any { it == UiEffect.RequestNativeReview })
         assertTrue(repository.loadReview().shown)
         assertFalse(vm.state.value.reviewCardVisible)
+    }
+
+    @Test
+    fun `a remote all in limit raises today's allowance and is remembered`() {
+        repository.saveGame(SavedGame(balance = 600))
+        val vm = GameViewModel(repository, Random(5), todayKey = { "2026-10-12" })
+        assertEquals(1, vm.state.value.allInRemaining)
+
+        vm.onFlagsLoaded(RemoteFlags(allInDailyLimit = 3))
+        assertEquals(3, vm.state.value.allInRemaining)
+
+        val restarted = GameViewModel(repository, Random(5), todayKey = { "2026-10-12" })
+        assertEquals(3, restarted.state.value.allInRemaining)
     }
 }

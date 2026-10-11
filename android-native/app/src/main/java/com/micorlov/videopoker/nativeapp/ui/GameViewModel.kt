@@ -1,6 +1,8 @@
 package com.micorlov.videopoker.nativeapp.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import com.micorlov.videopoker.nativeapp.data.AppTheme
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.UserSettings
@@ -11,6 +13,7 @@ import com.micorlov.videopoker.nativeapp.domain.GameEngine
 import com.micorlov.videopoker.nativeapp.domain.GameEvent
 import com.micorlov.videopoker.nativeapp.domain.GameState
 import com.micorlov.videopoker.nativeapp.domain.Phase
+import com.micorlov.videopoker.nativeapp.domain.RemoteFlags
 import com.micorlov.videopoker.nativeapp.domain.ReviewAsk
 import com.micorlov.videopoker.nativeapp.domain.ReviewPolicy
 import com.micorlov.videopoker.nativeapp.domain.Rules
@@ -38,6 +41,8 @@ data class UiState(
     val reviewCardVisible: Boolean = false,
     /** First-run walkthrough is up. */
     val showOnboarding: Boolean = false,
+    /** Admin switches; defaults until the fetch lands. */
+    val flags: RemoteFlags = RemoteFlags(),
 ) {
     /** True once the cards of the current round are face up, so results may be shown. */
     val revealed: Boolean get() = revealedRound == game.round
@@ -82,6 +87,8 @@ class GameViewModel(
     private val reviewEnabled: Boolean = false,
     /** First-run onboarding is for the real app; tests leave it off. */
     private val onboardingEnabled: Boolean = false,
+    /** Fetches the remote flags; null (tests, offline builds) keeps the cached ones. */
+    private val flagFetcher: (suspend () -> RemoteFlags?)? = null,
 ) : ViewModel() {
 
     private val effectChannel = Channel<UiEffect>(Channel.UNLIMITED)
@@ -89,6 +96,7 @@ class GameViewModel(
 
     private val _state: MutableStateFlow<UiState>
     private var allInUsed = 0
+    private var allInLimit = repository.loadFlags().allInDailyLimit
     private var reviewAskedThisSession = false
     private var reviewTimerPending = false
 
@@ -104,12 +112,14 @@ class GameViewModel(
             UiState(
                 opening.state, settings, revealedRound = -1, toast = null, allInRemaining = allInRemaining(),
                 showOnboarding = onboardingEnabled && !repository.isOnboardingSeen(),
+                flags = repository.loadFlags(),
             ),
         )
         state = _state.asStateFlow()
         // The opening deal can already carry news (a free rebuy for a player who left broke).
         applyEvents(opening.events, persist = opening.events.any { it is GameEvent.Rebuy }, game = opening.state)
         grantDailyBonus()
+        flagFetcher?.let { fetch -> viewModelScope.launch { fetch()?.let(::onFlagsLoaded) } }
     }
 
     /** +[Rules.DAILY_BONUS] chips the first time the app opens on a new local day. Idempotent per day. */
@@ -239,7 +249,14 @@ class GameViewModel(
 
     private fun today(): String = todayKey?.invoke().orEmpty()
 
-    private fun allInRemaining(): Int = (Rules.ALL_IN_DAILY_LIMIT - allInUsed).coerceAtLeast(0)
+    private fun allInRemaining(): Int = (allInLimit - allInUsed).coerceAtLeast(0)
+
+    /** Applies freshly fetched flags and keeps them for the next offline start. */
+    fun onFlagsLoaded(flags: RemoteFlags) {
+        repository.saveFlags(flags)
+        allInLimit = flags.allInDailyLimit
+        _state.update { it.copy(flags = flags, allInRemaining = allInRemaining()) }
+    }
 
     fun onSelectLanguage(language: AppLanguage) = updateSettings { it.copy(language = language) }
 
