@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Video Poker (Native)</string>
+
+    <!-- Navigation -->
+    <string name="nav_play">Play</string>
+    <string name="nav_stats">Stats</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Play -->
+    <string name="play_title">Video Poker</string>
+    <string name="play_level">Level %1$d</string>
+    <string name="play_balance">Balance</string>
+    <string name="play_total_bet">Total bet</string>
+    <string name="play_deal">Deal</string>
+    <string name="play_draw">Draw</string>
+    <string name="play_hint_hold">Tap the cards you want to keep, then draw.</string>
+    <string name="play_hint_bet">Pick your bet, then deal.</string>
+    <string name="play_held">HELD</string>
+    <string name="play_nothing">Nothing — %1$s</string>
+    <string name="play_win_streak">Win streak</string>
+    <string name="play_payout_bonus">+%1$d%% payout bonus</string>
+    <string name="play_streak_bonus_included">Includes +%1$s streak bonus</string>
+    <string name="play_paytable">Pay table</string>
+    <string name="play_extra_hands">Extra hands</string>
+    <string name="play_sound_on">Sound on</string>
+    <string name="play_sound_off">Sound off</string>
+    <string name="play_bet_chip">Bet %1$d</string>
+    <string name="play_expand">Show</string>
+    <string name="play_collapse">Hide</string>
+
+    <!-- Cards (accessibility) -->
+    <string name="card_description">%1$s of %2$s</string>
+    <string name="card_held_suffix">, held</string>
+    <string name="card_face_down">Card, face down</string>
+    <string name="card_hold_action">Toggle hold</string>
+    <string-array name="rank_names">
+        <item>Ace</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>Jack</item>
+        <item>Queen</item>
+        <item>King</item>
+    </string-array>
+    <string-array name="suit_names">
+        <item>Spades</item>
+        <item>Hearts</item>
+        <item>Diamonds</item>
+        <item>Clubs</item>
+    </string-array>
+
+    <!-- Toasts -->
+    <string name="toast_variant_locked">🔒 Unlocks at level %1$d</string>
+    <string name="toast_multi_locked">🔒 Multi-hand unlocks at level %1$d</string>
+    <string name="toast_rebuy">♻ +%1$s credits</string>
+    <string name="toast_finish_hand">Finish the current hand first</string>
+    <string name="toast_stats_reset">Statistics reset</string>
+
+    <!-- Stats -->
+    <string name="stats_title">Statistics</string>
+    <string name="stats_today">Today</string>
+    <string name="stats_all_time">All-Time</string>
+    <string name="stats_net">Net</string>
+    <string name="stats_won">Won</string>
+    <string name="stats_lost">Lost</string>
+    <string name="stats_hands">Hands Played</string>
+    <string name="stats_best_streak">Best Streak</string>
+    <string name="stats_level">Level %1$d</string>
+    <plurals name="stats_hands_to_next">
+        <item quantity="one">%1$d more hand to level %2$d</item>
+        <item quantity="other">%1$d more hands to level %2$d</item>
+    </plurals>
+    <string name="stats_next_unlock">%1$s unlocks at level %2$d</string>
+    <string name="stats_all_unlocked">Everything is unlocked</string>
+    <string name="stats_multi_hand">Triple &amp; Five Play</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_gameplay">Gameplay</string>
+    <string name="settings_sound">Sound Effects</string>
+    <string name="settings_haptics">Haptic Feedback</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_green">Green</string>
+    <string name="theme_blue">Blue</string>
+    <string name="theme_crimson">Crimson</string>
+    <string name="settings_default_bet">Default Bet</string>
+    <string name="settings_variant">Game Variant</string>
+    <string name="settings_hands">Hands per Deal</string>
+    <string name="settings_hands_one">1 Hand</string>
+    <string name="settings_hands_three">3× Hands</string>
+    <string name="settings_hands_five">5× Hands</string>
+    <string name="settings_paytable">Payout Table</string>
+    <string name="settings_reset">Reset Statistics</string>
+    <string name="settings_reset_title">Reset statistics?</string>
+    <string name="settings_reset_body">Your chips and level stay. Only the Stats screen counters are cleared.</string>
+    <string name="settings_reset_confirm">Reset</string>
+    <string name="settings_cancel">Cancel</string>
+    <string name="settings_locked_at">Unlocks at level %1$d</string>
+    <string name="settings_footer">Video Poker · v%1$s (native)</string>
+
+    <!-- Variants -->
+    <string name="variant_jacks">Jacks or Better</string>
+    <string name="variant_deuces">Deuces Wild</string>
+    <string name="variant_bonus">Bonus Poker</string>
+    <string name="variant_double_bonus">Double Bonus</string>
+
+    <!-- Hand names -->
+    <string name="hand_royal_flush">Royal Flush</string>
+    <string name="hand_straight_flush">Straight Flush</string>
+    <string name="hand_four_of_a_kind">Four of a Kind</string>
+    <string name="hand_four_aces">Four Aces</string>
+    <string name="hand_four_2s_4s">Four 2s-4s</string>
+    <string name="hand_four_5s_ks">Four 5s-Ks</string>
+    <string name="hand_four_deuces">Four Deuces</string>
+    <string name="hand_wild_royal_flush">Wild Royal Flush</string>
+    <string name="hand_five_of_a_kind">Five of a Kind</string>
+    <string name="hand_full_house">Full House</string>
+    <string name="hand_flush">Flush</string>
+    <string name="hand_straight">Straight</string>
+    <string name="hand_three_of_a_kind">Three of a Kind</string>
+    <string name="hand_two_pair">Two Pair</string>
+    <string name="hand_jacks_or_better">Jacks or Better</string>
+    <string name="hand_nothing">Nothing</string>
+
+    <!-- Hand explanations -->
+    <string name="exp_royal_flush">A, K, Q, J, 10 — all the same suit. The best hand in the game.</string>
+    <string name="exp_straight_flush">Five cards in a row, all the same suit.</string>
+    <string name="exp_four_of_a_kind">Four cards of the same rank.</string>
+    <string name="exp_four_aces">Four Aces — the biggest quad bonus.</string>
+    <string name="exp_four_2s_4s">Four of a kind, rank 2 through 4.</string>
+    <string name="exp_four_5s_ks">Four of a kind, rank 5 through King.</string>
+    <string name="exp_four_deuces">Four wild deuces — an automatic top-tier win.</string>
+    <string name="exp_wild_royal_flush">A Royal Flush made using at least one wild deuce.</string>
+    <string name="exp_five_of_a_kind">Five cards of the same rank, using wild deuces.</string>
+    <string name="exp_full_house">Three of a kind plus a pair.</string>
+    <string name="exp_flush">Five cards of the same suit, not in sequence.</string>
+    <string name="exp_straight">Five cards in sequence, mixed suits.</string>
+    <string name="exp_three_of_a_kind">Three cards of the same rank.</string>
+    <string name="exp_two_pair">Two separate pairs.</string>
+    <string name="exp_jacks_or_better">A pair of Jacks, Queens, Kings, or Aces.</string>
+    <string name="exp_nothing">No paying hand — better luck next deal.</string>
+
+    <!-- Short names for the pay-table ticker -->
+    <string name="ticker_royal_flush">ROYAL</string>
+    <string name="ticker_straight_flush">S. FLUSH</string>
+    <string name="ticker_four_of_a_kind">QUADS</string>
+    <string name="ticker_four_aces">4 ACES</string>
+    <string name="ticker_four_2s_4s">QUADS 2-4</string>
+    <string name="ticker_four_5s_ks">QUADS 5-K</string>
+    <string name="ticker_four_deuces">4 DEUCES</string>
+    <string name="ticker_wild_royal_flush">W. ROYAL</string>
+    <string name="ticker_five_of_a_kind">FIVE</string>
+    <string name="ticker_full_house">HOUSE</string>
+    <string name="ticker_flush">FLUSH</string>
+    <string name="ticker_straight">STRAIGHT</string>
+    <string name="ticker_three_of_a_kind">TRIPS</string>
+    <string name="ticker_two_pair">TWO PAIR</string>
+    <string name="ticker_jacks_or_better">JACKS+</string>
+    <string name="ticker_nothing">—</string>
+
+    <!-- Badges on winning cards -->
+    <string name="win_pair">Pair</string>
+    <string name="win_three_of_a_kind">3 of a Kind</string>
+    <string name="win_four_of_a_kind">4 of a Kind</string>
+    <string name="win_straight">Straight</string>
+    <string name="win_flush">Flush</string>
+    <string name="win_straight_flush">Str. Flush</string>
+    <string name="win_royal_flush">Royal Flush</string>
+</resources>

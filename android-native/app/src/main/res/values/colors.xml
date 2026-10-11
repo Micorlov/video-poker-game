@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The felt edge shows before Compose draws its first frame and behind the adaptive icon. -->
+    <color name="felt_edge">#14522C</color>
+    <color name="launcher_background">#0E2E1C</color>
+</resources>
