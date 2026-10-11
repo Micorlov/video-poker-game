@@ -51,7 +51,7 @@ Two separate codebases exist in the repo:
 |---|---|---|
 | Form | Terminal CLI | PWA + Capacitor Android/iOS |
 | Variants | Jacks or Better only | 4 variants × 3 hand-counts |
-| Bankroll | 100, no rebuy | 500, unlimited free rebuy |
+| Bankroll | 100, no rebuy | 1,000, unlimited free rebuy |
 | Bet range | 1–5 | 5 / 10 / 20 / 50 / ALL IN |
 | Paytable | 9/6 full-pay (25× quad) | 7/5 short-pay (20× quad) |
 | Progression | None | Levels, streaks, champions, bracelets, rooms, stories |
@@ -331,7 +331,7 @@ All-In slider all reverse with the reading direction.
 | Overlay | Behavior |
 |---|---|
 | **Story Viewer** | Full-screen, progress bars, 5s auto-advance, tap zones, Esc/←/→ keys. Shows hand name, cards, `+N credits · Nx`, and bracelet strip. Empty: "No winning hands yet / Win a hand to create your story." |
-| **Toast** | Singleton, 2.2s. ~30 call sites (`♻ +500 credits`, `Friend added!`, `Invite link copied!`, `Statistics reset`, …) |
+| **Toast** | Singleton, 2.2s. ~30 call sites (`♻ +1,000 credits`, `Friend added!`, `Invite link copied!`, `Statistics reset`, …) |
 | **PWA Install Bar** | "Install Video Poker for quick access" — appears after 3 distinct visit days, dismissal persisted |
 | **Win celebrations** | Escalating by hand rank: gold shimmer → card bounce → confetti burst → triple confetti + screen flash → fireworks + shake + gold rain |
 
@@ -420,8 +420,8 @@ in the story viewer. No credits are granted.
 
 ### 8.4 Rebuy
 
-When the balance can't cover the minimum bet, the game grants **+500 credits** with a
-`♻ +500 credits` toast. Unlimited and free; rebuys are counted for the daily leaderboard.
+When the balance can't cover the minimum bet, the game grants **+1,000 credits** with a
+`♻ +1,000 credits` toast. Unlimited and free; rebuys are counted for the daily leaderboard.
 
 ### 8.5 Personal Best
 

@@ -1,6 +1,11 @@
 package com.micorlov.videopoker.nativeapp.ui.play
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,10 +18,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LongState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -126,6 +136,29 @@ private fun HintText(textRes: Int) {
     )
 }
 
+/** Two pair or less: the web app's "gold shimmer" tier, a cream highlight sweeping across the payout. */
+private const val SHIMMER_MAX_STRENGTH = 2
+private const val SHIMMER_PERIOD_MS = 1500
+private const val SHIMMER_SPAN_PX = 400f
+private val ShimmerCream = Color(0xFFFFF5CC)
+
+@Composable
+private fun shimmerGold(): TextStyle {
+    val offset by rememberInfiniteTransition(label = "shimmer").animateFloat(
+        initialValue = 0f,
+        targetValue = SHIMMER_SPAN_PX,
+        animationSpec = infiniteRepeatable(tween(SHIMMER_PERIOD_MS, easing = LinearEasing)),
+        label = "shimmer-offset",
+    )
+    val brush = Brush.linearGradient(
+        colors = listOf(VpColors.Gold, ShimmerCream, VpColors.Gold),
+        start = Offset(offset - SHIMMER_SPAN_PX, 0f),
+        end = Offset(offset, 0f),
+        tileMode = TileMode.Repeated,
+    )
+    return TextStyle(brush = brush)
+}
+
 @Composable
 private fun WinResult(game: GameState, outcome: DrawOutcome) {
     val type = outcome.result.type
@@ -140,7 +173,7 @@ private fun WinResult(game: GameState, outcome: DrawOutcome) {
             Text(
                 text = "+" + formatNumber(outcome.totalWin),
                 modifier = Modifier.testTag("win-amount"),
-                style = TabularFigures,
+                style = if (type.strength <= SHIMMER_MAX_STRENGTH) TabularFigures.merge(shimmerGold()) else TabularFigures,
                 color = VpColors.Gold,
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,
