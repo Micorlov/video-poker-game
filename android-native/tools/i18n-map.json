@@ -1,0 +1,8 @@
+{
+  "play_win_streak": "play.winStreak",
+  "play_paytable": "settings.payoutTable",
+  "theme_green": "strip:settings.themeGreen",
+  "theme_blue": "strip:settings.themeBlue",
+  "theme_crimson": "strip:settings.themeCrimson",
+  "settings_locked_at": "strip:toast.unlockLevel"
+}

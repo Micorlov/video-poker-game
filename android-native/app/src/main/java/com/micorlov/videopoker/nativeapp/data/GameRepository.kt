@@ -1,5 +1,6 @@
 package com.micorlov.videopoker.nativeapp.data
 
+import com.micorlov.videopoker.nativeapp.domain.AppLanguage
 import com.micorlov.videopoker.nativeapp.domain.BestHand
 import com.micorlov.videopoker.nativeapp.domain.Card
 import com.micorlov.videopoker.nativeapp.domain.HandEvaluator
@@ -93,6 +94,7 @@ class GameRepository(private val store: KeyValueStore) {
             theme = AppTheme.fromStorageKey(store.getString(THEME)) ?: defaults.theme,
             hintsEnabled = store.getBoolean(HINTS) ?: defaults.hintsEnabled,
             voiceEnabled = store.getBoolean(VOICE) ?: defaults.voiceEnabled,
+            language = AppLanguage.fromTag(store.getString(LANGUAGE)),
             defaultBet = store.getInt(DEFAULT_BET)?.takeIf { it in Rules.BET_OPTIONS } ?: defaults.defaultBet,
         )
     }
@@ -105,6 +107,7 @@ class GameRepository(private val store: KeyValueStore) {
             putInt(DEFAULT_BET, settings.defaultBet)
             putBoolean(HINTS, settings.hintsEnabled)
             putBoolean(VOICE, settings.voiceEnabled)
+            putString(LANGUAGE, settings.language?.tag.orEmpty())
         }
     }
 
@@ -145,6 +148,7 @@ class GameRepository(private val store: KeyValueStore) {
         const val VARIANT = "game.variant"
         const val HAND_COUNT = "game.handCount"
         const val DAILY_BONUS_DAY = "daily.bonusDay"
+        const val LANGUAGE = "settings.language"
         const val VOICE = "settings.voice"
         const val HINTS = "settings.hints"
         const val ALL_IN_DAY = "allin.day"

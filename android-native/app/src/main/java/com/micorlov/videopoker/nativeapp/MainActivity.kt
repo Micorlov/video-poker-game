@@ -1,5 +1,6 @@
 package com.micorlov.videopoker.nativeapp
 
+import android.content.Context
 import android.graphics.Color
 import java.time.LocalDate
 import android.os.Bundle
@@ -13,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.SharedPreferencesStore
 import com.micorlov.videopoker.nativeapp.ui.GameViewModel
+import com.micorlov.videopoker.nativeapp.ui.LocaleContext
 import com.micorlov.videopoker.nativeapp.ui.VideoPokerApp
 
 class MainActivity : ComponentActivity() {
@@ -28,6 +30,8 @@ class MainActivity : ComponentActivity() {
                 ) as T
         }
     }
+
+    override fun attachBaseContext(newBase: Context) = super.attachBaseContext(LocaleContext.wrap(newBase))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

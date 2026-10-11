@@ -1,0 +1,53 @@
+{
+ "play_level": "Level %1$d",
+ "play_hint_hold": "Ketuk kartu yang ingin ditahan, lalu tarik.",
+ "play_hint_bet": "Pilih taruhan, lalu bagikan.",
+ "play_streak_bonus_included": "Termasuk bonus beruntun +%1$s",
+ "play_extra_hands": "Tangan tambahan",
+ "play_sound_on": "Suara aktif",
+ "play_sound_off": "Suara mati",
+ "play_hints_on": "Petunjuk aktif",
+ "play_hints_off": "Petunjuk mati",
+ "play_bet_chip": "Taruhan %1$d",
+ "play_expand": "Tampilkan",
+ "play_collapse": "Sembunyikan",
+ "card_description": "%1$s %2$s",
+ "card_held_suffix": ", ditahan",
+ "card_face_down": "Kartu tertutup",
+ "card_hold_action": "Ubah penahanan",
+ "toast_finish_hand": "Selesaikan tangan saat ini dulu",
+ "stats_level": "Level %1$d",
+ "stats_next_unlock": "%1$s terbuka di level %2$d",
+ "stats_all_unlocked": "Semuanya sudah terbuka",
+ "stats_multi_hand": "Triple & Five Play",
+ "settings_reset_title": "Atur ulang statistik?",
+ "settings_reset_body": "Chip dan level Anda tetap ada. Hanya penghitung Statistik yang dihapus.",
+ "settings_reset_confirm": "Atur ulang",
+ "settings_footer": "Video Poker · v%1$s (native)",
+ "stats_best_hand": "Tangan terbaik",
+ "settings_about": "Tentang",
+ "rank_names": [
+  "As",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "Jack",
+  "Queen",
+  "King"
+ ],
+ "suit_names": [
+  "Sekop",
+  "Hati",
+  "Wajik",
+  "Keriting"
+ ],
+ "stats_hands_to_next": {
+  "other": "%1$d tangan lagi ke level %2$d"
+ }
+}

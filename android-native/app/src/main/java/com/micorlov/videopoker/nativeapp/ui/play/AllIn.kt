@@ -27,6 +27,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -120,6 +122,8 @@ fun AllInSheet(offer: AllInOffer, onConfirm: () -> Unit, onDismiss: () -> Unit) 
 fun SlideToConfirm(label: String, onConfirmed: () -> Unit, modifier: Modifier = Modifier) {
     val palette = LocalPalette.current
     val density = LocalDensity.current
+    // The thumb starts at the reading-direction start edge, so a right-to-left layout drags leftwards.
+    val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1 else 1
     val thumbSize = 50.dp
     val inset = 3.dp
     BoxWithConstraints(
@@ -147,7 +151,7 @@ fun SlideToConfirm(label: String, onConfirmed: () -> Unit, modifier: Modifier = 
         )
         Column(
             Modifier
-                .offset { IntOffset((offsetPx + with(density) { inset.toPx() }).roundToInt(), 0) }
+                .offset { IntOffset(direction * (offsetPx + with(density) { inset.toPx() }).roundToInt(), 0) }
                 .size(thumbSize)
                 .clip(CircleShape)
                 .background(Brush.verticalGradient(listOf(palette.action, palette.actionDeep)))
@@ -164,7 +168,7 @@ fun SlideToConfirm(label: String, onConfirmed: () -> Unit, modifier: Modifier = 
                         onDragCancel = { offsetPx = 0f },
                     ) { change, drag ->
                         change.consume()
-                        offsetPx = (offsetPx + drag).coerceIn(0f, travelPx)
+                        offsetPx = (offsetPx + drag * direction).coerceIn(0f, travelPx)
                     }
                 }
                 .testTag("allin-thumb"),

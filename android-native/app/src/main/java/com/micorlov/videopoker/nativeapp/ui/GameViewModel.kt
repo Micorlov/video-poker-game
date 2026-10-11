@@ -5,6 +5,7 @@ import com.micorlov.videopoker.nativeapp.data.AppTheme
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.UserSettings
 import com.micorlov.videopoker.nativeapp.domain.AllInOffer
+import com.micorlov.videopoker.nativeapp.domain.AppLanguage
 import com.micorlov.videopoker.nativeapp.domain.DrawOutcome
 import com.micorlov.videopoker.nativeapp.domain.GameEngine
 import com.micorlov.videopoker.nativeapp.domain.GameEvent
@@ -231,6 +232,8 @@ class GameViewModel(
     private fun today(): String = todayKey?.invoke().orEmpty()
 
     private fun allInRemaining(): Int = (Rules.ALL_IN_DAILY_LIMIT - allInUsed).coerceAtLeast(0)
+
+    fun onSelectLanguage(language: AppLanguage) = updateSettings { it.copy(language = language) }
 
     fun onToggleVoice() = updateSettings { it.copy(voiceEnabled = !it.voiceEnabled) }
 

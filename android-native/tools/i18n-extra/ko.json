@@ -1,0 +1,53 @@
+{
+ "play_level": "레벨 %1$d",
+ "play_hint_hold": "남길 카드를 탭한 다음 드로하세요.",
+ "play_hint_bet": "베팅을 고른 뒤 딜하세요.",
+ "play_streak_bonus_included": "연승 보너스 +%1$s 포함",
+ "play_extra_hands": "추가 핸드",
+ "play_sound_on": "소리 켜짐",
+ "play_sound_off": "소리 꺼짐",
+ "play_hints_on": "힌트 켜짐",
+ "play_hints_off": "힌트 꺼짐",
+ "play_bet_chip": "베팅 %1$d",
+ "play_expand": "표시",
+ "play_collapse": "숨기기",
+ "card_description": "%2$s %1$s",
+ "card_held_suffix": ", 홀드됨",
+ "card_face_down": "뒷면 카드",
+ "card_hold_action": "홀드 전환",
+ "toast_finish_hand": "먼저 현재 핸드를 끝내세요",
+ "stats_level": "레벨 %1$d",
+ "stats_next_unlock": "%1$s은(는) 레벨 %2$d에서 열립니다",
+ "stats_all_unlocked": "모두 잠금 해제됨",
+ "stats_multi_hand": "트리플 & 파이브 플레이",
+ "settings_reset_title": "통계를 초기화할까요?",
+ "settings_reset_body": "칩과 레벨은 유지됩니다. 통계 화면의 카운터만 지워집니다.",
+ "settings_reset_confirm": "초기화",
+ "settings_footer": "Video Poker · v%1$s (네이티브)",
+ "stats_best_hand": "최고의 핸드",
+ "settings_about": "정보",
+ "rank_names": [
+  "에이스",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "잭",
+  "퀸",
+  "킹"
+ ],
+ "suit_names": [
+  "스페이드",
+  "하트",
+  "다이아몬드",
+  "클럽"
+ ],
+ "stats_hands_to_next": {
+  "other": "레벨 %2$d까지 %1$d핸드 남음"
+ }
+}

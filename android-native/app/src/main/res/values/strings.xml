@@ -203,4 +203,5 @@
     <string name="review_title">Enjoying Video Poker?</string>
     <string name="review_body">A quick rating on Google Play helps other players find us.</string>
     <string name="review_rate">Rate now</string>
+    <string name="settings_language">Language</string>
 </resources>

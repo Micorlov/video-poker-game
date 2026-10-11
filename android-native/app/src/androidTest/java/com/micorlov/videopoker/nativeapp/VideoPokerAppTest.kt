@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.SharedPreferencesStore
@@ -107,7 +108,7 @@ class VideoPokerAppTest {
         compose.onNodeWithTag("tab-settings").performClick()
         compose.onNodeWithTag("variant-deuces").assertTextContains("level 3", substring = true)
 
-        compose.onNodeWithTag("variant-deuces").performClick()
+        compose.onNodeWithTag("variant-deuces").performScrollTo().performClick()
         compose.waitUntil(timeoutMillis = 3_000) { compose.onAllNodesWithTag("toast").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("toast").assertTextContains("Finish the current hand first")
     }

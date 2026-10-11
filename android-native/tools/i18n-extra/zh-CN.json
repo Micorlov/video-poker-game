@@ -1,0 +1,53 @@
+{
+ "play_level": "等级 %1$d",
+ "play_hint_hold": "点击要保留的牌，然后换牌。",
+ "play_hint_bet": "选择下注金额，然后发牌。",
+ "play_streak_bonus_included": "含 +%1$s 连胜奖励",
+ "play_extra_hands": "额外牌手",
+ "play_sound_on": "声音已开",
+ "play_sound_off": "声音已关",
+ "play_hints_on": "提示已开",
+ "play_hints_off": "提示已关",
+ "play_bet_chip": "下注 %1$d",
+ "play_expand": "展开",
+ "play_collapse": "收起",
+ "card_description": "%2$s%1$s",
+ "card_held_suffix": "，已保留",
+ "card_face_down": "背面朝上的牌",
+ "card_hold_action": "切换保留",
+ "toast_finish_hand": "请先完成当前这一手",
+ "stats_level": "等级 %1$d",
+ "stats_next_unlock": "%1$s在等级 %2$d 解锁",
+ "stats_all_unlocked": "全部已解锁",
+ "stats_multi_hand": "三手与五手玩法",
+ "settings_reset_title": "重置统计？",
+ "settings_reset_body": "你的筹码和等级不变，只会清除统计页面的计数。",
+ "settings_reset_confirm": "重置",
+ "settings_footer": "Video Poker · v%1$s（原生）",
+ "stats_best_hand": "最佳牌型",
+ "settings_about": "关于",
+ "rank_names": [
+  "A",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "J",
+  "Q",
+  "K"
+ ],
+ "suit_names": [
+  "黑桃",
+  "红桃",
+  "方块",
+  "梅花"
+ ],
+ "stats_hands_to_next": {
+  "other": "再玩 %1$d 手升到等级 %2$d"
+ }
+}

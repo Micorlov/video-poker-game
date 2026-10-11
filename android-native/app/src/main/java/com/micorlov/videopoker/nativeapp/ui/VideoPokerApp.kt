@@ -139,6 +139,7 @@ fun VideoPokerApp(viewModel: GameViewModel) {
             SettingsActions(
                 onToggleSound = viewModel::onToggleSound,
                 onToggleHaptics = viewModel::onToggleHaptics,
+                onSelectLanguage = viewModel::onSelectLanguage,
                 onToggleVoice = {
                     viewModel.onToggleVoice()
                     // Switching on gives a sample, as the web app does.

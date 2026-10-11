@@ -1,0 +1,53 @@
+{
+ "play_level": "レベル %1$d",
+ "play_hint_hold": "残したいカードをタップして、ドローしましょう。",
+ "play_hint_bet": "ベットを選んで、ディールしましょう。",
+ "play_streak_bonus_included": "連勝ボーナス +%1$s を含む",
+ "play_extra_hands": "追加ハンド",
+ "play_sound_on": "サウンド オン",
+ "play_sound_off": "サウンド オフ",
+ "play_hints_on": "ヒント オン",
+ "play_hints_off": "ヒント オフ",
+ "play_bet_chip": "ベット %1$d",
+ "play_expand": "表示",
+ "play_collapse": "非表示",
+ "card_description": "%2$sの%1$s",
+ "card_held_suffix": "、ホールド中",
+ "card_face_down": "裏向きのカード",
+ "card_hold_action": "ホールドを切り替え",
+ "toast_finish_hand": "まず現在のハンドを終えてください",
+ "stats_level": "レベル %1$d",
+ "stats_next_unlock": "%1$sはレベル%2$dで解放",
+ "stats_all_unlocked": "すべて解放済み",
+ "stats_multi_hand": "トリプル＆ファイブプレイ",
+ "settings_reset_title": "統計をリセットしますか？",
+ "settings_reset_body": "チップとレベルはそのままです。統計画面のカウンターだけが消去されます。",
+ "settings_reset_confirm": "リセット",
+ "settings_footer": "Video Poker · v%1$s（ネイティブ）",
+ "stats_best_hand": "ベストハンド",
+ "settings_about": "このアプリについて",
+ "rank_names": [
+  "エース",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "ジャック",
+  "クイーン",
+  "キング"
+ ],
+ "suit_names": [
+  "スペード",
+  "ハート",
+  "ダイヤ",
+  "クラブ"
+ ],
+ "stats_hands_to_next": {
+  "other": "レベル%2$dまであと%1$dハンド"
+ }
+}

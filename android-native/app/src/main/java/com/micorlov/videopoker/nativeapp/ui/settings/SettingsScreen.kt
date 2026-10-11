@@ -35,7 +35,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.micorlov.videopoker.nativeapp.R
+import android.app.Activity
 import com.micorlov.videopoker.nativeapp.data.AppTheme
+import com.micorlov.videopoker.nativeapp.domain.AppLanguage
+import com.micorlov.videopoker.nativeapp.ui.LocaleContext
 import com.micorlov.videopoker.nativeapp.domain.Rules
 import com.micorlov.videopoker.nativeapp.domain.Variant
 import com.micorlov.videopoker.nativeapp.ui.StoreLinks
@@ -52,6 +55,7 @@ class SettingsActions(
     val onToggleSound: () -> Unit,
     val onToggleHaptics: () -> Unit,
     val onToggleVoice: () -> Unit,
+    val onSelectLanguage: (AppLanguage) -> Unit,
     val onSelectTheme: (AppTheme) -> Unit,
     val onSelectDefaultBet: (Int) -> Unit,
     val onSelectVariant: (Variant) -> Unit,
@@ -65,6 +69,8 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
     val game = ui.game
     var confirmingReset by rememberSaveable { mutableStateOf(false) }
     var showPaytable by rememberSaveable { mutableStateOf(false) }
+    var choosingLanguage by rememberSaveable { mutableStateOf(false) }
+    val activity = LocalContext.current as? Activity
 
     Column(
         modifier = modifier
@@ -84,6 +90,10 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
             SettingToggle(stringResource(R.string.settings_sound), settings.soundEnabled, actions.onToggleSound, "toggle-sound")
             SettingToggle(stringResource(R.string.settings_haptics), settings.hapticsEnabled, actions.onToggleHaptics, "toggle-haptics")
             SettingToggle(stringResource(R.string.settings_voice), settings.voiceEnabled, actions.onToggleVoice, "toggle-voice")
+        }
+
+        Section(R.string.settings_language) {
+            LinkRow(LocaleContext.current(LocalContext.current).nativeName, "language-row") { choosingLanguage = true }
         }
 
         Section(R.string.settings_theme) {
@@ -191,6 +201,19 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
         )
     }
 
+    if (choosingLanguage) {
+        LanguageDialog(
+            current = LocaleContext.current(LocalContext.current),
+            onPick = { language ->
+                choosingLanguage = false
+                actions.onSelectLanguage(language)
+                // The activity restarts so every string, number format and layout direction is rebuilt.
+                activity?.recreate()
+            },
+            onDismiss = { choosingLanguage = false },
+        )
+    }
+
     if (confirmingReset) {
         AlertDialog(
             onDismissRequest = { confirmingReset = false },
@@ -285,4 +308,32 @@ private fun rememberVersionName(): String {
     return remember(context) {
         runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull().orEmpty()
     }
+}
+
+/** Every shipped language, each in its own script, with the current one marked. */
+@Composable
+private fun LanguageDialog(current: AppLanguage, onPick: (AppLanguage) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_language)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()).testTag("language-list")) {
+                AppLanguage.entries.forEach { language ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable(role = Role.RadioButton) { onPick(language) }
+                            .padding(vertical = 12.dp)
+                            .testTag("language-${language.tag}"),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(language.nativeName, modifier = Modifier.weight(1f), fontSize = 16.sp)
+                        if (language == current) Text("✓", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) } },
+    )
 }

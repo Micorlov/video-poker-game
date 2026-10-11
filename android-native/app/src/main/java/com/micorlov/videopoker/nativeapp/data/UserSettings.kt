@@ -1,5 +1,6 @@
 package com.micorlov.videopoker.nativeapp.data
 
+import com.micorlov.videopoker.nativeapp.domain.AppLanguage
 import com.micorlov.videopoker.nativeapp.domain.Rules
 
 /** The three table-cloth themes from the web app's Settings → Theme. */
@@ -23,4 +24,6 @@ data class UserSettings(
     val hintsEnabled: Boolean = false,
     /** Spoken hand names after a win; on by default, as in the web app. */
     val voiceEnabled: Boolean = true,
+    /** The language the player picked; null follows the device. */
+    val language: AppLanguage? = null,
 )
