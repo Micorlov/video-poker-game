@@ -102,6 +102,10 @@ fun VideoPokerApp(viewModel: GameViewModel) {
                 onSelectBet = viewModel::onSelectBet,
                 onRevealed = viewModel::onRevealed,
                 onToggleSound = viewModel::onToggleSound,
+                onToggleHints = viewModel::onToggleHints,
+                onAllIn = viewModel::onAllInRequested,
+                onAllInConfirmed = viewModel::onAllInConfirmed,
+                onAllInDismissed = viewModel::onAllInDismissed,
             )
         }
         val settingsActions = remember(viewModel) {

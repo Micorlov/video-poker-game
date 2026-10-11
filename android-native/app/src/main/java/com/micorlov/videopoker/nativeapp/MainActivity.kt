@@ -1,6 +1,7 @@
 package com.micorlov.videopoker.nativeapp
 
 import android.graphics.Color
+import java.time.LocalDate
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -20,7 +21,10 @@ class MainActivity : ComponentActivity() {
         object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                GameViewModel(GameRepository(SharedPreferencesStore(applicationContext))) as T
+                GameViewModel(
+                    GameRepository(SharedPreferencesStore(applicationContext)),
+                    todayKey = { LocalDate.now().toString() },
+                ) as T
         }
     }
 

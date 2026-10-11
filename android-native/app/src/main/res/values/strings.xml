@@ -25,6 +25,9 @@
     <string name="play_extra_hands">Extra hands</string>
     <string name="play_sound_on">Sound on</string>
     <string name="play_sound_off">Sound off</string>
+    <string name="play_hints_on">Hints on</string>
+    <string name="play_hints_off">Hints off</string>
+    <string name="toast_hints_on">💡 Hints on — suggested holds glow blue</string>
     <string name="play_bet_chip">Bet %1$d</string>
     <string name="play_expand">Show</string>
     <string name="play_collapse">Hide</string>
@@ -60,6 +63,7 @@
     <string name="toast_variant_locked">🔒 Unlocks at level %1$d</string>
     <string name="toast_multi_locked">🔒 Multi-hand unlocks at level %1$d</string>
     <string name="toast_rebuy">♻ +%1$s credits</string>
+    <string name="toast_daily_bonus">Daily bonus: +%1$s free chips!</string>
     <string name="toast_finish_hand">Finish the current hand first</string>
     <string name="toast_stats_reset">Statistics reset</string>
 
@@ -173,4 +177,16 @@
     <string name="win_flush">Flush</string>
     <string name="win_straight_flush">Str. Flush</string>
     <string name="win_royal_flush">Royal Flush</string>
+    <string name="toast_all_in_good_luck">🔥 ALL IN — good luck!</string>
+    <string name="toast_no_all_in_left">⛔ No ALL INs left — back tomorrow!</string>
+    <string name="play_all_in">ALL IN</string>
+    <string name="play_all_in_left">%1$d left</string>
+    <string name="play_this_hand">this hand</string>
+    <string name="play_next_hand">the next hand</string>
+    <string name="sheet_go_all_in">Go All In</string>
+    <string name="sheet_all_in_eyebrow">Limited daily uses</string>
+    <string name="sheet_all_in_sub">This bets your entire balance — %1$s credits — on %2$s.</string>
+    <string name="sheet_potential">Potential on Full House</string>
+    <string name="sheet_slide_to_confirm">Slide to confirm</string>
+    <string name="sheet_not_now">Not now</string>
 </resources>

@@ -19,4 +19,6 @@ data class UserSettings(
     val hapticsEnabled: Boolean = true,
     val theme: AppTheme = AppTheme.GREEN,
     val defaultBet: Int = Rules.DEFAULT_BET,
+    /** Strategy hints: suggested holds glow blue during the hold phase. */
+    val hintsEnabled: Boolean = false,
 )

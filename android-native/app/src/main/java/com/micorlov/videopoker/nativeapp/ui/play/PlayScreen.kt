@@ -37,6 +37,7 @@ import com.micorlov.videopoker.nativeapp.R
 import com.micorlov.videopoker.nativeapp.audio.SoundCue
 import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.Phase
+import com.micorlov.videopoker.nativeapp.domain.StrategyHints
 import com.micorlov.videopoker.nativeapp.ui.Feedback
 import com.micorlov.videopoker.nativeapp.ui.UiState
 import com.micorlov.videopoker.nativeapp.ui.components.ActionButton
@@ -50,6 +51,10 @@ data class PlayActions(
     val onSelectBet: (Int) -> Unit,
     val onRevealed: (Int) -> Unit,
     val onToggleSound: () -> Unit,
+    val onToggleHints: () -> Unit,
+    val onAllIn: () -> Unit,
+    val onAllInConfirmed: () -> Unit,
+    val onAllInDismissed: () -> Unit,
 )
 
 private val SHAKE_STEPS = listOf(10f, -10f, 8f, -8f, 4f, 0f)
@@ -64,12 +69,17 @@ fun PlayScreen(
     modifier: Modifier = Modifier,
 ) {
     val game = ui.game
+    val hints = remember(game.hand, game.phase, game.variant, ui.settings.hintsEnabled) {
+        if (ui.settings.hintsEnabled && game.phase == Phase.HOLD) StrategyHints.holds(game.hand, game.variant) else emptyList()
+    }
     val displayedBalance = rememberDisplayedBalance(game, ui.revealed) { feedback.play(SoundCue.COIN) }
 
     val shake = remember { Animatable(0f) }
     LaunchedEffect(celebration?.id) {
         if (celebration?.tier == CelebrationTier.FIREWORKS) SHAKE_STEPS.forEach { shake.animateTo(it, tween(60)) }
     }
+
+    ui.allInOffer?.let { AllInSheet(it, actions.onAllInConfirmed, actions.onAllInDismissed) }
 
     Column(
         modifier = modifier
@@ -79,14 +89,15 @@ fun PlayScreen(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Header(ui, onToggleSound = actions.onToggleSound)
+        Header(ui, onToggleSound = actions.onToggleSound, onToggleHints = actions.onToggleHints)
         BalancePanel(displayedBalance, game)
-        BetRow(game, actions.onSelectBet)
+        BetRow(game, ui.allInRemaining, actions.onSelectBet, actions.onAllIn)
 
         HandRow(
             game = game,
             alreadyRevealed = ui.revealed,
             celebration = celebration,
+            hints = hints,
             onToggleHold = { index ->
                 if (game.phase == Phase.HOLD) {
                     feedback.play(SoundCue.CLICK)
@@ -131,8 +142,10 @@ fun PlayScreen(
 }
 
 @Composable
-private fun Header(ui: UiState, onToggleSound: () -> Unit) {
+private fun Header(ui: UiState, onToggleSound: () -> Unit, onToggleHints: () -> Unit) {
     val soundOn = ui.settings.soundEnabled
+    val hintsOn = ui.settings.hintsEnabled
+    val hintsLabel = stringResource(if (hintsOn) R.string.play_hints_on else R.string.play_hints_off)
     val soundLabel = stringResource(if (soundOn) R.string.play_sound_on else R.string.play_sound_off)
 
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -150,6 +163,19 @@ private fun Header(ui: UiState, onToggleSound: () -> Unit) {
                 fontSize = 13.sp,
             )
         }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Box(
+            Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(if (hintsOn) VpColors.Hint.copy(alpha = 0.45f) else VpColors.Surface)
+                .semantics { contentDescription = hintsLabel }
+                .toggleable(value = hintsOn, role = Role.Switch, onValueChange = { onToggleHints() })
+                .testTag("hints-toggle"),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("💡", fontSize = 20.sp, modifier = Modifier.clearAndSetSemantics { })
+        }
         Box(
             Modifier
                 .size(48.dp)
@@ -161,6 +187,7 @@ private fun Header(ui: UiState, onToggleSound: () -> Unit) {
             contentAlignment = Alignment.Center,
         ) {
             Text(if (soundOn) "🔊" else "🔇", fontSize = 20.sp, modifier = Modifier.clearAndSetSemantics { })
+        }
         }
     }
 }

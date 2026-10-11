@@ -74,8 +74,12 @@ fun ToastHost(toast: Toast?, onDismiss: (Int) -> Unit, modifier: Modifier = Modi
 @Composable
 private fun ToastMessage.text(): String = when (this) {
     is ToastMessage.Rebuy -> stringResource(R.string.toast_rebuy, formatNumber(amount))
+    is ToastMessage.DailyBonus -> stringResource(R.string.toast_daily_bonus, formatNumber(amount))
     is ToastMessage.VariantLocked -> stringResource(R.string.toast_variant_locked, level)
     is ToastMessage.MultiHandLocked -> stringResource(R.string.toast_multi_locked, level)
     ToastMessage.FinishHandFirst -> stringResource(R.string.toast_finish_hand)
+    ToastMessage.AllInGoodLuck -> stringResource(R.string.toast_all_in_good_luck)
+    ToastMessage.NoAllInLeft -> stringResource(R.string.toast_no_all_in_left)
+    ToastMessage.HintsOn -> stringResource(R.string.toast_hints_on)
     ToastMessage.StatsReset -> stringResource(R.string.toast_stats_reset)
 }

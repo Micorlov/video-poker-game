@@ -52,6 +52,8 @@ data class CardVisual(
     val held: Boolean = false,
     val dimmed: Boolean = false,
     val highlighted: Boolean = false,
+    /** Strategy hint: the suggested hold glows blue. */
+    val hinted: Boolean = false,
     val badge: String? = null,
 )
 
@@ -132,6 +134,7 @@ private fun CardFace(card: Card, visual: CardVisual) {
     val ring = when {
         visual.highlighted -> VpColors.Gold
         visual.held -> palette.action
+        visual.hinted -> VpColors.Hint
         else -> null
     }
 

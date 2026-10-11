@@ -87,8 +87,15 @@ fun BalancePanel(displayedBalance: LongState, game: GameState, modifier: Modifie
 
 /** The stake is locked for the length of a hand: chips only respond between hands. */
 @Composable
-fun BetRow(game: GameState, onSelectBet: (Int) -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+fun BetRow(
+    game: GameState,
+    allInRemaining: Int,
+    onSelectBet: (Int) -> Unit,
+    onAllIn: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Rules.BET_OPTIONS.forEach { amount ->
             ChipButton(
                 label = amount.toString(),
@@ -100,6 +107,8 @@ fun BetRow(game: GameState, onSelectBet: (Int) -> Unit, modifier: Modifier = Mod
                     .testTag("bet-$amount"),
             )
         }
+    }
+    AllInButton(selected = game.isAllIn, remaining = allInRemaining, onClick = onAllIn)
     }
 }
 

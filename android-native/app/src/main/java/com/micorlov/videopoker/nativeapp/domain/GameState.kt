@@ -54,6 +54,9 @@ data class DrawOutcome(
     val isWin: Boolean get() = totalWin > 0
 }
 
+/** What an ALL IN would stake: [perHand] on each hand, [stake] in all, and the Full House payout it would chase. */
+data class AllInOffer(val perHand: Int, val stake: Long, val potential: Long, val midHand: Boolean)
+
 /** The whole table. Immutable: every action returns a new copy. */
 data class GameState(
     val phase: Phase,
@@ -76,9 +79,12 @@ data class GameState(
     val outcome: DrawOutcome?,
     /** Bumped on every deal and draw so the UI knows when to animate. */
     val round: Int,
+    /** The bet in effect before ALL IN raised it; restored when the hand is done. Null when no ALL IN is active. */
+    val allInRevertBet: Int? = null,
 ) {
     val level: Int get() = Rules.level(lifetimeHands)
     val totalBet: Int get() = bet * handCount
+    val isAllIn: Boolean get() = allInRevertBet != null
 
     /** The multiple of the bet [type] pays right now. */
     fun payoutFor(type: HandType): Int =

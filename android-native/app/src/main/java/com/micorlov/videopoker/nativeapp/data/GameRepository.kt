@@ -41,12 +41,27 @@ class GameRepository(private val store: KeyValueStore) {
         }
     }
 
+    /** The local day (yyyy-MM-dd) the daily bonus was last paid, or empty if never. */
+    fun loadDailyBonusDay(): String = store.getString(DAILY_BONUS_DAY).orEmpty()
+
+    fun saveDailyBonusDay(day: String) = store.write { putString(DAILY_BONUS_DAY, day) }
+
+    /** ALL INs used on [day]; a stored count from another day does not count. */
+    fun loadAllInUsed(day: String): Int =
+        if (store.getString(ALL_IN_DAY) == day) nonNegativeInt(ALL_IN_COUNT) else 0
+
+    fun saveAllInUsed(day: String, count: Int) = store.write {
+        putString(ALL_IN_DAY, day)
+        putInt(ALL_IN_COUNT, count)
+    }
+
     fun loadSettings(): UserSettings {
         val defaults = UserSettings()
         return UserSettings(
             soundEnabled = store.getBoolean(SOUND) ?: defaults.soundEnabled,
             hapticsEnabled = store.getBoolean(HAPTICS) ?: defaults.hapticsEnabled,
             theme = AppTheme.fromStorageKey(store.getString(THEME)) ?: defaults.theme,
+            hintsEnabled = store.getBoolean(HINTS) ?: defaults.hintsEnabled,
             defaultBet = store.getInt(DEFAULT_BET)?.takeIf { it in Rules.BET_OPTIONS } ?: defaults.defaultBet,
         )
     }
@@ -57,6 +72,7 @@ class GameRepository(private val store: KeyValueStore) {
             putBoolean(HAPTICS, settings.hapticsEnabled)
             putString(THEME, settings.theme.storageKey)
             putInt(DEFAULT_BET, settings.defaultBet)
+            putBoolean(HINTS, settings.hintsEnabled)
         }
     }
 
@@ -87,6 +103,10 @@ class GameRepository(private val store: KeyValueStore) {
         const val LIFETIME_HANDS = "game.lifetimeHands"
         const val VARIANT = "game.variant"
         const val HAND_COUNT = "game.handCount"
+        const val DAILY_BONUS_DAY = "daily.bonusDay"
+        const val HINTS = "settings.hints"
+        const val ALL_IN_DAY = "allin.day"
+        const val ALL_IN_COUNT = "allin.count"
         const val SOUND = "settings.sound"
         const val HAPTICS = "settings.haptics"
         const val THEME = "settings.theme"

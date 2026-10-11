@@ -103,8 +103,43 @@ object GameEngine {
 
     fun selectBet(state: GameState, amount: Int): GameState {
         if (state.phase != Phase.BET || amount <= 0) return state
-        return state.copy(bet = amount)
+        return state.copy(bet = amount, allInRevertBet = null)
     }
+
+    /**
+     * What an ALL IN would stake right now, or null when it cannot be offered (mid-draw states
+     * aside, an empty stack gets a free rebuy instead). Unlike [selectBet], ALL IN is allowed
+     * mid-hand: it stakes whatever remains on top of the bet already charged at deal time.
+     */
+    fun allInOffer(state: GameState): AllInOffer? {
+        if (state.balance <= 0) return null
+        val perHand = (state.balance / state.handCount).coerceIn(1L, Rules.ALL_IN_MAX_BET.toLong()).toInt()
+        val betPerHand = (if (state.phase == Phase.HOLD) state.bet else 0) + perHand
+        return AllInOffer(
+            perHand = perHand,
+            stake = perHand.toLong() * state.handCount,
+            potential = betPerHand.toLong() * state.payoutFor(HandType.FULL_HOUSE) * state.handCount,
+            midHand = state.phase == Phase.HOLD,
+        )
+    }
+
+    /** Stakes [offer]. Mid-hand the extra is charged now, so draw() pays on the raised bet. */
+    fun allIn(state: GameState, offer: AllInOffer): GameState {
+        val revert = state.allInRevertBet ?: state.bet
+        return if (offer.midHand) {
+            state.copy(
+                balance = state.balance - offer.stake,
+                bet = state.bet + offer.perHand,
+                allInRevertBet = revert,
+            )
+        } else {
+            state.copy(bet = offer.perHand, allInRevertBet = revert)
+        }
+    }
+
+    /** The free refill an empty stack gets, whenever it is noticed. */
+    fun rebuy(state: GameState): Transition =
+        Transition(state.copy(balance = Rules.STARTING_BALANCE), listOf(GameEvent.Rebuy(Rules.STARTING_BALANCE)))
 
     fun selectVariant(state: GameState, variant: Variant): Transition {
         if (variant == state.variant) return Transition(state)
@@ -183,6 +218,8 @@ object GameEngine {
         return state.copy(
             phase = Phase.BET,
             balance = balance,
+            bet = state.allInRevertBet ?: state.bet,
+            allInRevertBet = null,
             hand = finalHand,
             deck = deck,
             payoutBonus = if (won) 0 else state.payoutBonus + 1,

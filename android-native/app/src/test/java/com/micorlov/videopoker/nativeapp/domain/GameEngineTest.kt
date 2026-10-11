@@ -504,4 +504,56 @@ class GameEngineTest {
             assertEquals(990L, state.balance)
         }
     }
+
+    // ---- ALL IN ---------------------------------------------------------------------
+
+    @Test
+    fun `all in before the deal stakes the whole stack on the next hand`() {
+        val state = betting(balance = 640, bet = 10)
+        val offer = checkNotNull(GameEngine.allInOffer(state))
+        assertEquals(640L, offer.stake)
+        assertEquals(640L * 7, offer.potential) // Full House pays 7 in the 7/5 Jacks or Better table
+
+        val staked = GameEngine.allIn(state, offer)
+        assertEquals(640, staked.bet)
+        assertTrue(staked.isAllIn)
+        assertEquals(0L, GameEngine.deal(staked, random).state.balance)
+    }
+
+    @Test
+    fun `all in is split across the hands of a multi-hand deal`() {
+        val state = betting(balance = 1000, bet = 10, handCount = 5, lifetimeHands = 45)
+        val offer = checkNotNull(GameEngine.allInOffer(state))
+        assertEquals(200, offer.perHand)
+        assertEquals(1000L, offer.stake)
+    }
+
+    @Test
+    fun `all in mid-hand charges the rest now and pays on the raised bet`() {
+        val mid = holding("A♠ A♥ 4♦ 7♣ 9♠", "5♣ 8♦ 3♠", holdFirstTwo, bet = 10, balance = 990)
+        val offer = checkNotNull(GameEngine.allInOffer(mid))
+        assertTrue(offer.midHand)
+        val staked = GameEngine.allIn(mid, offer)
+        assertEquals(0L, staked.balance)
+        assertEquals(1000, staked.bet)
+
+        val settled = GameEngine.draw(staked, random).state
+        // Whatever it paid, the bet falls back to what it was before ALL IN.
+        assertEquals(10, settled.bet)
+        assertFalse(settled.isAllIn)
+    }
+
+    @Test
+    fun `picking a normal bet cancels a pending all in`() {
+        val state = betting(balance = 640, bet = 10)
+        val staked = GameEngine.allIn(state, checkNotNull(GameEngine.allInOffer(state)))
+        val reselected = GameEngine.selectBet(staked, 20)
+        assertEquals(20, reselected.bet)
+        assertFalse(reselected.isAllIn)
+    }
+
+    @Test
+    fun `an empty stack has no all in offer`() {
+        assertEquals(null, GameEngine.allInOffer(betting(balance = 0)))
+    }
 }

@@ -4,11 +4,13 @@ import androidx.lifecycle.ViewModel
 import com.micorlov.videopoker.nativeapp.data.AppTheme
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.UserSettings
+import com.micorlov.videopoker.nativeapp.domain.AllInOffer
 import com.micorlov.videopoker.nativeapp.domain.DrawOutcome
 import com.micorlov.videopoker.nativeapp.domain.GameEngine
 import com.micorlov.videopoker.nativeapp.domain.GameEvent
 import com.micorlov.videopoker.nativeapp.domain.GameState
 import com.micorlov.videopoker.nativeapp.domain.Phase
+import com.micorlov.videopoker.nativeapp.domain.Rules
 import com.micorlov.videopoker.nativeapp.domain.Transition
 import com.micorlov.videopoker.nativeapp.domain.Variant
 import kotlinx.coroutines.channels.Channel
@@ -25,6 +27,10 @@ data class UiState(
     val settings: UserSettings,
     val revealedRound: Int,
     val toast: Toast?,
+    /** ALL INs still available today. */
+    val allInRemaining: Int = Rules.ALL_IN_DAILY_LIMIT,
+    /** Set while the ALL IN confirmation sheet is open. */
+    val allInOffer: AllInOffer? = null,
 ) {
     /** True once the cards of the current round are face up, so results may be shown. */
     val revealed: Boolean get() = revealedRound == game.round
@@ -34,10 +40,14 @@ data class Toast(val id: Int, val message: ToastMessage)
 
 sealed interface ToastMessage {
     data class Rebuy(val amount: Long) : ToastMessage
+    data class DailyBonus(val amount: Long) : ToastMessage
     data class VariantLocked(val level: Int) : ToastMessage
     data class MultiHandLocked(val level: Int) : ToastMessage
     data object FinishHandFirst : ToastMessage
     data object StatsReset : ToastMessage
+    data object HintsOn : ToastMessage
+    data object AllInGoodLuck : ToastMessage
+    data object NoAllInLeft : ToastMessage
 }
 
 /** One-shot happenings the UI reacts to with sound, haptics and fireworks. */
@@ -52,12 +62,15 @@ sealed interface UiEffect {
 class GameViewModel(
     private val repository: GameRepository,
     private val random: Random = Random.Default,
+    /** Today's local day key; null turns the daily bonus off (tests that need exact balances). */
+    private val todayKey: (() -> String)? = null,
 ) : ViewModel() {
 
     private val effectChannel = Channel<UiEffect>(Channel.UNLIMITED)
     private var toastCounter = 0
 
     private val _state: MutableStateFlow<UiState>
+    private var allInUsed = 0
 
     /** One flow for the whole lifetime: collectors key on its identity, so it must not be rebuilt per read. */
     val state: StateFlow<UiState>
@@ -66,10 +79,26 @@ class GameViewModel(
     init {
         val settings = repository.loadSettings()
         val opening = GameEngine.newGame(repository.loadGame(), settings.defaultBet, random)
-        _state = MutableStateFlow(UiState(opening.state, settings, revealedRound = -1, toast = null))
+        allInUsed = repository.loadAllInUsed(today())
+        _state = MutableStateFlow(
+            UiState(opening.state, settings, revealedRound = -1, toast = null, allInRemaining = allInRemaining()),
+        )
         state = _state.asStateFlow()
         // The opening deal can already carry news (a free rebuy for a player who left broke).
         applyEvents(opening.events, persist = opening.events.any { it is GameEvent.Rebuy }, game = opening.state)
+        grantDailyBonus()
+    }
+
+    /** +[Rules.DAILY_BONUS] chips the first time the app opens on a new local day. Idempotent per day. */
+    private fun grantDailyBonus() {
+        val today = todayKey?.invoke() ?: return
+        if (repository.loadDailyBonusDay() == today) return
+        val game = _state.value.game
+        val bonused = game.copy(balance = game.balance + Rules.DAILY_BONUS)
+        _state.update { it.copy(game = bonused) }
+        repository.saveGame(bonused.toSaved())
+        repository.saveDailyBonusDay(today)
+        showToast(ToastMessage.DailyBonus(Rules.DAILY_BONUS))
     }
 
     fun onMainAction() {
@@ -110,6 +139,38 @@ class GameViewModel(
     }
 
     fun onToggleSound() = updateSettings { it.copy(soundEnabled = !it.soundEnabled) }
+
+    fun onToggleHints() {
+        updateSettings { it.copy(hintsEnabled = !it.hintsEnabled) }
+        if (_state.value.settings.hintsEnabled) showToast(ToastMessage.HintsOn)
+    }
+
+    /** ALL IN tapped: open the confirmation, or explain why not. Allowed mid-hand, as on the web. */
+    fun onAllInRequested() {
+        val game = _state.value.game
+        if (_state.value.allInRemaining <= 0) return showToast(ToastMessage.NoAllInLeft)
+        val offer = GameEngine.allInOffer(game)
+        if (offer == null) {
+            commit(GameEngine.rebuy(game), persist = true)
+            return
+        }
+        _state.update { it.copy(allInOffer = offer) }
+    }
+
+    fun onAllInConfirmed() {
+        val current = _state.value
+        val offer = current.allInOffer ?: return
+        allInUsed++
+        repository.saveAllInUsed(today(), allInUsed)
+        _state.update { it.copy(game = GameEngine.allIn(it.game, offer), allInOffer = null, allInRemaining = allInRemaining()) }
+        showToast(ToastMessage.AllInGoodLuck)
+    }
+
+    fun onAllInDismissed() = _state.update { it.copy(allInOffer = null) }
+
+    private fun today(): String = todayKey?.invoke().orEmpty()
+
+    private fun allInRemaining(): Int = (Rules.ALL_IN_DAILY_LIMIT - allInUsed).coerceAtLeast(0)
 
     fun onToggleHaptics() = updateSettings { it.copy(hapticsEnabled = !it.hapticsEnabled) }
 

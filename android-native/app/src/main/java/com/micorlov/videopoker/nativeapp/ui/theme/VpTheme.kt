@@ -36,6 +36,7 @@ data class VpPalette(
 
 /** Colours shared by every theme: money and celebration are gold, never a call to action. */
 object VpColors {
+    val Hint = Color(0xFF4DA3FF)
     val Gold = Color(0xFFFFC93C)
     val GoldDeep = Color(0xFFD99E1B)
     val GoldInk = Color(0xFF3A2A02)

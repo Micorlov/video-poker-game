@@ -5,6 +5,15 @@ object Rules {
     /** Chips a new player starts with, and what a free rebuy resets the stack to. */
     const val STARTING_BALANCE = 1000L
 
+    /** Free chips granted on the first launch of each local calendar day (js/daily-bonus.js). */
+    const val DAILY_BONUS = 200L
+
+    /** ALL INs allowed per local day (ALLIN_DAILY_LIMIT_DEFAULT in js/game.js). */
+    const val ALL_IN_DAILY_LIMIT = 1
+
+    /** Keeps an ALL IN payout inside an Int: 1,000,000 x 250 x 5 hands, streak bonus included, still fits. */
+    const val ALL_IN_MAX_BET = 1_000_000
+
     const val MIN_BET = 5
     const val DEFAULT_BET = 10
     val BET_OPTIONS = listOf(5, 10, 20, 50)

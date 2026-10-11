@@ -239,4 +239,50 @@ class GameViewModelTest {
         assertEquals(ToastMessage.StatsReset, vm.state.value.toast?.message)
         assertEquals(1, vm.state.value.game.lifetimeHands, "level progress survives a statistics reset")
     }
+
+    @Test
+    fun `the first launch of a day pays the daily bonus once`() {
+        repository.saveGame(SavedGame(balance = 500))
+        val first = GameViewModel(repository, Random(5), todayKey = { "2026-10-12" })
+        assertEquals(700, first.state.value.game.toSaved().balance)
+        assertEquals(ToastMessage.DailyBonus(200), first.state.value.toast?.message)
+
+        val sameDay = GameViewModel(repository, Random(5), todayKey = { "2026-10-12" })
+        assertEquals(700, sameDay.state.value.game.toSaved().balance)
+        assertNull(sameDay.state.value.toast)
+
+        val nextDay = GameViewModel(repository, Random(5), todayKey = { "2026-10-13" })
+        assertEquals(900, nextDay.state.value.game.toSaved().balance)
+    }
+
+    @Test
+    fun `all in is limited to once a day and resets on a new day`() {
+        repository.saveGame(SavedGame(balance = 600))
+        val day1 = GameViewModel(repository, Random(5), todayKey = { "2026-10-12" })
+        assertEquals(1, day1.state.value.allInRemaining)
+
+        day1.onAllInRequested()
+        assertNotNull(day1.state.value.allInOffer)
+        day1.onAllInConfirmed()
+        assertEquals(0, day1.state.value.allInRemaining)
+        assertEquals(ToastMessage.AllInGoodLuck, day1.state.value.toast?.message)
+
+        day1.onAllInRequested()
+        assertNull(day1.state.value.allInOffer)
+        assertEquals(ToastMessage.NoAllInLeft, day1.state.value.toast?.message)
+
+        val sameDayRestart = GameViewModel(repository, Random(5), todayKey = { "2026-10-12" })
+        assertEquals(0, sameDayRestart.state.value.allInRemaining)
+        val nextDay = GameViewModel(repository, Random(5), todayKey = { "2026-10-13" })
+        assertEquals(1, nextDay.state.value.allInRemaining)
+    }
+
+    @Test
+    fun `dismissing the all in sheet spends nothing`() {
+        val vm = viewModel(SavedGame(balance = 600))
+        vm.onAllInRequested()
+        vm.onAllInDismissed()
+        assertNull(vm.state.value.allInOffer)
+        assertEquals(1, vm.state.value.allInRemaining)
+    }
 }
