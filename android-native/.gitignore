@@ -6,3 +6,4 @@ local.properties
 *.iml
 captures/
 e2e-artifacts/
+app/google-services.json

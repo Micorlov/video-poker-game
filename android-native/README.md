@@ -33,7 +33,7 @@ _Captured on an Android 16 emulator from real play (hands were dealt by the game
 
 **Deferred to later phases:** strategy hints, ALL IN, daily bonus, voice announcements, the 16
 translations (strings are already resources, so `values-xx/` folders can be added), and every
-social/online feature (Firebase auth, friends, rooms, leaderboards, push).
+social/online feature (Firebase auth, friends, rooms, leaderboards, push). To enable them, see [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
 
 ## Layout
 
