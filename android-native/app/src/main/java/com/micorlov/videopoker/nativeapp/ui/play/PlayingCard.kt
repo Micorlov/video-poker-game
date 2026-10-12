@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.micorlov.videopoker.nativeapp.R
 import com.micorlov.videopoker.nativeapp.domain.Card
+import com.micorlov.videopoker.nativeapp.ui.components.SuitIcon
 import com.micorlov.videopoker.nativeapp.ui.theme.LocalPalette
 import com.micorlov.videopoker.nativeapp.ui.theme.VpColors
 
@@ -149,7 +150,6 @@ private fun CardFace(card: Card, visual: CardVisual) {
         // Sized from the card's own width (toSp of a dp length), not the system font scale:
         // the glyphs must stay inside the card whatever text size the player has chosen.
         val rankSize = with(LocalDensity.current) { (maxWidth * 0.42f).toSp() }
-        val suitSize = with(LocalDensity.current) { (maxWidth * 0.4f).toSp() }
 
         // Rank top-left, suit bottom-right: the diagonal still reads at thumbnail size.
         Text(
@@ -162,13 +162,13 @@ private fun CardFace(card: Card, visual: CardVisual) {
             fontWeight = FontWeight.Bold,
             letterSpacing = (-0.04).em,
         )
-        Text(
-            text = card.suit.symbol.toString(),
+        SuitIcon(
+            suit = card.suit,
+            size = maxWidth * 0.36f,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 8.dp, bottom = 9.dp),
+                .padding(end = 9.dp, bottom = 12.dp),
             color = ink,
-            fontSize = suitSize,
         )
         Box(
             Modifier

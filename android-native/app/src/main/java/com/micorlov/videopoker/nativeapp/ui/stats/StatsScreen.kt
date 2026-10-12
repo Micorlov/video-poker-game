@@ -21,6 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +35,7 @@ import com.micorlov.videopoker.nativeapp.domain.PlayStats
 import com.micorlov.videopoker.nativeapp.domain.Rules
 import com.micorlov.videopoker.nativeapp.ui.components.ChipButton
 import com.micorlov.videopoker.nativeapp.ui.components.Eyebrow
+import com.micorlov.videopoker.nativeapp.ui.components.MiniCard
 import com.micorlov.videopoker.nativeapp.ui.components.VpPanel
 import com.micorlov.videopoker.nativeapp.ui.play.TabularFigures
 import com.micorlov.videopoker.nativeapp.ui.play.formatCost
@@ -150,12 +153,15 @@ private fun BestHandPanel(best: BestHand?) {
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
         )
-        Text(
-            text = best.cards.joinToString("  "),
-            modifier = Modifier.testTag("best-hand-cards"),
-            color = VpColors.TextMuted,
-            fontSize = 16.sp,
-        )
+        Row(
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .semantics(mergeDescendants = true) { contentDescription = best.cards.joinToString(" ") }
+                .testTag("best-hand-cards"),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            best.cards.forEach { MiniCard(it, fontSize = 16.sp) }
+        }
         Text(
             text = stringResource(R.string.stats_best_hand_payout, formatNumber(best.payout.toLong()), best.multiple),
             modifier = Modifier.testTag("best-hand-payout"),

@@ -4,6 +4,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -101,18 +104,30 @@ fun ActionButton(
                 .padding(bottom = 4.dp)
                 .clip(shape)
                 .background(Brush.verticalGradient(listOf(palette.action, palette.actionDeep)))
-                .padding(vertical = 15.dp),
+                .padding(horizontal = 16.dp, vertical = 15.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(icon, modifier = Modifier.clearAndSetSemantics { }, color = palette.actionInk, fontSize = 20.sp)
-            Text(
+            val suit = suitForGlyph(icon)
+            if (suit != null) {
+                SuitIcon(suit, 20.dp, color = palette.actionInk)
+            } else {
+                Text(icon, modifier = Modifier.clearAndSetSemantics { }, color = palette.actionInk, fontSize = 20.sp)
+            }
+            // One line that shrinks to fit: long labels ("Start with 1,000 chips", German, large text)
+            // used to wrap and push the icon out of the slab.
+            BasicText(
                 text = text.uppercase(),
-                modifier = Modifier.padding(start = 10.dp),
-                color = palette.actionInk,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.12.em,
+                modifier = Modifier.padding(start = 10.dp, end = 4.dp),
+                style = TextStyle(
+                    color = palette.actionInk,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.1.em,
+                ),
+                maxLines = 1,
+                softWrap = false,
+                autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = 18.sp),
             )
         }
     }

@@ -6,6 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +32,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -45,6 +52,9 @@ import com.micorlov.videopoker.nativeapp.R
 import com.micorlov.videopoker.nativeapp.domain.AppLanguage
 import com.micorlov.videopoker.nativeapp.domain.Rules
 import com.micorlov.videopoker.nativeapp.ui.components.ActionButton
+import com.micorlov.videopoker.nativeapp.ui.components.MiniCard
+import com.micorlov.videopoker.nativeapp.ui.components.SuitIcon
+import com.micorlov.videopoker.nativeapp.ui.components.cardOf
 import com.micorlov.videopoker.nativeapp.ui.text.formatNumber
 import com.micorlov.videopoker.nativeapp.ui.theme.LocalPalette
 import com.micorlov.videopoker.nativeapp.ui.theme.VpColors
@@ -94,7 +104,9 @@ fun OnboardingFlow(
             }
         }
 
-        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
+        val hero = step == OnboardingStep.WELCOME || step == OnboardingStep.PUSH || step == OnboardingStep.SIGN_IN
+        Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = if (hero) Alignment.Center else Alignment.TopCenter) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
             when (step) {
                 OnboardingStep.WELCOME -> WelcomeStep()
                 OnboardingStep.HANDS -> HandsStep()
@@ -104,38 +116,42 @@ fun OnboardingFlow(
                 OnboardingStep.SIGN_IN -> SignInStep(onGuest = onFinished)
             }
         }
+        }
 
-        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            NavArrow(if (rtl) "→" else "←", stringResource(R.string.ob_back), visible = index > 0, tag = "onboarding-back") { index-- }
-            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.Center) {
-                steps.forEach { s ->
-                    Box(
-                        Modifier
-                            .padding(horizontal = 4.dp)
-                            .size(if (s == step) 10.dp else 8.dp)
-                            .clip(CircleShape)
-                            .background(if (s == step) VpColors.Gold else VpColors.Border),
-                    )
-                }
+        Row(Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.Center) {
+            steps.forEach { s ->
+                Box(
+                    Modifier
+                        .padding(horizontal = 4.dp)
+                        .size(width = if (s == step) 22.dp else 8.dp, height = 8.dp)
+                        .clip(CircleShape)
+                        .background(if (s == step) VpColors.Gold else VpColors.Border),
+                )
             }
-            if (!last) {
+        }
+        val ownButtons = step == OnboardingStep.PUSH || last
+        Row(
+            Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (index > 0) NavArrow(if (rtl) "→" else "←", stringResource(R.string.ob_back), tag = "onboarding-back") { index-- }
+            if (!ownButtons) {
                 val label = if (index == 0) stringResource(R.string.ob_start_with_chips, formatNumber(Rules.STARTING_BALANCE)) else stringResource(R.string.ob_next)
-                ActionButton(text = label, icon = if (rtl) "←" else "→", onClick = { index++ }, modifier = Modifier.testTag("onboarding-next"))
-            } else {
-                Spacer(Modifier.size(48.dp))
+                ActionButton(text = label, icon = if (rtl) "←" else "→", onClick = { index++ }, modifier = Modifier.weight(1f).testTag("onboarding-next"))
             }
         }
     }
 }
 
 @Composable
-private fun NavArrow(glyph: String, description: String, visible: Boolean, tag: String, onClick: () -> Unit) {
-    if (!visible) return Spacer(Modifier.size(48.dp))
+private fun NavArrow(glyph: String, description: String, tag: String, onClick: () -> Unit) {
     Box(
         Modifier
-            .size(48.dp)
+            .size(52.dp)
             .clip(CircleShape)
             .background(VpColors.Surface)
+            .border(1.dp, VpColors.Border, CircleShape)
             .semantics { contentDescription = description }
             .clickable(role = Role.Button, onClick = onClick)
             .testTag(tag),
@@ -154,12 +170,11 @@ private fun Note(text: String) {
     Text(text, color = VpColors.TextMuted, fontSize = 13.sp, modifier = Modifier.padding(top = 16.dp), textAlign = TextAlign.Center)
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun WelcomeStep() {
     Column(Modifier.fillMaxWidth().padding(top = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("K", "A", "Q").forEach { rank -> MiniCard("$rank♠", Modifier.size(width = 64.dp, height = 90.dp), fontSize = 22.sp) }
-        }
+        HeroFan()
         Text(
             stringResource(R.string.ob_eyebrow).uppercase(),
             color = VpColors.TextFaint, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
@@ -175,7 +190,10 @@ private fun WelcomeStep() {
             color = VpColors.TextMuted, fontSize = 16.sp, textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 10.dp, bottom = 20.dp),
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Pill(stringResource(R.string.ob_pill_5card), VpColors.Gold)
             Pill(stringResource(R.string.ob_pill_free_chips), VpColors.Positive)
             Pill(stringResource(R.string.ob_pill_no_real_money), VpColors.TextMuted)
@@ -186,19 +204,30 @@ private fun WelcomeStep() {
 @Composable
 private fun Pill(text: String, color: androidx.compose.ui.graphics.Color) {
     Text(
-        text, color = color, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+        text, color = color, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false,
         modifier = Modifier.clip(RoundedCornerShape(50)).border(1.dp, color, RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 5.dp),
     )
 }
 
+/** Three spades fanned like a held hand, the ace on top. */
 @Composable
-private fun MiniCard(text: String, modifier: Modifier = Modifier, fontSize: androidx.compose.ui.unit.TextUnit = 13.sp) {
-    val red = text.endsWith("♥") || text.endsWith("♦")
-    Box(
-        modifier.clip(RoundedCornerShape(6.dp)).background(VpColors.CardFaceTop).padding(horizontal = 4.dp, vertical = 3.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text, color = if (red) VpColors.CardRed else VpColors.CardBlack, fontSize = fontSize, fontWeight = FontWeight.Bold)
+private fun HeroFan() {
+    Box(Modifier.size(width = 230.dp, height = 132.dp), contentAlignment = Alignment.BottomCenter) {
+        listOf(Triple("K♠", -14f, -58.dp), Triple("Q♠", 14f, 58.dp), Triple("A♠", 0f, 0.dp)).forEach { (text, angle, dx) ->
+            Box(
+                Modifier
+                    .offset(x = dx, y = if (angle == 0f) 0.dp else 10.dp)
+                    .rotate(angle)
+                    .shadow(10.dp, RoundedCornerShape(10.dp))
+                    .size(width = 84.dp, height = 120.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Brush.verticalGradient(listOf(VpColors.CardFaceTop, VpColors.CardFaceBottom))),
+            ) {
+                val card = cardOf(text)
+                Text(card.rank.label, color = VpColors.CardBlack, fontSize = 26.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 9.dp, top = 5.dp))
+                SuitIcon(card.suit, 36.dp, Modifier.align(Alignment.BottomEnd).padding(end = 9.dp, bottom = 10.dp), color = VpColors.CardBlack)
+            }
+        }
     }
 }
 
@@ -225,7 +254,7 @@ private fun HandsStep() {
                     .padding(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) { hand.cards.forEach { MiniCard(it) } }
+                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) { hand.cards.forEach { MiniCard(cardOf(it)) } }
                 Column(Modifier.weight(1f).padding(start = 10.dp), horizontalAlignment = Alignment.End) {
                     Text(stringResource(hand.nameRes), color = VpColors.Text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     Text(hand.payout, color = VpColors.Gold, fontSize = 14.sp, fontWeight = FontWeight.Bold)
@@ -254,7 +283,7 @@ private fun GameplayStep() {
             listOf("A♠" to true, "K♠" to true, "7♦" to false, "2♣" to false, "9♥" to false).forEach { (card, held) ->
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(if (held) stringResource(R.string.play_held) else " ", color = LocalPalette.current.action, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    MiniCard(card, Modifier.fillMaxWidth().height(64.dp), fontSize = 18.sp)
+                    MiniCard(cardOf(card), Modifier.fillMaxWidth().height(64.dp), fontSize = 18.sp)
                 }
             }
         }
@@ -306,7 +335,7 @@ private fun LeaderboardStep() {
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(if (i == 0) VpColors.SurfaceRaised else VpColors.Surface).padding(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("${i + 1}", color = VpColors.TextMuted, fontSize = 14.sp, modifier = Modifier.size(24.dp))
+                Text("${i + 1}", color = VpColors.TextMuted, fontSize = 14.sp, modifier = Modifier.width(24.dp))
                 Box(Modifier.size(28.dp).clip(CircleShape).background(if (i == 0) VpColors.Gold else VpColors.Border), contentAlignment = Alignment.Center) {
                     Text(label.take(1).uppercase(), color = VpColors.CardBlack, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
