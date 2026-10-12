@@ -206,6 +206,30 @@
     <string name="settings_enable_notifications">הפעלת התראות</string>
     <string name="notif_daily_title">ה-ALL IN שלך התאפס</string>
     <string name="notif_daily_body">חזור ותנצל אותו לפני שהוא יתאפס שוב!</string>
+    <string name="play_double_up">הכפל %1$s</string>
+    <string name="play_double_up_dealer">הדילר</string>
+    <string name="play_double_up_yours">שלך</string>
+    <string name="card_pick_action">בחר בקלף הזה</string>
+    <string name="play_double_up_rules">נצח את הקלף של הדילר וזכה ב־%1$s. אותו ערך – תיקו.</string>
+    <string name="play_double_up_win">זכית ב־%1$s!</string>
+    <string name="play_double_up_push">תיקו – %1$s הוחזרו</string>
+    <string name="play_double_up_lose">הדילר ניצח. הפסדת %1$s.</string>
+    <string name="play_collect_hint">או חלק כדי לגבות</string>
+    <string name="play_pick_card">בחר קלף</string>
+    <string name="play_review_best">✓ המהלך הטוב ביותר</string>
+    <string name="play_review_hold">המהלך הטוב ביותר: להחזיק %1$s</string>
+    <string name="play_review_discard">המהלך הטוב ביותר: להחליף את כל חמשת הקלפים</string>
+    <string name="play_review_cost">זה עלה בממוצע כ־%1$s קרדיטים</string>
+    <string name="play_ev_line">הטוב ביותר %1$s× · שלך %2$s×</string>
+    <string name="settings_feedback">משוב אסטרטגיה</string>
+    <string name="settings_double_up">הצע הכפלה</string>
+    <string name="settings_speed">מהירות המשחק</string>
+    <string name="settings_speed_normal">רגילה</string>
+    <string name="settings_speed_fast">מהירה</string>
+    <string name="settings_speed_turbo">טורבו</string>
+    <string name="stats_accuracy">דיוק אסטרטגי</string>
+    <string name="stats_mistake_cost">הפסד בגלל טעויות</string>
+    <string name="stats_accuracy_note">ידיים ששוחקו עם רמזים לא נספרות.</string>
     <string-array name="rank_names">
         <item>אס</item>
         <item>2</item>
@@ -231,5 +255,10 @@
         <item quantity="one">עוד יד %1$d לרמה %2$d</item>
         <item quantity="two">עוד %1$d ידיים לרמה %2$d</item>
         <item quantity="other">עוד %1$d ידיים לרמה %2$d</item>
+    </plurals>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="one">המהלך הטוב ביותר ב־%1$d מתוך יד %2$d</item>
+        <item quantity="two">המהלך הטוב ביותר ב־%1$d מתוך %2$d ידיים</item>
+        <item quantity="other">המהלך הטוב ביותר ב־%1$d מתוך %2$d ידיים</item>
     </plurals>
 </resources>

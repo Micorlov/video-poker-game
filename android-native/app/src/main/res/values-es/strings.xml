@@ -206,6 +206,30 @@
     <string name="settings_enable_notifications">Activar notificaciones</string>
     <string name="notif_daily_title">Tu ALL IN se ha renovado</string>
     <string name="notif_daily_body">¡Vuelve y reclámalo antes de que se reinicie otra vez!</string>
+    <string name="play_double_up">Doblar %1$s</string>
+    <string name="play_double_up_dealer">Crupier</string>
+    <string name="play_double_up_yours">Tuya</string>
+    <string name="card_pick_action">Elegir esta carta</string>
+    <string name="play_double_up_rules">Supera la carta del crupier para ganar %1$s. El mismo valor es empate.</string>
+    <string name="play_double_up_win">¡Ganas %1$s!</string>
+    <string name="play_double_up_push">Empate: recuperas %1$s</string>
+    <string name="play_double_up_lose">Gana el crupier. Pierdes %1$s.</string>
+    <string name="play_collect_hint">O reparte para cobrar</string>
+    <string name="play_pick_card">Elige una carta</string>
+    <string name="play_review_best">✓ Mejor jugada</string>
+    <string name="play_review_hold">Mejor jugada: quedarse con %1$s</string>
+    <string name="play_review_discard">Mejor jugada: pedir cinco cartas nuevas</string>
+    <string name="play_review_cost">Eso costó unos %1$s créditos de media</string>
+    <string name="play_ev_line">Mejor jugada %1$s× · la tuya %2$s×</string>
+    <string name="settings_feedback">Análisis de estrategia</string>
+    <string name="settings_double_up">Ofrecer doblar</string>
+    <string name="settings_speed">Velocidad del juego</string>
+    <string name="settings_speed_normal">Normal</string>
+    <string name="settings_speed_fast">Rápida</string>
+    <string name="settings_speed_turbo">Turbo</string>
+    <string name="stats_accuracy">Precisión estratégica</string>
+    <string name="stats_mistake_cost">Perdido por errores</string>
+    <string name="stats_accuracy_note">Las manos jugadas con pistas no cuentan.</string>
     <string-array name="rank_names">
         <item>As</item>
         <item>2</item>
@@ -230,5 +254,9 @@
     <plurals name="stats_hands_to_next">
         <item quantity="one">%1$d mano más para el nivel %2$d</item>
         <item quantity="other">%1$d manos más para el nivel %2$d</item>
+    </plurals>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="one">Mejor jugada en %1$d de %2$d mano</item>
+        <item quantity="other">Mejor jugada en %1$d de %2$d manos</item>
     </plurals>
 </resources>

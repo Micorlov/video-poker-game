@@ -25,7 +25,7 @@ class GameRepositoryTest {
     fun `a saved game round-trips`() {
         val saved = SavedGame(
             balance = 1234,
-            today = PlayStats(won = 400, lost = 250, handsPlayed = 33, bestStreak = 4),
+            today = PlayStats(won = 400, lost = 250, handsPlayed = 33, bestStreak = 4, reviewed = 30, bestPlays = 27, mistakeCost = 12.345),
             allTime = PlayStats(won = 9_000_000_000, lost = 7_500_000_000, handsPlayed = 2_000, bestStreak = 11),
             lossStreak = 3,
             winStreak = 2,
@@ -40,7 +40,15 @@ class GameRepositoryTest {
 
     @Test
     fun `settings round-trip`() {
-        val settings = UserSettings(soundEnabled = false, hapticsEnabled = false, theme = AppTheme.CRIMSON, defaultBet = 50)
+        val settings = UserSettings(
+            soundEnabled = false,
+            hapticsEnabled = false,
+            theme = AppTheme.CRIMSON,
+            defaultBet = 50,
+            feedbackEnabled = false,
+            doubleUpEnabled = false,
+            gameSpeed = GameSpeed.TURBO,
+        )
         repository.saveSettings(settings)
         assertEquals(settings, GameRepository(store).loadSettings())
     }
@@ -56,6 +64,10 @@ class GameRepositoryTest {
             putInt("game.handCount", 4)
             putInt("settings.defaultBet", 7)
             putString("settings.theme", "neon")
+            putInt("game.today.reviewed", 4)
+            putInt("game.today.bestPlays", 9)
+            putLong("game.today.mistakeMilli", -500)
+            putString("settings.speed", "warp")
         }
 
         val game = repository.loadGame()
@@ -65,10 +77,13 @@ class GameRepositoryTest {
         assertEquals(0L, game.today.won)
         assertEquals(Variant.JACKS, game.variant)
         assertEquals(1, game.handCount)
+        assertEquals(4, game.today.bestPlays, "never more best plays than reviewed hands")
+        assertEquals(0.0, game.today.mistakeCost)
 
         val settings = repository.loadSettings()
         assertEquals(Rules.DEFAULT_BET, settings.defaultBet)
         assertEquals(AppTheme.GREEN, settings.theme)
+        assertEquals(GameSpeed.NORMAL, settings.gameSpeed)
     }
 
     @Test

@@ -54,5 +54,35 @@
   "other": "Ещё %1$d раздачи до уровня %2$d"
  },
  "notif_daily_title": "Ваш ALL IN снова доступен",
- "notif_daily_body": "Возвращайтесь и используйте его, пока он не сбросился снова!"
+ "notif_daily_body": "Возвращайтесь и используйте его, пока он не сбросился снова!",
+ "play_double_up": "Удвоить %1$s",
+ "play_double_up_dealer": "Дилер",
+ "play_double_up_yours": "Ваша",
+ "card_pick_action": "Выбрать эту карту",
+ "play_double_up_rules": "Побейте карту дилера и выиграйте %1$s. Равный ранг — ничья.",
+ "play_double_up_win": "Вы выиграли %1$s!",
+ "play_double_up_push": "Ничья — %1$s возвращено",
+ "play_double_up_lose": "Дилер выиграл. Проиграно %1$s.",
+ "play_collect_hint": "Или раздайте, чтобы забрать",
+ "play_pick_card": "Выберите карту",
+ "play_review_best": "✓ Лучший ход",
+ "play_review_hold": "Лучший ход: оставить %1$s",
+ "play_review_discard": "Лучший ход: заменить все пять карт",
+ "play_review_cost": "Это стоило в среднем около %1$s кредитов",
+ "play_ev_line": "Лучший ход %1$s× · ваш %2$s×",
+ "settings_feedback": "Разбор стратегии",
+ "settings_double_up": "Предлагать удвоение",
+ "settings_speed": "Скорость игры",
+ "settings_speed_normal": "Обычная",
+ "settings_speed_fast": "Быстрая",
+ "settings_speed_turbo": "Турбо",
+ "stats_accuracy": "Точность стратегии",
+ "stats_mistake_cost": "Потеряно на ошибках",
+ "stats_accuracy_detail": {
+  "one": "Лучший ход в %1$d из %2$d раздачи",
+  "few": "Лучший ход в %1$d из %2$d раздач",
+  "many": "Лучший ход в %1$d из %2$d раздач",
+  "other": "Лучший ход в %1$d из %2$d раздачи"
+ },
+ "stats_accuracy_note": "Раздачи с подсказками не учитываются."
 }

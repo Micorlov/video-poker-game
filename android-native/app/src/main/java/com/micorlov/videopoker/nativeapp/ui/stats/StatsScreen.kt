@@ -35,6 +35,8 @@ import com.micorlov.videopoker.nativeapp.ui.components.ChipButton
 import com.micorlov.videopoker.nativeapp.ui.components.Eyebrow
 import com.micorlov.videopoker.nativeapp.ui.components.VpPanel
 import com.micorlov.videopoker.nativeapp.ui.play.TabularFigures
+import com.micorlov.videopoker.nativeapp.ui.play.formatCost
+import java.text.NumberFormat
 import com.micorlov.videopoker.nativeapp.ui.text.formatNumber
 import com.micorlov.videopoker.nativeapp.ui.text.formatSigned
 import com.micorlov.videopoker.nativeapp.ui.text.labelRes
@@ -88,10 +90,51 @@ fun StatsScreen(game: GameState, modifier: Modifier = Modifier) {
             StatTile(stringResource(R.string.stats_best_streak), stats.bestStreak.toString(), Modifier.weight(1f).testTag("stat-streak"))
         }
 
+        StrategyPanel(stats)
         BestHandPanel(game.bestHand)
         ProgressPanel(game)
     }
 }
+
+/** How often the holds were the best play, and what the other hands gave up on average. */
+@Composable
+private fun StrategyPanel(stats: PlayStats) {
+    VpPanel(Modifier.fillMaxWidth().testTag("strategy-panel")) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.weight(1f)) {
+                Eyebrow(stringResource(R.string.stats_accuracy))
+                Text(
+                    text = stats.accuracy?.let { formatPercent(it) } ?: "—",
+                    modifier = Modifier.padding(top = 4.dp).testTag("stat-accuracy"),
+                    style = TabularFigures,
+                    color = VpColors.Text,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Column(Modifier.weight(1f)) {
+                Eyebrow(stringResource(R.string.stats_mistake_cost))
+                Text(
+                    text = formatCost(stats.mistakeCost),
+                    modifier = Modifier.padding(top = 4.dp).testTag("stat-mistake-cost"),
+                    style = TabularFigures,
+                    color = VpColors.Text,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+        Text(
+            text = pluralStringResource(R.plurals.stats_accuracy_detail, stats.reviewed, stats.bestPlays, stats.reviewed),
+            modifier = Modifier.padding(top = 6.dp),
+            color = VpColors.TextMuted,
+            fontSize = 13.sp,
+        )
+        Text(stringResource(R.string.stats_accuracy_note), color = VpColors.TextFaint, fontSize = 12.sp)
+    }
+}
+
+private fun formatPercent(fraction: Double): String = NumberFormat.getPercentInstance().format(fraction)
 
 @Composable
 private fun BestHandPanel(best: BestHand?) {

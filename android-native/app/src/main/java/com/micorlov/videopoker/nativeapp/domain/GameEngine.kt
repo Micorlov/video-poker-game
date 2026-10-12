@@ -59,6 +59,7 @@ object GameEngine {
                 deck = boosted.deck,
                 held = NO_HOLDS,
                 outcome = null,
+                doubleUp = null,
                 round = table.round + 1,
             ),
             events,
@@ -113,7 +114,7 @@ object GameEngine {
      * mid-hand: it stakes whatever remains on top of the bet already charged at deal time.
      */
     fun allInOffer(state: GameState): AllInOffer? {
-        if (state.balance <= 0) return null
+        if (state.balance <= 0 || state.phase == Phase.DOUBLE_UP) return null
         val perHand = (state.balance / state.handCount).coerceIn(1L, Rules.ALL_IN_MAX_BET.toLong()).toInt()
         val betPerHand = (if (state.phase == Phase.HOLD) state.bet else 0) + perHand
         return AllInOffer(
@@ -159,6 +160,59 @@ object GameEngine {
         }
         return Transition(state.copy(handCount = count))
     }
+
+    /**
+     * Puts [GameState.doubleUpStake] at risk: it leaves the stack, the dealer's card is turned
+     * up and four more are dealt face down from a fresh deck. A plain shuffle: the hidden
+     * boost never touches a double-up.
+     */
+    fun startDoubleUp(state: GameState, random: Random): GameState {
+        val stake = state.doubleUpStake ?: return state
+        val cards = standardDeck().shuffled(random)
+        return state.copy(
+            phase = Phase.DOUBLE_UP,
+            balance = state.balance - stake,
+            doubleUp = DoubleUp(
+                stake = stake,
+                dealer = cards.first(),
+                choices = cards.subList(1, 1 + DOUBLE_UP_CHOICES),
+                number = (state.doubleUp?.number ?: 0) + 1,
+            ),
+        )
+    }
+
+    /** The player's card against the dealer's, aces high: higher doubles the stake, a tie returns it. */
+    fun pickDoubleUp(state: GameState, index: Int): GameState {
+        val doubleUp = state.doubleUp
+        if (state.phase != Phase.DOUBLE_UP || doubleUp == null || index !in doubleUp.choices.indices) return state
+
+        val mine = doubleUp.choices[index].rank.value
+        val dealer = doubleUp.dealer.rank.value
+        val result = when {
+            mine > dealer -> DoubleUpResult.WIN
+            mine == dealer -> DoubleUpResult.PUSH
+            else -> DoubleUpResult.LOSE
+        }
+        val settled = doubleUp.copy(picked = index, result = result)
+        val balance = state.balance + settled.returned
+        return state.copy(
+            phase = Phase.BET,
+            balance = balance,
+            doubleUp = settled,
+            bestBalance = maxOf(state.bestBalance, balance),
+            today = state.today.afterDoubleUp(settled),
+            allTime = state.allTime.afterDoubleUp(settled),
+        )
+    }
+
+    /**
+     * Counts one reviewed hand on the Stats screen: [best] when the holds matched the best play,
+     * otherwise [cost] is the chips that choice gave up on average.
+     */
+    fun recordDecision(state: GameState, best: Boolean, cost: Double): GameState = state.copy(
+        today = state.today.afterDecision(best, cost),
+        allTime = state.allTime.afterDecision(best, cost),
+    )
 
     /** Clears the Stats screen counters; the stack, level and balance high stay. */
     fun resetStatistics(state: GameState): GameState = state.copy(
@@ -248,14 +302,27 @@ object GameEngine {
         )
     }
 
-    private fun PlayStats.afterHand(outcome: DrawOutcome, streak: Int) = PlayStats(
+    private fun PlayStats.afterHand(outcome: DrawOutcome, streak: Int) = copy(
         won = won + outcome.totalWin,
         lost = lost + if (outcome.isWin) 0 else outcome.totalBet,
         handsPlayed = handsPlayed + 1,
         bestStreak = maxOf(bestStreak, streak),
     )
 
+    private fun PlayStats.afterDoubleUp(doubleUp: DoubleUp) = when (doubleUp.result) {
+        DoubleUpResult.WIN -> copy(won = won + doubleUp.stake)
+        DoubleUpResult.LOSE -> copy(lost = lost + doubleUp.stake)
+        DoubleUpResult.PUSH, null -> this
+    }
+
+    private fun PlayStats.afterDecision(best: Boolean, cost: Double) = copy(
+        reviewed = reviewed + 1,
+        bestPlays = bestPlays + if (best) 1 else 0,
+        mistakeCost = mistakeCost + if (best) 0.0 else cost.coerceAtLeast(0.0),
+    )
+
     private val NO_HOLDS = List(HAND_SIZE) { false }
     private const val HAND_SIZE = HandEvaluator.HAND_SIZE
     private const val TRIPLE_PLAY = 3
+    private const val DOUBLE_UP_CHOICES = 4
 }

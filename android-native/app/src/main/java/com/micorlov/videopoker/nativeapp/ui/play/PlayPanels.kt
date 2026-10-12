@@ -43,6 +43,7 @@ import com.micorlov.videopoker.nativeapp.domain.DrawOutcome
 import com.micorlov.videopoker.nativeapp.domain.GameState
 import com.micorlov.videopoker.nativeapp.domain.Phase
 import com.micorlov.videopoker.nativeapp.domain.Rules
+import com.micorlov.videopoker.nativeapp.ui.UiState
 import com.micorlov.videopoker.nativeapp.ui.components.ChipButton
 import com.micorlov.videopoker.nativeapp.ui.components.Eyebrow
 import com.micorlov.videopoker.nativeapp.ui.components.VpPanel
@@ -112,10 +113,18 @@ fun BetRow(
     }
 }
 
-/** What the last hand paid, shown once its cards are face up. Before that, a hint for the next move. */
+/**
+ * What the last hand paid, shown once its cards are face up, with how the holds compared with
+ * the best play and the double-up offer. Before that, a hint for the next move (and, with hints
+ * on, what the holds are worth). During a double-up, how it stands.
+ */
 @Composable
-fun ResultPanel(game: GameState, revealed: Boolean, modifier: Modifier = Modifier) {
+fun ResultPanel(ui: UiState, onDoubleUp: () -> Unit, modifier: Modifier = Modifier) {
+    val game = ui.game
+    val revealed = ui.revealed
     val outcome = game.outcome
+    val doubleUp = game.doubleUp
+    val doubleUpStake = game.doubleUpStake?.takeIf { ui.canDoubleUp }
     // A polite live region: TalkBack reads out the result when it appears, with no need to hunt for it.
     VpPanel(
         modifier
@@ -125,11 +134,16 @@ fun ResultPanel(game: GameState, revealed: Boolean, modifier: Modifier = Modifie
             .testTag("result-panel"),
     ) {
         when {
-            outcome == null || !revealed -> HintText(
-                if (game.phase == Phase.HOLD) R.string.play_hint_hold else R.string.play_hint_bet,
-            )
-            outcome.isWin -> WinResult(game, outcome)
-            else -> LossResult(game)
+            doubleUp != null -> DoubleUpStatus(doubleUp, ui.doubleUpRevealed, doubleUpStake, onDoubleUp)
+            outcome == null || !revealed -> {
+                HintText(if (game.phase == Phase.HOLD) R.string.play_hint_hold else R.string.play_hint_bet)
+                ui.holdAnalysis?.takeIf { ui.settings.hintsEnabled }?.let { EvLine(it, game.held, Modifier.padding(top = 6.dp)) }
+            }
+            else -> {
+                if (outcome.isWin) WinResult(outcome) else LossResult(game)
+                ui.visibleReview?.let { ReviewLine(it) }
+                doubleUpStake?.let { DoubleUpButton(it, onDoubleUp) }
+            }
         }
     }
 }
@@ -169,7 +183,7 @@ private fun shimmerGold(): TextStyle {
 }
 
 @Composable
-private fun WinResult(game: GameState, outcome: DrawOutcome) {
+private fun WinResult(outcome: DrawOutcome) {
     val type = outcome.result.type
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(

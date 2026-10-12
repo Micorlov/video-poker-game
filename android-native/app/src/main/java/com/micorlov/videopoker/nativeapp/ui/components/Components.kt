@@ -75,6 +75,7 @@ fun ActionButton(
     icon: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val palette = LocalPalette.current
     val interaction = remember { MutableInteractionSource() }
@@ -87,11 +88,12 @@ fun ActionButton(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                alpha = if (enabled) 1f else DISABLED_ALPHA
             }
             .shadow(10.dp, shape, ambientColor = palette.action, spotColor = palette.action)
             .clip(shape)
             .background(palette.actionEdge)
-            .clickable(interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick),
+            .clickable(enabled = enabled, interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick),
     ) {
         Row(
             modifier = Modifier
@@ -115,6 +117,8 @@ fun ActionButton(
         }
     }
 }
+
+private const val DISABLED_ALPHA = 0.5f
 
 /** A selectable pill: bet amounts, hand counts, themes. A locked chip stays tappable so it can explain itself. */
 @Composable

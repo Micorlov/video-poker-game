@@ -206,6 +206,30 @@
     <string name="settings_enable_notifications">Bildirimleri aç</string>
     <string name="notif_daily_title">ALL IN hakkın yenilendi</string>
     <string name="notif_daily_body">Tekrar sıfırlanmadan önce gel ve kullan!</string>
+    <string name="play_double_up">İkiye katla %1$s</string>
+    <string name="play_double_up_dealer">Krupiye</string>
+    <string name="play_double_up_yours">Senin</string>
+    <string name="card_pick_action">Bu kartı seç</string>
+    <string name="play_double_up_rules">%1$s kazanmak için krupiyenin kartını geç. Aynı değer berabere.</string>
+    <string name="play_double_up_win">%1$s kazandın!</string>
+    <string name="play_double_up_push">Berabere — %1$s geri</string>
+    <string name="play_double_up_lose">Krupiye kazandı. %1$s kaybettin.</string>
+    <string name="play_collect_hint">Ya da toplamak için dağıt</string>
+    <string name="play_pick_card">Bir kart seç</string>
+    <string name="play_review_best">✓ En iyi hamle</string>
+    <string name="play_review_hold">En iyi hamle: %1$s tut</string>
+    <string name="play_review_discard">En iyi hamle: beş yeni kart çek</string>
+    <string name="play_review_cost">Bu ortalama yaklaşık %1$s krediye mal oldu</string>
+    <string name="play_ev_line">En iyi hamle %1$s× · seninki %2$s×</string>
+    <string name="settings_feedback">Strateji geri bildirimi</string>
+    <string name="settings_double_up">İkiye katlamayı öner</string>
+    <string name="settings_speed">Oyun hızı</string>
+    <string name="settings_speed_normal">Normal</string>
+    <string name="settings_speed_fast">Hızlı</string>
+    <string name="settings_speed_turbo">Turbo</string>
+    <string name="stats_accuracy">Strateji isabeti</string>
+    <string name="stats_mistake_cost">Hatalarla kaybedilen</string>
+    <string name="stats_accuracy_note">İpuçları açıkken oynanan eller sayılmaz.</string>
     <string-array name="rank_names">
         <item>As</item>
         <item>2</item>
@@ -230,5 +254,8 @@
     <plurals name="stats_hands_to_next">
         <item quantity="one">%2$d. seviyeye %1$d el kaldı</item>
         <item quantity="other">%2$d. seviyeye %1$d el kaldı</item>
+    </plurals>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="other">%2$d elin %1$d tanesinde en iyi hamle</item>
     </plurals>
 </resources>

@@ -253,4 +253,34 @@
     <string name="settings_enable_notifications">Enable Notifications</string>
     <string name="notif_daily_title">Your ALL IN reset is ready</string>
     <string name="notif_daily_body">Come back and claim it before it resets again!</string>
+
+    <!-- Double up, strategy feedback, game speed -->
+    <string name="play_double_up">Double up %1$s</string>
+    <string name="play_double_up_dealer">Dealer</string>
+    <string name="play_double_up_yours">Yours</string>
+    <string name="card_pick_action">Pick this card</string>
+    <string name="play_double_up_rules">Beat the dealer\'s card to win %1$s. The same rank is a push.</string>
+    <string name="play_double_up_win">You win %1$s!</string>
+    <string name="play_double_up_push">Push — %1$s back</string>
+    <string name="play_double_up_lose">The dealer wins. %1$s lost.</string>
+    <string name="play_collect_hint">Or deal to collect</string>
+    <string name="play_pick_card">Pick a card</string>
+    <string name="play_review_best">✓ Best play</string>
+    <string name="play_review_hold">Best play: hold %1$s</string>
+    <string name="play_review_discard">Best play: draw five new cards</string>
+    <string name="play_review_cost">That cost about %1$s credits on average</string>
+    <string name="play_ev_line">Best hold %1$s× · yours %2$s×</string>
+    <string name="settings_feedback">Strategy Feedback</string>
+    <string name="settings_double_up">Offer Double Up</string>
+    <string name="settings_speed">Game Speed</string>
+    <string name="settings_speed_normal">Normal</string>
+    <string name="settings_speed_fast">Fast</string>
+    <string name="settings_speed_turbo">Turbo</string>
+    <string name="stats_accuracy">Strategy accuracy</string>
+    <string name="stats_mistake_cost">Lost to mistakes</string>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="one">Best play in %1$d of %2$d hand</item>
+        <item quantity="other">Best play in %1$d of %2$d hands</item>
+    </plurals>
+    <string name="stats_accuracy_note">Hands played with hints on are not counted.</string>
 </resources>

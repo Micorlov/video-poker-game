@@ -51,5 +51,32 @@
   "other": "レベル%2$dまであと%1$dハンド"
  },
  "notif_daily_title": "ALL INがリセットされました",
- "notif_daily_body": "もう一度リセットされる前に戻ってきて使いましょう！"
+ "notif_daily_body": "もう一度リセットされる前に戻ってきて使いましょう！",
+ "play_double_up": "ダブルアップ %1$s",
+ "play_double_up_dealer": "ディーラー",
+ "play_double_up_yours": "あなた",
+ "card_pick_action": "このカードを選ぶ",
+ "play_double_up_rules": "ディーラーのカードより強ければ %1$s 獲得。同じランクは引き分け。",
+ "play_double_up_win": "%1$s 獲得！",
+ "play_double_up_push": "引き分け — %1$s 返却",
+ "play_double_up_lose": "ディーラーの勝ち。%1$s を失いました。",
+ "play_collect_hint": "ディールで受け取り",
+ "play_pick_card": "カードを選んでください",
+ "play_review_best": "✓ 最善手",
+ "play_review_hold": "最善手：%1$s をホールド",
+ "play_review_discard": "最善手：5枚すべて交換",
+ "play_review_cost": "平均で約 %1$s クレジットの損",
+ "play_ev_line": "最善手 %1$s× · あなた %2$s×",
+ "settings_feedback": "戦略フィードバック",
+ "settings_double_up": "ダブルアップを表示",
+ "settings_speed": "ゲーム速度",
+ "settings_speed_normal": "標準",
+ "settings_speed_fast": "高速",
+ "settings_speed_turbo": "ターボ",
+ "stats_accuracy": "戦略の正確さ",
+ "stats_mistake_cost": "ミスによる損失",
+ "stats_accuracy_detail": {
+  "other": "%2$d ハンド中 %1$d ハンドで最善手"
+ },
+ "stats_accuracy_note": "ヒントをオンにしたハンドは数えません。"
 }

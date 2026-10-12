@@ -206,6 +206,30 @@
     <string name="settings_enable_notifications">Aktifkan notifikasi</string>
     <string name="notif_daily_title">ALL IN Anda sudah direset</string>
     <string name="notif_daily_body">Kembali dan gunakan sebelum direset lagi!</string>
+    <string name="play_double_up">Gandakan %1$s</string>
+    <string name="play_double_up_dealer">Bandar</string>
+    <string name="play_double_up_yours">Milikmu</string>
+    <string name="card_pick_action">Pilih kartu ini</string>
+    <string name="play_double_up_rules">Kalahkan kartu bandar untuk menang %1$s. Nilai sama berarti seri.</string>
+    <string name="play_double_up_win">Kamu menang %1$s!</string>
+    <string name="play_double_up_push">Seri — %1$s kembali</string>
+    <string name="play_double_up_lose">Bandar menang. %1$s hilang.</string>
+    <string name="play_collect_hint">Atau bagikan untuk mengambil</string>
+    <string name="play_pick_card">Pilih kartu</string>
+    <string name="play_review_best">✓ Langkah terbaik</string>
+    <string name="play_review_hold">Langkah terbaik: tahan %1$s</string>
+    <string name="play_review_discard">Langkah terbaik: tukar kelima kartu</string>
+    <string name="play_review_cost">Itu merugikan sekitar %1$s kredit rata-rata</string>
+    <string name="play_ev_line">Langkah terbaik %1$s× · milikmu %2$s×</string>
+    <string name="settings_feedback">Umpan balik strategi</string>
+    <string name="settings_double_up">Tawarkan gandakan</string>
+    <string name="settings_speed">Kecepatan permainan</string>
+    <string name="settings_speed_normal">Normal</string>
+    <string name="settings_speed_fast">Cepat</string>
+    <string name="settings_speed_turbo">Turbo</string>
+    <string name="stats_accuracy">Akurasi strategi</string>
+    <string name="stats_mistake_cost">Hilang karena kesalahan</string>
+    <string name="stats_accuracy_note">Tangan yang dimainkan dengan petunjuk tidak dihitung.</string>
     <string-array name="rank_names">
         <item>As</item>
         <item>2</item>
@@ -229,5 +253,8 @@
     </string-array>
     <plurals name="stats_hands_to_next">
         <item quantity="other">%1$d tangan lagi ke level %2$d</item>
+    </plurals>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="other">Langkah terbaik di %1$d dari %2$d tangan</item>
     </plurals>
 </resources>

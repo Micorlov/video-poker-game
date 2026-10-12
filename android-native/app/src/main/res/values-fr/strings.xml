@@ -206,6 +206,30 @@
     <string name="settings_enable_notifications">Activer les notifications</string>
     <string name="notif_daily_title">Votre ALL IN est de retour</string>
     <string name="notif_daily_body">Revenez le récupérer avant qu\'il ne se réinitialise !</string>
+    <string name="play_double_up">Doubler %1$s</string>
+    <string name="play_double_up_dealer">Croupier</string>
+    <string name="play_double_up_yours">La vôtre</string>
+    <string name="card_pick_action">Choisir cette carte</string>
+    <string name="play_double_up_rules">Battez la carte du croupier pour gagner %1$s. Même valeur : égalité.</string>
+    <string name="play_double_up_win">Vous gagnez %1$s !</string>
+    <string name="play_double_up_push">Égalité — %1$s rendus</string>
+    <string name="play_double_up_lose">Le croupier gagne. %1$s perdus.</string>
+    <string name="play_collect_hint">Ou distribuez pour encaisser</string>
+    <string name="play_pick_card">Choisissez une carte</string>
+    <string name="play_review_best">✓ Meilleur coup</string>
+    <string name="play_review_hold">Meilleur coup : garder %1$s</string>
+    <string name="play_review_discard">Meilleur coup : tirer cinq nouvelles cartes</string>
+    <string name="play_review_cost">Cela a coûté environ %1$s crédits en moyenne</string>
+    <string name="play_ev_line">Meilleur coup %1$s× · le vôtre %2$s×</string>
+    <string name="settings_feedback">Analyse de stratégie</string>
+    <string name="settings_double_up">Proposer de doubler</string>
+    <string name="settings_speed">Vitesse du jeu</string>
+    <string name="settings_speed_normal">Normale</string>
+    <string name="settings_speed_fast">Rapide</string>
+    <string name="settings_speed_turbo">Turbo</string>
+    <string name="stats_accuracy">Précision stratégique</string>
+    <string name="stats_mistake_cost">Perdu sur des erreurs</string>
+    <string name="stats_accuracy_note">Les mains jouées avec les conseils ne comptent pas.</string>
     <string-array name="rank_names">
         <item>As</item>
         <item>2</item>
@@ -230,5 +254,10 @@
     <plurals name="stats_hands_to_next">
         <item quantity="one">Encore %1$d main pour le niveau %2$d</item>
         <item quantity="other">Encore %1$d mains pour le niveau %2$d</item>
+    </plurals>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="one">Meilleur coup sur %1$d de %2$d main</item>
+        <item quantity="many">Meilleur coup sur %1$d des %2$d mains</item>
+        <item quantity="other">Meilleur coup sur %1$d des %2$d mains</item>
     </plurals>
 </resources>

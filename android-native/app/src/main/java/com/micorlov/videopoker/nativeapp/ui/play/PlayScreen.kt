@@ -37,7 +37,6 @@ import com.micorlov.videopoker.nativeapp.R
 import com.micorlov.videopoker.nativeapp.audio.SoundCue
 import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.Phase
-import com.micorlov.videopoker.nativeapp.domain.StrategyHints
 import com.micorlov.videopoker.nativeapp.ui.Feedback
 import com.micorlov.videopoker.nativeapp.ui.UiState
 import com.micorlov.videopoker.nativeapp.ui.components.ActionButton
@@ -55,6 +54,9 @@ data class PlayActions(
     val onAllIn: () -> Unit,
     val onAllInConfirmed: () -> Unit,
     val onAllInDismissed: () -> Unit,
+    val onDoubleUp: () -> Unit,
+    val onPickDoubleUp: (Int) -> Unit,
+    val onDoubleUpRevealed: (Int) -> Unit,
 )
 
 private val SHAKE_STEPS = listOf(10f, -10f, 8f, -8f, 4f, 0f)
@@ -69,10 +71,10 @@ fun PlayScreen(
     modifier: Modifier = Modifier,
 ) {
     val game = ui.game
-    val hints = remember(game.hand, game.phase, game.variant, ui.settings.hintsEnabled) {
-        if (ui.settings.hintsEnabled && game.phase == Phase.HOLD) StrategyHints.holds(game.hand, game.variant) else emptyList()
-    }
-    val displayedBalance = rememberDisplayedBalance(game, ui.revealed) { feedback.play(SoundCue.COIN) }
+    val pace = ui.settings.gameSpeed.pace
+    val hints = ui.holdAnalysis?.takeIf { ui.settings.hintsEnabled }?.bestHolds().orEmpty()
+    val balanceRevealed = if (game.doubleUp != null) ui.doubleUpRevealed else ui.revealed
+    val displayedBalance = rememberDisplayedBalance(game, balanceRevealed, pace) { feedback.play(SoundCue.COIN) }
 
     val shake = remember { Animatable(0f) }
     LaunchedEffect(celebration?.id) {
@@ -94,50 +96,82 @@ fun PlayScreen(
         BalancePanel(displayedBalance, game)
         BetRow(game, ui.allInRemaining, actions.onSelectBet, actions.onAllIn)
 
-        HandRow(
-            game = game,
-            alreadyRevealed = ui.revealed,
-            celebration = celebration,
-            hints = hints,
-            onToggleHold = { index ->
-                if (game.phase == Phase.HOLD) {
+        val onFlip = {
+            feedback.play(SoundCue.DEAL)
+            feedback.haptics.light()
+        }
+        val doubleUp = game.doubleUp
+        val tapToDeal = {
+            feedback.haptics.medium()
+            actions.onMainAction()
+        }
+        // Between hands, once the result is up, a tap on the cards deals the next hand.
+        val settledAndShown = if (doubleUp != null) ui.doubleUpRevealed else game.phase == Phase.BET && ui.revealed
+        if (doubleUp != null) {
+            DoubleUpRow(
+                doubleUp = doubleUp,
+                revealed = ui.doubleUpRevealed,
+                pace = pace,
+                onPick = { index ->
                     feedback.play(SoundCue.CLICK)
                     feedback.haptics.light()
-                }
-                actions.onToggleHold(index)
-            },
-            onFlip = {
-                feedback.play(SoundCue.DEAL)
-                feedback.haptics.light()
-            },
-            onRevealed = actions.onRevealed,
-        )
+                    actions.onPickDoubleUp(index)
+                },
+                onTapToDeal = tapToDeal.takeIf { settledAndShown },
+                onFlip = onFlip,
+                onRevealed = actions.onDoubleUpRevealed,
+            )
+        } else {
+            HandRow(
+                game = game,
+                alreadyRevealed = ui.revealed,
+                celebration = celebration,
+                hints = hints,
+                pace = pace,
+                onToggleHold = { index ->
+                    feedback.play(SoundCue.CLICK)
+                    feedback.haptics.light()
+                    actions.onToggleHold(index)
+                },
+                onTapToDeal = tapToDeal.takeIf { settledAndShown },
+                onFlip = onFlip,
+                onRevealed = actions.onRevealed,
+            )
+        }
 
         val drawing = game.phase == Phase.HOLD
+        val picking = game.phase == Phase.DOUBLE_UP
         ActionButton(
-            text = stringResource(if (drawing) R.string.play_draw else R.string.play_deal),
+            text = stringResource(
+                when {
+                    picking -> R.string.play_pick_card
+                    drawing -> R.string.play_draw
+                    else -> R.string.play_deal
+                },
+            ),
             icon = if (drawing) "↻" else "♠",
             onClick = {
                 if (!drawing) feedback.haptics.medium()
                 actions.onMainAction()
             },
+            enabled = !picking,
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("main-button"),
         )
 
-        ResultPanel(game, ui.revealed)
+        ResultPanel(ui, actions.onDoubleUp)
 
         // Below the button, never above it: the extra hands appear a moment after the draw and
         // must not push Deal out from under the player's thumb.
-        if (ui.revealed) {
+        if (ui.revealed && doubleUp == null) {
             game.outcome?.takeIf { it.extraHands.isNotEmpty() }?.let { ExtraHandsPanel(it) }
         }
 
         StreakBar(game)
         PaytableCard(
             game = game,
-            highlight = if (ui.revealed) game.outcome?.bestType?.takeIf { it != HandType.NOTHING } else null,
+            highlight = if (ui.revealed && doubleUp == null) game.outcome?.bestType?.takeIf { it != HandType.NOTHING } else null,
         )
     }
 }

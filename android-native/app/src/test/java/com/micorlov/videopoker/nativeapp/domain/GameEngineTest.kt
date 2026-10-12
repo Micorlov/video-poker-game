@@ -575,4 +575,146 @@ class GameEngineTest {
         val loser = holding("2♠ 5♥ 8♦ 9♣ 3♠", "K♦ 4♦ 6♥ 7♠ J♣", listOf(false, false, false, false, false))
         assertEquals(null, GameEngine.draw(loser, random).state.bestHand)
     }
+
+    // ---- double up --------------------------------------------------------------------
+
+    /** A pair of kings won 10 on a bet of 10; the table is back between hands. */
+    private fun afterAWin(): GameState {
+        val winner = holding("K♠ K♥ 8♦ 9♣ 3♠", "2♦ 4♦ 6♥", holdFirstTwo)
+        return GameEngine.draw(winner, random).state
+    }
+
+    private fun doubling(dealer: String, choices: String, stake: Long = 10, balance: Long = 990, number: Int = 1) =
+        afterAWin().copy(
+            phase = Phase.DOUBLE_UP,
+            balance = balance,
+            doubleUp = DoubleUp(stake = stake, dealer = card(dealer), choices = hand(choices), number = number),
+        )
+
+    @Test
+    fun `a win can be doubled up, a loss cannot`() {
+        assertEquals(10L, afterAWin().doubleUpStake)
+
+        val loser = holding("2♠ 5♥ 8♦ 9♣ 3♠", "K♦ 4♦ 6♥ 7♠ J♣", holdNone)
+        assertEquals(null, GameEngine.draw(loser, random).state.doubleUpStake)
+        assertEquals(null, holding("K♠ K♥ 8♦ 9♣ 3♠", "2♦", holdFirstTwo).doubleUpStake, "not mid-hand")
+    }
+
+    @Test
+    fun `starting a double up stakes the win and deals the dealer and four cards`() {
+        val before = afterAWin()
+
+        val doubling = GameEngine.startDoubleUp(before, random)
+
+        assertEquals(Phase.DOUBLE_UP, doubling.phase)
+        assertEquals(before.balance - 10, doubling.balance)
+        val doubleUp = assertNotNull(doubling.doubleUp)
+        assertEquals(10L, doubleUp.stake)
+        assertEquals(4, doubleUp.choices.size)
+        assertEquals(5, (doubleUp.choices + doubleUp.dealer).toSet().size)
+        assertEquals(1, doubleUp.number)
+    }
+
+    @Test
+    fun `a higher card doubles the stake`() {
+        val won = GameEngine.pickDoubleUp(doubling("9♠", "Q♦ 3♣ 9♥ 2♠"), 0)
+
+        assertEquals(Phase.BET, won.phase)
+        assertEquals(DoubleUpResult.WIN, won.doubleUp?.result)
+        assertEquals(1010L, won.balance)
+        assertEquals(20L, won.doubleUpStake, "the next double rides the whole return")
+    }
+
+    @Test
+    fun `the same rank is a push and the stake comes back`() {
+        val push = GameEngine.pickDoubleUp(doubling("9♠", "Q♦ 3♣ 9♥ 2♠"), 2)
+
+        assertEquals(DoubleUpResult.PUSH, push.doubleUp?.result)
+        assertEquals(1000L, push.balance)
+        assertEquals(10L, push.doubleUpStake)
+    }
+
+    @Test
+    fun `a lower card loses the stake and ends the run`() {
+        val lost = GameEngine.pickDoubleUp(doubling("9♠", "Q♦ 3♣ 9♥ 2♠"), 3)
+
+        assertEquals(DoubleUpResult.LOSE, lost.doubleUp?.result)
+        assertEquals(990L, lost.balance)
+        assertEquals(null, lost.doubleUpStake)
+    }
+
+    @Test
+    fun `aces are high in a double up`() {
+        assertEquals(DoubleUpResult.WIN, GameEngine.pickDoubleUp(doubling("K♠", "A♦ 3♣ 9♥ 2♠"), 0).doubleUp?.result)
+        assertEquals(DoubleUpResult.LOSE, GameEngine.pickDoubleUp(doubling("A♠", "K♦ 3♣ 9♥ 2♠"), 0).doubleUp?.result)
+    }
+
+    @Test
+    fun `double up results count in the statistics`() {
+        val start = doubling("9♠", "Q♦ 3♣ 9♥ 2♠")
+
+        val won = GameEngine.pickDoubleUp(start, 0)
+        assertEquals(start.today.won + 10, won.today.won)
+        assertEquals(start.allTime.won + 10, won.allTime.won)
+
+        val lost = GameEngine.pickDoubleUp(start, 3)
+        assertEquals(start.today.lost + 10, lost.today.lost)
+        assertEquals(start.today.won, lost.today.won)
+    }
+
+    @Test
+    fun `picks are ignored outside a double up and out of range`() {
+        val start = doubling("9♠", "Q♦ 3♣ 9♥ 2♠")
+
+        assertEquals(start, GameEngine.pickDoubleUp(start, 4))
+        assertEquals(afterAWin(), GameEngine.pickDoubleUp(afterAWin(), 0))
+    }
+
+    @Test
+    fun `the run stops after the last allowed double`() {
+        val last = doubling("9♠", "Q♦ 3♣ 9♥ 2♠", number = Rules.MAX_DOUBLE_UPS)
+
+        assertEquals(null, GameEngine.pickDoubleUp(last, 0).doubleUpStake)
+    }
+
+    @Test
+    fun `dealing collects and clears the double up`() {
+        val won = GameEngine.pickDoubleUp(doubling("9♠", "Q♦ 3♣ 9♥ 2♠"), 0)
+
+        val next = GameEngine.deal(won, random).state
+
+        assertEquals(null, next.doubleUp)
+        assertEquals(won.balance - next.totalBet, next.balance)
+    }
+
+    @Test
+    fun `nothing else happens on the table during a double up`() {
+        val start = doubling("9♠", "Q♦ 3♣ 9♥ 2♠")
+
+        assertEquals(start, GameEngine.deal(start, random).state)
+        assertEquals(start, GameEngine.draw(start, random).state)
+        assertEquals(start, GameEngine.selectBet(start, 50))
+        assertEquals(null, GameEngine.allInOffer(start))
+        assertEquals(listOf<GameEvent>(GameEvent.FinishHandFirst), GameEngine.selectVariant(start.copy(lifetimeHands = 100), Variant.DEUCES).events)
+    }
+
+    @Test
+    fun `quitting mid double up keeps the stake`() {
+        assertEquals(1000L, doubling("9♠", "Q♦ 3♣ 9♥ 2♠", stake = 10, balance = 990).toSaved().balance)
+    }
+
+    // ---- decision review ----------------------------------------------------------------
+
+    @Test
+    fun `reviewed decisions count best plays and the cost of the rest`() {
+        val table = betting()
+
+        val reviewed = GameEngine.recordDecision(GameEngine.recordDecision(table, best = true, cost = 0.0), best = false, cost = 2.5)
+
+        assertEquals(2, reviewed.today.reviewed)
+        assertEquals(1, reviewed.today.bestPlays)
+        assertEquals(2.5, reviewed.today.mistakeCost)
+        assertEquals(0.5, reviewed.allTime.accuracy)
+        assertEquals(null, table.today.accuracy)
+    }
 }

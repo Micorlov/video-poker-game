@@ -52,5 +52,34 @@
   "other": "Encore %1$d mains pour le niveau %2$d"
  },
  "notif_daily_title": "Votre ALL IN est de retour",
- "notif_daily_body": "Revenez le récupérer avant qu'il ne se réinitialise !"
+ "notif_daily_body": "Revenez le récupérer avant qu'il ne se réinitialise !",
+ "play_double_up": "Doubler %1$s",
+ "play_double_up_dealer": "Croupier",
+ "play_double_up_yours": "La vôtre",
+ "card_pick_action": "Choisir cette carte",
+ "play_double_up_rules": "Battez la carte du croupier pour gagner %1$s. Même valeur : égalité.",
+ "play_double_up_win": "Vous gagnez %1$s !",
+ "play_double_up_push": "Égalité — %1$s rendus",
+ "play_double_up_lose": "Le croupier gagne. %1$s perdus.",
+ "play_collect_hint": "Ou distribuez pour encaisser",
+ "play_pick_card": "Choisissez une carte",
+ "play_review_best": "✓ Meilleur coup",
+ "play_review_hold": "Meilleur coup : garder %1$s",
+ "play_review_discard": "Meilleur coup : tirer cinq nouvelles cartes",
+ "play_review_cost": "Cela a coûté environ %1$s crédits en moyenne",
+ "play_ev_line": "Meilleur coup %1$s× · le vôtre %2$s×",
+ "settings_feedback": "Analyse de stratégie",
+ "settings_double_up": "Proposer de doubler",
+ "settings_speed": "Vitesse du jeu",
+ "settings_speed_normal": "Normale",
+ "settings_speed_fast": "Rapide",
+ "settings_speed_turbo": "Turbo",
+ "stats_accuracy": "Précision stratégique",
+ "stats_mistake_cost": "Perdu sur des erreurs",
+ "stats_accuracy_detail": {
+  "one": "Meilleur coup sur %1$d de %2$d main",
+  "many": "Meilleur coup sur %1$d des %2$d mains",
+  "other": "Meilleur coup sur %1$d des %2$d mains"
+ },
+ "stats_accuracy_note": "Les mains jouées avec les conseils ne comptent pas."
 }

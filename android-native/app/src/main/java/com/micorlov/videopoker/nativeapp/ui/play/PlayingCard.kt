@@ -73,12 +73,12 @@ fun PlayingCard(
     visual: CardVisual,
     lift: Animatable<Float, AnimationVector1D>,
     description: String,
-    holdable: Boolean,
+    /** What a tap does, for TalkBack; null when the card does not respond to taps. */
+    clickLabel: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val faceDown = stringResource(R.string.card_face_down)
-    val holdAction = stringResource(R.string.card_hold_action)
     val faceUp by remember(rotation) { derivedStateOf { rotation.value <= 90f } }
 
     Box(
@@ -90,8 +90,8 @@ fun PlayingCard(
                 role = Role.Button
             }
             .clickable(
-                enabled = holdable,
-                onClickLabel = holdAction,
+                enabled = clickLabel != null,
+                onClickLabel = clickLabel,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick,

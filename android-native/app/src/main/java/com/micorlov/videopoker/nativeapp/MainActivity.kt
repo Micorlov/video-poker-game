@@ -16,6 +16,7 @@ import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.SharedPreferencesStore
 import com.micorlov.videopoker.nativeapp.link.LinkIntake
 import com.micorlov.videopoker.nativeapp.link.RemoteFlagsFetcher
+import com.micorlov.videopoker.nativeapp.ui.AnalysisMode
 import com.micorlov.videopoker.nativeapp.ui.GameViewModel
 import com.micorlov.videopoker.nativeapp.ui.LocaleContext
 import com.micorlov.videopoker.nativeapp.ui.VideoPokerApp
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
                     reviewEnabled = true,
                     onboardingEnabled = true,
                     flagFetcher = RemoteFlagsFetcher::fetch,
+                    analysisMode = AnalysisMode.BACKGROUND,
                 ) as T
         }
     }

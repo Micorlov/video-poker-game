@@ -188,7 +188,7 @@ class FeatureParityTest {
         finishOpeningHand()
 
         openSettings()
-        compose.onNodeWithTag("default-bet-20").performClick()
+        compose.onNodeWithTag("default-bet-20").performScrollTo().performClick()
         openPlay()
 
         compose.onNodeWithTag("total-bet").assertTextContains("20")

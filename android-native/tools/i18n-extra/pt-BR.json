@@ -52,5 +52,33 @@
   "other": "mais %1$d mãos para o nível %2$d"
  },
  "notif_daily_title": "Seu ALL IN foi renovado",
- "notif_daily_body": "Volte e aproveite antes que ele reinicie de novo!"
+ "notif_daily_body": "Volte e aproveite antes que ele reinicie de novo!",
+ "play_double_up": "Dobrar %1$s",
+ "play_double_up_dealer": "Banca",
+ "play_double_up_yours": "Sua",
+ "card_pick_action": "Escolher esta carta",
+ "play_double_up_rules": "Vença a carta da banca para ganhar %1$s. A mesma carta é empate.",
+ "play_double_up_win": "Você ganhou %1$s!",
+ "play_double_up_push": "Empate: %1$s de volta",
+ "play_double_up_lose": "A banca vence. %1$s perdidos.",
+ "play_collect_hint": "Ou distribua para receber",
+ "play_pick_card": "Escolha uma carta",
+ "play_review_best": "✓ Melhor jogada",
+ "play_review_hold": "Melhor jogada: segurar %1$s",
+ "play_review_discard": "Melhor jogada: trocar as cinco cartas",
+ "play_review_cost": "Isso custou cerca de %1$s créditos em média",
+ "play_ev_line": "Melhor jogada %1$s× · a sua %2$s×",
+ "settings_feedback": "Análise de estratégia",
+ "settings_double_up": "Oferecer dobrar",
+ "settings_speed": "Velocidade do jogo",
+ "settings_speed_normal": "Normal",
+ "settings_speed_fast": "Rápida",
+ "settings_speed_turbo": "Turbo",
+ "stats_accuracy": "Precisão estratégica",
+ "stats_mistake_cost": "Perdido em erros",
+ "stats_accuracy_detail": {
+  "one": "Melhor jogada em %1$d de %2$d mão",
+  "other": "Melhor jogada em %1$d de %2$d mãos"
+ },
+ "stats_accuracy_note": "Mãos jogadas com dicas ativadas não contam."
 }

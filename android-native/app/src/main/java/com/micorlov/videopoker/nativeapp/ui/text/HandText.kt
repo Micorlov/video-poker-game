@@ -91,6 +91,12 @@ fun formatNumber(value: Long): String = NumberFormat.getIntegerInstance().format
 
 fun formatNumber(value: Int): String = formatNumber(value.toLong())
 
+/** A fractional amount with exactly [digits] decimals, in the phone's locale: "1.25". */
+fun formatDecimal(value: Double, digits: Int): String = NumberFormat.getNumberInstance().apply {
+    minimumFractionDigits = digits
+    maximumFractionDigits = digits
+}.format(value)
+
 /** '+1,200' / '-340' / '0', for net results. */
 fun formatSigned(value: Long): String = when {
     value > 0 -> "+" + formatNumber(value)

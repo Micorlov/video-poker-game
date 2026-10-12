@@ -15,13 +15,30 @@ enum class AppTheme(val storageKey: String) {
     }
 }
 
+/** How fast cards flip and winnings count up. [pace] scales every animation duration. */
+enum class GameSpeed(val storageKey: String, val pace: Float) {
+    NORMAL("normal", 1f),
+    FAST("fast", 0.5f),
+    TURBO("turbo", 0.25f),
+    ;
+
+    companion object {
+        fun fromStorageKey(key: String?): GameSpeed? = entries.firstOrNull { it.storageKey == key }
+    }
+}
+
 data class UserSettings(
     val soundEnabled: Boolean = true,
     val hapticsEnabled: Boolean = true,
     val theme: AppTheme = AppTheme.GREEN,
     val defaultBet: Int = Rules.DEFAULT_BET,
-    /** Strategy hints: suggested holds glow blue during the hold phase. */
+    /** Strategy hints: the best hold glows blue during the hold phase. */
     val hintsEnabled: Boolean = false,
+    /** After each draw, say whether the holds were the best play and what a mistake cost. */
+    val feedbackEnabled: Boolean = true,
+    /** Offer a double-up after every win. */
+    val doubleUpEnabled: Boolean = true,
+    val gameSpeed: GameSpeed = GameSpeed.NORMAL,
     /** Spoken hand names after a win; on by default, as in the web app. */
     val voiceEnabled: Boolean = true,
     /** The language the player picked; null follows the device. */

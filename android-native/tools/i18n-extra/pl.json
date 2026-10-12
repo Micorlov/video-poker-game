@@ -54,5 +54,35 @@
   "other": "Jeszcze %1$d rozdania do poziomu %2$d"
  },
  "notif_daily_title": "Twoje ALL IN jest znowu gotowe",
- "notif_daily_body": "Wróć i skorzystaj, zanim znów się zresetuje!"
+ "notif_daily_body": "Wróć i skorzystaj, zanim znów się zresetuje!",
+ "play_double_up": "Podwój %1$s",
+ "play_double_up_dealer": "Krupier",
+ "play_double_up_yours": "Twoja",
+ "card_pick_action": "Wybierz tę kartę",
+ "play_double_up_rules": "Pokonaj kartę krupiera, aby wygrać %1$s. Ta sama figura to remis.",
+ "play_double_up_win": "Wygrywasz %1$s!",
+ "play_double_up_push": "Remis — %1$s wraca",
+ "play_double_up_lose": "Wygrywa krupier. Tracisz %1$s.",
+ "play_collect_hint": "Albo rozdaj, aby odebrać",
+ "play_pick_card": "Wybierz kartę",
+ "play_review_best": "✓ Najlepszy ruch",
+ "play_review_hold": "Najlepszy ruch: zatrzymaj %1$s",
+ "play_review_discard": "Najlepszy ruch: wymień wszystkie pięć kart",
+ "play_review_cost": "To kosztowało średnio ok. %1$s kredytów",
+ "play_ev_line": "Najlepszy ruch %1$s× · twój %2$s×",
+ "settings_feedback": "Ocena strategii",
+ "settings_double_up": "Proponuj podwojenie",
+ "settings_speed": "Tempo gry",
+ "settings_speed_normal": "Normalne",
+ "settings_speed_fast": "Szybkie",
+ "settings_speed_turbo": "Turbo",
+ "stats_accuracy": "Trafność strategii",
+ "stats_mistake_cost": "Stracone na błędach",
+ "stats_accuracy_detail": {
+  "one": "Najlepszy ruch w %1$d z %2$d rozdania",
+  "few": "Najlepszy ruch w %1$d z %2$d rozdań",
+  "many": "Najlepszy ruch w %1$d z %2$d rozdań",
+  "other": "Najlepszy ruch w %1$d z %2$d rozdania"
+ },
+ "stats_accuracy_note": "Rozdania z włączonymi podpowiedziami się nie liczą."
 }

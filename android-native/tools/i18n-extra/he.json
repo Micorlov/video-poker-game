@@ -53,5 +53,34 @@
   "other": "עוד %1$d ידיים לרמה %2$d"
  },
  "notif_daily_title": "ה-ALL IN שלך התאפס",
- "notif_daily_body": "חזור ותנצל אותו לפני שהוא יתאפס שוב!"
+ "notif_daily_body": "חזור ותנצל אותו לפני שהוא יתאפס שוב!",
+ "play_double_up": "הכפל %1$s",
+ "play_double_up_dealer": "הדילר",
+ "play_double_up_yours": "שלך",
+ "card_pick_action": "בחר בקלף הזה",
+ "play_double_up_rules": "נצח את הקלף של הדילר וזכה ב־%1$s. אותו ערך – תיקו.",
+ "play_double_up_win": "זכית ב־%1$s!",
+ "play_double_up_push": "תיקו – %1$s הוחזרו",
+ "play_double_up_lose": "הדילר ניצח. הפסדת %1$s.",
+ "play_collect_hint": "או חלק כדי לגבות",
+ "play_pick_card": "בחר קלף",
+ "play_review_best": "✓ המהלך הטוב ביותר",
+ "play_review_hold": "המהלך הטוב ביותר: להחזיק %1$s",
+ "play_review_discard": "המהלך הטוב ביותר: להחליף את כל חמשת הקלפים",
+ "play_review_cost": "זה עלה בממוצע כ־%1$s קרדיטים",
+ "play_ev_line": "הטוב ביותר %1$s× · שלך %2$s×",
+ "settings_feedback": "משוב אסטרטגיה",
+ "settings_double_up": "הצע הכפלה",
+ "settings_speed": "מהירות המשחק",
+ "settings_speed_normal": "רגילה",
+ "settings_speed_fast": "מהירה",
+ "settings_speed_turbo": "טורבו",
+ "stats_accuracy": "דיוק אסטרטגי",
+ "stats_mistake_cost": "הפסד בגלל טעויות",
+ "stats_accuracy_detail": {
+  "one": "המהלך הטוב ביותר ב־%1$d מתוך יד %2$d",
+  "two": "המהלך הטוב ביותר ב־%1$d מתוך %2$d ידיים",
+  "other": "המהלך הטוב ביותר ב־%1$d מתוך %2$d ידיים"
+ },
+ "stats_accuracy_note": "ידיים ששוחקו עם רמזים לא נספרות."
 }

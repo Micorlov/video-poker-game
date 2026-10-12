@@ -206,6 +206,30 @@
     <string name="settings_enable_notifications">Włącz powiadomienia</string>
     <string name="notif_daily_title">Twoje ALL IN jest znowu gotowe</string>
     <string name="notif_daily_body">Wróć i skorzystaj, zanim znów się zresetuje!</string>
+    <string name="play_double_up">Podwój %1$s</string>
+    <string name="play_double_up_dealer">Krupier</string>
+    <string name="play_double_up_yours">Twoja</string>
+    <string name="card_pick_action">Wybierz tę kartę</string>
+    <string name="play_double_up_rules">Pokonaj kartę krupiera, aby wygrać %1$s. Ta sama figura to remis.</string>
+    <string name="play_double_up_win">Wygrywasz %1$s!</string>
+    <string name="play_double_up_push">Remis — %1$s wraca</string>
+    <string name="play_double_up_lose">Wygrywa krupier. Tracisz %1$s.</string>
+    <string name="play_collect_hint">Albo rozdaj, aby odebrać</string>
+    <string name="play_pick_card">Wybierz kartę</string>
+    <string name="play_review_best">✓ Najlepszy ruch</string>
+    <string name="play_review_hold">Najlepszy ruch: zatrzymaj %1$s</string>
+    <string name="play_review_discard">Najlepszy ruch: wymień wszystkie pięć kart</string>
+    <string name="play_review_cost">To kosztowało średnio ok. %1$s kredytów</string>
+    <string name="play_ev_line">Najlepszy ruch %1$s× · twój %2$s×</string>
+    <string name="settings_feedback">Ocena strategii</string>
+    <string name="settings_double_up">Proponuj podwojenie</string>
+    <string name="settings_speed">Tempo gry</string>
+    <string name="settings_speed_normal">Normalne</string>
+    <string name="settings_speed_fast">Szybkie</string>
+    <string name="settings_speed_turbo">Turbo</string>
+    <string name="stats_accuracy">Trafność strategii</string>
+    <string name="stats_mistake_cost">Stracone na błędach</string>
+    <string name="stats_accuracy_note">Rozdania z włączonymi podpowiedziami się nie liczą.</string>
     <string-array name="rank_names">
         <item>As</item>
         <item>2</item>
@@ -232,5 +256,11 @@
         <item quantity="few">Jeszcze %1$d rozdania do poziomu %2$d</item>
         <item quantity="many">Jeszcze %1$d rozdań do poziomu %2$d</item>
         <item quantity="other">Jeszcze %1$d rozdania do poziomu %2$d</item>
+    </plurals>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="one">Najlepszy ruch w %1$d z %2$d rozdania</item>
+        <item quantity="few">Najlepszy ruch w %1$d z %2$d rozdań</item>
+        <item quantity="many">Najlepszy ruch w %1$d z %2$d rozdań</item>
+        <item quantity="other">Najlepszy ruch w %1$d z %2$d rozdania</item>
     </plurals>
 </resources>

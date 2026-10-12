@@ -206,6 +206,30 @@
     <string name="settings_enable_notifications">Включить уведомления</string>
     <string name="notif_daily_title">Ваш ALL IN снова доступен</string>
     <string name="notif_daily_body">Возвращайтесь и используйте его, пока он не сбросился снова!</string>
+    <string name="play_double_up">Удвоить %1$s</string>
+    <string name="play_double_up_dealer">Дилер</string>
+    <string name="play_double_up_yours">Ваша</string>
+    <string name="card_pick_action">Выбрать эту карту</string>
+    <string name="play_double_up_rules">Побейте карту дилера и выиграйте %1$s. Равный ранг — ничья.</string>
+    <string name="play_double_up_win">Вы выиграли %1$s!</string>
+    <string name="play_double_up_push">Ничья — %1$s возвращено</string>
+    <string name="play_double_up_lose">Дилер выиграл. Проиграно %1$s.</string>
+    <string name="play_collect_hint">Или раздайте, чтобы забрать</string>
+    <string name="play_pick_card">Выберите карту</string>
+    <string name="play_review_best">✓ Лучший ход</string>
+    <string name="play_review_hold">Лучший ход: оставить %1$s</string>
+    <string name="play_review_discard">Лучший ход: заменить все пять карт</string>
+    <string name="play_review_cost">Это стоило в среднем около %1$s кредитов</string>
+    <string name="play_ev_line">Лучший ход %1$s× · ваш %2$s×</string>
+    <string name="settings_feedback">Разбор стратегии</string>
+    <string name="settings_double_up">Предлагать удвоение</string>
+    <string name="settings_speed">Скорость игры</string>
+    <string name="settings_speed_normal">Обычная</string>
+    <string name="settings_speed_fast">Быстрая</string>
+    <string name="settings_speed_turbo">Турбо</string>
+    <string name="stats_accuracy">Точность стратегии</string>
+    <string name="stats_mistake_cost">Потеряно на ошибках</string>
+    <string name="stats_accuracy_note">Раздачи с подсказками не учитываются.</string>
     <string-array name="rank_names">
         <item>Туз</item>
         <item>2</item>
@@ -232,5 +256,11 @@
         <item quantity="few">Ещё %1$d раздачи до уровня %2$d</item>
         <item quantity="many">Ещё %1$d раздач до уровня %2$d</item>
         <item quantity="other">Ещё %1$d раздачи до уровня %2$d</item>
+    </plurals>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="one">Лучший ход в %1$d из %2$d раздачи</item>
+        <item quantity="few">Лучший ход в %1$d из %2$d раздач</item>
+        <item quantity="many">Лучший ход в %1$d из %2$d раздач</item>
+        <item quantity="other">Лучший ход в %1$d из %2$d раздачи</item>
     </plurals>
 </resources>

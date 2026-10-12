@@ -2,16 +2,24 @@ package com.micorlov.videopoker.nativeapp.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.micorlov.videopoker.nativeapp.data.AppTheme
+import com.micorlov.videopoker.nativeapp.data.GameSpeed
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.UserSettings
 import com.micorlov.videopoker.nativeapp.domain.AllInOffer
 import com.micorlov.videopoker.nativeapp.domain.AppLanguage
+import com.micorlov.videopoker.nativeapp.domain.Card
+import com.micorlov.videopoker.nativeapp.domain.DoubleUpResult
 import com.micorlov.videopoker.nativeapp.domain.DrawOutcome
 import com.micorlov.videopoker.nativeapp.domain.GameEngine
 import com.micorlov.videopoker.nativeapp.domain.GameEvent
 import com.micorlov.videopoker.nativeapp.domain.GameState
+import com.micorlov.videopoker.nativeapp.domain.HandEvaluator
+import com.micorlov.videopoker.nativeapp.domain.HoldAnalysis
+import com.micorlov.videopoker.nativeapp.domain.HoldAnalyzer
 import com.micorlov.videopoker.nativeapp.domain.Phase
 import com.micorlov.videopoker.nativeapp.domain.RemoteFlags
 import com.micorlov.videopoker.nativeapp.domain.ReviewAsk
@@ -43,10 +51,51 @@ data class UiState(
     val showOnboarding: Boolean = false,
     /** Admin switches; defaults until the fetch lands. */
     val flags: RemoteFlags = RemoteFlags(),
+    /** The hold maths for a deal, once it has been worked out. */
+    val analysis: RoundAnalysis? = null,
+    /** How the last draw's holds compared with the best play. */
+    val review: DecisionReview? = null,
+    /** The [com.micorlov.videopoker.nativeapp.domain.DoubleUp.number] whose cards finished turning over; 0 for none this hand. */
+    val revealedDoubleUp: Int = 0,
 ) {
     /** True once the cards of the current round are face up, so results may be shown. */
     val revealed: Boolean get() = revealedRound == game.round
+
+    /** Expected values for the hand on the table, while holds are being chosen. */
+    val holdAnalysis: HoldAnalysis?
+        get() = analysis?.takeIf { game.phase == Phase.HOLD && it.round == game.round }?.analysis
+
+    /** The review of the hand on the table, once its cards are face up and feedback is on. */
+    val visibleReview: DecisionReview?
+        get() = review?.takeIf { settings.feedbackEnabled && revealed && it.round == game.round }
+
+    /** True once a settled double-up's cards are face up, so its result may be shown. */
+    val doubleUpRevealed: Boolean
+        get() = game.doubleUp?.let { it.result != null && it.number == revealedDoubleUp } == true
+
+    /** A double-up can be started right now. */
+    val canDoubleUp: Boolean
+        get() = settings.doubleUpEnabled && game.doubleUpStake != null && revealed && (game.doubleUp == null || doubleUpRevealed)
 }
+
+/** [analysis] belongs to the deal of [round]. */
+data class RoundAnalysis(val round: Int, val analysis: HoldAnalysis)
+
+/**
+ * How a draw's holds measured up. [round] is the round the draw produced. [cost] is the chips
+ * the choice gave up on average (zero for a best play); [bestCards] is what the best play kept.
+ */
+data class DecisionReview(
+    val round: Int,
+    val best: Boolean,
+    val cost: Double,
+    val bestCards: List<Card>,
+    val chosenEv: Double,
+    val bestEv: Double,
+)
+
+/** Where the hold maths runs: off the main thread in the app; inline, or not at all, in tests. */
+enum class AnalysisMode { OFF, INLINE, BACKGROUND }
 
 data class Toast(val id: Int, val message: ToastMessage)
 
@@ -65,6 +114,8 @@ sealed interface ToastMessage {
 /** One-shot happenings the UI reacts to with sound, haptics and fireworks. */
 sealed interface UiEffect {
     data class HandRevealed(val outcome: DrawOutcome) : UiEffect
+
+    data class DoubleUpRevealed(val result: DoubleUpResult) : UiEffect
 
     /** A quality win earned a rating ask: call [GameViewModel.onReviewTimer] after [ReviewPolicy.PROMPT_DELAY_MS]. */
     data object ReviewEarned : UiEffect
@@ -89,6 +140,8 @@ class GameViewModel(
     private val onboardingEnabled: Boolean = false,
     /** Fetches the remote flags; null (tests, offline builds) keeps the cached ones. */
     private val flagFetcher: (suspend () -> RemoteFlags?)? = null,
+    /** The app works the hold maths out in the background; most tests skip it. */
+    private val analysisMode: AnalysisMode = AnalysisMode.OFF,
 ) : ViewModel() {
 
     private val effectChannel = Channel<UiEffect>(Channel.UNLIMITED)
@@ -99,6 +152,21 @@ class GameViewModel(
     private var allInLimit = repository.loadFlags().allInDailyLimit
     private var reviewAskedThisSession = false
     private var reviewTimerPending = false
+
+    /** Deals whose hold maths is being worked out. */
+    private val analysingRounds = mutableSetOf<Int>()
+
+    /** Draws made before their deal's maths was ready, by deal round, waiting to be reviewed. */
+    private val pendingReviews = mutableMapOf<Int, PendingReview>()
+
+    private data class PendingReview(
+        val dealRound: Int,
+        val drawRound: Int,
+        val dealt: List<Card>,
+        val held: List<Boolean>,
+        val totalBet: Int,
+        val hinted: Boolean,
+    )
 
     /** One flow for the whole lifetime: collectors key on its identity, so it must not be rebuilt per read. */
     val state: StateFlow<UiState>
@@ -119,6 +187,7 @@ class GameViewModel(
         // The opening deal can already carry news (a free rebuy for a player who left broke).
         applyEvents(opening.events, persist = opening.events.any { it is GameEvent.Rebuy }, game = opening.state)
         grantDailyBonus()
+        requestAnalysis(_state.value.game)
         flagFetcher?.let { fetch -> viewModelScope.launch { fetch()?.let(::onFlagsLoaded) } }
     }
 
@@ -136,10 +205,101 @@ class GameViewModel(
 
     fun onMainAction() {
         val game = _state.value.game
-        val transition = if (game.phase == Phase.BET) GameEngine.deal(game, random) else GameEngine.draw(game, random)
-        val finishedHand = game.phase == Phase.HOLD
-        if (finishedHand) todayKey?.invoke()?.let(repository::saveLastPlayedDay)
-        commit(transition, persist = finishedHand || transition.events.any { it is GameEvent.Rebuy })
+        when (game.phase) {
+            Phase.BET -> {
+                val transition = GameEngine.deal(game, random)
+                _state.update { it.copy(revealedDoubleUp = 0) }
+                commit(transition, persist = transition.events.any { it is GameEvent.Rebuy })
+                requestAnalysis(transition.state)
+            }
+            Phase.HOLD -> draw(game)
+            Phase.DOUBLE_UP -> Unit
+        }
+    }
+
+    private fun draw(game: GameState) {
+        val transition = GameEngine.draw(game, random)
+        todayKey?.invoke()?.let(repository::saveLastPlayedDay)
+        commit(transition, persist = true)
+        val drawn = transition.state.outcome ?: return
+        val pending = PendingReview(
+            dealRound = game.round,
+            drawRound = transition.state.round,
+            dealt = game.dealtHand,
+            held = game.held,
+            totalBet = drawn.totalBet,
+            hinted = _state.value.settings.hintsEnabled,
+        )
+        val ready = _state.value.analysis?.takeIf { it.round == game.round }?.analysis
+        when {
+            ready != null -> review(pending, ready)
+            !_state.value.settings.feedbackEnabled -> Unit
+            else -> {
+                pendingReviews[game.round] = pending
+                requestAnalysis(game)
+            }
+        }
+    }
+
+    /** Works out the hold maths for [game]'s deal (a hand being held), if anything needs it and it is not already known. */
+    private fun requestAnalysis(game: GameState) {
+        val settings = _state.value.settings
+        if (analysisMode == AnalysisMode.OFF || (!settings.hintsEnabled && !settings.feedbackEnabled)) return
+        val round = game.round
+        if (game.phase != Phase.HOLD || game.dealtHand.size != HandEvaluator.HAND_SIZE) return
+        if (round in analysingRounds || _state.value.analysis?.round == round) return
+        analysingRounds += round
+        val work = { HoldAnalyzer.analyze(game.dealtHand, game.variant, game::payoutFor) }
+        when (analysisMode) {
+            AnalysisMode.INLINE -> onAnalysed(round, work())
+            AnalysisMode.BACKGROUND -> viewModelScope.launch { onAnalysed(round, withContext(Dispatchers.Default) { work() }) }
+            AnalysisMode.OFF -> Unit
+        }
+    }
+
+    private fun onAnalysed(round: Int, analysis: HoldAnalysis) {
+        analysingRounds -= round
+        // A slow result for an older deal must not replace the maths of the hand now on the table.
+        _state.update { if ((it.analysis?.round ?: -1) > round) it else it.copy(analysis = RoundAnalysis(round, analysis)) }
+        pendingReviews.remove(round)?.let { review(it, analysis) }
+    }
+
+    /** Scores the draw against the best play; a hand played with hints on does not count towards accuracy. */
+    private fun review(pending: PendingReview, analysis: HoldAnalysis) {
+        val best = analysis.isBest(pending.held)
+        val chosenEv = analysis.ev(pending.held)
+        val cost = if (best) 0.0 else (analysis.bestEv - chosenEv) * pending.totalBet
+        val bestHolds = analysis.bestHolds()
+        val review = DecisionReview(
+            round = pending.drawRound,
+            best = best,
+            cost = cost,
+            bestCards = pending.dealt.filterIndexed { i, _ -> bestHolds[i] },
+            chosenEv = chosenEv,
+            bestEv = analysis.bestEv,
+        )
+        _state.update { it.copy(review = review) }
+        if (pending.hinted || !_state.value.settings.feedbackEnabled) return
+        val counted = GameEngine.recordDecision(_state.value.game, best, cost)
+        _state.update { it.copy(game = counted) }
+        repository.saveGame(counted.toSaved())
+    }
+
+    /** Stakes the last win on a double-up. Deal instead collects it. */
+    fun onDoubleUp() {
+        if (!_state.value.canDoubleUp) return
+        commit(Transition(GameEngine.startDoubleUp(_state.value.game, random)))
+    }
+
+    fun onPickDoubleUp(index: Int) = commit(Transition(GameEngine.pickDoubleUp(_state.value.game, index)), persist = true)
+
+    /** Called when double-up [number]'s cards have finished turning over. */
+    fun onDoubleUpRevealed(number: Int) {
+        val doubleUp = _state.value.game.doubleUp ?: return
+        val result = doubleUp.result ?: return
+        if (doubleUp.number != number || _state.value.revealedDoubleUp == number) return
+        _state.update { it.copy(revealedDoubleUp = number) }
+        effectChannel.trySend(UiEffect.DoubleUpRevealed(result))
     }
 
     fun onToggleHold(index: Int) = commit(Transition(GameEngine.toggleHold(_state.value.game, index)))
@@ -221,12 +381,25 @@ class GameViewModel(
 
     fun onToggleHints() {
         updateSettings { it.copy(hintsEnabled = !it.hintsEnabled) }
-        if (_state.value.settings.hintsEnabled) showToast(ToastMessage.HintsOn)
+        if (_state.value.settings.hintsEnabled) {
+            showToast(ToastMessage.HintsOn)
+            requestAnalysis(_state.value.game)
+        }
     }
+
+    fun onToggleFeedback() {
+        updateSettings { it.copy(feedbackEnabled = !it.feedbackEnabled) }
+        requestAnalysis(_state.value.game)
+    }
+
+    fun onToggleDoubleUp() = updateSettings { it.copy(doubleUpEnabled = !it.doubleUpEnabled) }
+
+    fun onSelectSpeed(speed: GameSpeed) = updateSettings { it.copy(gameSpeed = speed) }
 
     /** ALL IN tapped: open the confirmation, or explain why not. Allowed mid-hand, as on the web. */
     fun onAllInRequested() {
         val game = _state.value.game
+        if (game.phase == Phase.DOUBLE_UP) return showToast(ToastMessage.FinishHandFirst)
         if (_state.value.allInRemaining <= 0) return showToast(ToastMessage.NoAllInLeft)
         val offer = GameEngine.allInOffer(game)
         if (offer == null) {

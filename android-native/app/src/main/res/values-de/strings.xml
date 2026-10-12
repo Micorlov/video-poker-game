@@ -206,6 +206,30 @@
     <string name="settings_enable_notifications">Benachrichtigungen aktivieren</string>
     <string name="notif_daily_title">Dein ALL IN ist wieder bereit</string>
     <string name="notif_daily_body">Komm zurück und hol es dir, bevor es erneut zurückgesetzt wird!</string>
+    <string name="play_double_up">Verdoppeln: %1$s</string>
+    <string name="play_double_up_dealer">Dealer</string>
+    <string name="play_double_up_yours">Deine</string>
+    <string name="card_pick_action">Diese Karte wählen</string>
+    <string name="play_double_up_rules">Schlage die Karte des Dealers und gewinne %1$s. Gleicher Rang ist unentschieden.</string>
+    <string name="play_double_up_win">Du gewinnst %1$s!</string>
+    <string name="play_double_up_push">Unentschieden – %1$s zurück</string>
+    <string name="play_double_up_lose">Der Dealer gewinnt. %1$s verloren.</string>
+    <string name="play_collect_hint">Oder austeilen, um zu kassieren</string>
+    <string name="play_pick_card">Wähle eine Karte</string>
+    <string name="play_review_best">✓ Bester Zug</string>
+    <string name="play_review_hold">Bester Zug: %1$s halten</string>
+    <string name="play_review_discard">Bester Zug: fünf neue Karten ziehen</string>
+    <string name="play_review_cost">Das hat im Schnitt etwa %1$s Credits gekostet</string>
+    <string name="play_ev_line">Bester Zug %1$s× · deiner %2$s×</string>
+    <string name="settings_feedback">Strategie-Feedback</string>
+    <string name="settings_double_up">Verdoppeln anbieten</string>
+    <string name="settings_speed">Spieltempo</string>
+    <string name="settings_speed_normal">Normal</string>
+    <string name="settings_speed_fast">Schnell</string>
+    <string name="settings_speed_turbo">Turbo</string>
+    <string name="stats_accuracy">Strategie-Genauigkeit</string>
+    <string name="stats_mistake_cost">Durch Fehler verloren</string>
+    <string name="stats_accuracy_note">Hände mit Tipps zählen nicht.</string>
     <string-array name="rank_names">
         <item>Ass</item>
         <item>2</item>
@@ -230,5 +254,9 @@
     <plurals name="stats_hands_to_next">
         <item quantity="one">Noch %1$d Hand bis Level %2$d</item>
         <item quantity="other">Noch %1$d Hände bis Level %2$d</item>
+    </plurals>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="one">Bester Zug in %1$d von %2$d Hand</item>
+        <item quantity="other">Bester Zug in %1$d von %2$d Händen</item>
     </plurals>
 </resources>

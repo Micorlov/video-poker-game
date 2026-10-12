@@ -52,5 +52,34 @@
   "other": "Ancora %1$d mani al livello %2$d"
  },
  "notif_daily_title": "Il tuo ALL IN è di nuovo disponibile",
- "notif_daily_body": "Torna a usarlo prima che si azzeri di nuovo!"
+ "notif_daily_body": "Torna a usarlo prima che si azzeri di nuovo!",
+ "play_double_up": "Raddoppia %1$s",
+ "play_double_up_dealer": "Banco",
+ "play_double_up_yours": "Tua",
+ "card_pick_action": "Scegli questa carta",
+ "play_double_up_rules": "Batti la carta del banco per vincere %1$s. Stesso valore è pareggio.",
+ "play_double_up_win": "Vinci %1$s!",
+ "play_double_up_push": "Pareggio: %1$s restituiti",
+ "play_double_up_lose": "Vince il banco. %1$s persi.",
+ "play_collect_hint": "Oppure distribuisci per incassare",
+ "play_pick_card": "Scegli una carta",
+ "play_review_best": "✓ Mossa migliore",
+ "play_review_hold": "Mossa migliore: tieni %1$s",
+ "play_review_discard": "Mossa migliore: cambia tutte e cinque le carte",
+ "play_review_cost": "È costato in media circa %1$s crediti",
+ "play_ev_line": "Mossa migliore %1$s× · la tua %2$s×",
+ "settings_feedback": "Analisi della strategia",
+ "settings_double_up": "Offri il raddoppio",
+ "settings_speed": "Velocità di gioco",
+ "settings_speed_normal": "Normale",
+ "settings_speed_fast": "Veloce",
+ "settings_speed_turbo": "Turbo",
+ "stats_accuracy": "Precisione strategica",
+ "stats_mistake_cost": "Perso per errori",
+ "stats_accuracy_detail": {
+  "one": "Mossa migliore in %1$d mano su %2$d",
+  "many": "Mossa migliore in %1$d mani su %2$d",
+  "other": "Mossa migliore in %1$d mani su %2$d"
+ },
+ "stats_accuracy_note": "Le mani giocate con i suggerimenti non contano."
 }

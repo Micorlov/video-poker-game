@@ -47,6 +47,9 @@ object Rules {
         return unlocks.filter { it.level > level }.minByOrNull { it.level }
     }
 
+    /** Double-ups allowed in a row before the win must be collected. */
+    const val MAX_DOUBLE_UPS = 5
+
     /** Extra payout fraction for a run of consecutive winning hands. */
     fun streakBonus(winStreak: Int): Double = when {
         winStreak >= 10 -> 0.5

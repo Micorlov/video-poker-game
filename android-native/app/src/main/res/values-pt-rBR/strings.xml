@@ -206,6 +206,30 @@
     <string name="settings_enable_notifications">Ativar notificações</string>
     <string name="notif_daily_title">Seu ALL IN foi renovado</string>
     <string name="notif_daily_body">Volte e aproveite antes que ele reinicie de novo!</string>
+    <string name="play_double_up">Dobrar %1$s</string>
+    <string name="play_double_up_dealer">Banca</string>
+    <string name="play_double_up_yours">Sua</string>
+    <string name="card_pick_action">Escolher esta carta</string>
+    <string name="play_double_up_rules">Vença a carta da banca para ganhar %1$s. A mesma carta é empate.</string>
+    <string name="play_double_up_win">Você ganhou %1$s!</string>
+    <string name="play_double_up_push">Empate: %1$s de volta</string>
+    <string name="play_double_up_lose">A banca vence. %1$s perdidos.</string>
+    <string name="play_collect_hint">Ou distribua para receber</string>
+    <string name="play_pick_card">Escolha uma carta</string>
+    <string name="play_review_best">✓ Melhor jogada</string>
+    <string name="play_review_hold">Melhor jogada: segurar %1$s</string>
+    <string name="play_review_discard">Melhor jogada: trocar as cinco cartas</string>
+    <string name="play_review_cost">Isso custou cerca de %1$s créditos em média</string>
+    <string name="play_ev_line">Melhor jogada %1$s× · a sua %2$s×</string>
+    <string name="settings_feedback">Análise de estratégia</string>
+    <string name="settings_double_up">Oferecer dobrar</string>
+    <string name="settings_speed">Velocidade do jogo</string>
+    <string name="settings_speed_normal">Normal</string>
+    <string name="settings_speed_fast">Rápida</string>
+    <string name="settings_speed_turbo">Turbo</string>
+    <string name="stats_accuracy">Precisão estratégica</string>
+    <string name="stats_mistake_cost">Perdido em erros</string>
+    <string name="stats_accuracy_note">Mãos jogadas com dicas ativadas não contam.</string>
     <string-array name="rank_names">
         <item>Ás</item>
         <item>2</item>
@@ -230,5 +254,9 @@
     <plurals name="stats_hands_to_next">
         <item quantity="one">mais %1$d mão para o nível %2$d</item>
         <item quantity="other">mais %1$d mãos para o nível %2$d</item>
+    </plurals>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="one">Melhor jogada em %1$d de %2$d mão</item>
+        <item quantity="other">Melhor jogada em %1$d de %2$d mãos</item>
     </plurals>
 </resources>

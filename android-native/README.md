@@ -30,10 +30,12 @@ _Captured on an Android 16 emulator from real play (hands were dealt by the game
 | Levels (1 per 5 hands), Stats screen (Today / All-Time), reset | ✅ |
 | Local save (a hand in progress never costs chips), 3 themes, sound + haptics toggles | ✅ |
 | Synthesized sound effects, card-flip animation, win celebrations | ✅ |
+| Strategy hints from exact expected values (every hold scored over every draw) | ✅ native only |
+| Mistake feedback after each draw, strategy accuracy on the Stats screen | ✅ native only |
+| Double up after a win (beat the dealer's card, up to 5 in a row) | ✅ native only |
+| Game speed (Normal / Fast / Turbo), tap the cards to deal the next hand | ✅ native only |
 
-**Deferred to later phases:** strategy hints, ALL IN, daily bonus, voice announcements, the 16
-translations (strings are already resources, so `values-xx/` folders can be added), and every
-social/online feature (Firebase auth, friends, rooms, leaderboards, push). To enable them, see [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
+**Deferred to later phases:** every social/online feature (Firebase auth, friends, rooms, leaderboards, push). To enable them, see [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
 
 ## Layout
 
@@ -52,7 +54,7 @@ A JDK 17+ and the Android SDK (platform 36) are required; the toolchain matches 
 
 ```bash
 cd android-native
-./gradlew testDebugUnitTest          # 120+ JVM tests, ~25 s
+./gradlew testDebugUnitTest          # 190+ JVM tests, ~40 s
 ./gradlew assembleDebug              # app/build/outputs/apk/debug/app-debug.apk
 ./gradlew connectedDebugAndroidTest  # Compose UI tests; needs a device or emulator
 adb install -r app/build/outputs/apk/debug/app-debug.apk
@@ -71,6 +73,11 @@ node android-native/tools/gen-golden.js   # rewrites app/src/test/resources/hand
 
 Re-run it (and the tests) whenever `js/hand-eval.js` changes.
 
+The hint maths uses its own allocation-free classifier (`domain/FastClassifier.kt`), because
+`HoldAnalyzer` scores 2,598,960 hands per deal. `FastClassifierTest` checks it against the
+evaluator above on every five-card hand, for every variant, and `HoldAnalyzerTest` checks the
+expected values against brute force and hand-counted examples.
+
 ## Intentional differences from the web app
 
 - The result panel, win badges and balance count-up wait until the card flips finish, so the
@@ -79,3 +86,12 @@ Re-run it (and the tests) whenever `js/hand-eval.js` changes.
 - Tapping a table setting mid-hand explains that the hand must finish first, instead of silently
   doing nothing.
 - Portrait-locked on phones (tablets and foldables still rotate).
+- Strategy hints are the exact best hold for the pay table in force (loss escalator included),
+  worked out off the main thread after each deal, not the web app's rule-of-thumb ladder
+  (`js/hints.js`). With hints on, the result panel also shows what the best hold and the current
+  holds are worth per credit bet.
+- After each draw the result panel says whether the holds were the best play and, if not, what
+  was and what the choice cost on average. Hands played with hints on are not counted in the
+  accuracy shown on the Stats screen. Settings → Strategy Feedback turns it off.
+- Double up, game speed and tap-to-deal do not exist in the web app. Quitting mid double-up
+  keeps the stake, the same way quitting mid-hand never costs chips.

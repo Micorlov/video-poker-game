@@ -206,6 +206,30 @@
     <string name="settings_enable_notifications">通知をオンにする</string>
     <string name="notif_daily_title">ALL INがリセットされました</string>
     <string name="notif_daily_body">もう一度リセットされる前に戻ってきて使いましょう！</string>
+    <string name="play_double_up">ダブルアップ %1$s</string>
+    <string name="play_double_up_dealer">ディーラー</string>
+    <string name="play_double_up_yours">あなた</string>
+    <string name="card_pick_action">このカードを選ぶ</string>
+    <string name="play_double_up_rules">ディーラーのカードより強ければ %1$s 獲得。同じランクは引き分け。</string>
+    <string name="play_double_up_win">%1$s 獲得！</string>
+    <string name="play_double_up_push">引き分け — %1$s 返却</string>
+    <string name="play_double_up_lose">ディーラーの勝ち。%1$s を失いました。</string>
+    <string name="play_collect_hint">ディールで受け取り</string>
+    <string name="play_pick_card">カードを選んでください</string>
+    <string name="play_review_best">✓ 最善手</string>
+    <string name="play_review_hold">最善手：%1$s をホールド</string>
+    <string name="play_review_discard">最善手：5枚すべて交換</string>
+    <string name="play_review_cost">平均で約 %1$s クレジットの損</string>
+    <string name="play_ev_line">最善手 %1$s× · あなた %2$s×</string>
+    <string name="settings_feedback">戦略フィードバック</string>
+    <string name="settings_double_up">ダブルアップを表示</string>
+    <string name="settings_speed">ゲーム速度</string>
+    <string name="settings_speed_normal">標準</string>
+    <string name="settings_speed_fast">高速</string>
+    <string name="settings_speed_turbo">ターボ</string>
+    <string name="stats_accuracy">戦略の正確さ</string>
+    <string name="stats_mistake_cost">ミスによる損失</string>
+    <string name="stats_accuracy_note">ヒントをオンにしたハンドは数えません。</string>
     <string-array name="rank_names">
         <item>エース</item>
         <item>2</item>
@@ -229,5 +253,8 @@
     </string-array>
     <plurals name="stats_hands_to_next">
         <item quantity="other">レベル%2$dまであと%1$dハンド</item>
+    </plurals>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="other">%2$d ハンド中 %1$d ハンドで最善手</item>
     </plurals>
 </resources>

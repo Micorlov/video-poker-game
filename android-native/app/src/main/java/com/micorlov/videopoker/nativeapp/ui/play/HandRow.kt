@@ -30,8 +30,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private const val FLIP_STAGGER_MS = 250L
-private const val FLIP_MS = 600
+private const val FLIP_STAGGER_MS = 250f
+private const val FLIP_MS = 600f
 private const val BOUNCE_STAGGER_MS = 100L
 private const val BOUNCE_HEIGHT_DP = 12f
 private const val HAND_SIZE = HandEvaluator.HAND_SIZE
@@ -43,6 +43,8 @@ private const val HAND_SIZE = HandEvaluator.HAND_SIZE
  *
  * [alreadyRevealed] is true when this round's cards were already face up before this row
  * was composed (the player came back from another tab) — then there is nothing to flip.
+ * [pace] scales the flips (the game speed setting). Between hands, [onTapToDeal] (when set)
+ * lets a tap on any card deal the next hand.
  */
 @Composable
 fun HandRow(
@@ -50,7 +52,9 @@ fun HandRow(
     alreadyRevealed: Boolean,
     celebration: Celebration?,
     hints: List<Boolean>,
+    pace: Float,
     onToggleHold: (Int) -> Unit,
+    onTapToDeal: (() -> Unit)?,
     onFlip: () -> Unit,
     onRevealed: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -68,9 +72,9 @@ fun HandRow(
         coroutineScope {
             flipping.sorted().forEachIndexed { order, index ->
                 launch {
-                    delay(order * FLIP_STAGGER_MS)
+                    delay((order * FLIP_STAGGER_MS * pace).toLong())
                     currentOnFlip()
-                    rotations[index].animateTo(0f, tween(FLIP_MS, easing = FastOutSlowInEasing))
+                    rotations[index].animateTo(0f, tween((FLIP_MS * pace).toInt(), easing = FastOutSlowInEasing))
                     faceUp[index] = true
                 }
             }
@@ -96,6 +100,9 @@ fun HandRow(
     }
 
     val heldLabel = stringResource(R.string.play_held)
+    val holdAction = stringResource(R.string.card_hold_action)
+    val dealAction = stringResource(R.string.play_deal)
+    val holdable = game.phase == Phase.HOLD
     val showingResult = outcome != null
     val anyHeld = game.held.any { it }
     // Held cards never flip, but their win badge still waits for the whole hand: a pair badge
@@ -128,8 +135,14 @@ fun HandRow(
                 ),
                 lift = lifts[index],
                 description = cardDescription(card, held = isHeld),
-                holdable = game.phase == Phase.HOLD,
-                onClick = { onToggleHold(index) },
+                // A card can only be held once it is face up: a quick second tap after a tap-to-deal
+                // lands on a card still turning over, and must not hold it unseen.
+                clickLabel = when {
+                    holdable -> holdAction.takeIf { faceUp[index] }
+                    onTapToDeal != null -> dealAction
+                    else -> null
+                },
+                onClick = { if (holdable) onToggleHold(index) else onTapToDeal?.invoke() },
                 modifier = Modifier
                     .weight(1f)
                     .testTag("card-$index"),

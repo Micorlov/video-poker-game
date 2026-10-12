@@ -51,5 +51,32 @@
   "other": "再玩 %1$d 手升到等级 %2$d"
  },
  "notif_daily_title": "你的 ALL IN 已重置",
- "notif_daily_body": "在再次重置前回来使用吧！"
+ "notif_daily_body": "在再次重置前回来使用吧！",
+ "play_double_up": "加倍 %1$s",
+ "play_double_up_dealer": "庄家",
+ "play_double_up_yours": "你的",
+ "card_pick_action": "选择这张牌",
+ "play_double_up_rules": "比庄家的牌大即可赢得 %1$s。点数相同为平局。",
+ "play_double_up_win": "你赢得 %1$s！",
+ "play_double_up_push": "平局 — 退还 %1$s",
+ "play_double_up_lose": "庄家获胜。输掉 %1$s。",
+ "play_collect_hint": "或发牌领取",
+ "play_pick_card": "请选一张牌",
+ "play_review_best": "✓ 最佳打法",
+ "play_review_hold": "最佳打法：保留 %1$s",
+ "play_review_discard": "最佳打法：五张全换",
+ "play_review_cost": "这一手平均约损失 %1$s 积分",
+ "play_ev_line": "最佳 %1$s× · 你的 %2$s×",
+ "settings_feedback": "策略反馈",
+ "settings_double_up": "提供加倍",
+ "settings_speed": "游戏速度",
+ "settings_speed_normal": "正常",
+ "settings_speed_fast": "快速",
+ "settings_speed_turbo": "极速",
+ "stats_accuracy": "策略准确率",
+ "stats_mistake_cost": "失误损失",
+ "stats_accuracy_detail": {
+  "other": "%2$d 手中 %1$d 手为最佳打法"
+ },
+ "stats_accuracy_note": "开启提示时打的牌不计入。"
 }

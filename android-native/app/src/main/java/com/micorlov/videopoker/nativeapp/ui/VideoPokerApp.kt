@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.micorlov.videopoker.nativeapp.audio.SoundCue
 import com.micorlov.videopoker.nativeapp.audio.SoundPlayer
 import com.micorlov.videopoker.nativeapp.audio.VoiceAnnouncer
+import com.micorlov.videopoker.nativeapp.domain.DoubleUpResult
 import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.ReviewPolicy
 import kotlinx.coroutines.launch
@@ -104,6 +105,14 @@ fun VideoPokerApp(viewModel: GameViewModel) {
                         viewModel.onReviewTimer(blocked = false)
                     }
                     UiEffect.RequestNativeReview -> InAppReview.request(context)
+                    is UiEffect.DoubleUpRevealed -> when (effect.result) {
+                        DoubleUpResult.WIN -> {
+                            feedback.play(SoundCue.WIN)
+                            feedback.haptics.heavy()
+                        }
+                        DoubleUpResult.PUSH -> feedback.haptics.light()
+                        DoubleUpResult.LOSE -> feedback.play(SoundCue.LOSS)
+                    }
                     is UiEffect.HandRevealed -> {
                         val outcome = effect.outcome
                         if (!outcome.isWin) {
@@ -147,12 +156,18 @@ fun VideoPokerApp(viewModel: GameViewModel) {
                 onAllIn = viewModel::onAllInRequested,
                 onAllInConfirmed = viewModel::onAllInConfirmed,
                 onAllInDismissed = viewModel::onAllInDismissed,
+                onDoubleUp = viewModel::onDoubleUp,
+                onPickDoubleUp = viewModel::onPickDoubleUp,
+                onDoubleUpRevealed = viewModel::onDoubleUpRevealed,
             )
         }
         val settingsActions = remember(viewModel) {
             SettingsActions(
                 onToggleSound = viewModel::onToggleSound,
                 onToggleHaptics = viewModel::onToggleHaptics,
+                onToggleFeedback = viewModel::onToggleFeedback,
+                onToggleDoubleUp = viewModel::onToggleDoubleUp,
+                onSelectSpeed = viewModel::onSelectSpeed,
                 onSelectLanguage = viewModel::onSelectLanguage,
                 onEnableNotifications = {
                     viewModel.onEnableNotifications()

@@ -56,5 +56,37 @@
   "other": "%1$d يد أخرى للمستوى %2$d"
  },
  "notif_daily_title": "تمت إعادة تعيين ALL IN الخاص بك",
- "notif_daily_body": "عُد واستخدمه قبل أن تتم إعادة تعيينه مرة أخرى!"
+ "notif_daily_body": "عُد واستخدمه قبل أن تتم إعادة تعيينه مرة أخرى!",
+ "play_double_up": "ضاعف %1$s",
+ "play_double_up_dealer": "الموزّع",
+ "play_double_up_yours": "ورقتك",
+ "card_pick_action": "اختر هذه الورقة",
+ "play_double_up_rules": "تغلّب على ورقة الموزّع لتربح %1$s. الرتبة نفسها تعادل.",
+ "play_double_up_win": "ربحت %1$s!",
+ "play_double_up_push": "تعادل — استرجعت %1$s",
+ "play_double_up_lose": "فاز الموزّع. خسرت %1$s.",
+ "play_collect_hint": "أو وزّع لتحصيل الربح",
+ "play_pick_card": "اختر ورقة",
+ "play_review_best": "✓ أفضل لعبة",
+ "play_review_hold": "أفضل لعبة: احتفظ بـ %1$s",
+ "play_review_discard": "أفضل لعبة: اسحب خمس أوراق جديدة",
+ "play_review_cost": "كلّفك ذلك نحو %1$s رصيد في المتوسط",
+ "play_ev_line": "الأفضل %1$s× · اختيارك %2$s×",
+ "settings_feedback": "تقييم الاستراتيجية",
+ "settings_double_up": "اعرض المضاعفة",
+ "settings_speed": "سرعة اللعب",
+ "settings_speed_normal": "عادية",
+ "settings_speed_fast": "سريعة",
+ "settings_speed_turbo": "توربو",
+ "stats_accuracy": "دقة الاستراتيجية",
+ "stats_mistake_cost": "خسائر الأخطاء",
+ "stats_accuracy_detail": {
+  "zero": "أفضل لعبة في %1$d من %2$d يد",
+  "one": "أفضل لعبة في %1$d من يد واحدة",
+  "two": "أفضل لعبة في %1$d من يدين",
+  "few": "أفضل لعبة في %1$d من %2$d أيدٍ",
+  "many": "أفضل لعبة في %1$d من %2$d يدًا",
+  "other": "أفضل لعبة في %1$d من %2$d يد"
+ },
+ "stats_accuracy_note": "لا تُحسب الأيدي التي لُعبت والتلميحات مفعّلة."
 }

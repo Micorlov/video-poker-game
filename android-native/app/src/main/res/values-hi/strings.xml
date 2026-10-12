@@ -206,6 +206,30 @@
     <string name="settings_enable_notifications">सूचनाएँ चालू करें</string>
     <string name="notif_daily_title">आपका ALL IN फिर से तैयार है</string>
     <string name="notif_daily_body">दोबारा रीसेट होने से पहले आकर इसे इस्तेमाल करें!</string>
+    <string name="play_double_up">दोगुना करें %1$s</string>
+    <string name="play_double_up_dealer">डीलर</string>
+    <string name="play_double_up_yours">आपका</string>
+    <string name="card_pick_action">यह कार्ड चुनें</string>
+    <string name="play_double_up_rules">%1$s जीतने के लिए डीलर के कार्ड से बड़ा कार्ड चुनें। बराबर रैंक पर टाई।</string>
+    <string name="play_double_up_win">आप %1$s जीते!</string>
+    <string name="play_double_up_push">टाई — %1$s वापस</string>
+    <string name="play_double_up_lose">डीलर जीता। %1$s गए।</string>
+    <string name="play_collect_hint">या लेने के लिए डील करें</string>
+    <string name="play_pick_card">एक कार्ड चुनें</string>
+    <string name="play_review_best">✓ सबसे अच्छी चाल</string>
+    <string name="play_review_hold">सबसे अच्छी चाल: %1$s रखें</string>
+    <string name="play_review_discard">सबसे अच्छी चाल: पाँचों नए कार्ड लें</string>
+    <string name="play_review_cost">इसकी औसत कीमत लगभग %1$s क्रेडिट रही</string>
+    <string name="play_ev_line">सबसे अच्छी चाल %1$s× · आपकी %2$s×</string>
+    <string name="settings_feedback">रणनीति फ़ीडबैक</string>
+    <string name="settings_double_up">दोगुना करने का विकल्प दें</string>
+    <string name="settings_speed">गेम की गति</string>
+    <string name="settings_speed_normal">सामान्य</string>
+    <string name="settings_speed_fast">तेज़</string>
+    <string name="settings_speed_turbo">टर्बो</string>
+    <string name="stats_accuracy">रणनीति सटीकता</string>
+    <string name="stats_mistake_cost">गलतियों में गए</string>
+    <string name="stats_accuracy_note">संकेत चालू रखकर खेले गए हाथ नहीं गिने जाते।</string>
     <string-array name="rank_names">
         <item>इक्का</item>
         <item>2</item>
@@ -230,5 +254,9 @@
     <plurals name="stats_hands_to_next">
         <item quantity="one">लेवल %2$d तक %1$d और हाथ</item>
         <item quantity="other">लेवल %2$d तक %1$d और हाथ</item>
+    </plurals>
+    <plurals name="stats_accuracy_detail">
+        <item quantity="one">%2$d में से %1$d हाथ में सबसे अच्छी चाल</item>
+        <item quantity="other">%2$d में से %1$d हाथों में सबसे अच्छी चाल</item>
     </plurals>
 </resources>

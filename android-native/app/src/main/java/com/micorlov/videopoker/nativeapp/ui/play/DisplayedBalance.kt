@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import com.micorlov.videopoker.nativeapp.domain.GameState
+import kotlin.math.roundToInt
 
 private const val COUNT_UP_MS = 1000
 private const val CREDITS_PER_TICK = 5
@@ -20,20 +21,21 @@ private val EaseOutQuad = Easing { it * (2f - it) }
 /**
  * The balance as the player sees it. A win does not land the instant the draw happens: the
  * old balance holds until the cards have flipped, then counts up to the new one, ticking
- * coins as it goes (js/audio.js animateBalance). A loss, or a new deal, shows at once.
+ * coins as it goes (js/audio.js animateBalance). A loss, or a new deal, shows at once. A
+ * double-up's return lands the same way once its cards are face up; [pace] scales the count.
  *
  * Returns the state holder rather than its value, so only the composable that actually
  * displays the number re-reads it on each frame of the count-up.
  */
 @Composable
-fun rememberDisplayedBalance(game: GameState, revealed: Boolean, onCoinTick: () -> Unit): LongState {
-    val win = game.outcome?.takeIf { it.isWin }?.totalWin?.toLong() ?: 0L
+fun rememberDisplayedBalance(game: GameState, revealed: Boolean, pace: Float, onCoinTick: () -> Unit): LongState {
+    val win = landingCredit(game)
     val settled = game.balance
     val before = settled - win
     val shown = remember { mutableLongStateOf(if (revealed) settled else before) }
     val tick by rememberUpdatedState(onCoinTick)
 
-    LaunchedEffect(game.round, revealed) {
+    LaunchedEffect(game.round, revealed, settled) {
         when {
             win == 0L -> shown.longValue = settled
             !revealed -> shown.longValue = before
@@ -41,7 +43,7 @@ fun rememberDisplayedBalance(game: GameState, revealed: Boolean, onCoinTick: () 
             else -> {
                 val ticks = (win / CREDITS_PER_TICK).toInt().coerceIn(1, MAX_TICKS)
                 var ticked = 0
-                animate(0f, 1f, animationSpec = tween(COUNT_UP_MS, easing = EaseOutQuad)) { fraction, _ ->
+                animate(0f, 1f, animationSpec = tween((COUNT_UP_MS * pace).roundToInt(), easing = EaseOutQuad)) { fraction, _ ->
                     shown.longValue = before + (win * fraction).toLong()
                     val due = (fraction * ticks).toInt()
                     if (due > ticked) {
@@ -54,4 +56,10 @@ fun rememberDisplayedBalance(game: GameState, revealed: Boolean, onCoinTick: () 
         }
     }
     return shown
+}
+
+/** The chips that land with a count-up: a settled double-up's return, else the last hand's win. */
+private fun landingCredit(game: GameState): Long {
+    val doubleUp = game.doubleUp ?: return game.outcome?.takeIf { it.isWin }?.totalWin?.toLong() ?: 0L
+    return doubleUp.returned
 }

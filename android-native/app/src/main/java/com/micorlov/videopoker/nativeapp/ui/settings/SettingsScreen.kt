@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.micorlov.videopoker.nativeapp.R
 import android.app.Activity
 import com.micorlov.videopoker.nativeapp.data.AppTheme
+import com.micorlov.videopoker.nativeapp.data.GameSpeed
 import com.micorlov.videopoker.nativeapp.domain.AppLanguage
 import com.micorlov.videopoker.nativeapp.ui.LocaleContext
 import com.micorlov.videopoker.nativeapp.domain.Rules
@@ -54,6 +55,9 @@ import com.micorlov.videopoker.nativeapp.ui.theme.VpColors
 class SettingsActions(
     val onToggleSound: () -> Unit,
     val onToggleHaptics: () -> Unit,
+    val onToggleFeedback: () -> Unit,
+    val onToggleDoubleUp: () -> Unit,
+    val onSelectSpeed: (GameSpeed) -> Unit,
     val onToggleVoice: () -> Unit,
     val onEnableNotifications: () -> Unit,
     val onToggleNotifySocial: () -> Unit,
@@ -95,6 +99,21 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
             SettingToggle(stringResource(R.string.settings_sound), settings.soundEnabled, actions.onToggleSound, "toggle-sound")
             SettingToggle(stringResource(R.string.settings_haptics), settings.hapticsEnabled, actions.onToggleHaptics, "toggle-haptics")
             SettingToggle(stringResource(R.string.settings_voice), settings.voiceEnabled, actions.onToggleVoice, "toggle-voice")
+            SettingToggle(stringResource(R.string.settings_feedback), settings.feedbackEnabled, actions.onToggleFeedback, "toggle-feedback")
+            SettingToggle(stringResource(R.string.settings_double_up), settings.doubleUpEnabled, actions.onToggleDoubleUp, "toggle-double-up")
+        }
+
+        Section(R.string.settings_speed) {
+            ChipRow {
+                GameSpeed.entries.forEach { speed ->
+                    ChipButton(
+                        label = stringResource(speed.labelRes()),
+                        selected = settings.gameSpeed == speed,
+                        onClick = { actions.onSelectSpeed(speed) },
+                        modifier = Modifier.weight(1f).testTag("speed-${speed.storageKey}"),
+                    )
+                }
+            }
         }
 
         Section(R.string.settings_language) {
@@ -307,6 +326,12 @@ private fun AppTheme.labelRes(): Int = when (this) {
     AppTheme.GREEN -> R.string.theme_green
     AppTheme.BLUE -> R.string.theme_blue
     AppTheme.CRIMSON -> R.string.theme_crimson
+}
+
+private fun GameSpeed.labelRes(): Int = when (this) {
+    GameSpeed.NORMAL -> R.string.settings_speed_normal
+    GameSpeed.FAST -> R.string.settings_speed_fast
+    GameSpeed.TURBO -> R.string.settings_speed_turbo
 }
 
 private fun handCountLabel(count: Int): Int = when (count) {

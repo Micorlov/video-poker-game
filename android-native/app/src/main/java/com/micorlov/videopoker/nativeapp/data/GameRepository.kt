@@ -12,6 +12,7 @@ import com.micorlov.videopoker.nativeapp.domain.ReviewState
 import com.micorlov.videopoker.nativeapp.domain.Rules
 import com.micorlov.videopoker.nativeapp.domain.SavedGame
 import com.micorlov.videopoker.nativeapp.domain.Variant
+import kotlin.math.roundToLong
 
 /**
  * Loads and saves progress and settings. Everything read back is validated, because
@@ -153,6 +154,9 @@ class GameRepository(private val store: KeyValueStore) {
             hapticsEnabled = store.getBoolean(HAPTICS) ?: defaults.hapticsEnabled,
             theme = AppTheme.fromStorageKey(store.getString(THEME)) ?: defaults.theme,
             hintsEnabled = store.getBoolean(HINTS) ?: defaults.hintsEnabled,
+            feedbackEnabled = store.getBoolean(FEEDBACK) ?: defaults.feedbackEnabled,
+            doubleUpEnabled = store.getBoolean(DOUBLE_UP) ?: defaults.doubleUpEnabled,
+            gameSpeed = GameSpeed.fromStorageKey(store.getString(SPEED)) ?: defaults.gameSpeed,
             voiceEnabled = store.getBoolean(VOICE) ?: defaults.voiceEnabled,
             language = AppLanguage.fromTag(store.getString(LANGUAGE)),
             notifySocial = store.getBoolean(NOTIFY_SOCIAL) ?: defaults.notifySocial,
@@ -170,6 +174,9 @@ class GameRepository(private val store: KeyValueStore) {
             putString(THEME, settings.theme.storageKey)
             putInt(DEFAULT_BET, settings.defaultBet)
             putBoolean(HINTS, settings.hintsEnabled)
+            putBoolean(FEEDBACK, settings.feedbackEnabled)
+            putBoolean(DOUBLE_UP, settings.doubleUpEnabled)
+            putString(SPEED, settings.gameSpeed.storageKey)
             putBoolean(VOICE, settings.voiceEnabled)
             putString(LANGUAGE, settings.language?.tag.orEmpty())
             putBoolean(NOTIFY_SOCIAL, settings.notifySocial)
@@ -188,24 +195,39 @@ class GameRepository(private val store: KeyValueStore) {
         return BestHand(type, store.getInt(BEST_MULT)?.coerceAtLeast(0) ?: 0, payout, cards)
     }
 
-    private fun loadStats(prefix: String) = PlayStats(
-        won = nonNegativeLong("$prefix.won"),
-        lost = nonNegativeLong("$prefix.lost"),
-        handsPlayed = nonNegativeInt("$prefix.handsPlayed"),
-        bestStreak = nonNegativeInt("$prefix.bestStreak"),
-    )
+    private fun loadStats(prefix: String): PlayStats {
+        val reviewed = nonNegativeInt("$prefix.reviewed")
+        return PlayStats(
+            won = nonNegativeLong("$prefix.won"),
+            lost = nonNegativeLong("$prefix.lost"),
+            handsPlayed = nonNegativeInt("$prefix.handsPlayed"),
+            bestStreak = nonNegativeInt("$prefix.bestStreak"),
+            reviewed = reviewed,
+            // More best plays than reviews would show an accuracy over 100%.
+            bestPlays = nonNegativeInt("$prefix.bestPlays").coerceAtMost(reviewed),
+            mistakeCost = nonNegativeLong("$prefix.mistakeMilli") / MILLI,
+        )
+    }
 
     private fun KeyValueStore.Writer.saveStats(prefix: String, stats: PlayStats) {
         putLong("$prefix.won", stats.won)
         putLong("$prefix.lost", stats.lost)
         putInt("$prefix.handsPlayed", stats.handsPlayed)
         putInt("$prefix.bestStreak", stats.bestStreak)
+        putInt("$prefix.reviewed", stats.reviewed)
+        putInt("$prefix.bestPlays", stats.bestPlays)
+        // The store has no floating point type: the average cost is kept in thousandths of a chip.
+        putLong("$prefix.mistakeMilli", (stats.mistakeCost * MILLI).roundToLong())
     }
 
     private fun nonNegativeInt(key: String): Int = store.getInt(key)?.takeIf { it >= 0 } ?: 0
     private fun nonNegativeLong(key: String): Long = store.getLong(key)?.takeIf { it >= 0 } ?: 0L
 
     private companion object {
+        const val MILLI = 1000.0
+        const val FEEDBACK = "settings.feedback"
+        const val DOUBLE_UP = "settings.doubleUp"
+        const val SPEED = "settings.speed"
         const val BALANCE = "game.balance"
         const val TODAY = "game.today"
         const val ALL_TIME = "game.allTime"

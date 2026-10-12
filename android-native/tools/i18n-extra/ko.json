@@ -51,5 +51,32 @@
   "other": "레벨 %2$d까지 %1$d핸드 남음"
  },
  "notif_daily_title": "ALL IN이 초기화되었어요",
- "notif_daily_body": "다시 초기화되기 전에 돌아와서 사용하세요!"
+ "notif_daily_body": "다시 초기화되기 전에 돌아와서 사용하세요!",
+ "play_double_up": "더블업 %1$s",
+ "play_double_up_dealer": "딜러",
+ "play_double_up_yours": "내 카드",
+ "card_pick_action": "이 카드 선택",
+ "play_double_up_rules": "딜러 카드보다 높으면 %1$s 획득. 같은 숫자는 무승부.",
+ "play_double_up_win": "%1$s 획득!",
+ "play_double_up_push": "무승부 — %1$s 반환",
+ "play_double_up_lose": "딜러 승리. %1$s 잃음.",
+ "play_collect_hint": "또는 딜해서 받기",
+ "play_pick_card": "카드를 고르세요",
+ "play_review_best": "✓ 최선의 플레이",
+ "play_review_hold": "최선의 플레이: %1$s 홀드",
+ "play_review_discard": "최선의 플레이: 다섯 장 모두 교체",
+ "play_review_cost": "평균 약 %1$s 크레딧 손해였습니다",
+ "play_ev_line": "최선 %1$s× · 내 선택 %2$s×",
+ "settings_feedback": "전략 피드백",
+ "settings_double_up": "더블업 제안",
+ "settings_speed": "게임 속도",
+ "settings_speed_normal": "보통",
+ "settings_speed_fast": "빠르게",
+ "settings_speed_turbo": "터보",
+ "stats_accuracy": "전략 정확도",
+ "stats_mistake_cost": "실수로 잃은 크레딧",
+ "stats_accuracy_detail": {
+  "other": "%2$d판 중 %1$d판 최선의 플레이"
+ },
+ "stats_accuracy_note": "힌트를 켜고 한 판은 집계하지 않습니다."
 }
