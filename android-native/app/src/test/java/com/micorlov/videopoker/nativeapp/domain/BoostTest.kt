@@ -121,4 +121,18 @@ class BoostTest {
         val deal = Deal(dealt, standardDeck() - dealt.toSet())
         assertEquals(deal, Boost.toFlushDraw(deal, Random(3)))
     }
+
+    @Test
+    fun `swapped-out cards are shuffled back, not queued as the next cards drawn`() {
+        // Draws take from the end of the deck. If the cards a boost removed always sat there,
+        // a boosted flush draw would always draw an off-suit card first.
+        val nextDrawnWasSwappedOut = (0 until 500).count { seed ->
+            val deal = freshDeal(seed)
+            val result = Boost.toFlushDraw(deal, Random(seed))
+            val swappedOut = deal.hand - result.hand.toSet()
+            swappedOut.isNotEmpty() && result.deck.last() in swappedOut
+        }
+        // At most three swapped-out cards among 47: about one deal in twenty, never every one.
+        assertTrue(nextDrawnWasSwappedOut < 75, "next card drawn was a swapped-out card in $nextDrawnWasSwappedOut of 500 deals")
+    }
 }

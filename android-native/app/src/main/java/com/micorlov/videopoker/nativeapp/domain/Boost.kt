@@ -59,7 +59,7 @@ object Boost {
         if (replaceable.isEmpty()) return deal
         val replaceIndex = replaceable[random.nextInt(replaceable.size)]
 
-        return swap(deal, replaceIndex, newCard)
+        return swap(deal, replaceIndex, newCard, random)
     }
 
     /** Recolours the fewest cards needed to make four of one suit. */
@@ -81,17 +81,22 @@ object Boost {
             if (availableRanks.isEmpty()) break
             val newRank = availableRanks[random.nextInt(availableRanks.size)]
             usedRanks += newRank
-            current = swap(current, index, Card(newRank, bestSuit))
+            current = swap(current, index, Card(newRank, bestSuit), random)
             needed--
         }
         return current
     }
 
-    /** Puts [newCard] into the hand at [index]; the card it replaces goes to the back of the deck. */
-    private fun swap(deal: Deal, index: Int, newCard: Card): Deal {
+    /**
+     * Puts [newCard] into the hand at [index]; the card it replaces goes back to a random place
+     * in the deck. Draws take from the end, so parking it there made it the first card drawn:
+     * a boosted four-to-a-flush could never complete (fixed in js/game.js returnToDeck() too).
+     */
+    private fun swap(deal: Deal, index: Int, newCard: Card, random: Random): Deal {
         val oldCard = deal.hand[index]
         val hand = deal.hand.toMutableList().also { it[index] = newCard }
-        val deck = deal.deck.filter { it != newCard } + oldCard
+        val deck = deal.deck.filter { it != newCard }.toMutableList()
+        deck.add(random.nextInt(deck.size + 1), oldCard)
         return Deal(hand, deck)
     }
 }

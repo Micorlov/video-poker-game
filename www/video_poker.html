@@ -18907,10 +18907,16 @@ function boostToPair() {
     const replaceIdx = otherIndices[Math.floor(Math.random() * otherIndices.length)];
 
     const oldCard = hand[replaceIdx];
-    deck.push(oldCard);
+    returnToDeck(oldCard);
     hand[replaceIdx] = newCard;
     const deckIdx = deck.findIndex(c => c.rank === newCard.rank && c.suit === newCard.suit);
     if (deckIdx !== -1) deck.splice(deckIdx, 1);
+}
+
+// A swapped-out card goes back to a random place in the deck. Draws pop from the end, so
+// pushing it there made it the first card drawn: a boosted flush draw could never complete.
+function returnToDeck(card) {
+    deck.splice(Math.floor(Math.random() * (deck.length + 1)), 0, card);
 }
 
 function boostToFlushDraw() {
@@ -18933,7 +18939,7 @@ function boostToFlushDraw() {
         const newCard = { rank: newRank, suit: bestSuit };
 
         const oldCard = hand[idx];
-        deck.push(oldCard);
+        returnToDeck(oldCard);
         hand[idx] = newCard;
         usedRanksInSuit.add(newRank);
         const deckIdx = deck.findIndex(c => c.rank === newCard.rank && c.suit === newCard.suit);
