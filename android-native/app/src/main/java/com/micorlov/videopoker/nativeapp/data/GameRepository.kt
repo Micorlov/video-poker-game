@@ -64,6 +64,7 @@ class GameRepository(private val store: KeyValueStore) {
         cardCount = nonNegativeInt(REVIEW_CARDS),
         lastCardAt = nonNegativeLong(REVIEW_LAST_CARD_AT),
         rated = store.getBoolean(REVIEW_RATED) ?: false,
+        firstDay = store.getString(REVIEW_FIRST_DAY).orEmpty(),
     )
 
     fun saveReview(state: ReviewState) = store.write {
@@ -73,6 +74,7 @@ class GameRepository(private val store: KeyValueStore) {
         putInt(REVIEW_CARDS, state.cardCount)
         putLong(REVIEW_LAST_CARD_AT, state.lastCardAt)
         putBoolean(REVIEW_RATED, state.rated)
+        putString(REVIEW_FIRST_DAY, state.firstDay)
     }
 
     fun loadLastPlayedDay(): String = store.getString(LAST_PLAYED_DAY).orEmpty()
@@ -253,6 +255,7 @@ class GameRepository(private val store: KeyValueStore) {
         const val REVIEW_CARDS = "review.cardCount"
         const val REVIEW_LAST_CARD_AT = "review.lastCardAt"
         const val REVIEW_RATED = "review.rated"
+        const val REVIEW_FIRST_DAY = "review.firstDay"
         const val ONBOARDING_SEEN = "onboarding.seen"
         const val LAST_PLAYED_DAY = "daily.lastPlayedDay"
         const val LAST_REMINDER_DAY = "daily.lastReminderDay"

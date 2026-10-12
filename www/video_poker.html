@@ -13606,11 +13606,11 @@ function resetAllTimeStats() {
 /* --- js/review.js --- */
 // Rating ask — Google Play's in-app review sheet first, then our star card.
 //
-// A player earns the ask with three quality wins (a Straight or better, see
-// draw() in js/game.js) or level 3. The first ask is the native Play sheet
-// (@capacitor-community/in-app-review). Play rate-limits that sheet and often
-// shows nothing, so later asks use the "Enjoying Video Poker?" star card, whose
-// Rate button opens the Play listing (openRateGame in js/deeplink.js).
+// A player earns the ask with three wins in a row, a win on the day they
+// installed, or level 3 (see draw() in js/game.js). The first ask is the native
+// Play sheet (@capacitor-community/in-app-review). Play rate-limits that sheet
+// and often shows nothing, so later asks use the "Enjoying Video Poker?" star
+// card, whose Rate button opens the Play listing (openRateGame in js/deeplink.js).
 //
 // Play policy: nothing here may ask "would you rate us 5 stars" or otherwise
 // question the player before or while the native sheet is up — the card is a
@@ -13621,7 +13621,7 @@ function resetAllTimeStats() {
 // never again once the player taps Rate, and never on top of another prompt.
 
 const REVIEW_KEY = 'vp_review';
-const REVIEW_QUALITY_WINS_NEEDED = 3;
+const REVIEW_WIN_STREAK_NEEDED = 3;
 const REVIEW_LEVEL_THRESHOLD = 3;
 // Later than the 2600 ms sign-in / big-win share prompts in draw(), so those
 // claim the screen first and the overlay check below sees them.
@@ -13633,6 +13633,8 @@ const REVIEW_BLOCKING_OVERLAYS =
 
 let reviewAskedThisSession = false;
 let reviewPromptPending = false;
+// The streak that earned the pending ask, for the analytics event at ask time.
+let reviewEarnedStreak = 0;
 
 function loadReviewState() {
     try {
@@ -13648,11 +13650,12 @@ function loadReviewState() {
                 shownAt: Number(raw.shownAt) || (shown ? Date.now() : 0),
                 cardCount: Number(raw.cardCount) || 0,
                 lastCardAt: Number(raw.lastCardAt) || 0,
-                rated: !!raw.rated
+                rated: !!raw.rated,
+                firstDay: typeof raw.firstDay === 'string' ? raw.firstDay : ''
             };
         }
     } catch (e) { /* corrupt or unavailable — start fresh */ }
-    return { wins: 0, shown: false, shownAt: 0, cardCount: 0, lastCardAt: 0, rated: false };
+    return { wins: 0, shown: false, shownAt: 0, cardCount: 0, lastCardAt: 0, rated: false, firstDay: '' };
 }
 
 function saveReviewState(state) {
@@ -13666,9 +13669,38 @@ function isAndroidApp() {
     return !!(cap && typeof cap.getPlatform === 'function' && cap.getPlatform() === 'android');
 }
 
+function reviewTodayKey() {
+    return window.vpTodayKey ? vpTodayKey() : '';
+}
+
+// Stamped once at boot so a win on the day of install can earn the ask. Only a
+// fresh install is stamped: a player arriving from an earlier build has hands
+// behind them and earns the ask the usual way instead of on their next win. An
+// unstamped install never counts as first-day, so this fails closed.
+function markFirstDayOnFreshInstall() {
+    const today = reviewTodayKey();
+    if (!today) return;
+    if (!window.getLifetimeHands || getLifetimeHands() > 0) return;
+    const state = loadReviewState();
+    if (state.firstDay) return;
+    saveReviewState({ ...state, firstDay: today });
+}
+
+function isFirstDayWin(state) {
+    return !!state.firstDay && state.firstDay === reviewTodayKey();
+}
+
 function reviewCardDue(state, now) {
     if (state.rated || state.cardCount >= REVIEW_CARD_LIFETIME_CAP) return false;
     return now - Math.max(state.shownAt, state.lastCardAt) >= REVIEW_CARD_COOLDOWN_MS;
+}
+
+// Three wins in a row, a win on the first day, or level 3.
+function reviewEarned(state, winStreak) {
+    if (winStreak >= REVIEW_WIN_STREAK_NEEDED) return true;
+    if (isFirstDayWin(state)) return true;
+    const level = window.getLocalLevel ? getLocalLevel() : 1;
+    return level >= REVIEW_LEVEL_THRESHOLD;
 }
 
 function requestInAppReview() {
@@ -13684,6 +13716,7 @@ function askNativeReview(state, now) {
     saveReviewState({ ...state, shown: true, shownAt: now });
     if (window.logVpEvent) logVpEvent(VP_ASO_EVENTS.reviewPromptEarned, {
         quality_wins: state.wins,
+        win_streak: reviewEarnedStreak,
         level: window.getLocalLevel ? getLocalLevel() : 1
     });
     requestInAppReview();
@@ -13716,20 +13749,21 @@ function maybeShowReviewPrompt() {
     }
 }
 
-// Called from draw() in js/game.js on every Straight-or-better win.
-function vpOnQualityWin() {
+// Called from draw() in js/game.js on every paying hand. `quality` marks a
+// Straight or better, which is counted as a statistic but no longer gates the ask.
+function vpOnWin(winStreak, quality) {
     const prev = loadReviewState();
-    const state = { ...prev, wins: prev.wins + 1 };
-    saveReviewState(state);
+    const state = quality ? { ...prev, wins: prev.wins + 1 } : prev;
+    if (quality) saveReviewState(state);
 
     if (reviewAskedThisSession || reviewPromptPending) return;
     if (!(window.isNativeApp && isNativeApp())) return;
-    const level = window.getLocalLevel ? getLocalLevel() : 1;
-    if (state.wins < REVIEW_QUALITY_WINS_NEEDED && level < REVIEW_LEVEL_THRESHOLD) return;
+    if (!reviewEarned(state, winStreak)) return;
     const wantsAsk = !state.shown || (isAndroidApp() && reviewCardDue(state, Date.now()));
     if (!wantsAsk) return;
 
     reviewPromptPending = true;
+    reviewEarnedStreak = winStreak;
     setTimeout(maybeShowReviewPrompt, REVIEW_PROMPT_DELAY_MS);
 }
 
@@ -13750,7 +13784,9 @@ function dismissReviewPrompt() {
     closeReviewPrompt();
 }
 
-window.vpOnQualityWin = vpOnQualityWin;
+markFirstDayOnFreshInstall();
+
+window.vpOnWin = vpOnWin;
 window.acceptReviewPrompt = acceptReviewPrompt;
 window.dismissReviewPrompt = dismissReviewPrompt;
 
@@ -19121,8 +19157,8 @@ function draw() {
     handsPlayed++;
     addLifetimeHand();
     recordAllTimeHand(win, totalBet, winStreak > bestStreak ? winStreak : bestStreak);
-    // A Straight or better counts toward the rating ask (js/review.js).
-    if (win > 0 && (HAND_RANK[bestType] || 0) >= 4 && window.vpOnQualityWin) vpOnQualityWin();
+    // Any win can earn the rating ask (js/review.js); a Straight or better also counts as a quality win.
+    if (win > 0 && window.vpOnWin) vpOnWin(winStreak, (HAND_RANK[bestType] || 0) >= 4);
 
     if (win > 0) {
         totalWon += win;

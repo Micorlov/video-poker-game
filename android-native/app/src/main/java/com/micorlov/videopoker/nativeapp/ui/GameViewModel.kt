@@ -117,7 +117,7 @@ sealed interface UiEffect {
 
     data class DoubleUpRevealed(val result: DoubleUpResult) : UiEffect
 
-    /** A quality win earned a rating ask: call [GameViewModel.onReviewTimer] after [ReviewPolicy.PROMPT_DELAY_MS]. */
+    /** A win earned a rating ask: call [GameViewModel.onReviewTimer] after [ReviewPolicy.PROMPT_DELAY_MS]. */
     data object ReviewEarned : UiEffect
 
     /** Show Google Play's in-app review sheet. */
@@ -186,9 +186,22 @@ class GameViewModel(
         state = _state.asStateFlow()
         // The opening deal can already carry news (a free rebuy for a player who left broke).
         applyEvents(opening.events, persist = opening.events.any { it is GameEvent.Rebuy }, game = opening.state)
+        stampFirstDay()
         grantDailyBonus()
         requestAnalysis(_state.value.game)
         flagFetcher?.let { fetch -> viewModelScope.launch { fetch()?.let(::onFlagsLoaded) } }
+    }
+
+    /**
+     * Records today as the install's first day, so a win today can earn the rating ask. Only a
+     * fresh install is stamped: a player arriving from an earlier build has hands behind them
+     * and must earn the ask the usual way, not be asked on their next win.
+     */
+    private fun stampFirstDay() {
+        val today = todayKey?.invoke() ?: return
+        val review = repository.loadReview()
+        if (review.firstDay.isNotEmpty() || _state.value.game.lifetimeHands > 0) return
+        repository.saveReview(review.copy(firstDay = today))
     }
 
     /** +[Rules.DAILY_BONUS] chips the first time the app opens on a new local day. Idempotent per day. */
@@ -331,16 +344,21 @@ class GameViewModel(
         _state.update { it.copy(revealedRound = round) }
         current.game.outcome?.let {
             effectChannel.trySend(UiEffect.HandRevealed(it))
-            if (ReviewPolicy.isQualityWin(it.bestType)) onQualityWin(current.game.level)
+            if (it.isWin) onWin(current.game)
         }
     }
 
-    private fun onQualityWin(level: Int) {
+    /** Any paying hand can earn the rating ask; [ReviewPolicy] decides whether this one does. */
+    private fun onWin(game: GameState) {
         if (!reviewEnabled) return
-        val state = repository.loadReview().let { it.copy(wins = it.wins + 1) }
-        repository.saveReview(state)
+        val outcome = game.outcome ?: return
+        var state = repository.loadReview()
+        if (ReviewPolicy.isQualityWin(outcome.bestType)) {
+            state = state.copy(wins = state.wins + 1)
+            repository.saveReview(state)
+        }
         if (reviewAskedThisSession || reviewTimerPending) return
-        if (!ReviewPolicy.earnedAsk(state, level, clock())) return
+        if (!ReviewPolicy.earnedAsk(state, game.level, game.winStreak, today(), clock())) return
         reviewTimerPending = true
         effectChannel.trySend(UiEffect.ReviewEarned)
     }

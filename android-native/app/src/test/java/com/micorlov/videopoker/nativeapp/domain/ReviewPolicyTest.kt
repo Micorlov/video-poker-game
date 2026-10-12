@@ -9,6 +9,10 @@ class ReviewPolicyTest {
 
     private val day = 24L * 60 * 60 * 1000
     private val now = 100 * day
+    private val today = "2026-10-13"
+
+    private fun earnedAsk(state: ReviewState, level: Int = 1, winStreak: Int = 0, today: String = this.today) =
+        ReviewPolicy.earnedAsk(state, level, winStreak, today, now)
 
     @Test
     fun `only a straight or better is a quality win`() {
@@ -19,10 +23,33 @@ class ReviewPolicyTest {
     }
 
     @Test
-    fun `three quality wins or level three earn the first ask`() {
-        assertFalse(ReviewPolicy.earnedAsk(ReviewState(wins = 2), level = 2, now = now))
-        assertTrue(ReviewPolicy.earnedAsk(ReviewState(wins = 3), level = 1, now = now))
-        assertTrue(ReviewPolicy.earnedAsk(ReviewState(wins = 0), level = 3, now = now))
+    fun `three wins in a row earn the first ask`() {
+        assertFalse(earnedAsk(ReviewState(), winStreak = 2))
+        assertTrue(earnedAsk(ReviewState(), winStreak = 3))
+        assertTrue(earnedAsk(ReviewState(), winStreak = 9))
+    }
+
+    @Test
+    fun `a win on the install's first day earns the ask`() {
+        assertTrue(earnedAsk(ReviewState(firstDay = today), winStreak = 1))
+        assertFalse(earnedAsk(ReviewState(firstDay = "2026-10-12"), winStreak = 1))
+    }
+
+    @Test
+    fun `an unknown first day never earns the ask, even without a day key`() {
+        assertFalse(earnedAsk(ReviewState(firstDay = ""), winStreak = 1))
+        assertFalse(earnedAsk(ReviewState(firstDay = ""), winStreak = 1, today = ""))
+    }
+
+    @Test
+    fun `level three earns the ask without a streak or a first-day win`() {
+        assertTrue(earnedAsk(ReviewState(), level = 3, winStreak = 1))
+        assertFalse(earnedAsk(ReviewState(), level = 2, winStreak = 1))
+    }
+
+    @Test
+    fun `a lifetime of quality wins no longer earns the ask on its own`() {
+        assertFalse(earnedAsk(ReviewState(wins = 9), winStreak = 1))
     }
 
     @Test
@@ -41,5 +68,12 @@ class ReviewPolicyTest {
         assertEquals(ReviewAsk.NONE, ReviewPolicy.decide(old.copy(cardCount = 3), now))
         assertEquals(ReviewAsk.NONE, ReviewPolicy.decide(old.copy(rated = true), now))
         assertEquals(ReviewAsk.NONE, ReviewPolicy.decide(old.copy(cardCount = 1, lastCardAt = now - day), now))
+    }
+
+    @Test
+    fun `an earned streak still waits out the card cooldown once the sheet has been shown`() {
+        val asked = ReviewState(shown = true, shownAt = now)
+        assertFalse(ReviewPolicy.earnedAsk(asked, level = 1, winStreak = 3, today = today, now = now + day))
+        assertTrue(ReviewPolicy.earnedAsk(asked, level = 1, winStreak = 3, today = today, now = now + 7 * day))
     }
 }

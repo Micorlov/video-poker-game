@@ -684,8 +684,8 @@ function draw() {
     handsPlayed++;
     addLifetimeHand();
     recordAllTimeHand(win, totalBet, winStreak > bestStreak ? winStreak : bestStreak);
-    // A Straight or better counts toward the rating ask (js/review.js).
-    if (win > 0 && (HAND_RANK[bestType] || 0) >= 4 && window.vpOnQualityWin) vpOnQualityWin();
+    // Any win can earn the rating ask (js/review.js); a Straight or better also counts as a quality win.
+    if (win > 0 && window.vpOnWin) vpOnWin(winStreak, (HAND_RANK[bestType] || 0) >= 4);
 
     if (win > 0) {
         totalWon += win;

@@ -291,7 +291,7 @@ class GameViewModelTest {
     @Test
     fun `the review card shows once per session and rating it ends the asks`() {
         val week = 7L * 24 * 60 * 60 * 1000
-        repository.saveReview(ReviewState(wins = 5, shown = true, shownAt = 0))
+        repository.saveReview(ReviewState(shown = true, shownAt = 0))
         repository.saveGame(SavedGame())
         val vm = GameViewModel(repository, Random(5), clock = { 10 * week }, reviewEnabled = true)
 
@@ -305,6 +305,70 @@ class GameViewModelTest {
         vm.onReviewRated()
         assertFalse(vm.state.value.reviewCardVisible)
         assertTrue(repository.loadReview().rated)
+    }
+
+    /** A seed whose opening hand pays, so a streak test lands on a known hand. */
+    private val WINNING_SEED = 8
+
+    /** Plays hands until one pays, revealing each draw. Returns the hands played, or -1 if none won. */
+    private fun GameViewModel.playUntilWin(maxHands: Int = 9): Int {
+        repeat(maxHands) { played ->
+            if (state.value.game.phase == Phase.BET) onMainAction()
+            onMainAction()
+            onRevealed(state.value.game.round)
+            if (state.value.game.outcome?.isWin == true) return played + 1
+        }
+        return -1
+    }
+
+    @Test
+    fun `a win completing three in a row earns the ask`() {
+        repository.saveGame(SavedGame(winStreak = 2))
+        val vm = GameViewModel(repository, Random(WINNING_SEED), clock = { 5_000 }, reviewEnabled = true)
+
+        assertTrue(vm.playUntilWin() > 0, "the seeded deal must produce a paying hand")
+        assertEquals(3, vm.state.value.game.winStreak)
+        assertTrue(vm.state.value.game.level < 3, "the streak must be the reason, not the level")
+        assertTrue(vm.drainEffects().any { it == UiEffect.ReviewEarned })
+    }
+
+    @Test
+    fun `two wins in a row do not earn the ask`() {
+        repository.saveGame(SavedGame(winStreak = 1))
+        val vm = GameViewModel(repository, Random(WINNING_SEED), clock = { 5_000 }, reviewEnabled = true)
+
+        assertTrue(vm.playUntilWin() > 0)
+        assertEquals(2, vm.state.value.game.winStreak)
+        assertFalse(vm.drainEffects().any { it == UiEffect.ReviewEarned })
+    }
+
+    @Test
+    fun `a win on the install's first day earns the ask`() {
+        val today = "2026-10-13"
+        repository.saveReview(ReviewState(firstDay = today))
+        repository.saveGame(SavedGame())
+        val vm = GameViewModel(repository, Random(WINNING_SEED), todayKey = { today }, clock = { 5_000 }, reviewEnabled = true)
+
+        assertTrue(vm.playUntilWin() > 0)
+        assertEquals(1, vm.state.value.game.winStreak)
+        assertTrue(vm.state.value.game.level < 3)
+        assertTrue(vm.drainEffects().any { it == UiEffect.ReviewEarned })
+    }
+
+    @Test
+    fun `a fresh install records today as its first day`() {
+        val vm = GameViewModel(repository, Random(5), todayKey = { "2026-10-13" }, reviewEnabled = true)
+
+        assertEquals("2026-10-13", repository.loadReview().firstDay)
+        assertEquals(0, vm.state.value.game.lifetimeHands)
+    }
+
+    @Test
+    fun `an install with hands behind it is never treated as first day`() {
+        repository.saveGame(SavedGame(lifetimeHands = 4))
+        GameViewModel(repository, Random(5), todayKey = { "2026-10-13" }, reviewEnabled = true)
+
+        assertEquals("", repository.loadReview().firstDay)
     }
 
     @Test

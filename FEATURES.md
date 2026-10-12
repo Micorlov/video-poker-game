@@ -443,9 +443,11 @@ is *not* marked) so it cannot block a cloud restore; `maybeRestoreCloudState()` 
 
 ### 8.7 In-App Review Ask (since 2.4) and Rating Card (since 2.8)
 
-`js/review.js` counts quality wins (a Straight or better) in `vp_review`. On the native app, once
-the player has three such wins or reaches level 3, the first ask is the Play in-app review sheet
-(`@capacitor-community/in-app-review`, 3.2 s after the winning draw).
+`js/review.js` keeps the ask's bookkeeping in `vp_review`. On the native app the ask is earned by
+**three wins in a row** (any paying hand, the same streak the bonus meter shows), **a win on the
+day of install**, or **level 3**; the first ask is then the Play in-app review sheet
+(`@capacitor-community/in-app-review`, 3.2 s after the winning draw). Quality wins (a Straight or
+better) are still counted in `vp_review.wins`, but only as a statistic — they no longer earn the ask.
 
 Play rate-limits that sheet and often shows nothing, so from 2.8 later asks on Android use the
 "Enjoying Video Poker?" star card (`#review-prompt-modal`). Its **Rate now** button opens the Play
@@ -454,9 +456,15 @@ last card, at most 3 cards per install, never again after **Rate now**, and skip
 while another modal, sheet or onboarding is on screen. Per Play policy the copy never names a star
 count and nothing asks the player's opinion right before the native sheet.
 
-`vp_review` = `{wins, shown, shownAt, cardCount, lastCardAt, rated}` (timestamps in epoch ms).
-Analytics: `review_prompt_earned` (native ask), `review_card_shown`, `review_card_rate`,
-`review_card_dismissed`. Tests: `scripts/review/review.test.js`.
+`firstDay` is stamped once at boot, and only on an install with no hands played: a player
+arriving from an earlier build has no stamp and so never counts as first-day, which keeps the
+upgrade from asking the whole install base on its next win. An unstamped install never qualifies.
+
+`vp_review` = `{wins, shown, shownAt, cardCount, lastCardAt, rated, firstDay}` (timestamps in
+epoch ms, `firstDay` a local day key). Analytics: `review_prompt_earned` (native ask, with the
+earning `win_streak`), `review_card_shown`, `review_card_rate`, `review_card_dismissed`.
+Tests: `scripts/review/review.test.js`, and `ReviewPolicyTest`/`GameViewModelTest` in
+`android-native/`.
 
 ---
 
