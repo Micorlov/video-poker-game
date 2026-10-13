@@ -57,6 +57,8 @@ data class PlayActions(
     val onDoubleUp: () -> Unit,
     val onPickDoubleUp: (Int) -> Unit,
     val onDoubleUpRevealed: (Int) -> Unit,
+    /** Opens the Friends tab; null hides the invite badge (friends switched off). */
+    val onOpenFriends: (() -> Unit)? = null,
 )
 
 private val SHAKE_STEPS = listOf(10f, -10f, 8f, -8f, 4f, 0f)
@@ -92,7 +94,10 @@ fun PlayScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Header(ui, onToggleSound = actions.onToggleSound, onToggleHints = actions.onToggleHints)
-        TournamentPill()
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
+            TournamentPill(Modifier.weight(1f))
+            actions.onOpenFriends?.let { InviteBadge(it, Modifier.padding(top = 4.dp)) }
+        }
         BalancePanel(displayedBalance, game)
         BetRow(game, ui.allInRemaining, actions.onSelectBet, actions.onAllIn)
 

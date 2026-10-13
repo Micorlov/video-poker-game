@@ -78,5 +78,24 @@
  "stats_accuracy_detail": {
   "other": "%2$d 手中 %1$d 手为最佳打法"
  },
- "stats_accuracy_note": "开启提示时打的牌不计入。"
+ "stats_accuracy_note": "开启提示时打的牌不计入。",
+ "friends_invite_title": "邀请好友，一起玩",
+ "friends_how_1": "点击“邀请”，通过 WhatsApp、短信或任意应用发送消息",
+ "friends_how_2": "好友安装游戏并使用 Google 登录",
+ "friends_how_3": "你们俩都将获得 %1$s 筹码，并在今日榜单上比拼",
+ "friends_invite_button": "邀请好友",
+ "friends_add_title": "有好友的邀请码吗？",
+ "friends_signing_in": "正在登录…",
+ "friends_sign_in_note": "登录后即可查看好友和今日得分。",
+ "friends_unavailable": "此版本暂不支持好友功能。",
+ "friends_today_title": "今日榜单",
+ "friends_not_played": "今天还没玩",
+ "friends_rewards_progress": "邀请奖励：%1$d / %2$d",
+ "invite_message": "来和我一起玩视频扑克吧！你加入后我们都能获得 %1$s 免费筹码。\n%2$s\n我的邀请码：%3$s",
+ "play_invite_badge": "邀请好友 · +%1$s",
+ "settings_invite_friends": "邀请好友",
+ "toast_invalid_code": "请输入 6 位邀请码",
+ "toast_friends_offline": "无法连接服务器，请检查网络",
+ "toast_referral_welcome": "🎁 你的好友送你 %1$s 筹码，欢迎入座！",
+ "toast_invites_rewarded": "🎉 有好友加入，你获得了 %1$s 筹码！"
 }

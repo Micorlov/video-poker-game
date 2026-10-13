@@ -88,5 +88,24 @@
   "many": "أفضل لعبة في %1$d من %2$d يدًا",
   "other": "أفضل لعبة في %1$d من %2$d يد"
  },
- "stats_accuracy_note": "لا تُحسب الأيدي التي لُعبت والتلميحات مفعّلة."
+ "stats_accuracy_note": "لا تُحسب الأيدي التي لُعبت والتلميحات مفعّلة.",
+ "friends_invite_title": "ادعُ أصدقاءك والعبوا معًا",
+ "friends_how_1": "اضغط دعوة وأرسل الرسالة عبر واتساب أو الرسائل النصية أو أي تطبيق",
+ "friends_how_2": "يثبّت صديقك اللعبة ويسجّل الدخول بحساب Google",
+ "friends_how_3": "تحصلان كلاكما على %1$s رقاقة وتتنافسان في جدول اليوم",
+ "friends_invite_button": "ادعُ أصدقاءك",
+ "friends_add_title": "هل لديك رمز صديق؟",
+ "friends_signing_in": "جارٍ تسجيل الدخول…",
+ "friends_sign_in_note": "سجّل الدخول لترى أصدقاءك ونتائج اليوم.",
+ "friends_unavailable": "الأصدقاء غير متاحين في هذا الإصدار بعد.",
+ "friends_today_title": "جدول اليوم",
+ "friends_not_played": "لم يلعب بعد",
+ "friends_rewards_progress": "مكافآت الدعوة: %1$d من %2$d",
+ "invite_message": "العب فيديو بوكر معي! نحصل كلانا على %1$s رقاقة مجانية عند انضمامك.\n%2$s\nرمز دعوتي: %3$s",
+ "play_invite_badge": "ادعُ أصدقاءك · ‎+%1$s",
+ "settings_invite_friends": "دعوة الأصدقاء",
+ "toast_invalid_code": "أدخل رمزًا من 6 أحرف",
+ "toast_friends_offline": "تعذّر الوصول إلى الخادم — تحقّق من اتصالك",
+ "toast_referral_welcome": "🎁 أرسل لك صديقك %1$s رقاقة — أهلًا بك على الطاولة!",
+ "toast_invites_rewarded": "🎉 انضم أصدقاء — ربحت %1$s رقاقة!"
 }

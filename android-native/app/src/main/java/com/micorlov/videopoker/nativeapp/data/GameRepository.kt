@@ -37,24 +37,79 @@ class GameRepository(private val store: KeyValueStore) {
         )
     }
 
-    fun saveGame(game: SavedGame) {
-        store.write {
-            putLong(BALANCE, game.balance)
-            saveStats(TODAY, game.today)
-            saveStats(ALL_TIME, game.allTime)
-            putInt(LOSS_STREAK, game.lossStreak)
-            putInt(WIN_STREAK, game.winStreak)
-            putLong(BEST_BALANCE, game.bestBalance)
-            putInt(LIFETIME_HANDS, game.lifetimeHands)
-            putString(VARIANT, game.variant.storageKey)
-            putInt(HAND_COUNT, game.handCount)
-            game.bestHand?.let {
-                putString(BEST_TYPE, it.type.key)
-                putInt(BEST_MULT, it.multiple)
-                putInt(BEST_PAYOUT, it.payout)
-                putString(BEST_CARDS, it.cards.joinToString(" "))
-            }
+    fun saveGame(game: SavedGame) = store.write { putGame(game) }
+
+    private fun KeyValueStore.Writer.putGame(game: SavedGame) {
+        putLong(BALANCE, game.balance)
+        saveStats(TODAY, game.today)
+        saveStats(ALL_TIME, game.allTime)
+        putInt(LOSS_STREAK, game.lossStreak)
+        putInt(WIN_STREAK, game.winStreak)
+        putLong(BEST_BALANCE, game.bestBalance)
+        putInt(LIFETIME_HANDS, game.lifetimeHands)
+        putString(VARIANT, game.variant.storageKey)
+        putInt(HAND_COUNT, game.handCount)
+        game.bestHand?.let {
+            putString(BEST_TYPE, it.type.key)
+            putInt(BEST_MULT, it.multiple)
+            putInt(BEST_PAYOUT, it.payout)
+            putString(BEST_CARDS, it.cards.joinToString(" "))
         }
+    }
+
+    /**
+     * Gifted chips (invite rewards) waiting to be added to the balance. The friends feature parks
+     * them here and the game moves them onto the stack with [saveGameConsumingCredits], so a crash
+     * in between can neither lose nor double them.
+     */
+    fun loadPendingCredits(): Long = nonNegativeLong(PENDING_CREDITS)
+
+    fun addPendingCredit(amount: Long) {
+        if (amount <= 0) return
+        val total = loadPendingCredits() + amount
+        store.write { putLong(PENDING_CREDITS, total) }
+    }
+
+    /**
+     * Invite rewards this device set out to claim, by referral row id, with the chips each is
+     * worth. Kept before the claim is sent, so a claim that lands on the server after the app
+     * was killed is still credited once the row shows as claimed.
+     */
+    fun loadClaimIntents(): Map<String, Long> = parseLedger(store.getString(CLAIM_INTENTS))
+
+    fun saveClaimIntent(rowId: String, credit: Long) {
+        val intents = loadClaimIntents() + (rowId to credit.coerceAtLeast(0))
+        store.write { putString(CLAIM_INTENTS, formatLedger(intents)) }
+    }
+
+    /** Rows whose chips are already in pending credits or the balance. */
+    fun loadCreditedClaims(): Set<String> = parseLedger(store.getString(CLAIMS_CREDITED)).keys
+
+    /** Credits a claimed row once: the chips and the "credited" mark land in the same write. */
+    fun creditClaim(rowId: String, credit: Long): Boolean {
+        val credited = loadCreditedClaims()
+        if (rowId in credited) return false
+        val total = loadPendingCredits() + credit.coerceAtLeast(0)
+        store.write {
+            putLong(PENDING_CREDITS, total)
+            putString(CLAIMS_CREDITED, formatLedger((credited + rowId).associateWith { 0L }))
+        }
+        return true
+    }
+
+    private fun parseLedger(raw: String?): Map<String, Long> = raw.orEmpty().split(',')
+        .mapNotNull { entry ->
+            val id = entry.substringBefore(':').takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            id to (entry.substringAfter(':', "0").toLongOrNull()?.coerceAtLeast(0) ?: 0L)
+        }
+        .toMap()
+
+    private fun formatLedger(entries: Map<String, Long>): String = entries.entries.joinToString(",") { "${it.key}:${it.value}" }
+
+    /** Saves a game whose balance already includes the pending credits, and clears them in the same write. */
+    fun saveGameConsumingCredits(game: SavedGame) = store.write {
+        putGame(game)
+        putLong(PENDING_CREDITS, 0L)
     }
 
     fun loadReview(): ReviewState = ReviewState(
@@ -263,6 +318,9 @@ class GameRepository(private val store: KeyValueStore) {
         const val NOTIFY_LEADERBOARD = "settings.notify.leaderboard"
         const val NOTIFY_DAILY = "settings.notify.dailyReminder"
         const val NOTIFY_BEST_HAND = "settings.notify.bestHand"
+        const val PENDING_CREDITS = "credits.pending"
+        const val CLAIM_INTENTS = "credits.claimIntents"
+        const val CLAIMS_CREDITED = "credits.claimsCredited"
         const val PENDING_KIND = "link.pendingKind"
         const val PENDING_VALUE = "link.pendingValue"
         const val REFERRER_READ = "link.referrerRead"

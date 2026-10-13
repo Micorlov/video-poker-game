@@ -43,6 +43,10 @@ import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.ReviewPolicy
 import kotlinx.coroutines.launch
 import com.micorlov.videopoker.nativeapp.ui.text.spokenRes
+import com.micorlov.videopoker.nativeapp.ui.friends.FriendsEffects
+import com.micorlov.videopoker.nativeapp.ui.friends.FriendsTab
+import com.micorlov.videopoker.nativeapp.ui.friends.FriendsViewModel
+import com.micorlov.videopoker.nativeapp.ui.friends.PendingInviteRedirect
 import com.micorlov.videopoker.nativeapp.ui.nav.BottomNav
 import com.micorlov.videopoker.nativeapp.ui.nav.Tab
 import com.micorlov.videopoker.nativeapp.ui.play.Celebration
@@ -68,7 +72,12 @@ private val MAX_CONTENT_WIDTH = 460.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun VideoPokerApp(viewModel: GameViewModel) {
+fun VideoPokerApp(
+    viewModel: GameViewModel,
+    friends: FriendsViewModel? = null,
+    /** Bumped when an invite link arrives while the app is open, to bring up the Friends tab. */
+    openFriendsSignal: Int = 0,
+) {
     val ui by viewModel.state.collectAsStateWithLifecycle()
 
     VideoPokerTheme(ui.settings.theme) {
@@ -93,8 +102,16 @@ fun VideoPokerApp(viewModel: GameViewModel) {
         }
         var celebration by remember { mutableStateOf<Celebration?>(null) }
 
-        // Back from Stats or Settings goes to the table; only back from the table leaves the app.
+        // Back from any other tab goes to the table; only back from the table leaves the app.
         BackHandler(enabled = tab != Tab.PLAY) { tab = Tab.PLAY }
+
+        val friendsOn = friends != null && ui.flags.friendsRooms
+        val visibleTabs = if (friendsOn) Tab.entries else Tab.entries - Tab.FRIENDS
+        if (!friendsOn && tab == Tab.FRIENDS) tab = Tab.PLAY
+        val openFriends: (() -> Unit)? = if (friendsOn) ({ tab = Tab.FRIENDS }) else null
+        if (friends != null) FriendsEffects(friends, viewModel)
+        LaunchedEffect(openFriendsSignal) { if (openFriendsSignal > 0 && friendsOn) tab = Tab.FRIENDS }
+        PendingInviteRedirect(friends, ui.showOnboarding, friendsOn) { tab = Tab.FRIENDS }
 
         LaunchedEffect(viewModel) {
             var nextCelebrationId = 0
@@ -145,7 +162,7 @@ fun VideoPokerApp(viewModel: GameViewModel) {
             if (celebration?.id == id) celebration = null
         }
 
-        val playActions = remember(viewModel) {
+        val playActions = remember(viewModel, friendsOn) {
             PlayActions(
                 onMainAction = viewModel::onMainAction,
                 onToggleHold = viewModel::onToggleHold,
@@ -159,9 +176,10 @@ fun VideoPokerApp(viewModel: GameViewModel) {
                 onDoubleUp = viewModel::onDoubleUp,
                 onPickDoubleUp = viewModel::onPickDoubleUp,
                 onDoubleUpRevealed = viewModel::onDoubleUpRevealed,
+                onOpenFriends = openFriends,
             )
         }
-        val settingsActions = remember(viewModel) {
+        val settingsActions = remember(viewModel, friendsOn) {
             SettingsActions(
                 onToggleSound = viewModel::onToggleSound,
                 onToggleHaptics = viewModel::onToggleHaptics,
@@ -193,6 +211,7 @@ fun VideoPokerApp(viewModel: GameViewModel) {
                 onSelectVariant = viewModel::onSelectVariant,
                 onSelectHandCount = viewModel::onSelectHandCount,
                 onResetStatistics = viewModel::onResetStatistics,
+                onInviteFriends = openFriends,
             )
         }
 
@@ -207,6 +226,7 @@ fun VideoPokerApp(viewModel: GameViewModel) {
                     Box(Modifier.widthIn(max = MAX_CONTENT_WIDTH).fillMaxSize()) {
                         when (tab) {
                             Tab.PLAY -> PlayScreen(ui, celebration, feedback, playActions)
+                            Tab.FRIENDS -> friends?.let { FriendsTab(it) }
                             Tab.STATS -> StatsScreen(ui.game)
                             Tab.SETTINGS -> SettingsScreen(ui, settingsActions)
                         }
@@ -216,6 +236,7 @@ fun VideoPokerApp(viewModel: GameViewModel) {
                     BottomNav(
                         selected = tab,
                         onSelect = { tab = it },
+                        visible = visibleTabs,
                         modifier = Modifier
                             .widthIn(max = MAX_CONTENT_WIDTH)
                             .padding(horizontal = 16.dp, vertical = 8.dp)

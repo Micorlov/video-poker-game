@@ -79,5 +79,24 @@
  "stats_accuracy_detail": {
   "other": "%2$d elin %1$d tanesinde en iyi hamle"
  },
- "stats_accuracy_note": "İpuçları açıkken oynanan eller sayılmaz."
+ "stats_accuracy_note": "İpuçları açıkken oynanan eller sayılmaz.",
+ "friends_invite_title": "Arkadaşlarını davet et, birlikte oynayın",
+ "friends_how_1": "Davet Et'e dokun ve mesajı WhatsApp, SMS veya herhangi bir uygulamayla gönder",
+ "friends_how_2": "Arkadaşın oyunu yükler ve Google ile giriş yapar",
+ "friends_how_3": "İkiniz de %1$s çip kazanır ve bugünün tablosunda yarışırsınız",
+ "friends_invite_button": "Arkadaşlarını davet et",
+ "friends_add_title": "Bir arkadaşının kodu mu var?",
+ "friends_signing_in": "Giriş yapılıyor…",
+ "friends_sign_in_note": "Arkadaşlarını ve bugünün puanlarını görmek için giriş yap.",
+ "friends_unavailable": "Arkadaşlar bu sürümde henüz kullanılamıyor.",
+ "friends_today_title": "Bugünün tablosu",
+ "friends_not_played": "Henüz oynamadı",
+ "friends_rewards_progress": "Davet ödülleri: %1$d / %2$d",
+ "invite_message": "Benimle Video Poker oyna! Katıldığında ikimiz de %1$s ücretsiz çip kazanıyoruz.\n%2$s\nDavet kodum: %3$s",
+ "play_invite_badge": "Arkadaşlarını davet et · +%1$s",
+ "settings_invite_friends": "Arkadaşlarını davet et",
+ "toast_invalid_code": "6 karakterlik bir kod gir",
+ "toast_friends_offline": "Sunucuya ulaşılamıyor — bağlantını kontrol et",
+ "toast_referral_welcome": "🎁 Arkadaşın sana %1$s çip gönderdi — masaya hoş geldin!",
+ "toast_invites_rewarded": "🎉 Arkadaşların katıldı — %1$s çip kazandın!"
 }

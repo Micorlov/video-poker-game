@@ -70,6 +70,8 @@ class SettingsActions(
     val onSelectVariant: (Variant) -> Unit,
     val onSelectHandCount: (Int) -> Unit,
     val onResetStatistics: () -> Unit,
+    /** Opens the Friends tab; null hides the row (friends switched off). */
+    val onInviteFriends: (() -> Unit)? = null,
 )
 
 @Composable
@@ -94,6 +96,12 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
         )
+
+        actions.onInviteFriends?.let { invite ->
+            Section(R.string.nav_friends) {
+                LinkRow("✉ " + stringResource(R.string.settings_invite_friends), "invite-friends-row", invite)
+            }
+        }
 
         Section(R.string.settings_gameplay) {
             SettingToggle(stringResource(R.string.settings_sound), settings.soundEnabled, actions.onToggleSound, "toggle-sound")

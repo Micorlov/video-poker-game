@@ -78,5 +78,24 @@
  "stats_accuracy_detail": {
   "other": "%2$d판 중 %1$d판 최선의 플레이"
  },
- "stats_accuracy_note": "힌트를 켜고 한 판은 집계하지 않습니다."
+ "stats_accuracy_note": "힌트를 켜고 한 판은 집계하지 않습니다.",
+ "friends_invite_title": "친구를 초대해 함께 플레이하세요",
+ "friends_how_1": "초대를 탭하고 WhatsApp, 문자 또는 원하는 앱으로 메시지를 보내세요",
+ "friends_how_2": "친구가 게임을 설치하고 Google로 로그인합니다",
+ "friends_how_3": "두 사람 모두 %1$s 칩을 받고 오늘의 순위에서 겨룹니다",
+ "friends_invite_button": "친구 초대",
+ "friends_add_title": "친구 코드가 있나요?",
+ "friends_signing_in": "로그인 중…",
+ "friends_sign_in_note": "로그인하면 친구와 오늘의 점수를 볼 수 있습니다.",
+ "friends_unavailable": "이 버전에서는 아직 친구 기능을 사용할 수 없습니다.",
+ "friends_today_title": "오늘의 순위",
+ "friends_not_played": "아직 플레이 안 함",
+ "friends_rewards_progress": "초대 보상: %2$d개 중 %1$d개",
+ "invite_message": "나랑 비디오 포커 하자! 네가 참여하면 우리 둘 다 무료 칩 %1$s개를 받아.\n%2$s\n내 초대 코드: %3$s",
+ "play_invite_badge": "친구 초대 · +%1$s",
+ "settings_invite_friends": "친구 초대",
+ "toast_invalid_code": "6자리 코드를 입력하세요",
+ "toast_friends_offline": "서버에 연결할 수 없습니다. 연결을 확인하세요",
+ "toast_referral_welcome": "🎁 친구가 %1$s 칩을 보냈어요. 테이블에 오신 것을 환영합니다!",
+ "toast_invites_rewarded": "🎉 친구가 참여했어요. %1$s 칩을 받았습니다!"
 }

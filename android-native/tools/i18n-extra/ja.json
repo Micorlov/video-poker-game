@@ -78,5 +78,24 @@
  "stats_accuracy_detail": {
   "other": "%2$d ハンド中 %1$d ハンドで最善手"
  },
- "stats_accuracy_note": "ヒントをオンにしたハンドは数えません。"
+ "stats_accuracy_note": "ヒントをオンにしたハンドは数えません。",
+ "friends_invite_title": "友達を招待して一緒に遊ぼう",
+ "friends_how_1": "「招待」をタップして、WhatsApp、SMS、その他のアプリでメッセージを送信",
+ "friends_how_2": "友達がゲームをインストールしてGoogleでログイン",
+ "friends_how_3": "2人とも%1$sチップを獲得して、今日のランキングで競えます",
+ "friends_invite_button": "友達を招待",
+ "friends_add_title": "友達のコードをお持ちですか？",
+ "friends_signing_in": "ログイン中…",
+ "friends_sign_in_note": "ログインすると友達と今日のスコアが表示されます。",
+ "friends_unavailable": "このバージョンでは友達機能はまだ利用できません。",
+ "friends_today_title": "今日のランキング",
+ "friends_not_played": "まだプレイしていません",
+ "friends_rewards_progress": "招待報酬：%1$d / %2$d",
+ "invite_message": "一緒にビデオポーカーをやろう！参加すると2人とも%1$sチップが無料でもらえるよ。\n%2$s\n招待コード：%3$s",
+ "play_invite_badge": "友達を招待 · +%1$s",
+ "settings_invite_friends": "友達を招待",
+ "toast_invalid_code": "6文字のコードを入力してください",
+ "toast_friends_offline": "サーバーに接続できません。接続を確認してください",
+ "toast_referral_welcome": "🎁 友達から%1$sチップが届きました。テーブルへようこそ！",
+ "toast_invites_rewarded": "🎉 友達が参加しました。%1$sチップを獲得！"
 }

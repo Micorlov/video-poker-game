@@ -17,14 +17,15 @@ match /referrals/{referredUid} {
                   || request.auth.uid == resource.data.inviterUid);
 
   // Only the referred player files their own row, and only for someone else.
-  // rewardCoins is pinned here so a tampered client can't mint a larger payout,
-  // and claimedAt must start null so the inviter's claim below is the only way
+  // rewardCoins is pinned here so a tampered client can't mint a larger payout
+  // (2000 from the web app, 1000 from the native Android app, whose inviter
+  // reward is smaller and capped at ten friends client-side), and claimedAt must start null so the inviter's claim below is the only way
   // it can ever be set.
   allow create: if request.auth != null
                 && request.auth.uid == referredUid
                 && request.resource.data.referredUid == referredUid
                 && request.resource.data.inviterUid != referredUid
-                && request.resource.data.rewardCoins == 2000
+                && request.resource.data.rewardCoins in [1000, 2000]
                 // Two-sided reward (v2.1): the invitee's welcome coins are
                 // pinned like rewardCoins. Optional during the rollout so
                 // pre-2.1 clients (which don't send the field) keep working;

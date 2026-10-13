@@ -12,6 +12,7 @@ import com.micorlov.videopoker.nativeapp.data.UserSettings
 import com.micorlov.videopoker.nativeapp.domain.AllInOffer
 import com.micorlov.videopoker.nativeapp.domain.AppLanguage
 import com.micorlov.videopoker.nativeapp.domain.Card
+import com.micorlov.videopoker.nativeapp.domain.DailyProfitPolicy
 import com.micorlov.videopoker.nativeapp.domain.DoubleUpResult
 import com.micorlov.videopoker.nativeapp.domain.DrawOutcome
 import com.micorlov.videopoker.nativeapp.domain.GameEngine
@@ -109,6 +110,16 @@ sealed interface ToastMessage {
     data object HintsOn : ToastMessage
     data object AllInGoodLuck : ToastMessage
     data object NoAllInLeft : ToastMessage
+    data class ReferralWelcome(val amount: Long) : ToastMessage
+    data class InvitesRewarded(val count: Int, val amount: Long) : ToastMessage
+    data class FriendsAdded(val count: Int) : ToastMessage
+    data object OwnInviteCode : ToastMessage
+    data object NoPlayerForCode : ToastMessage
+    data object AlreadyFriends : ToastMessage
+    data object InvalidCode : ToastMessage
+    data object SignInFailed : ToastMessage
+    data object FriendsOffline : ToastMessage
+    data object FriendsUnavailable : ToastMessage
 }
 
 /** One-shot happenings the UI reacts to with sound, haptics and fireworks. */
@@ -142,6 +153,8 @@ class GameViewModel(
     private val flagFetcher: (suspend () -> RemoteFlags?)? = null,
     /** The app works the hold maths out in the background; most tests skip it. */
     private val analysisMode: AnalysisMode = AnalysisMode.OFF,
+    /** Each settled hand or double-up's chips won minus chips staked, for the friends' daily ranking. */
+    private val onNetResult: (Long) -> Unit = {},
 ) : ViewModel() {
 
     private val effectChannel = Channel<UiEffect>(Channel.UNLIMITED)
@@ -188,6 +201,7 @@ class GameViewModel(
         applyEvents(opening.events, persist = opening.events.any { it is GameEvent.Rebuy }, game = opening.state)
         stampFirstDay()
         grantDailyBonus()
+        applyPendingCredits()
         requestAnalysis(_state.value.game)
         flagFetcher?.let { fetch -> viewModelScope.launch { fetch()?.let(::onFlagsLoaded) } }
     }
@@ -216,6 +230,23 @@ class GameViewModel(
         showToast(ToastMessage.DailyBonus(Rules.DAILY_BONUS))
     }
 
+    /**
+     * Moves gifted chips (invite rewards) parked by the friends feature onto the stack, saving and
+     * clearing them in one write. Safe mid-hand: the saved balance still refunds the stake on the table.
+     */
+    fun applyPendingCredits(announce: ToastMessage? = null) {
+        val pending = repository.loadPendingCredits()
+        if (pending <= 0) return
+        val game = _state.value.game
+        val credited = game.copy(balance = game.balance + pending)
+        _state.update { it.copy(game = credited) }
+        repository.saveGameConsumingCredits(credited.toSaved())
+        announce?.let(::showToast)
+    }
+
+    /** A message from another screen (Friends) shown in the shared toast. */
+    fun onExternalToast(message: ToastMessage) = showToast(message)
+
     fun onMainAction() {
         val game = _state.value.game
         when (game.phase) {
@@ -235,6 +266,7 @@ class GameViewModel(
         todayKey?.invoke()?.let(repository::saveLastPlayedDay)
         commit(transition, persist = true)
         val drawn = transition.state.outcome ?: return
+        onNetResult(DailyProfitPolicy.handDelta(drawn))
         val pending = PendingReview(
             dealRound = game.round,
             drawRound = transition.state.round,
@@ -304,7 +336,12 @@ class GameViewModel(
         commit(Transition(GameEngine.startDoubleUp(_state.value.game, random)))
     }
 
-    fun onPickDoubleUp(index: Int) = commit(Transition(GameEngine.pickDoubleUp(_state.value.game, index)), persist = true)
+    fun onPickDoubleUp(index: Int) {
+        val before = _state.value.game.doubleUp
+        commit(Transition(GameEngine.pickDoubleUp(_state.value.game, index)), persist = true)
+        val after = _state.value.game.doubleUp ?: return
+        if (before?.result == null && after.result != null) onNetResult(DailyProfitPolicy.doubleUpDelta(after))
+    }
 
     /** Called when double-up [number]'s cards have finished turning over. */
     fun onDoubleUpRevealed(number: Int) {

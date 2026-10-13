@@ -37,16 +37,22 @@ import com.micorlov.videopoker.nativeapp.ui.components.SuitIcon
 import com.micorlov.videopoker.nativeapp.ui.theme.LocalPalette
 import com.micorlov.videopoker.nativeapp.ui.theme.VpColors
 
-/** The three screens. The web app's Friends tab arrives with the social features. */
+/** The screens, in rail order. Friends can be switched off remotely, so the rail shows only [visible] ones. */
 enum class Tab(@param:StringRes val label: Int, val tag: String) {
     PLAY(R.string.nav_play, "tab-play"),
+    FRIENDS(R.string.nav_friends, "tab-friends"),
     STATS(R.string.nav_stats, "tab-stats"),
     SETTINGS(R.string.nav_settings, "tab-settings"),
 }
 
 /** The floating rail at the bottom: a shadowed bar on the cloth, the active tab in the action colour. */
 @Composable
-fun BottomNav(selected: Tab, onSelect: (Tab) -> Unit, modifier: Modifier = Modifier) {
+fun BottomNav(
+    selected: Tab,
+    onSelect: (Tab) -> Unit,
+    modifier: Modifier = Modifier,
+    visible: List<Tab> = Tab.entries,
+) {
     val palette = LocalPalette.current
     val shape = RoundedCornerShape(28.dp)
 
@@ -59,7 +65,7 @@ fun BottomNav(selected: Tab, onSelect: (Tab) -> Unit, modifier: Modifier = Modif
             .padding(6.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Tab.entries.forEach { tab ->
+        visible.forEach { tab ->
             val active = tab == selected
             Column(
                 modifier = Modifier
@@ -90,9 +96,20 @@ fun BottomNav(selected: Tab, onSelect: (Tab) -> Unit, modifier: Modifier = Modif
 private fun TabIcon(tab: Tab, color: Color, modifier: Modifier = Modifier) {
     when (tab) {
         Tab.PLAY -> SuitIcon(Suit.SPADES, 22.dp, modifier, color)
+        Tab.FRIENDS -> Spacer(modifier.size(22.dp).drawBehind { drawFriends(color) })
         Tab.STATS -> Spacer(modifier.size(22.dp).drawBehind { drawBars(color) })
         Tab.SETTINGS -> Spacer(modifier.size(22.dp).drawBehind { drawGear(color) })
     }
+}
+
+/** Two people: a head and shoulders in front, a second, smaller one behind. */
+private fun DrawScope.drawFriends(color: Color) {
+    val unit = size.minDimension
+    val back = color.copy(alpha = 0.6f)
+    drawCircle(back, radius = unit * 0.15f, center = Offset(unit * 0.7f, unit * 0.3f))
+    drawArc(back, 180f, 180f, useCenter = true, topLeft = Offset(unit * 0.45f, unit * 0.52f), size = Size(unit * 0.5f, unit * 0.5f))
+    drawCircle(color, radius = unit * 0.18f, center = Offset(unit * 0.38f, unit * 0.3f))
+    drawArc(color, 180f, 180f, useCenter = true, topLeft = Offset(unit * 0.06f, unit * 0.56f), size = Size(unit * 0.64f, unit * 0.64f))
 }
 
 /** Three rising bars on a shared baseline. */

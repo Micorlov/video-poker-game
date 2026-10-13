@@ -4,6 +4,12 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// Firebase is configured by app/google-services.json, which is not committed (see
+// FIREBASE_SETUP.md). Without it the app still builds and Friends shows as unavailable.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     // `native` is a reserved word in Java, so it cannot be a package segment.
     namespace = "com.micorlov.videopoker.nativeapp"
@@ -64,10 +70,19 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation(kotlin("test"))
     testImplementation("org.json:json:20240303")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
 
     implementation("com.google.android.play:review-ktx:2.0.2")
     implementation("androidx.work:work-runtime-ktx:2.10.0")
     implementation("com.android.installreferrer:installreferrer:2.2")
+
+    implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("androidx.credentials:credentials:1.6.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.2.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.work:work-testing:2.10.0")

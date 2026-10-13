@@ -17,15 +17,18 @@ class LinkIntake(private val repository: GameRepository) {
         return link
     }
 
-    /** Reads the Play install referrer once per install; later launches do nothing. */
-    fun readInstallReferrer(context: Context) {
+    /** Reads the Play install referrer once per install; later launches do nothing. [onParked] hears of a code it found. */
+    fun readInstallReferrer(context: Context, onParked: (DeepLink) -> Unit = {}) {
         if (repository.isReferrerRead()) return
         val client = InstallReferrerClient.newBuilder(context.applicationContext).build()
         client.startConnection(object : InstallReferrerStateListener {
             override fun onInstallReferrerSetupFinished(responseCode: Int) {
                 try {
                     if (responseCode == InstallReferrerClient.InstallReferrerResponse.OK) {
-                        DeepLink.fromReferrer(client.installReferrer.installReferrer)?.let(repository::savePendingLink)
+                        DeepLink.fromReferrer(client.installReferrer.installReferrer)?.let {
+                            repository.savePendingLink(it)
+                            onParked(it)
+                        }
                         repository.markReferrerRead()
                     } else if (responseCode == InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED) {
                         repository.markReferrerRead()

@@ -84,5 +84,24 @@
   "many": "Najlepszy ruch w %1$d z %2$d rozdań",
   "other": "Najlepszy ruch w %1$d z %2$d rozdania"
  },
- "stats_accuracy_note": "Rozdania z włączonymi podpowiedziami się nie liczą."
+ "stats_accuracy_note": "Rozdania z włączonymi podpowiedziami się nie liczą.",
+ "friends_invite_title": "Zaproś znajomych, grajcie razem",
+ "friends_how_1": "Stuknij Zaproś i wyślij wiadomość przez WhatsApp, SMS lub dowolną aplikację",
+ "friends_how_2": "Znajomy instaluje grę i loguje się przez Google",
+ "friends_how_3": "Oboje dostajecie %1$s żetonów i rywalizujecie w dzisiejszej tabeli",
+ "friends_invite_button": "Zaproś znajomych",
+ "friends_add_title": "Masz kod znajomego?",
+ "friends_signing_in": "Logowanie…",
+ "friends_sign_in_note": "Zaloguj się, aby zobaczyć znajomych i dzisiejsze wyniki.",
+ "friends_unavailable": "Znajomi nie są jeszcze dostępni w tej wersji.",
+ "friends_today_title": "Dzisiejsza tabela",
+ "friends_not_played": "Jeszcze nie grał",
+ "friends_rewards_progress": "Nagrody za zaproszenia: %1$d z %2$d",
+ "invite_message": "Zagraj ze mną w Video Poker! Oboje dostaniemy %1$s darmowych żetonów, gdy dołączysz.\n%2$s\nMój kod zaproszenia: %3$s",
+ "play_invite_badge": "Zaproś znajomych · +%1$s",
+ "settings_invite_friends": "Zaproś znajomych",
+ "toast_invalid_code": "Wpisz 6-znakowy kod",
+ "toast_friends_offline": "Brak połączenia z serwerem — sprawdź internet",
+ "toast_referral_welcome": "🎁 Znajomy wysłał ci %1$s żetonów — witaj przy stole!",
+ "toast_invites_rewarded": "🎉 Znajomi dołączyli — zdobywasz %1$s żetonów!"
 }

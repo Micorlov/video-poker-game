@@ -78,5 +78,24 @@
  "stats_accuracy_detail": {
   "other": "Langkah terbaik di %1$d dari %2$d tangan"
  },
- "stats_accuracy_note": "Tangan yang dimainkan dengan petunjuk tidak dihitung."
+ "stats_accuracy_note": "Tangan yang dimainkan dengan petunjuk tidak dihitung.",
+ "friends_invite_title": "Undang teman, main bersama",
+ "friends_how_1": "Ketuk Undang dan kirim pesannya lewat WhatsApp, SMS, atau aplikasi apa pun",
+ "friends_how_2": "Temanmu memasang game dan masuk dengan Google",
+ "friends_how_3": "Kalian berdua mendapat %1$s chip dan bersaing di tabel hari ini",
+ "friends_invite_button": "Undang teman",
+ "friends_add_title": "Punya kode teman?",
+ "friends_signing_in": "Sedang masuk…",
+ "friends_sign_in_note": "Masuk untuk melihat teman dan skor hari ini.",
+ "friends_unavailable": "Fitur teman belum tersedia di versi ini.",
+ "friends_today_title": "Tabel hari ini",
+ "friends_not_played": "Belum bermain",
+ "friends_rewards_progress": "Hadiah undangan: %1$d dari %2$d",
+ "invite_message": "Main Video Poker bareng aku! Kita berdua dapat %1$s chip gratis saat kamu bergabung.\n%2$s\nKode undanganku: %3$s",
+ "play_invite_badge": "Undang teman · +%1$s",
+ "settings_invite_friends": "Undang teman",
+ "toast_invalid_code": "Masukkan kode 6 karakter",
+ "toast_friends_offline": "Tidak dapat menjangkau server — periksa koneksimu",
+ "toast_referral_welcome": "🎁 Temanmu mengirim %1$s chip — selamat datang di meja!",
+ "toast_invites_rewarded": "🎉 Teman bergabung — kamu mendapat %1$s chip!"
 }

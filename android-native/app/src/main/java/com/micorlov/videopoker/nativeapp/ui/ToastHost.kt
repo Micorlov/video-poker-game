@@ -82,4 +82,15 @@ private fun ToastMessage.text(): String = when (this) {
     ToastMessage.NoAllInLeft -> stringResource(R.string.toast_no_all_in_left)
     ToastMessage.HintsOn -> stringResource(R.string.toast_hints_on)
     ToastMessage.StatsReset -> stringResource(R.string.toast_stats_reset)
+    is ToastMessage.ReferralWelcome -> stringResource(R.string.toast_referral_welcome, formatNumber(amount))
+    is ToastMessage.InvitesRewarded -> stringResource(R.string.toast_invites_rewarded, formatNumber(amount))
+    is ToastMessage.FriendsAdded ->
+        if (count > 1) stringResource(R.string.toast_friends_added, count) else stringResource(R.string.toast_friend_added)
+    ToastMessage.OwnInviteCode -> stringResource(R.string.toast_own_invite)
+    ToastMessage.NoPlayerForCode -> stringResource(R.string.toast_no_player_for_code)
+    ToastMessage.AlreadyFriends -> stringResource(R.string.toast_already_friends)
+    ToastMessage.InvalidCode -> stringResource(R.string.toast_invalid_code)
+    ToastMessage.SignInFailed -> stringResource(R.string.toast_sign_in_failed)
+    ToastMessage.FriendsOffline -> stringResource(R.string.toast_friends_offline)
+    ToastMessage.FriendsUnavailable -> stringResource(R.string.friends_unavailable)
 }

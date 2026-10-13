@@ -85,7 +85,9 @@ service cloud.firestore {
                     && request.auth.uid == referredUid
                     && request.resource.data.referredUid == referredUid
                     && request.resource.data.inviterUid != referredUid
-                    && request.resource.data.rewardCoins == 2000
+                    // 2000 from the web app; 1000 from the native app, whose
+                    // inviter reward is smaller and capped at ten friends.
+                    && request.resource.data.rewardCoins in [1000, 2000]
                     // Two-sided reward: invitee welcome coins, pinned like
                     // rewardCoins. Optional during the rollout so clients
                     // shipped before 2.1 (which don't send it) keep working.

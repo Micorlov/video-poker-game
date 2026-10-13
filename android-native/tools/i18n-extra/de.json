@@ -80,5 +80,24 @@
   "one": "Bester Zug in %1$d von %2$d Hand",
   "other": "Bester Zug in %1$d von %2$d Händen"
  },
- "stats_accuracy_note": "Hände mit Tipps zählen nicht."
+ "stats_accuracy_note": "Hände mit Tipps zählen nicht.",
+ "friends_invite_title": "Lade Freunde ein, spielt zusammen",
+ "friends_how_1": "Tippe auf Einladen und sende die Nachricht per WhatsApp, SMS oder einer anderen App",
+ "friends_how_2": "Dein Freund installiert das Spiel und meldet sich mit Google an",
+ "friends_how_3": "Ihr bekommt beide %1$s Chips und tretet in der heutigen Tabelle gegeneinander an",
+ "friends_invite_button": "Freunde einladen",
+ "friends_add_title": "Hast du einen Freundescode?",
+ "friends_signing_in": "Anmeldung…",
+ "friends_sign_in_note": "Melde dich an, um deine Freunde und die heutigen Punkte zu sehen.",
+ "friends_unavailable": "Freunde sind in dieser Version noch nicht verfügbar.",
+ "friends_today_title": "Heutige Tabelle",
+ "friends_not_played": "Noch nicht gespielt",
+ "friends_rewards_progress": "Einladungsboni: %1$d von %2$d",
+ "invite_message": "Spiel Video Poker mit mir! Wir bekommen beide %1$s Gratis-Chips, wenn du mitmachst.\n%2$s\nMein Einladungscode: %3$s",
+ "play_invite_badge": "Freunde einladen · +%1$s",
+ "settings_invite_friends": "Freunde einladen",
+ "toast_invalid_code": "Gib einen 6-stelligen Code ein",
+ "toast_friends_offline": "Server nicht erreichbar – prüfe deine Verbindung",
+ "toast_referral_welcome": "🎁 Dein Freund hat dir %1$s Chips geschickt – willkommen am Tisch!",
+ "toast_invites_rewarded": "🎉 Freunde sind beigetreten – du hast %1$s Chips verdient!"
 }

@@ -80,5 +80,24 @@
   "one": "Melhor jogada em %1$d de %2$d mão",
   "other": "Melhor jogada em %1$d de %2$d mãos"
  },
- "stats_accuracy_note": "Mãos jogadas com dicas ativadas não contam."
+ "stats_accuracy_note": "Mãos jogadas com dicas ativadas não contam.",
+ "friends_invite_title": "Convide amigos e joguem juntos",
+ "friends_how_1": "Toque em Convidar e envie a mensagem pelo WhatsApp, SMS ou qualquer app",
+ "friends_how_2": "Seu amigo instala o jogo e entra com o Google",
+ "friends_how_3": "Vocês dois ganham %1$s fichas e disputam a tabela de hoje",
+ "friends_invite_button": "Convidar amigos",
+ "friends_add_title": "Tem o código de um amigo?",
+ "friends_signing_in": "Entrando…",
+ "friends_sign_in_note": "Entre para ver seus amigos e as pontuações de hoje.",
+ "friends_unavailable": "Amigos ainda não estão disponíveis nesta versão.",
+ "friends_today_title": "Tabela de hoje",
+ "friends_not_played": "Ainda não jogou",
+ "friends_rewards_progress": "Prêmios de convite: %1$d de %2$d",
+ "invite_message": "Jogue Video Poker comigo! Nós dois ganhamos %1$s fichas grátis quando você entrar.\n%2$s\nMeu código de convite: %3$s",
+ "play_invite_badge": "Convidar amigos · +%1$s",
+ "settings_invite_friends": "Convidar amigos",
+ "toast_invalid_code": "Digite um código de 6 caracteres",
+ "toast_friends_offline": "Não foi possível acessar o servidor — verifique sua conexão",
+ "toast_referral_welcome": "🎁 Seu amigo enviou %1$s fichas para você — bem-vindo à mesa!",
+ "toast_invites_rewarded": "🎉 Amigos entraram — você ganhou %1$s fichas!"
 }

@@ -82,5 +82,24 @@
   "two": "המהלך הטוב ביותר ב־%1$d מתוך %2$d ידיים",
   "other": "המהלך הטוב ביותר ב־%1$d מתוך %2$d ידיים"
  },
- "stats_accuracy_note": "ידיים ששוחקו עם רמזים לא נספרות."
+ "stats_accuracy_note": "ידיים ששוחקו עם רמזים לא נספרות.",
+ "friends_invite_title": "הזמינו חברים, שחקו יחד",
+ "friends_how_1": "הקישו על הזמנה ושלחו את ההודעה בוואטסאפ, ב־SMS או בכל אפליקציה",
+ "friends_how_2": "החבר מתקין את המשחק ומתחבר עם Google",
+ "friends_how_3": "שניכם מקבלים %1$s צ׳יפים ומתחרים בטבלה של היום",
+ "friends_invite_button": "הזמינו חברים",
+ "friends_add_title": "יש לכם קוד של חבר?",
+ "friends_signing_in": "מתחברים…",
+ "friends_sign_in_note": "התחברו כדי לראות את החברים שלכם ואת הניקוד של היום.",
+ "friends_unavailable": "החברים עדיין לא זמינים בגרסה הזו.",
+ "friends_today_title": "הטבלה של היום",
+ "friends_not_played": "עוד לא שיחק",
+ "friends_rewards_progress": "פרסי הזמנה: %1$d מתוך %2$d",
+ "invite_message": "בואו לשחק איתי וידאו פוקר! שנינו מקבלים %1$s צ׳יפים חינם כשמצטרפים.\n%2$s\nקוד ההזמנה שלי: %3$s",
+ "play_invite_badge": "הזמינו חברים · ‎+%1$s",
+ "settings_invite_friends": "הזמנת חברים",
+ "toast_invalid_code": "הזינו קוד בן 6 תווים",
+ "toast_friends_offline": "אין חיבור לשרת — בדקו את החיבור",
+ "toast_referral_welcome": "🎁 החבר שלכם שלח לכם %1$s צ׳יפים — ברוכים הבאים לשולחן!",
+ "toast_invites_rewarded": "🎉 חברים הצטרפו — הרווחתם %1$s צ׳יפים!"
 }

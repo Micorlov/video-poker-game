@@ -81,5 +81,24 @@
   "many": "Meilleur coup sur %1$d des %2$d mains",
   "other": "Meilleur coup sur %1$d des %2$d mains"
  },
- "stats_accuracy_note": "Les mains jouées avec les conseils ne comptent pas."
+ "stats_accuracy_note": "Les mains jouées avec les conseils ne comptent pas.",
+ "friends_invite_title": "Invitez des amis, jouez ensemble",
+ "friends_how_1": "Touchez Inviter et envoyez le message par WhatsApp, SMS ou n’importe quelle appli",
+ "friends_how_2": "Votre ami installe le jeu et se connecte avec Google",
+ "friends_how_3": "Vous recevez tous les deux %1$s jetons et vous affrontez au classement du jour",
+ "friends_invite_button": "Inviter des amis",
+ "friends_add_title": "Vous avez le code d’un ami ?",
+ "friends_signing_in": "Connexion…",
+ "friends_sign_in_note": "Connectez-vous pour voir vos amis et les scores du jour.",
+ "friends_unavailable": "Les amis ne sont pas encore disponibles dans cette version.",
+ "friends_today_title": "Classement du jour",
+ "friends_not_played": "Pas encore joué",
+ "friends_rewards_progress": "Récompenses d’invitation : %1$d sur %2$d",
+ "invite_message": "Joue au Video Poker avec moi ! On reçoit tous les deux %1$s jetons gratuits quand tu nous rejoins.\n%2$s\nMon code d’invitation : %3$s",
+ "play_invite_badge": "Inviter des amis · +%1$s",
+ "settings_invite_friends": "Inviter des amis",
+ "toast_invalid_code": "Saisissez un code de 6 caractères",
+ "toast_friends_offline": "Serveur injoignable — vérifiez votre connexion",
+ "toast_referral_welcome": "🎁 Votre ami vous a envoyé %1$s jetons — bienvenue à la table !",
+ "toast_invites_rewarded": "🎉 Des amis vous ont rejoint — vous gagnez %1$s jetons !"
 }
