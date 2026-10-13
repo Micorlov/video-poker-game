@@ -21,13 +21,28 @@ android {
         applicationId = "com.micorlov.videopoker.nativeapp"
         minSdk = 24
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.0"
+        versionCode = 3
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // The upload key lives outside the repo: `source ~/keys/videopoker-native-upload.env`
+    // before `./gradlew bundleRelease`. Without those variables the release build is unsigned.
+    val uploadKeystore = System.getenv("VP_NATIVE_KEYSTORE")
+    signingConfigs {
+        if (uploadKeystore != null) {
+            create("upload") {
+                storeFile = file(uploadKeystore)
+                storePassword = System.getenv("VP_NATIVE_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("VP_NATIVE_KEY_ALIAS")
+                keyPassword = System.getenv("VP_NATIVE_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
+            if (uploadKeystore != null) signingConfig = signingConfigs.getByName("upload")
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

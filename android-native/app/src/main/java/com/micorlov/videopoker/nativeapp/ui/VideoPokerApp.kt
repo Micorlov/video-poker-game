@@ -105,7 +105,7 @@ fun VideoPokerApp(
         // Back from any other tab goes to the table; only back from the table leaves the app.
         BackHandler(enabled = tab != Tab.PLAY) { tab = Tab.PLAY }
 
-        val friendsOn = friends != null && ui.flags.friendsRooms
+        val friendsOn = friends != null && friends.available && ui.flags.friendsRooms
         val visibleTabs = if (friendsOn) Tab.entries else Tab.entries - Tab.FRIENDS
         if (!friendsOn && tab == Tab.FRIENDS) tab = Tab.PLAY
         val openFriends: (() -> Unit)? = if (friendsOn) ({ tab = Tab.FRIENDS }) else null

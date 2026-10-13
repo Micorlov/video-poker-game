@@ -81,6 +81,9 @@ class FriendsViewModel(
     )
     val state: StateFlow<FriendsUiState> = _state.asStateFlow()
 
+    /** False in a build without Firebase: the app then hides Friends instead of showing a dead tab. */
+    val available: Boolean get() = auth.available
+
     private val effectChannel = Channel<FriendsEffect>(Channel.UNLIMITED)
     val effects: ReceiveChannel<FriendsEffect> get() = effectChannel
 
