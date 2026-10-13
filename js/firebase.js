@@ -464,6 +464,14 @@ function logUserToFirestore(user) {
 
 var _vpSessionStart = Date.now();
 var _vpSessionHour  = new Date().getHours();
+// The day the current session belongs to. getDayKey() lives in
+// js/leaderboards.js, which the page may not have parsed yet at this point, so
+// the key is resolved lazily and re-resolved on every session reset.
+var _vpSessionDayKey = _vpDayKeyNow();
+
+function _vpDayKeyNow() {
+    return (typeof getDayKey === 'function') ? getDayKey() : null;
+}
 
 function _vpFlushSession() {
     if (!db || !auth || !auth.currentUser) return;
@@ -477,11 +485,15 @@ function _vpFlushSession() {
     };
     update['playHourMap.h' + _vpSessionHour] = firebase.firestore.FieldValue.increment(1);
     firebaseSafe(function() { return db.collection('users').doc(uid).update(update); });
+    // Same span, filed against the day's leaderboard entry so the admin board
+    // can show time played next to hands played.
+    if (typeof pushDailyPlayTime === 'function') pushDailyPlayTime(dur, _vpSessionDayKey);
 }
 
 function _vpResetSession() {
     _vpSessionStart = Date.now();
     _vpSessionHour  = new Date().getHours();
+    _vpSessionDayKey = _vpDayKeyNow();
 }
 
 document.addEventListener('visibilitychange', function() {

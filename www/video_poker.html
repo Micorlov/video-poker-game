@@ -14692,6 +14692,14 @@ function logUserToFirestore(user) {
 
 var _vpSessionStart = Date.now();
 var _vpSessionHour  = new Date().getHours();
+// The day the current session belongs to. getDayKey() lives in
+// js/leaderboards.js, which the page may not have parsed yet at this point, so
+// the key is resolved lazily and re-resolved on every session reset.
+var _vpSessionDayKey = _vpDayKeyNow();
+
+function _vpDayKeyNow() {
+    return (typeof getDayKey === 'function') ? getDayKey() : null;
+}
 
 function _vpFlushSession() {
     if (!db || !auth || !auth.currentUser) return;
@@ -14705,11 +14713,15 @@ function _vpFlushSession() {
     };
     update['playHourMap.h' + _vpSessionHour] = firebase.firestore.FieldValue.increment(1);
     firebaseSafe(function() { return db.collection('users').doc(uid).update(update); });
+    // Same span, filed against the day's leaderboard entry so the admin board
+    // can show time played next to hands played.
+    if (typeof pushDailyPlayTime === 'function') pushDailyPlayTime(dur, _vpSessionDayKey);
 }
 
 function _vpResetSession() {
     _vpSessionStart = Date.now();
     _vpSessionHour  = new Date().getHours();
+    _vpSessionDayKey = _vpDayKeyNow();
 }
 
 document.addEventListener('visibilitychange', function() {
@@ -17792,6 +17804,26 @@ function pushDailyRebuy() {
             photoURL: user.photoURL || null,
             dayKey: dayKey,
             rebuys: firebase.firestore.FieldValue.increment(1),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+    });
+}
+
+// Play time for the day, in milliseconds. Fed by the session flush in
+// js/firebase.js, so it counts the same spans the lifetime
+// users/{uid}.totalPlayTimeMs counts — only bucketed into the day the session
+// belongs to, which is the day the board itself reports on. `dayKey` is the day
+// the session started: a session running past midnight belongs to the day it
+// was played, not the one it ended in.
+function pushDailyPlayTime(ms, dayKey) {
+    const user = window.egUser;
+    if (!user || !(ms > 0)) return;
+    const key = dayKey || getDayKey();
+    firebaseSafe(function() {
+        return db.collection('daily_scores').doc(key + '_' + user.uid).set({
+            uid: user.uid,
+            dayKey: key,
+            playMs: firebase.firestore.FieldValue.increment(ms),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
     });

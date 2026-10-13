@@ -179,6 +179,26 @@ function pushDailyRebuy() {
     });
 }
 
+// Play time for the day, in milliseconds. Fed by the session flush in
+// js/firebase.js, so it counts the same spans the lifetime
+// users/{uid}.totalPlayTimeMs counts — only bucketed into the day the session
+// belongs to, which is the day the board itself reports on. `dayKey` is the day
+// the session started: a session running past midnight belongs to the day it
+// was played, not the one it ended in.
+function pushDailyPlayTime(ms, dayKey) {
+    const user = window.egUser;
+    if (!user || !(ms > 0)) return;
+    const key = dayKey || getDayKey();
+    firebaseSafe(function() {
+        return db.collection('daily_scores').doc(key + '_' + user.uid).set({
+            uid: user.uid,
+            dayKey: key,
+            playMs: firebase.firestore.FieldValue.increment(ms),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+    });
+}
+
 // --- Read-side subscriptions (top 20 fetched once; sliced to 5 for the collapsed view) ---
 function subscribeHourlyBoard() {
     const user = window.egUser;

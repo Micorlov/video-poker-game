@@ -266,8 +266,8 @@
                         </div>
                     </div>
                     <div class="table-scroll"><table>
-                        <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Hands</th><th>Rebuys</th><th>Best Hand</th><th>Actions</th></tr></thead>
-                        <tbody id="live-body"><tr><td colspan="7" class="empty-state">Loading...</td></tr></tbody>
+                        <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Hands</th><th>Time Played</th><th>Rebuys</th><th>Best Hand</th><th>Actions</th></tr></thead>
+                        <tbody id="live-body"><tr><td colspan="8" class="empty-state">Loading...</td></tr></tbody>
                     </table></div>
                 </div>
 
@@ -359,8 +359,8 @@
                         <span class="badge" id="comp-count">0</span>
                     </div>
                     <div class="table-scroll"><table>
-                        <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Hands</th><th>Rebuys</th><th>Best Hand</th><th>Actions</th></tr></thead>
-                        <tbody id="comp-body"><tr><td colspan="7" class="empty-state">Select an hour</td></tr></tbody>
+                        <thead><tr><th>#</th><th>Player</th><th>Score</th><th>Hands</th><th>Time Played</th><th>Rebuys</th><th>Best Hand</th><th>Actions</th></tr></thead>
+                        <tbody id="comp-body"><tr><td colspan="8" class="empty-state">Select an hour</td></tr></tbody>
                     </table></div>
                 </div>
 
@@ -948,7 +948,7 @@
             document.getElementById('s-hour-players').textContent = snap.size;
             var totalRebuys = 0;
             if (snap.empty) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No players this ' + (isDaily ? 'day' : 'hour') + ' yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No players this ' + (isDaily ? 'day' : 'hour') + ' yet</td></tr>';
                 document.getElementById('s-hour-rebuys').textContent = '0';
                 return;
             }
@@ -971,6 +971,7 @@
                     '<td>' + photo + (d.displayName || '—') + '</td>' +
                     '<td class="' + scoreClass + '">' + scoreText + '</td>' +
                     '<td>' + (isDaily ? (d.hands || 0) : '—') + '</td>' +
+                    '<td>' + (isDaily ? formatPlayTime(d.playMs) : '—') + '</td>' +
                     '<td>' + (isDaily ? (d.rebuys || 0) : '—') + '</td>' +
                     '<td>' + (isDaily ? (d.bestHand || '—') : '—') + '</td>' +
                     '<td>' +
@@ -1026,6 +1027,17 @@
         return (icons[p] || '') + ' ' + p;
     }
 
+    // Milliseconds of play time as "2h 15m" / "40m" / "<1m". Shared by the
+    // leaderboard's per-day column and the Users panel's lifetime column so the
+    // two never drift apart.
+    function formatPlayTime(ms) {
+        if (!ms || ms < 1000) return '—';
+        var h = Math.floor(ms / 3600000);
+        var m = Math.floor((ms % 3600000) / 60000);
+        if (!h && !m) return '<1m';
+        return h ? h + 'h ' + m + 'm' : m + 'm';
+    }
+
     // Anything behind the current build is worth spotting at a glance: an old
     // client silently stops reporting whatever newer fields the panel reads.
     function versionCell(v) {
@@ -1051,10 +1063,7 @@
                     var fh = parseInt(bestKey.replace('h', ''), 10);
                     d._favHour = (fh % 12 || 12) + (fh < 12 ? ' AM' : ' PM');
                 } else { d._favHour = '—'; }
-                var ms = d.totalPlayTimeMs || 0;
-                var totalH = Math.floor(ms / 3600000);
-                var totalM = Math.floor((ms % 3600000) / 60000);
-                d._totalPlaytime = ms ? (totalH ? totalH + 'h ' + totalM + 'm' : totalM + 'm') : '—';
+                d._totalPlaytime = formatPlayTime(d.totalPlayTimeMs);
                 if (d.timezoneOffset != null) {
                     var tz = -d.timezoneOffset;
                     d._timezone = 'UTC' + (tz >= 0 ? '+' : '') + Math.floor(Math.abs(tz) / 60) +
@@ -1276,7 +1285,7 @@
             document.getElementById('comp-count').textContent = snap.size + ' players';
             var tbody = document.getElementById('comp-body');
             if (snap.empty) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No data for this ' + (isDaily ? 'day' : 'hour') + '</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No data for this ' + (isDaily ? 'day' : 'hour') + '</td></tr>';
                 return;
             }
             tbody.innerHTML = '';
@@ -1297,6 +1306,7 @@
                     '<td>' + photo + (d.displayName || '—') + '</td>' +
                     '<td class="' + scoreClass + '">' + scoreText + '</td>' +
                     '<td>' + (isDaily ? (d.hands || 0) : '—') + '</td>' +
+                    '<td>' + (isDaily ? formatPlayTime(d.playMs) : '—') + '</td>' +
                     '<td>' + (isDaily ? (d.rebuys || 0) : '—') + '</td>' +
                     '<td>' + (isDaily ? (d.bestHand || '—') : '—') + '</td>' +
                     '<td>' +

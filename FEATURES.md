@@ -543,7 +543,7 @@ Separate page (`admin.html`), gated to a single admin email via Google sign-in.
 
 | Tab | Capabilities |
 |---|---|
-| **Overview** | Total users · Active today · Current-hour players · Rebuys; live current-hour table (15s refresh); recent logins |
+| **Overview** | Total users · Active today · Current-hour players · Rebuys; live current-hour/day table (15s refresh) with score, hands, **time played**, rebuys and best hand; recent logins |
 | **Users** | Full user list with name/email search |
 | **Competitions** | Browse hourly/daily results, delete or reset individual scores; CRUD for limited-time **Events** (name, emoji, type, multiplier, hand, start/end) |
 | **Features** | Remote flags — `facebookSignIn`, `champions`, `stories`, `friendsRooms`, and the ALL IN daily limit |

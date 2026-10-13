@@ -51,7 +51,7 @@ test('every function that writes daily_scores sends uid', () => {
     const writers = dailyScoreWriters(LEADERBOARDS);
     assert.deepStrictEqual(
         writers.map((fn) => fn.name).sort(),
-        ['flushDailyScore', 'patchOwnCountry', 'pushDailyRebuy'],
+        ['flushDailyScore', 'patchOwnCountry', 'pushDailyPlayTime', 'pushDailyRebuy'],
         'a new daily_scores writer appeared — make sure it sends uid, then add it here'
     );
     writers.forEach((fn) => {
@@ -100,3 +100,83 @@ test('running patchOwnCountry writes uid and country to the day document', async
     assert.strictEqual(daily.fields.country, 'US');
     assert.strictEqual(daily.opts.merge, true);
 });
+
+// Time played, the column the admin board shows next to hands played. The write
+// is driven by the session flush in js/firebase.js, which fires on every
+// background/foreground switch — so the two guards that matter are that a
+// session too short to count writes nothing, and that the day it lands in is
+// the day the session started, not the day it ended.
+test('pushDailyPlayTime increments playMs on the session\'s own day', async () => {
+    const { context, writes } = playTimeContext();
+    context.pushDailyPlayTime(90000, '2026-09-26');
+    await new Promise((r) => setImmediate(r));
+
+    assert.strictEqual(writes.length, 1);
+    assert.strictEqual(writes[0].name, 'daily_scores');
+    assert.strictEqual(writes[0].id, '2026-09-26_u1');
+    assert.strictEqual(writes[0].fields.uid, 'u1');
+    assert.strictEqual(writes[0].fields.dayKey, '2026-09-26');
+    assert.deepStrictEqual(writes[0].fields.playMs, { increment: 90000 });
+    assert.strictEqual(writes[0].opts.merge, true);
+});
+
+test('pushDailyPlayTime falls back to today when no day is given', async () => {
+    const { context, writes } = playTimeContext();
+    context.pushDailyPlayTime(5000);
+    await new Promise((r) => setImmediate(r));
+
+    assert.strictEqual(writes[0].id, '2026-09-27_u1');
+    assert.strictEqual(writes[0].fields.dayKey, '2026-09-27');
+});
+
+test('pushDailyPlayTime writes nothing without a user or a positive duration', async () => {
+    const signedOut = playTimeContext({ user: null });
+    signedOut.context.pushDailyPlayTime(90000, '2026-09-26');
+
+    const noTime = playTimeContext();
+    noTime.context.pushDailyPlayTime(0, '2026-09-26');
+    noTime.context.pushDailyPlayTime(-5000, '2026-09-26');
+    noTime.context.pushDailyPlayTime(undefined, '2026-09-26');
+
+    await new Promise((r) => setImmediate(r));
+    assert.deepStrictEqual(signedOut.writes, []);
+    assert.deepStrictEqual(noTime.writes, []);
+});
+
+// js/firebase.js owns the session clock; leaving it uncalled there would make
+// the column silently stay empty, which no test of leaderboards.js could catch.
+test('the session flush hands its duration to pushDailyPlayTime', () => {
+    const firebaseJs = fs.readFileSync(path.join(ROOT, 'js', 'firebase.js'), 'utf8');
+    const flush = firebaseJs.match(/function _vpFlushSession\(\)[\s\S]*?\n}/)[0];
+    assert.match(flush, /pushDailyPlayTime\(dur, _vpSessionDayKey\)/);
+    // The day key is re-resolved per session, so a session that starts after
+    // midnight does not keep filing time under yesterday.
+    const reset = firebaseJs.match(/function _vpResetSession\(\)[\s\S]*?\n}/)[0];
+    assert.match(reset, /_vpSessionDayKey = _vpDayKeyNow\(\)/);
+});
+
+function playTimeContext(opts) {
+    const writes = [];
+    const user = (opts && 'user' in opts) ? opts.user : { uid: 'u1' };
+    const context = vm.createContext({
+        window: { egUser: user },
+        db: {
+            collection: (name) => ({
+                doc: (id) => ({
+                    set: (fields, setOpts) => { writes.push({ name, id, fields, opts: setOpts }); return Promise.resolve(); }
+                })
+            })
+        },
+        firebase: { firestore: {
+            FieldValue: {
+                increment: (n) => ({ increment: n }),
+                serverTimestamp: () => 'server-time'
+            }
+        } },
+        firebaseSafe: (op) => op(),
+        getDayKey: () => '2026-09-27',
+        Promise, Object, String
+    });
+    vm.runInContext(LEADERBOARDS.match(/function pushDailyPlayTime\(ms, dayKey\)[\s\S]*?\n}/)[0], context);
+    return { context, writes };
+}
