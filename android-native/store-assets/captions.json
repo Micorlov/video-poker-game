@@ -1,0 +1,130 @@
+{
+  "en": [
+    { "kicker": "Free video poker", "l1": "No ads. No real money.", "l2": "Just five cards." },
+    { "kicker": "Deuces Wild", "l1": "Every 2 is wild.", "l2": "Chase Four Deuces." },
+    { "kicker": "Triple Play & Five Play", "l1": "Hold once.", "l2": "Draw five hands." },
+    { "kicker": "Nine winning hands", "l1": "Hit a Straight.", "l2": "Chase the Royal." },
+    { "kicker": "Exact strategy hints", "l1": "See the best hold.", "l2": "On every hand." },
+    { "kicker": "16 languages", "l1": "Plays in your", "l2": "own language." }
+  ],
+  "es": [
+    { "kicker": "Video póker gratis", "l1": "Sin anuncios ni dinero.", "l2": "Solo cinco cartas." },
+    { "kicker": "Deuces Wild", "l1": "Cada 2 es comodín.", "l2": "Busca los cuatro 2." },
+    { "kicker": "Triple Play y Five Play", "l1": "Retén una vez.", "l2": "Juega cinco manos." },
+    { "kicker": "Nueve jugadas ganadoras", "l1": "Liga una escalera.", "l2": "Persigue la Real." },
+    { "kicker": "Pistas de estrategia exactas", "l1": "Mira la mejor jugada.", "l2": "En cada mano." },
+    { "kicker": "16 idiomas", "l1": "Juega en", "l2": "tu idioma." }
+  ],
+  "pt-BR": [
+    { "kicker": "Vídeo pôquer grátis", "l1": "Sem anúncios. Sem dinheiro.", "l2": "Só cinco cartas." },
+    { "kicker": "Deuces Wild", "l1": "Todo 2 é curinga.", "l2": "Busque os quatro 2." },
+    { "kicker": "Triple Play e Five Play", "l1": "Segure uma vez.", "l2": "Puxe cinco mãos." },
+    { "kicker": "Nove mãos vencedoras", "l1": "Acerte uma sequência.", "l2": "Busque o Royal." },
+    { "kicker": "Dicas exatas de estratégia", "l1": "Veja a melhor jogada.", "l2": "Em cada mão." },
+    { "kicker": "16 idiomas", "l1": "Joga no", "l2": "seu idioma." }
+  ],
+  "de": [
+    { "kicker": "Gratis Video Poker", "l1": "Ohne Werbung, ohne Geld.", "l2": "Nur fünf Karten." },
+    { "kicker": "Deuces Wild", "l1": "Jede 2 ist ein Joker.", "l2": "Jag die vier Zweien." },
+    { "kicker": "Triple Play & Five Play", "l1": "Einmal halten.", "l2": "Fünf Hände ziehen." },
+    { "kicker": "Neun Gewinnhände", "l1": "Triff die Straße.", "l2": "Jag den Royal." },
+    { "kicker": "Exakte Strategie-Tipps", "l1": "Sieh die beste Wahl.", "l2": "Bei jeder Hand." },
+    { "kicker": "16 Sprachen", "l1": "Spielt in deiner", "l2": "Sprache." }
+  ],
+  "fr": [
+    { "kicker": "Vidéo poker gratuit", "l1": "Sans pub. Sans argent.", "l2": "Juste cinq cartes." },
+    { "kicker": "Deuces Wild", "l1": "Chaque 2 est un joker.", "l2": "Visez les quatre 2." },
+    { "kicker": "Triple Play & Five Play", "l1": "Gardez une fois.", "l2": "Tirez cinq mains." },
+    { "kicker": "Neuf mains gagnantes", "l1": "Touchez une quinte.", "l2": "Visez la Royale." },
+    { "kicker": "Conseils de stratégie exacts", "l1": "Voyez quoi garder.", "l2": "À chaque main." },
+    { "kicker": "16 langues", "l1": "Joue dans", "l2": "votre langue." }
+  ],
+  "it": [
+    { "kicker": "Video poker gratis", "l1": "Zero pubblicità.", "l2": "Zero soldi veri." },
+    { "kicker": "Deuces Wild", "l1": "Ogni 2 è un jolly.", "l2": "Insegui i quattro 2." },
+    { "kicker": "Triple Play e Five Play", "l1": "Tieni una volta.", "l2": "Pesca cinque mani." },
+    { "kicker": "Nove mani vincenti", "l1": "Fai scala.", "l2": "Insegui la Reale." },
+    { "kicker": "Consigli di strategia esatti", "l1": "Scopri cosa tenere.", "l2": "A ogni mano." },
+    { "kicker": "16 lingue", "l1": "Gioca nella", "l2": "tua lingua." }
+  ],
+  "pl": [
+    { "kicker": "Darmowy video poker", "l1": "Bez reklam. Bez kasy.", "l2": "Tylko pięć kart." },
+    { "kicker": "Deuces Wild", "l1": "Każda 2 to dżoker.", "l2": "Goń cztery dwójki." },
+    { "kicker": "Triple Play i Five Play", "l1": "Zatrzymaj raz.", "l2": "Dobierz pięć rąk." },
+    { "kicker": "Dziewięć układów", "l1": "Traf strita.", "l2": "Goń pokera królewskiego." },
+    { "kicker": "Dokładne podpowiedzi", "l1": "Zobacz, co zatrzymać.", "l2": "W każdym rozdaniu." },
+    { "kicker": "16 języków", "l1": "Gra w Twoim", "l2": "języku." }
+  ],
+  "ru": [
+    { "kicker": "Бесплатный видеопокер", "l1": "Без рекламы и денег.", "l2": "Только пять карт." },
+    { "kicker": "Deuces Wild", "l1": "Каждая 2 — джокер.", "l2": "Лови четыре двойки." },
+    { "kicker": "Triple Play и Five Play", "l1": "Держи один раз.", "l2": "Тяни пять рук." },
+    { "kicker": "Девять выигрышных рук", "l1": "Собери стрит.", "l2": "Гонись за роялем." },
+    { "kicker": "Точные подсказки", "l1": "Лучший выбор карт.", "l2": "В каждой раздаче." },
+    { "kicker": "16 языков", "l1": "Играет на вашем", "l2": "языке." }
+  ],
+  "tr": [
+    { "kicker": "Ücretsiz video poker", "l1": "Reklam yok. Para yok.", "l2": "Sadece beş kart." },
+    { "kicker": "Deuces Wild", "l1": "Her 2 jokerdir.", "l2": "Dört ikiliyi kovala." },
+    { "kicker": "Triple Play & Five Play", "l1": "Bir kez tut.", "l2": "Beş el çek." },
+    { "kicker": "Dokuz kazanan el", "l1": "Kent yakala.", "l2": "Royal'i kovala." },
+    { "kicker": "Kesin strateji ipuçları", "l1": "En iyi seçimi gör.", "l2": "Her elde." },
+    { "kicker": "16 dil", "l1": "Kendi dilinde", "l2": "oynar." }
+  ],
+  "id": [
+    { "kicker": "Video poker gratis", "l1": "Tanpa iklan, tanpa uang.", "l2": "Cuma lima kartu." },
+    { "kicker": "Deuces Wild", "l1": "Setiap 2 adalah wild.", "l2": "Kejar empat kartu 2." },
+    { "kicker": "Triple Play & Five Play", "l1": "Tahan sekali.", "l2": "Tarik lima tangan." },
+    { "kicker": "Sembilan tangan menang", "l1": "Dapatkan straight.", "l2": "Kejar Royal Flush." },
+    { "kicker": "Petunjuk strategi akurat", "l1": "Lihat pilihan terbaik.", "l2": "Di setiap putaran." },
+    { "kicker": "16 bahasa", "l1": "Main dalam", "l2": "bahasamu." }
+  ],
+  "hi": [
+    { "kicker": "मुफ़्त वीडियो पोकर", "l1": "न विज्ञापन, न असली पैसा।", "l2": "बस पाँच पत्ते।" },
+    { "kicker": "Deuces Wild", "l1": "हर 2 वाइल्ड है।", "l2": "चार 2 का पीछा करें।" },
+    { "kicker": "Triple Play और Five Play", "l1": "एक बार होल्ड करें।", "l2": "पाँच हाथ खेलें।" },
+    { "kicker": "नौ जीतने वाले हाथ", "l1": "स्ट्रेट बनाएँ।", "l2": "रॉयल का पीछा करें।" },
+    { "kicker": "सटीक रणनीति संकेत", "l1": "सबसे अच्छा होल्ड देखें।", "l2": "हर हाथ में।" },
+    { "kicker": "16 भाषाएँ", "l1": "आपकी अपनी", "l2": "भाषा में।" }
+  ],
+  "ja": [
+    { "kicker": "無料ビデオポーカー", "l1": "広告なし、課金なし。", "l2": "カードは5枚だけ。" },
+    { "kicker": "Deuces Wild", "l1": "2はすべてワイルド。", "l2": "フォーデュースを狙え。" },
+    { "kicker": "Triple Play & Five Play", "l1": "ホールドは一度、", "l2": "5ハンドをドロー。" },
+    { "kicker": "9種類の役", "l1": "ストレートを決めて", "l2": "ロイヤルを狙え。" },
+    { "kicker": "正確な戦略ヒント", "l1": "最適なホールドが", "l2": "毎回ひと目でわかる。" },
+    { "kicker": "16言語対応", "l1": "あなたの言語で", "l2": "遊べる。" }
+  ],
+  "ko": [
+    { "kicker": "무료 비디오 포커", "l1": "광고 없음. 현금 없음.", "l2": "카드 다섯 장뿐." },
+    { "kicker": "Deuces Wild", "l1": "모든 2가 와일드.", "l2": "포 듀스를 노려요." },
+    { "kicker": "Triple Play & Five Play", "l1": "한 번 홀드하고", "l2": "다섯 핸드 드로우." },
+    { "kicker": "아홉 가지 족보", "l1": "스트레이트를 맞추고", "l2": "로열을 노리세요." },
+    { "kicker": "정확한 전략 힌트", "l1": "최선의 홀드를 확인.", "l2": "매 핸드마다." },
+    { "kicker": "16개 언어", "l1": "내 언어로", "l2": "플레이." }
+  ],
+  "zh-CN": [
+    { "kicker": "免费视频扑克", "l1": "无广告，无真钱。", "l2": "只有五张牌。" },
+    { "kicker": "Deuces Wild", "l1": "每张2都是百搭。", "l2": "冲击四条2。" },
+    { "kicker": "Triple Play & Five Play", "l1": "保留一次，", "l2": "同时抽五手牌。" },
+    { "kicker": "九种获胜牌型", "l1": "拿下顺子，", "l2": "冲击皇家同花顺。" },
+    { "kicker": "精准策略提示", "l1": "看清最佳保留。", "l2": "每一手都有。" },
+    { "kicker": "十六种语言", "l1": "用你的语言", "l2": "畅玩。" }
+  ],
+  "he": [
+    { "kicker": "וידאו פוקר חינם", "l1": "בלי פרסומות. בלי כסף.", "l2": "רק חמישה קלפים." },
+    { "kicker": "Deuces Wild", "l1": "כל 2 הוא ג'וקר.", "l2": "רדפו אחרי ארבעה 2." },
+    { "kicker": "Triple Play & Five Play", "l1": "החזיקו פעם אחת.", "l2": "משכו חמש ידיים." },
+    { "kicker": "תשע ידיים זוכות", "l1": "תפסו סטרייט.", "l2": "רדפו אחרי הרויאל." },
+    { "kicker": "רמזי אסטרטגיה מדויקים", "l1": "ראו מה כדאי להחזיק.", "l2": "בכל יד." },
+    { "kicker": "16 שפות", "l1": "משחק בשפה", "l2": "שלכם." }
+  ],
+  "ar": [
+    { "kicker": "فيديو بوكر مجاني", "l1": "بلا إعلانات. بلا مال.", "l2": "خمس بطاقات فقط." },
+    { "kicker": "Deuces Wild", "l1": "كل 2 جوكر.", "l2": "طارد أربع ثنائيات." },
+    { "kicker": "Triple Play و Five Play", "l1": "ثبّت مرة واحدة.", "l2": "واسحب خمس أيادٍ." },
+    { "kicker": "تسع أيادٍ رابحة", "l1": "كوّن ستريت.", "l2": "وطارد الرويال." },
+    { "kicker": "تلميحات استراتيجية دقيقة", "l1": "اعرف أفضل اختيار.", "l2": "في كل يد." },
+    { "kicker": "16 لغة", "l1": "العب", "l2": "بلغتك." }
+  ]
+}

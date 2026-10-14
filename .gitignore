@@ -16,3 +16,6 @@ android/app/google-services.json.bak
 # Generated per build by build.js; the deploy ships its own copy
 build-info.json
 www/build-info.json
+
+# Raw emulator captures behind the framed native store screenshots
+android-native/store-assets/raw/
