@@ -2,8 +2,11 @@ package com.micorlov.videopoker.nativeapp
 
 import android.content.Context
 import com.google.firebase.FirebaseApp
+import com.micorlov.videopoker.nativeapp.data.AnalyticsEvents
 import com.micorlov.videopoker.nativeapp.data.DailyProfitStore
 import com.micorlov.videopoker.nativeapp.data.DailyProfitTracker
+import com.micorlov.videopoker.nativeapp.data.EventLogger
+import com.micorlov.videopoker.nativeapp.data.FirebaseEventLogger
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.SharedPreferencesStore
 import com.micorlov.videopoker.nativeapp.data.social.AuthGateway
@@ -36,6 +39,13 @@ class AppContainer(context: Context) {
     val remote: SocialRemote = if (firebaseReady) FirestoreSocialRemote(appVersion = versionName()) else UnavailableRemote
     val friends = FriendsRepository(remote, gameRepository)
     val profitSync = ProfitSync(remote, auth.user, dailyProfit.state, scope).also { if (firebaseReady) it.start() }
+
+    /** GA4 through Firebase Analytics: the com.micorlov.videopoker stream the web build reported to. */
+    val events: EventLogger = if (firebaseReady) FirebaseEventLogger(appContext) else EventLogger.NONE
+
+    init {
+        events.log(AnalyticsEvents.APP_OPEN, mapOf("app_version" to versionName()))
+    }
 
     private fun versionName(): String =
         runCatching { appContext.packageManager.getPackageInfo(appContext.packageName, 0).versionName }.getOrNull() ?: "unknown"

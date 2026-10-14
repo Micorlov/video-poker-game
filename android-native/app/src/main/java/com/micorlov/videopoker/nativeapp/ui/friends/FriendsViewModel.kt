@@ -2,6 +2,8 @@ package com.micorlov.videopoker.nativeapp.ui.friends
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.micorlov.videopoker.nativeapp.data.AnalyticsEvents
+import com.micorlov.videopoker.nativeapp.data.EventLogger
 import com.micorlov.videopoker.nativeapp.data.social.AuthGateway
 import com.micorlov.videopoker.nativeapp.data.social.FriendsRepository
 import com.micorlov.videopoker.nativeapp.data.social.RemoteUnavailable
@@ -70,6 +72,7 @@ class FriendsViewModel(
     private val clock: () -> Long = System::currentTimeMillis,
     /** The time, re-read often enough to keep the countdown current and roll the table over at UTC midnight. */
     private val ticker: Flow<Long> = clockTicker(clock),
+    private val events: EventLogger = EventLogger.NONE,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -111,7 +114,7 @@ class FriendsViewModel(
     fun onInvite(host: SignInHost) {
         val current = _state.value
         when {
-            current.code != null -> effectChannel.trySend(FriendsEffect.Share(current.code))
+            current.code != null -> share(current.code)
             current.auth == FriendsAuth.SIGNED_OUT -> {
                 shareWhenReady = true
                 onSignIn(host)
@@ -165,6 +168,11 @@ class FriendsViewModel(
         profileJob = viewModelScope.launch { loadProfile(user) }
     }
 
+    private fun share(code: String) {
+        events.log(AnalyticsEvents.INVITE_SHARED, mapOf("channel" to "system_share"))
+        effectChannel.trySend(FriendsEffect.Share(code))
+    }
+
     private suspend fun loadProfile(user: AuthUser) {
         val code = fetchCode(user) ?: run {
             shareWhenReady = false
@@ -173,7 +181,7 @@ class FriendsViewModel(
         _state.update { it.copy(code = code) }
         if (shareWhenReady) {
             shareWhenReady = false
-            effectChannel.trySend(FriendsEffect.Share(code))
+            share(code)
         }
         joinPendingInvite(user)
     }

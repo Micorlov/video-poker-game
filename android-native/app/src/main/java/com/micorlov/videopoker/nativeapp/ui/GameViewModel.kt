@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.micorlov.videopoker.nativeapp.data.AnalyticsEvents
 import com.micorlov.videopoker.nativeapp.data.AppTheme
+import com.micorlov.videopoker.nativeapp.data.EventLogger
 import com.micorlov.videopoker.nativeapp.data.GameSpeed
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.UserSettings
@@ -155,6 +157,8 @@ class GameViewModel(
     private val analysisMode: AnalysisMode = AnalysisMode.OFF,
     /** Each settled hand or double-up's chips won minus chips staked, for the friends' daily ranking. */
     private val onNetResult: (Long) -> Unit = {},
+    /** Product analytics (GA4 through Firebase in the app); tests and offline builds log nowhere. */
+    private val events: EventLogger = EventLogger.NONE,
 ) : ViewModel() {
 
     private val effectChannel = Channel<UiEffect>(Channel.UNLIMITED)
@@ -227,6 +231,7 @@ class GameViewModel(
         _state.update { it.copy(game = bonused) }
         repository.saveGame(bonused.toSaved())
         repository.saveDailyBonusDay(today)
+        events.log(AnalyticsEvents.DAILY_BONUS_CLAIMED, mapOf("amount" to Rules.DAILY_BONUS.toLong()))
         showToast(ToastMessage.DailyBonus(Rules.DAILY_BONUS))
     }
 
@@ -254,6 +259,7 @@ class GameViewModel(
                 val transition = GameEngine.deal(game, random)
                 _state.update { it.copy(revealedDoubleUp = 0) }
                 commit(transition, persist = transition.events.any { it is GameEvent.Rebuy })
+                if (transition.state.phase == Phase.HOLD) logHandStarted(transition.state)
                 requestAnalysis(transition.state)
             }
             Phase.HOLD -> draw(game)
@@ -267,6 +273,15 @@ class GameViewModel(
         commit(transition, persist = true)
         val drawn = transition.state.outcome ?: return
         onNetResult(DailyProfitPolicy.handDelta(drawn))
+        events.log(
+            AnalyticsEvents.HAND_COMPLETED,
+            mapOf(
+                "variant" to game.variant.storageKey,
+                "hands" to game.handCount.toLong(),
+                "result" to drawn.bestType.key,
+                "won" to drawn.isWin,
+            ),
+        )
         val pending = PendingReview(
             dealRound = game.round,
             drawRound = transition.state.round,
@@ -285,6 +300,11 @@ class GameViewModel(
             }
         }
     }
+
+    private fun logHandStarted(game: GameState) = events.log(
+        AnalyticsEvents.HAND_STARTED,
+        mapOf("variant" to game.variant.storageKey, "hands" to game.handCount.toLong(), "bet" to game.bet.toLong()),
+    )
 
     /** Works out the hold maths for [game]'s deal (a hand being held), if anything needs it and it is not already known. */
     private fun requestAnalysis(game: GameState) {
@@ -397,6 +417,7 @@ class GameViewModel(
         if (reviewAskedThisSession || reviewTimerPending) return
         if (!ReviewPolicy.earnedAsk(state, game.level, game.winStreak, today(), clock())) return
         reviewTimerPending = true
+        events.log(AnalyticsEvents.REVIEW_PROMPT_EARNED, emptyMap())
         effectChannel.trySend(UiEffect.ReviewEarned)
     }
 
@@ -419,6 +440,7 @@ class GameViewModel(
             ReviewAsk.STAR_CARD -> {
                 reviewAskedThisSession = true
                 repository.saveReview(state.copy(cardCount = state.cardCount + 1, lastCardAt = now))
+                events.log(AnalyticsEvents.REVIEW_CARD_SHOWN, emptyMap())
                 _state.update { it.copy(reviewCardVisible = true) }
             }
         }
@@ -427,10 +449,14 @@ class GameViewModel(
     /** "Rate now" on the card: never ask again. */
     fun onReviewRated() {
         repository.saveReview(repository.loadReview().copy(rated = true))
+        events.log(AnalyticsEvents.REVIEW_CARD_RATE, emptyMap())
         _state.update { it.copy(reviewCardVisible = false) }
     }
 
-    fun onReviewDismissed() = _state.update { it.copy(reviewCardVisible = false) }
+    fun onReviewDismissed() {
+        events.log(AnalyticsEvents.REVIEW_CARD_DISMISSED, emptyMap())
+        _state.update { it.copy(reviewCardVisible = false) }
+    }
 
     fun onToggleSound() = updateSettings { it.copy(soundEnabled = !it.soundEnabled) }
 
@@ -490,6 +516,7 @@ class GameViewModel(
 
     fun onOnboardingFinished() {
         repository.markOnboardingSeen()
+        events.log(AnalyticsEvents.ONBOARDING_STEP, mapOf("step" to "complete"))
         _state.update { it.copy(showOnboarding = false) }
     }
 

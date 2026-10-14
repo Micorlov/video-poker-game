@@ -43,12 +43,15 @@ class MainActivity : ComponentActivity() {
                 flagFetcher = RemoteFlagsFetcher::fetch,
                 analysisMode = AnalysisMode.BACKGROUND,
                 onNetResult = container.dailyProfit::record,
+                events = container.events,
             )
         }
     }
 
     private val friendsViewModel: FriendsViewModel by viewModels {
-        factory { FriendsViewModel(container.auth, container.remote, container.friends, container.dailyProfit.state) }
+        factory {
+            FriendsViewModel(container.auth, container.remote, container.friends, container.dailyProfit.state, events = container.events)
+        }
     }
 
     override fun attachBaseContext(newBase: Context) = super.attachBaseContext(LocaleContext.wrap(newBase))
