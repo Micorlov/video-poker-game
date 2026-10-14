@@ -7,7 +7,8 @@ Everything that works offline or against public data is already built; see `e2e-
 ## Steps (once, in the Firebase console for project `video-poker-6d665`)
 
 1. Project settings → Your apps → **Add app → Android**.
-   - Package name: `com.micorlov.videopoker.nativeapp`
+   - Package name: `com.micorlov.videopoker` (since 3.0.0; the Capacitor app's Firebase app,
+     already registered with the upload and Play app-signing SHA-1s)
    - Debug signing SHA-1: `0C:46:3D:6E:46:30:10:D2:1B:59:15:2E:5D:1A:6B:47:69:55:24:9D`
      (from `~/.android/debug.keystore`; add the release SHA-1 later for Play builds)
 2. Authentication → Sign-in method → make sure **Google** is enabled.

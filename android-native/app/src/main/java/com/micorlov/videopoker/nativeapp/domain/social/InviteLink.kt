@@ -9,7 +9,7 @@ import java.net.URLEncoder
  * same scheme.
  */
 object InviteLink {
-    const val PACKAGE = "com.micorlov.videopoker.nativeapp"
+    const val PACKAGE = "com.micorlov.videopoker"
     private const val STORE = "https://play.google.com/store/apps/details"
 
     fun forCode(code: String, packageName: String = PACKAGE): String =

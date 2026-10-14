@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/launcher_background" />
-    <foreground>
-        <!-- The brand art is full-bleed; inset it so the launcher's mask never crops the cards. -->
-        <inset
-            android:drawable="@drawable/ic_launcher_art"
-            android:inset="18%" />
-    </foreground>
+    <!-- The Play Store icon art, already padded into the adaptive safe zone by
+         scripts/icons/make_adaptive_foreground.py, so it needs no inset. -->
+    <foreground android:drawable="@drawable/ic_launcher_art" />
 </adaptive-icon>

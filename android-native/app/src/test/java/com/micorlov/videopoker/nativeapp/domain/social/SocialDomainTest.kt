@@ -33,7 +33,7 @@ class InviteLinkTest {
     fun `the link opens the Play listing and carries the code in the install referrer`() {
         val link = InviteLink.forCode("AB23CD")
         assertEquals(
-            "https://play.google.com/store/apps/details?id=com.micorlov.videopoker.nativeapp&referrer=ref%3DAB23CD",
+            "https://play.google.com/store/apps/details?id=com.micorlov.videopoker&referrer=ref%3DAB23CD",
             link,
         )
         val referrer = URI(link).query.substringAfter("referrer=")

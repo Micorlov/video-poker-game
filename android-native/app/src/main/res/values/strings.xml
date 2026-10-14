@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Video Poker (Native)</string>
+    <string name="app_name">Video Poker</string>
 
     <!-- Navigation -->
     <string name="nav_play">Play</string>
@@ -205,7 +205,7 @@
     <string name="review_rate">Rate now</string>
     <string name="settings_language">Language</string>
     <string name="ob_eyebrow">Social Casino</string>
-    <string name="ob_welcome_title">Royal Video Poker</string>
+    <string name="ob_welcome_title">Video Poker</string>
     <string name="ob_welcome_subtitle">Five cards. One decision. Play with free chips — no real money, all the thrill.</string>
     <string name="ob_pill_5card">5-Card Draw</string>
     <string name="ob_pill_free_chips">Free Chips Daily</string>

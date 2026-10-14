@@ -16,18 +16,19 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        // A separate applicationId so this installs next to the Capacitor app
-        // (com.micorlov.videopoker) instead of replacing it.
-        applicationId = "com.micorlov.videopoker.nativeapp"
+        // Ships as the update to the Capacitor app's Play listing, so it shares its
+        // applicationId and continues its version codes (the web app's last is 14).
+        applicationId = "com.micorlov.videopoker"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.1.0"
+        versionCode = 15
+        versionName = "3.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // The upload key lives outside the repo: `source ~/keys/videopoker-native-upload.env`
-    // before `./gradlew bundleRelease`. Without those variables the release build is unsigned.
+    // The upload key lives outside the repo: `source ~/keys/videopoker-upload.env` (the key Play
+    // has on file for com.micorlov.videopoker) before `./gradlew bundleRelease`. Without those
+    // variables the release build is unsigned.
     val uploadKeystore = System.getenv("VP_NATIVE_KEYSTORE")
     signingConfigs {
         if (uploadKeystore != null) {

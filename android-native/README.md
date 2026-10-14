@@ -1,11 +1,15 @@
 # Video Poker — native Android (Kotlin + Jetpack Compose)
 
-A from-scratch native port of the web game in the repo root. It installs **next to** the
-Capacitor app (`../android`, `com.micorlov.videopoker`) under its own id,
-`com.micorlov.videopoker.nativeapp` (`native` is a reserved word in Java, so it can't be a
-package segment).
+A from-scratch native port of the web game in the repo root. Since 3.0.0 (versionCode 15) it
+ships as the update to the Capacitor app's Play listing, under the same applicationId
+`com.micorlov.videopoker`, signed with that listing's upload key (`~/keys/videopoker-upload.env`).
+The Kotlin namespace stays `com.micorlov.videopoker.nativeapp` (`native` is a reserved word in
+Java, so it can't be a package segment).
 
-This is **phase 1: the core game.** The web app stays the product until the later phases land.
+Release: `source ~/keys/videopoker-upload.env && ./gradlew bundleRelease`, then
+`PLAY_TRACK=internal node ../scripts/play-native-release.js validate|commit` (AAB, store text and
+every locale's screenshots in one edit) and promote the internal release to production in the
+Play Console.
 
 ![Video Poker native screens](screenshots/overview.png)
 
