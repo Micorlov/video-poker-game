@@ -111,6 +111,37 @@ class FriendsViewModelTest {
     }
 
     @Test
+    fun `deleting the account erases it, signs out and says so`() = test {
+        auth.setUser(me)
+        remote.connect("me", "ann", "ANN222")
+        val vm = viewModel()
+        vm.drain()
+
+        vm.onDeleteAccount(TestHost)
+
+        assertTrue(auth.deleted)
+        assertEquals(listOf("me"), remote.erased)
+        assertFalse(remote.areFriends("me", "ann"))
+        assertEquals(FriendsAuth.SIGNED_OUT, vm.state.value.auth)
+        assertFalse(vm.state.value.deleting)
+        assertEquals(ToastMessage.AccountDeleted, assertIs<FriendsEffect.Toast>(vm.drain().single()).message)
+    }
+
+    @Test
+    fun `a failed deletion keeps the player signed in and says it failed`() = test {
+        auth.setUser(me)
+        auth.deleteResult = Result.failure(IllegalStateException("no"))
+        val vm = viewModel()
+        vm.drain()
+
+        vm.onDeleteAccount(TestHost)
+
+        assertEquals(FriendsAuth.SIGNED_IN, vm.state.value.auth)
+        assertFalse(vm.state.value.deleting)
+        assertEquals(ToastMessage.AccountDeleteFailed, assertIs<FriendsEffect.Toast>(vm.drain().single()).message)
+    }
+
+    @Test
     fun `a parked invite is joined after sign in`() = test {
         remote.codes["ann"] = "ANN222"
         game.savePendingLink(DeepLink.Invite("ANN222"))

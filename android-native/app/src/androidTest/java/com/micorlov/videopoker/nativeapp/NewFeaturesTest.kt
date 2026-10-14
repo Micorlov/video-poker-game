@@ -90,17 +90,6 @@ class NewFeaturesTest {
     }
 
     @Test
-    fun theTournamentPillExpandsAndCollapses() {
-        launch()
-
-        compose.onNodeWithTag("tournament-expand").assertDoesNotExist()
-        compose.onNodeWithTag("tournament-pill").performClick()
-        compose.onNodeWithTag("tournament-expand").assertIsDisplayed()
-        compose.onNodeWithTag("tournament-pill").performClick()
-        compose.onNodeWithTag("tournament-expand").assertDoesNotExist()
-    }
-
-    @Test
     fun statsShowsAnEmptyBestHandUntilSomethingIsWon() {
         launch()
 

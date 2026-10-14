@@ -7,7 +7,9 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.micorlov.videopoker.nativeapp.domain.social.AuthUser
@@ -41,6 +43,11 @@ class FirebaseAuthGateway(private val context: Context) : AuthGateway {
     }
 
     private suspend fun signInOrThrow(host: SignInHost): AuthUser {
+        val signedIn = auth.signInWithCredential(googleAuthCredential(host)).await().user
+        return checkNotNull(signedIn).toAuthUser().also { _user.value = it }
+    }
+
+    private suspend fun googleAuthCredential(host: SignInHost): AuthCredential {
         val activity = (host as ActivityHost).activity
         val option = GetSignInWithGoogleOption.Builder(webClientId()).build()
         val request = GetCredentialRequest.Builder().addCredentialOption(option).build()
@@ -49,11 +56,25 @@ class FirebaseAuthGateway(private val context: Context) : AuthGateway {
             "unexpected credential ${credential.type}"
         }
         val idToken = GoogleIdTokenCredential.createFrom(credential.data).idToken
-        val signedIn = auth.signInWithCredential(GoogleAuthProvider.getCredential(idToken, null)).await().user
-        return checkNotNull(signedIn).toAuthUser().also { _user.value = it }
+        return GoogleAuthProvider.getCredential(idToken, null)
     }
 
     override fun signOut() = auth.signOut()
+
+    override suspend fun deleteAccount(host: SignInHost): Result<Unit> = try {
+        val current = checkNotNull(auth.currentUser) { "not signed in" }
+        try {
+            current.delete().await()
+        } catch (e: FirebaseAuthRecentLoginRequiredException) {
+            current.reauthenticate(googleAuthCredential(host)).await()
+            current.delete().await()
+        }
+        Result.success(Unit)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 
     /** The OAuth web client id the google-services plugin generates from google-services.json. */
     @SuppressLint("DiscouragedApi")

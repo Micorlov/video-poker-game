@@ -63,7 +63,7 @@ fun PendingInviteRedirect(friends: FriendsViewModel?, onboarding: Boolean, enabl
     }
 }
 
-private tailrec fun Context.findActivity(): Activity = when (this) {
+internal tailrec fun Context.findActivity(): Activity = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> error("Friends needs an Activity context")

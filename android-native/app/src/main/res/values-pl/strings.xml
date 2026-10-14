@@ -151,8 +151,6 @@
     <string name="settings_more_games">Więcej gier od Orlov Games</string>
     <string name="voice_four_2s_4s">Kareta, od dwójek do czwórek</string>
     <string name="voice_four_5s_ks">Kareta, od piątek do króli</string>
-    <string name="play_tournament_pill">Turniej 2</string>
-    <string name="play_tournament_expand">🏆 Turniej nr 2</string>
     <string name="review_title">Podoba Ci się Wideo Poker?</string>
     <string name="review_body">Szybka ocena w Google Play pomaga innym graczom nas znaleźć.</string>
     <string name="review_rate">Oceń teraz</string>
@@ -174,26 +172,15 @@
     <string name="ob_draw">Wymień</string>
     <string name="ob_one_free_all_in">Jeden darmowy all-in dziennie — zaproś znajomego, aby odblokować kolejny.</string>
     <string name="ob_compete_climb">Rywalizuj i piąć się w górę</string>
-    <string name="ob_race_leaderboards">Ścigaj się w rankingach znajomych, godzinnym i dziennym o bonusowe żetony.</string>
-    <string name="ob_lb_friends">Znajomi</string>
-    <string name="ob_lb_hourly">Godzinny</string>
-    <string name="ob_lb_daily">Dzienny</string>
+    <string name="ob_race_leaderboards">Ścigaj się ze znajomymi w dzisiejszym rankingu.</string>
     <string name="ob_friends_today">Znajomi · Dziś</string>
     <string name="ob_you_are_first">Jesteś nr 1!</string>
     <string name="ob_you">Ty</string>
-    <string name="ob_also_live">Na żywo także: turnieje godzinne i dzienne z wszystkimi graczami aplikacji.</string>
     <string name="ob_never_miss_win">Nie przegap żadnej wygranej</string>
-    <string name="ob_get_notified">Otrzymuj powiadomienia o wynikach turniejów, wyzwaniach znajomych i bonusach dziennych.</string>
+    <string name="ob_get_notified">Otrzymasz powiadomienie, gdy bonus dzienny będzie gotowy.</string>
     <string name="ob_daily_bonus_reminders">Przypomnienia o bonusie dziennym</string>
-    <string name="ob_friend_challenge_alerts">Alerty o wyzwaniach znajomych</string>
-    <string name="ob_tournament_results">Wyniki turniejów</string>
     <string name="ob_enable_notifications">Włącz powiadomienia</string>
     <string name="ob_not_now">Nie teraz</string>
-    <string name="ob_save_progress">Zapisz swoje postępy</string>
-    <string name="ob_sign_in_sync">Zaloguj się, aby zabezpieczyć żetony i rywalizować ze znajomymi.</string>
-    <string name="ob_never_lose">Nigdy nie strać żetonów ani postępów</string>
-    <string name="ob_play_across">Graj na telefonie i tablecie</string>
-    <string name="ob_find_friends">Znajduj znajomych po nazwie automatycznie</string>
     <string name="ob_continue_guest">Kontynuuj jako gość</string>
     <string name="ob_back">Wstecz</string>
     <string name="ob_next">Dalej</string>
@@ -297,4 +284,14 @@
         <item quantity="many">Najlepszy ruch w %1$d z %2$d rozdań</item>
         <item quantity="other">Najlepszy ruch w %1$d z %2$d rozdania</item>
     </plurals>
+
+    <!-- Account, deletion and policy links -->
+    <string name="settings_account">Konto</string>
+    <string name="settings_delete_account">Usuń konto</string>
+    <string name="settings_delete_title">Usunąć konto?</string>
+    <string name="settings_delete_body">Twój profil, połączenia ze znajomymi i dzisiejszy wynik zostaną trwale usunięte z naszych serwerów, a Ty zostaniesz wylogowany. Żetony i postęp na tym urządzeniu zostają. Zapisy nagród za zaproszenia są zachowywane, aby nagrody nie dało się odebrać dwa razy.</string>
+    <string name="settings_delete_confirm">Usuń</string>
+    <string name="toast_account_deleted">Konto usunięte</string>
+    <string name="toast_account_delete_failed">Nie udało się usunąć konta — sprawdź połączenie i spróbuj ponownie</string>
+    <string name="settings_privacy_policy">Polityka prywatności</string>
 </resources>

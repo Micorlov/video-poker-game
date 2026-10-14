@@ -372,6 +372,26 @@ class GameViewModelTest {
     }
 
     @Test
+    fun `a player upgrading from the WebView build is never stamped as first day`() {
+        GameViewModel(repository, Random(5), todayKey = { "2026-10-13" }, reviewEnabled = true, upgradedFromLegacy = true)
+
+        assertEquals("", repository.loadReview().firstDay)
+    }
+
+    @Test
+    fun `a first-day stamp made before the legacy data was recognised is withdrawn`() {
+        repository.saveReview(ReviewState(firstDay = "2026-10-13"))
+        val vm = GameViewModel(
+            repository, Random(WINNING_SEED), todayKey = { "2026-10-13" }, clock = { 5_000 },
+            reviewEnabled = true, upgradedFromLegacy = true,
+        )
+
+        assertEquals("", repository.loadReview().firstDay)
+        assertTrue(vm.playUntilWin() > 0)
+        assertFalse(vm.drainEffects().any { it == UiEffect.ReviewEarned })
+    }
+
+    @Test
     fun `the first ask goes to Google Play's sheet and is recorded`() {
         repository.saveGame(SavedGame())
         val vm = GameViewModel(repository, Random(5), clock = { 5_000 }, reviewEnabled = true)

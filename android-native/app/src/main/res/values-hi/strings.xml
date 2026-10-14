@@ -151,8 +151,6 @@
     <string name="settings_more_games">Orlov Games के और गेम</string>
     <string name="voice_four_2s_4s">चार एक जैसे, दुक्की से चौके तक</string>
     <string name="voice_four_5s_ks">चार एक जैसे, पंजे से बादशाह तक</string>
-    <string name="play_tournament_pill">टूर्नामेंट 2</string>
-    <string name="play_tournament_expand">🏆 टूर्नामेंट #2</string>
     <string name="review_title">वीडियो पोकर पसंद आ रहा है?</string>
     <string name="review_body">Google Play पर एक छोटी-सी रेटिंग दूसरे खिलाड़ियों को हमें ढूँढने में मदद करती है।</string>
     <string name="review_rate">अभी रेट करें</string>
@@ -174,26 +172,15 @@
     <string name="ob_draw">ड्रॉ</string>
     <string name="ob_one_free_all_in">रोज़ एक मुफ़्त ऑल-इन — एक दोस्त को बुलाकर दूसरा खोलें।</string>
     <string name="ob_compete_climb">मुक़ाबला करें और ऊपर चढ़ें</string>
-    <string name="ob_race_leaderboards">बोनस चिप्स के लिए दोस्त, घंटे और दिन की लीडरबोर्ड में दौड़ें।</string>
-    <string name="ob_lb_friends">दोस्त</string>
-    <string name="ob_lb_hourly">प्रति घंटा</string>
-    <string name="ob_lb_daily">रोज़ाना</string>
+    <string name="ob_race_leaderboards">आज की लीडरबोर्ड में अपने दोस्तों से दौड़ लगाएँ।</string>
     <string name="ob_friends_today">दोस्त · आज</string>
     <string name="ob_you_are_first">आप नंबर 1 हैं!</string>
     <string name="ob_you">आप</string>
-    <string name="ob_also_live">यह भी लाइव: ऐप के सभी खिलाड़ियों के ख़िलाफ़ घंटे और दिन के टूर्नामेंट।</string>
     <string name="ob_never_miss_win">कोई जीत न छूटे</string>
-    <string name="ob_get_notified">टूर्नामेंट के नतीजों, दोस्तों की चुनौतियों और रोज़ के बोनस की सूचना पाएँ।</string>
+    <string name="ob_get_notified">रोज़ का बोनस तैयार होने पर सूचना पाएँ।</string>
     <string name="ob_daily_bonus_reminders">रोज़ के बोनस की याद</string>
-    <string name="ob_friend_challenge_alerts">दोस्तों की चुनौती की सूचना</string>
-    <string name="ob_tournament_results">टूर्नामेंट के नतीजे</string>
     <string name="ob_enable_notifications">सूचनाएँ चालू करें</string>
     <string name="ob_not_now">अभी नहीं</string>
-    <string name="ob_save_progress">अपनी प्रगति सहेजें</string>
-    <string name="ob_sign_in_sync">अपनी चिप्स का बैकअप लेने और दोस्तों से मुक़ाबला करने के लिए साइन इन करें।</string>
-    <string name="ob_never_lose">अपनी चिप्स या प्रगति कभी न खोएँ</string>
-    <string name="ob_play_across">अपने फ़ोन और टैबलेट पर खेलें</string>
-    <string name="ob_find_friends">दोस्तों को नाम से अपने आप खोजें</string>
     <string name="ob_continue_guest">मेहमान के रूप में जारी रखें</string>
     <string name="ob_back">पीछे</string>
     <string name="ob_next">आगे</string>
@@ -293,4 +280,14 @@
         <item quantity="one">%2$d में से %1$d हाथ में सबसे अच्छी चाल</item>
         <item quantity="other">%2$d में से %1$d हाथों में सबसे अच्छी चाल</item>
     </plurals>
+
+    <!-- Account, deletion and policy links -->
+    <string name="settings_account">खाता</string>
+    <string name="settings_delete_account">खाता हटाएँ</string>
+    <string name="settings_delete_title">अपना खाता हटाएँ?</string>
+    <string name="settings_delete_body">इससे आपकी प्रोफ़ाइल, दोस्तों के कनेक्शन और आज का स्कोर हमारे सर्वर से हमेशा के लिए हट जाएँगे और आप साइन आउट हो जाएँगे। इस डिवाइस के चिप्स और प्रगति बनी रहेगी। आमंत्रण इनाम के रिकॉर्ड रखे जाते हैं ताकि कोई इनाम दो बार न लिया जा सके।</string>
+    <string name="settings_delete_confirm">हटाएँ</string>
+    <string name="toast_account_deleted">खाता हटा दिया गया</string>
+    <string name="toast_account_delete_failed">खाता हटाया नहीं जा सका — कनेक्शन जाँचें और फिर कोशिश करें</string>
+    <string name="settings_privacy_policy">गोपनीयता नीति</string>
 </resources>

@@ -15,4 +15,10 @@ interface AuthGateway {
     suspend fun signIn(host: SignInHost): Result<AuthUser>
 
     fun signOut()
+
+    /**
+     * Deletes the signed-in account from the sign-in service. Google may ask the player to confirm
+     * their identity again first, which is why it needs the [host].
+     */
+    suspend fun deleteAccount(host: SignInHost): Result<Unit>
 }

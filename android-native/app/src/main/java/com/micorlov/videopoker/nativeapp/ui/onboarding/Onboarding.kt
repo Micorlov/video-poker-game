@@ -313,16 +313,6 @@ private fun GameplayStep() {
 @Composable
 private fun LeaderboardStep() {
     ScreenTitle(stringResource(R.string.ob_compete_climb), stringResource(R.string.ob_race_leaderboards))
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        listOf(R.string.ob_lb_friends, R.string.ob_lb_hourly, R.string.ob_lb_daily).forEachIndexed { i, res ->
-            Text(
-                stringResource(res), fontSize = 13.sp, textAlign = TextAlign.Center,
-                color = if (i == 0) LocalPalette.current.actionInk else VpColors.Text,
-                modifier = Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
-                    .background(if (i == 0) LocalPalette.current.action else VpColors.Surface).padding(vertical = 8.dp),
-            )
-        }
-    }
     Row(Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(stringResource(R.string.ob_friends_today), color = VpColors.TextMuted, fontSize = 13.sp)
         Text(stringResource(R.string.ob_you_are_first), color = VpColors.Gold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
@@ -344,7 +334,6 @@ private fun LeaderboardStep() {
             }
         }
     }
-    Note(stringResource(R.string.ob_also_live))
 }
 
 @Composable
@@ -365,7 +354,7 @@ private fun PushStep(onEnable: () -> Unit, onNotNow: () -> Unit) {
         Box(Modifier.size(84.dp).clip(CircleShape).background(VpColors.Surface), contentAlignment = Alignment.Center) { Text("🔔", fontSize = 40.sp) }
         Text(stringResource(R.string.ob_never_miss_win), color = VpColors.Text, fontSize = 26.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 16.dp))
         Text(stringResource(R.string.ob_get_notified), color = VpColors.TextMuted, fontSize = 15.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
-        Checklist(listOf(R.string.ob_daily_bonus_reminders, R.string.ob_friend_challenge_alerts, R.string.ob_tournament_results))
+        Checklist(listOf(R.string.ob_daily_bonus_reminders))
         ActionButton(text = stringResource(R.string.ob_enable_notifications), icon = "🔔", onClick = onEnable, modifier = Modifier.fillMaxWidth().testTag("onboarding-enable-notifications"))
         Text(
             stringResource(R.string.ob_not_now), color = VpColors.TextMuted, fontSize = 15.sp, textAlign = TextAlign.Center,
@@ -377,9 +366,8 @@ private fun PushStep(onEnable: () -> Unit, onNotNow: () -> Unit) {
 @Composable
 private fun SignInStep(onGuest: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(top = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(stringResource(R.string.ob_save_progress), color = VpColors.Text, fontSize = 26.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-        Text(stringResource(R.string.ob_sign_in_sync), color = VpColors.TextMuted, fontSize = 15.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
-        Checklist(listOf(R.string.ob_never_lose, R.string.ob_play_across, R.string.ob_find_friends))
+        Text(stringResource(R.string.nav_friends), color = VpColors.Text, fontSize = 26.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        Text(stringResource(R.string.friends_sign_in_note), color = VpColors.TextMuted, fontSize = 15.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp, bottom = 24.dp))
         ActionButton(text = stringResource(R.string.ob_continue_guest), icon = "▶", onClick = onGuest, modifier = Modifier.fillMaxWidth().testTag("onboarding-guest"))
     }
 }

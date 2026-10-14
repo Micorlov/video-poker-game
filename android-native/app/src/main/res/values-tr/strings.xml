@@ -151,8 +151,6 @@
     <string name="settings_more_games">Orlov Games’ten daha fazla oyun</string>
     <string name="voice_four_2s_4s">Dörtlü, ikilerden dörtlere</string>
     <string name="voice_four_5s_ks">Dörtlü, beşlerden papazlara</string>
-    <string name="play_tournament_pill">Turnuva 2</string>
-    <string name="play_tournament_expand">🏆 Turnuva No. 2</string>
     <string name="review_title">Video Poker hoşuna gidiyor mu?</string>
     <string name="review_body">Google Play’de kısa bir puan, diğer oyuncuların bizi bulmasına yardımcı olur.</string>
     <string name="review_rate">Şimdi puanla</string>
@@ -174,26 +172,15 @@
     <string name="ob_draw">Çek</string>
     <string name="ob_one_free_all_in">Günde bir ücretsiz all in — bir arkadaş davet ederek bir tane daha aç.</string>
     <string name="ob_compete_climb">Yarış ve yüksel</string>
-    <string name="ob_race_leaderboards">Bonus jetonlar için arkadaş, saatlik ve günlük sıralamalarda yarış.</string>
-    <string name="ob_lb_friends">Arkadaşlar</string>
-    <string name="ob_lb_hourly">Saatlik</string>
-    <string name="ob_lb_daily">Günlük</string>
+    <string name="ob_race_leaderboards">Bugünkü sıralamada arkadaşlarınla yarış.</string>
     <string name="ob_friends_today">Arkadaşlar · Bugün</string>
     <string name="ob_you_are_first">1 numarasın!</string>
     <string name="ob_you">Sen</string>
-    <string name="ob_also_live">Ayrıca canlı: uygulamadaki tüm oyunculara karşı saatlik ve günlük turnuvalar.</string>
     <string name="ob_never_miss_win">Hiçbir kazancı kaçırma</string>
-    <string name="ob_get_notified">Turnuva sonuçları, arkadaş meydan okumaları ve günlük bonuslar hakkında bildirim al.</string>
+    <string name="ob_get_notified">Günlük bonusun hazır olduğunda bildirim al.</string>
     <string name="ob_daily_bonus_reminders">Günlük bonus hatırlatıcıları</string>
-    <string name="ob_friend_challenge_alerts">Arkadaş meydan okuma uyarıları</string>
-    <string name="ob_tournament_results">Turnuva sonuçları</string>
     <string name="ob_enable_notifications">Bildirimleri aç</string>
     <string name="ob_not_now">Şimdi değil</string>
-    <string name="ob_save_progress">İlerlemeni kaydet</string>
-    <string name="ob_sign_in_sync">Jetonlarını yedeklemek ve arkadaşlarınla yarışmak için giriş yap.</string>
-    <string name="ob_never_lose">Jetonlarını ve ilerlemeni asla kaybetme</string>
-    <string name="ob_play_across">Telefonunda ve tabletinde oyna</string>
-    <string name="ob_find_friends">Arkadaşlarını adlarıyla otomatik bul</string>
     <string name="ob_continue_guest">Misafir olarak devam et</string>
     <string name="ob_back">Geri</string>
     <string name="ob_next">İleri</string>
@@ -292,4 +279,14 @@
     <plurals name="stats_accuracy_detail">
         <item quantity="other">%2$d elin %1$d tanesinde en iyi hamle</item>
     </plurals>
+
+    <!-- Account, deletion and policy links -->
+    <string name="settings_account">Hesap</string>
+    <string name="settings_delete_account">Hesabı sil</string>
+    <string name="settings_delete_title">Hesabın silinsin mi?</string>
+    <string name="settings_delete_body">Profilin, arkadaş bağlantıların ve günlük skorun sunucularımızdan kalıcı olarak silinir ve oturumun kapatılır. Bu cihazdaki jetonlar ve ilerleme korunur. Davet ödülü kayıtları, bir ödül iki kez alınamasın diye saklanır.</string>
+    <string name="settings_delete_confirm">Sil</string>
+    <string name="toast_account_deleted">Hesap silindi</string>
+    <string name="toast_account_delete_failed">Hesap silinemedi — bağlantını kontrol edip tekrar dene</string>
+    <string name="settings_privacy_policy">Gizlilik politikası</string>
 </resources>

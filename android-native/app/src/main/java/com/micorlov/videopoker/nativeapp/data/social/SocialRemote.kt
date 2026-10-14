@@ -38,6 +38,13 @@ interface SocialRemote {
 
     suspend fun pushDailyProfit(uid: String, profit: DailyProfit)
 
+    /**
+     * Erases everything the security rules let this player remove: their profile, both sides of
+     * every friendship and their device tokens. Safe to repeat. The invite-reward ledger and the
+     * invite circle are append-only, so those entries stay.
+     */
+    suspend fun deleteUserData(uid: String)
+
     fun friendUids(uid: String): Flow<Set<String>>
 
     fun scores(uids: Set<String>): Flow<List<FriendScore>>

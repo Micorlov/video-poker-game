@@ -29,6 +29,16 @@ class FakeAuthGateway(
 
     override fun signOut() { _user.value = null }
 
+    /** What [deleteAccount] answers; a failure leaves the player signed in. */
+    var deleteResult: Result<Unit> = Result.success(Unit)
+    var deleted = false
+        private set
+
+    override suspend fun deleteAccount(host: SignInHost): Result<Unit> {
+        deleteResult.onSuccess { deleted = true; _user.value = null }
+        return deleteResult
+    }
+
     fun setUser(user: AuthUser?) { _user.value = user }
 }
 
@@ -99,6 +109,17 @@ class FakeSocialRemote : SocialRemote {
         online()
         pushes += uid to profit
         setProfit(uid, profit)
+    }
+
+    val erased = mutableListOf<String>()
+
+    override suspend fun deleteUserData(uid: String) {
+        online()
+        erased += uid
+        edges.value = edges.value.filterNot { it.first == uid || it.second == uid }.toSet()
+        codes.remove(uid)
+        names.remove(uid)
+        profits.value = profits.value - uid
     }
 
     override fun friendUids(uid: String): Flow<Set<String>> =

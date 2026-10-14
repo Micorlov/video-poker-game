@@ -55,6 +55,22 @@ class ProfitSyncTest {
     }
 
     @Test
+    fun `nothing is sent while held and sending resumes when released`() = runTest {
+        user.value = me
+        val sync = sync()
+        sync.hold()
+        profit.value = DailyProfit("2026-10-13", 70)
+        sync.flush()
+        advanceTimeBy(ProfitSync.QUIET_MS + 1)
+        assertTrue(remote.pushes.isEmpty())
+
+        sync.release()
+        sync.flush()
+        runCurrent()
+        assertEquals(1, remote.pushes.size)
+    }
+
+    @Test
     fun `a failed send is retried on the next change`() = runTest {
         user.value = me
         val sync = sync()

@@ -94,10 +94,7 @@ fun PlayScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Header(ui, onToggleSound = actions.onToggleSound, onToggleHints = actions.onToggleHints)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
-            TournamentPill(Modifier.weight(1f))
-            actions.onOpenFriends?.let { InviteBadge(it, Modifier.padding(top = 4.dp)) }
-        }
+        actions.onOpenFriends?.let { InviteBadge(it, Modifier.align(Alignment.End)) }
         BalancePanel(displayedBalance, game)
         BetRow(game, ui.allInRemaining, actions.onSelectBet, actions.onAllIn)
 

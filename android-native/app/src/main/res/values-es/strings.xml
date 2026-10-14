@@ -151,8 +151,6 @@
     <string name="settings_more_games">Más juegos de Orlov Games</string>
     <string name="voice_four_2s_4s">Póker de doses a cuatros</string>
     <string name="voice_four_5s_ks">Póker de cincos a reyes</string>
-    <string name="play_tournament_pill">Torneo 2</string>
-    <string name="play_tournament_expand">🏆 Torneo n.º 2</string>
     <string name="review_title">¿Te gusta Video Póker?</string>
     <string name="review_body">Una valoración rápida en Google Play ayuda a otros jugadores a encontrarnos.</string>
     <string name="review_rate">Valorar ahora</string>
@@ -174,26 +172,15 @@
     <string name="ob_draw">Robar</string>
     <string name="ob_one_free_all_in">Una apuesta TODO gratis al día — invita a un amigo para desbloquear otra.</string>
     <string name="ob_compete_climb">Compite y asciende</string>
-    <string name="ob_race_leaderboards">Compite en las clasificaciones de amigos, horaria y diaria por fichas extra.</string>
-    <string name="ob_lb_friends">Amigos</string>
-    <string name="ob_lb_hourly">Por hora</string>
-    <string name="ob_lb_daily">Diario</string>
+    <string name="ob_race_leaderboards">Compite con tus amigos en la clasificación de hoy.</string>
     <string name="ob_friends_today">Amigos · Hoy</string>
     <string name="ob_you_are_first">¡Eres el n.º 1!</string>
     <string name="ob_you">Tú</string>
-    <string name="ob_also_live">También en directo: torneos horarios y diarios contra todos los jugadores de la app.</string>
     <string name="ob_never_miss_win">No te pierdas ninguna victoria</string>
-    <string name="ob_get_notified">Recibe avisos de resultados de torneos, retos de amigos y bonus diarios.</string>
+    <string name="ob_get_notified">Recibe un aviso cuando tu bonus diario esté listo.</string>
     <string name="ob_daily_bonus_reminders">Recordatorios de bonus diario</string>
-    <string name="ob_friend_challenge_alerts">Avisos de retos de amigos</string>
-    <string name="ob_tournament_results">Resultados de torneos</string>
     <string name="ob_enable_notifications">Activar notificaciones</string>
     <string name="ob_not_now">Ahora no</string>
-    <string name="ob_save_progress">Guarda tu progreso</string>
-    <string name="ob_sign_in_sync">Inicia sesión para respaldar tus fichas y competir con amigos.</string>
-    <string name="ob_never_lose">Nunca pierdas tus fichas ni tu progreso</string>
-    <string name="ob_play_across">Juega en tu móvil y en tu tablet</string>
-    <string name="ob_find_friends">Encuentra amigos por su nombre automáticamente</string>
     <string name="ob_continue_guest">Continuar como invitado</string>
     <string name="ob_back">Atrás</string>
     <string name="ob_next">Siguiente</string>
@@ -293,4 +280,14 @@
         <item quantity="one">Mejor jugada en %1$d de %2$d mano</item>
         <item quantity="other">Mejor jugada en %1$d de %2$d manos</item>
     </plurals>
+
+    <!-- Account, deletion and policy links -->
+    <string name="settings_account">Cuenta</string>
+    <string name="settings_delete_account">Eliminar cuenta</string>
+    <string name="settings_delete_title">¿Eliminar tu cuenta?</string>
+    <string name="settings_delete_body">Se eliminarán de forma permanente tu perfil, tus conexiones de amigos y tu puntuación diaria de nuestros servidores, y se cerrará tu sesión. Las fichas y el progreso de este dispositivo se conservan. Los registros de recompensas por invitación se conservan para que una recompensa no se reclame dos veces.</string>
+    <string name="settings_delete_confirm">Eliminar</string>
+    <string name="toast_account_deleted">Cuenta eliminada</string>
+    <string name="toast_account_delete_failed">No se pudo eliminar la cuenta: comprueba tu conexión e inténtalo de nuevo</string>
+    <string name="settings_privacy_policy">Política de privacidad</string>
 </resources>

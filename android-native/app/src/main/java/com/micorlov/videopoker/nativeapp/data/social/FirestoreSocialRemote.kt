@@ -128,6 +128,28 @@ class FirestoreSocialRemote(
         Unit
     }
 
+    override suspend fun deleteUserData(uid: String) = remote {
+        val own = users.document(uid)
+        val friendIds = own.collection("friends").get().await().documents.map { it.id }
+        // Each friendship is two documents: this player's and the friend's reciprocal edge.
+        friendIds.chunked(FRIENDS_PER_BATCH).forEach { chunk ->
+            val batch = db.batch()
+            chunk.forEach { friendUid ->
+                batch.delete(own.collection("friends").document(friendUid))
+                batch.delete(users.document(friendUid).collection("friends").document(uid))
+            }
+            batch.commit().await()
+        }
+        val tokens = own.collection("fcmTokens").get().await().documents
+        tokens.chunked(DELETES_PER_BATCH).forEach { chunk ->
+            val batch = db.batch()
+            chunk.forEach { batch.delete(it.reference) }
+            batch.commit().await()
+        }
+        own.delete().await()
+        Unit
+    }
+
     override fun friendUids(uid: String): Flow<Set<String>> = listeners.friendUids(uid)
 
     override fun scores(uids: Set<String>): Flow<List<FriendScore>> = listeners.scores(uids)
@@ -147,6 +169,9 @@ class FirestoreSocialRemote(
 
     private companion object {
         const val CODE_ATTEMPTS = 5
+        /** Firestore allows 500 writes per batch; a friendship takes two. */
+        const val FRIENDS_PER_BATCH = 200
+        const val DELETES_PER_BATCH = 400
         const val SOURCE = "android-native"
     }
 }

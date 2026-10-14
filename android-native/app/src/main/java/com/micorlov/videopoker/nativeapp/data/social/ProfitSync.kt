@@ -23,6 +23,9 @@ class ProfitSync(
 ) {
     private var lastSent: Pair<String, DailyProfit>? = null
 
+    /** While true nothing is sent: an account being deleted must not have its profile written back. */
+    @Volatile private var held = false
+
     @OptIn(FlowPreview::class)
     fun start() {
         scope.launch {
@@ -32,6 +35,10 @@ class ProfitSync(
         }
     }
 
+    fun hold() { held = true }
+
+    fun release() { held = false }
+
     fun flush() {
         val uid = user.value?.uid ?: return
         val current = profit.value
@@ -39,7 +46,7 @@ class ProfitSync(
     }
 
     private suspend fun send(uid: String, value: DailyProfit) {
-        if (value.dayKey.isEmpty() || lastSent == uid to value) return
+        if (held || value.dayKey.isEmpty() || lastSent == uid to value) return
         runCatching { remote.pushDailyProfit(uid, value) }.onSuccess { lastSent = uid to value }
     }
 

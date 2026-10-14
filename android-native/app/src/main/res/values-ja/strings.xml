@@ -151,8 +151,6 @@
     <string name="settings_more_games">Orlov Games の他のゲーム</string>
     <string name="voice_four_2s_4s">フォーカード、2から4</string>
     <string name="voice_four_5s_ks">フォーカード、5からキング</string>
-    <string name="play_tournament_pill">トーナメント2</string>
-    <string name="play_tournament_expand">🏆 トーナメント第2回</string>
     <string name="review_title">ビデオポーカーを楽しんでいますか？</string>
     <string name="review_body">Google Playで評価していただくと、ほかのプレイヤーが見つけやすくなります。</string>
     <string name="review_rate">今すぐ評価</string>
@@ -174,26 +172,15 @@
     <string name="ob_draw">ドロー</string>
     <string name="ob_one_free_all_in">1日1回オールイン無料 — フレンドを招待するともう1回解放。</string>
     <string name="ob_compete_climb">競って駆け上がろう</string>
-    <string name="ob_race_leaderboards">フレンド・毎時・デイリーのランキングでボーナスチップを狙おう。</string>
-    <string name="ob_lb_friends">フレンド</string>
-    <string name="ob_lb_hourly">毎時</string>
-    <string name="ob_lb_daily">デイリー</string>
+    <string name="ob_race_leaderboards">今日のランキングでフレンドと競おう。</string>
     <string name="ob_friends_today">フレンド · 今日</string>
     <string name="ob_you_are_first">あなたが1位！</string>
     <string name="ob_you">あなた</string>
-    <string name="ob_also_live">開催中：アプリの全プレイヤーと競う毎時・デイリートーナメント。</string>
     <string name="ob_never_miss_win">勝利を見逃さない</string>
-    <string name="ob_get_notified">トーナメント結果、フレンドからの挑戦、デイリーボーナスをお知らせします。</string>
+    <string name="ob_get_notified">デイリーボーナスの準備ができたらお知らせします。</string>
     <string name="ob_daily_bonus_reminders">デイリーボーナスのお知らせ</string>
-    <string name="ob_friend_challenge_alerts">フレンドの挑戦の通知</string>
-    <string name="ob_tournament_results">トーナメント結果</string>
     <string name="ob_enable_notifications">通知をオンにする</string>
     <string name="ob_not_now">あとで</string>
-    <string name="ob_save_progress">進行状況を保存</string>
-    <string name="ob_sign_in_sync">ログインしてチップをバックアップし、フレンドと競いましょう。</string>
-    <string name="ob_never_lose">チップも進行状況も失わない</string>
-    <string name="ob_play_across">スマホでもタブレットでもプレイ</string>
-    <string name="ob_find_friends">名前でフレンドを自動で見つける</string>
     <string name="ob_continue_guest">ゲストとして続ける</string>
     <string name="ob_back">戻る</string>
     <string name="ob_next">次へ</string>
@@ -291,4 +278,14 @@
     <plurals name="stats_accuracy_detail">
         <item quantity="other">%2$d ハンド中 %1$d ハンドで最善手</item>
     </plurals>
+
+    <!-- Account, deletion and policy links -->
+    <string name="settings_account">アカウント</string>
+    <string name="settings_delete_account">アカウントを削除</string>
+    <string name="settings_delete_title">アカウントを削除しますか？</string>
+    <string name="settings_delete_body">プロフィール、フレンドとの接続、今日のスコアがサーバーから完全に削除され、ログアウトされます。この端末のチップと進行状況は残ります。招待報酬の記録は、報酬の二重受け取りを防ぐため保持されます。</string>
+    <string name="settings_delete_confirm">削除</string>
+    <string name="toast_account_deleted">アカウントを削除しました</string>
+    <string name="toast_account_delete_failed">アカウントを削除できませんでした。接続を確認してもう一度お試しください</string>
+    <string name="settings_privacy_policy">プライバシーポリシー</string>
 </resources>

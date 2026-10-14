@@ -151,8 +151,6 @@
     <string name="settings_more_games">Orlov Games 的更多游戏</string>
     <string name="voice_four_2s_4s">四条，2 到 4</string>
     <string name="voice_four_5s_ks">四条，5 到 K</string>
-    <string name="play_tournament_pill">锦标赛 2</string>
-    <string name="play_tournament_expand">🏆 第 2 届锦标赛</string>
     <string name="review_title">喜欢视频扑克吗？</string>
     <string name="review_body">在 Google Play 上给个评分，能帮助更多玩家找到我们。</string>
     <string name="review_rate">立即评分</string>
@@ -174,26 +172,15 @@
     <string name="ob_draw">换牌</string>
     <string name="ob_one_free_all_in">每天一次免费全下 — 邀请好友再解锁一次。</string>
     <string name="ob_compete_climb">比拼并攀升</string>
-    <string name="ob_race_leaderboards">在好友榜、小时榜和每日榜上争夺奖励筹码。</string>
-    <string name="ob_lb_friends">好友</string>
-    <string name="ob_lb_hourly">每小时</string>
-    <string name="ob_lb_daily">每日</string>
+    <string name="ob_race_leaderboards">在今日榜单上与好友一较高下。</string>
     <string name="ob_friends_today">好友 · 今天</string>
     <string name="ob_you_are_first">你是第 1 名！</string>
     <string name="ob_you">你</string>
-    <string name="ob_also_live">同时进行：与全体玩家对战的每小时和每日锦标赛。</string>
     <string name="ob_never_miss_win">不错过任何一次胜利</string>
-    <string name="ob_get_notified">接收锦标赛结果、好友挑战和每日奖励的通知。</string>
+    <string name="ob_get_notified">每日奖励准备好时通知你。</string>
     <string name="ob_daily_bonus_reminders">每日奖励提醒</string>
-    <string name="ob_friend_challenge_alerts">好友挑战提醒</string>
-    <string name="ob_tournament_results">锦标赛结果</string>
     <string name="ob_enable_notifications">开启通知</string>
     <string name="ob_not_now">暂不</string>
-    <string name="ob_save_progress">保存你的进度</string>
-    <string name="ob_sign_in_sync">登录以备份筹码并与好友一较高下。</string>
-    <string name="ob_never_lose">永远不会丢失筹码或进度</string>
-    <string name="ob_play_across">在手机和平板上都能玩</string>
-    <string name="ob_find_friends">按名字自动找到好友</string>
     <string name="ob_continue_guest">以访客身份继续</string>
     <string name="ob_back">返回</string>
     <string name="ob_next">下一步</string>
@@ -291,4 +278,14 @@
     <plurals name="stats_accuracy_detail">
         <item quantity="other">%2$d 手中 %1$d 手为最佳打法</item>
     </plurals>
+
+    <!-- Account, deletion and policy links -->
+    <string name="settings_account">账号</string>
+    <string name="settings_delete_account">删除账号</string>
+    <string name="settings_delete_title">删除你的账号？</string>
+    <string name="settings_delete_body">这将从我们的服务器上永久删除你的资料、好友关系和今日得分，并退出登录。此设备上的筹码和进度会保留。邀请奖励记录会被保留，以防奖励被重复领取。</string>
+    <string name="settings_delete_confirm">删除</string>
+    <string name="toast_account_deleted">账号已删除</string>
+    <string name="toast_account_delete_failed">无法删除账号——请检查网络后重试</string>
+    <string name="settings_privacy_policy">隐私政策</string>
 </resources>

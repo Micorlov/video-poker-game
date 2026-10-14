@@ -44,13 +44,17 @@ class MainActivity : ComponentActivity() {
                 analysisMode = AnalysisMode.BACKGROUND,
                 onNetResult = container.dailyProfit::record,
                 events = container.events,
+                upgradedFromLegacy = container.upgradedFromLegacy,
             )
         }
     }
 
     private val friendsViewModel: FriendsViewModel by viewModels {
         factory {
-            FriendsViewModel(container.auth, container.remote, container.friends, container.dailyProfit.state, events = container.events)
+            FriendsViewModel(
+                container.auth, container.remote, container.friends, container.dailyProfit.state,
+                events = container.events, accountDeletion = container.accountDeletion,
+            )
         }
     }
 

@@ -198,8 +198,6 @@
     <string name="settings_more_games">More games by Orlov Games</string>
     <string name="voice_four_2s_4s">Four of a kind, twos through fours</string>
     <string name="voice_four_5s_ks">Four of a kind, fives through kings</string>
-    <string name="play_tournament_pill">Tournament 2</string>
-    <string name="play_tournament_expand">🏆 Tournament #2</string>
     <string name="review_title">Enjoying Video Poker?</string>
     <string name="review_body">A quick rating on Google Play helps other players find us.</string>
     <string name="review_rate">Rate now</string>
@@ -221,26 +219,15 @@
     <string name="ob_draw">Draw</string>
     <string name="ob_one_free_all_in">One free All-In per day — invite a friend to unlock another.</string>
     <string name="ob_compete_climb">Compete &amp; Climb</string>
-    <string name="ob_race_leaderboards">Race Friends, Hourly, and Daily leaderboards for bonus chips.</string>
-    <string name="ob_lb_friends">Friends</string>
-    <string name="ob_lb_hourly">Hourly</string>
-    <string name="ob_lb_daily">Daily</string>
+    <string name="ob_race_leaderboards">Race your friends on today\'s leaderboard.</string>
     <string name="ob_friends_today">Friends · Today</string>
     <string name="ob_you_are_first">You\'re #1!</string>
     <string name="ob_you">You</string>
-    <string name="ob_also_live">Also live: hourly and daily tournaments against every player in the app.</string>
     <string name="ob_never_miss_win">Never Miss a Win</string>
-    <string name="ob_get_notified">Get notified about tournament results, friend challenges, and daily bonuses.</string>
+    <string name="ob_get_notified">Get a reminder when your daily bonus is ready.</string>
     <string name="ob_daily_bonus_reminders">Daily bonus reminders</string>
-    <string name="ob_friend_challenge_alerts">Friend challenge alerts</string>
-    <string name="ob_tournament_results">Tournament results</string>
     <string name="ob_enable_notifications">Enable Notifications</string>
     <string name="ob_not_now">Not Now</string>
-    <string name="ob_save_progress">Save Your Progress</string>
-    <string name="ob_sign_in_sync">Sign in to back up your chips and compete with friends.</string>
-    <string name="ob_never_lose">Never lose your chips or progress</string>
-    <string name="ob_play_across">Play across your phone and tablet</string>
-    <string name="ob_find_friends">Find friends by name automatically</string>
     <string name="ob_continue_guest">Continue as Guest</string>
     <string name="ob_back">Back</string>
     <string name="ob_next">Next</string>
@@ -319,4 +306,14 @@
     <string name="toast_friends_offline">Can\'t reach the server — check your connection</string>
     <string name="toast_referral_welcome">🎁 Your friend sent you %1$s chips — welcome to the table!</string>
     <string name="toast_invites_rewarded">🎉 Friends joined — you earned %1$s chips!</string>
+
+    <!-- Account, deletion and policy links -->
+    <string name="settings_account">Account</string>
+    <string name="settings_delete_account">Delete account</string>
+    <string name="settings_delete_title">Delete your account?</string>
+    <string name="settings_delete_body">This permanently deletes your profile, friend connections and daily score from our servers, and signs you out. Chips and progress on this device are kept. Invite-reward records are kept so a reward cannot be claimed twice.</string>
+    <string name="settings_delete_confirm">Delete</string>
+    <string name="toast_account_deleted">Account deleted</string>
+    <string name="toast_account_delete_failed">Couldn\'t delete the account — check your connection and try again</string>
+    <string name="settings_privacy_policy">Privacy policy</string>
 </resources>

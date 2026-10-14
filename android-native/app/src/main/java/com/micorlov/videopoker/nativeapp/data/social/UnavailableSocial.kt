@@ -15,6 +15,7 @@ object UnavailableAuth : AuthGateway {
     override val user: StateFlow<AuthUser?> = MutableStateFlow(null)
     override suspend fun signIn(host: SignInHost): Result<AuthUser> = Result.failure(RemoteUnavailable())
     override fun signOut() = Unit
+    override suspend fun deleteAccount(host: SignInHost): Result<Unit> = Result.failure(RemoteUnavailable())
 }
 
 object UnavailableRemote : SocialRemote {
@@ -28,6 +29,7 @@ object UnavailableRemote : SocialRemote {
     override suspend fun createReferral(user: AuthUser, inviterUid: String, code: String): Boolean = down()
     override suspend fun claimReferral(rowId: String): Boolean = down()
     override suspend fun pushDailyProfit(uid: String, profit: DailyProfit) = down()
+    override suspend fun deleteUserData(uid: String) = down()
     override fun friendUids(uid: String): Flow<Set<String>> = emptyFlow()
     override fun scores(uids: Set<String>): Flow<List<FriendScore>> = emptyFlow()
     override fun referralsAsInviter(uid: String): Flow<List<ReferralRow>> = emptyFlow()

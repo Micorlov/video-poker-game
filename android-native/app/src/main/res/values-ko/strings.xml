@@ -151,8 +151,6 @@
     <string name="settings_more_games">Orlov Games의 다른 게임</string>
     <string name="voice_four_2s_4s">포카드, 2에서 4까지</string>
     <string name="voice_four_5s_ks">포카드, 5에서 킹까지</string>
-    <string name="play_tournament_pill">토너먼트 2</string>
-    <string name="play_tournament_expand">🏆 토너먼트 2회</string>
     <string name="review_title">비디오 포커 재미있으신가요?</string>
     <string name="review_body">Google Play에 간단히 평점을 남겨 주시면 다른 플레이어들이 저희를 찾는 데 도움이 됩니다.</string>
     <string name="review_rate">지금 평가하기</string>
@@ -174,26 +172,15 @@
     <string name="ob_draw">드로우</string>
     <string name="ob_one_free_all_in">하루 한 번 무료 올인 — 친구를 초대하면 한 번 더 열려요.</string>
     <string name="ob_compete_climb">겨루고 올라가세요</string>
-    <string name="ob_race_leaderboards">친구·시간별·일별 순위표에서 보너스 칩을 노려보세요.</string>
-    <string name="ob_lb_friends">친구</string>
-    <string name="ob_lb_hourly">시간별</string>
-    <string name="ob_lb_daily">일별</string>
+    <string name="ob_race_leaderboards">오늘의 순위표에서 친구와 겨뤄보세요.</string>
     <string name="ob_friends_today">친구 · 오늘</string>
     <string name="ob_you_are_first">당신이 1위!</string>
     <string name="ob_you">나</string>
-    <string name="ob_also_live">진행 중: 앱의 모든 플레이어와 겨루는 시간별·일별 토너먼트.</string>
     <string name="ob_never_miss_win">승리를 놓치지 마세요</string>
-    <string name="ob_get_notified">토너먼트 결과, 친구의 도전, 일일 보너스를 알려드려요.</string>
+    <string name="ob_get_notified">일일 보너스가 준비되면 알려드려요.</string>
     <string name="ob_daily_bonus_reminders">일일 보너스 알림</string>
-    <string name="ob_friend_challenge_alerts">친구 도전 알림</string>
-    <string name="ob_tournament_results">토너먼트 결과</string>
     <string name="ob_enable_notifications">알림 켜기</string>
     <string name="ob_not_now">나중에</string>
-    <string name="ob_save_progress">진행 상황 저장</string>
-    <string name="ob_sign_in_sync">로그인하면 칩을 백업하고 친구와 겨룰 수 있어요.</string>
-    <string name="ob_never_lose">칩과 진행 상황을 절대 잃지 않아요</string>
-    <string name="ob_play_across">휴대폰과 태블릿에서 플레이</string>
-    <string name="ob_find_friends">이름으로 친구를 자동으로 찾기</string>
     <string name="ob_continue_guest">게스트로 계속하기</string>
     <string name="ob_back">뒤로</string>
     <string name="ob_next">다음</string>
@@ -291,4 +278,14 @@
     <plurals name="stats_accuracy_detail">
         <item quantity="other">%2$d판 중 %1$d판 최선의 플레이</item>
     </plurals>
+
+    <!-- Account, deletion and policy links -->
+    <string name="settings_account">계정</string>
+    <string name="settings_delete_account">계정 삭제</string>
+    <string name="settings_delete_title">계정을 삭제할까요?</string>
+    <string name="settings_delete_body">프로필, 친구 연결, 오늘의 점수가 서버에서 영구적으로 삭제되고 로그아웃됩니다. 이 기기의 칩과 진행 상황은 유지됩니다. 초대 보상 기록은 보상이 중복 수령되지 않도록 보관됩니다.</string>
+    <string name="settings_delete_confirm">삭제</string>
+    <string name="toast_account_deleted">계정이 삭제되었습니다</string>
+    <string name="toast_account_delete_failed">계정을 삭제하지 못했습니다. 연결을 확인하고 다시 시도하세요</string>
+    <string name="settings_privacy_policy">개인정보 처리방침</string>
 </resources>

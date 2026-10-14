@@ -151,8 +151,6 @@
     <string name="settings_more_games">Plus de jeux par Orlov Games</string>
     <string name="voice_four_2s_4s">Carré, des deux aux quatre</string>
     <string name="voice_four_5s_ks">Carré, des cinq aux rois</string>
-    <string name="play_tournament_pill">Tournoi 2</string>
-    <string name="play_tournament_expand">🏆 Tournoi nº 2</string>
     <string name="review_title">Vous aimez Vidéo Poker ?</string>
     <string name="review_body">Une petite note sur Google Play aide d’autres joueurs à nous trouver.</string>
     <string name="review_rate">Noter maintenant</string>
@@ -174,26 +172,15 @@
     <string name="ob_draw">Tirer</string>
     <string name="ob_one_free_all_in">Un tapis gratuit par jour — invitez un ami pour en débloquer un autre.</string>
     <string name="ob_compete_climb">Affrontez et grimpez</string>
-    <string name="ob_race_leaderboards">Disputez les classements amis, horaire et quotidien pour des jetons bonus.</string>
-    <string name="ob_lb_friends">Amis</string>
-    <string name="ob_lb_hourly">Horaire</string>
-    <string name="ob_lb_daily">Quotidien</string>
+    <string name="ob_race_leaderboards">Défiez vos amis dans le classement du jour.</string>
     <string name="ob_friends_today">Amis · Aujourd’hui</string>
     <string name="ob_you_are_first">Vous êtes nº 1 !</string>
     <string name="ob_you">Vous</string>
-    <string name="ob_also_live">Également en direct : tournois horaires et quotidiens contre tous les joueurs de l’app.</string>
     <string name="ob_never_miss_win">Ne ratez aucune victoire</string>
-    <string name="ob_get_notified">Soyez averti des résultats de tournois, des défis d’amis et des bonus quotidiens.</string>
+    <string name="ob_get_notified">Soyez averti quand votre bonus quotidien est prêt.</string>
     <string name="ob_daily_bonus_reminders">Rappels de bonus quotidien</string>
-    <string name="ob_friend_challenge_alerts">Alertes de défis d’amis</string>
-    <string name="ob_tournament_results">Résultats de tournois</string>
     <string name="ob_enable_notifications">Activer les notifications</string>
     <string name="ob_not_now">Plus tard</string>
-    <string name="ob_save_progress">Sauvegardez votre progression</string>
-    <string name="ob_sign_in_sync">Connectez-vous pour sauvegarder vos jetons et affronter vos amis.</string>
-    <string name="ob_never_lose">Ne perdez jamais vos jetons ni votre progression</string>
-    <string name="ob_play_across">Jouez sur votre téléphone et votre tablette</string>
-    <string name="ob_find_friends">Trouvez vos amis par leur nom automatiquement</string>
     <string name="ob_continue_guest">Continuer en invité</string>
     <string name="ob_back">Retour</string>
     <string name="ob_next">Suivant</string>
@@ -294,4 +281,14 @@
         <item quantity="many">Meilleur coup sur %1$d des %2$d mains</item>
         <item quantity="other">Meilleur coup sur %1$d des %2$d mains</item>
     </plurals>
+
+    <!-- Account, deletion and policy links -->
+    <string name="settings_account">Compte</string>
+    <string name="settings_delete_account">Supprimer le compte</string>
+    <string name="settings_delete_title">Supprimer votre compte ?</string>
+    <string name="settings_delete_body">Votre profil, vos amis et votre score du jour seront définitivement supprimés de nos serveurs, et vous serez déconnecté. Les jetons et la progression sur cet appareil sont conservés. Les enregistrements de récompenses de parrainage sont conservés pour qu’une récompense ne soit pas réclamée deux fois.</string>
+    <string name="settings_delete_confirm">Supprimer</string>
+    <string name="toast_account_deleted">Compte supprimé</string>
+    <string name="toast_account_delete_failed">Impossible de supprimer le compte : vérifiez votre connexion et réessayez</string>
+    <string name="settings_privacy_policy">Politique de confidentialité</string>
 </resources>

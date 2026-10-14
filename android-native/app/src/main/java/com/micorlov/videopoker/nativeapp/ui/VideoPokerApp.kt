@@ -43,10 +43,14 @@ import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.ReviewPolicy
 import kotlinx.coroutines.launch
 import com.micorlov.videopoker.nativeapp.ui.text.spokenRes
+import com.micorlov.videopoker.nativeapp.data.social.ActivityHost
+import com.micorlov.videopoker.nativeapp.ui.friends.FriendsAuth
 import com.micorlov.videopoker.nativeapp.ui.friends.FriendsEffects
 import com.micorlov.videopoker.nativeapp.ui.friends.FriendsTab
 import com.micorlov.videopoker.nativeapp.ui.friends.FriendsViewModel
 import com.micorlov.videopoker.nativeapp.ui.friends.PendingInviteRedirect
+import com.micorlov.videopoker.nativeapp.ui.friends.findActivity
+import com.micorlov.videopoker.nativeapp.ui.settings.AccountSettings
 import com.micorlov.videopoker.nativeapp.ui.nav.BottomNav
 import com.micorlov.videopoker.nativeapp.ui.nav.Tab
 import com.micorlov.videopoker.nativeapp.ui.play.Celebration
@@ -179,6 +183,17 @@ fun VideoPokerApp(
                 onOpenFriends = openFriends,
             )
         }
+        val friendsState = friends?.state?.collectAsStateWithLifecycle()?.value
+        val accountSettings = if (friends != null && friends.available) {
+            val activity = LocalContext.current.findActivity()
+            AccountSettings(
+                signedIn = friendsState?.auth == FriendsAuth.SIGNED_IN,
+                deleting = friendsState?.deleting == true,
+                onDelete = { friends.onDeleteAccount(ActivityHost(activity)) },
+            )
+        } else {
+            null
+        }
         val settingsActions = remember(viewModel, friendsOn) {
             SettingsActions(
                 onToggleSound = viewModel::onToggleSound,
@@ -228,7 +243,7 @@ fun VideoPokerApp(
                             Tab.PLAY -> PlayScreen(ui, celebration, feedback, playActions)
                             Tab.FRIENDS -> friends?.let { FriendsTab(it) }
                             Tab.STATS -> StatsScreen(ui.game)
-                            Tab.SETTINGS -> SettingsScreen(ui, settingsActions)
+                            Tab.SETTINGS -> SettingsScreen(ui, settingsActions, account = accountSettings)
                         }
                     }
                 }

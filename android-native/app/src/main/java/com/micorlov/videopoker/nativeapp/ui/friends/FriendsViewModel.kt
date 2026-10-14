@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.micorlov.videopoker.nativeapp.data.AnalyticsEvents
 import com.micorlov.videopoker.nativeapp.data.EventLogger
+import com.micorlov.videopoker.nativeapp.data.social.AccountDeletion
 import com.micorlov.videopoker.nativeapp.data.social.AuthGateway
 import com.micorlov.videopoker.nativeapp.data.social.FriendsRepository
 import com.micorlov.videopoker.nativeapp.data.social.RemoteUnavailable
@@ -47,6 +48,8 @@ data class FriendsUiState(
     val resetIn: ResetCountdown = ResetCountdown(0, 0),
     val rewardsEarned: Int = 0,
     val pendingInvite: Boolean = false,
+    /** True while the account is being deleted, so Settings can stop a second tap. */
+    val deleting: Boolean = false,
 ) {
     val rewardsCap: Int get() = RewardPolicy.INVITER_CAP
 }
@@ -73,6 +76,7 @@ class FriendsViewModel(
     /** The time, re-read often enough to keep the countdown current and roll the table over at UTC midnight. */
     private val ticker: Flow<Long> = clockTicker(clock),
     private val events: EventLogger = EventLogger.NONE,
+    private val accountDeletion: AccountDeletion = AccountDeletion(auth, remote),
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -106,6 +110,21 @@ class FriendsViewModel(
                 shareWhenReady = false
                 _state.update { it.copy(auth = FriendsAuth.SIGNED_OUT) }
                 toast(ToastMessage.SignInFailed)
+            }
+        }
+    }
+
+    /** Erases the player's cloud account and signs them out; the chips and progress on this device stay. */
+    fun onDeleteAccount(host: SignInHost) {
+        if (auth.user.value == null || _state.value.deleting) return
+        _state.update { it.copy(deleting = true) }
+        viewModelScope.launch {
+            val result = accountDeletion.delete(host)
+            _state.update { it.copy(deleting = false) }
+            if (result.isSuccess) {
+                toast(ToastMessage.AccountDeleted)
+            } else {
+                toast(ToastMessage.AccountDeleteFailed)
             }
         }
     }

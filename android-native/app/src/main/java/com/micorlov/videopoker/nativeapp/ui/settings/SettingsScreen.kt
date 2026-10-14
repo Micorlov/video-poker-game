@@ -42,6 +42,7 @@ import com.micorlov.videopoker.nativeapp.domain.AppLanguage
 import com.micorlov.videopoker.nativeapp.ui.LocaleContext
 import com.micorlov.videopoker.nativeapp.domain.Rules
 import com.micorlov.videopoker.nativeapp.domain.Variant
+import com.micorlov.videopoker.nativeapp.ui.PolicyLinks
 import com.micorlov.videopoker.nativeapp.ui.StoreLinks
 import com.micorlov.videopoker.nativeapp.ui.UiState
 import com.micorlov.videopoker.nativeapp.ui.components.ChipButton
@@ -74,11 +75,22 @@ class SettingsActions(
     val onInviteFriends: (() -> Unit)? = null,
 )
 
+/**
+ * The Account section. [signedIn] decides what the row does: delete the account here, or send a
+ * player who is not signed in on this device to the web page where deletion can be requested.
+ */
+class AccountSettings(
+    val signedIn: Boolean,
+    val deleting: Boolean,
+    val onDelete: () -> Unit,
+)
+
 @Composable
-fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = Modifier) {
+fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = Modifier, account: AccountSettings? = null) {
     val settings = ui.settings
     val game = ui.game
     var confirmingReset by rememberSaveable { mutableStateOf(false) }
+    var confirmingDelete by rememberSaveable { mutableStateOf(false) }
     var showPaytable by rememberSaveable { mutableStateOf(false) }
     var choosingLanguage by rememberSaveable { mutableStateOf(false) }
     val activity = LocalContext.current as? Activity
@@ -216,6 +228,15 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
         Section(R.string.settings_about) {
             LinkRow(stringResource(R.string.settings_rate_game), "rate-game") { StoreLinks.openListing(context) }
             LinkRow(stringResource(R.string.settings_more_games), "more-games") { StoreLinks.openDeveloperPage(context) }
+            LinkRow(stringResource(R.string.settings_privacy_policy), "privacy-policy") { PolicyLinks.open(context, PolicyLinks.PRIVACY_POLICY) }
+        }
+
+        account?.let {
+            Section(R.string.settings_account) {
+                LinkRow(stringResource(R.string.settings_delete_account), "delete-account") {
+                    if (it.signedIn) confirmingDelete = true else PolicyLinks.open(context, PolicyLinks.DELETE_ACCOUNT)
+                }
+            }
         }
 
         Text(
@@ -251,6 +272,27 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
                 activity?.recreate()
             },
             onDismiss = { choosingLanguage = false },
+        )
+    }
+
+    if (confirmingDelete && account != null) {
+        AlertDialog(
+            onDismissRequest = { confirmingDelete = false },
+            title = { Text(stringResource(R.string.settings_delete_title)) },
+            text = { Text(stringResource(R.string.settings_delete_body)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmingDelete = false
+                        account.onDelete()
+                    },
+                    enabled = !account.deleting,
+                    modifier = Modifier.testTag("delete-account-confirm"),
+                ) { Text(stringResource(R.string.settings_delete_confirm), color = VpColors.Red) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmingDelete = false }) { Text(stringResource(R.string.settings_cancel)) }
+            },
         )
     }
 

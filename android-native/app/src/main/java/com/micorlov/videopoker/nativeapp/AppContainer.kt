@@ -9,6 +9,7 @@ import com.micorlov.videopoker.nativeapp.data.EventLogger
 import com.micorlov.videopoker.nativeapp.data.FirebaseEventLogger
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.SharedPreferencesStore
+import com.micorlov.videopoker.nativeapp.data.social.AccountDeletion
 import com.micorlov.videopoker.nativeapp.data.social.AuthGateway
 import com.micorlov.videopoker.nativeapp.data.social.FirebaseAuthGateway
 import com.micorlov.videopoker.nativeapp.data.social.FirestoreSocialRemote
@@ -20,6 +21,7 @@ import com.micorlov.videopoker.nativeapp.data.social.UnavailableRemote
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import java.io.File
 
 /**
  * The app-wide objects, built once per process. Firebase is only used when the build carries
@@ -39,9 +41,17 @@ class AppContainer(context: Context) {
     val remote: SocialRemote = if (firebaseReady) FirestoreSocialRemote(appVersion = versionName()) else UnavailableRemote
     val friends = FriendsRepository(remote, gameRepository)
     val profitSync = ProfitSync(remote, auth.user, dailyProfit.state, scope).also { if (firebaseReady) it.start() }
+    val accountDeletion = AccountDeletion(auth, remote, hold = profitSync::hold, release = profitSync::release)
 
     /** GA4 through Firebase Analytics: the com.micorlov.videopoker stream the web build reported to. */
     val events: EventLogger = if (firebaseReady) FirebaseEventLogger(appContext) else EventLogger.NONE
+
+    /**
+     * The earlier Capacitor build kept its data in the WebView's directory, which a native
+     * install never creates. Native 3.0 did not migrate that data, so this is the only trace
+     * that the player was here before.
+     */
+    val upgradedFromLegacy: Boolean = File(appContext.dataDir, LEGACY_WEBVIEW_DIR).exists()
 
     init {
         events.log(AnalyticsEvents.APP_OPEN, mapOf("app_version" to versionName()))
@@ -49,4 +59,8 @@ class AppContainer(context: Context) {
 
     private fun versionName(): String =
         runCatching { appContext.packageManager.getPackageInfo(appContext.packageName, 0).versionName }.getOrNull() ?: "unknown"
+
+    private companion object {
+        const val LEGACY_WEBVIEW_DIR = "app_webview"
+    }
 }

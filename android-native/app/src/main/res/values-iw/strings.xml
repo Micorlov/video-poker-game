@@ -151,8 +151,6 @@
     <string name="settings_more_games">עוד משחקים מבית Orlov Games</string>
     <string name="voice_four_2s_4s">רביעייה, משתיים עד ארבע</string>
     <string name="voice_four_5s_ks">רביעייה, מחמש עד מלך</string>
-    <string name="play_tournament_pill">טורניר 2</string>
-    <string name="play_tournament_expand">🏆 טורניר מס׳ 2</string>
     <string name="review_title">נהנים מווידאו פוקר?</string>
     <string name="review_body">דירוג קצר ב-Google Play עוזר לשחקנים אחרים למצוא אותנו.</string>
     <string name="review_rate">דרגו עכשיו</string>
@@ -174,26 +172,15 @@
     <string name="ob_draw">החלפה</string>
     <string name="ob_one_free_all_in">הימור אחד על הכול חינם ביום — הזמינו חבר כדי לפתוח עוד אחד.</string>
     <string name="ob_compete_climb">התחרו וטפסו</string>
-    <string name="ob_race_leaderboards">התחרו בטבלאות החברים, השעה והיום על ז׳יטוני בונוס.</string>
-    <string name="ob_lb_friends">חברים</string>
-    <string name="ob_lb_hourly">שעתי</string>
-    <string name="ob_lb_daily">יומי</string>
+    <string name="ob_race_leaderboards">התחרו בחברים בטבלת היום.</string>
     <string name="ob_friends_today">חברים · היום</string>
     <string name="ob_you_are_first">אתם במקום הראשון!</string>
     <string name="ob_you">אתם</string>
-    <string name="ob_also_live">גם עכשיו: טורנירים שעתיים ויומיים מול כל השחקנים באפליקציה.</string>
     <string name="ob_never_miss_win">אל תפספסו אף זכייה</string>
-    <string name="ob_get_notified">קבלו התראות על תוצאות טורנירים, אתגרי חברים ובונוסים יומיים.</string>
+    <string name="ob_get_notified">קבלו התראה כשהבונוס היומי שלכם מוכן.</string>
     <string name="ob_daily_bonus_reminders">תזכורות לבונוס היומי</string>
-    <string name="ob_friend_challenge_alerts">התראות על אתגרי חברים</string>
-    <string name="ob_tournament_results">תוצאות טורנירים</string>
     <string name="ob_enable_notifications">הפעלת התראות</string>
     <string name="ob_not_now">לא עכשיו</string>
-    <string name="ob_save_progress">שמרו את ההתקדמות</string>
-    <string name="ob_sign_in_sync">התחברו כדי לגבות את הז׳יטונים ולהתחרות מול חברים.</string>
-    <string name="ob_never_lose">לעולם לא תאבדו ז׳יטונים או התקדמות</string>
-    <string name="ob_play_across">שחקו בטלפון ובטאבלט</string>
-    <string name="ob_find_friends">מצאו חברים לפי שם באופן אוטומטי</string>
     <string name="ob_continue_guest">המשך כאורח</string>
     <string name="ob_back">חזרה</string>
     <string name="ob_next">הבא</string>
@@ -295,4 +282,14 @@
         <item quantity="two">המהלך הטוב ביותר ב־%1$d מתוך %2$d ידיים</item>
         <item quantity="other">המהלך הטוב ביותר ב־%1$d מתוך %2$d ידיים</item>
     </plurals>
+
+    <!-- Account, deletion and policy links -->
+    <string name="settings_account">חשבון</string>
+    <string name="settings_delete_account">מחיקת חשבון</string>
+    <string name="settings_delete_title">למחוק את החשבון?</string>
+    <string name="settings_delete_body">הפרופיל, החיבורים עם חברים והניקוד היומי שלכם יימחקו לצמיתות משרתינו, ותנותקו מהחשבון. הז׳יטונים וההתקדמות במכשיר זה נשמרים. רשומות של פרסי הזמנה נשמרות כדי שלא ניתן יהיה לממש פרס פעמיים.</string>
+    <string name="settings_delete_confirm">מחיקה</string>
+    <string name="toast_account_deleted">החשבון נמחק</string>
+    <string name="toast_account_delete_failed">לא ניתן היה למחוק את החשבון — בדקו את החיבור ונסו שוב</string>
+    <string name="settings_privacy_policy">מדיניות פרטיות</string>
 </resources>

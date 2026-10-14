@@ -93,4 +93,6 @@ private fun ToastMessage.text(): String = when (this) {
     ToastMessage.SignInFailed -> stringResource(R.string.toast_sign_in_failed)
     ToastMessage.FriendsOffline -> stringResource(R.string.toast_friends_offline)
     ToastMessage.FriendsUnavailable -> stringResource(R.string.friends_unavailable)
+    ToastMessage.AccountDeleted -> stringResource(R.string.toast_account_deleted)
+    ToastMessage.AccountDeleteFailed -> stringResource(R.string.toast_account_delete_failed)
 }

@@ -122,6 +122,8 @@ sealed interface ToastMessage {
     data object SignInFailed : ToastMessage
     data object FriendsOffline : ToastMessage
     data object FriendsUnavailable : ToastMessage
+    data object AccountDeleted : ToastMessage
+    data object AccountDeleteFailed : ToastMessage
 }
 
 /** One-shot happenings the UI reacts to with sound, haptics and fireworks. */
@@ -159,6 +161,8 @@ class GameViewModel(
     private val onNetResult: (Long) -> Unit = {},
     /** Product analytics (GA4 through Firebase in the app); tests and offline builds log nowhere. */
     private val events: EventLogger = EventLogger.NONE,
+    /** True when the earlier WebView build's data is on the device: its player has history the native save lacks. */
+    private val upgradedFromLegacy: Boolean = false,
 ) : ViewModel() {
 
     private val effectChannel = Channel<UiEffect>(Channel.UNLIMITED)
@@ -213,11 +217,18 @@ class GameViewModel(
     /**
      * Records today as the install's first day, so a win today can earn the rating ask. Only a
      * fresh install is stamped: a player arriving from an earlier build has hands behind them
-     * and must earn the ask the usual way, not be asked on their next win.
+     * and must earn the ask the usual way, not be asked on their next win. The earlier WebView
+     * build's progress is not carried over, so such a player shows no hands here and is
+     * recognised by the leftover WebView data instead; a stamp an earlier native build already
+     * made for them is withdrawn.
      */
     private fun stampFirstDay() {
         val today = todayKey?.invoke() ?: return
         val review = repository.loadReview()
+        if (upgradedFromLegacy) {
+            if (review.firstDay.isNotEmpty()) repository.saveReview(review.copy(firstDay = ""))
+            return
+        }
         if (review.firstDay.isNotEmpty() || _state.value.game.lifetimeHands > 0) return
         repository.saveReview(review.copy(firstDay = today))
     }

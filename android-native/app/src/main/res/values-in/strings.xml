@@ -151,8 +151,6 @@
     <string name="settings_more_games">Game lain dari Orlov Games</string>
     <string name="voice_four_2s_4s">Four of a kind, dua sampai empat</string>
     <string name="voice_four_5s_ks">Four of a kind, lima sampai king</string>
-    <string name="play_tournament_pill">Turnamen 2</string>
-    <string name="play_tournament_expand">🏆 Turnamen No. 2</string>
     <string name="review_title">Suka Video Poker?</string>
     <string name="review_body">Rating singkat di Google Play membantu pemain lain menemukan kami.</string>
     <string name="review_rate">Beri rating</string>
@@ -174,26 +172,15 @@
     <string name="ob_draw">Tarik</string>
     <string name="ob_one_free_all_in">Satu all-in gratis per hari — undang teman untuk membuka satu lagi.</string>
     <string name="ob_compete_climb">Bersaing &amp; naik peringkat</string>
-    <string name="ob_race_leaderboards">Berlomba di papan peringkat teman, per jam, dan harian demi chip bonus.</string>
-    <string name="ob_lb_friends">Teman</string>
-    <string name="ob_lb_hourly">Per jam</string>
-    <string name="ob_lb_daily">Harian</string>
+    <string name="ob_race_leaderboards">Berlomba dengan teman di papan peringkat hari ini.</string>
     <string name="ob_friends_today">Teman · Hari ini</string>
     <string name="ob_you_are_first">Kamu No. 1!</string>
     <string name="ob_you">Kamu</string>
-    <string name="ob_also_live">Juga live: turnamen per jam dan harian melawan semua pemain di aplikasi.</string>
     <string name="ob_never_miss_win">Jangan lewatkan kemenangan</string>
-    <string name="ob_get_notified">Dapatkan info hasil turnamen, tantangan teman, dan bonus harian.</string>
+    <string name="ob_get_notified">Dapatkan pengingat saat bonus harianmu siap.</string>
     <string name="ob_daily_bonus_reminders">Pengingat bonus harian</string>
-    <string name="ob_friend_challenge_alerts">Peringatan tantangan teman</string>
-    <string name="ob_tournament_results">Hasil turnamen</string>
     <string name="ob_enable_notifications">Aktifkan notifikasi</string>
     <string name="ob_not_now">Nanti saja</string>
-    <string name="ob_save_progress">Simpan progresmu</string>
-    <string name="ob_sign_in_sync">Masuk untuk mencadangkan chip dan bersaing dengan teman.</string>
-    <string name="ob_never_lose">Jangan pernah kehilangan chip atau progres</string>
-    <string name="ob_play_across">Main di ponsel dan tablet</string>
-    <string name="ob_find_friends">Temukan teman lewat nama secara otomatis</string>
     <string name="ob_continue_guest">Lanjutkan sebagai tamu</string>
     <string name="ob_back">Kembali</string>
     <string name="ob_next">Lanjut</string>
@@ -291,4 +278,14 @@
     <plurals name="stats_accuracy_detail">
         <item quantity="other">Langkah terbaik di %1$d dari %2$d tangan</item>
     </plurals>
+
+    <!-- Account, deletion and policy links -->
+    <string name="settings_account">Akun</string>
+    <string name="settings_delete_account">Hapus akun</string>
+    <string name="settings_delete_title">Hapus akun Anda?</string>
+    <string name="settings_delete_body">Profil, koneksi teman, dan skor harian Anda akan dihapus permanen dari server kami, dan Anda akan keluar. Chip dan progres di perangkat ini tetap tersimpan. Catatan hadiah undangan disimpan agar hadiah tidak bisa diklaim dua kali.</string>
+    <string name="settings_delete_confirm">Hapus</string>
+    <string name="toast_account_deleted">Akun dihapus</string>
+    <string name="toast_account_delete_failed">Akun tidak dapat dihapus — periksa koneksi lalu coba lagi</string>
+    <string name="settings_privacy_policy">Kebijakan privasi</string>
 </resources>
