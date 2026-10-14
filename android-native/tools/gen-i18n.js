@@ -19,10 +19,11 @@ const LANG_DIR = path.join(ROOT, 'js', 'lang');
 const MAP_FILE = path.join(__dirname, 'i18n-map.json');
 const EXTRA_DIR = path.join(__dirname, 'i18n-extra'); // hand translations: <lang>.json { native_name: text }
 
-// web code -> Android resource qualifier
+// web code -> Android resource qualifier. Indonesian and Hebrew use the legacy codes
+// (in, iw): Android resolves those locales to them, and values-id / values-he never match.
 const FOLDERS = {
     es: 'es', 'pt-BR': 'pt-rBR', de: 'de', fr: 'fr', it: 'it', pl: 'pl', ru: 'ru', tr: 'tr',
-    id: 'id', hi: 'hi', ja: 'ja', ko: 'ko', 'zh-CN': 'zh-rCN', he: 'he', ar: 'ar',
+    id: 'in', hi: 'hi', ja: 'ja', ko: 'ko', 'zh-CN': 'zh-rCN', he: 'iw', ar: 'ar',
 };
 
 function loadDict(code) {
