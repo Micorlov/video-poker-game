@@ -98,5 +98,8 @@
  "toast_invalid_code": "6 karakterlik bir kod gir",
  "toast_friends_offline": "Sunucuya ulaşılamıyor — bağlantını kontrol et",
  "toast_referral_welcome": "🎁 Arkadaşın sana %1$s çip gönderdi — masaya hoş geldin!",
- "toast_invites_rewarded": "🎉 Arkadaşların katıldı — %1$s çip kazandın!"
+ "toast_invites_rewarded": "🎉 Arkadaşların katıldı — %1$s çip kazandın!",
+ "coach_hold": "Tutmak için dokun",
+ "coach_release": "Bırakmak için dokun",
+ "coach_press": "Şimdi %1$s dokun"
 }

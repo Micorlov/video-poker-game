@@ -99,5 +99,8 @@
  "toast_invalid_code": "Gib einen 6-stelligen Code ein",
  "toast_friends_offline": "Server nicht erreichbar – prüfe deine Verbindung",
  "toast_referral_welcome": "🎁 Dein Freund hat dir %1$s Chips geschickt – willkommen am Tisch!",
- "toast_invites_rewarded": "🎉 Freunde sind beigetreten – du hast %1$s Chips verdient!"
+ "toast_invites_rewarded": "🎉 Freunde sind beigetreten – du hast %1$s Chips verdient!",
+ "coach_hold": "Tippe zum Behalten",
+ "coach_release": "Tippe zum Loslassen",
+ "coach_press": "Jetzt %1$s tippen"
 }

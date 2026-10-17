@@ -107,5 +107,8 @@
  "toast_invalid_code": "أدخل رمزًا من 6 أحرف",
  "toast_friends_offline": "تعذّر الوصول إلى الخادم — تحقّق من اتصالك",
  "toast_referral_welcome": "🎁 أرسل لك صديقك %1$s رقاقة — أهلًا بك على الطاولة!",
- "toast_invites_rewarded": "🎉 انضم أصدقاء — ربحت %1$s رقاقة!"
+ "toast_invites_rewarded": "🎉 انضم أصدقاء — ربحت %1$s رقاقة!",
+ "coach_hold": "اضغط للاحتفاظ",
+ "coach_release": "اضغط للإفلات",
+ "coach_press": "الآن اضغط %1$s"
 }

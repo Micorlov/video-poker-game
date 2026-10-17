@@ -100,5 +100,8 @@
  "toast_invalid_code": "Inserisci un codice di 6 caratteri",
  "toast_friends_offline": "Server non raggiungibile — controlla la connessione",
  "toast_referral_welcome": "🎁 Il tuo amico ti ha inviato %1$s fiches — benvenuto al tavolo!",
- "toast_invites_rewarded": "🎉 Gli amici si sono uniti — hai guadagnato %1$s fiches!"
+ "toast_invites_rewarded": "🎉 Gli amici si sono uniti — hai guadagnato %1$s fiches!",
+ "coach_hold": "Tocca per tenere",
+ "coach_release": "Tocca per lasciare",
+ "coach_press": "Ora tocca %1$s"
 }

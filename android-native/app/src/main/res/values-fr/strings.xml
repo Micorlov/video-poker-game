@@ -12,6 +12,9 @@
     <string name="play_draw">Tirer</string>
     <string name="play_hint_hold">Touchez les cartes à garder, puis changez.</string>
     <string name="play_hint_bet">Choisissez votre mise, puis distribuez.</string>
+    <string name="coach_hold">Touchez pour garder</string>
+    <string name="coach_release">Touchez pour relâcher</string>
+    <string name="coach_press">Maintenant, touchez %1$s</string>
     <string name="play_held">GARDÉE</string>
     <string name="play_nothing">Rien — %1$s</string>
     <string name="play_win_streak">Série de victoires</string>

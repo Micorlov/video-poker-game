@@ -12,6 +12,9 @@
     <string name="play_draw">Wymień</string>
     <string name="play_hint_hold">Dotknij kart, które chcesz zatrzymać, a potem wymień.</string>
     <string name="play_hint_bet">Wybierz stawkę i rozdaj.</string>
+    <string name="coach_hold">Dotknij, aby zatrzymać</string>
+    <string name="coach_release">Dotknij, aby puścić</string>
+    <string name="coach_press">Teraz dotknij %1$s</string>
     <string name="play_held">TRZYMANA</string>
     <string name="play_nothing">Nic — %1$s</string>
     <string name="play_win_streak">Seria wygranych</string>

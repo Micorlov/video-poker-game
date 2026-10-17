@@ -12,6 +12,9 @@
     <string name="play_draw">Tauschen</string>
     <string name="play_hint_hold">Tippe auf die Karten, die du behalten willst, und tausche dann.</string>
     <string name="play_hint_bet">Wähle deinen Einsatz und gib die Karten.</string>
+    <string name="coach_hold">Tippe zum Behalten</string>
+    <string name="coach_release">Tippe zum Loslassen</string>
+    <string name="coach_press">Jetzt %1$s tippen</string>
     <string name="play_held">HALTEN</string>
     <string name="play_nothing">Nichts — %1$s</string>
     <string name="play_win_streak">Siegesserie</string>

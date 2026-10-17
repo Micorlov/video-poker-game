@@ -12,6 +12,9 @@
     <string name="play_draw">ドロー</string>
     <string name="play_hint_hold">残したいカードをタップして、ドローしましょう。</string>
     <string name="play_hint_bet">ベットを選んで、ディールしましょう。</string>
+    <string name="coach_hold">タップして残す</string>
+    <string name="coach_release">タップして戻す</string>
+    <string name="coach_press">次に%1$sをタップ</string>
     <string name="play_held">ホールド</string>
     <string name="play_nothing">ノーハンド — %1$s</string>
     <string name="play_win_streak">連勝記録</string>

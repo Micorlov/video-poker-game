@@ -12,6 +12,9 @@
     <string name="play_draw">Robar</string>
     <string name="play_hint_hold">Toca las cartas que quieres conservar y luego cambia.</string>
     <string name="play_hint_bet">Elige tu apuesta y reparte.</string>
+    <string name="coach_hold">Toca para guardar</string>
+    <string name="coach_release">Toca para soltar</string>
+    <string name="coach_press">Ahora toca %1$s</string>
     <string name="play_held">FIJA</string>
     <string name="play_nothing">Nada — %1$s</string>
     <string name="play_win_streak">Racha de victorias</string>

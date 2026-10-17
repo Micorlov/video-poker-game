@@ -12,6 +12,9 @@
     <string name="play_draw">드로우</string>
     <string name="play_hint_hold">남길 카드를 탭한 다음 드로하세요.</string>
     <string name="play_hint_bet">베팅을 고른 뒤 딜하세요.</string>
+    <string name="coach_hold">탭해서 남기기</string>
+    <string name="coach_release">탭해서 놓기</string>
+    <string name="coach_press">이제 %1$s를 탭하세요</string>
     <string name="play_held">홀드</string>
     <string name="play_nothing">없음 — %1$s</string>
     <string name="play_win_streak">연승 기록</string>

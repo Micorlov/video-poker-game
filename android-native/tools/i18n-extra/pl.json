@@ -103,5 +103,8 @@
  "toast_invalid_code": "Wpisz 6-znakowy kod",
  "toast_friends_offline": "Brak połączenia z serwerem — sprawdź internet",
  "toast_referral_welcome": "🎁 Znajomy wysłał ci %1$s żetonów — witaj przy stole!",
- "toast_invites_rewarded": "🎉 Znajomi dołączyli — zdobywasz %1$s żetonów!"
+ "toast_invites_rewarded": "🎉 Znajomi dołączyli — zdobywasz %1$s żetonów!",
+ "coach_hold": "Dotknij, aby zatrzymać",
+ "coach_release": "Dotknij, aby puścić",
+ "coach_press": "Teraz dotknij %1$s"
 }

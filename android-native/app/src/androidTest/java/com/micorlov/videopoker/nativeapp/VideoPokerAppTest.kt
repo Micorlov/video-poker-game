@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ApplicationProvider
+import com.micorlov.videopoker.nativeapp.R
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.SharedPreferencesStore
 import com.micorlov.videopoker.nativeapp.domain.SavedGame
@@ -45,6 +46,24 @@ class VideoPokerAppTest {
         repository.saveGame(saved)
         val viewModel = GameViewModel(repository, Random(seed))
         compose.setContent { VideoPokerApp(viewModel) }
+    }
+
+    @Test
+    fun theOpeningTutorialPointsAtTheWinningCardsThenDraw() {
+        launch()
+        compose.waitUntil(timeoutMillis = 5_000) {
+            compose.onAllNodesWithTag("coach-label").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.coach_hold))
+        compose.onNodeWithTag("card-1").performClick()
+        compose.onNodeWithTag("card-3").performClick()
+        compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.play_draw), substring = true, ignoreCase = true)
+
+        compose.onNodeWithTag("main-button").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.play_deal), substring = true, ignoreCase = true)
     }
 
     @Test

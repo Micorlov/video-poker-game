@@ -12,6 +12,9 @@
     <string name="play_draw">Cambia</string>
     <string name="play_hint_hold">Tocca le carte da tenere, poi cambia.</string>
     <string name="play_hint_bet">Scegli la puntata e distribuisci.</string>
+    <string name="coach_hold">Tocca per tenere</string>
+    <string name="coach_release">Tocca per lasciare</string>
+    <string name="coach_press">Ora tocca %1$s</string>
     <string name="play_held">TENUTA</string>
     <string name="play_nothing">Niente — %1$s</string>
     <string name="play_win_streak">Serie di vittorie</string>

@@ -97,5 +97,8 @@
  "toast_invalid_code": "Masukkan kode 6 karakter",
  "toast_friends_offline": "Tidak dapat menjangkau server — periksa koneksimu",
  "toast_referral_welcome": "🎁 Temanmu mengirim %1$s chip — selamat datang di meja!",
- "toast_invites_rewarded": "🎉 Teman bergabung — kamu mendapat %1$s chip!"
+ "toast_invites_rewarded": "🎉 Teman bergabung — kamu mendapat %1$s chip!",
+ "coach_hold": "Ketuk untuk menahan",
+ "coach_release": "Ketuk untuk melepas",
+ "coach_press": "Sekarang ketuk %1$s"
 }

@@ -3,6 +3,7 @@ package com.micorlov.videopoker.nativeapp.ui.play
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,11 +20,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -35,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.micorlov.videopoker.nativeapp.R
 import com.micorlov.videopoker.nativeapp.audio.SoundCue
+import com.micorlov.videopoker.nativeapp.domain.CoachTarget
+import com.micorlov.videopoker.nativeapp.domain.FirstHands
 import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.Phase
 import com.micorlov.videopoker.nativeapp.ui.Feedback
@@ -83,13 +96,46 @@ fun PlayScreen(
         if (celebration?.tier == CelebrationTier.FIREWORKS) SHAKE_STEPS.forEach { shake.animateTo(it, tween(60)) }
     }
 
+    val placement = remember { TablePlacement() }
+    val scroll = rememberScrollState()
+    val coach = FirstHands.coach(
+        lifetimeHands = game.lifetimeHands,
+        variant = game.variant,
+        phase = game.phase,
+        hand = game.hand,
+        held = game.held,
+        cardsFaceUp = ui.revealed,
+    )
+    val hole = coachHole(placement, coach, placement.cardsTick)
+    val localDensity = LocalDensity.current
+    LaunchedEffect(coach, hole) {
+        val rect = hole ?: return@LaunchedEffect
+        val viewHeight = placement.root?.takeIf { it.isAttached }?.size?.height?.toFloat() ?: return@LaunchedEffect
+        val pointingAtCard = coach is CoachTarget.Hold || coach is CoachTarget.Release
+        val handRoom = with(localDensity) { 140.dp.toPx() }
+        val edge = with(localDensity) { 8.dp.toPx() }
+        val marginTop = if (pointingAtCard) edge else handRoom
+        val marginBottom = if (pointingAtCard) handRoom else edge
+        val delta = when {
+            rect.bottom + marginBottom - viewHeight > 8f -> rect.bottom + marginBottom - viewHeight
+            marginTop - rect.top > 8f -> rect.top - marginTop
+            else -> 0f
+        }
+        if (delta != 0f) scroll.animateScrollBy(delta)
+    }
+
     ui.allInOffer?.let { AllInSheet(it, actions.onAllInConfirmed, actions.onAllInDismissed) }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
+            .onGloballyPositioned { placement.root = it },
+    ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
             .graphicsLayer { translationX = shake.value * density }
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scroll)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -138,6 +184,7 @@ fun PlayScreen(
                 onTapToDeal = tapToDeal.takeIf { settledAndShown },
                 onFlip = onFlip,
                 onRevealed = actions.onRevealed,
+                onCardPlaced = placement::placeCard,
             )
         }
 
@@ -159,6 +206,7 @@ fun PlayScreen(
             enabled = !picking,
             modifier = Modifier
                 .fillMaxWidth()
+                .onGloballyPositioned { placement.button = it }
                 .testTag("main-button"),
         )
 
@@ -176,6 +224,49 @@ fun PlayScreen(
             highlight = if (ui.revealed && doubleUp == null) game.outcome?.bestType?.takeIf { it != HandType.NOTHING } else null,
         )
     }
+
+    val spot = hole
+    if (coach != null && spot != null && spot.width > 1f && spot.height > 1f) {
+        val action = stringResource(if (game.phase == Phase.HOLD) R.string.play_draw else R.string.play_deal)
+        val label = when (coach) {
+            is CoachTarget.Hold -> stringResource(R.string.coach_hold)
+            is CoachTarget.Release -> stringResource(R.string.coach_release)
+            CoachTarget.Draw, CoachTarget.Deal -> stringResource(R.string.coach_press, action)
+        }
+        CoachOverlay(
+            hole = spot,
+            label = label,
+            pointsUp = coach is CoachTarget.Hold || coach is CoachTarget.Release,
+        )
+    }
+    }
+}
+
+/** Where the cards and the deal button sit, in the table's own coordinates. */
+private class TablePlacement {
+    var root by mutableStateOf<LayoutCoordinates?>(null)
+    var button by mutableStateOf<LayoutCoordinates?>(null)
+    var cardsTick by mutableIntStateOf(0)
+    val cards = arrayOfNulls<LayoutCoordinates>(5)
+
+    fun placeCard(index: Int, coords: LayoutCoordinates) {
+        if (index !in cards.indices) return
+        cards[index] = coords
+        cardsTick++
+    }
+}
+
+private fun coachHole(placement: TablePlacement, coach: CoachTarget?, cardTick: Int): Rect? {
+    if (coach == null || cardTick < 0) return null
+    val root = placement.root ?: return null
+    val target = when (coach) {
+        is CoachTarget.Hold -> placement.cards.getOrNull(coach.index)
+        is CoachTarget.Release -> placement.cards.getOrNull(coach.index)
+        CoachTarget.Draw, CoachTarget.Deal -> placement.button
+    } ?: return null
+    if (!root.isAttached || !target.isAttached) return null
+    val topLeft = root.localPositionOf(target, Offset.Zero)
+    return Rect(topLeft, Size(target.size.width.toFloat(), target.size.height.toFloat()))
 }
 
 @Composable

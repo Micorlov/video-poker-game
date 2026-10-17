@@ -12,6 +12,9 @@
     <string name="play_draw">换牌</string>
     <string name="play_hint_hold">点击要保留的牌，然后换牌。</string>
     <string name="play_hint_bet">选择下注金额，然后发牌。</string>
+    <string name="coach_hold">点击保留</string>
+    <string name="coach_release">点击放回</string>
+    <string name="coach_press">现在点击%1$s</string>
     <string name="play_held">保留</string>
     <string name="play_nothing">无牌型 — %1$s</string>
     <string name="play_win_streak">连胜纪录</string>

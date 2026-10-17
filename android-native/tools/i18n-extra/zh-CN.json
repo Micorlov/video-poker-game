@@ -97,5 +97,8 @@
  "toast_invalid_code": "请输入 6 位邀请码",
  "toast_friends_offline": "无法连接服务器，请检查网络",
  "toast_referral_welcome": "🎁 你的好友送你 %1$s 筹码，欢迎入座！",
- "toast_invites_rewarded": "🎉 有好友加入，你获得了 %1$s 筹码！"
+ "toast_invites_rewarded": "🎉 有好友加入，你获得了 %1$s 筹码！",
+ "coach_hold": "点击保留",
+ "coach_release": "点击放回",
+ "coach_press": "现在点击%1$s"
 }

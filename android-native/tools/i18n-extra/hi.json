@@ -99,5 +99,8 @@
  "toast_invalid_code": "6 अक्षरों का कोड डालें",
  "toast_friends_offline": "सर्वर से संपर्क नहीं हो पा रहा — अपना कनेक्शन जाँचें",
  "toast_referral_welcome": "🎁 आपके दोस्त ने आपको %1$s चिप्स भेजे — टेबल पर स्वागत है!",
- "toast_invites_rewarded": "🎉 दोस्त जुड़ गए — आपने %1$s चिप्स कमाए!"
+ "toast_invites_rewarded": "🎉 दोस्त जुड़ गए — आपने %1$s चिप्स कमाए!",
+ "coach_hold": "रखने के लिए टैप करें",
+ "coach_release": "छोड़ने के लिए टैप करें",
+ "coach_press": "अब %1$s पर टैप करें"
 }

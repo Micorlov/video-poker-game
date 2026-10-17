@@ -12,6 +12,9 @@
     <string name="play_draw">سحب</string>
     <string name="play_hint_hold">اضغط على الأوراق التي تريد الاحتفاظ بها ثم اسحب.</string>
     <string name="play_hint_bet">اختر رهانك ثم وزّع.</string>
+    <string name="coach_hold">اضغط للاحتفاظ</string>
+    <string name="coach_release">اضغط للإفلات</string>
+    <string name="coach_press">الآن اضغط %1$s</string>
     <string name="play_held">محفوظة</string>
     <string name="play_nothing">لا يوجد — %1$s</string>
     <string name="play_win_streak">سلسلة الانتصارات</string>

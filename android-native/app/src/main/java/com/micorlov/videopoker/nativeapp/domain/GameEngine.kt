@@ -46,9 +46,14 @@ object GameEngine {
         table = affordableHandCount(table)
 
         val balanceAfterStake = table.balance - table.totalBet
-        val shuffled = standardDeck().shuffled(random)
-        val dealt = Deal(hand = shuffled.take(HAND_SIZE), deck = shuffled.drop(HAND_SIZE))
-        val boosted = Boost.apply(dealt, balanceAfterStake, table.bet, table.lossStreak, random)
+        val scripted = FirstHands.scriptedHand(table.lifetimeHands, table.variant)
+        val boosted = if (scripted != null) {
+            FirstHands.deal(scripted, random)
+        } else {
+            val shuffled = standardDeck().shuffled(random)
+            val dealt = Deal(hand = shuffled.take(HAND_SIZE), deck = shuffled.drop(HAND_SIZE))
+            Boost.apply(dealt, balanceAfterStake, table.bet, table.lossStreak, random)
+        }
 
         return Transition(
             table.copy(

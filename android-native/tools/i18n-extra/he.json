@@ -101,5 +101,8 @@
  "toast_invalid_code": "הזינו קוד בן 6 תווים",
  "toast_friends_offline": "אין חיבור לשרת — בדקו את החיבור",
  "toast_referral_welcome": "🎁 החבר שלכם שלח לכם %1$s צ׳יפים — ברוכים הבאים לשולחן!",
- "toast_invites_rewarded": "🎉 חברים הצטרפו — הרווחתם %1$s צ׳יפים!"
+ "toast_invites_rewarded": "🎉 חברים הצטרפו — הרווחתם %1$s צ׳יפים!",
+ "coach_hold": "הקש כדי לשמור",
+ "coach_release": "הקש כדי לשחרר",
+ "coach_press": "עכשיו הקש על %1$s"
 }

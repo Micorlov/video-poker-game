@@ -97,5 +97,8 @@
  "toast_invalid_code": "6文字のコードを入力してください",
  "toast_friends_offline": "サーバーに接続できません。接続を確認してください",
  "toast_referral_welcome": "🎁 友達から%1$sチップが届きました。テーブルへようこそ！",
- "toast_invites_rewarded": "🎉 友達が参加しました。%1$sチップを獲得！"
+ "toast_invites_rewarded": "🎉 友達が参加しました。%1$sチップを獲得！",
+ "coach_hold": "タップして残す",
+ "coach_release": "タップして戻す",
+ "coach_press": "次に%1$sをタップ"
 }

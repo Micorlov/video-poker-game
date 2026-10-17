@@ -16,6 +16,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -57,6 +59,7 @@ fun HandRow(
     onTapToDeal: (() -> Unit)?,
     onFlip: () -> Unit,
     onRevealed: (Int) -> Unit,
+    onCardPlaced: (Int, LayoutCoordinates) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
     val round = game.round
@@ -145,6 +148,7 @@ fun HandRow(
                 onClick = { if (holdable) onToggleHold(index) else onTapToDeal?.invoke() },
                 modifier = Modifier
                     .weight(1f)
+                    .onGloballyPositioned { onCardPlaced(index, it) }
                     .testTag("card-$index"),
             )
         }

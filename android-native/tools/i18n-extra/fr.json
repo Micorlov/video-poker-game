@@ -100,5 +100,8 @@
  "toast_invalid_code": "Saisissez un code de 6 caractères",
  "toast_friends_offline": "Serveur injoignable — vérifiez votre connexion",
  "toast_referral_welcome": "🎁 Votre ami vous a envoyé %1$s jetons — bienvenue à la table !",
- "toast_invites_rewarded": "🎉 Des amis vous ont rejoint — vous gagnez %1$s jetons !"
+ "toast_invites_rewarded": "🎉 Des amis vous ont rejoint — vous gagnez %1$s jetons !",
+ "coach_hold": "Touchez pour garder",
+ "coach_release": "Touchez pour relâcher",
+ "coach_press": "Maintenant, touchez %1$s"
 }
