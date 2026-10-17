@@ -60,6 +60,7 @@ import com.micorlov.videopoker.nativeapp.ui.components.ActionButton
 import com.micorlov.videopoker.nativeapp.ui.text.cardDescription
 import com.micorlov.videopoker.nativeapp.ui.text.labelRes
 import com.micorlov.videopoker.nativeapp.ui.theme.VpColors
+import kotlinx.coroutines.delay
 
 @Immutable
 data class PlayActions(
@@ -73,6 +74,8 @@ data class PlayActions(
     val onAllIn: () -> Unit,
     val onAllInTipSeen: () -> Unit,
     val onHintsTipSeen: () -> Unit,
+    /** The opening coach has finished saying this draw was a win. */
+    val onOpeningWinAnnounced: () -> Unit = {},
     val onAllInConfirmed: () -> Unit,
     val onAllInDismissed: () -> Unit,
     /** Google sign-in from the depleted ALL IN prompt. */
@@ -123,12 +126,20 @@ fun PlayScreen(
         cardsFaceUp = ui.revealed,
         hintsExplained = ui.hintsTipSeen,
         allInExplained = ui.allInTipSeen,
+        winAnnounced = ui.openingWinAnnounced || game.outcome?.isWin != true,
     )
     val spoken = coachSpoken(coach, game)
-    LaunchedEffect(coach) { spoken?.let(actions.onSpeak) }
+    LaunchedEffect(coach) {
+        spoken?.let(actions.onSpeak)
+        if (coach == CoachTarget.Won) {
+            delay(FirstHands.WIN_ANNOUNCE_MS)
+            actions.onOpeningWinAnnounced()
+        }
+    }
     val hole = placement.cardsTick.let { coachHole(placement, coach) }
     val onHintsPlaced = remember { placement::placeHints }
     val onAllInPlaced = remember { placement::placeAllIn }
+    val onResultPlaced = remember { placement::placeResult }
     val onToggleHints = remember(coach, actions) {
         {
             if (coach is CoachTarget.Hints) actions.onHintsTipSeen()
@@ -145,7 +156,7 @@ fun PlayScreen(
         val rect = hole ?: return@LaunchedEffect
         val viewHeight = placement.root?.takeIf { it.isAttached }?.size?.height?.toFloat() ?: return@LaunchedEffect
         val pointingAtCard = coach is CoachTarget.Hold || coach is CoachTarget.Release ||
-            coach is CoachTarget.Hints || coach is CoachTarget.AllIn
+            coach is CoachTarget.Hints || coach is CoachTarget.AllIn || coach == CoachTarget.Won
         val handRoom = with(localDensity) { 140.dp.toPx() }
         val edge = with(localDensity) { 8.dp.toPx() }
         val marginTop = if (pointingAtCard) edge else handRoom
@@ -288,7 +299,7 @@ fun PlayScreen(
             }
         }
 
-        ResultPanel(ui, actions.onDoubleUp)
+        ResultPanel(ui, actions.onDoubleUp, Modifier.onGloballyPositioned(onResultPlaced))
 
         // Below the button, never above it: the extra hands appear a moment after the draw and
         // must not push Deal out from under the player's thumb.
@@ -311,13 +322,14 @@ fun PlayScreen(
             is CoachTarget.Release -> stringResource(R.string.coach_release)
             CoachTarget.Hints -> stringResource(R.string.coach_hints)
             CoachTarget.AllIn -> stringResource(R.string.coach_all_in)
+            CoachTarget.Won -> wonLine(game)
             CoachTarget.Draw, CoachTarget.Deal -> stringResource(R.string.coach_press, action)
         }
         CoachOverlay(
             hole = spot,
             label = label,
             pointsUp = coach is CoachTarget.Hold || coach is CoachTarget.Release ||
-                coach is CoachTarget.Hints || coach is CoachTarget.AllIn,
+                coach is CoachTarget.Hints || coach is CoachTarget.AllIn || coach == CoachTarget.Won,
         )
     }
     }
@@ -332,9 +344,16 @@ private fun coachSpoken(coach: CoachTarget?, game: GameState): String? {
         is CoachTarget.Release -> voiceCard(R.string.coach_release_voice, game, coach.index)
         CoachTarget.Hints -> stringResource(R.string.coach_hints)
         CoachTarget.AllIn -> stringResource(R.string.coach_all_in)
+        CoachTarget.Won -> wonLine(game)
         CoachTarget.Draw -> stringResource(R.string.coach_press, stringResource(R.string.play_draw))
         CoachTarget.Deal -> stringResource(R.string.coach_press, stringResource(R.string.play_deal))
     }
+}
+
+@Composable
+private fun wonLine(game: GameState): String {
+    val type = game.outcome?.bestType ?: HandType.NOTHING
+    return stringResource(R.string.coach_won, stringResource(type.labelRes()))
 }
 
 @Composable
@@ -349,6 +368,7 @@ private class TablePlacement {
     var button by mutableStateOf<LayoutCoordinates?>(null)
     var hints by mutableStateOf<LayoutCoordinates?>(null)
     var allIn by mutableStateOf<LayoutCoordinates?>(null)
+    var result by mutableStateOf<LayoutCoordinates?>(null)
     var cardsTick by mutableIntStateOf(0)
     val cards = arrayOfNulls<LayoutCoordinates>(5)
 
@@ -367,6 +387,11 @@ private class TablePlacement {
         if (allIn.sameSpot(coords)) return
         allIn = coords
     }
+
+    fun placeResult(coords: LayoutCoordinates) {
+        if (result.sameSpot(coords)) return
+        result = coords
+    }
 }
 
 private fun LayoutCoordinates?.sameSpot(next: LayoutCoordinates): Boolean {
@@ -383,6 +408,7 @@ private fun coachHole(placement: TablePlacement, coach: CoachTarget?): Rect? {
         is CoachTarget.Release -> placement.cards.getOrNull(coach.index)
         CoachTarget.Hints -> placement.hints
         CoachTarget.AllIn -> placement.allIn
+        CoachTarget.Won -> placement.result
         CoachTarget.Draw, CoachTarget.Deal -> placement.button
     } ?: return null
     if (!root.isAttached || !target.isAttached) return null

@@ -22,6 +22,7 @@
     <string name="coach_all_in">Günde bir, kartları gördükten sonra</string>
     <string name="coach_hold_voice">Tutmak için dokun: %1$s</string>
     <string name="coach_release_voice">Bırakmak için dokun: %1$s</string>
+    <string name="coach_won">Kazandınız: %1$s</string>
     <string name="play_held">TUTULDU</string>
     <string name="play_nothing">Yok — %1$s</string>
     <string name="play_win_streak">Galibiyet serisi</string>

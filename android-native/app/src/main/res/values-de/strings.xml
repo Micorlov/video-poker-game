@@ -22,6 +22,7 @@
     <string name="coach_all_in">Einmal am Tag, wenn die Karten offen sind</string>
     <string name="coach_hold_voice">Tippen zum Behalten: %1$s</string>
     <string name="coach_release_voice">Tippen zum Loslassen: %1$s</string>
+    <string name="coach_won">Gewonnen: %1$s</string>
     <string name="play_held">HALTEN</string>
     <string name="play_nothing">Nichts — %1$s</string>
     <string name="play_win_streak">Siegesserie</string>

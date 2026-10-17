@@ -22,6 +22,7 @@
     <string name="coach_all_in">Раз в день, когда карты открыты</string>
     <string name="coach_hold_voice">Нажмите, чтобы оставить: %1$s</string>
     <string name="coach_release_voice">Нажмите, чтобы отпустить: %1$s</string>
+    <string name="coach_won">Вы выиграли: %1$s</string>
     <string name="play_held">ОСТАВЛЕНА</string>
     <string name="play_nothing">Ничего — %1$s</string>
     <string name="play_win_streak">Серия побед</string>

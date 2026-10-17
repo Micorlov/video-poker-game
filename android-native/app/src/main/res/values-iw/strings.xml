@@ -22,6 +22,7 @@
     <string name="coach_all_in">פעם ביום, אחרי שרואים את הקלפים</string>
     <string name="coach_hold_voice">הקש כדי לשמור: %1$s</string>
     <string name="coach_release_voice">הקש כדי לשחרר: %1$s</string>
+    <string name="coach_won">זכית: %1$s</string>
     <string name="play_held">נשמר</string>
     <string name="play_nothing">אין צירוף — %1$s</string>
     <string name="play_win_streak">רצף ניצחונות</string>

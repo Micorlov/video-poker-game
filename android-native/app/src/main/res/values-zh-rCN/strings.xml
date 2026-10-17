@@ -22,6 +22,7 @@
     <string name="coach_all_in">每天一次，看到牌之后</string>
     <string name="coach_hold_voice">点按保留：%1$s</string>
     <string name="coach_release_voice">点按放开：%1$s</string>
+    <string name="coach_won">你赢了：%1$s</string>
     <string name="play_held">保留</string>
     <string name="play_nothing">无牌型 — %1$s</string>
     <string name="play_win_streak">连胜纪录</string>

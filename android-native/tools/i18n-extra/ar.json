@@ -115,6 +115,7 @@
  "coach_all_in": "مرة في اليوم، بعد ظهور الأوراق",
  "coach_hold_voice": "اضغط للإبقاء: %1$s",
  "coach_release_voice": "اضغط للتحرير: %1$s",
+ "coach_won": "لقد فزت: %1$s",
  "toast_all_in_after_cards": "مرة في اليوم — بعد ظهور الأوراق",
  "prompt_notify_title": "السماح بالإشعارات؟",
  "prompt_notify_body": "سنذكّرك عندما تصبح المكافأة اليومية جاهزة.",

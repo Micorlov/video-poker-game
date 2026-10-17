@@ -22,6 +22,7 @@
     <string name="coach_all_in">Une fois par jour, après avoir vu les cartes</string>
     <string name="coach_hold_voice">Touchez pour garder : %1$s</string>
     <string name="coach_release_voice">Touchez pour lâcher : %1$s</string>
+    <string name="coach_won">Vous avez gagné : %1$s</string>
     <string name="play_held">GARDÉE</string>
     <string name="play_nothing">Rien — %1$s</string>
     <string name="play_win_streak">Série de victoires</string>
