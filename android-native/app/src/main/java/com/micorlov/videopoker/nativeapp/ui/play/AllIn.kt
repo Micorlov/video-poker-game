@@ -104,8 +104,8 @@ fun AllInSheet(offer: AllInOffer, onConfirm: () -> Unit, onDismiss: () -> Unit) 
             Column(
                 Modifier
                     .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
                     .widthIn(max = 460.dp)
+                    .fillMaxWidth()
                     .clip(shape)
                     .background(Brush.verticalGradient(listOf(palette.panelSolid, palette.bgEdge)))
                     .drawWithContent {
