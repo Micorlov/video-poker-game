@@ -59,6 +59,9 @@ class NewFeaturesTest {
     @Test
     fun turningHintsOnShowsAToast() {
         launch()
+        compose.waitUntil(timeoutMillis = 5_000) {
+            compose.onAllNodesWithTag("hints-toggle").fetchSemanticsNodes().isNotEmpty()
+        }
 
         compose.onNodeWithTag("hints-toggle").performClick()
         compose.onNodeWithTag("toast").assertTextContains("Hints on", substring = true)

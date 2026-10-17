@@ -102,7 +102,8 @@ fun PlayScreen(
 ) {
     val game = ui.game
     val pace = ui.settings.gameSpeed.pace
-    val hints = ui.holdAnalysis?.takeIf { ui.settings.hintsEnabled }?.bestHolds().orEmpty()
+    val hintsLit = ui.settings.hintsEnabled && ui.hintsLampVisible
+    val hints = ui.holdAnalysis?.takeIf { hintsLit }?.bestHolds().orEmpty()
     val balanceRevealed = if (game.doubleUp != null) ui.doubleUpRevealed else ui.revealed
     val displayedBalance = rememberDisplayedBalance(game, balanceRevealed, pace) { feedback.play(SoundCue.COIN) }
 
@@ -417,31 +418,33 @@ private fun Header(
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Box(
-            Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(if (hintsOn) VpColors.Hint.copy(alpha = 0.45f) else VpColors.Surface)
-                .semantics { contentDescription = hintsLabel }
-                .toggleable(value = hintsOn, role = Role.Switch, onValueChange = { onToggleHints() })
-                .onGloballyPositioned(onHintsPlaced)
-                .testTag("hints-toggle"),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text("💡", fontSize = 20.sp, modifier = Modifier.clearAndSetSemantics { })
-        }
-        Box(
-            Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(VpColors.Surface)
-                .semantics { contentDescription = soundLabel }
-                .toggleable(value = soundOn, role = Role.Switch, onValueChange = { onToggleSound() })
-                .testTag("sound-toggle"),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(if (soundOn) "🔊" else "🔇", fontSize = 20.sp, modifier = Modifier.clearAndSetSemantics { })
-        }
+            if (ui.hintsLampVisible) {
+                Box(
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(if (hintsOn) VpColors.Hint.copy(alpha = 0.45f) else VpColors.Surface)
+                        .semantics { contentDescription = hintsLabel }
+                        .toggleable(value = hintsOn, role = Role.Switch, onValueChange = { onToggleHints() })
+                        .onGloballyPositioned(onHintsPlaced)
+                        .testTag("hints-toggle"),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("💡", fontSize = 20.sp, modifier = Modifier.clearAndSetSemantics { })
+                }
+            }
+            Box(
+                Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(VpColors.Surface)
+                    .semantics { contentDescription = soundLabel }
+                    .toggleable(value = soundOn, role = Role.Switch, onValueChange = { onToggleSound() })
+                    .testTag("sound-toggle"),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(if (soundOn) "🔊" else "🔇", fontSize = 20.sp, modifier = Modifier.clearAndSetSemantics { })
+            }
         }
     }
 }

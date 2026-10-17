@@ -77,6 +77,13 @@ data class UiState(
     /** True once the cards of the current round are face up, so results may be shown. */
     val revealed: Boolean get() = revealedRound == game.round
 
+    /**
+     * The hints lamp is on the table only while this hand's cards are face up.
+     * Draw, the result, and the next deal's flip all take it away, even when hints stay on.
+     * The next face-up deal brings it back already lit when [UserSettings.hintsEnabled] is set.
+     */
+    val hintsLampVisible: Boolean get() = game.phase == Phase.HOLD && revealed
+
     /** Expected values for the hand on the table, while holds are being chosen. */
     val holdAnalysis: HoldAnalysis?
         get() = analysis?.takeIf { game.phase == Phase.HOLD && it.round == game.round }?.analysis
