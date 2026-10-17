@@ -12,6 +12,9 @@
     <string name="play_draw">Обмен</string>
     <string name="play_hint_hold">Нажмите на карты, которые хотите оставить, затем меняйте.</string>
     <string name="play_hint_bet">Выберите ставку и раздавайте.</string>
+    <string name="play_bet_open">Нажмите фишку, чтобы изменить ставку</string>
+    <string name="play_bet_locked">Ставка заблокирована до конца этой руки</string>
+    <string name="play_bet_locked_all_in">Ставка заблокирована — олл-ин доступен</string>
     <string name="coach_hold">Нажмите, чтобы оставить</string>
     <string name="coach_release">Нажмите, чтобы отпустить</string>
     <string name="coach_press">Теперь нажмите %1$s</string>

@@ -12,6 +12,9 @@
     <string name="play_draw">החלפה</string>
     <string name="play_hint_hold">הקש על הקלפים שברצונך לשמור, ואז החלף.</string>
     <string name="play_hint_bet">בחר הימור ואז חלק.</string>
+    <string name="play_bet_open">הקישו על אסימון כדי לשנות את ההימור</string>
+    <string name="play_bet_locked">ההימור נעול עד סוף היד</string>
+    <string name="play_bet_locked_all_in">ההימור נעול — אול-אין זמין</string>
     <string name="coach_hold">הקש כדי לשמור</string>
     <string name="coach_release">הקש כדי לשחרר</string>
     <string name="coach_press">עכשיו הקש על %1$s</string>

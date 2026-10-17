@@ -12,6 +12,9 @@
     <string name="play_draw">ドロー</string>
     <string name="play_hint_hold">残したいカードをタップして、ドローしましょう。</string>
     <string name="play_hint_bet">ベットを選んで、ディールしましょう。</string>
+    <string name="play_bet_open">チップをタップしてベットを変更</string>
+    <string name="play_bet_locked">このハンドが終わるまでベットは固定</string>
+    <string name="play_bet_locked_all_in">ベット固定 — オールインできます</string>
     <string name="coach_hold">タップして残す</string>
     <string name="coach_release">タップして戻す</string>
     <string name="coach_press">次に%1$sをタップ</string>

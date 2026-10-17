@@ -1685,10 +1685,55 @@ button:focus:not(:focus-visible) {
     font-weight: 700;
 }
 
+.bet-status {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-align: center;
+}
+
+.bet-status-bet { color: var(--gold); }
+.bet-status-allin { color: var(--text); }
+.bet-status-locked { color: var(--text-faint); }
+
 .bet-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr) 1.15fr;
     gap: 8px;
+}
+
+/* A locked stake chip, including the current one, must not look pressable. */
+.bet-row:not(.bets-open) .bet-btn:not(.bet-btn-allin) {
+    opacity: 0.38;
+    filter: grayscale(0.65);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.bet-row:not(.bets-open) .bet-btn.selected:not(.bet-btn-allin) {
+    opacity: 0.62;
+    background: var(--surface);
+    color: var(--text-faint);
+    box-shadow: inset 0 0 0 1.5px var(--border);
+}
+
+.bet-row:not(.allin-open) .bet-btn-allin {
+    opacity: 0.38;
+    filter: grayscale(0.8);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.bet-row.allin-open .bet-btn-allin {
+    opacity: 1;
+    filter: none;
+    box-shadow: 0 0 0 2px var(--action);
+}
+
+.bet-row.bets-open .bet-btn:not(.bet-btn-allin) {
+    opacity: 1;
+    filter: none;
 }
 
 .bet-btn {
@@ -1829,6 +1874,7 @@ button:focus:not(:focus-visible) {
     gap: 9px;
     justify-content: space-between;
     padding: 20px 0 0;
+    perspective: 900px;
 }
 
 .hand-placeholder-text {
@@ -1845,13 +1891,40 @@ button:focus:not(:focus-visible) {
     cursor: pointer;
     perspective: 600px;
     -webkit-tap-highlight-color: transparent;
+    transform-origin: center 20%;
+}
+
+/* Deal-in: the card starts small and high (far up the felt) and settles into the hand. */
+.card.receiving {
+    animation: card-receive 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* A discarded draw card folds back before its replacement is pitched in. */
+.card.discarding {
+    animation: card-fold 0.26s cubic-bezier(0.4, 0, 1, 1) forwards;
+    pointer-events: none;
+}
+
+/* A finished hand with nothing to pay folds the whole fan away. */
+.hand.folding .card {
+    animation: card-fold 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
+    pointer-events: none;
+}
+
+.hand.folded {
+    min-height: 0;
+    padding-top: 0;
+}
+
+.hand.folded .card {
+    visibility: hidden;
 }
 
 .card-inner {
     position: relative;
     width: 100%;
     height: 100%;
-    transition: transform 0.5s;
+    transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
     transform-style: preserve-3d;
 }
 
@@ -4373,6 +4446,24 @@ body.screen-shake {
     to { background-position: -200% center; }
 }
 
+@keyframes card-receive {
+    0% {
+        opacity: 0;
+        transform: translateY(-42px) scale(0.58) rotate(var(--fan, 0deg));
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0deg);
+    }
+}
+
+@keyframes card-fold {
+    to {
+        opacity: 0;
+        transform: translateY(-22px) scale(0.28) rotateX(72deg);
+    }
+}
+
 .card.bounce {
     animation: card-bounce 0.5s ease;
 }
@@ -5507,6 +5598,7 @@ body:not(.ob-step-welcome) .ob-lang-chip {
                     <span class="section-label" data-i18n="play.totalBet">Total bet</span>
                     <span class="total-bet-value" id="bet-display">10</span>
                 </div>
+                <p class="bet-status bet-status-locked" id="bet-status" aria-live="polite"></p>
                 <div class="bet-row">
                     <button class="bet-btn" onclick="setBet(5)" id="bet-5">5</button>
                     <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
@@ -6647,6 +6739,9 @@ vpRegisterLang('en', {
     'play.signInCompete': 'Sign in to compete for the hourly crown',
     'play.signInLeaderboards': 'Sign in to see leaderboards',
     'play.totalBet': 'Total bet',
+    'play.betOpen': 'Tap a chip to change your bet',
+    'play.betLocked': 'Bet locked until this hand is finished',
+    'play.betLockedAllIn': 'Bet locked — All in is available',
     'play.allIn': 'ALL IN',
     'play.allInLeft': '{{n}} left',
     'play.deal': 'Deal',
@@ -7075,6 +7170,9 @@ vpRegisterLang('es', {
     'play.signInCompete': 'Inicia sesión para competir por la corona horaria',
     'play.signInLeaderboards': 'Inicia sesión para ver las clasificaciones',
     'play.totalBet': 'Apuesta total',
+    'play.betOpen': 'Toca una ficha para cambiar la apuesta',
+    'play.betLocked': 'Apuesta bloqueada hasta que termine esta mano',
+    'play.betLockedAllIn': 'Apuesta bloqueada — All in disponible',
     'play.allIn': 'TODO',
     'play.allInLeft': 'quedan {{n}}',
     'play.deal': 'Repartir',
@@ -7468,6 +7566,9 @@ vpRegisterLang('pt-BR', {
     'play.signInCompete': 'Entre para disputar a coroa da hora',
     'play.signInLeaderboards': 'Entre para ver os rankings',
     'play.totalBet': 'Aposta total',
+    'play.betOpen': 'Toque numa ficha para mudar a aposta',
+    'play.betLocked': 'Aposta travada até o fim desta mão',
+    'play.betLockedAllIn': 'Aposta travada — All in disponível',
     'play.allIn': 'TUDO',
     'play.allInLeft': 'restam {{n}}',
     'play.deal': 'Distribuir',
@@ -7863,6 +7964,9 @@ vpRegisterLang('de', {
     'play.signInCompete': 'Melde dich an, um um die Stundenkrone zu spielen',
     'play.signInLeaderboards': 'Melde dich an, um Ranglisten zu sehen',
     'play.totalBet': 'Gesamteinsatz',
+    'play.betOpen': 'Tippe auf einen Chip, um den Einsatz zu ändern',
+    'play.betLocked': 'Einsatz gesperrt, bis diese Hand vorbei ist',
+    'play.betLockedAllIn': 'Einsatz gesperrt — All-in ist möglich',
     'play.allIn': 'ALL IN',
     'play.allInLeft': 'noch {{n}}',
     'play.deal': 'Geben',
@@ -8256,6 +8360,9 @@ vpRegisterLang('fr', {
     'play.signInCompete': 'Connectez-vous pour viser la couronne horaire',
     'play.signInLeaderboards': 'Connectez-vous pour voir les classements',
     'play.totalBet': 'Mise totale',
+    'play.betOpen': 'Touchez une mise pour la changer',
+    'play.betLocked': 'Mise verrouillée jusqu’à la fin de cette main',
+    'play.betLockedAllIn': 'Mise verrouillée — le tapis est disponible',
     'play.allIn': 'TAPIS',
     'play.allInLeft': '{{n}} restant',
     'play.deal': 'Distribuer',
@@ -8649,6 +8756,9 @@ vpRegisterLang('it', {
     'play.signInCompete': 'Accedi per competere per la corona oraria',
     'play.signInLeaderboards': 'Accedi per vedere le classifiche',
     'play.totalBet': 'Puntata totale',
+    'play.betOpen': 'Tocca una fiche per cambiare la puntata',
+    'play.betLocked': 'Puntata bloccata fino alla fine di questa mano',
+    'play.betLockedAllIn': 'Puntata bloccata — All in disponibile',
     'play.allIn': 'ALL IN',
     'play.allInLeft': 'ne resta {{n}}',
     'play.deal': 'Distribuisci',
@@ -9044,6 +9154,9 @@ vpRegisterLang('pl', {
     'play.signInCompete': 'Zaloguj się, aby powalczyć o koronę godziny',
     'play.signInLeaderboards': 'Zaloguj się, aby zobaczyć rankingi',
     'play.totalBet': 'Łączny zakład',
+    'play.betOpen': 'Dotknij żetonu, aby zmienić stawkę',
+    'play.betLocked': 'Stawka zablokowana do końca tej ręki',
+    'play.betLockedAllIn': 'Stawka zablokowana — All in jest dostępne',
     'play.allIn': 'ALL IN',
     'play.allInLeft': 'zostało {{n}}',
     'play.deal': 'Rozdaj',
@@ -9439,6 +9552,9 @@ vpRegisterLang('ru', {
     'play.signInCompete': 'Войдите, чтобы побороться за корону часа',
     'play.signInLeaderboards': 'Войдите, чтобы видеть рейтинги',
     'play.totalBet': 'Общая ставка',
+    'play.betOpen': 'Нажмите фишку, чтобы изменить ставку',
+    'play.betLocked': 'Ставка заблокирована до конца этой руки',
+    'play.betLockedAllIn': 'Ставка заблокирована — олл-ин доступен',
     'play.allIn': 'ВА-БАНК',
     'play.allInLeft': 'осталось {{n}}',
     'play.deal': 'Раздать',
@@ -9832,6 +9948,9 @@ vpRegisterLang('tr', {
     'play.signInCompete': 'Saatlik taç için yarışmak üzere giriş yap',
     'play.signInLeaderboards': 'Sıralamaları görmek için giriş yap',
     'play.totalBet': 'Toplam bahis',
+    'play.betOpen': 'Bahsi değiştirmek için bir fişe dokun',
+    'play.betLocked': 'Bu el bitene kadar bahis kilitli',
+    'play.betLockedAllIn': 'Bahis kilitli — All in açık',
     'play.allIn': 'ALL IN',
     'play.allInLeft': '{{n}} kaldı',
     'play.deal': 'Dağıt',
@@ -10225,6 +10344,9 @@ vpRegisterLang('id', {
     'play.signInCompete': 'Masuk untuk memperebutkan mahkota per jam',
     'play.signInLeaderboards': 'Masuk untuk melihat papan peringkat',
     'play.totalBet': 'Total taruhan',
+    'play.betOpen': 'Ketuk chip untuk mengubah taruhan',
+    'play.betLocked': 'Taruhan terkunci sampai tangan ini selesai',
+    'play.betLockedAllIn': 'Taruhan terkunci — All in tersedia',
     'play.allIn': 'ALL IN',
     'play.allInLeft': 'sisa {{n}}',
     'play.deal': 'Bagikan',
@@ -10620,6 +10742,9 @@ vpRegisterLang('hi', {
     'play.signInCompete': 'घंटे का ताज जीतने के लिए साइन इन करें',
     'play.signInLeaderboards': 'लीडरबोर्ड देखने के लिए साइन इन करें',
     'play.totalBet': 'कुल दांव',
+    'play.betOpen': 'दांव बदलने के लिए चिप पर टैप करें',
+    'play.betLocked': 'यह हाथ खत्म होने तक दांव लॉक है',
+    'play.betLockedAllIn': 'दांव लॉक है — ऑल इन उपलब्ध है',
     'play.allIn': 'ऑल इन',
     'play.allInLeft': '{{n}} बचे',
     'play.deal': 'बाँटें',
@@ -11015,6 +11140,9 @@ vpRegisterLang('ja', {
     'play.signInCompete': 'ログインして毎時の王座に挑戦',
     'play.signInLeaderboards': 'ログインしてランキングを表示',
     'play.totalBet': '合計ベット',
+    'play.betOpen': 'チップをタップしてベットを変更',
+    'play.betLocked': 'このハンドが終わるまでベットは固定',
+    'play.betLockedAllIn': 'ベット固定 — オールインできます',
     'play.allIn': 'オールイン',
     'play.allInLeft': '残り{{n}}回',
     'play.deal': 'ディール',
@@ -11408,6 +11536,9 @@ vpRegisterLang('ko', {
     'play.signInCompete': '로그인하고 시간당 왕좌에 도전하세요',
     'play.signInLeaderboards': '로그인하면 순위표를 볼 수 있어요',
     'play.totalBet': '총 베팅',
+    'play.betOpen': '칩을 눌러 베팅을 바꾸세요',
+    'play.betLocked': '이 핸드가 끝날 때까지 베팅이 잠겨 있습니다',
+    'play.betLockedAllIn': '베팅 잠김 — 올인 가능',
     'play.allIn': '올인',
     'play.allInLeft': '{{n}}회 남음',
     'play.deal': '딜',
@@ -11802,6 +11933,9 @@ vpRegisterLang('zh-CN', {
     'play.signInCompete': '登录后争夺每小时桂冠',
     'play.signInLeaderboards': '登录后可查看排行榜',
     'play.totalBet': '总下注',
+    'play.betOpen': '点筹码即可更改下注',
+    'play.betLocked': '本手结束前下注已锁定',
+    'play.betLockedAllIn': '下注已锁定 — 可以全下',
     'play.allIn': '全下',
     'play.allInLeft': '剩 {{n}} 次',
     'play.deal': '发牌',
@@ -12198,6 +12332,9 @@ vpRegisterLang('he', {
     'play.signInCompete': 'התחברו כדי להתחרות על כתר השעה',
     'play.signInLeaderboards': 'התחברו כדי לראות את הטבלאות',
     'play.totalBet': 'סך ההימור',
+    'play.betOpen': 'הקישו על אסימון כדי לשנות את ההימור',
+    'play.betLocked': 'ההימור נעול עד סוף היד',
+    'play.betLockedAllIn': 'ההימור נעול — אול-אין זמין',
     'play.allIn': 'הכול',
     'play.allInLeft': 'נותרו {{n}}',
     'play.deal': 'חלוקה',
@@ -12589,6 +12726,9 @@ vpRegisterLang('ar', {
     'play.signInCompete': 'سجّل الدخول للتنافس على تاج الساعة',
     'play.signInLeaderboards': 'سجّل الدخول لرؤية الترتيب',
     'play.totalBet': 'إجمالي الرهان',
+    'play.betOpen': 'انقر رقاقة لتغيير الرهان',
+    'play.betLocked': 'الرهان مقفل حتى تنتهي هذه اليد',
+    'play.betLockedAllIn': 'الرهان مقفل — الكل متاح',
     'play.allIn': 'كل الرصيد',
     'play.allInLeft': 'المتبقي {{n}}',
     'play.deal': 'توزيع',
@@ -18717,10 +18857,91 @@ function renderPayouts() {
     renderVariantLabel();
 }
 
-function setBet(amount) {
+// Which money control is open. 'bet' = stake chips (and, on the web, All In).
+// 'allin' = the hand is face up, so only All In can change the money.
+// 'locked' = cards are still dealing, drawing, or folding.
+let tableWindow = 'bet';
+let handKept = false;
+let presentationGen = 0;
+
+function motionReduced() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function syncMoneyControls() {
+    const row = document.querySelector('.bet-row');
+    if (row) {
+        row.classList.toggle('bets-open', tableWindow === 'bet');
+        // Web All In is legal between hands and during a hold. It only goes
+        // quiet while the cards themselves are still moving.
+        row.classList.toggle('allin-open', tableWindow === 'bet' || tableWindow === 'allin');
+    }
+    const status = document.getElementById('bet-status');
+    if (status) {
+        const key = tableWindow === 'bet' ? 'play.betOpen'
+            : tableWindow === 'allin' ? 'play.betLockedAllIn'
+            : 'play.betLocked';
+        status.textContent = t(key);
+        status.className = 'bet-status bet-status-' + (tableWindow === 'bet' ? 'bet' : tableWindow === 'allin' ? 'allin' : 'locked');
+    }
+}
+
+function foldHand(onDone) {
+    const gen = presentationGen;
+    const handEl = document.getElementById('hand');
+    const finish = function() {
+        if (gen !== presentationGen) return;
+        if (handEl) {
+            handEl.classList.remove('folding');
+            handEl.classList.add('folded');
+        }
+        handKept = false;
+        onDone();
+    };
+    if (!handEl || !handEl.children.length || motionReduced()) {
+        finish();
+        return;
+    }
+    handEl.classList.remove('folded');
+    handEl.classList.add('folding');
+    setTimeout(finish, 420);
+}
+
+function discardUnheld(onDone) {
+    const gen = presentationGen;
+    const handEl = document.getElementById('hand');
+    if (!handEl || motionReduced()) {
+        onDone();
+        return;
+    }
+    let any = false;
+    for (let i = 0; i < 5; i++) {
+        if (!held[i] && handEl.children[i]) {
+            handEl.children[i].classList.add('discarding');
+            any = true;
+        }
+    }
+    if (!any) {
+        onDone();
+        return;
+    }
+    setTimeout(function() {
+        if (gen === presentationGen) onDone();
+    }, 260);
+}
+
+if (window.vpOnLanguageChange) vpOnLanguageChange(syncMoneyControls);
+
+function setBet(amount, quiet) {
     // The stake is charged at deal time but the payout is computed at draw
-    // time, so it must stay locked for the duration of the hand.
-    if (gameState !== 'bet') return;
+    // time, so it must stay locked for the duration of the hand. tableWindow
+    // stays locked while cards are still travelling, even after draw() has
+    // already moved gameState back to 'bet'. quiet is for the game itself
+    // (shrinking an unaffordable bet, restoring the stake after ALL IN).
+    if (gameState !== 'bet' || (!quiet && tableWindow !== 'bet')) {
+        if (!quiet && gameState === 'bet' && tableWindow !== 'bet') showToast(t('play.betLocked'));
+        return;
+    }
     bet = amount;
     updateTotalBetDisplay();
     document.querySelectorAll('.bet-row .bet-btn').forEach(btn => {
@@ -18833,6 +19054,11 @@ function openAllInSheet() {
     // Unlike setBet(), All In is allowed mid-hand: it stakes whatever balance
     // remains on top of the bet already charged at deal time, so it can't
     // reproduce the deal-cheap/raise-later exploit that setBet() must block.
+    // It is not available while cards are still dealing, drawing, or folding.
+    if (tableWindow === 'locked') {
+        showToast(t('play.betLocked'));
+        return;
+    }
     if (gameState !== 'bet' && gameState !== 'hold') return;
     if (getAllInRemaining() <= 0) {
         // A guest who signs in gets 2 a day instead of 1. Anyone already at the
@@ -18916,7 +19142,7 @@ function confirmAllIn() {
         document.getElementById('balance').textContent = formatNumber(balance);
         updateTotalBetDisplay();
     } else {
-        setBet(allInPendingAmount);
+        setBet(allInPendingAmount, true);
     }
     const btn = document.getElementById('bet-allin');
     if (btn) btn.classList.add('selected');
@@ -19134,7 +19360,10 @@ function updateMainButton() {
     btn.className = isDraw ? 'btn-secondary' : 'btn-primary';
 }
 
+let clearing = false;
+
 function mainAction() {
+    if (clearing) return;
     if (gameState === 'bet') deal();
     else if (gameState === 'hold') draw();
 }
@@ -19146,7 +19375,7 @@ function deal() {
         } else {
             bet = Math.max(5, Math.floor(balance / 5) * 5);
             if (bet > balance) bet = 5;
-            setBet(bet);
+            setBet(bet, true);
             if (balance < bet) {
                 doRebuy();
             }
@@ -19172,8 +19401,28 @@ function deal() {
     dealtHand = hand.slice();
     held = [false, false, false, false, false];
     gameState = 'hold';
+    presentationGen++;
+    tableWindow = 'locked';
+    syncMoneyControls();
 
-    renderHand();
+    const paintHand = function() {
+        const gen = presentationGen;
+        renderHand([], [], [], false, true, function() {
+            if (gen !== presentationGen || gameState !== 'hold') return;
+            tableWindow = 'allin';
+            handKept = false;
+            syncMoneyControls();
+        });
+    };
+    if (handKept) {
+        clearing = true;
+        foldHand(function() {
+            clearing = false;
+            paintHand();
+        });
+    } else {
+        paintHand();
+    }
     renderMultiHands([]);
     updateMainButton();
     lastHandType = null;
@@ -19327,18 +19576,37 @@ function draw() {
         document.getElementById('explanation').textContent = vpHandExplanation(handType);
     }
 
-    renderHand(winIndices, thirdMatchIndices, secondPairIndices, true, true, function() {
-        if (win === 0) {
-            playSound('loss');
-        } else {
-            triggerWinCelebration(bestType, win);
-            triggerHaptic('HEAVY');
-        }
+    presentationGen++;
+    tableWindow = 'locked';
+    syncMoneyControls();
+    const drawGen = presentationGen;
+    discardUnheld(function() {
+        if (drawGen !== presentationGen) return;
+        renderHand(winIndices, thirdMatchIndices, secondPairIndices, true, true, function() {
+            if (drawGen !== presentationGen) return;
+            if (win === 0) {
+                playSound('loss');
+                setTimeout(function() {
+                    if (drawGen !== presentationGen) return;
+                    foldHand(function() {
+                        if (drawGen !== presentationGen) return;
+                        tableWindow = 'bet';
+                        syncMoneyControls();
+                    });
+                }, motionReduced() ? 0 : 520);
+            } else {
+                handKept = true;
+                tableWindow = 'bet';
+                syncMoneyControls();
+                triggerWinCelebration(bestType, win);
+                triggerHaptic('HEAVY');
+            }
+        });
     });
 
     gameState = 'bet';
     if (betBeforeAllIn !== null) {
-        setBet(betBeforeAllIn);
+        setBet(betBeforeAllIn, true);
         betBeforeAllIn = null;
     }
     updateMainButton();
@@ -19390,6 +19658,7 @@ let lastRenderHandArgs = null;
 function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false, animateFlip = true, onFlipsComplete = null) {
     lastRenderHandArgs = [winningIndices, thirdMatchIndices, secondPairIndices, isDraw, false];
     const handEl = document.getElementById('hand');
+    handEl.classList.remove('folded', 'folding');
     handEl.innerHTML = '';
     const anyHeld = held.some(h => h);
     let flippingCount = 0;
@@ -19413,6 +19682,8 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         if (thirdMatchIndices.includes(i)) classes += ' third-match';
 
         cardEl.className = classes.trim();
+        cardEl.style.setProperty('--fan', ((i - 2) * 4) + 'deg');
+        if (shouldStartFlipped) cardEl.classList.add('receiving');
         cardEl.onclick = () => toggleHold(i);
         const SUIT_NAMES = { '♠': 'Spades', '♥': 'Hearts', '♦': 'Diamonds', '♣': 'Clubs' };
         const RANK_NAMES = { 'A': 'Ace', 'J': 'Jack', 'Q': 'Queen', 'K': 'King' };
@@ -19463,6 +19734,10 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         hand.forEach((card, i) => {
             const cardEl = handEl.children[i];
             if (cardEl && cardEl.classList.contains('flipped')) {
+                cardEl.style.animationDelay = (flipDelayIndex * 72) + 'ms';
+                // Travel in face-down, then turn as the card arrives. The flip
+                // itself is the card-inner transition (0.34s); this delay is only
+                // the stagger plus the moment the travel has mostly landed.
                 setTimeout(() => {
                     const inner = cardEl.querySelector('.card-inner');
                     if (inner) {
@@ -19470,10 +19745,6 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
                         cardEl.classList.remove('flipped');
                         playSound('deal');
                         triggerHaptic('LIGHT');
-                        // 'revealed' (and the win effects it gates) must wait for the
-                        // card-inner's own rotateY transition to actually finish —
-                        // adding it at flip-start left the gold glow/badge popping in
-                        // ~1.1s before the card had visually turned to face up.
                         let settled = false;
                         const settle = () => {
                             if (settled) return;
@@ -19482,17 +19753,19 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
                             flipsFinished++;
                             if (flipsFinished === flippingCount && onFlipsComplete) onFlipsComplete();
                         };
-                        setTimeout(() => {
-                            inner.classList.remove('animating');
-                            inner.addEventListener('transitionend', function onFlipEnd(e) {
-                                if (e.propertyName !== 'transform') return;
-                                inner.removeEventListener('transitionend', onFlipEnd);
-                                settle();
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                inner.classList.remove('animating');
+                                inner.addEventListener('transitionend', function onFlipEnd(e) {
+                                    if (e.propertyName !== 'transform') return;
+                                    inner.removeEventListener('transitionend', onFlipEnd);
+                                    settle();
+                                });
+                                setTimeout(settle, 400);
                             });
-                            setTimeout(settle, 550);
-                        }, 600);
+                        });
                     }
-                }, flipDelayIndex * 250);
+                }, flipDelayIndex * 72 + 200);
                 flipDelayIndex++;
             }
         });

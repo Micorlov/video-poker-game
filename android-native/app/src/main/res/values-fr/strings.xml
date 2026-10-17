@@ -12,6 +12,9 @@
     <string name="play_draw">Tirer</string>
     <string name="play_hint_hold">Touchez les cartes à garder, puis changez.</string>
     <string name="play_hint_bet">Choisissez votre mise, puis distribuez.</string>
+    <string name="play_bet_open">Touchez une mise pour la changer</string>
+    <string name="play_bet_locked">Mise verrouillée jusqu’à la fin de cette main</string>
+    <string name="play_bet_locked_all_in">Mise verrouillée — le tapis est disponible</string>
     <string name="coach_hold">Touchez pour garder</string>
     <string name="coach_release">Touchez pour relâcher</string>
     <string name="coach_press">Maintenant, touchez %1$s</string>

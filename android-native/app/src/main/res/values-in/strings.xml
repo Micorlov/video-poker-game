@@ -12,6 +12,9 @@
     <string name="play_draw">Tarik</string>
     <string name="play_hint_hold">Ketuk kartu yang ingin ditahan, lalu tarik.</string>
     <string name="play_hint_bet">Pilih taruhan, lalu bagikan.</string>
+    <string name="play_bet_open">Ketuk chip untuk mengubah taruhan</string>
+    <string name="play_bet_locked">Taruhan terkunci sampai tangan ini selesai</string>
+    <string name="play_bet_locked_all_in">Taruhan terkunci — All in tersedia</string>
     <string name="coach_hold">Ketuk untuk menahan</string>
     <string name="coach_release">Ketuk untuk melepas</string>
     <string name="coach_press">Sekarang ketuk %1$s</string>

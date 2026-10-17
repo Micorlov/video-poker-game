@@ -12,6 +12,9 @@
     <string name="play_draw">سحب</string>
     <string name="play_hint_hold">اضغط على الأوراق التي تريد الاحتفاظ بها ثم اسحب.</string>
     <string name="play_hint_bet">اختر رهانك ثم وزّع.</string>
+    <string name="play_bet_open">انقر رقاقة لتغيير الرهان</string>
+    <string name="play_bet_locked">الرهان مقفل حتى تنتهي هذه اليد</string>
+    <string name="play_bet_locked_all_in">الرهان مقفل — الكل متاح</string>
     <string name="coach_hold">اضغط للاحتفاظ</string>
     <string name="coach_release">اضغط للإفلات</string>
     <string name="coach_press">الآن اضغط %1$s</string>

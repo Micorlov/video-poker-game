@@ -12,6 +12,9 @@
     <string name="play_draw">Descartar</string>
     <string name="play_hint_hold">Toque nas cartas que quer manter e depois troque.</string>
     <string name="play_hint_bet">Escolha sua aposta e distribua.</string>
+    <string name="play_bet_open">Toque numa ficha para mudar a aposta</string>
+    <string name="play_bet_locked">Aposta travada até o fim desta mão</string>
+    <string name="play_bet_locked_all_in">Aposta travada — All in disponível</string>
     <string name="coach_hold">Toque para manter</string>
     <string name="coach_release">Toque para soltar</string>
     <string name="coach_press">Agora toque em %1$s</string>

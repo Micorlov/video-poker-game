@@ -12,6 +12,9 @@
     <string name="play_draw">Wymień</string>
     <string name="play_hint_hold">Dotknij kart, które chcesz zatrzymać, a potem wymień.</string>
     <string name="play_hint_bet">Wybierz stawkę i rozdaj.</string>
+    <string name="play_bet_open">Dotknij żetonu, aby zmienić stawkę</string>
+    <string name="play_bet_locked">Stawka zablokowana do końca tej ręki</string>
+    <string name="play_bet_locked_all_in">Stawka zablokowana — All in jest dostępne</string>
     <string name="coach_hold">Dotknij, aby zatrzymać</string>
     <string name="coach_release">Dotknij, aby puścić</string>
     <string name="coach_press">Teraz dotknij %1$s</string>

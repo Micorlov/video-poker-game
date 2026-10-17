@@ -12,6 +12,9 @@
     <string name="play_draw">ड्रॉ</string>
     <string name="play_hint_hold">जो कार्ड रखना है उन पर टैप करें, फिर ड्रॉ करें।</string>
     <string name="play_hint_bet">अपना दांव चुनें, फिर बाँटें।</string>
+    <string name="play_bet_open">दांव बदलने के लिए चिप पर टैप करें</string>
+    <string name="play_bet_locked">यह हाथ खत्म होने तक दांव लॉक है</string>
+    <string name="play_bet_locked_all_in">दांव लॉक है — ऑल इन उपलब्ध है</string>
     <string name="coach_hold">रखने के लिए टैप करें</string>
     <string name="coach_release">छोड़ने के लिए टैप करें</string>
     <string name="coach_press">अब %1$s पर टैप करें</string>

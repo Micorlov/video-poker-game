@@ -66,6 +66,7 @@ data class PlayActions(
     val onMainAction: () -> Unit,
     val onToggleHold: (Int) -> Unit,
     val onSelectBet: (Int) -> Unit,
+    val onBetLocked: () -> Unit,
     val onRevealed: (Int) -> Unit,
     val onToggleSound: () -> Unit,
     val onToggleHints: () -> Unit,
@@ -182,10 +183,18 @@ fun PlayScreen(
         )
         actions.onOpenFriends?.let { InviteBadge(it, Modifier.align(Alignment.End)) }
         BalancePanel(displayedBalance, game)
+        var stakeWindow by remember { mutableStateOf(StakeWindow.LOCKED) }
+        val moneyWindow = when {
+            game.phase == Phase.DOUBLE_UP || (game.doubleUp != null && !ui.doubleUpRevealed) -> StakeWindow.LOCKED
+            game.doubleUp != null -> StakeWindow.CHANGE_BET
+            else -> stakeWindow
+        }
         BetRow(
             game,
+            moneyWindow,
             ui.allInRemaining,
             actions.onSelectBet,
+            actions.onBetLocked,
             onAllIn = onAllIn,
             onAllInPlaced = onAllInPlaced,
         )
@@ -226,6 +235,7 @@ fun PlayScreen(
                 onTapToDeal = null,
                 onFlip = onFlip,
                 onRevealed = actions.onRevealed,
+                onStakeWindow = { stakeWindow = it },
                 onCardPlaced = placement::placeCard,
             )
         }

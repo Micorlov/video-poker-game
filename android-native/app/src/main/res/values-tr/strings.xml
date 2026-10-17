@@ -12,6 +12,9 @@
     <string name="play_draw">Çek</string>
     <string name="play_hint_hold">Tutmak istediğin kartlara dokun, sonra çek.</string>
     <string name="play_hint_bet">Bahsini seç ve dağıt.</string>
+    <string name="play_bet_open">Bahsi değiştirmek için bir fişe dokun</string>
+    <string name="play_bet_locked">Bu el bitene kadar bahis kilitli</string>
+    <string name="play_bet_locked_all_in">Bahis kilitli — All in açık</string>
     <string name="coach_hold">Tutmak için dokun</string>
     <string name="coach_release">Bırakmak için dokun</string>
     <string name="coach_press">Şimdi %1$s dokun</string>

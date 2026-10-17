@@ -68,13 +68,23 @@ private const val CONFIRM_THRESHOLD = 0.85f
  * Google sign-in prompt (2 a day instead of 1).
  */
 @Composable
-fun AllInButton(selected: Boolean, remaining: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun AllInButton(
+    selected: Boolean,
+    remaining: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    live: Boolean = true,
+    unavailableDescription: String? = null,
+) {
     ChipButton(
         label = "🔥 " + stringResource(R.string.play_all_in) + " · " + stringResource(R.string.play_all_in_left, remaining),
         selected = selected,
         onClick = onClick,
         locked = false,
         enabled = true,
+        live = live,
+        emphasized = true,
+        unavailableDescription = unavailableDescription,
         modifier = modifier.fillMaxWidth().testTag("bet-allin"),
     )
 }
