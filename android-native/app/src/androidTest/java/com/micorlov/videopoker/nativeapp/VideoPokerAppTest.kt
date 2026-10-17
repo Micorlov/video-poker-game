@@ -87,7 +87,7 @@ class VideoPokerAppTest {
     }
 
     private fun tapDeal(deal: String) {
-        compose.waitUntil(timeoutMillis = 12_000) { coachText().contains(deal, ignoreCase = true) }
+        compose.waitUntil(timeoutMillis = 16_000) { coachText().contains(deal, ignoreCase = true) }
         compose.onNodeWithTag("main-button").performClick()
     }
 

@@ -85,13 +85,21 @@ class FirstHandsTest {
     }
 
     @Test
-    fun `between hands the hand points at deal once the cards are face up`() {
+    fun `between hands the coach says the win then points at deal`() {
         val hand = checkNotNull(FirstHands.scriptedHand(0, Variant.JACKS))
-        assertNull(coach(hand, heldNone, phase = Phase.BET, cardsFaceUp = false, lifetimeHands = 1))
+        assertNull(coach(hand, heldNone, phase = Phase.BET, cardsFaceUp = false, lifetimeHands = 1, winAnnounced = false))
+        assertEquals(
+            CoachTarget.Won,
+            coach(hand, heldNone, phase = Phase.BET, cardsFaceUp = true, lifetimeHands = 1, winAnnounced = false),
+        )
         assertEquals(
             CoachTarget.Deal,
-            coach(hand, heldNone, phase = Phase.BET, cardsFaceUp = true, lifetimeHands = 1),
+            coach(hand, heldNone, phase = Phase.BET, cardsFaceUp = true, lifetimeHands = 1, winAnnounced = true),
         )
+        assertEquals(true, FirstHands.announcesWin(1, Variant.JACKS))
+        assertEquals(true, FirstHands.announcesWin(2, Variant.JACKS))
+        assertEquals(false, FirstHands.announcesWin(FirstHands.ROUNDS, Variant.JACKS))
+        assertEquals(false, FirstHands.announcesWin(1, Variant.DEUCES))
     }
 
     @Test
@@ -110,6 +118,7 @@ class FirstHandsTest {
         lifetimeHands: Int = 0,
         hintsExplained: Boolean = true,
         allInExplained: Boolean = true,
+        winAnnounced: Boolean = true,
     ) = FirstHands.coach(
         lifetimeHands,
         Variant.JACKS,
@@ -119,6 +128,7 @@ class FirstHandsTest {
         cardsFaceUp,
         hintsExplained,
         allInExplained,
+        winAnnounced,
     )
 
     private val heldNone = List(5) { false }

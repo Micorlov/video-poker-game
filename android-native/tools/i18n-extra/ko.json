@@ -105,6 +105,7 @@
  "coach_all_in": "하루에 한 번, 카드가 보인 뒤에",
  "coach_hold_voice": "보관하려면 탭: %1$s",
  "coach_release_voice": "놓으려면 탭: %1$s",
+ "coach_won": "이겼습니다: %1$s",
  "toast_all_in_after_cards": "하루에 한 번 — 카드가 보인 뒤에",
  "prompt_notify_title": "알림을 허용할까요?",
  "prompt_notify_body": "일일 보너스가 준비되면 알려 드립니다.",

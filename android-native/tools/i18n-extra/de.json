@@ -107,6 +107,7 @@
  "coach_all_in": "Einmal am Tag, wenn die Karten offen sind",
  "coach_hold_voice": "Tippen zum Behalten: %1$s",
  "coach_release_voice": "Tippen zum Loslassen: %1$s",
+ "coach_won": "Gewonnen: %1$s",
  "toast_all_in_after_cards": "Einmal am Tag — erst wenn die Karten offen sind",
  "prompt_notify_title": "Benachrichtigungen erlauben?",
  "prompt_notify_body": "Hol dir eine Erinnerung, wenn dein täglicher Bonus bereit ist.",

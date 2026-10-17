@@ -107,6 +107,7 @@
  "coach_all_in": "Uma vez por dia, depois de ver as cartas",
  "coach_hold_voice": "Toque para guardar: %1$s",
  "coach_release_voice": "Toque para soltar: %1$s",
+ "coach_won": "Você ganhou: %1$s",
  "toast_all_in_after_cards": "Uma vez por dia — depois de ver as cartas",
  "prompt_notify_title": "Permitir notificações?",
  "prompt_notify_body": "Receba um lembrete quando seu bônus diário estiver pronto.",

@@ -22,6 +22,7 @@
     <string name="coach_all_in">Raz dziennie, gdy karty są odkryte</string>
     <string name="coach_hold_voice">Dotknij, aby zatrzymać: %1$s</string>
     <string name="coach_release_voice">Dotknij, aby puścić: %1$s</string>
+    <string name="coach_won">Wygrana: %1$s</string>
     <string name="play_held">TRZYMANA</string>
     <string name="play_nothing">Nic — %1$s</string>
     <string name="play_win_streak">Seria wygranych</string>

@@ -39,6 +39,7 @@ import com.micorlov.videopoker.nativeapp.audio.SoundCue
 import com.micorlov.videopoker.nativeapp.audio.SoundPlayer
 import com.micorlov.videopoker.nativeapp.audio.VoiceAnnouncer
 import com.micorlov.videopoker.nativeapp.domain.DoubleUpResult
+import com.micorlov.videopoker.nativeapp.domain.FirstHands
 import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.ReviewPolicy
 import kotlinx.coroutines.launch
@@ -157,7 +158,10 @@ fun VideoPokerApp(
                         val strength = outcome.bestType.strength
                         feedback.play(if (strength >= BIG_WIN_STRENGTH) SoundCue.BIG_WIN else SoundCue.WIN)
                         feedback.haptics.heavy()
-                        voice.speak(context.getString(outcome.bestType.spokenRes()))
+                        val table = viewModel.state.value.game
+                        if (!FirstHands.announcesWin(table.lifetimeHands, table.variant)) {
+                            voice.speak(context.getString(outcome.bestType.spokenRes()))
+                        }
                         celebration = Celebration(++nextCelebrationId, CelebrationTier.forStrength(strength))
                     }
                 }
@@ -209,6 +213,7 @@ fun VideoPokerApp(
                 onAllIn = viewModel::onAllInRequested,
                 onAllInTipSeen = viewModel::onAllInTipSeen,
                 onHintsTipSeen = viewModel::onHintsTipSeen,
+                onOpeningWinAnnounced = viewModel::onOpeningWinAnnounced,
                 onSpeak = { voice.speak(it) },
                 onAllInConfirmed = viewModel::onAllInConfirmed,
                 onAllInDismissed = viewModel::onAllInDismissed,

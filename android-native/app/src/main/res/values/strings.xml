@@ -28,6 +28,7 @@
     <string name="coach_all_in">All in once a day, after your cards are face up</string>
     <string name="coach_hold_voice">Tap to keep: %1$s</string>
     <string name="coach_release_voice">Tap to let go: %1$s</string>
+    <string name="coach_won">You won: %1$s</string>
     <string name="play_held">HELD</string>
     <string name="play_nothing">Nothing — %1$s</string>
     <string name="play_win_streak">Win streak</string>

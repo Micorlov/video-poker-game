@@ -105,6 +105,7 @@
  "coach_all_in": "每天一次，看到牌之后",
  "coach_hold_voice": "点按保留：%1$s",
  "coach_release_voice": "点按放开：%1$s",
+ "coach_won": "你赢了：%1$s",
  "toast_all_in_after_cards": "每天一次 — 看到牌之后",
  "prompt_notify_title": "允许通知？",
  "prompt_notify_body": "每日奖励准备好时提醒你。",

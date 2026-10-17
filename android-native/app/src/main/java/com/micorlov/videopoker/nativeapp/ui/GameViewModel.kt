@@ -63,6 +63,8 @@ data class UiState(
     val hintsTipSeen: Boolean = false,
     /** The opening hand has already explained that ALL IN is once a day. */
     val allInTipSeen: Boolean = false,
+    /** The coach has said the hand just drawn was a win. Cleared when the next hand is dealt. */
+    val openingWinAnnounced: Boolean = false,
     /** First-run walkthrough is up. */
     val showOnboarding: Boolean = false,
     /** Admin switches; defaults until the fetch lands. */
@@ -294,7 +296,7 @@ class GameViewModel(
         when (game.phase) {
             Phase.BET -> {
                 val transition = GameEngine.deal(game, random)
-                _state.update { it.copy(revealedDoubleUp = 0) }
+                _state.update { it.copy(revealedDoubleUp = 0, openingWinAnnounced = false) }
                 commit(transition, persist = transition.events.any { it is GameEvent.Rebuy })
                 if (transition.state.phase == Phase.HOLD) logHandStarted(transition.state)
                 requestAnalysis(transition.state)
@@ -591,6 +593,9 @@ class GameViewModel(
 
     /** The first hand's floating hand pointed at ALL IN; don't point there again. */
     fun onAllInTipSeen() = _state.update { it.copy(allInTipSeen = true) }
+
+    /** The opening coach has said this draw was a win. Point at Deal next. */
+    fun onOpeningWinAnnounced() = _state.update { it.copy(openingWinAnnounced = true) }
 
     /**
      * ALL IN tapped: open the confirmation, or explain why not. A guest who has used today's

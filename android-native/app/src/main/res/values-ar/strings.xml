@@ -22,6 +22,7 @@
     <string name="coach_all_in">مرة في اليوم، بعد ظهور الأوراق</string>
     <string name="coach_hold_voice">اضغط للإبقاء: %1$s</string>
     <string name="coach_release_voice">اضغط للتحرير: %1$s</string>
+    <string name="coach_won">لقد فزت: %1$s</string>
     <string name="play_held">محفوظة</string>
     <string name="play_nothing">لا يوجد — %1$s</string>
     <string name="play_win_streak">سلسلة الانتصارات</string>

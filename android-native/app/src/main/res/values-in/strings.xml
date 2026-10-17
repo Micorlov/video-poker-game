@@ -22,6 +22,7 @@
     <string name="coach_all_in">Sekali sehari, setelah kartu terbuka</string>
     <string name="coach_hold_voice">Ketuk untuk menyimpan: %1$s</string>
     <string name="coach_release_voice">Ketuk untuk melepas: %1$s</string>
+    <string name="coach_won">Kamu menang: %1$s</string>
     <string name="play_held">DITAHAN</string>
     <string name="play_nothing">Tidak ada — %1$s</string>
     <string name="play_win_streak">Rentetan menang</string>
