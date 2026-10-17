@@ -62,6 +62,26 @@ class GameEngineTest {
     // ---- starting a game ------------------------------------------------------------
 
     @Test
+    fun `a stake off the ladder or larger than the stack is ignored`() {
+        val table = betting()
+        assertEquals(10, GameEngine.selectBet(table, 1_000).bet)
+        assertEquals(10, GameEngine.selectBet(table.copy(balance = 40), 50).bet)
+        assertEquals(10, GameEngine.selectBet(table.copy(handCount = 5, balance = 90), 20).bet)
+        assertEquals(50, GameEngine.selectBet(table, 50).bet)
+    }
+
+    @Test
+    fun `a big stack slides the chips up and leaves the chosen stake alone`() {
+        val table = betting(balance = 1_000_000, bet = 20).copy(stakeOptions = listOf(5, 10, 20, 50))
+        val dealt = GameEngine.deal(table, random).state
+        val drawn = GameEngine.draw(dealt.copy(held = List(5) { true }), random).state
+
+        assertEquals(20, drawn.bet)
+        assertTrue(drawn.stakeOptions.first() >= 2_000)
+        assertEquals(4, drawn.stakeOptions.size)
+    }
+
+    @Test
     fun `a new game deals a hand and charges the bet`() {
         val state = GameEngine.newGame(SavedGame(balance = 500), defaultBet = 10, random = random).state
 

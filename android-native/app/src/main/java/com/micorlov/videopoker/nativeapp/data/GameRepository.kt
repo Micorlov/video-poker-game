@@ -10,6 +10,7 @@ import com.micorlov.videopoker.nativeapp.domain.PlayStats
 import com.micorlov.videopoker.nativeapp.domain.RemoteFlags
 import com.micorlov.videopoker.nativeapp.domain.ReviewState
 import com.micorlov.videopoker.nativeapp.domain.Rules
+import com.micorlov.videopoker.nativeapp.domain.StakeLadder
 import com.micorlov.videopoker.nativeapp.domain.SavedGame
 import com.micorlov.videopoker.nativeapp.domain.Variant
 import kotlin.math.roundToLong
@@ -220,7 +221,7 @@ class GameRepository(private val store: KeyValueStore) {
             notifyLeaderboard = store.getBoolean(NOTIFY_LEADERBOARD) ?: defaults.notifyLeaderboard,
             dailyReminderEnabled = store.getBoolean(NOTIFY_DAILY) ?: defaults.dailyReminderEnabled,
             notifyBestHand = store.getBoolean(NOTIFY_BEST_HAND) ?: defaults.notifyBestHand,
-            defaultBet = store.getInt(DEFAULT_BET)?.takeIf { it in Rules.BET_OPTIONS } ?: defaults.defaultBet,
+            defaultBet = store.getInt(DEFAULT_BET)?.takeIf { it in StakeLadder.SERIES } ?: defaults.defaultBet,
         )
     }
 

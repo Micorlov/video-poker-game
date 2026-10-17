@@ -45,12 +45,14 @@ import com.micorlov.videopoker.nativeapp.domain.DrawOutcome
 import com.micorlov.videopoker.nativeapp.domain.GameState
 import com.micorlov.videopoker.nativeapp.domain.Phase
 import com.micorlov.videopoker.nativeapp.domain.Rules
+import com.micorlov.videopoker.nativeapp.domain.StakeLadder
 import com.micorlov.videopoker.nativeapp.ui.UiState
 import com.micorlov.videopoker.nativeapp.ui.components.ChipButton
 import com.micorlov.videopoker.nativeapp.ui.components.Eyebrow
 import com.micorlov.videopoker.nativeapp.ui.components.VpPanel
 import com.micorlov.videopoker.nativeapp.ui.text.explanationRes
 import com.micorlov.videopoker.nativeapp.ui.text.formatNumber
+import com.micorlov.videopoker.nativeapp.ui.text.formatStake
 import com.micorlov.videopoker.nativeapp.ui.text.labelRes
 import com.micorlov.videopoker.nativeapp.ui.theme.VpColors
 import kotlin.math.roundToInt
@@ -100,11 +102,12 @@ fun BetRow(
 ) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Rules.BET_OPTIONS.forEach { amount ->
+        game.stakeOptions.forEach { amount ->
+            val affordable = StakeLadder.affordable(amount, game.handCount, game.balance)
             ChipButton(
-                label = amount.toString(),
+                label = formatStake(amount),
                 selected = game.bet == amount,
-                enabled = game.phase == Phase.BET,
+                enabled = game.phase == Phase.BET && affordable,
                 onClick = { onSelectBet(amount) },
                 modifier = Modifier
                     .weight(1f)

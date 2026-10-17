@@ -91,6 +91,10 @@ fun formatNumber(value: Long): String = NumberFormat.getIntegerInstance().format
 
 fun formatNumber(value: Int): String = formatNumber(value.toLong())
 
+/** A bet chip. Thousands stay short enough for a four-button row: 500000 is "500K". */
+fun formatStake(amount: Int): String =
+    if (amount >= 1_000 && amount % 1_000 == 0) "${amount / 1_000}K" else amount.toString()
+
 /** A fractional amount with exactly [digits] decimals, in the phone's locale: "1.25". */
 fun formatDecimal(value: Double, digits: Int): String = NumberFormat.getNumberInstance().apply {
     minimumFractionDigits = digits
