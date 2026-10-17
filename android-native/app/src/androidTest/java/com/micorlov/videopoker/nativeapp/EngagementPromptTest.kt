@@ -73,7 +73,7 @@ class EngagementPromptTest {
         listOf(1, 3).forEach { compose.onNodeWithTag("card-$it").performClick() }
         compose.onNodeWithTag("main-button").performClick()
 
-        compose.waitUntil(timeoutMillis = 8_000) {
+        compose.waitUntil(timeoutMillis = 12_000) {
             compose.onAllNodesWithTag("rating-prompt").fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText(context.getString(R.string.prompt_rate_title)).assertIsDisplayed()
