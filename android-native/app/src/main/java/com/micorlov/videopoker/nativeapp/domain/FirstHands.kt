@@ -12,14 +12,9 @@ object FirstHands {
     const val ROUNDS = 3
 
     /**
-     * After an opening draw's cards have landed, the held cards rest this long before the
-     * win is spoken and the tutorial moves on. Long enough to feel the win.
-     */
-    const val WIN_HOLD_MS = 3_000L
-
-    /**
-     * How long the "you won" line stays up, once the cards are face up, before the coach
-     * points at Deal. The next line speaks over this one, so the pause has to let the
+     * How long the "you won" line stays up, once the drawn cards are face up, before the
+     * coach points at Deal. The win itself is not delayed: it is said as soon as those
+     * cards have landed. The next line speaks over this one, so the pause has to let the
      * sentence finish.
      */
     const val WIN_ANNOUNCE_MS = 3_000L
@@ -39,14 +34,6 @@ object FirstHands {
     /** The five cards to deal, or null when this hand is an ordinary shuffle. */
     fun scriptedHand(lifetimeHands: Int, variant: Variant): List<Card>? =
         if (applies(lifetimeHands, variant)) HANDS[lifetimeHands] else null
-
-    /**
-     * How long to rest on the held cards after a draw, before announcing the win.
-     * [lifetimeHands] has already counted the hand just drawn, so 1, 2, and 3 are the
-     * three opening wins. A loss, a later hand, and Deuces Wild announce immediately.
-     */
-    fun winHoldMs(lifetimeHands: Int, variant: Variant, won: Boolean): Long =
-        if (won && variant != Variant.DEUCES && lifetimeHands in 1..ROUNDS) WIN_HOLD_MS else 0L
 
     /**
      * The first two opening wins are said by the coach ("you won"), not by the plain hand

@@ -21,16 +21,6 @@ class FirstHandsTest {
     }
 
     @Test
-    fun `an opening win rests before it is announced`() {
-        assertEquals(FirstHands.WIN_HOLD_MS, FirstHands.winHoldMs(1, Variant.JACKS, won = true))
-        assertEquals(FirstHands.WIN_HOLD_MS, FirstHands.winHoldMs(FirstHands.ROUNDS, Variant.JACKS, won = true))
-        assertEquals(0L, FirstHands.winHoldMs(1, Variant.JACKS, won = false))
-        assertEquals(0L, FirstHands.winHoldMs(0, Variant.JACKS, won = true))
-        assertEquals(0L, FirstHands.winHoldMs(FirstHands.ROUNDS + 1, Variant.JACKS, won = true))
-        assertEquals(0L, FirstHands.winHoldMs(1, Variant.DEUCES, won = true))
-    }
-
-    @Test
     fun `the fourth deal is a normal shuffle`() {
         val dealt = GameEngine.deal(betting(lifetimeHands = FirstHands.ROUNDS), ConstantRandom(-1)).state
         assertEquals(standardDeck().shuffled(ConstantRandom(-1)).take(5), dealt.hand)

@@ -68,10 +68,6 @@ private const val DISCARD_STAGGER_MS = 40L
 /** A losing hand stays readable for a beat, then folds back and collapses. */
 private const val LOSS_READ_MS = 520L
 
-/** How far a held card sinks, in dp, for the opening win's press-and-hold. */
-private const val OPENING_PRESS_DP = -8f
-private const val OPENING_PRESS_MS = 220
-
 /** A loss folds back toward the dealer once it has been readable. */
 private const val FOLD_MS = 380
 private const val FOLD_STAGGER_MS = 42L
@@ -212,14 +208,6 @@ fun HandRow(
             )
         }
 
-        // Opening wins rest on the held cards — pressed down — before the win is announced.
-        val holdMs = if (instant) {
-            0L
-        } else {
-            FirstHands.winHoldMs(dealt.lifetimeHands, dealt.variant, dealt.outcome?.isWin == true)
-        }
-        if (holdMs > 0L) pressAndHold(lifts, dealt.held, holdMs)
-
         facesSettled = true
         currentOnRevealed(round)
 
@@ -330,28 +318,6 @@ fun HandRow(
                     .testTag("card-$index"),
             )
         }
-    }
-}
-
-/** Sink the held cards and keep them there, then let them back up. */
-private suspend fun pressAndHold(
-    lifts: List<Animatable<Float, AnimationVector1D>>,
-    held: List<Boolean>,
-    holdMs: Long,
-) {
-    val indices = held.mapIndexedNotNull { index, isHeld -> index.takeIf { isHeld } }
-    if (indices.isEmpty()) {
-        delay(holdMs)
-        return
-    }
-    val press = tween<Float>(OPENING_PRESS_MS)
-    coroutineScope {
-        indices.forEach { index -> launch { lifts[index].animateTo(OPENING_PRESS_DP, press) } }
-    }
-    val rest = holdMs - OPENING_PRESS_MS
-    if (rest > 0L) delay(rest)
-    coroutineScope {
-        indices.forEach { index -> launch { lifts[index].animateTo(0f, press) } }
     }
 }
 
