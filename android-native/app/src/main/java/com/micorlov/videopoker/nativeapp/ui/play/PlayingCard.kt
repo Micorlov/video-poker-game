@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,12 +29,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -254,14 +255,18 @@ private fun CardBack(modifier: Modifier = Modifier) {
     }
 }
 
-/** The HELD / win pill that sits on a card's top edge. Held is a choice (action orange); a win is money (gold). */
+/**
+ * The HELD / win pill that sits on a card's top edge. Held is a choice (action orange); a win is
+ * money (gold). The pill is measured with the card's own width, so a long name ellipsizes instead
+ * of running across the gap onto the next card's pill.
+ */
 @Composable
 private fun CardBadge(text: String, gold: Boolean, modifier: Modifier = Modifier) {
     val palette = LocalPalette.current
     val colors = if (gold) listOf(VpColors.Gold, VpColors.GoldDeep) else listOf(palette.action, palette.actionDeep)
     Box(
         modifier
-            .wrapContentWidth(unbounded = true)
+            .testTag(if (gold) "win-badge" else "held-badge")
             .clip(RoundedCornerShape(6.dp))
             .background(Brush.verticalGradient(colors))
             .padding(horizontal = 7.dp, vertical = 2.dp),
@@ -274,6 +279,7 @@ private fun CardBadge(text: String, gold: Boolean, modifier: Modifier = Modifier
             letterSpacing = 0.1.em,
             maxLines = 1,
             softWrap = false,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
