@@ -12,6 +12,16 @@
     <string name="play_draw">ドロー</string>
     <string name="play_hint_hold">残したいカードをタップして、ドローしましょう。</string>
     <string name="play_hint_bet">ベットを選んで、ディールしましょう。</string>
+    <string name="play_bet_open">チップをタップしてベットを変更</string>
+    <string name="play_bet_locked">このハンドが終わるまでベットは固定</string>
+    <string name="play_bet_locked_all_in">ベット固定 — オールインできます</string>
+    <string name="coach_hold">タップして残す</string>
+    <string name="coach_release">タップして戻す</string>
+    <string name="coach_press">次に%1$sをタップ</string>
+    <string name="coach_hints">ヒントはランプをタップ</string>
+    <string name="coach_all_in">1日1回、カードが見えてから</string>
+    <string name="coach_hold_voice">キープ: %1$s</string>
+    <string name="coach_release_voice">戻す: %1$s</string>
     <string name="play_held">ホールド</string>
     <string name="play_nothing">ノーハンド — %1$s</string>
     <string name="play_win_streak">連勝記録</string>
@@ -132,6 +142,7 @@
     <string name="win_royal_flush">ロイヤルフラッシュ</string>
     <string name="toast_all_in_good_luck">🔥 オールイン — 幸運を！</string>
     <string name="toast_no_all_in_left">⛔ オールインの残り回数なし — また明日！</string>
+    <string name="toast_all_in_after_cards">1日1回 — カードが見えてから</string>
     <string name="play_all_in">オールイン</string>
     <string name="play_all_in_left">残り%1$d回</string>
     <string name="play_this_hand">このハンド</string>
@@ -288,4 +299,10 @@
     <string name="toast_account_deleted">アカウントを削除しました</string>
     <string name="toast_account_delete_failed">アカウントを削除できませんでした。接続を確認してもう一度お試しください</string>
     <string name="settings_privacy_policy">プライバシーポリシー</string>
+    <string name="prompt_notify_title">通知を許可しますか？</string>
+    <string name="prompt_notify_body">デイリーボーナスの準備ができたらお知らせします。</string>
+    <string name="prompt_notify_allow">通知を許可</string>
+    <string name="prompt_rate_title">5つ星で評価する</string>
+    <string name="prompt_rate_body">ビデオポーカーを楽しんでいますか？Playストアで5つ星の評価をお願いします。</string>
+    <string name="prompt_rate_action">5つ星で評価</string>
 </resources>

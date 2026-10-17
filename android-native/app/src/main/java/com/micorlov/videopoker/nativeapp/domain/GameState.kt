@@ -124,6 +124,11 @@ data class GameState(
     val bestHand: BestHand? = null,
     /** The double-up in progress or just settled; cleared by the next deal. */
     val doubleUp: DoubleUp? = null,
+    /**
+     * The four bet chips on screen. Set from the stack when the table is created, then
+     * moved only between hands. Copying the state keeps the row still during a hand.
+     */
+    val stakeOptions: List<Int> = StakeLadder.ideal(balance),
 ) {
     val level: Int get() = Rules.level(lifetimeHands)
     val totalBet: Int get() = bet * handCount

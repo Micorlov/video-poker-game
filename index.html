@@ -193,6 +193,7 @@
                     <span class="section-label" data-i18n="play.totalBet">Total bet</span>
                     <span class="total-bet-value" id="bet-display">10</span>
                 </div>
+                <p class="bet-status bet-status-locked" id="bet-status" aria-live="polite"></p>
                 <div class="bet-row">
                     <button class="bet-btn" onclick="setBet(5)" id="bet-5">5</button>
                     <button class="bet-btn selected" onclick="setBet(10)" id="bet-10">10</button>
@@ -635,6 +636,23 @@
             <div class="sheet-sub" data-i18n-html="sheet.allInOutSubHtml">Every friend who joins through your invite unlocks <strong>+1 All-In every day</strong>.</div>
             <button class="btn-primary allin-unlock-invite" onclick="allInUnlockInvite()" data-i18n="sheet.allInInviteBtn">Invite a friend</button>
             <button class="sheet-dismiss" onclick="closeSheet('allin-unlock-sheet')" data-i18n="modal.notNow">Not now</button>
+        </div>
+    </div>
+
+    <!-- All-In sign-in: a guest at 0 left can get 2 a day instead of 1. -->
+    <div class="sheet-backdrop hidden" id="allin-signin-sheet" onclick="if(event.target===this)closeSheet('allin-signin-sheet')">
+        <div class="sheet">
+            <div class="sheet-header">
+                <span class="sheet-mark">♠</span>
+                <span class="sheet-heading">
+                    <span class="sheet-title" data-i18n="sheet.allInSignInTitle">Out of All-Ins today</span>
+                    <span class="sheet-eyebrow" data-i18n="sheet.allInSignInEyebrow">Back tomorrow — or sign in</span>
+                </span>
+                <button class="sheet-close" onclick="closeSheet('allin-signin-sheet')">✕</button>
+            </div>
+            <div class="sheet-sub" data-i18n="sheet.allInSignInBody">Sign in with Google and you'll get 2 per day instead of 1.</div>
+            <button class="btn-primary allin-unlock-invite" onclick="allInSignInWithGoogle()" data-i18n="settings.signInGoogle">Sign in with Google</button>
+            <button class="sheet-dismiss" onclick="closeSheet('allin-signin-sheet')" data-i18n="modal.notNow">Not now</button>
         </div>
     </div>
 

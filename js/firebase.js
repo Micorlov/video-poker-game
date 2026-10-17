@@ -514,6 +514,10 @@ if (auth) {
         // "signed out" and pop the sign-in modal. See handleJoinDeepLink().
         window._authResolved = true;
         window.egUser = user || null;
+        // Signing in raises the daily All-In allowance (2 instead of 1) and
+        // retires the prompt that offered it. js/game.js owns both.
+        if (user && window.closeSheet) closeSheet('allin-signin-sheet');
+        if (window.updateAllInUI) updateAllInUI();
         if (window.isNativeApp && isNativeApp() && window.applyDefaultLeaderboardTab) applyDefaultLeaderboardTab();
         if (window.closeSignInModal) closeSignInModal();
         if (user && window.closeSigninPromptModal) closeSigninPromptModal();

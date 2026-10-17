@@ -12,6 +12,16 @@
     <string name="play_draw">Robar</string>
     <string name="play_hint_hold">Toca las cartas que quieres conservar y luego cambia.</string>
     <string name="play_hint_bet">Elige tu apuesta y reparte.</string>
+    <string name="play_bet_open">Toca una ficha para cambiar la apuesta</string>
+    <string name="play_bet_locked">Apuesta bloqueada hasta que termine esta mano</string>
+    <string name="play_bet_locked_all_in">Apuesta bloqueada — All in disponible</string>
+    <string name="coach_hold">Toca para guardar</string>
+    <string name="coach_release">Toca para soltar</string>
+    <string name="coach_press">Ahora toca %1$s</string>
+    <string name="coach_hints">Toca la lámpara para pistas</string>
+    <string name="coach_all_in">Una vez al día, después de ver las cartas</string>
+    <string name="coach_hold_voice">Toca para guardar: %1$s</string>
+    <string name="coach_release_voice">Toca para soltar: %1$s</string>
     <string name="play_held">FIJA</string>
     <string name="play_nothing">Nada — %1$s</string>
     <string name="play_win_streak">Racha de victorias</string>
@@ -132,6 +142,7 @@
     <string name="win_royal_flush">Escalera real</string>
     <string name="toast_all_in_good_luck">🔥 TODO — ¡buena suerte!</string>
     <string name="toast_no_all_in_left">⛔ No te quedan apuestas TODO — ¡vuelve mañana!</string>
+    <string name="toast_all_in_after_cards">Una vez al día — úsalo después de ver las cartas</string>
     <string name="play_all_in">TODO</string>
     <string name="play_all_in_left">quedan %1$d</string>
     <string name="play_this_hand">esta mano</string>
@@ -290,4 +301,10 @@
     <string name="toast_account_deleted">Cuenta eliminada</string>
     <string name="toast_account_delete_failed">No se pudo eliminar la cuenta: comprueba tu conexión e inténtalo de nuevo</string>
     <string name="settings_privacy_policy">Política de privacidad</string>
+    <string name="prompt_notify_title">¿Permitir notificaciones?</string>
+    <string name="prompt_notify_body">Recibe un aviso cuando tu bono diario esté listo.</string>
+    <string name="prompt_notify_allow">Permitir notificaciones</string>
+    <string name="prompt_rate_title">Califícanos con 5 estrellas</string>
+    <string name="prompt_rate_body">¿Disfrutas Video Poker? Califica la app con 5 estrellas en Play Store.</string>
+    <string name="prompt_rate_action">Calificar con 5 estrellas</string>
 </resources>

@@ -12,6 +12,16 @@
     <string name="play_draw">Wymień</string>
     <string name="play_hint_hold">Dotknij kart, które chcesz zatrzymać, a potem wymień.</string>
     <string name="play_hint_bet">Wybierz stawkę i rozdaj.</string>
+    <string name="play_bet_open">Dotknij żetonu, aby zmienić stawkę</string>
+    <string name="play_bet_locked">Stawka zablokowana do końca tej ręki</string>
+    <string name="play_bet_locked_all_in">Stawka zablokowana — All in jest dostępne</string>
+    <string name="coach_hold">Dotknij, aby zatrzymać</string>
+    <string name="coach_release">Dotknij, aby puścić</string>
+    <string name="coach_press">Teraz dotknij %1$s</string>
+    <string name="coach_hints">Dotknij lampki, aby dostać podpowiedzi</string>
+    <string name="coach_all_in">Raz dziennie, gdy karty są odkryte</string>
+    <string name="coach_hold_voice">Dotknij, aby zatrzymać: %1$s</string>
+    <string name="coach_release_voice">Dotknij, aby puścić: %1$s</string>
     <string name="play_held">TRZYMANA</string>
     <string name="play_nothing">Nic — %1$s</string>
     <string name="play_win_streak">Seria wygranych</string>
@@ -132,6 +142,7 @@
     <string name="win_royal_flush">Poker królewski</string>
     <string name="toast_all_in_good_luck">🔥 ALL IN — powodzenia!</string>
     <string name="toast_no_all_in_left">⛔ Brak all-inów — wróć jutro!</string>
+    <string name="toast_all_in_after_cards">Raz dziennie — gdy karty są odkryte</string>
     <string name="play_all_in">ALL IN</string>
     <string name="play_all_in_left">zostało %1$d</string>
     <string name="play_this_hand">to rozdanie</string>
@@ -294,4 +305,10 @@
     <string name="toast_account_deleted">Konto usunięte</string>
     <string name="toast_account_delete_failed">Nie udało się usunąć konta — sprawdź połączenie i spróbuj ponownie</string>
     <string name="settings_privacy_policy">Polityka prywatności</string>
+    <string name="prompt_notify_title">Zezwolić na powiadomienia?</string>
+    <string name="prompt_notify_body">Dostaniesz przypomnienie, gdy dzienny bonus będzie gotowy.</string>
+    <string name="prompt_notify_allow">Zezwól na powiadomienia</string>
+    <string name="prompt_rate_title">Oceń nas na 5 gwiazdek</string>
+    <string name="prompt_rate_body">Podoba Ci się Wideo Poker? Oceń aplikację na 5 gwiazdek w Sklepie Play.</string>
+    <string name="prompt_rate_action">Oceń na 5 gwiazdek</string>
 </resources>

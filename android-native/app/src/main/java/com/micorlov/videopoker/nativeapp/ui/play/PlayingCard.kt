@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -48,6 +49,17 @@ import com.micorlov.videopoker.nativeapp.ui.theme.VpColors
 /** Width : height of a card, from the web app's `.card { aspect-ratio: 0.68 }`. */
 const val CARD_ASPECT = 0.68f
 
+/** Far up the felt, the size a card has before it travels into the hand. */
+private const val APPROACH_SCALE = 0.58f
+private const val APPROACH_Y_DP = -46f
+
+/** Collapsed and hinged back toward the dealer. */
+private const val FOLD_SCALE = 0.28f
+private const val FOLD_Y_DP = -20f
+private const val FOLD_DEGREES = 72f
+private const val GATHER_DP = 14f
+private const val FAN_DEGREES = 4f
+
 /** How a card is dressed: held (orange ring), dimmed (an unheld card beside held ones), or winning (gold ring). */
 data class CardVisual(
     val held: Boolean = false,
@@ -62,6 +74,11 @@ data class CardVisual(
  * One card. [rotation] is the flip: 0 shows the face, 180 the back; past 90 degrees the
  * back is drawn, counter-rotated so it is not mirrored. [lift] raises the card in dp for
  * the win bounce.
+ *
+ * [approach] is the deal-in, 0 far up the felt and 1 seated in the hand. [fold] is the
+ * return, 0 seated and 1 collapsed back toward the dealer. [gather] is how far this slot
+ * sits from the centre of the fan (−2..2); a fold pulls it inward. Null approach/fold
+ * means the card is already at rest (the double-up row).
  *
  * The animations are passed as [Animatable]s, not floats, and read only inside draw-phase
  * lambdas: a flip then redraws the card at 60 fps without recomposing it. Composition only
@@ -78,6 +95,9 @@ fun PlayingCard(
     clickLabel: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    approach: Animatable<Float, AnimationVector1D>? = null,
+    fold: Animatable<Float, AnimationVector1D>? = null,
+    gather: Float = 0f,
 ) {
     val faceDown = stringResource(R.string.card_face_down)
     val faceUp by remember(rotation) { derivedStateOf { rotation.value <= 90f } }
@@ -85,7 +105,22 @@ fun PlayingCard(
     Box(
         modifier = modifier
             .aspectRatio(CARD_ASPECT)
-            .graphicsLayer { translationY = -lift.value * density }
+            .graphicsLayer {
+                val near = (approach?.value ?: 1f).coerceAtLeast(0f)
+                val away = (fold?.value ?: 0f).coerceIn(0f, 1f)
+                // near may pass 1 while the spring settles, so the card lands a touch larger then rests.
+                val scale = (APPROACH_SCALE + (1f - APPROACH_SCALE) * near.coerceAtMost(1.06f)) *
+                    (1f - (1f - FOLD_SCALE) * away)
+                scaleX = scale
+                scaleY = scale
+                alpha = (near.coerceAtMost(1f) * (1f - away)).coerceIn(0f, 1f)
+                translationY = ((APPROACH_Y_DP * (1f - near)) + (FOLD_Y_DP * away) - lift.value) * density
+                translationX = gather * GATHER_DP * away * density
+                rotationZ = gather * FAN_DEGREES * (1f - near) * (1f - away)
+                rotationX = FOLD_DEGREES * away
+                transformOrigin = TransformOrigin(0.5f, 0.2f)
+                cameraDistance = 16f * density
+            }
             .semantics(mergeDescendants = true) {
                 contentDescription = if (faceUp) description else faceDown
                 role = Role.Button

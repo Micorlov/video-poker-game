@@ -37,6 +37,12 @@ data class VpPalette(
 /** Colours shared by every theme: money and celebration are gold, never a call to action. */
 object VpColors {
     val Hint = Color(0xFF4DA3FF)
+
+    /** Deal and Draw share one button. These two stay apart on every felt colour. */
+    val Deal = Color(0xFF2F7BFF)
+    val DealDeep = Color(0xFF1A56C4)
+    val Draw = Color(0xFFF5872E)
+    val DrawDeep = Color(0xFFC45E10)
     val Gold = Color(0xFFFFC93C)
     val GoldDeep = Color(0xFFD99E1B)
     val GoldInk = Color(0xFF3A2A02)

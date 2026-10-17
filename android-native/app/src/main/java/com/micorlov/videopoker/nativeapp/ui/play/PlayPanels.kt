@@ -22,6 +22,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -36,6 +38,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.micorlov.videopoker.nativeapp.R
 import com.micorlov.videopoker.nativeapp.domain.Card
@@ -43,12 +46,14 @@ import com.micorlov.videopoker.nativeapp.domain.DrawOutcome
 import com.micorlov.videopoker.nativeapp.domain.GameState
 import com.micorlov.videopoker.nativeapp.domain.Phase
 import com.micorlov.videopoker.nativeapp.domain.Rules
+import com.micorlov.videopoker.nativeapp.domain.StakeLadder
 import com.micorlov.videopoker.nativeapp.ui.UiState
 import com.micorlov.videopoker.nativeapp.ui.components.ChipButton
 import com.micorlov.videopoker.nativeapp.ui.components.Eyebrow
 import com.micorlov.videopoker.nativeapp.ui.components.VpPanel
 import com.micorlov.videopoker.nativeapp.ui.text.explanationRes
 import com.micorlov.videopoker.nativeapp.ui.text.formatNumber
+import com.micorlov.videopoker.nativeapp.ui.text.formatStake
 import com.micorlov.videopoker.nativeapp.ui.text.labelRes
 import com.micorlov.videopoker.nativeapp.ui.theme.VpColors
 import kotlin.math.roundToInt
@@ -86,30 +91,74 @@ fun BalancePanel(displayedBalance: LongState, game: GameState, modifier: Modifie
     }
 }
 
-/** The stake is locked for the length of a hand: chips only respond between hands. */
+/**
+ * Stake chips and ALL IN. [window] decides which of them looks open: chips between settled
+ * hands, ALL IN once the dealt cards are face up, and neither while cards are still moving.
+ * A locked chip still takes the tap so it can say why.
+ */
 @Composable
 fun BetRow(
     game: GameState,
+    window: StakeWindow,
     allInRemaining: Int,
     onSelectBet: (Int) -> Unit,
+    onBetLocked: () -> Unit,
     onAllIn: () -> Unit,
+    onAllInPlaced: (LayoutCoordinates) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    val betsOpen = window == StakeWindow.CHANGE_BET
+    val allInOpen = window == StakeWindow.ALL_IN
+    val status = stringResource(
+        when (window) {
+            StakeWindow.CHANGE_BET -> R.string.play_bet_open
+            StakeWindow.ALL_IN -> R.string.play_bet_locked_all_in
+            StakeWindow.LOCKED -> R.string.play_bet_locked
+        },
+    )
+    val lockedHint = stringResource(R.string.play_bet_locked)
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Rules.BET_OPTIONS.forEach { amount ->
-            ChipButton(
-                label = amount.toString(),
-                selected = game.bet == amount,
-                enabled = game.phase == Phase.BET,
-                onClick = { onSelectBet(amount) },
-                modifier = Modifier
-                    .weight(1f)
-                    .testTag("bet-$amount"),
-            )
+        Text(
+            text = status,
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { liveRegion = LiveRegionMode.Polite }
+                .testTag("bet-status"),
+            color = when (window) {
+                StakeWindow.CHANGE_BET -> VpColors.Gold
+                StakeWindow.ALL_IN -> VpColors.Text
+                StakeWindow.LOCKED -> VpColors.TextFaint
+            },
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.06.em,
+            textAlign = TextAlign.Center,
+        )
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            game.stakeOptions.forEach { amount ->
+                val affordable = StakeLadder.affordable(amount, game.handCount, game.balance)
+                val live = betsOpen && affordable
+                ChipButton(
+                    label = formatStake(amount),
+                    selected = game.bet == amount,
+                    enabled = live || !betsOpen,
+                    live = live,
+                    unavailableDescription = lockedHint,
+                    onClick = { if (live) onSelectBet(amount) else onBetLocked() },
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("bet-$amount"),
+                )
+            }
         }
-    }
-    AllInButton(selected = game.isAllIn, remaining = allInRemaining, onClick = onAllIn)
+        AllInButton(
+            selected = game.isAllIn,
+            remaining = allInRemaining,
+            live = allInOpen,
+            unavailableDescription = lockedHint,
+            onClick = onAllIn,
+            modifier = Modifier.onGloballyPositioned(onAllInPlaced),
+        )
     }
 }
 

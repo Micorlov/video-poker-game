@@ -12,6 +12,16 @@
     <string name="play_draw">Çek</string>
     <string name="play_hint_hold">Tutmak istediğin kartlara dokun, sonra çek.</string>
     <string name="play_hint_bet">Bahsini seç ve dağıt.</string>
+    <string name="play_bet_open">Bahsi değiştirmek için bir fişe dokun</string>
+    <string name="play_bet_locked">Bu el bitene kadar bahis kilitli</string>
+    <string name="play_bet_locked_all_in">Bahis kilitli — All in açık</string>
+    <string name="coach_hold">Tutmak için dokun</string>
+    <string name="coach_release">Bırakmak için dokun</string>
+    <string name="coach_press">Şimdi %1$s dokun</string>
+    <string name="coach_hints">İpucu için lambaya dokun</string>
+    <string name="coach_all_in">Günde bir, kartları gördükten sonra</string>
+    <string name="coach_hold_voice">Tutmak için dokun: %1$s</string>
+    <string name="coach_release_voice">Bırakmak için dokun: %1$s</string>
     <string name="play_held">TUTULDU</string>
     <string name="play_nothing">Yok — %1$s</string>
     <string name="play_win_streak">Galibiyet serisi</string>
@@ -132,6 +142,7 @@
     <string name="win_royal_flush">Royal floş</string>
     <string name="toast_all_in_good_luck">🔥 ALL IN — bol şans!</string>
     <string name="toast_no_all_in_left">⛔ All in hakkın kalmadı — yarın gel!</string>
+    <string name="toast_all_in_after_cards">Günde bir — kartları gördükten sonra</string>
     <string name="play_all_in">ALL IN</string>
     <string name="play_all_in_left">%1$d kaldı</string>
     <string name="play_this_hand">bu ele</string>
@@ -289,4 +300,10 @@
     <string name="toast_account_deleted">Hesap silindi</string>
     <string name="toast_account_delete_failed">Hesap silinemedi — bağlantını kontrol edip tekrar dene</string>
     <string name="settings_privacy_policy">Gizlilik politikası</string>
+    <string name="prompt_notify_title">Bildirimlere izin verilsin mi?</string>
+    <string name="prompt_notify_body">Günlük bonusun hazır olduğunda bir hatırlatma al.</string>
+    <string name="prompt_notify_allow">Bildirimlere izin ver</string>
+    <string name="prompt_rate_title">Bizi 5 yıldızla değerlendirin</string>
+    <string name="prompt_rate_body">Video Poker hoşunuza gidiyor mu? Uygulamayı Play Store\'da 5 yıldızla değerlendirin.</string>
+    <string name="prompt_rate_action">5 yıldız ver</string>
 </resources>

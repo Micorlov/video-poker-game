@@ -62,6 +62,26 @@ class GameEngineTest {
     // ---- starting a game ------------------------------------------------------------
 
     @Test
+    fun `a stake off the ladder or larger than the stack is ignored`() {
+        val table = betting()
+        assertEquals(10, GameEngine.selectBet(table, 1_000).bet)
+        assertEquals(10, GameEngine.selectBet(table.copy(balance = 40), 50).bet)
+        assertEquals(10, GameEngine.selectBet(table.copy(handCount = 5, balance = 90), 20).bet)
+        assertEquals(50, GameEngine.selectBet(table, 50).bet)
+    }
+
+    @Test
+    fun `a big stack slides the chips up and leaves the chosen stake alone`() {
+        val table = betting(balance = 1_000_000, bet = 20).copy(stakeOptions = listOf(5, 10, 20, 50))
+        val dealt = GameEngine.deal(table, random).state
+        val drawn = GameEngine.draw(dealt.copy(held = List(5) { true }), random).state
+
+        assertEquals(20, drawn.bet)
+        assertTrue(drawn.stakeOptions.first() >= 2_000)
+        assertEquals(4, drawn.stakeOptions.size)
+    }
+
+    @Test
     fun `a new game deals a hand and charges the bet`() {
         val state = GameEngine.newGame(SavedGame(balance = 500), defaultBet = 10, random = random).state
 
@@ -170,12 +190,13 @@ class GameEngineTest {
 
     @Test
     fun `the boost judges the stack after the stake, so exactly four bets left is critical`() {
+        // The first three deals are the opening tutorial, so the boost is checked from the next one.
         // 50 - 10 = 40 = four bets: critical, so a triggered boost reaches for a pair.
-        val critical = GameEngine.deal(betting(balance = 50, bet = 10), ConstantRandom(0)).state
+        val critical = GameEngine.deal(betting(balance = 50, bet = 10, lifetimeHands = 3), ConstantRandom(0)).state
         assertTrue(hasPair(critical.hand), "critical stack must be helped with a pair: ${critical.hand}")
 
         // 60 - 10 = 50: only low, so the same roll takes the flush-draw tease instead.
-        val low = GameEngine.deal(betting(balance = 60, bet = 10), ConstantRandom(0)).state
+        val low = GameEngine.deal(betting(balance = 60, bet = 10, lifetimeHands = 3), ConstantRandom(0)).state
         assertTrue(biggestSuit(low.hand) >= 4, "a low (not critical) stack gets the flush tease: ${low.hand}")
     }
 
@@ -190,7 +211,7 @@ class GameEngineTest {
 
     @Test
     fun `a roll above the chance leaves the deal untouched`() {
-        val dealt = GameEngine.deal(betting(balance = 50, bet = 10), ConstantRandom(-1)).state
+        val dealt = GameEngine.deal(betting(balance = 50, bet = 10, lifetimeHands = 3), ConstantRandom(-1)).state
         // ConstantRandom(-1) also drives the shuffle, so compare against the same shuffle unboosted.
         val expected = standardDeck().shuffled(ConstantRandom(-1)).take(5)
         assertEquals(expected, dealt.hand)

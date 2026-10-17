@@ -35,8 +35,8 @@ private const val CARDS = 5
  * [onRevealed], and only then is the result shown ([revealed] turns true).
  *
  * A double-up already [revealed] when this row is first composed (the player came back from
- * another tab) starts face up: nothing turns over again. Once it is settled, [onTapToDeal]
- * (when set) lets a tap on any card deal the next hand, as on the hand row.
+ * another tab) starts face up: nothing turns over again. [onTapToDeal] stays unset, so a tap
+ * on a settled card does not deal; only the Deal button does.
  */
 @Composable
 fun DoubleUpRow(

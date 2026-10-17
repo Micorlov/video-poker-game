@@ -12,6 +12,16 @@
     <string name="play_draw">Tarik</string>
     <string name="play_hint_hold">Ketuk kartu yang ingin ditahan, lalu tarik.</string>
     <string name="play_hint_bet">Pilih taruhan, lalu bagikan.</string>
+    <string name="play_bet_open">Ketuk chip untuk mengubah taruhan</string>
+    <string name="play_bet_locked">Taruhan terkunci sampai tangan ini selesai</string>
+    <string name="play_bet_locked_all_in">Taruhan terkunci — All in tersedia</string>
+    <string name="coach_hold">Ketuk untuk menahan</string>
+    <string name="coach_release">Ketuk untuk melepas</string>
+    <string name="coach_press">Sekarang ketuk %1$s</string>
+    <string name="coach_hints">Ketuk lampu untuk petunjuk</string>
+    <string name="coach_all_in">Sekali sehari, setelah kartu terbuka</string>
+    <string name="coach_hold_voice">Ketuk untuk menyimpan: %1$s</string>
+    <string name="coach_release_voice">Ketuk untuk melepas: %1$s</string>
     <string name="play_held">DITAHAN</string>
     <string name="play_nothing">Tidak ada — %1$s</string>
     <string name="play_win_streak">Rentetan menang</string>
@@ -132,6 +142,7 @@
     <string name="win_royal_flush">Royal Flush</string>
     <string name="toast_all_in_good_luck">🔥 ALL IN — semoga beruntung!</string>
     <string name="toast_no_all_in_left">⛔ All-in habis — kembali besok!</string>
+    <string name="toast_all_in_after_cards">Sekali sehari — setelah kartu terbuka</string>
     <string name="play_all_in">ALL IN</string>
     <string name="play_all_in_left">sisa %1$d</string>
     <string name="play_this_hand">tangan ini</string>
@@ -288,4 +299,10 @@
     <string name="toast_account_deleted">Akun dihapus</string>
     <string name="toast_account_delete_failed">Akun tidak dapat dihapus — periksa koneksi lalu coba lagi</string>
     <string name="settings_privacy_policy">Kebijakan privasi</string>
+    <string name="prompt_notify_title">Izinkan notifikasi?</string>
+    <string name="prompt_notify_body">Dapatkan pengingat saat bonus harian siap.</string>
+    <string name="prompt_notify_allow">Izinkan notifikasi</string>
+    <string name="prompt_rate_title">Beri kami 5 bintang</string>
+    <string name="prompt_rate_body">Suka Video Poker? Beri aplikasi ini 5 bintang di Play Store.</string>
+    <string name="prompt_rate_action">Beri 5 bintang</string>
 </resources>

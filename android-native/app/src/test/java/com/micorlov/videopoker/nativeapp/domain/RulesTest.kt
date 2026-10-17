@@ -67,4 +67,40 @@ class RulesTest {
         assertEquals(listOf(5, 10, 20, 50), Rules.BET_OPTIONS)
         assertEquals(listOf(1, 3, 5), Rules.HAND_COUNT_OPTIONS)
     }
+
+    @Test
+    fun `a starter stack still shows the original four chips`() {
+        assertEquals(listOf(5, 10, 20, 50), StakeLadder.ideal(0))
+        assertEquals(listOf(5, 10, 20, 50), StakeLadder.ideal(1_000))
+    }
+
+    @Test
+    fun `bet chips slide up a 1-2-5 ladder toward five percent of the stack`() {
+        assertEquals(listOf(10, 20, 50, 100), StakeLadder.ideal(2_000))
+        assertEquals(listOf(50, 100, 200, 500), StakeLadder.ideal(10_000))
+        assertEquals(listOf(500, 1_000, 2_000, 5_000), StakeLadder.ideal(100_000))
+        assertEquals(listOf(5_000, 10_000, 20_000, 50_000), StakeLadder.ideal(1_000_000))
+        assertEquals(listOf(50_000, 100_000, 200_000, 500_000), StakeLadder.ideal(10_000_000))
+        assertEquals(StakeLadder.ideal(10_000_000), StakeLadder.ideal(40_000_000))
+    }
+
+    @Test
+    fun `a small loss under a band boundary leaves the chips where they are`() {
+        val high = StakeLadder.ideal(2_000)
+        assertEquals(high, StakeLadder.advance(high, 1_500))
+        assertEquals(listOf(5, 10, 20, 50), StakeLadder.advance(high, 1_000))
+    }
+
+    @Test
+    fun `the chip in play stays on the row while the stack can still cover it`() {
+        val high = listOf(10, 20, 50, 100)
+        assertEquals(high, StakeLadder.advance(high, 500, bet = 100))
+        assertEquals(listOf(5, 10, 20, 50), StakeLadder.advance(high, 80, bet = 100))
+    }
+
+    @Test
+    fun `five hands disable a chip the stack cannot cover`() {
+        assertEquals(false, StakeLadder.affordable(20, handCount = 5, balance = 90))
+        assertEquals(true, StakeLadder.affordable(20, handCount = 5, balance = 100))
+    }
 }

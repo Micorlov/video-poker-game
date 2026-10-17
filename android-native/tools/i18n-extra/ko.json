@@ -97,5 +97,19 @@
  "toast_invalid_code": "6자리 코드를 입력하세요",
  "toast_friends_offline": "서버에 연결할 수 없습니다. 연결을 확인하세요",
  "toast_referral_welcome": "🎁 친구가 %1$s 칩을 보냈어요. 테이블에 오신 것을 환영합니다!",
- "toast_invites_rewarded": "🎉 친구가 참여했어요. %1$s 칩을 받았습니다!"
+ "toast_invites_rewarded": "🎉 친구가 참여했어요. %1$s 칩을 받았습니다!",
+ "coach_hold": "탭해서 남기기",
+ "coach_release": "탭해서 놓기",
+ "coach_press": "이제 %1$s를 탭하세요",
+ "coach_hints": "힌트는 램프를 탭하세요",
+ "coach_all_in": "하루에 한 번, 카드가 보인 뒤에",
+ "coach_hold_voice": "보관하려면 탭: %1$s",
+ "coach_release_voice": "놓으려면 탭: %1$s",
+ "toast_all_in_after_cards": "하루에 한 번 — 카드가 보인 뒤에",
+ "prompt_notify_title": "알림을 허용할까요?",
+ "prompt_notify_body": "일일 보너스가 준비되면 알려 드립니다.",
+ "prompt_notify_allow": "알림 허용",
+ "prompt_rate_title": "별 5개로 평가해 주세요",
+ "prompt_rate_body": "비디오 포커가 마음에 드시나요? Play 스토어에서 별 5개로 평가해 주세요.",
+ "prompt_rate_action": "별 5개로 평가"
 }

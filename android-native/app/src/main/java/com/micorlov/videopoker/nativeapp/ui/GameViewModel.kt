@@ -17,6 +17,9 @@ import com.micorlov.videopoker.nativeapp.domain.Card
 import com.micorlov.videopoker.nativeapp.domain.DailyProfitPolicy
 import com.micorlov.videopoker.nativeapp.domain.DoubleUpResult
 import com.micorlov.videopoker.nativeapp.domain.DrawOutcome
+import com.micorlov.videopoker.nativeapp.domain.EngagementPrompt
+import com.micorlov.videopoker.nativeapp.domain.EngagementPromptPolicy
+import com.micorlov.videopoker.nativeapp.domain.EngagementPromptState
 import com.micorlov.videopoker.nativeapp.domain.GameEngine
 import com.micorlov.videopoker.nativeapp.domain.GameEvent
 import com.micorlov.videopoker.nativeapp.domain.GameState
@@ -48,8 +51,18 @@ data class UiState(
     val allInRemaining: Int = Rules.ALL_IN_DAILY_LIMIT,
     /** Set while the ALL IN confirmation sheet is open. */
     val allInOffer: AllInOffer? = null,
+    /** Set when today's ALL INs are gone and signing in with Google would grant another. */
+    val allInSignInPrompt: Boolean = false,
     /** The "Enjoying Video Poker?" card is up. */
     val reviewCardVisible: Boolean = false,
+    /** Push-notification permission, asked once after ten completed hands. */
+    val notificationPromptVisible: Boolean = false,
+    /** Five-star Play Store rating, asked once after twenty paying hands. */
+    val ratingPromptVisible: Boolean = false,
+    /** The opening hand has already pointed at the hints lamp. */
+    val hintsTipSeen: Boolean = false,
+    /** The opening hand has already explained that ALL IN is once a day. */
+    val allInTipSeen: Boolean = false,
     /** First-run walkthrough is up. */
     val showOnboarding: Boolean = false,
     /** Admin switches; defaults until the fetch lands. */
@@ -112,6 +125,7 @@ sealed interface ToastMessage {
     data object HintsOn : ToastMessage
     data object AllInGoodLuck : ToastMessage
     data object NoAllInLeft : ToastMessage
+    data object AllInAfterCards : ToastMessage
     data class ReferralWelcome(val amount: Long) : ToastMessage
     data class InvitesRewarded(val count: Int, val amount: Long) : ToastMessage
     data class FriendsAdded(val count: Int) : ToastMessage
@@ -151,7 +165,7 @@ class GameViewModel(
     private val clock: () -> Long = System::currentTimeMillis,
     /** The review ask is for the real app only; tests leave it off. */
     private val reviewEnabled: Boolean = false,
-    /** First-run onboarding is for the real app; tests leave it off. */
+    /** First-run walkthrough. The shipped app leaves this off so a launch deals a hand at once. */
     private val onboardingEnabled: Boolean = false,
     /** Fetches the remote flags; null (tests, offline builds) keeps the cached ones. */
     private val flagFetcher: (suspend () -> RemoteFlags?)? = null,
@@ -163,6 +177,10 @@ class GameViewModel(
     private val events: EventLogger = EventLogger.NONE,
     /** True when the earlier WebView build's data is on the device: its player has history the native save lacks. */
     private val upgradedFromLegacy: Boolean = false,
+    /** Google sign-in can raise today's ALL IN allowance. Off in tests and in builds without Firebase. */
+    private val googleSignInAvailable: Boolean = false,
+    /** Already signed in when the table opens, so the extra ALL IN is there on the first frame. */
+    signedInWithGoogle: Boolean = false,
 ) : ViewModel() {
 
     private val effectChannel = Channel<UiEffect>(Channel.UNLIMITED)
@@ -171,6 +189,7 @@ class GameViewModel(
     private val _state: MutableStateFlow<UiState>
     private var allInUsed = 0
     private var allInLimit = repository.loadFlags().allInDailyLimit
+    private var googleSignedIn = signedInWithGoogle && googleSignInAvailable
     private var reviewAskedThisSession = false
     private var reviewTimerPending = false
 
@@ -387,6 +406,9 @@ class GameViewModel(
 
     fun onSelectBet(amount: Int) = commit(Transition(GameEngine.selectBet(_state.value.game, amount)))
 
+    /** A stake chip was tapped while the hand still owns the bet. */
+    fun onBetLocked() = showToast(ToastMessage.FinishHandFirst)
+
     fun onSelectVariant(variant: Variant) {
         val before = _state.value.game
         val transition = GameEngine.selectVariant(before, variant)
@@ -413,7 +435,73 @@ class GameViewModel(
         current.game.outcome?.let {
             effectChannel.trySend(UiEffect.HandRevealed(it))
             if (it.isWin) onWin(current.game)
+            recordTurn(current.game)
         }
+    }
+
+    /**
+     * One completed hand. A paying hand counts toward the rating ask. The dialog waits until
+     * this hand's cards are face up, and until no other prompt owns the screen.
+     */
+    private fun recordTurn(game: GameState) {
+        val outcome = game.outcome ?: return
+        var prompts = repository.loadEngagementPrompts()
+        if (outcome.isWin) prompts = prompts.copy(rewardedTurns = prompts.rewardedTurns + 1)
+        if (EngagementPromptPolicy.notificationAlreadySatisfied(game.lifetimeHands, prompts, notificationsEnabled())) {
+            prompts = prompts.copy(notificationAsked = true)
+        }
+        repository.saveEngagementPrompts(prompts)
+        showEngagementPrompt(game.lifetimeHands, prompts)
+    }
+
+    private fun showEngagementPrompt(turnsPlayed: Int, prompts: EngagementPromptState) {
+        val ui = _state.value
+        if (ui.showOnboarding || ui.notificationPromptVisible || ui.ratingPromptVisible || ui.reviewCardVisible || ui.allInOffer != null) return
+        when (EngagementPromptPolicy.decide(turnsPlayed, prompts, notificationsEnabled())) {
+            EngagementPrompt.NOTIFICATIONS -> _state.update { it.copy(notificationPromptVisible = true) }
+            EngagementPrompt.RATING -> _state.update { it.copy(ratingPromptVisible = true) }
+            EngagementPrompt.NONE -> Unit
+        }
+    }
+
+    private fun notificationsEnabled(): Boolean = with(_state.value.settings) {
+        notifySocial || notifyLeaderboard || dailyReminderEnabled || notifyBestHand
+    }
+
+    /**
+     * Hide the in-app dialog while the system permission sheet is up. The ask stays unspent
+     * until [onNotificationPermissionResult] reports what the player chose.
+     */
+    fun onNotificationPromptAwaitingSystem() {
+        _state.update { it.copy(notificationPromptVisible = false) }
+    }
+
+    /**
+     * The system permission sheet finished. Categories turn on only when permission was
+     * granted; either way the ten-turn ask is spent.
+     */
+    fun onNotificationPermissionResult(granted: Boolean) {
+        if (granted) onEnableNotifications()
+        finishNotificationPrompt()
+    }
+
+    fun onNotificationPromptDismissed() = finishNotificationPrompt()
+
+    private fun finishNotificationPrompt() {
+        val prompts = repository.loadEngagementPrompts().copy(notificationAsked = true)
+        repository.saveEngagementPrompts(prompts)
+        _state.update { it.copy(notificationPromptVisible = false) }
+        showEngagementPrompt(_state.value.game.lifetimeHands, prompts)
+    }
+
+    /** "Rate 5 stars" or the Play Store link: don't ask again. The UI opens the listing. */
+    fun onRatingPromptAccepted() = finishRatingPrompt()
+
+    fun onRatingPromptDismissed() = finishRatingPrompt()
+
+    private fun finishRatingPrompt() {
+        repository.saveEngagementPrompts(repository.loadEngagementPrompts().copy(ratingAsked = true))
+        _state.update { it.copy(ratingPromptVisible = false) }
     }
 
     /** Any paying hand can earn the rating ask; [ReviewPolicy] decides whether this one does. */
@@ -438,7 +526,8 @@ class GameViewModel(
      */
     fun onReviewTimer(blocked: Boolean) {
         reviewTimerPending = false
-        if (reviewAskedThisSession || blocked || _state.value.allInOffer != null || _state.value.reviewCardVisible) return
+        val ui = _state.value
+        if (reviewAskedThisSession || blocked || ui.allInOffer != null || ui.reviewCardVisible || ui.notificationPromptVisible || ui.ratingPromptVisible) return
         val state = repository.loadReview()
         val now = clock()
         when (ReviewPolicy.decide(state, now)) {
@@ -462,11 +551,13 @@ class GameViewModel(
         repository.saveReview(repository.loadReview().copy(rated = true))
         events.log(AnalyticsEvents.REVIEW_CARD_RATE, emptyMap())
         _state.update { it.copy(reviewCardVisible = false) }
+        showEngagementPrompt(_state.value.game.lifetimeHands, repository.loadEngagementPrompts())
     }
 
     fun onReviewDismissed() {
         events.log(AnalyticsEvents.REVIEW_CARD_DISMISSED, emptyMap())
         _state.update { it.copy(reviewCardVisible = false) }
+        showEngagementPrompt(_state.value.game.lifetimeHands, repository.loadEngagementPrompts())
     }
 
     fun onToggleSound() = updateSettings { it.copy(soundEnabled = !it.soundEnabled) }
@@ -488,18 +579,45 @@ class GameViewModel(
 
     fun onSelectSpeed(speed: GameSpeed) = updateSettings { it.copy(gameSpeed = speed) }
 
-    /** ALL IN tapped: open the confirmation, or explain why not. Allowed mid-hand, as on the web. */
+    /** The first hand's floating hand pointed at the lamp; don't point there again. */
+    fun onHintsTipSeen() = _state.update { it.copy(hintsTipSeen = true) }
+
+    /** The first hand's floating hand pointed at ALL IN; don't point there again. */
+    fun onAllInTipSeen() = _state.update { it.copy(allInTipSeen = true) }
+
+    /**
+     * ALL IN tapped: open the confirmation, or explain why not. A guest who has used today's
+     * one gets the Google sign-in prompt (2 a day instead of 1). Otherwise the confirmation
+     * waits until this hand's cards are face up.
+     */
     fun onAllInRequested() {
         val game = _state.value.game
         if (game.phase == Phase.DOUBLE_UP) return showToast(ToastMessage.FinishHandFirst)
-        if (_state.value.allInRemaining <= 0) return showToast(ToastMessage.NoAllInLeft)
+        if (_state.value.allInRemaining <= 0) {
+            if (googleSignInGrantsAnother()) {
+                _state.update { it.copy(allInSignInPrompt = true) }
+            } else {
+                showToast(ToastMessage.NoAllInLeft)
+            }
+            return
+        }
+        if (game.phase != Phase.HOLD || !_state.value.revealed) return showToast(ToastMessage.AllInAfterCards)
         val offer = GameEngine.allInOffer(game)
         if (offer == null) {
             commit(GameEngine.rebuy(game), persist = true)
             return
         }
-        _state.update { it.copy(allInOffer = offer) }
+        _state.update { it.copy(allInOffer = offer, allInSignInPrompt = false) }
     }
+
+    /** Google account changed. Signing in raises today's allowance and closes the prompt. */
+    fun onGoogleSignedIn(signedIn: Boolean) {
+        if (!googleSignInAvailable || googleSignedIn == signedIn) return
+        googleSignedIn = signedIn
+        _state.update { it.copy(allInRemaining = allInRemaining(), allInSignInPrompt = false) }
+    }
+
+    fun onAllInSignInDismissed() = _state.update { it.copy(allInSignInPrompt = false) }
 
     fun onAllInConfirmed() {
         val current = _state.value
@@ -514,13 +632,27 @@ class GameViewModel(
 
     private fun today(): String = todayKey?.invoke().orEmpty()
 
-    private fun allInRemaining(): Int = (allInLimit - allInUsed).coerceAtLeast(0)
+    private fun allInRemaining(): Int = (effectiveAllInLimit() - allInUsed).coerceAtLeast(0)
+
+    private fun effectiveAllInLimit(): Int = Rules.allInDailyLimit(allInLimit, googleSignedIn)
+
+    /** True when a guest still has a Google sign-in that would add an ALL IN today. */
+    private fun googleSignInGrantsAnother(): Boolean =
+        googleSignInAvailable && !googleSignedIn &&
+            Rules.allInDailyLimit(allInLimit, signedInWithGoogle = true) > allInUsed
 
     /** Applies freshly fetched flags and keeps them for the next offline start. */
     fun onFlagsLoaded(flags: RemoteFlags) {
         repository.saveFlags(flags)
         allInLimit = flags.allInDailyLimit
-        _state.update { it.copy(flags = flags, allInRemaining = allInRemaining()) }
+        val remaining = allInRemaining()
+        _state.update {
+            it.copy(
+                flags = flags,
+                allInRemaining = remaining,
+                allInSignInPrompt = it.allInSignInPrompt && remaining <= 0 && googleSignInGrantsAnother(),
+            )
+        }
     }
 
     fun onSelectLanguage(language: AppLanguage) = updateSettings { it.copy(language = language) }

@@ -81,7 +81,11 @@ class FriendsViewModel(
 
     private val _state = MutableStateFlow(
         FriendsUiState(
-            auth = if (auth.available) FriendsAuth.SIGNED_OUT else FriendsAuth.UNAVAILABLE,
+            auth = when {
+                !auth.available -> FriendsAuth.UNAVAILABLE
+                auth.user.value != null -> FriendsAuth.SIGNED_IN
+                else -> FriendsAuth.SIGNED_OUT
+            },
             resetIn = UtcDay.untilReset(clock()),
             pendingInvite = friends.hasPendingInvite(),
         ),

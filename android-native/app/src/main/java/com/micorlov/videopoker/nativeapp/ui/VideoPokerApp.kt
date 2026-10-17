@@ -100,9 +100,23 @@ fun VideoPokerApp(
         var tab by rememberSaveable { mutableStateOf(Tab.PLAY) }
         var choosingLanguage by rememberSaveable { mutableStateOf(false) }
         LaunchedEffect(ui.settings.dailyReminderEnabled) { DailyReminderScheduler.sync(context, ui.settings.dailyReminderEnabled) }
-        val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+        var promptPermissionPending by rememberSaveable { mutableStateOf(false) }
+        val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (!promptPermissionPending) return@rememberLauncherForActivityResult
+            promptPermissionPending = false
+            viewModel.onNotificationPermissionResult(granted)
+        }
         val requestNotifications = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        val allowNotificationPrompt = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                promptPermissionPending = true
+                viewModel.onNotificationPromptAwaitingSystem()
+                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                viewModel.onNotificationPermissionResult(true)
+            }
         }
         var celebration by remember { mutableStateOf<Celebration?>(null) }
 
@@ -159,6 +173,22 @@ fun VideoPokerApp(
                 onDismiss = viewModel::onReviewDismissed,
             )
         }
+        if (ui.notificationPromptVisible) {
+            NotificationPrompt(
+                onAllow = allowNotificationPrompt,
+                onDismiss = viewModel::onNotificationPromptDismissed,
+            )
+        }
+        if (ui.ratingPromptVisible) {
+            RatingPrompt(
+                storeUrl = StoreLinks.listingUri(context.packageName).toString(),
+                onRate = {
+                    viewModel.onRatingPromptAccepted()
+                    StoreLinks.openListing(context)
+                },
+                onDismiss = viewModel::onRatingPromptDismissed,
+            )
+        }
 
         LaunchedEffect(celebration?.id) {
             val id = celebration?.id ?: return@LaunchedEffect
@@ -166,17 +196,24 @@ fun VideoPokerApp(
             if (celebration?.id == id) celebration = null
         }
 
-        val playActions = remember(viewModel, friendsOn) {
+        val signInHost = remember(context) { ActivityHost(context.findActivity()) }
+        val playActions = remember(viewModel, friends, friendsOn, signInHost) {
             PlayActions(
                 onMainAction = viewModel::onMainAction,
                 onToggleHold = viewModel::onToggleHold,
                 onSelectBet = viewModel::onSelectBet,
+                onBetLocked = viewModel::onBetLocked,
                 onRevealed = viewModel::onRevealed,
                 onToggleSound = viewModel::onToggleSound,
                 onToggleHints = viewModel::onToggleHints,
                 onAllIn = viewModel::onAllInRequested,
+                onAllInTipSeen = viewModel::onAllInTipSeen,
+                onHintsTipSeen = viewModel::onHintsTipSeen,
+                onSpeak = { voice.speak(it) },
                 onAllInConfirmed = viewModel::onAllInConfirmed,
                 onAllInDismissed = viewModel::onAllInDismissed,
+                onAllInSignIn = { friends?.onSignIn(signInHost) },
+                onAllInSignInDismissed = viewModel::onAllInSignInDismissed,
                 onDoubleUp = viewModel::onDoubleUp,
                 onPickDoubleUp = viewModel::onPickDoubleUp,
                 onDoubleUpRevealed = viewModel::onDoubleUpRevealed,
@@ -184,6 +221,9 @@ fun VideoPokerApp(
             )
         }
         val friendsState = friends?.state?.collectAsStateWithLifecycle()?.value
+        LaunchedEffect(friendsState?.auth) {
+            viewModel.onGoogleSignedIn(friendsState?.auth == FriendsAuth.SIGNED_IN)
+        }
         val accountSettings = if (friends != null && friends.available) {
             val activity = LocalContext.current.findActivity()
             AccountSettings(
@@ -240,7 +280,13 @@ fun VideoPokerApp(
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                     Box(Modifier.widthIn(max = MAX_CONTENT_WIDTH).fillMaxSize()) {
                         when (tab) {
-                            Tab.PLAY -> PlayScreen(ui, celebration, feedback, playActions)
+                            Tab.PLAY -> PlayScreen(
+                                ui,
+                                celebration,
+                                feedback,
+                                playActions,
+                                allInSigningIn = friendsState?.auth == FriendsAuth.SIGNING_IN,
+                            )
                             Tab.FRIENDS -> friends?.let { FriendsTab(it) }
                             Tab.STATS -> StatsScreen(ui.game)
                             Tab.SETTINGS -> SettingsScreen(ui, settingsActions, account = accountSettings)

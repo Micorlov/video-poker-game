@@ -37,6 +37,7 @@ class FriendsTabTest {
         override val available = true
         override val user: StateFlow<AuthUser?> = MutableStateFlow(null)
         override suspend fun signIn(host: SignInHost): Result<AuthUser> = Result.failure(IllegalStateException())
+        override suspend fun deleteAccount(host: SignInHost): Result<Unit> = Result.failure(IllegalStateException())
         override fun signOut() = Unit
     }
 

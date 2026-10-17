@@ -8,8 +8,18 @@ object Rules {
     /** Free chips granted on the first launch of each local calendar day (js/daily-bonus.js). */
     const val DAILY_BONUS = 200L
 
-    /** ALL INs allowed per local day (ALLIN_DAILY_LIMIT_DEFAULT in js/game.js). */
+    /** ALL INs allowed per local day for a guest (ALLIN_DAILY_LIMIT_DEFAULT in js/game.js). */
     const val ALL_IN_DAILY_LIMIT = 1
+
+    /** ALL INs allowed per local day once the player is signed in with Google. */
+    const val ALL_IN_SIGNED_IN_DAILY_LIMIT = 2
+
+    /**
+     * Today's allowance. [configured] is the guest limit (remote flags can raise it).
+     * Signing in with Google raises a 1-a-day allowance to 2 and leaves a higher one alone.
+     */
+    fun allInDailyLimit(configured: Int, signedInWithGoogle: Boolean): Int =
+        if (signedInWithGoogle) maxOf(configured, ALL_IN_SIGNED_IN_DAILY_LIMIT) else configured
 
     /** Keeps an ALL IN payout inside an Int: 1,000,000 x 250 x 5 hands, streak bonus included, still fits. */
     const val ALL_IN_MAX_BET = 1_000_000

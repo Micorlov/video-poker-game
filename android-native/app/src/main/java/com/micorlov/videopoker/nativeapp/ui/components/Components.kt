@@ -29,11 +29,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -79,8 +81,13 @@ fun ActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    color: Color = Color.Unspecified,
+    colorDeep: Color = Color.Unspecified,
 ) {
     val palette = LocalPalette.current
+    val fill = if (color == Color.Unspecified) palette.action else color
+    val deep = if (colorDeep == Color.Unspecified) palette.actionDeep else colorDeep
+    val ink = if (color == Color.Unspecified) palette.actionInk else Color.White
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val scale by animateFloatAsState(if (pressed) 0.97f else 1f, label = "actionPress")
@@ -93,9 +100,9 @@ fun ActionButton(
                 scaleY = scale
                 alpha = if (enabled) 1f else DISABLED_ALPHA
             }
-            .shadow(10.dp, shape, ambientColor = palette.action, spotColor = palette.action)
+            .shadow(10.dp, shape, ambientColor = fill, spotColor = fill)
             .clip(shape)
-            .background(palette.actionEdge)
+            .background(if (color == Color.Unspecified) palette.actionEdge else deep.copy(alpha = 0.55f))
             .clickable(enabled = enabled, interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick),
     ) {
         Row(
@@ -103,16 +110,16 @@ fun ActionButton(
                 .fillMaxWidth()
                 .padding(bottom = 4.dp)
                 .clip(shape)
-                .background(Brush.verticalGradient(listOf(palette.action, palette.actionDeep)))
+                .background(Brush.verticalGradient(listOf(fill, deep)))
                 .padding(horizontal = 16.dp, vertical = 15.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             val suit = suitForGlyph(icon)
             if (suit != null) {
-                SuitIcon(suit, 20.dp, color = palette.actionInk)
+                SuitIcon(suit, 20.dp, color = ink)
             } else {
-                Text(icon, modifier = Modifier.clearAndSetSemantics { }, color = palette.actionInk, fontSize = 20.sp)
+                Text(icon, modifier = Modifier.clearAndSetSemantics { }, color = ink, fontSize = 20.sp)
             }
             // One line that shrinks to fit: long labels ("Start with 1,000 chips", German, large text)
             // used to wrap and push the icon out of the slab.
@@ -120,7 +127,7 @@ fun ActionButton(
                 text = text.uppercase(),
                 modifier = Modifier.padding(start = 10.dp, end = 4.dp),
                 style = TextStyle(
-                    color = palette.actionInk,
+                    color = ink,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.1.em,
@@ -135,7 +142,15 @@ fun ActionButton(
 
 private const val DISABLED_ALPHA = 0.5f
 
-/** A selectable pill: bet amounts, hand counts, themes. A locked chip stays tappable so it can explain itself. */
+/**
+ * A selectable pill: bet amounts, hand counts, themes. A locked chip stays tappable so it can
+ * explain itself.
+ *
+ * [live] is the money-control affordance. When it is false the chip, including the current
+ * choice, drops the action fill and fades, so a locked bet cannot be mistaken for one you
+ * can change. [emphasized] draws an available-but-not-selected chip (ALL IN during a hand)
+ * in the action colour so it is the control that reads as open.
+ */
 @Composable
 fun ChipButton(
     label: String,
@@ -144,31 +159,54 @@ fun ChipButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     locked: Boolean = false,
+    live: Boolean = true,
+    emphasized: Boolean = false,
+    unavailableDescription: String? = null,
 ) {
     val palette = LocalPalette.current
     val shape = RoundedCornerShape(14.dp)
-    // Dim what you cannot pick, but keep the current choice at full strength so it stays readable.
-    val dimmed = locked || (!enabled && !selected)
-    val background = if (selected) {
-        Modifier.background(Brush.verticalGradient(listOf(palette.action, palette.actionDeep)))
-    } else {
-        Modifier.background(VpColors.Surface).border(1.dp, VpColors.Border, shape)
+    val filled = selected && live && enabled && !locked
+    val highlighted = emphasized && live && enabled && !locked && !selected
+    val background = when {
+        filled -> Modifier.background(Brush.verticalGradient(listOf(palette.action, palette.actionDeep)))
+        highlighted -> Modifier
+            .background(palette.action.copy(alpha = 0.22f))
+            .border(2.dp, palette.action, shape)
+        else -> Modifier.background(VpColors.Surface).border(
+            width = if (selected) 1.5.dp else 1.dp,
+            color = if (selected) VpColors.TextFaint else VpColors.Border,
+            shape = shape,
+        )
+    }
+    val alpha = when {
+        locked || !live -> if (selected || emphasized) 0.55f else 0.32f
+        !enabled && !selected -> DISABLED_ALPHA
+        else -> 1f
+    }
+    val ink = when {
+        filled -> palette.actionInk
+        highlighted -> palette.action
+        !live || locked -> VpColors.TextFaint
+        else -> VpColors.Text
     }
 
     Box(
         modifier = modifier
             .heightIn(min = 46.dp)
-            .alpha(if (dimmed) 0.55f else 1f)
+            .alpha(alpha)
             .clip(shape)
             .then(background)
-            .semantics { this.selected = selected }
+            .semantics {
+                this.selected = selected
+                if (!live && unavailableDescription != null) stateDescription = unavailableDescription
+            }
             .clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = if (locked) "🔒 $label" else label,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-            color = if (selected) palette.actionInk else VpColors.Text,
+            color = ink,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
         )

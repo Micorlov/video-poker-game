@@ -97,5 +97,19 @@
  "toast_invalid_code": "Masukkan kode 6 karakter",
  "toast_friends_offline": "Tidak dapat menjangkau server — periksa koneksimu",
  "toast_referral_welcome": "🎁 Temanmu mengirim %1$s chip — selamat datang di meja!",
- "toast_invites_rewarded": "🎉 Teman bergabung — kamu mendapat %1$s chip!"
+ "toast_invites_rewarded": "🎉 Teman bergabung — kamu mendapat %1$s chip!",
+ "coach_hold": "Ketuk untuk menahan",
+ "coach_release": "Ketuk untuk melepas",
+ "coach_press": "Sekarang ketuk %1$s",
+ "coach_hints": "Ketuk lampu untuk petunjuk",
+ "coach_all_in": "Sekali sehari, setelah kartu terbuka",
+ "coach_hold_voice": "Ketuk untuk menyimpan: %1$s",
+ "coach_release_voice": "Ketuk untuk melepas: %1$s",
+ "toast_all_in_after_cards": "Sekali sehari — setelah kartu terbuka",
+ "prompt_notify_title": "Izinkan notifikasi?",
+ "prompt_notify_body": "Dapatkan pengingat saat bonus harian siap.",
+ "prompt_notify_allow": "Izinkan notifikasi",
+ "prompt_rate_title": "Beri kami 5 bintang",
+ "prompt_rate_body": "Suka Video Poker? Beri aplikasi ini 5 bintang di Play Store.",
+ "prompt_rate_action": "Beri 5 bintang"
 }

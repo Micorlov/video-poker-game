@@ -12,6 +12,16 @@
     <string name="play_draw">سحب</string>
     <string name="play_hint_hold">اضغط على الأوراق التي تريد الاحتفاظ بها ثم اسحب.</string>
     <string name="play_hint_bet">اختر رهانك ثم وزّع.</string>
+    <string name="play_bet_open">انقر رقاقة لتغيير الرهان</string>
+    <string name="play_bet_locked">الرهان مقفل حتى تنتهي هذه اليد</string>
+    <string name="play_bet_locked_all_in">الرهان مقفل — الكل متاح</string>
+    <string name="coach_hold">اضغط للاحتفاظ</string>
+    <string name="coach_release">اضغط للإفلات</string>
+    <string name="coach_press">الآن اضغط %1$s</string>
+    <string name="coach_hints">اضغط المصباح للحصول على تلميحات</string>
+    <string name="coach_all_in">مرة في اليوم، بعد ظهور الأوراق</string>
+    <string name="coach_hold_voice">اضغط للإبقاء: %1$s</string>
+    <string name="coach_release_voice">اضغط للتحرير: %1$s</string>
     <string name="play_held">محفوظة</string>
     <string name="play_nothing">لا يوجد — %1$s</string>
     <string name="play_win_streak">سلسلة الانتصارات</string>
@@ -132,6 +142,7 @@
     <string name="win_royal_flush">رويال فلاش</string>
     <string name="toast_all_in_good_luck">🔥 كل الرصيد — بالتوفيق!</string>
     <string name="toast_no_all_in_left">⛔ لم تعد لديك رهانات بكل الرصيد — عد غدًا!</string>
+    <string name="toast_all_in_after_cards">مرة في اليوم — بعد ظهور الأوراق</string>
     <string name="play_all_in">كل الرصيد</string>
     <string name="play_all_in_left">المتبقي %1$d</string>
     <string name="play_this_hand">هذه اليد</string>
@@ -298,4 +309,10 @@
     <string name="toast_account_deleted">تم حذف الحساب</string>
     <string name="toast_account_delete_failed">تعذّر حذف الحساب — تحقق من اتصالك وحاول مجددًا</string>
     <string name="settings_privacy_policy">سياسة الخصوصية</string>
+    <string name="prompt_notify_title">السماح بالإشعارات؟</string>
+    <string name="prompt_notify_body">سنذكّرك عندما تصبح المكافأة اليومية جاهزة.</string>
+    <string name="prompt_notify_allow">السماح بالإشعارات</string>
+    <string name="prompt_rate_title">قيّمونا بـ 5 نجوم</string>
+    <string name="prompt_rate_body">هل تستمتع بفيديو بوكر؟ قيّم التطبيق بـ 5 نجوم على متجر Play.</string>
+    <string name="prompt_rate_action">تقييم بـ 5 نجوم</string>
 </resources>

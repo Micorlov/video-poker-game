@@ -49,6 +49,7 @@ import com.micorlov.videopoker.nativeapp.ui.components.ChipButton
 import com.micorlov.videopoker.nativeapp.ui.components.Eyebrow
 import com.micorlov.videopoker.nativeapp.ui.components.VpPanel
 import com.micorlov.videopoker.nativeapp.ui.play.PaytableList
+import com.micorlov.videopoker.nativeapp.ui.text.formatStake
 import com.micorlov.videopoker.nativeapp.ui.text.labelRes
 import com.micorlov.videopoker.nativeapp.ui.theme.LocalPalette
 import com.micorlov.videopoker.nativeapp.ui.theme.VpColors
@@ -155,9 +156,9 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
 
         Section(R.string.settings_default_bet) {
             ChipRow {
-                Rules.BET_OPTIONS.forEach { amount ->
+                game.stakeOptions.forEach { amount ->
                     ChipButton(
-                        label = amount.toString(),
+                        label = formatStake(amount),
                         selected = settings.defaultBet == amount,
                         onClick = { actions.onSelectDefaultBet(amount) },
                         modifier = Modifier.weight(1f).testTag("default-bet-$amount"),

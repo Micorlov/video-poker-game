@@ -100,5 +100,19 @@
  "toast_invalid_code": "Saisissez un code de 6 caractères",
  "toast_friends_offline": "Serveur injoignable — vérifiez votre connexion",
  "toast_referral_welcome": "🎁 Votre ami vous a envoyé %1$s jetons — bienvenue à la table !",
- "toast_invites_rewarded": "🎉 Des amis vous ont rejoint — vous gagnez %1$s jetons !"
+ "toast_invites_rewarded": "🎉 Des amis vous ont rejoint — vous gagnez %1$s jetons !",
+ "coach_hold": "Touchez pour garder",
+ "coach_release": "Touchez pour relâcher",
+ "coach_press": "Maintenant, touchez %1$s",
+ "coach_hints": "Touchez la lampe pour des indices",
+ "coach_all_in": "Une fois par jour, après avoir vu les cartes",
+ "coach_hold_voice": "Touchez pour garder : %1$s",
+ "coach_release_voice": "Touchez pour lâcher : %1$s",
+ "toast_all_in_after_cards": "Une fois par jour — après avoir vu les cartes",
+ "prompt_notify_title": "Autoriser les notifications ?",
+ "prompt_notify_body": "Recevez un rappel quand votre bonus quotidien est prêt.",
+ "prompt_notify_allow": "Autoriser les notifications",
+ "prompt_rate_title": "Notez-nous 5 étoiles",
+ "prompt_rate_body": "Vous aimez Video Poker ? Notez l'app 5 étoiles sur le Play Store.",
+ "prompt_rate_action": "Noter 5 étoiles"
 }

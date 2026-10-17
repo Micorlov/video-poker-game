@@ -12,6 +12,16 @@
     <string name="play_draw">Обмен</string>
     <string name="play_hint_hold">Нажмите на карты, которые хотите оставить, затем меняйте.</string>
     <string name="play_hint_bet">Выберите ставку и раздавайте.</string>
+    <string name="play_bet_open">Нажмите фишку, чтобы изменить ставку</string>
+    <string name="play_bet_locked">Ставка заблокирована до конца этой руки</string>
+    <string name="play_bet_locked_all_in">Ставка заблокирована — олл-ин доступен</string>
+    <string name="coach_hold">Нажмите, чтобы оставить</string>
+    <string name="coach_release">Нажмите, чтобы отпустить</string>
+    <string name="coach_press">Теперь нажмите %1$s</string>
+    <string name="coach_hints">Нажмите на лампу, чтобы получить подсказки</string>
+    <string name="coach_all_in">Раз в день, когда карты открыты</string>
+    <string name="coach_hold_voice">Нажмите, чтобы оставить: %1$s</string>
+    <string name="coach_release_voice">Нажмите, чтобы отпустить: %1$s</string>
     <string name="play_held">ОСТАВЛЕНА</string>
     <string name="play_nothing">Ничего — %1$s</string>
     <string name="play_win_streak">Серия побед</string>
@@ -132,6 +142,7 @@
     <string name="win_royal_flush">Роял-флеш</string>
     <string name="toast_all_in_good_luck">🔥 ВА-БАНК — удачи!</string>
     <string name="toast_no_all_in_left">⛔ Ва-банк закончился — возвращайтесь завтра!</string>
+    <string name="toast_all_in_after_cards">Раз в день — когда карты открыты</string>
     <string name="play_all_in">ВА-БАНК</string>
     <string name="play_all_in_left">осталось %1$d</string>
     <string name="play_this_hand">эту раздачу</string>
@@ -294,4 +305,10 @@
     <string name="toast_account_deleted">Аккаунт удалён</string>
     <string name="toast_account_delete_failed">Не удалось удалить аккаунт — проверьте подключение и повторите попытку</string>
     <string name="settings_privacy_policy">Политика конфиденциальности</string>
+    <string name="prompt_notify_title">Разрешить уведомления?</string>
+    <string name="prompt_notify_body">Напомним, когда ежедневный бонус будет готов.</string>
+    <string name="prompt_notify_allow">Разрешить уведомления</string>
+    <string name="prompt_rate_title">Оцените нас на 5 звёзд</string>
+    <string name="prompt_rate_body">Нравится Видео-покер? Поставьте приложению 5 звёзд в Play Store.</string>
+    <string name="prompt_rate_action">Поставить 5 звёзд</string>
 </resources>

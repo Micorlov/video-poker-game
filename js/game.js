@@ -188,10 +188,91 @@ function renderPayouts() {
     renderVariantLabel();
 }
 
-function setBet(amount) {
+// Which money control is open. 'bet' = stake chips (and, on the web, All In).
+// 'allin' = the hand is face up, so only All In can change the money.
+// 'locked' = cards are still dealing, drawing, or folding.
+let tableWindow = 'bet';
+let handKept = false;
+let presentationGen = 0;
+
+function motionReduced() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function syncMoneyControls() {
+    const row = document.querySelector('.bet-row');
+    if (row) {
+        row.classList.toggle('bets-open', tableWindow === 'bet');
+        // Web All In is legal between hands and during a hold. It only goes
+        // quiet while the cards themselves are still moving.
+        row.classList.toggle('allin-open', tableWindow === 'bet' || tableWindow === 'allin');
+    }
+    const status = document.getElementById('bet-status');
+    if (status) {
+        const key = tableWindow === 'bet' ? 'play.betOpen'
+            : tableWindow === 'allin' ? 'play.betLockedAllIn'
+            : 'play.betLocked';
+        status.textContent = t(key);
+        status.className = 'bet-status bet-status-' + (tableWindow === 'bet' ? 'bet' : tableWindow === 'allin' ? 'allin' : 'locked');
+    }
+}
+
+function foldHand(onDone) {
+    const gen = presentationGen;
+    const handEl = document.getElementById('hand');
+    const finish = function() {
+        if (gen !== presentationGen) return;
+        if (handEl) {
+            handEl.classList.remove('folding');
+            handEl.classList.add('folded');
+        }
+        handKept = false;
+        onDone();
+    };
+    if (!handEl || !handEl.children.length || motionReduced()) {
+        finish();
+        return;
+    }
+    handEl.classList.remove('folded');
+    handEl.classList.add('folding');
+    setTimeout(finish, 420);
+}
+
+function discardUnheld(onDone) {
+    const gen = presentationGen;
+    const handEl = document.getElementById('hand');
+    if (!handEl || motionReduced()) {
+        onDone();
+        return;
+    }
+    let any = false;
+    for (let i = 0; i < 5; i++) {
+        if (!held[i] && handEl.children[i]) {
+            handEl.children[i].classList.add('discarding');
+            any = true;
+        }
+    }
+    if (!any) {
+        onDone();
+        return;
+    }
+    setTimeout(function() {
+        if (gen === presentationGen) onDone();
+    }, 260);
+}
+
+if (window.vpOnLanguageChange) vpOnLanguageChange(syncMoneyControls);
+
+function setBet(amount, quiet) {
     // The stake is charged at deal time but the payout is computed at draw
-    // time, so it must stay locked for the duration of the hand.
-    if (gameState !== 'bet') return;
+    // time, so it must stay locked for the duration of the hand. tableWindow
+    // stays locked while cards are still travelling, even after draw() has
+    // already moved gameState back to 'bet'. quiet is for the game itself
+    // (shrinking an unaffordable bet, restoring the stake after ALL IN).
+    if (gameState !== 'bet' || (!quiet && tableWindow !== 'bet')) {
+        if (!quiet && gameState === 'bet' && tableWindow !== 'bet') showToast(t('play.betLocked'));
+        return;
+    }
     bet = amount;
     updateTotalBetDisplay();
     document.querySelectorAll('.bet-row .bet-btn').forEach(btn => {
@@ -203,21 +284,49 @@ function setBet(amount) {
 
 // --- All In: limited daily uses ---
 const ALLIN_DAILY_LIMIT_DEFAULT = 1;
+// A Google sign-in raises that guest allowance to 2. A higher remote limit is left alone.
+const ALLIN_SIGNED_IN_DAILY_LIMIT = 2;
 // Onboarding promises "invite a friend to unlock another" — this delivers it:
 // each referred friend adds one daily All-In, capped to protect the economy.
 const ALLIN_REFERRAL_BONUS_CAP = 2;
 let allInUsesToday = 0;
 
+function allInGuestBase() {
+    const configured = window.egFeatures && window.egFeatures.allInDailyLimit;
+    return (typeof configured === 'number' && configured > 0) ? configured : ALLIN_DAILY_LIMIT_DEFAULT;
+}
+
+function allInReferralBonus() {
+    try {
+        const invited = window.getReferralInvitedCount ? getReferralInvitedCount() : 0;
+        return Math.min(invited, ALLIN_REFERRAL_BONUS_CAP);
+    } catch (e) {
+        return 0;
+    }
+}
+
 function getAllInDailyLimit() {
     const configured = window.egFeatures && window.egFeatures.allInDailyLimit;
     try {
-        const base = (typeof configured === 'number' && configured > 0) ? configured : ALLIN_DAILY_LIMIT_DEFAULT;
-        const invited = window.getReferralInvitedCount ? getReferralInvitedCount() : 0;
-        return base + Math.min(invited, ALLIN_REFERRAL_BONUS_CAP);
+        const guest = allInGuestBase();
+        const base = window.egUser ? Math.max(guest, ALLIN_SIGNED_IN_DAILY_LIMIT) : guest;
+        return base + allInReferralBonus();
     } catch (e) {
         // The very first applyFeatureFlags() (js/firebase.js) runs before this
         // script's top-level consts initialize — fall back to the config value.
         return (typeof configured === 'number' && configured > 0) ? configured : 1;
+    }
+}
+
+// A guest who has spent today's one can still earn the second by signing in.
+// Wait until auth has settled: before that, a returning Google user looks signed out.
+function googleSignInGrantsAllIn() {
+    if (window.egUser || !window._authResolved) return false;
+    try {
+        const boosted = Math.max(allInGuestBase(), ALLIN_SIGNED_IN_DAILY_LIMIT) + allInReferralBonus();
+        return boosted > allInUsesToday;
+    } catch (e) {
+        return false;
     }
 }
 
@@ -276,11 +385,17 @@ function openAllInSheet() {
     // Unlike setBet(), All In is allowed mid-hand: it stakes whatever balance
     // remains on top of the bet already charged at deal time, so it can't
     // reproduce the deal-cheap/raise-later exploit that setBet() must block.
+    // It is not available while cards are still dealing, drawing, or folding.
+    if (tableWindow === 'locked') {
+        showToast(t('play.betLocked'));
+        return;
+    }
     if (gameState !== 'bet' && gameState !== 'hold') return;
     if (getAllInRemaining() <= 0) {
-        // The scarcity moment is the invite hook (Ludo King model: invite
-        // because you want something) — offer the unlock, not just a wall.
-        openSheet('allin-unlock-sheet');
+        // A guest who signs in gets 2 a day instead of 1. Anyone already at the
+        // higher allowance gets the invite hook instead (each friend = +1/day).
+        if (googleSignInGrantsAllIn()) openSheet('allin-signin-sheet');
+        else openSheet('allin-unlock-sheet');
         return;
     }
     if (balance <= 0) {
@@ -309,6 +424,11 @@ function openAllInSheet() {
     }
     resetAllInSlider();
     openSheet('allin-sheet');
+}
+
+function allInSignInWithGoogle() {
+    if (window.logVpEvent) logVpEvent('allin_signin_prompt_clicked');
+    if (window.signInWithGoogle) signInWithGoogle();
 }
 
 function closeAllInSheet() {
@@ -353,7 +473,7 @@ function confirmAllIn() {
         document.getElementById('balance').textContent = formatNumber(balance);
         updateTotalBetDisplay();
     } else {
-        setBet(allInPendingAmount);
+        setBet(allInPendingAmount, true);
     }
     const btn = document.getElementById('bet-allin');
     if (btn) btn.classList.add('selected');
@@ -571,7 +691,10 @@ function updateMainButton() {
     btn.className = isDraw ? 'btn-secondary' : 'btn-primary';
 }
 
+let clearing = false;
+
 function mainAction() {
+    if (clearing) return;
     if (gameState === 'bet') deal();
     else if (gameState === 'hold') draw();
 }
@@ -583,7 +706,7 @@ function deal() {
         } else {
             bet = Math.max(5, Math.floor(balance / 5) * 5);
             if (bet > balance) bet = 5;
-            setBet(bet);
+            setBet(bet, true);
             if (balance < bet) {
                 doRebuy();
             }
@@ -609,8 +732,28 @@ function deal() {
     dealtHand = hand.slice();
     held = [false, false, false, false, false];
     gameState = 'hold';
+    presentationGen++;
+    tableWindow = 'locked';
+    syncMoneyControls();
 
-    renderHand();
+    const paintHand = function() {
+        const gen = presentationGen;
+        renderHand([], [], [], false, true, function() {
+            if (gen !== presentationGen || gameState !== 'hold') return;
+            tableWindow = 'allin';
+            handKept = false;
+            syncMoneyControls();
+        });
+    };
+    if (handKept) {
+        clearing = true;
+        foldHand(function() {
+            clearing = false;
+            paintHand();
+        });
+    } else {
+        paintHand();
+    }
     renderMultiHands([]);
     updateMainButton();
     lastHandType = null;
@@ -764,18 +907,37 @@ function draw() {
         document.getElementById('explanation').textContent = vpHandExplanation(handType);
     }
 
-    renderHand(winIndices, thirdMatchIndices, secondPairIndices, true, true, function() {
-        if (win === 0) {
-            playSound('loss');
-        } else {
-            triggerWinCelebration(bestType, win);
-            triggerHaptic('HEAVY');
-        }
+    presentationGen++;
+    tableWindow = 'locked';
+    syncMoneyControls();
+    const drawGen = presentationGen;
+    discardUnheld(function() {
+        if (drawGen !== presentationGen) return;
+        renderHand(winIndices, thirdMatchIndices, secondPairIndices, true, true, function() {
+            if (drawGen !== presentationGen) return;
+            if (win === 0) {
+                playSound('loss');
+                setTimeout(function() {
+                    if (drawGen !== presentationGen) return;
+                    foldHand(function() {
+                        if (drawGen !== presentationGen) return;
+                        tableWindow = 'bet';
+                        syncMoneyControls();
+                    });
+                }, motionReduced() ? 0 : 520);
+            } else {
+                handKept = true;
+                tableWindow = 'bet';
+                syncMoneyControls();
+                triggerWinCelebration(bestType, win);
+                triggerHaptic('HEAVY');
+            }
+        });
     });
 
     gameState = 'bet';
     if (betBeforeAllIn !== null) {
-        setBet(betBeforeAllIn);
+        setBet(betBeforeAllIn, true);
         betBeforeAllIn = null;
     }
     updateMainButton();
@@ -827,6 +989,7 @@ let lastRenderHandArgs = null;
 function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndices = [], isDraw = false, animateFlip = true, onFlipsComplete = null) {
     lastRenderHandArgs = [winningIndices, thirdMatchIndices, secondPairIndices, isDraw, false];
     const handEl = document.getElementById('hand');
+    handEl.classList.remove('folded', 'folding');
     handEl.innerHTML = '';
     const anyHeld = held.some(h => h);
     let flippingCount = 0;
@@ -850,6 +1013,8 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         if (thirdMatchIndices.includes(i)) classes += ' third-match';
 
         cardEl.className = classes.trim();
+        cardEl.style.setProperty('--fan', ((i - 2) * 4) + 'deg');
+        if (shouldStartFlipped) cardEl.classList.add('receiving');
         cardEl.onclick = () => toggleHold(i);
         const SUIT_NAMES = { '♠': 'Spades', '♥': 'Hearts', '♦': 'Diamonds', '♣': 'Clubs' };
         const RANK_NAMES = { 'A': 'Ace', 'J': 'Jack', 'Q': 'Queen', 'K': 'King' };
@@ -900,6 +1065,10 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
         hand.forEach((card, i) => {
             const cardEl = handEl.children[i];
             if (cardEl && cardEl.classList.contains('flipped')) {
+                cardEl.style.animationDelay = (flipDelayIndex * 72) + 'ms';
+                // Travel in face-down, then turn as the card arrives. The flip
+                // itself is the card-inner transition (0.34s); this delay is only
+                // the stagger plus the moment the travel has mostly landed.
                 setTimeout(() => {
                     const inner = cardEl.querySelector('.card-inner');
                     if (inner) {
@@ -907,10 +1076,6 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
                         cardEl.classList.remove('flipped');
                         playSound('deal');
                         triggerHaptic('LIGHT');
-                        // 'revealed' (and the win effects it gates) must wait for the
-                        // card-inner's own rotateY transition to actually finish —
-                        // adding it at flip-start left the gold glow/badge popping in
-                        // ~1.1s before the card had visually turned to face up.
                         let settled = false;
                         const settle = () => {
                             if (settled) return;
@@ -919,17 +1084,19 @@ function renderHand(winningIndices = [], thirdMatchIndices = [], secondPairIndic
                             flipsFinished++;
                             if (flipsFinished === flippingCount && onFlipsComplete) onFlipsComplete();
                         };
-                        setTimeout(() => {
-                            inner.classList.remove('animating');
-                            inner.addEventListener('transitionend', function onFlipEnd(e) {
-                                if (e.propertyName !== 'transform') return;
-                                inner.removeEventListener('transitionend', onFlipEnd);
-                                settle();
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                inner.classList.remove('animating');
+                                inner.addEventListener('transitionend', function onFlipEnd(e) {
+                                    if (e.propertyName !== 'transform') return;
+                                    inner.removeEventListener('transitionend', onFlipEnd);
+                                    settle();
+                                });
+                                setTimeout(settle, 400);
                             });
-                            setTimeout(settle, 550);
-                        }, 600);
+                        });
                     }
-                }, flipDelayIndex * 250);
+                }, flipDelayIndex * 72 + 200);
                 flipDelayIndex++;
             }
         });

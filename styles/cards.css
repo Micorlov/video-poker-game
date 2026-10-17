@@ -315,10 +315,55 @@
     font-weight: 700;
 }
 
+.bet-status {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-align: center;
+}
+
+.bet-status-bet { color: var(--gold); }
+.bet-status-allin { color: var(--text); }
+.bet-status-locked { color: var(--text-faint); }
+
 .bet-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr) 1.15fr;
     gap: 8px;
+}
+
+/* A locked stake chip, including the current one, must not look pressable. */
+.bet-row:not(.bets-open) .bet-btn:not(.bet-btn-allin) {
+    opacity: 0.38;
+    filter: grayscale(0.65);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.bet-row:not(.bets-open) .bet-btn.selected:not(.bet-btn-allin) {
+    opacity: 0.62;
+    background: var(--surface);
+    color: var(--text-faint);
+    box-shadow: inset 0 0 0 1.5px var(--border);
+}
+
+.bet-row:not(.allin-open) .bet-btn-allin {
+    opacity: 0.38;
+    filter: grayscale(0.8);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.bet-row.allin-open .bet-btn-allin {
+    opacity: 1;
+    filter: none;
+    box-shadow: 0 0 0 2px var(--action);
+}
+
+.bet-row.bets-open .bet-btn:not(.bet-btn-allin) {
+    opacity: 1;
+    filter: none;
 }
 
 .bet-btn {
@@ -459,6 +504,7 @@
     gap: 9px;
     justify-content: space-between;
     padding: 20px 0 0;
+    perspective: 900px;
 }
 
 .hand-placeholder-text {
@@ -475,13 +521,40 @@
     cursor: pointer;
     perspective: 600px;
     -webkit-tap-highlight-color: transparent;
+    transform-origin: center 20%;
+}
+
+/* Deal-in: the card starts small and high (far up the felt) and settles into the hand. */
+.card.receiving {
+    animation: card-receive 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* A discarded draw card folds back before its replacement is pitched in. */
+.card.discarding {
+    animation: card-fold 0.26s cubic-bezier(0.4, 0, 1, 1) forwards;
+    pointer-events: none;
+}
+
+/* A finished hand with nothing to pay folds the whole fan away. */
+.hand.folding .card {
+    animation: card-fold 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
+    pointer-events: none;
+}
+
+.hand.folded {
+    min-height: 0;
+    padding-top: 0;
+}
+
+.hand.folded .card {
+    visibility: hidden;
 }
 
 .card-inner {
     position: relative;
     width: 100%;
     height: 100%;
-    transition: transform 0.5s;
+    transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
     transform-style: preserve-3d;
 }
 

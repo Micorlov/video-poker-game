@@ -12,6 +12,16 @@
     <string name="play_draw">Tauschen</string>
     <string name="play_hint_hold">Tippe auf die Karten, die du behalten willst, und tausche dann.</string>
     <string name="play_hint_bet">Wähle deinen Einsatz und gib die Karten.</string>
+    <string name="play_bet_open">Tippe auf einen Chip, um den Einsatz zu ändern</string>
+    <string name="play_bet_locked">Einsatz gesperrt, bis diese Hand vorbei ist</string>
+    <string name="play_bet_locked_all_in">Einsatz gesperrt — All-in ist möglich</string>
+    <string name="coach_hold">Tippe zum Behalten</string>
+    <string name="coach_release">Tippe zum Loslassen</string>
+    <string name="coach_press">Jetzt %1$s tippen</string>
+    <string name="coach_hints">Tippe auf die Lampe für Hinweise</string>
+    <string name="coach_all_in">Einmal am Tag, wenn die Karten offen sind</string>
+    <string name="coach_hold_voice">Tippen zum Behalten: %1$s</string>
+    <string name="coach_release_voice">Tippen zum Loslassen: %1$s</string>
     <string name="play_held">HALTEN</string>
     <string name="play_nothing">Nichts — %1$s</string>
     <string name="play_win_streak">Siegesserie</string>
@@ -132,6 +142,7 @@
     <string name="win_royal_flush">Royal Flush</string>
     <string name="toast_all_in_good_luck">🔥 ALL IN — viel Glück!</string>
     <string name="toast_no_all_in_left">⛔ Keine All-Ins mehr — morgen wieder!</string>
+    <string name="toast_all_in_after_cards">Einmal am Tag — erst wenn die Karten offen sind</string>
     <string name="play_all_in">ALL IN</string>
     <string name="play_all_in_left">noch %1$d</string>
     <string name="play_this_hand">diese Hand</string>
@@ -290,4 +301,10 @@
     <string name="toast_account_deleted">Konto gelöscht</string>
     <string name="toast_account_delete_failed">Konto konnte nicht gelöscht werden – prüfe deine Verbindung und versuche es erneut</string>
     <string name="settings_privacy_policy">Datenschutzerklärung</string>
+    <string name="prompt_notify_title">Benachrichtigungen erlauben?</string>
+    <string name="prompt_notify_body">Hol dir eine Erinnerung, wenn dein täglicher Bonus bereit ist.</string>
+    <string name="prompt_notify_allow">Benachrichtigungen erlauben</string>
+    <string name="prompt_rate_title">Bewerte uns mit 5 Sternen</string>
+    <string name="prompt_rate_body">Gefällt dir Video Poker? Bitte bewerte die App mit 5 Sternen im Play Store.</string>
+    <string name="prompt_rate_action">Mit 5 Sternen bewerten</string>
 </resources>

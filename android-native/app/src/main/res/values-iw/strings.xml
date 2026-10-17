@@ -12,6 +12,16 @@
     <string name="play_draw">החלפה</string>
     <string name="play_hint_hold">הקש על הקלפים שברצונך לשמור, ואז החלף.</string>
     <string name="play_hint_bet">בחר הימור ואז חלק.</string>
+    <string name="play_bet_open">הקישו על אסימון כדי לשנות את ההימור</string>
+    <string name="play_bet_locked">ההימור נעול עד סוף היד</string>
+    <string name="play_bet_locked_all_in">ההימור נעול — אול-אין זמין</string>
+    <string name="coach_hold">הקש כדי לשמור</string>
+    <string name="coach_release">הקש כדי לשחרר</string>
+    <string name="coach_press">עכשיו הקש על %1$s</string>
+    <string name="coach_hints">הקש על המנורה לקבל רמזים</string>
+    <string name="coach_all_in">פעם ביום, אחרי שרואים את הקלפים</string>
+    <string name="coach_hold_voice">הקש כדי לשמור: %1$s</string>
+    <string name="coach_release_voice">הקש כדי לשחרר: %1$s</string>
     <string name="play_held">נשמר</string>
     <string name="play_nothing">אין צירוף — %1$s</string>
     <string name="play_win_streak">רצף ניצחונות</string>
@@ -132,6 +142,7 @@
     <string name="win_royal_flush">רויאל פלאש</string>
     <string name="toast_all_in_good_luck">🔥 הכול — בהצלחה!</string>
     <string name="toast_no_all_in_left">⛔ נגמרו ההימורים על הכול — חזרו מחר!</string>
+    <string name="toast_all_in_after_cards">פעם ביום, כשהקלפים של היד הזו גלויים</string>
     <string name="play_all_in">הכול</string>
     <string name="play_all_in_left">נותרו %1$d</string>
     <string name="play_this_hand">היד הזו</string>
@@ -292,4 +303,10 @@
     <string name="toast_account_deleted">החשבון נמחק</string>
     <string name="toast_account_delete_failed">לא ניתן היה למחוק את החשבון — בדקו את החיבור ונסו שוב</string>
     <string name="settings_privacy_policy">מדיניות פרטיות</string>
+    <string name="prompt_notify_title">לאפשר התראות?</string>
+    <string name="prompt_notify_body">נשלח תזכורת כשהבונוס היומי מוכן.</string>
+    <string name="prompt_notify_allow">אפשרו התראות</string>
+    <string name="prompt_rate_title">דרגו אותנו ב-5 כוכבים</string>
+    <string name="prompt_rate_body">נהנים מווידאו פוקר? דרגו את האפליקציה ב-5 כוכבים ב-Play Store.</string>
+    <string name="prompt_rate_action">דרגו 5 כוכבים</string>
 </resources>

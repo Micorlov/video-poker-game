@@ -19,6 +19,7 @@ object GameEngine {
             // A bad saved count would make a hand cost nothing (0) or break the multi-hand maths.
             handCount = saved.handCount.takeIf { it in Rules.HAND_COUNT_OPTIONS } ?: 1,
             bet = defaultBet,
+            stakeOptions = StakeLadder.advance(StakeLadder.ideal(saved.balance), saved.balance, defaultBet),
             balance = saved.balance,
             hand = emptyList(),
             dealtHand = emptyList(),
@@ -46,9 +47,14 @@ object GameEngine {
         table = affordableHandCount(table)
 
         val balanceAfterStake = table.balance - table.totalBet
-        val shuffled = standardDeck().shuffled(random)
-        val dealt = Deal(hand = shuffled.take(HAND_SIZE), deck = shuffled.drop(HAND_SIZE))
-        val boosted = Boost.apply(dealt, balanceAfterStake, table.bet, table.lossStreak, random)
+        val scripted = FirstHands.scriptedHand(table.lifetimeHands, table.variant)
+        val boosted = if (scripted != null) {
+            FirstHands.deal(scripted, random)
+        } else {
+            val shuffled = standardDeck().shuffled(random)
+            val dealt = Deal(hand = shuffled.take(HAND_SIZE), deck = shuffled.drop(HAND_SIZE))
+            Boost.apply(dealt, balanceAfterStake, table.bet, table.lossStreak, random)
+        }
 
         return Transition(
             table.copy(
@@ -104,7 +110,8 @@ object GameEngine {
     }
 
     fun selectBet(state: GameState, amount: Int): GameState {
-        if (state.phase != Phase.BET || amount <= 0) return state
+        if (state.phase != Phase.BET || amount !in state.stakeOptions) return state
+        if (!StakeLadder.affordable(amount, state.handCount, state.balance)) return state
         return state.copy(bet = amount, allInRevertBet = null)
     }
 
@@ -202,6 +209,7 @@ object GameEngine {
             bestBalance = maxOf(state.bestBalance, balance),
             today = state.today.afterDoubleUp(settled),
             allTime = state.allTime.afterDoubleUp(settled),
+            stakeOptions = StakeLadder.advance(state.stakeOptions, balance, state.bet),
         )
     }
 
@@ -226,18 +234,25 @@ object GameEngine {
 
     /** If the stack can't cover the bet, shrink the bet to fit, or refill the stack when even the smallest bet won't fit. */
     private fun affordableBet(state: GameState, events: MutableList<GameEvent>): GameState {
-        if (state.balance >= state.bet) return state
-        if (state.balance == 0L) return rebuy(state, events)
-
-        val fitted = maxOf(Rules.MIN_BET, (state.balance / Rules.MIN_BET).toInt() * Rules.MIN_BET)
-        val bet = if (fitted > state.balance) Rules.MIN_BET else fitted
-        val shrunk = state.copy(bet = bet)
-        return if (shrunk.balance < shrunk.bet) rebuy(shrunk, events) else shrunk
+        if (state.balance >= state.bet.toLong()) return state
+        val funded = if (state.balance == 0L) rebuy(state, events) else state
+        if (funded.balance >= funded.bet.toLong()) return funded
+        val shrunk = funded.copy(bet = largestAffordableBet(funded))
+        return if (shrunk.balance < shrunk.bet.toLong()) rebuy(shrunk, events) else shrunk
     }
+
+    /** The biggest chip on the row this stack can cover, or the minimum bet when none of them fit. */
+    private fun largestAffordableBet(state: GameState): Int =
+        state.stakeOptions.lastOrNull { StakeLadder.affordable(it, state.handCount, state.balance) }
+            ?: Rules.MIN_BET
 
     private fun rebuy(state: GameState, events: MutableList<GameEvent>): GameState {
         events += GameEvent.Rebuy(Rules.STARTING_BALANCE)
-        return state.copy(balance = Rules.STARTING_BALANCE)
+        val balance = Rules.STARTING_BALANCE
+        return state.copy(
+            balance = balance,
+            stakeOptions = StakeLadder.advance(state.stakeOptions, balance, state.bet),
+        )
     }
 
     /** Multi-hand quietly drops to what the stack can cover instead of forcing a rebuy. */
@@ -275,6 +290,7 @@ object GameEngine {
             balance = balance,
             bet = state.allInRevertBet ?: state.bet,
             allInRevertBet = null,
+            stakeOptions = StakeLadder.advance(state.stakeOptions, balance, state.allInRevertBet ?: state.bet),
             hand = finalHand,
             deck = deck,
             payoutBonus = if (won) 0 else state.payoutBonus + 1,

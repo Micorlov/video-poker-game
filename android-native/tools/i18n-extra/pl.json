@@ -103,5 +103,19 @@
  "toast_invalid_code": "Wpisz 6-znakowy kod",
  "toast_friends_offline": "Brak połączenia z serwerem — sprawdź internet",
  "toast_referral_welcome": "🎁 Znajomy wysłał ci %1$s żetonów — witaj przy stole!",
- "toast_invites_rewarded": "🎉 Znajomi dołączyli — zdobywasz %1$s żetonów!"
+ "toast_invites_rewarded": "🎉 Znajomi dołączyli — zdobywasz %1$s żetonów!",
+ "coach_hold": "Dotknij, aby zatrzymać",
+ "coach_release": "Dotknij, aby puścić",
+ "coach_press": "Teraz dotknij %1$s",
+ "coach_hints": "Dotknij lampki, aby dostać podpowiedzi",
+ "coach_all_in": "Raz dziennie, gdy karty są odkryte",
+ "coach_hold_voice": "Dotknij, aby zatrzymać: %1$s",
+ "coach_release_voice": "Dotknij, aby puścić: %1$s",
+ "toast_all_in_after_cards": "Raz dziennie — gdy karty są odkryte",
+ "prompt_notify_title": "Zezwolić na powiadomienia?",
+ "prompt_notify_body": "Dostaniesz przypomnienie, gdy dzienny bonus będzie gotowy.",
+ "prompt_notify_allow": "Zezwól na powiadomienia",
+ "prompt_rate_title": "Oceń nas na 5 gwiazdek",
+ "prompt_rate_body": "Podoba Ci się Wideo Poker? Oceń aplikację na 5 gwiazdek w Sklepie Play.",
+ "prompt_rate_action": "Oceń na 5 gwiazdek"
 }

@@ -107,5 +107,19 @@
  "toast_invalid_code": "أدخل رمزًا من 6 أحرف",
  "toast_friends_offline": "تعذّر الوصول إلى الخادم — تحقّق من اتصالك",
  "toast_referral_welcome": "🎁 أرسل لك صديقك %1$s رقاقة — أهلًا بك على الطاولة!",
- "toast_invites_rewarded": "🎉 انضم أصدقاء — ربحت %1$s رقاقة!"
+ "toast_invites_rewarded": "🎉 انضم أصدقاء — ربحت %1$s رقاقة!",
+ "coach_hold": "اضغط للاحتفاظ",
+ "coach_release": "اضغط للإفلات",
+ "coach_press": "الآن اضغط %1$s",
+ "coach_hints": "اضغط المصباح للحصول على تلميحات",
+ "coach_all_in": "مرة في اليوم، بعد ظهور الأوراق",
+ "coach_hold_voice": "اضغط للإبقاء: %1$s",
+ "coach_release_voice": "اضغط للتحرير: %1$s",
+ "toast_all_in_after_cards": "مرة في اليوم — بعد ظهور الأوراق",
+ "prompt_notify_title": "السماح بالإشعارات؟",
+ "prompt_notify_body": "سنذكّرك عندما تصبح المكافأة اليومية جاهزة.",
+ "prompt_notify_allow": "السماح بالإشعارات",
+ "prompt_rate_title": "قيّمونا بـ 5 نجوم",
+ "prompt_rate_body": "هل تستمتع بفيديو بوكر؟ قيّم التطبيق بـ 5 نجوم على متجر Play.",
+ "prompt_rate_action": "تقييم بـ 5 نجوم"
 }

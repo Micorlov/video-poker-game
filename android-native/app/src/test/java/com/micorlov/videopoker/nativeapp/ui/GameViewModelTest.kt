@@ -3,6 +3,8 @@ package com.micorlov.videopoker.nativeapp.ui
 import com.micorlov.videopoker.nativeapp.data.AppTheme
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.InMemoryStore
+import com.micorlov.videopoker.nativeapp.domain.EngagementPromptState
+import com.micorlov.videopoker.nativeapp.domain.FirstHands
 import com.micorlov.videopoker.nativeapp.domain.Phase
 import com.micorlov.videopoker.nativeapp.domain.RemoteFlags
 import com.micorlov.videopoker.nativeapp.domain.ReviewState
@@ -264,6 +266,9 @@ class GameViewModelTest {
         assertEquals(1, day1.state.value.allInRemaining)
 
         day1.onAllInRequested()
+        assertEquals(ToastMessage.AllInAfterCards, day1.state.value.toast?.message)
+        day1.onRevealed(day1.state.value.game.round)
+        day1.onAllInRequested()
         assertNotNull(day1.state.value.allInOffer)
         day1.onAllInConfirmed()
         assertEquals(0, day1.state.value.allInRemaining)
@@ -280,8 +285,66 @@ class GameViewModelTest {
     }
 
     @Test
+    fun `a guest who is out of all-ins can sign in for a second one today`() {
+        repository.saveGame(SavedGame(balance = 600))
+        val vm = GameViewModel(
+            repository, Random(5), todayKey = { "2026-10-12" }, googleSignInAvailable = true,
+        )
+        assertEquals(1, vm.state.value.allInRemaining)
+
+        vm.onRevealed(vm.state.value.game.round)
+        vm.onAllInRequested()
+        vm.onAllInConfirmed()
+        assertEquals(0, vm.state.value.allInRemaining)
+
+        vm.onAllInRequested()
+        assertTrue(vm.state.value.allInSignInPrompt)
+        assertNull(vm.state.value.allInOffer)
+
+        vm.onAllInSignInDismissed()
+        assertFalse(vm.state.value.allInSignInPrompt)
+        assertEquals(0, vm.state.value.allInRemaining)
+
+        vm.onAllInRequested()
+        vm.onGoogleSignedIn(true)
+        assertFalse(vm.state.value.allInSignInPrompt)
+        assertEquals(1, vm.state.value.allInRemaining)
+
+        // The first ALL IN already staked the stack, so the extra use waits until there are chips again.
+        vm.onAllInRequested()
+        assertEquals(1, vm.state.value.allInRemaining)
+        assertNull(vm.state.value.allInOffer)
+        vm.onAllInRequested()
+        assertNotNull(vm.state.value.allInOffer)
+        vm.onAllInConfirmed()
+        assertEquals(0, vm.state.value.allInRemaining)
+
+        vm.onAllInRequested()
+        assertFalse(vm.state.value.allInSignInPrompt)
+        assertEquals(ToastMessage.NoAllInLeft, vm.state.value.toast?.message)
+    }
+
+    @Test
+    fun `signing in does not raise an all-in limit that is already above two`() {
+        repository.saveGame(SavedGame(balance = 600))
+        val vm = GameViewModel(
+            repository, Random(5), todayKey = { "2026-10-12" },
+            googleSignInAvailable = true, signedInWithGoogle = true,
+        )
+        vm.onFlagsLoaded(RemoteFlags(allInDailyLimit = 3))
+        assertEquals(3, vm.state.value.allInRemaining)
+
+        val restarted = GameViewModel(
+            repository, Random(5), todayKey = { "2026-10-12" },
+            googleSignInAvailable = true, signedInWithGoogle = true,
+        )
+        assertEquals(3, restarted.state.value.allInRemaining)
+    }
+
+    @Test
     fun `dismissing the all in sheet spends nothing`() {
         val vm = viewModel(SavedGame(balance = 600))
+        vm.onRevealed(vm.state.value.game.round)
         vm.onAllInRequested()
         vm.onAllInDismissed()
         assertNull(vm.state.value.allInOffer)
@@ -323,7 +386,7 @@ class GameViewModelTest {
 
     @Test
     fun `a win completing three in a row earns the ask`() {
-        repository.saveGame(SavedGame(winStreak = 2))
+        repository.saveGame(SavedGame(winStreak = 2, lifetimeHands = FirstHands.ROUNDS))
         val vm = GameViewModel(repository, Random(WINNING_SEED), clock = { 5_000 }, reviewEnabled = true)
 
         assertTrue(vm.playUntilWin() > 0, "the seeded deal must produce a paying hand")
@@ -334,7 +397,7 @@ class GameViewModelTest {
 
     @Test
     fun `two wins in a row do not earn the ask`() {
-        repository.saveGame(SavedGame(winStreak = 1))
+        repository.saveGame(SavedGame(winStreak = 1, lifetimeHands = FirstHands.ROUNDS))
         val vm = GameViewModel(repository, Random(WINNING_SEED), clock = { 5_000 }, reviewEnabled = true)
 
         assertTrue(vm.playUntilWin() > 0)
@@ -400,6 +463,119 @@ class GameViewModelTest {
         assertTrue(vm.drainEffects().any { it == UiEffect.RequestNativeReview })
         assertTrue(repository.loadReview().shown)
         assertFalse(vm.state.value.reviewCardVisible)
+    }
+
+    private fun GameViewModel.finishHand() {
+        if (state.value.game.phase == Phase.BET) onMainAction()
+        onMainAction()
+        onRevealed(state.value.game.round)
+    }
+
+    @Test
+    fun `the notification prompt appears after ten turns and not before`() {
+        val vm = viewModel()
+        repeat(9) { vm.finishHand() }
+        assertFalse(vm.state.value.notificationPromptVisible)
+        assertEquals(9, vm.state.value.game.lifetimeHands)
+
+        vm.finishHand()
+        assertTrue(vm.state.value.notificationPromptVisible)
+        assertEquals(10, vm.state.value.game.lifetimeHands)
+        assertFalse(repository.loadEngagementPrompts().notificationAsked)
+    }
+
+    @Test
+    fun `dismissing the notification prompt records the ask`() {
+        val vm = viewModel(SavedGame(lifetimeHands = 9))
+        vm.finishHand()
+        assertTrue(vm.state.value.notificationPromptVisible)
+
+        vm.onNotificationPromptDismissed()
+        assertFalse(vm.state.value.notificationPromptVisible)
+        assertTrue(repository.loadEngagementPrompts().notificationAsked)
+
+        vm.finishHand()
+        assertFalse(vm.state.value.notificationPromptVisible)
+    }
+
+    @Test
+    fun `granting notification permission switches every category on`() {
+        val vm = viewModel(SavedGame(lifetimeHands = 9))
+        vm.finishHand()
+        vm.onNotificationPermissionResult(granted = true)
+
+        val settings = repository.loadSettings()
+        assertTrue(settings.notifySocial && settings.notifyLeaderboard && settings.dailyReminderEnabled && settings.notifyBestHand)
+        assertTrue(repository.loadEngagementPrompts().notificationAsked)
+        assertFalse(vm.state.value.notificationPromptVisible)
+    }
+
+    @Test
+    fun `denying notification permission spends the ask without turning categories on`() {
+        val vm = viewModel(SavedGame(lifetimeHands = 9))
+        vm.finishHand()
+        vm.onNotificationPermissionResult(granted = false)
+
+        val settings = repository.loadSettings()
+        assertFalse(settings.notifySocial || settings.notifyLeaderboard || settings.dailyReminderEnabled || settings.notifyBestHand)
+        assertTrue(repository.loadEngagementPrompts().notificationAsked)
+        assertFalse(vm.state.value.notificationPromptVisible)
+    }
+
+    @Test
+    fun `notifications already on skip the ten-turn dialog`() {
+        repository.saveSettings(repository.loadSettings().copy(dailyReminderEnabled = true))
+        val vm = viewModel(SavedGame(lifetimeHands = 9))
+        vm.finishHand()
+
+        assertFalse(vm.state.value.notificationPromptVisible)
+        assertTrue(repository.loadEngagementPrompts().notificationAsked)
+    }
+
+    @Test
+    fun `the rating prompt appears on the twentieth rewarded turn`() {
+        repository.saveEngagementPrompts(EngagementPromptState(rewardedTurns = 19, notificationAsked = true))
+        repository.saveGame(SavedGame(lifetimeHands = FirstHands.ROUNDS))
+        val vm = GameViewModel(repository, Random(WINNING_SEED))
+
+        assertTrue(vm.playUntilWin() > 0, "the seeded deal must produce a paying hand")
+        assertEquals(20, repository.loadEngagementPrompts().rewardedTurns)
+        assertTrue(vm.state.value.ratingPromptVisible)
+    }
+
+    @Test
+    fun `a losing hand does not count as a rewarded turn`() {
+        val seed = (0..80).first { candidate ->
+            val repo = GameRepository(InMemoryStore())
+            repo.saveGame(SavedGame(lifetimeHands = FirstHands.ROUNDS))
+            val probe = GameViewModel(repo, Random(candidate))
+            probe.finishHand()
+            probe.state.value.game.outcome?.isWin == false
+        }
+        repository.saveEngagementPrompts(EngagementPromptState(rewardedTurns = 19, notificationAsked = true))
+        repository.saveGame(SavedGame(lifetimeHands = FirstHands.ROUNDS))
+        val vm = GameViewModel(repository, Random(seed))
+        vm.finishHand()
+
+        assertEquals(false, vm.state.value.game.outcome?.isWin)
+        assertEquals(19, repository.loadEngagementPrompts().rewardedTurns)
+        assertFalse(vm.state.value.ratingPromptVisible)
+    }
+
+    @Test
+    fun `dismissing the rating prompt does not ask again`() {
+        repository.saveEngagementPrompts(EngagementPromptState(rewardedTurns = 19, notificationAsked = true))
+        repository.saveGame(SavedGame(lifetimeHands = FirstHands.ROUNDS))
+        val vm = GameViewModel(repository, Random(WINNING_SEED))
+        assertTrue(vm.playUntilWin() > 0)
+        assertTrue(vm.state.value.ratingPromptVisible)
+
+        vm.onRatingPromptDismissed()
+        assertFalse(vm.state.value.ratingPromptVisible)
+        assertTrue(repository.loadEngagementPrompts().ratingAsked)
+
+        vm.finishHand()
+        assertFalse(vm.state.value.ratingPromptVisible)
     }
 
     @Test

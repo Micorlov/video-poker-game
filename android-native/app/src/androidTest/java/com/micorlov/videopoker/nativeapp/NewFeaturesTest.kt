@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -12,6 +15,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.swipe
 import androidx.test.core.app.ApplicationProvider
+import com.micorlov.videopoker.nativeapp.R
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.SharedPreferencesStore
 import com.micorlov.videopoker.nativeapp.domain.SavedGame
@@ -62,7 +66,8 @@ class NewFeaturesTest {
 
     @Test
     fun allInNeedsASlideAndCanBeUsedOncePerDay() {
-        launch(SavedGame(balance = 500), today = "2026-10-12")
+        launch(SavedGame(balance = 500, lifetimeHands = 3), today = "2026-10-12")
+        waitUntilCardsAreFaceUp()
 
         compose.onNodeWithTag("bet-allin").performScrollTo().performClick()
         compose.onNodeWithTag("allin-sheet").assertIsDisplayed()
@@ -80,7 +85,8 @@ class NewFeaturesTest {
 
     @Test
     fun notNowClosesTheAllInSheetWithoutSpendingIt() {
-        launch(SavedGame(balance = 500), today = "2026-10-12")
+        launch(SavedGame(balance = 500, lifetimeHands = 3), today = "2026-10-12")
+        waitUntilCardsAreFaceUp()
 
         compose.onNodeWithTag("bet-allin").performScrollTo().performClick()
         compose.onNodeWithTag("allin-dismiss").performClick()
@@ -105,5 +111,15 @@ class NewFeaturesTest {
         compose.onNodeWithTag("toggle-voice").performScrollTo().assertIsDisplayed()
         compose.onNodeWithTag("rate-game").performScrollTo().assertIsDisplayed()
         compose.onNodeWithTag("more-games").performScrollTo().assertIsDisplayed()
+    }
+
+    private fun waitUntilCardsAreFaceUp() {
+        val faceDown = ApplicationProvider.getApplicationContext<Context>().getString(R.string.card_face_down)
+        compose.waitUntil(timeoutMillis = 5_000) {
+            compose.onAllNodesWithTag("card-0").fetchSemanticsNodes().any { node ->
+                val description = node.config.getOrNull(SemanticsProperties.ContentDescription).orEmpty().joinToString()
+                description.isNotEmpty() && faceDown !in description
+            }
+        }
     }
 }

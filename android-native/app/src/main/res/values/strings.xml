@@ -14,8 +14,20 @@
     <string name="play_total_bet">Total bet</string>
     <string name="play_deal">Deal</string>
     <string name="play_draw">Draw</string>
+    <string name="play_deal_help">New hand. Takes your bet.</string>
+    <string name="play_draw_help">Replaces cards you didn\'t hold.</string>
     <string name="play_hint_hold">Tap the cards you want to keep, then draw.</string>
     <string name="play_hint_bet">Pick your bet, then deal.</string>
+    <string name="play_bet_open">Tap a chip to change your bet</string>
+    <string name="play_bet_locked">Bet locked until this hand is finished</string>
+    <string name="play_bet_locked_all_in">Bet locked — All in is available</string>
+    <string name="coach_hold">Tap to keep</string>
+    <string name="coach_release">Tap to let go</string>
+    <string name="coach_press">Now tap %1$s</string>
+    <string name="coach_hints">Tap the lamp to turn hints on</string>
+    <string name="coach_all_in">All in once a day, after your cards are face up</string>
+    <string name="coach_hold_voice">Tap to keep: %1$s</string>
+    <string name="coach_release_voice">Tap to let go: %1$s</string>
     <string name="play_held">HELD</string>
     <string name="play_nothing">Nothing — %1$s</string>
     <string name="play_win_streak">Win streak</string>
@@ -179,6 +191,7 @@
     <string name="win_royal_flush">Royal Flush</string>
     <string name="toast_all_in_good_luck">🔥 ALL IN — good luck!</string>
     <string name="toast_no_all_in_left">⛔ No ALL INs left — back tomorrow!</string>
+    <string name="toast_all_in_after_cards">Once a day, while this hand\'s cards are face up</string>
     <string name="play_all_in">ALL IN</string>
     <string name="play_all_in_left">%1$d left</string>
     <string name="play_this_hand">this hand</string>
@@ -189,6 +202,9 @@
     <string name="sheet_potential">Potential on Full House</string>
     <string name="sheet_slide_to_confirm">Slide to confirm</string>
     <string name="sheet_not_now">Not now</string>
+    <string name="sheet_all_in_sign_in_eyebrow">Back tomorrow — or sign in</string>
+    <string name="sheet_all_in_sign_in_title">Out of All-Ins today</string>
+    <string name="sheet_all_in_sign_in_body">Sign in with Google and you\'ll get 2 per day instead of 1.</string>
     <string name="stats_best_hand">Best hand</string>
     <string name="stats_no_winning_hands">No winning hands yet</string>
     <string name="stats_best_hand_payout">+%1$s credits · %2$d×</string>
@@ -316,4 +332,10 @@
     <string name="toast_account_deleted">Account deleted</string>
     <string name="toast_account_delete_failed">Couldn\'t delete the account — check your connection and try again</string>
     <string name="settings_privacy_policy">Privacy policy</string>
+    <string name="prompt_notify_title">Allow notifications?</string>
+    <string name="prompt_notify_body">Get a reminder when your daily bonus is ready.</string>
+    <string name="prompt_notify_allow">Allow notifications</string>
+    <string name="prompt_rate_title">Rate us 5 stars</string>
+    <string name="prompt_rate_body">Enjoying Video Poker? Please rate the app 5 stars on the Play Store.</string>
+    <string name="prompt_rate_action">Rate 5 stars</string>
 </resources>
