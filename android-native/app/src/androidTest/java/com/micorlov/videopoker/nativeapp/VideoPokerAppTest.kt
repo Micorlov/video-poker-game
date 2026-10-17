@@ -61,9 +61,14 @@ class VideoPokerAppTest {
         compose.onNodeWithTag("card-3").performClick()
         compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.play_draw), substring = true, ignoreCase = true)
 
+        val deal = context.getString(R.string.play_deal)
         compose.onNodeWithTag("main-button").performClick()
-        compose.waitForIdle()
-        compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.play_deal), substring = true, ignoreCase = true)
+        compose.waitUntil(timeoutMillis = 5_000) {
+            compose.onAllNodesWithTag("coach-label").fetchSemanticsNodes().any { node ->
+                node.config.any { (_, value) -> value.toString().contains(deal, ignoreCase = true) }
+            }
+        }
+        compose.onNodeWithTag("coach-label").assertTextContains(deal, substring = true, ignoreCase = true)
     }
 
     @Test

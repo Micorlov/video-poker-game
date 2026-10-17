@@ -106,7 +106,7 @@ fun PlayScreen(
         held = game.held,
         cardsFaceUp = ui.revealed,
     )
-    val hole = coachHole(placement, coach, placement.cardsTick)
+    val hole = placement.cardsTick.let { coachHole(placement, coach) }
     val localDensity = LocalDensity.current
     LaunchedEffect(coach, hole) {
         val rect = hole ?: return@LaunchedEffect
@@ -256,8 +256,8 @@ private class TablePlacement {
     }
 }
 
-private fun coachHole(placement: TablePlacement, coach: CoachTarget?, cardTick: Int): Rect? {
-    if (coach == null || cardTick < 0) return null
+private fun coachHole(placement: TablePlacement, coach: CoachTarget?): Rect? {
+    if (coach == null) return null
     val root = placement.root ?: return null
     val target = when (coach) {
         is CoachTarget.Hold -> placement.cards.getOrNull(coach.index)

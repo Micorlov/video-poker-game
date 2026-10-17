@@ -4,8 +4,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -68,11 +69,11 @@ fun CoachOverlay(hole: Rect, label: String, pointsUp: Boolean, modifier: Modifie
     BoxWithConstraints(modifier.fillMaxSize().testTag("coach")) {
         val widthPx = with(density) { maxWidth.toPx() }
         val heightPx = with(density) { maxHeight.toPx() }
-        Spotlight(target, corner)
-        ScrimBlocker(0f, 0f, widthPx, target.top)
-        ScrimBlocker(0f, target.bottom, widthPx, heightPx - target.bottom)
-        ScrimBlocker(0f, target.top, target.left, target.height)
-        ScrimBlocker(target.right, target.top, widthPx - target.right, target.height)
+        Spotlight(spot, corner)
+        ScrimBlocker(0f, 0f, widthPx, spot.top)
+        ScrimBlocker(0f, spot.bottom, widthPx, heightPx - spot.bottom)
+        ScrimBlocker(0f, spot.top, spot.left, spot.height)
+        ScrimBlocker(spot.right, spot.top, widthPx - spot.right, spot.height)
         FloatingHand(spot, label, pointsUp)
     }
 }
@@ -106,11 +107,18 @@ private fun ScrimBlocker(left: Float, top: Float, width: Float, height: Float) {
             .offset { IntOffset(left.roundToInt(), top.roundToInt()) }
             .size(with(density) { width.toDp() }, with(density) { height.toDp() })
             .clearAndSetSemantics { hideFromAccessibility() }
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = {},
-            ),
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    down.consume()
+                    var pressed = true
+                    while (pressed) {
+                        val event = awaitPointerEvent()
+                        event.changes.forEach { it.consume() }
+                        pressed = event.changes.any { it.pressed }
+                    }
+                }
+            },
     )
 }
 
