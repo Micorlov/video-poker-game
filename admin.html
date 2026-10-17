@@ -244,8 +244,8 @@
                     <div class="stat-card"><div class="label">Active Today</div><div class="value" id="s-today">—</div></div>
                     <div class="stat-card"><div class="label">New Users (7d)</div><div class="value" id="s-new-7d">—</div><div class="sub" id="s-new-today">—</div></div>
                     <div class="stat-card"><div class="label">New Users (30d)</div><div class="value" id="s-new-30d">—</div><div class="sub" id="s-new-undated">—</div></div>
-                    <div class="stat-card"><div class="label" id="live-stat-label">Current Hour Players</div><div class="value" id="s-hour-players">—</div><div class="sub"><span class="live-dot"></span>Live</div></div>
-                    <div class="stat-card"><div class="label" id="rebuy-stat-label">Total Rebuys (this hour)</div><div class="value" id="s-hour-rebuys">—</div></div>
+                    <div class="stat-card"><div class="label" id="live-stat-label">Current Day Players</div><div class="value" id="s-hour-players">—</div><div class="sub"><span class="live-dot"></span>Live</div></div>
+                    <div class="stat-card"><div class="label" id="rebuy-stat-label">Total Rebuys (today)</div><div class="value" id="s-hour-rebuys">—</div></div>
                     <div class="stat-card"><div class="label">Active 7d (WAU)</div><div class="value" id="s-wau">—</div></div>
                     <div class="stat-card"><div class="label">Active 30d (MAU)</div><div class="value" id="s-mau">—</div></div>
                     <div class="stat-card"><div class="label">Churned (&gt;7d)</div><div class="value" id="s-churned" style="cursor:pointer" onclick="switchTabById('users','churned')" title="Click to filter churned users">—</div></div>
@@ -256,11 +256,11 @@
 
                 <div class="panel">
                     <div class="panel-header" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <h2 style="display:flex; align-items:center; gap:8px; margin:0;"><span class="live-dot"></span> <span id="live-title">Live — Current Hour (UTC)</span></h2>
+                        <h2 style="display:flex; align-items:center; gap:8px; margin:0;"><span class="live-dot"></span> <span id="live-title">Live — Current Day</span></h2>
                         <div style="display:flex; align-items:center; gap:10px;">
                             <select id="admin-overview-select" onchange="setAdminOverviewTab(this.value)" style="padding:6px 12px; font-size:14px; border-radius:6px; background:#1b3224; border:1px solid #ffd700; color:#ffd700; cursor:pointer; font-weight:bold;">
                                 <option value="hourly">Hourly Scores (UTC)</option>
-                                <option value="daily">Daily Players</option>
+                                <option value="daily" selected>Daily Players</option>
                             </select>
                             <button onclick="loadCurrentHour()">↻ Refresh</button>
                         </div>
@@ -350,7 +350,7 @@
                     <button onclick="navHour(1)">›</button>
                     <select id="admin-comp-select" onchange="setAdminCompTab(this.value)" style="padding:6px 12px; font-size:14px; border-radius:6px; background:#1b3224; border:1px solid #ffd700; color:#ffd700; cursor:pointer; font-weight:bold; margin-left: auto;">
                         <option value="hourly">Hourly History (UTC)</option>
-                        <option value="daily">Daily History</option>
+                        <option value="daily" selected>Daily History</option>
                     </select>
                 </div>
                 <div class="panel">
@@ -633,8 +633,8 @@
     var usersSortField = 'lastLogin';
     var usersSortDir = -1;
     var compHourOffset = 0;
-    var adminOverviewTab = 'hourly';
-    var adminCompTab = 'hourly';
+    var adminOverviewTab = 'daily';
+    var adminCompTab = 'daily';
 
     var DEFAULT_FEATURES = {
         facebookSignIn: true,
