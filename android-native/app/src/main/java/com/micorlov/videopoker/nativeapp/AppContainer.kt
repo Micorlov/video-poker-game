@@ -7,7 +7,11 @@ import com.micorlov.videopoker.nativeapp.data.DailyProfitStore
 import com.micorlov.videopoker.nativeapp.data.DailyProfitTracker
 import com.micorlov.videopoker.nativeapp.data.EventLogger
 import com.micorlov.videopoker.nativeapp.data.FirebaseEventLogger
+import com.micorlov.videopoker.nativeapp.data.FirestoreInstallReporter
 import com.micorlov.videopoker.nativeapp.data.GameRepository
+import com.micorlov.videopoker.nativeapp.data.InstallDevice
+import com.micorlov.videopoker.nativeapp.data.InstallTracker
+import com.micorlov.videopoker.nativeapp.data.PlayTimeLedger
 import com.micorlov.videopoker.nativeapp.data.SharedPreferencesStore
 import com.micorlov.videopoker.nativeapp.data.social.AccountDeletion
 import com.micorlov.videopoker.nativeapp.data.social.AuthGateway
@@ -47,6 +51,13 @@ class AppContainer(context: Context) {
     val events: EventLogger = if (firebaseReady) FirebaseEventLogger(appContext) else EventLogger.NONE
 
     /**
+     * Guest launches never get a user document. This writes the same
+     * installs/{id}_open row the web build writes, which is what the admin
+     * panel counts as a guest for the day. Called from the init block below.
+     */
+    private val installReporter = FirestoreInstallReporter(InstallTracker(store), PlayTimeLedger(store))
+
+    /**
      * The earlier Capacitor build kept its data in the WebView's directory, which a native
      * install never creates. Native 3.0 did not migrate that data, so this is the only trace
      * that the player was here before.
@@ -55,7 +66,20 @@ class AppContainer(context: Context) {
 
     init {
         events.log(AnalyticsEvents.APP_OPEN, mapOf("app_version" to versionName()))
+        installReporter.report(existing = upgradedFromLegacy, device = installDevice(versionName()))
     }
+
+    fun reportPlayTime(elapsedMs: Long) = installReporter.reportPlayTime(elapsedMs)
+
+    private fun installDevice(version: String) = InstallDevice(
+        version = version,
+        platform = "android",
+        androidSdk = android.os.Build.VERSION.SDK_INT,
+        chrome = 0,
+        lang = java.util.Locale.getDefault().toLanguageTag(),
+        country = "",
+        source = "",
+    )
 
     private fun versionName(): String =
         runCatching { appContext.packageManager.getPackageInfo(appContext.packageName, 0).versionName }.getOrNull() ?: "unknown"

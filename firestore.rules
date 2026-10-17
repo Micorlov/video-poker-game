@@ -383,11 +383,14 @@ service cloud.firestore {
     // absolute count, so a stale resend is refused rather than double-counted),
     // `lastOpenAt` is the server's clock, and a country or source that was
     // unknown ('') at the open stage may be filled in once — never changed.
-    // Nothing else on the doc can move.
+    // A guest has no user document, so played time is a separate update of
+    // `playMs` on this same open doc: it only grows, and one write adds at
+    // most 12 hours. Called by FirestoreInstallReporter.flushPlay.
     match /installs/{docId} {
       allow create: if validInstallStage(request.resource.data);
       allow update: if docId.matches('^[A-Za-z0-9]{20}_open$')
-                    && validInstallLaunch(resource.data, request.resource.data);
+                    && (validInstallLaunch(resource.data, request.resource.data)
+                        || validInstallPlay(resource.data, request.resource.data));
       allow read, delete: if request.auth != null
                           && request.auth.token.email == 'micorlov@gmail.com';
 
@@ -399,6 +402,18 @@ service cloud.firestore {
                 || (before.country == '' && after.country is string && after.country.size() <= 8))
             && (after.source == before.source
                 || (before.source == '' && after.source is string && after.source.size() <= 40));
+      }
+
+      function validInstallPlay(before, after) {
+        return after.diff(before).affectedKeys().hasOnly(['playMs'])
+            && after.playMs is int
+            && after.playMs > playMsBefore(before)
+            && after.playMs - playMsBefore(before) <= 43200000
+            && after.playMs <= 315360000000;
+      }
+
+      function playMsBefore(d) {
+        return d.get('playMs', 0);
       }
 
       function validInstallStage(d) {

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import java.time.LocalDate
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -33,13 +34,16 @@ class MainActivity : ComponentActivity() {
     /** Bumped when an invite link arrives while the app is open, so the Friends tab comes up. */
     private val openFriendsSignal = mutableIntStateOf(0)
 
+    /** Elapsed-realtime when the activity last came to the foreground. 0 while stopped. */
+    private var foregroundSince = 0L
+
     private val viewModel: GameViewModel by viewModels {
         factory {
             GameViewModel(
                 container.gameRepository,
                 todayKey = { LocalDate.now().toString() },
                 reviewEnabled = true,
-                onboardingEnabled = true,
+                onboardingEnabled = false,
                 flagFetcher = RemoteFlagsFetcher::fetch,
                 analysisMode = AnalysisMode.BACKGROUND,
                 onNetResult = container.dailyProfit::record,
@@ -83,6 +87,7 @@ class MainActivity : ComponentActivity() {
     /** Rewards that arrived while no screen was listening reach the stack when the app comes back. */
     override fun onStart() {
         super.onStart()
+        if (foregroundSince == 0L) foregroundSince = SystemClock.elapsedRealtime()
         viewModel.applyPendingCredits()
     }
 
@@ -90,6 +95,9 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         super.onStop()
         container.profitSync.flush()
+        val started = foregroundSince
+        foregroundSince = 0L
+        if (started != 0L) container.reportPlayTime(SystemClock.elapsedRealtime() - started)
     }
 
     private fun onLinkParked(link: DeepLink) {

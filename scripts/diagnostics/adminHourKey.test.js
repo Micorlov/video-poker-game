@@ -94,11 +94,12 @@ test('the daily board includes guests and signed-in players who have no score', 
         [{ uid: 'u1', displayName: 'Ada', installId: 'inst-ada', loginMs: noon, lastMs: noon }],
         [
             { installId: 'inst-ada', firstMs: noon, lastMs: noon },
-            { installId: 'guest99', firstMs: noon, lastMs: noon }
+            { installId: 'guest99', firstMs: noon, lastMs: noon, playMs: 125000 }
         ],
         day
     );
     assert.deepStrictEqual(rows.map((r) => r.displayName).sort(), ['Ada', 'Guest guest9'].sort());
+    assert.strictEqual(rows.find((r) => r.displayName === 'Guest guest9').playMs, 125000);
 });
 
 test('a scored player stays ahead of someone who only opened the app', () => {

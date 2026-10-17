@@ -1010,7 +1010,7 @@
                 photoURL: '',
                 score: null,
                 hands: null,
-                playMs: 0,
+                playMs: activeInstalls[id].playMs || 0,
                 rebuys: 0,
                 bestHand: '—',
                 hasScore: false
@@ -1062,7 +1062,12 @@
                 var d = doc.data();
                 if (d.stage !== 'open' || !d.installId) return;
                 var firstMs = tsMillis(d.at);
-                opens.push({ installId: d.installId, firstMs: firstMs, lastMs: tsMillis(d.lastOpenAt) || firstMs });
+                opens.push({
+                    installId: d.installId,
+                    firstMs: firstMs,
+                    lastMs: tsMillis(d.lastOpenAt) || firstMs,
+                    playMs: d.playMs || 0
+                });
             });
             return mergeDailyRoster(scores, users, opens, dayKey);
         });

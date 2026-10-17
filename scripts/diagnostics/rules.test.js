@@ -121,6 +121,23 @@ test('install funnel and error report rules', async (t) => {
         assert.ok(!await launch(doc, { opens: I(2), country: S('IL') }));
     });
 
+    async function play(docId, playMs) {
+        return commit({
+            update: { name: `${DOCS}/installs/${docId}`, fields: { playMs: I(playMs) } },
+            updateMask: { fieldPaths: ['playMs'] },
+            currentDocument: { exists: true }
+        });
+    }
+
+    await t.test('played time only grows, by at most twelve hours', async () => {
+        const doc = await opened();
+        assert.ok(await play(doc, 60000));
+        assert.ok(await play(doc, 120000));
+        assert.ok(!await play(doc, 120000), 'the same total is not a new session');
+        assert.ok(!await play(doc, 60000));
+        assert.ok(!await play(doc, 120000 + 43200001));
+    });
+
     await t.test('nothing else on the doc can move', async () => {
         const doc = await opened();
         assert.ok(!await launch(doc, { opens: I(2), version: S('9.9') }));
