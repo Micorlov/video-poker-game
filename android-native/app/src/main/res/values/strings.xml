@@ -199,6 +199,9 @@
     <string name="sheet_potential">Potential on Full House</string>
     <string name="sheet_slide_to_confirm">Slide to confirm</string>
     <string name="sheet_not_now">Not now</string>
+    <string name="sheet_all_in_sign_in_eyebrow">Back tomorrow — or sign in</string>
+    <string name="sheet_all_in_sign_in_title">Out of All-Ins today</string>
+    <string name="sheet_all_in_sign_in_body">Sign in with Google and you\'ll get 2 per day instead of 1.</string>
     <string name="stats_best_hand">Best hand</string>
     <string name="stats_no_winning_hands">No winning hands yet</string>
     <string name="stats_best_hand_payout">+%1$s credits · %2$d×</string>

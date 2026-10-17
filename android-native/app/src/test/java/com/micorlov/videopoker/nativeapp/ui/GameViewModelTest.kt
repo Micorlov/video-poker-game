@@ -284,6 +284,63 @@ class GameViewModelTest {
     }
 
     @Test
+    fun `a guest who is out of all-ins can sign in for a second one today`() {
+        repository.saveGame(SavedGame(balance = 600))
+        val vm = GameViewModel(
+            repository, Random(5), todayKey = { "2026-10-12" }, googleSignInAvailable = true,
+        )
+        assertEquals(1, vm.state.value.allInRemaining)
+
+        vm.onRevealed(vm.state.value.game.round)
+        vm.onAllInRequested()
+        vm.onAllInConfirmed()
+        assertEquals(0, vm.state.value.allInRemaining)
+
+        vm.onAllInRequested()
+        assertTrue(vm.state.value.allInSignInPrompt)
+        assertNull(vm.state.value.allInOffer)
+
+        vm.onAllInSignInDismissed()
+        assertFalse(vm.state.value.allInSignInPrompt)
+        assertEquals(0, vm.state.value.allInRemaining)
+
+        vm.onAllInRequested()
+        vm.onGoogleSignedIn(true)
+        assertFalse(vm.state.value.allInSignInPrompt)
+        assertEquals(1, vm.state.value.allInRemaining)
+
+        // The first ALL IN already staked the stack, so the extra use waits until there are chips again.
+        vm.onAllInRequested()
+        assertEquals(1, vm.state.value.allInRemaining)
+        assertNull(vm.state.value.allInOffer)
+        vm.onAllInRequested()
+        assertNotNull(vm.state.value.allInOffer)
+        vm.onAllInConfirmed()
+        assertEquals(0, vm.state.value.allInRemaining)
+
+        vm.onAllInRequested()
+        assertFalse(vm.state.value.allInSignInPrompt)
+        assertEquals(ToastMessage.NoAllInLeft, vm.state.value.toast?.message)
+    }
+
+    @Test
+    fun `signing in does not raise an all-in limit that is already above two`() {
+        repository.saveGame(SavedGame(balance = 600))
+        val vm = GameViewModel(
+            repository, Random(5), todayKey = { "2026-10-12" },
+            googleSignInAvailable = true, signedInWithGoogle = true,
+        )
+        vm.onFlagsLoaded(RemoteFlags(allInDailyLimit = 3))
+        assertEquals(3, vm.state.value.allInRemaining)
+
+        val restarted = GameViewModel(
+            repository, Random(5), todayKey = { "2026-10-12" },
+            googleSignInAvailable = true, signedInWithGoogle = true,
+        )
+        assertEquals(3, restarted.state.value.allInRemaining)
+    }
+
+    @Test
     fun `dismissing the all in sheet spends nothing`() {
         val vm = viewModel(SavedGame(balance = 600))
         vm.onRevealed(vm.state.value.game.round)

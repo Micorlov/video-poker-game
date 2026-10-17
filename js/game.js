@@ -203,21 +203,49 @@ function setBet(amount) {
 
 // --- All In: limited daily uses ---
 const ALLIN_DAILY_LIMIT_DEFAULT = 1;
+// A Google sign-in raises that guest allowance to 2. A higher remote limit is left alone.
+const ALLIN_SIGNED_IN_DAILY_LIMIT = 2;
 // Onboarding promises "invite a friend to unlock another" — this delivers it:
 // each referred friend adds one daily All-In, capped to protect the economy.
 const ALLIN_REFERRAL_BONUS_CAP = 2;
 let allInUsesToday = 0;
 
+function allInGuestBase() {
+    const configured = window.egFeatures && window.egFeatures.allInDailyLimit;
+    return (typeof configured === 'number' && configured > 0) ? configured : ALLIN_DAILY_LIMIT_DEFAULT;
+}
+
+function allInReferralBonus() {
+    try {
+        const invited = window.getReferralInvitedCount ? getReferralInvitedCount() : 0;
+        return Math.min(invited, ALLIN_REFERRAL_BONUS_CAP);
+    } catch (e) {
+        return 0;
+    }
+}
+
 function getAllInDailyLimit() {
     const configured = window.egFeatures && window.egFeatures.allInDailyLimit;
     try {
-        const base = (typeof configured === 'number' && configured > 0) ? configured : ALLIN_DAILY_LIMIT_DEFAULT;
-        const invited = window.getReferralInvitedCount ? getReferralInvitedCount() : 0;
-        return base + Math.min(invited, ALLIN_REFERRAL_BONUS_CAP);
+        const guest = allInGuestBase();
+        const base = window.egUser ? Math.max(guest, ALLIN_SIGNED_IN_DAILY_LIMIT) : guest;
+        return base + allInReferralBonus();
     } catch (e) {
         // The very first applyFeatureFlags() (js/firebase.js) runs before this
         // script's top-level consts initialize — fall back to the config value.
         return (typeof configured === 'number' && configured > 0) ? configured : 1;
+    }
+}
+
+// A guest who has spent today's one can still earn the second by signing in.
+// Wait until auth has settled: before that, a returning Google user looks signed out.
+function googleSignInGrantsAllIn() {
+    if (window.egUser || !window._authResolved) return false;
+    try {
+        const boosted = Math.max(allInGuestBase(), ALLIN_SIGNED_IN_DAILY_LIMIT) + allInReferralBonus();
+        return boosted > allInUsesToday;
+    } catch (e) {
+        return false;
     }
 }
 
@@ -278,9 +306,10 @@ function openAllInSheet() {
     // reproduce the deal-cheap/raise-later exploit that setBet() must block.
     if (gameState !== 'bet' && gameState !== 'hold') return;
     if (getAllInRemaining() <= 0) {
-        // The scarcity moment is the invite hook (Ludo King model: invite
-        // because you want something) — offer the unlock, not just a wall.
-        openSheet('allin-unlock-sheet');
+        // A guest who signs in gets 2 a day instead of 1. Anyone already at the
+        // higher allowance gets the invite hook instead (each friend = +1/day).
+        if (googleSignInGrantsAllIn()) openSheet('allin-signin-sheet');
+        else openSheet('allin-unlock-sheet');
         return;
     }
     if (balance <= 0) {
@@ -309,6 +338,11 @@ function openAllInSheet() {
     }
     resetAllInSlider();
     openSheet('allin-sheet');
+}
+
+function allInSignInWithGoogle() {
+    if (window.logVpEvent) logVpEvent('allin_signin_prompt_clicked');
+    if (window.signInWithGoogle) signInWithGoogle();
 }
 
 function closeAllInSheet() {

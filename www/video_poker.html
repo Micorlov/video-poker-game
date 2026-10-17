@@ -5952,6 +5952,23 @@ body:not(.ob-step-welcome) .ob-lang-chip {
         </div>
     </div>
 
+    <!-- All-In sign-in: a guest at 0 left can get 2 a day instead of 1. -->
+    <div class="sheet-backdrop hidden" id="allin-signin-sheet" onclick="if(event.target===this)closeSheet('allin-signin-sheet')">
+        <div class="sheet">
+            <div class="sheet-header">
+                <span class="sheet-mark">♠</span>
+                <span class="sheet-heading">
+                    <span class="sheet-title" data-i18n="sheet.allInSignInTitle">Out of All-Ins today</span>
+                    <span class="sheet-eyebrow" data-i18n="sheet.allInSignInEyebrow">Back tomorrow — or sign in</span>
+                </span>
+                <button class="sheet-close" onclick="closeSheet('allin-signin-sheet')">✕</button>
+            </div>
+            <div class="sheet-sub" data-i18n="sheet.allInSignInBody">Sign in with Google and you'll get 2 per day instead of 1.</div>
+            <button class="btn-primary allin-unlock-invite" onclick="allInSignInWithGoogle()" data-i18n="settings.signInGoogle">Sign in with Google</button>
+            <button class="sheet-dismiss" onclick="closeSheet('allin-signin-sheet')" data-i18n="modal.notNow">Not now</button>
+        </div>
+    </div>
+
     <!-- All In confirmation bottom sheet -->
     <div class="sheet-backdrop hidden" id="allin-sheet" onclick="if(event.target===this)closeAllInSheet()">
         <div class="sheet">
@@ -6762,6 +6779,9 @@ vpRegisterLang('en', {
     'sheet.allInOutEyebrow': 'Back tomorrow — or…',
     'sheet.allInOutSubHtml': 'Every friend who joins through your invite unlocks <strong>+1 All-In every day</strong>.',
     'sheet.allInInviteBtn': 'Invite a friend',
+    'sheet.allInSignInTitle': 'Out of All-Ins today',
+    'sheet.allInSignInEyebrow': 'Back tomorrow — or sign in',
+    'sheet.allInSignInBody': 'Sign in with Google and you\'ll get 2 per day instead of 1.',
     'sheet.goAllIn': 'Go All In',
     'sheet.allInEyebrow': 'Limited daily uses',
     'sheet.allInSub': 'This bets your entire balance — {{amount}} credits — on {{target}}.',
@@ -14742,6 +14762,10 @@ if (auth) {
         // "signed out" and pop the sign-in modal. See handleJoinDeepLink().
         window._authResolved = true;
         window.egUser = user || null;
+        // Signing in raises the daily All-In allowance (2 instead of 1) and
+        // retires the prompt that offered it. js/game.js owns both.
+        if (user && window.closeSheet) closeSheet('allin-signin-sheet');
+        if (window.updateAllInUI) updateAllInUI();
         if (window.isNativeApp && isNativeApp() && window.applyDefaultLeaderboardTab) applyDefaultLeaderboardTab();
         if (window.closeSignInModal) closeSignInModal();
         if (user && window.closeSigninPromptModal) closeSigninPromptModal();
@@ -18708,21 +18732,49 @@ function setBet(amount) {
 
 // --- All In: limited daily uses ---
 const ALLIN_DAILY_LIMIT_DEFAULT = 1;
+// A Google sign-in raises that guest allowance to 2. A higher remote limit is left alone.
+const ALLIN_SIGNED_IN_DAILY_LIMIT = 2;
 // Onboarding promises "invite a friend to unlock another" — this delivers it:
 // each referred friend adds one daily All-In, capped to protect the economy.
 const ALLIN_REFERRAL_BONUS_CAP = 2;
 let allInUsesToday = 0;
 
+function allInGuestBase() {
+    const configured = window.egFeatures && window.egFeatures.allInDailyLimit;
+    return (typeof configured === 'number' && configured > 0) ? configured : ALLIN_DAILY_LIMIT_DEFAULT;
+}
+
+function allInReferralBonus() {
+    try {
+        const invited = window.getReferralInvitedCount ? getReferralInvitedCount() : 0;
+        return Math.min(invited, ALLIN_REFERRAL_BONUS_CAP);
+    } catch (e) {
+        return 0;
+    }
+}
+
 function getAllInDailyLimit() {
     const configured = window.egFeatures && window.egFeatures.allInDailyLimit;
     try {
-        const base = (typeof configured === 'number' && configured > 0) ? configured : ALLIN_DAILY_LIMIT_DEFAULT;
-        const invited = window.getReferralInvitedCount ? getReferralInvitedCount() : 0;
-        return base + Math.min(invited, ALLIN_REFERRAL_BONUS_CAP);
+        const guest = allInGuestBase();
+        const base = window.egUser ? Math.max(guest, ALLIN_SIGNED_IN_DAILY_LIMIT) : guest;
+        return base + allInReferralBonus();
     } catch (e) {
         // The very first applyFeatureFlags() (js/firebase.js) runs before this
         // script's top-level consts initialize — fall back to the config value.
         return (typeof configured === 'number' && configured > 0) ? configured : 1;
+    }
+}
+
+// A guest who has spent today's one can still earn the second by signing in.
+// Wait until auth has settled: before that, a returning Google user looks signed out.
+function googleSignInGrantsAllIn() {
+    if (window.egUser || !window._authResolved) return false;
+    try {
+        const boosted = Math.max(allInGuestBase(), ALLIN_SIGNED_IN_DAILY_LIMIT) + allInReferralBonus();
+        return boosted > allInUsesToday;
+    } catch (e) {
+        return false;
     }
 }
 
@@ -18783,9 +18835,10 @@ function openAllInSheet() {
     // reproduce the deal-cheap/raise-later exploit that setBet() must block.
     if (gameState !== 'bet' && gameState !== 'hold') return;
     if (getAllInRemaining() <= 0) {
-        // The scarcity moment is the invite hook (Ludo King model: invite
-        // because you want something) — offer the unlock, not just a wall.
-        openSheet('allin-unlock-sheet');
+        // A guest who signs in gets 2 a day instead of 1. Anyone already at the
+        // higher allowance gets the invite hook instead (each friend = +1/day).
+        if (googleSignInGrantsAllIn()) openSheet('allin-signin-sheet');
+        else openSheet('allin-unlock-sheet');
         return;
     }
     if (balance <= 0) {
@@ -18814,6 +18867,11 @@ function openAllInSheet() {
     }
     resetAllInSlider();
     openSheet('allin-sheet');
+}
+
+function allInSignInWithGoogle() {
+    if (window.logVpEvent) logVpEvent('allin_signin_prompt_clicked');
+    if (window.signInWithGoogle) signInWithGoogle();
 }
 
 function closeAllInSheet() {

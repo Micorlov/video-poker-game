@@ -48,6 +48,8 @@ data class UiState(
     val allInRemaining: Int = Rules.ALL_IN_DAILY_LIMIT,
     /** Set while the ALL IN confirmation sheet is open. */
     val allInOffer: AllInOffer? = null,
+    /** Set when today's ALL INs are gone and signing in with Google would grant another. */
+    val allInSignInPrompt: Boolean = false,
     /** The "Enjoying Video Poker?" card is up. */
     val reviewCardVisible: Boolean = false,
     /** The opening hand has already pointed at the hints lamp. */
@@ -168,6 +170,10 @@ class GameViewModel(
     private val events: EventLogger = EventLogger.NONE,
     /** True when the earlier WebView build's data is on the device: its player has history the native save lacks. */
     private val upgradedFromLegacy: Boolean = false,
+    /** Google sign-in can raise today's ALL IN allowance. Off in tests and in builds without Firebase. */
+    private val googleSignInAvailable: Boolean = false,
+    /** Already signed in when the table opens, so the extra ALL IN is there on the first frame. */
+    signedInWithGoogle: Boolean = false,
 ) : ViewModel() {
 
     private val effectChannel = Channel<UiEffect>(Channel.UNLIMITED)
@@ -176,6 +182,7 @@ class GameViewModel(
     private val _state: MutableStateFlow<UiState>
     private var allInUsed = 0
     private var allInLimit = repository.loadFlags().allInDailyLimit
+    private var googleSignedIn = signedInWithGoogle && googleSignInAvailable
     private var reviewAskedThisSession = false
     private var reviewTimerPending = false
 
@@ -500,21 +507,38 @@ class GameViewModel(
     fun onAllInTipSeen() = _state.update { it.copy(allInTipSeen = true) }
 
     /**
-     * ALL IN tapped: open the confirmation, or explain why not. Once a day, and only after
-     * this hand's cards are face up.
+     * ALL IN tapped: open the confirmation, or explain why not. A guest who has used today's
+     * one gets the Google sign-in prompt (2 a day instead of 1). Otherwise the confirmation
+     * waits until this hand's cards are face up.
      */
     fun onAllInRequested() {
         val game = _state.value.game
         if (game.phase == Phase.DOUBLE_UP) return showToast(ToastMessage.FinishHandFirst)
+        if (_state.value.allInRemaining <= 0) {
+            if (googleSignInGrantsAnother()) {
+                _state.update { it.copy(allInSignInPrompt = true) }
+            } else {
+                showToast(ToastMessage.NoAllInLeft)
+            }
+            return
+        }
         if (game.phase != Phase.HOLD || !_state.value.revealed) return showToast(ToastMessage.AllInAfterCards)
-        if (_state.value.allInRemaining <= 0) return showToast(ToastMessage.NoAllInLeft)
         val offer = GameEngine.allInOffer(game)
         if (offer == null) {
             commit(GameEngine.rebuy(game), persist = true)
             return
         }
-        _state.update { it.copy(allInOffer = offer) }
+        _state.update { it.copy(allInOffer = offer, allInSignInPrompt = false) }
     }
+
+    /** Google account changed. Signing in raises today's allowance and closes the prompt. */
+    fun onGoogleSignedIn(signedIn: Boolean) {
+        if (!googleSignInAvailable || googleSignedIn == signedIn) return
+        googleSignedIn = signedIn
+        _state.update { it.copy(allInRemaining = allInRemaining(), allInSignInPrompt = false) }
+    }
+
+    fun onAllInSignInDismissed() = _state.update { it.copy(allInSignInPrompt = false) }
 
     fun onAllInConfirmed() {
         val current = _state.value
@@ -529,13 +553,27 @@ class GameViewModel(
 
     private fun today(): String = todayKey?.invoke().orEmpty()
 
-    private fun allInRemaining(): Int = (allInLimit - allInUsed).coerceAtLeast(0)
+    private fun allInRemaining(): Int = (effectiveAllInLimit() - allInUsed).coerceAtLeast(0)
+
+    private fun effectiveAllInLimit(): Int = Rules.allInDailyLimit(allInLimit, googleSignedIn)
+
+    /** True when a guest still has a Google sign-in that would add an ALL IN today. */
+    private fun googleSignInGrantsAnother(): Boolean =
+        googleSignInAvailable && !googleSignedIn &&
+            Rules.allInDailyLimit(allInLimit, signedInWithGoogle = true) > allInUsed
 
     /** Applies freshly fetched flags and keeps them for the next offline start. */
     fun onFlagsLoaded(flags: RemoteFlags) {
         repository.saveFlags(flags)
         allInLimit = flags.allInDailyLimit
-        _state.update { it.copy(flags = flags, allInRemaining = allInRemaining()) }
+        val remaining = allInRemaining()
+        _state.update {
+            it.copy(
+                flags = flags,
+                allInRemaining = remaining,
+                allInSignInPrompt = it.allInSignInPrompt && remaining <= 0 && googleSignInGrantsAnother(),
+            )
+        }
     }
 
     fun onSelectLanguage(language: AppLanguage) = updateSettings { it.copy(language = language) }

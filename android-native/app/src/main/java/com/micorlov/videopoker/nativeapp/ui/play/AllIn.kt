@@ -52,6 +52,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.micorlov.videopoker.nativeapp.R
 import com.micorlov.videopoker.nativeapp.domain.AllInOffer
+import com.micorlov.videopoker.nativeapp.ui.components.ActionButton
 import com.micorlov.videopoker.nativeapp.ui.components.ChipButton
 import com.micorlov.videopoker.nativeapp.ui.components.Eyebrow
 import com.micorlov.videopoker.nativeapp.ui.text.formatNumber
@@ -62,7 +63,10 @@ import kotlin.math.roundToInt
 /** How far the thumb must travel before the slide counts (CONFIRM_THRESHOLD in js/game.js). */
 private const val CONFIRM_THRESHOLD = 0.85f
 
-/** The ALL IN chip with its uses-left badge. Stays tappable when depleted so it can explain itself. */
+/**
+ * The ALL IN chip with its uses-left badge. Stays tappable at 0 so a guest can open the
+ * Google sign-in prompt (2 a day instead of 1).
+ */
 @Composable
 fun AllInButton(selected: Boolean, remaining: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
     ChipButton(
@@ -156,6 +160,78 @@ fun AllInSheet(offer: AllInOffer, onConfirm: () -> Unit, onDismiss: () -> Unit) 
                         .clickable(role = Role.Button, onClick = onDismiss)
                         .padding(8.dp)
                         .testTag("allin-dismiss"),
+                    color = VpColors.TextMuted,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Shown when a guest has used today's ALL IN. Signing in with Google raises the allowance to 2.
+ * Same bottom sheet as the confirmation, without the slide.
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun AllInSignInSheet(signingIn: Boolean, onSignIn: () -> Unit, onDismiss: () -> Unit) {
+    val palette = LocalPalette.current
+    val shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(Modifier.fillMaxSize()) {
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onDismiss,
+                    )
+                    .clearAndSetSemantics { },
+            )
+            Column(
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .widthIn(max = 460.dp)
+                    .fillMaxWidth()
+                    .clip(shape)
+                    .background(Brush.verticalGradient(listOf(palette.panelSolid, palette.bgEdge)))
+                    .padding(start = 18.dp, end = 18.dp, top = 20.dp, bottom = 28.dp)
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("allin-signin-sheet"),
+            ) {
+                Eyebrow(stringResource(R.string.sheet_all_in_sign_in_eyebrow))
+                Text(
+                    text = stringResource(R.string.sheet_all_in_sign_in_title),
+                    color = VpColors.Text,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = stringResource(R.string.sheet_all_in_sign_in_body),
+                    modifier = Modifier.padding(top = 6.dp),
+                    color = VpColors.TextMuted,
+                    fontSize = 14.sp,
+                )
+                ActionButton(
+                    text = stringResource(if (signingIn) R.string.friends_signing_in else R.string.friends_sign_in),
+                    icon = "G",
+                    onClick = onSignIn,
+                    enabled = !signingIn,
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp).testTag("allin-signin"),
+                )
+                Text(
+                    text = stringResource(R.string.sheet_not_now),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
+                        .clickable(role = Role.Button, onClick = onDismiss)
+                        .padding(8.dp)
+                        .testTag("allin-signin-dismiss"),
                     color = VpColors.TextMuted,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,

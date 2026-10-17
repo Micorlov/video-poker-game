@@ -74,6 +74,9 @@ data class PlayActions(
     val onHintsTipSeen: () -> Unit,
     val onAllInConfirmed: () -> Unit,
     val onAllInDismissed: () -> Unit,
+    /** Google sign-in from the depleted ALL IN prompt. */
+    val onAllInSignIn: () -> Unit = {},
+    val onAllInSignInDismissed: () -> Unit = {},
     val onDoubleUp: () -> Unit,
     val onPickDoubleUp: (Int) -> Unit,
     val onDoubleUpRevealed: (Int) -> Unit,
@@ -93,6 +96,8 @@ fun PlayScreen(
     feedback: Feedback,
     actions: PlayActions,
     modifier: Modifier = Modifier,
+    /** True while the Google account picker from the ALL IN prompt is in flight. */
+    allInSigningIn: Boolean = false,
 ) {
     val game = ui.game
     val pace = ui.settings.gameSpeed.pace
@@ -152,6 +157,9 @@ fun PlayScreen(
     }
 
     ui.allInOffer?.let { AllInSheet(it, actions.onAllInConfirmed, actions.onAllInDismissed) }
+    if (ui.allInSignInPrompt) {
+        AllInSignInSheet(allInSigningIn, actions.onAllInSignIn, actions.onAllInSignInDismissed)
+    }
 
     Box(
         modifier = modifier

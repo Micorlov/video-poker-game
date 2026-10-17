@@ -166,7 +166,8 @@ fun VideoPokerApp(
             if (celebration?.id == id) celebration = null
         }
 
-        val playActions = remember(viewModel, friendsOn) {
+        val signInHost = remember(context) { ActivityHost(context.findActivity()) }
+        val playActions = remember(viewModel, friends, friendsOn, signInHost) {
             PlayActions(
                 onMainAction = viewModel::onMainAction,
                 onToggleHold = viewModel::onToggleHold,
@@ -180,6 +181,8 @@ fun VideoPokerApp(
                 onSpeak = { voice.speak(it) },
                 onAllInConfirmed = viewModel::onAllInConfirmed,
                 onAllInDismissed = viewModel::onAllInDismissed,
+                onAllInSignIn = { friends?.onSignIn(signInHost) },
+                onAllInSignInDismissed = viewModel::onAllInSignInDismissed,
                 onDoubleUp = viewModel::onDoubleUp,
                 onPickDoubleUp = viewModel::onPickDoubleUp,
                 onDoubleUpRevealed = viewModel::onDoubleUpRevealed,
@@ -187,6 +190,9 @@ fun VideoPokerApp(
             )
         }
         val friendsState = friends?.state?.collectAsStateWithLifecycle()?.value
+        LaunchedEffect(friendsState?.auth) {
+            viewModel.onGoogleSignedIn(friendsState?.auth == FriendsAuth.SIGNED_IN)
+        }
         val accountSettings = if (friends != null && friends.available) {
             val activity = LocalContext.current.findActivity()
             AccountSettings(
@@ -243,7 +249,13 @@ fun VideoPokerApp(
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                     Box(Modifier.widthIn(max = MAX_CONTENT_WIDTH).fillMaxSize()) {
                         when (tab) {
-                            Tab.PLAY -> PlayScreen(ui, celebration, feedback, playActions)
+                            Tab.PLAY -> PlayScreen(
+                                ui,
+                                celebration,
+                                feedback,
+                                playActions,
+                                allInSigningIn = friendsState?.auth == FriendsAuth.SIGNING_IN,
+                            )
                             Tab.FRIENDS -> friends?.let { FriendsTab(it) }
                             Tab.STATS -> StatsScreen(ui.game)
                             Tab.SETTINGS -> SettingsScreen(ui, settingsActions, account = accountSettings)

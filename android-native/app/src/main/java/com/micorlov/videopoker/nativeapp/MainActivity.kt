@@ -49,6 +49,8 @@ class MainActivity : ComponentActivity() {
                 onNetResult = container.dailyProfit::record,
                 events = container.events,
                 upgradedFromLegacy = container.upgradedFromLegacy,
+                googleSignInAvailable = container.auth.available,
+                signedInWithGoogle = container.auth.user.value != null,
             )
         }
     }
