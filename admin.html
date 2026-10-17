@@ -256,10 +256,10 @@
 
                 <div class="panel">
                     <div class="panel-header" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                        <h2 style="display:flex; align-items:center; gap:8px; margin:0;"><span class="live-dot"></span> <span id="live-title">Live — Current Hour</span></h2>
+                        <h2 style="display:flex; align-items:center; gap:8px; margin:0;"><span class="live-dot"></span> <span id="live-title">Live — Current Hour (UTC)</span></h2>
                         <div style="display:flex; align-items:center; gap:10px;">
                             <select id="admin-overview-select" onchange="setAdminOverviewTab(this.value)" style="padding:6px 12px; font-size:14px; border-radius:6px; background:#1b3224; border:1px solid #ffd700; color:#ffd700; cursor:pointer; font-weight:bold;">
-                                <option value="hourly">Hourly Scores</option>
+                                <option value="hourly">Hourly Scores (UTC)</option>
                                 <option value="daily">Daily Scores</option>
                             </select>
                             <button onclick="loadCurrentHour()">↻ Refresh</button>
@@ -349,7 +349,7 @@
                     <span id="comp-hour-label">—</span>
                     <button onclick="navHour(1)">›</button>
                     <select id="admin-comp-select" onchange="setAdminCompTab(this.value)" style="padding:6px 12px; font-size:14px; border-radius:6px; background:#1b3224; border:1px solid #ffd700; color:#ffd700; cursor:pointer; font-weight:bold; margin-left: auto;">
-                        <option value="hourly">Hourly History</option>
+                        <option value="hourly">Hourly History (UTC)</option>
                         <option value="daily">Daily History</option>
                     </select>
                 </div>
@@ -812,13 +812,16 @@
             .catch(function(err) { alert('Delete failed: ' + err.message); });
     }
 
+    // Must match js/champions.js getHourKey(): players are filed under
+    // hourly/{YYYYMMDDHH}/entries using the UTC hour. A local key such as
+    // "2026-10-17T17" never hits those documents, so the board stays empty.
     function getHourKey(offset) {
         var now = new Date();
-        now.setHours(now.getHours() + (offset || 0));
-        return now.getFullYear() + '-' +
-            String(now.getMonth() + 1).padStart(2, '0') + '-' +
-            String(now.getDate()).padStart(2, '0') + 'T' +
-            String(now.getHours()).padStart(2, '0');
+        now.setUTCHours(now.getUTCHours() + (offset || 0));
+        return '' + now.getUTCFullYear() +
+            String(now.getUTCMonth() + 1).padStart(2, '0') +
+            String(now.getUTCDate()).padStart(2, '0') +
+            String(now.getUTCHours()).padStart(2, '0');
     }
 
     function getDayKey(offset) {
@@ -842,10 +845,13 @@
     }
 
     function formatHourLabel(hk) {
-        var parts = hk.split('T');
-        var hour = parseInt(parts[1]);
+        var y = hk.slice(0, 4);
+        var mo = hk.slice(4, 6);
+        var d = hk.slice(6, 8);
+        var hour = parseInt(hk.slice(8, 10), 10);
         var nextHour = (hour + 1) % 24;
-        return parts[0] + '  ' + String(hour).padStart(2, '0') + ':00 – ' + String(nextHour).padStart(2, '0') + ':00';
+        return y + '-' + mo + '-' + d + '  ' +
+            String(hour).padStart(2, '0') + ':00 – ' + String(nextHour).padStart(2, '0') + ':00 UTC';
     }
 
     function setAdminOverviewTab(val) {
@@ -854,7 +860,7 @@
         var liveStatLabel = document.getElementById('live-stat-label');
         var rebuyStatLabel = document.getElementById('rebuy-stat-label');
         if (val === 'hourly') {
-            if (liveTitle) liveTitle.textContent = 'Live — Current Hour';
+            if (liveTitle) liveTitle.textContent = 'Live — Current Hour (UTC)';
             if (liveStatLabel) liveStatLabel.textContent = 'Current Hour Players';
             if (rebuyStatLabel) rebuyStatLabel.textContent = 'Total Rebuys (this hour)';
         } else {
@@ -975,12 +981,14 @@
                     '<td>' + (isDaily ? (d.rebuys || 0) : '—') + '</td>' +
                     '<td>' + (isDaily ? (d.bestHand || '—') : '—') + '</td>' +
                     '<td>' +
-                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + rowKey + '\', \'' + uid + '\')">Reset</button>' +
-                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + rowKey + '\', \'' + uid + '\')">Delete</button>' +
+                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + rowKey + '\', \'' + uid + '\', ' + isDaily + ')">Reset</button>' +
+                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + rowKey + '\', \'' + uid + '\', ' + isDaily + ')">Delete</button>' +
                     '</td>';
                 tbody.appendChild(tr);
             });
             document.getElementById('s-hour-rebuys').textContent = totalRebuys;
+        }).catch(function(err) {
+            tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Could not load players (' + (err.code || err.message) + ')</td></tr>';
         });
     }
 
@@ -1310,17 +1318,26 @@
                     '<td>' + (isDaily ? (d.rebuys || 0) : '—') + '</td>' +
                     '<td>' + (isDaily ? (d.bestHand || '—') : '—') + '</td>' +
                     '<td>' +
-                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + rowKey + '\', \'' + uid + '\')">Reset</button>' +
-                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + rowKey + '\', \'' + uid + '\')">Delete</button>' +
+                    '<button class="btn-action btn-reset" onclick="resetScore(\'' + rowKey + '\', \'' + uid + '\', ' + isDaily + ')">Reset</button>' +
+                    '<button class="btn-action btn-delete" onclick="deleteScore(\'' + rowKey + '\', \'' + uid + '\', ' + isDaily + ')">Delete</button>' +
                     '</td>';
                 tbody.appendChild(tr);
             });
+        }).catch(function(err) {
+            tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Could not load players (' + (err.code || err.message) + ')</td></tr>';
         });
     }
 
-    function deleteScore(key, uid) {
+    // Daily keys are YYYY-MM-DD. Hour keys are YYYYMMDDHH and used to be told
+    // apart by the "T" in the old local format — a compact UTC key has no "T",
+    // so that check would send an hourly delete at the daily collection.
+    function isDailyScoreKey(key) {
+        return String(key).indexOf('-') !== -1;
+    }
+
+    function deleteScore(key, uid, isDaily) {
         if (!confirm('Are you sure you want to delete this score entry?')) return;
-        var isDaily = !key.includes('T');
+        if (isDaily == null) isDaily = isDailyScoreKey(key);
         var ref = isDaily
             ? db.collection('daily_scores').doc(key + '_' + uid)
             : db.collection('hourly').doc(key).collection('entries').doc(uid);
@@ -1334,9 +1351,9 @@
         });
     }
 
-    function resetScore(key, uid) {
+    function resetScore(key, uid, isDaily) {
         if (!confirm('Are you sure you want to reset this score to 0?')) return;
-        var isDaily = !key.includes('T');
+        if (isDaily == null) isDaily = isDailyScoreKey(key);
         var ref = isDaily
             ? db.collection('daily_scores').doc(key + '_' + uid)
             : db.collection('hourly').doc(key).collection('entries').doc(uid);
