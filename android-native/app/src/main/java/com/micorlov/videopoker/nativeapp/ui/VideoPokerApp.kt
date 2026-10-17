@@ -175,6 +175,8 @@ fun VideoPokerApp(
                 onToggleSound = viewModel::onToggleSound,
                 onToggleHints = viewModel::onToggleHints,
                 onAllIn = viewModel::onAllInRequested,
+                onAllInTipSeen = viewModel::onAllInTipSeen,
+                onHintsTipSeen = viewModel::onHintsTipSeen,
                 onAllInConfirmed = viewModel::onAllInConfirmed,
                 onAllInDismissed = viewModel::onAllInDismissed,
                 onDoubleUp = viewModel::onDoubleUp,

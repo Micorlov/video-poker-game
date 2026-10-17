@@ -22,6 +22,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -93,6 +95,7 @@ fun BetRow(
     allInRemaining: Int,
     onSelectBet: (Int) -> Unit,
     onAllIn: () -> Unit,
+    onAllInPlaced: (LayoutCoordinates) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -109,7 +112,12 @@ fun BetRow(
             )
         }
     }
-    AllInButton(selected = game.isAllIn, remaining = allInRemaining, onClick = onAllIn)
+    AllInButton(
+        selected = game.isAllIn,
+        remaining = allInRemaining,
+        onClick = onAllIn,
+        modifier = Modifier.onGloballyPositioned(onAllInPlaced),
+    )
     }
 }
 

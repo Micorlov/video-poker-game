@@ -100,5 +100,8 @@
  "toast_invites_rewarded": "🎉 친구가 참여했어요. %1$s 칩을 받았습니다!",
  "coach_hold": "탭해서 남기기",
  "coach_release": "탭해서 놓기",
- "coach_press": "이제 %1$s를 탭하세요"
+ "coach_press": "이제 %1$s를 탭하세요",
+ "coach_hints": "힌트는 램프를 탭하세요",
+ "coach_all_in": "하루에 한 번, 카드가 보인 뒤에",
+ "toast_all_in_after_cards": "하루에 한 번 — 카드가 보인 뒤에"
 }

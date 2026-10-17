@@ -15,6 +15,8 @@
     <string name="coach_hold">Dotknij, aby zatrzymać</string>
     <string name="coach_release">Dotknij, aby puścić</string>
     <string name="coach_press">Teraz dotknij %1$s</string>
+    <string name="coach_hints">Dotknij lampki, aby dostać podpowiedzi</string>
+    <string name="coach_all_in">Raz dziennie, gdy karty są odkryte</string>
     <string name="play_held">TRZYMANA</string>
     <string name="play_nothing">Nic — %1$s</string>
     <string name="play_win_streak">Seria wygranych</string>
@@ -135,6 +137,7 @@
     <string name="win_royal_flush">Poker królewski</string>
     <string name="toast_all_in_good_luck">🔥 ALL IN — powodzenia!</string>
     <string name="toast_no_all_in_left">⛔ Brak all-inów — wróć jutro!</string>
+    <string name="toast_all_in_after_cards">Raz dziennie — gdy karty są odkryte</string>
     <string name="play_all_in">ALL IN</string>
     <string name="play_all_in_left">zostało %1$d</string>
     <string name="play_this_hand">to rozdanie</string>

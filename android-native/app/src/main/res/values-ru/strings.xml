@@ -15,6 +15,8 @@
     <string name="coach_hold">Нажмите, чтобы оставить</string>
     <string name="coach_release">Нажмите, чтобы отпустить</string>
     <string name="coach_press">Теперь нажмите %1$s</string>
+    <string name="coach_hints">Нажмите на лампу, чтобы получить подсказки</string>
+    <string name="coach_all_in">Раз в день, когда карты открыты</string>
     <string name="play_held">ОСТАВЛЕНА</string>
     <string name="play_nothing">Ничего — %1$s</string>
     <string name="play_win_streak">Серия побед</string>
@@ -135,6 +137,7 @@
     <string name="win_royal_flush">Роял-флеш</string>
     <string name="toast_all_in_good_luck">🔥 ВА-БАНК — удачи!</string>
     <string name="toast_no_all_in_left">⛔ Ва-банк закончился — возвращайтесь завтра!</string>
+    <string name="toast_all_in_after_cards">Раз в день — когда карты открыты</string>
     <string name="play_all_in">ВА-БАНК</string>
     <string name="play_all_in_left">осталось %1$d</string>
     <string name="play_this_hand">эту раздачу</string>

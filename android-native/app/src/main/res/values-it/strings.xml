@@ -15,6 +15,8 @@
     <string name="coach_hold">Tocca per tenere</string>
     <string name="coach_release">Tocca per lasciare</string>
     <string name="coach_press">Ora tocca %1$s</string>
+    <string name="coach_hints">Tocca la lampada per i suggerimenti</string>
+    <string name="coach_all_in">Una volta al giorno, dopo aver visto le carte</string>
     <string name="play_held">TENUTA</string>
     <string name="play_nothing">Niente — %1$s</string>
     <string name="play_win_streak">Serie di vittorie</string>
@@ -135,6 +137,7 @@
     <string name="win_royal_flush">Scala reale</string>
     <string name="toast_all_in_good_luck">🔥 ALL IN — buona fortuna!</string>
     <string name="toast_no_all_in_left">⛔ All-in finiti — torna domani!</string>
+    <string name="toast_all_in_after_cards">Una volta al giorno — dopo aver visto le carte</string>
     <string name="play_all_in">ALL IN</string>
     <string name="play_all_in_left">ne resta %1$d</string>
     <string name="play_this_hand">questa mano</string>

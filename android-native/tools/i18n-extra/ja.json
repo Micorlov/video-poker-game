@@ -100,5 +100,8 @@
  "toast_invites_rewarded": "🎉 友達が参加しました。%1$sチップを獲得！",
  "coach_hold": "タップして残す",
  "coach_release": "タップして戻す",
- "coach_press": "次に%1$sをタップ"
+ "coach_press": "次に%1$sをタップ",
+ "coach_hints": "ヒントはランプをタップ",
+ "coach_all_in": "1日1回、カードが見えてから",
+ "toast_all_in_after_cards": "1日1回 — カードが見えてから"
 }

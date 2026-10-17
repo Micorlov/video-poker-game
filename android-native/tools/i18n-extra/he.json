@@ -104,5 +104,8 @@
  "toast_invites_rewarded": "🎉 חברים הצטרפו — הרווחתם %1$s צ׳יפים!",
  "coach_hold": "הקש כדי לשמור",
  "coach_release": "הקש כדי לשחרר",
- "coach_press": "עכשיו הקש על %1$s"
+ "coach_press": "עכשיו הקש על %1$s",
+ "coach_hints": "הקש על המנורה לקבל רמזים",
+ "coach_all_in": "פעם ביום, אחרי שרואים את הקלפים",
+ "toast_all_in_after_cards": "פעם ביום, כשהקלפים של היד הזו גלויים"
 }

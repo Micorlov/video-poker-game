@@ -15,6 +15,8 @@
     <string name="coach_hold">Touchez pour garder</string>
     <string name="coach_release">Touchez pour relâcher</string>
     <string name="coach_press">Maintenant, touchez %1$s</string>
+    <string name="coach_hints">Touchez la lampe pour des indices</string>
+    <string name="coach_all_in">Une fois par jour, après avoir vu les cartes</string>
     <string name="play_held">GARDÉE</string>
     <string name="play_nothing">Rien — %1$s</string>
     <string name="play_win_streak">Série de victoires</string>
@@ -135,6 +137,7 @@
     <string name="win_royal_flush">Quinte flush royale</string>
     <string name="toast_all_in_good_luck">🔥 TAPIS — bonne chance !</string>
     <string name="toast_no_all_in_left">⛔ Plus de tapis — revenez demain !</string>
+    <string name="toast_all_in_after_cards">Une fois par jour — après avoir vu les cartes</string>
     <string name="play_all_in">TAPIS</string>
     <string name="play_all_in_left">%1$d restant</string>
     <string name="play_this_hand">cette main</string>

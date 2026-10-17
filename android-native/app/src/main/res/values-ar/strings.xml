@@ -15,6 +15,8 @@
     <string name="coach_hold">اضغط للاحتفاظ</string>
     <string name="coach_release">اضغط للإفلات</string>
     <string name="coach_press">الآن اضغط %1$s</string>
+    <string name="coach_hints">اضغط المصباح للحصول على تلميحات</string>
+    <string name="coach_all_in">مرة في اليوم، بعد ظهور الأوراق</string>
     <string name="play_held">محفوظة</string>
     <string name="play_nothing">لا يوجد — %1$s</string>
     <string name="play_win_streak">سلسلة الانتصارات</string>
@@ -135,6 +137,7 @@
     <string name="win_royal_flush">رويال فلاش</string>
     <string name="toast_all_in_good_luck">🔥 كل الرصيد — بالتوفيق!</string>
     <string name="toast_no_all_in_left">⛔ لم تعد لديك رهانات بكل الرصيد — عد غدًا!</string>
+    <string name="toast_all_in_after_cards">مرة في اليوم — بعد ظهور الأوراق</string>
     <string name="play_all_in">كل الرصيد</string>
     <string name="play_all_in_left">المتبقي %1$d</string>
     <string name="play_this_hand">هذه اليد</string>

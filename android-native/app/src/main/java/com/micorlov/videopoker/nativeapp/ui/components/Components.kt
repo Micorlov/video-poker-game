@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -79,8 +80,13 @@ fun ActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    color: Color = Color.Unspecified,
+    colorDeep: Color = Color.Unspecified,
 ) {
     val palette = LocalPalette.current
+    val fill = if (color == Color.Unspecified) palette.action else color
+    val deep = if (colorDeep == Color.Unspecified) palette.actionDeep else colorDeep
+    val ink = if (color == Color.Unspecified) palette.actionInk else Color.White
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val scale by animateFloatAsState(if (pressed) 0.97f else 1f, label = "actionPress")
@@ -93,9 +99,9 @@ fun ActionButton(
                 scaleY = scale
                 alpha = if (enabled) 1f else DISABLED_ALPHA
             }
-            .shadow(10.dp, shape, ambientColor = palette.action, spotColor = palette.action)
+            .shadow(10.dp, shape, ambientColor = fill, spotColor = fill)
             .clip(shape)
-            .background(palette.actionEdge)
+            .background(if (color == Color.Unspecified) palette.actionEdge else deep.copy(alpha = 0.55f))
             .clickable(enabled = enabled, interactionSource = interaction, indication = null, role = Role.Button, onClick = onClick),
     ) {
         Row(
@@ -103,16 +109,16 @@ fun ActionButton(
                 .fillMaxWidth()
                 .padding(bottom = 4.dp)
                 .clip(shape)
-                .background(Brush.verticalGradient(listOf(palette.action, palette.actionDeep)))
+                .background(Brush.verticalGradient(listOf(fill, deep)))
                 .padding(horizontal = 16.dp, vertical = 15.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             val suit = suitForGlyph(icon)
             if (suit != null) {
-                SuitIcon(suit, 20.dp, color = palette.actionInk)
+                SuitIcon(suit, 20.dp, color = ink)
             } else {
-                Text(icon, modifier = Modifier.clearAndSetSemantics { }, color = palette.actionInk, fontSize = 20.sp)
+                Text(icon, modifier = Modifier.clearAndSetSemantics { }, color = ink, fontSize = 20.sp)
             }
             // One line that shrinks to fit: long labels ("Start with 1,000 chips", German, large text)
             // used to wrap and push the icon out of the slab.
@@ -120,7 +126,7 @@ fun ActionButton(
                 text = text.uppercase(),
                 modifier = Modifier.padding(start = 10.dp, end = 4.dp),
                 style = TextStyle(
-                    color = palette.actionInk,
+                    color = ink,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.1.em,

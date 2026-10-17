@@ -15,6 +15,8 @@
     <string name="coach_hold">点击保留</string>
     <string name="coach_release">点击放回</string>
     <string name="coach_press">现在点击%1$s</string>
+    <string name="coach_hints">点灯获取提示</string>
+    <string name="coach_all_in">每天一次，看到牌之后</string>
     <string name="play_held">保留</string>
     <string name="play_nothing">无牌型 — %1$s</string>
     <string name="play_win_streak">连胜纪录</string>
@@ -135,6 +137,7 @@
     <string name="win_royal_flush">皇家同花顺</string>
     <string name="toast_all_in_good_luck">🔥 全下 — 祝你好运！</string>
     <string name="toast_no_all_in_left">⛔ 全下次数已用完 — 明天再来！</string>
+    <string name="toast_all_in_after_cards">每天一次 — 看到牌之后</string>
     <string name="play_all_in">全下</string>
     <string name="play_all_in_left">剩 %1$d 次</string>
     <string name="play_this_hand">这一手</string>

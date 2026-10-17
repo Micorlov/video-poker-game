@@ -37,6 +37,26 @@ class FirstHandsTest {
     }
 
     @Test
+    fun `the first hand points at the lamp then at all in`() {
+        val hand = checkNotNull(FirstHands.scriptedHand(0, Variant.JACKS))
+
+        assertEquals(CoachTarget.Hints, coach(hand, heldNone, hintsExplained = false, allInExplained = false))
+        assertEquals(CoachTarget.AllIn, coach(hand, heldNone, hintsExplained = true, allInExplained = false))
+        assertEquals(CoachTarget.Hold(1), coach(hand, heldNone))
+        assertNull(coach(hand, heldNone, hintsExplained = false, allInExplained = false, cardsFaceUp = false))
+        assertEquals(
+            CoachTarget.Hold(0),
+            coach(
+                checkNotNull(FirstHands.scriptedHand(2, Variant.JACKS)),
+                heldNone,
+                lifetimeHands = 2,
+                hintsExplained = false,
+                allInExplained = false,
+            ),
+        )
+    }
+
+    @Test
     fun `the hand points at each winning card then at draw`() {
         val hand = checkNotNull(FirstHands.scriptedHand(0, Variant.JACKS))
         val keep = HandEvaluator.evaluate(hand, Variant.JACKS).winIndices.sorted()
@@ -90,7 +110,18 @@ class FirstHandsTest {
         phase: Phase = Phase.HOLD,
         cardsFaceUp: Boolean = true,
         lifetimeHands: Int = 0,
-    ) = FirstHands.coach(lifetimeHands, Variant.JACKS, phase, hand, held, cardsFaceUp)
+        hintsExplained: Boolean = true,
+        allInExplained: Boolean = true,
+    ) = FirstHands.coach(
+        lifetimeHands,
+        Variant.JACKS,
+        phase,
+        hand,
+        held,
+        cardsFaceUp,
+        hintsExplained,
+        allInExplained,
+    )
 
     private val heldNone = List(5) { false }
 

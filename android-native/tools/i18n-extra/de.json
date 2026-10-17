@@ -102,5 +102,8 @@
  "toast_invites_rewarded": "🎉 Freunde sind beigetreten – du hast %1$s Chips verdient!",
  "coach_hold": "Tippe zum Behalten",
  "coach_release": "Tippe zum Loslassen",
- "coach_press": "Jetzt %1$s tippen"
+ "coach_press": "Jetzt %1$s tippen",
+ "coach_hints": "Tippe auf die Lampe für Hinweise",
+ "coach_all_in": "Einmal am Tag, wenn die Karten offen sind",
+ "toast_all_in_after_cards": "Einmal am Tag — erst wenn die Karten offen sind"
 }

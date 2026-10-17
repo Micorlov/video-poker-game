@@ -100,5 +100,8 @@
  "toast_invites_rewarded": "🎉 有好友加入，你获得了 %1$s 筹码！",
  "coach_hold": "点击保留",
  "coach_release": "点击放回",
- "coach_press": "现在点击%1$s"
+ "coach_press": "现在点击%1$s",
+ "coach_hints": "点灯获取提示",
+ "coach_all_in": "每天一次，看到牌之后",
+ "toast_all_in_after_cards": "每天一次 — 看到牌之后"
 }

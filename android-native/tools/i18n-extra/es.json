@@ -102,5 +102,8 @@
  "toast_invites_rewarded": "🎉 Se unieron amigos: ¡ganaste %1$s fichas!",
  "coach_hold": "Toca para guardar",
  "coach_release": "Toca para soltar",
- "coach_press": "Ahora toca %1$s"
+ "coach_press": "Ahora toca %1$s",
+ "coach_hints": "Toca la lámpara para pistas",
+ "coach_all_in": "Una vez al día, después de ver las cartas",
+ "toast_all_in_after_cards": "Una vez al día — úsalo después de ver las cartas"
 }

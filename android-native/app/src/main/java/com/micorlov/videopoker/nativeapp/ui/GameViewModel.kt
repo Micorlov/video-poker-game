@@ -50,6 +50,10 @@ data class UiState(
     val allInOffer: AllInOffer? = null,
     /** The "Enjoying Video Poker?" card is up. */
     val reviewCardVisible: Boolean = false,
+    /** The opening hand has already pointed at the hints lamp. */
+    val hintsTipSeen: Boolean = false,
+    /** The opening hand has already explained that ALL IN is once a day. */
+    val allInTipSeen: Boolean = false,
     /** First-run walkthrough is up. */
     val showOnboarding: Boolean = false,
     /** Admin switches; defaults until the fetch lands. */
@@ -112,6 +116,7 @@ sealed interface ToastMessage {
     data object HintsOn : ToastMessage
     data object AllInGoodLuck : ToastMessage
     data object NoAllInLeft : ToastMessage
+    data object AllInAfterCards : ToastMessage
     data class ReferralWelcome(val amount: Long) : ToastMessage
     data class InvitesRewarded(val count: Int, val amount: Long) : ToastMessage
     data class FriendsAdded(val count: Int) : ToastMessage
@@ -488,10 +493,20 @@ class GameViewModel(
 
     fun onSelectSpeed(speed: GameSpeed) = updateSettings { it.copy(gameSpeed = speed) }
 
-    /** ALL IN tapped: open the confirmation, or explain why not. Allowed mid-hand, as on the web. */
+    /** The first hand's floating hand pointed at the lamp; don't point there again. */
+    fun onHintsTipSeen() = _state.update { it.copy(hintsTipSeen = true) }
+
+    /** The first hand's floating hand pointed at ALL IN; don't point there again. */
+    fun onAllInTipSeen() = _state.update { it.copy(allInTipSeen = true) }
+
+    /**
+     * ALL IN tapped: open the confirmation, or explain why not. Once a day, and only after
+     * this hand's cards are face up.
+     */
     fun onAllInRequested() {
         val game = _state.value.game
         if (game.phase == Phase.DOUBLE_UP) return showToast(ToastMessage.FinishHandFirst)
+        if (game.phase != Phase.HOLD || !_state.value.revealed) return showToast(ToastMessage.AllInAfterCards)
         if (_state.value.allInRemaining <= 0) return showToast(ToastMessage.NoAllInLeft)
         val offer = GameEngine.allInOffer(game)
         if (offer == null) {

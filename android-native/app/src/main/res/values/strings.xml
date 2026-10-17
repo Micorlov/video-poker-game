@@ -14,11 +14,15 @@
     <string name="play_total_bet">Total bet</string>
     <string name="play_deal">Deal</string>
     <string name="play_draw">Draw</string>
+    <string name="play_deal_help">New hand. Takes your bet.</string>
+    <string name="play_draw_help">Replaces cards you didn\'t hold.</string>
     <string name="play_hint_hold">Tap the cards you want to keep, then draw.</string>
     <string name="play_hint_bet">Pick your bet, then deal.</string>
     <string name="coach_hold">Tap to keep</string>
     <string name="coach_release">Tap to let go</string>
     <string name="coach_press">Now tap %1$s</string>
+    <string name="coach_hints">Tap the lamp for hints</string>
+    <string name="coach_all_in">Once a day, after you see your cards</string>
     <string name="play_held">HELD</string>
     <string name="play_nothing">Nothing — %1$s</string>
     <string name="play_win_streak">Win streak</string>
@@ -182,6 +186,7 @@
     <string name="win_royal_flush">Royal Flush</string>
     <string name="toast_all_in_good_luck">🔥 ALL IN — good luck!</string>
     <string name="toast_no_all_in_left">⛔ No ALL INs left — back tomorrow!</string>
+    <string name="toast_all_in_after_cards">Once a day, while this hand\'s cards are face up</string>
     <string name="play_all_in">ALL IN</string>
     <string name="play_all_in_left">%1$d left</string>
     <string name="play_this_hand">this hand</string>

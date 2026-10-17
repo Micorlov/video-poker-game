@@ -1,6 +1,7 @@
 package com.micorlov.videopoker.nativeapp
 
 import android.content.Context
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertTextContains
@@ -56,6 +57,11 @@ class VideoPokerAppTest {
         }
 
         val context = ApplicationProvider.getApplicationContext<Context>()
+        compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.coach_hints))
+        compose.onNodeWithTag("hints-toggle").performClick()
+        compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.coach_all_in))
+        compose.onNodeWithTag("bet-allin").performClick()
+        compose.onNodeWithTag("allin-sheet").assertDoesNotExist()
         compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.coach_hold))
         compose.onNodeWithTag("card-1").performClick()
         compose.onNodeWithTag("card-3").performClick()

@@ -106,5 +106,8 @@
  "toast_invites_rewarded": "🎉 Znajomi dołączyli — zdobywasz %1$s żetonów!",
  "coach_hold": "Dotknij, aby zatrzymać",
  "coach_release": "Dotknij, aby puścić",
- "coach_press": "Teraz dotknij %1$s"
+ "coach_press": "Teraz dotknij %1$s",
+ "coach_hints": "Dotknij lampki, aby dostać podpowiedzi",
+ "coach_all_in": "Raz dziennie, gdy karty są odkryte",
+ "toast_all_in_after_cards": "Raz dziennie — gdy karty są odkryte"
 }

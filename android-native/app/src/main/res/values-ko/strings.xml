@@ -15,6 +15,8 @@
     <string name="coach_hold">탭해서 남기기</string>
     <string name="coach_release">탭해서 놓기</string>
     <string name="coach_press">이제 %1$s를 탭하세요</string>
+    <string name="coach_hints">힌트는 램프를 탭하세요</string>
+    <string name="coach_all_in">하루에 한 번, 카드가 보인 뒤에</string>
     <string name="play_held">홀드</string>
     <string name="play_nothing">없음 — %1$s</string>
     <string name="play_win_streak">연승 기록</string>
@@ -135,6 +137,7 @@
     <string name="win_royal_flush">로열 플러시</string>
     <string name="toast_all_in_good_luck">🔥 올인 — 행운을 빌어요!</string>
     <string name="toast_no_all_in_left">⛔ 남은 올인이 없어요 — 내일 다시!</string>
+    <string name="toast_all_in_after_cards">하루에 한 번 — 카드가 보인 뒤에</string>
     <string name="play_all_in">올인</string>
     <string name="play_all_in_left">%1$d회 남음</string>
     <string name="play_this_hand">이번 핸드</string>

@@ -39,12 +39,20 @@ object FirstHands {
         hand: List<Card>,
         held: List<Boolean>,
         cardsFaceUp: Boolean,
+        /** The lamp tip, on the first hand once the cards are face up. */
+        hintsExplained: Boolean = true,
+        /** The once-a-day ALL IN tip, on the first hand after the lamp. */
+        allInExplained: Boolean = true,
     ): CoachTarget? {
         if (!applies(lifetimeHands, variant) || !cardsFaceUp) return null
         return when (phase) {
             Phase.BET -> CoachTarget.Deal
             Phase.DOUBLE_UP -> null
-            Phase.HOLD -> holdCoach(variant, hand, held)
+            Phase.HOLD -> when {
+                lifetimeHands == 0 && !hintsExplained -> CoachTarget.Hints
+                lifetimeHands == 0 && !allInExplained -> CoachTarget.AllIn
+                else -> holdCoach(variant, hand, held)
+            }
         }
     }
 
@@ -84,4 +92,10 @@ sealed interface CoachTarget {
 
     /** Between the opening hands. Press Deal. */
     data object Deal : CoachTarget
+
+    /** The once-a-day ALL IN chip, once the cards are face up. */
+    data object AllIn : CoachTarget
+
+    /** The lamp in the header. Tapping it turns hints on. */
+    data object Hints : CoachTarget
 }

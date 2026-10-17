@@ -103,5 +103,8 @@
  "toast_invites_rewarded": "🎉 Gli amici si sono uniti — hai guadagnato %1$s fiches!",
  "coach_hold": "Tocca per tenere",
  "coach_release": "Tocca per lasciare",
- "coach_press": "Ora tocca %1$s"
+ "coach_press": "Ora tocca %1$s",
+ "coach_hints": "Tocca la lampada per i suggerimenti",
+ "coach_all_in": "Una volta al giorno, dopo aver visto le carte",
+ "toast_all_in_after_cards": "Una volta al giorno — dopo aver visto le carte"
 }

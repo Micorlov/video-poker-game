@@ -3,6 +3,7 @@ package com.micorlov.videopoker.nativeapp.ui
 import com.micorlov.videopoker.nativeapp.data.AppTheme
 import com.micorlov.videopoker.nativeapp.data.GameRepository
 import com.micorlov.videopoker.nativeapp.data.InMemoryStore
+import com.micorlov.videopoker.nativeapp.domain.FirstHands
 import com.micorlov.videopoker.nativeapp.domain.Phase
 import com.micorlov.videopoker.nativeapp.domain.RemoteFlags
 import com.micorlov.videopoker.nativeapp.domain.ReviewState
@@ -264,6 +265,9 @@ class GameViewModelTest {
         assertEquals(1, day1.state.value.allInRemaining)
 
         day1.onAllInRequested()
+        assertEquals(ToastMessage.AllInAfterCards, day1.state.value.toast?.message)
+        day1.onRevealed(day1.state.value.game.round)
+        day1.onAllInRequested()
         assertNotNull(day1.state.value.allInOffer)
         day1.onAllInConfirmed()
         assertEquals(0, day1.state.value.allInRemaining)
@@ -282,6 +286,7 @@ class GameViewModelTest {
     @Test
     fun `dismissing the all in sheet spends nothing`() {
         val vm = viewModel(SavedGame(balance = 600))
+        vm.onRevealed(vm.state.value.game.round)
         vm.onAllInRequested()
         vm.onAllInDismissed()
         assertNull(vm.state.value.allInOffer)
@@ -323,7 +328,7 @@ class GameViewModelTest {
 
     @Test
     fun `a win completing three in a row earns the ask`() {
-        repository.saveGame(SavedGame(winStreak = 2))
+        repository.saveGame(SavedGame(winStreak = 2, lifetimeHands = FirstHands.ROUNDS))
         val vm = GameViewModel(repository, Random(WINNING_SEED), clock = { 5_000 }, reviewEnabled = true)
 
         assertTrue(vm.playUntilWin() > 0, "the seeded deal must produce a paying hand")
@@ -334,7 +339,7 @@ class GameViewModelTest {
 
     @Test
     fun `two wins in a row do not earn the ask`() {
-        repository.saveGame(SavedGame(winStreak = 1))
+        repository.saveGame(SavedGame(winStreak = 1, lifetimeHands = FirstHands.ROUNDS))
         val vm = GameViewModel(repository, Random(WINNING_SEED), clock = { 5_000 }, reviewEnabled = true)
 
         assertTrue(vm.playUntilWin() > 0)

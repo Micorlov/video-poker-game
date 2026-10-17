@@ -15,6 +15,8 @@
     <string name="coach_hold">Toque para manter</string>
     <string name="coach_release">Toque para soltar</string>
     <string name="coach_press">Agora toque em %1$s</string>
+    <string name="coach_hints">Toque na lâmpada para dicas</string>
+    <string name="coach_all_in">Uma vez por dia, depois de ver as cartas</string>
     <string name="play_held">FIXA</string>
     <string name="play_nothing">Nada — %1$s</string>
     <string name="play_win_streak">Sequência de vitórias</string>
@@ -135,6 +137,7 @@
     <string name="win_royal_flush">Royal Flush</string>
     <string name="toast_all_in_good_luck">🔥 TUDO — boa sorte!</string>
     <string name="toast_no_all_in_left">⛔ Sem apostas TUDO — volte amanhã!</string>
+    <string name="toast_all_in_after_cards">Uma vez por dia — depois de ver as cartas</string>
     <string name="play_all_in">TUDO</string>
     <string name="play_all_in_left">restam %1$d</string>
     <string name="play_this_hand">nesta mão</string>

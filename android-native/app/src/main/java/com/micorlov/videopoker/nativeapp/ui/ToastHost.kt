@@ -80,6 +80,7 @@ private fun ToastMessage.text(): String = when (this) {
     ToastMessage.FinishHandFirst -> stringResource(R.string.toast_finish_hand)
     ToastMessage.AllInGoodLuck -> stringResource(R.string.toast_all_in_good_luck)
     ToastMessage.NoAllInLeft -> stringResource(R.string.toast_no_all_in_left)
+    ToastMessage.AllInAfterCards -> stringResource(R.string.toast_all_in_after_cards)
     ToastMessage.HintsOn -> stringResource(R.string.toast_hints_on)
     ToastMessage.StatsReset -> stringResource(R.string.toast_stats_reset)
     is ToastMessage.ReferralWelcome -> stringResource(R.string.toast_referral_welcome, formatNumber(amount))

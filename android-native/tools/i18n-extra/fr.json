@@ -103,5 +103,8 @@
  "toast_invites_rewarded": "🎉 Des amis vous ont rejoint — vous gagnez %1$s jetons !",
  "coach_hold": "Touchez pour garder",
  "coach_release": "Touchez pour relâcher",
- "coach_press": "Maintenant, touchez %1$s"
+ "coach_press": "Maintenant, touchez %1$s",
+ "coach_hints": "Touchez la lampe pour des indices",
+ "coach_all_in": "Une fois par jour, après avoir vu les cartes",
+ "toast_all_in_after_cards": "Une fois par jour — après avoir vu les cartes"
 }

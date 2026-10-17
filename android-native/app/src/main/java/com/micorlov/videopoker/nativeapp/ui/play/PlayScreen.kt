@@ -34,6 +34,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -41,7 +42,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.micorlov.videopoker.nativeapp.R
@@ -65,6 +68,8 @@ data class PlayActions(
     val onToggleSound: () -> Unit,
     val onToggleHints: () -> Unit,
     val onAllIn: () -> Unit,
+    val onAllInTipSeen: () -> Unit,
+    val onHintsTipSeen: () -> Unit,
     val onAllInConfirmed: () -> Unit,
     val onAllInDismissed: () -> Unit,
     val onDoubleUp: () -> Unit,
@@ -105,13 +110,29 @@ fun PlayScreen(
         hand = game.hand,
         held = game.held,
         cardsFaceUp = ui.revealed,
+        hintsExplained = ui.hintsTipSeen,
+        allInExplained = ui.allInTipSeen,
     )
     val hole = placement.cardsTick.let { coachHole(placement, coach) }
+    val onHintsPlaced = remember { placement::placeHints }
+    val onAllInPlaced = remember { placement::placeAllIn }
+    val onToggleHints = remember(coach, actions) {
+        {
+            if (coach is CoachTarget.Hints) actions.onHintsTipSeen()
+            actions.onToggleHints()
+        }
+    }
+    val onAllIn = remember(coach, actions) {
+        {
+            if (coach is CoachTarget.AllIn) actions.onAllInTipSeen() else actions.onAllIn()
+        }
+    }
     val localDensity = LocalDensity.current
     LaunchedEffect(coach, hole) {
         val rect = hole ?: return@LaunchedEffect
         val viewHeight = placement.root?.takeIf { it.isAttached }?.size?.height?.toFloat() ?: return@LaunchedEffect
-        val pointingAtCard = coach is CoachTarget.Hold || coach is CoachTarget.Release
+        val pointingAtCard = coach is CoachTarget.Hold || coach is CoachTarget.Release ||
+            coach is CoachTarget.Hints || coach is CoachTarget.AllIn
         val handRoom = with(localDensity) { 140.dp.toPx() }
         val edge = with(localDensity) { 8.dp.toPx() }
         val marginTop = if (pointingAtCard) edge else handRoom
@@ -139,10 +160,21 @@ fun PlayScreen(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Header(ui, onToggleSound = actions.onToggleSound, onToggleHints = actions.onToggleHints)
+        Header(
+            ui,
+            onToggleSound = actions.onToggleSound,
+            onToggleHints = onToggleHints,
+            onHintsPlaced = onHintsPlaced,
+        )
         actions.onOpenFriends?.let { InviteBadge(it, Modifier.align(Alignment.End)) }
         BalancePanel(displayedBalance, game)
-        BetRow(game, ui.allInRemaining, actions.onSelectBet, actions.onAllIn)
+        BetRow(
+            game,
+            ui.allInRemaining,
+            actions.onSelectBet,
+            onAllIn = onAllIn,
+            onAllInPlaced = onAllInPlaced,
+        )
 
         val onFlip = {
             feedback.play(SoundCue.DEAL)
@@ -190,25 +222,50 @@ fun PlayScreen(
 
         val drawing = game.phase == Phase.HOLD
         val picking = game.phase == Phase.DOUBLE_UP
-        ActionButton(
-            text = stringResource(
-                when {
-                    picking -> R.string.play_pick_card
-                    drawing -> R.string.play_draw
-                    else -> R.string.play_deal
+        Column(
+            Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            ActionButton(
+                text = stringResource(
+                    when {
+                        picking -> R.string.play_pick_card
+                        drawing -> R.string.play_draw
+                        else -> R.string.play_deal
+                    },
+                ),
+                icon = if (drawing) "↻" else "♠",
+                onClick = {
+                    if (!drawing) feedback.haptics.medium()
+                    actions.onMainAction()
                 },
-            ),
-            icon = if (drawing) "↻" else "♠",
-            onClick = {
-                if (!drawing) feedback.haptics.medium()
-                actions.onMainAction()
-            },
-            enabled = !picking,
-            modifier = Modifier
-                .fillMaxWidth()
-                .onGloballyPositioned { placement.button = it }
-                .testTag("main-button"),
-        )
+                enabled = !picking,
+                color = when {
+                    picking -> Color.Unspecified
+                    drawing -> VpColors.Draw
+                    else -> VpColors.Deal
+                },
+                colorDeep = when {
+                    picking -> Color.Unspecified
+                    drawing -> VpColors.DrawDeep
+                    else -> VpColors.DealDeep
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { placement.button = it }
+                    .testTag("main-button"),
+            )
+            if (!picking) {
+                Text(
+                    text = stringResource(if (drawing) R.string.play_draw_help else R.string.play_deal_help),
+                    modifier = Modifier.testTag("main-button-help"),
+                    color = VpColors.TextMuted,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
 
         ResultPanel(ui, actions.onDoubleUp)
 
@@ -231,12 +288,15 @@ fun PlayScreen(
         val label = when (coach) {
             is CoachTarget.Hold -> stringResource(R.string.coach_hold)
             is CoachTarget.Release -> stringResource(R.string.coach_release)
+            CoachTarget.Hints -> stringResource(R.string.coach_hints)
+            CoachTarget.AllIn -> stringResource(R.string.coach_all_in)
             CoachTarget.Draw, CoachTarget.Deal -> stringResource(R.string.coach_press, action)
         }
         CoachOverlay(
             hole = spot,
             label = label,
-            pointsUp = coach is CoachTarget.Hold || coach is CoachTarget.Release,
+            pointsUp = coach is CoachTarget.Hold || coach is CoachTarget.Release ||
+                coach is CoachTarget.Hints || coach is CoachTarget.AllIn,
         )
     }
     }
@@ -246,6 +306,8 @@ fun PlayScreen(
 private class TablePlacement {
     var root by mutableStateOf<LayoutCoordinates?>(null)
     var button by mutableStateOf<LayoutCoordinates?>(null)
+    var hints by mutableStateOf<LayoutCoordinates?>(null)
+    var allIn by mutableStateOf<LayoutCoordinates?>(null)
     var cardsTick by mutableIntStateOf(0)
     val cards = arrayOfNulls<LayoutCoordinates>(5)
 
@@ -254,6 +316,22 @@ private class TablePlacement {
         cards[index] = coords
         cardsTick++
     }
+
+    fun placeHints(coords: LayoutCoordinates) {
+        if (hints.sameSpot(coords)) return
+        hints = coords
+    }
+
+    fun placeAllIn(coords: LayoutCoordinates) {
+        if (allIn.sameSpot(coords)) return
+        allIn = coords
+    }
+}
+
+private fun LayoutCoordinates?.sameSpot(next: LayoutCoordinates): Boolean {
+    val current = this ?: return false
+    if (!current.isAttached || !next.isAttached) return false
+    return current.size == next.size && current.positionInWindow() == next.positionInWindow()
 }
 
 private fun coachHole(placement: TablePlacement, coach: CoachTarget?): Rect? {
@@ -262,6 +340,8 @@ private fun coachHole(placement: TablePlacement, coach: CoachTarget?): Rect? {
     val target = when (coach) {
         is CoachTarget.Hold -> placement.cards.getOrNull(coach.index)
         is CoachTarget.Release -> placement.cards.getOrNull(coach.index)
+        CoachTarget.Hints -> placement.hints
+        CoachTarget.AllIn -> placement.allIn
         CoachTarget.Draw, CoachTarget.Deal -> placement.button
     } ?: return null
     if (!root.isAttached || !target.isAttached) return null
@@ -270,7 +350,12 @@ private fun coachHole(placement: TablePlacement, coach: CoachTarget?): Rect? {
 }
 
 @Composable
-private fun Header(ui: UiState, onToggleSound: () -> Unit, onToggleHints: () -> Unit) {
+private fun Header(
+    ui: UiState,
+    onToggleSound: () -> Unit,
+    onToggleHints: () -> Unit,
+    onHintsPlaced: (LayoutCoordinates) -> Unit,
+) {
     val soundOn = ui.settings.soundEnabled
     val hintsOn = ui.settings.hintsEnabled
     val hintsLabel = stringResource(if (hintsOn) R.string.play_hints_on else R.string.play_hints_off)
@@ -299,6 +384,7 @@ private fun Header(ui: UiState, onToggleSound: () -> Unit, onToggleHints: () -> 
                 .background(if (hintsOn) VpColors.Hint.copy(alpha = 0.45f) else VpColors.Surface)
                 .semantics { contentDescription = hintsLabel }
                 .toggleable(value = hintsOn, role = Role.Switch, onValueChange = { onToggleHints() })
+                .onGloballyPositioned(onHintsPlaced)
                 .testTag("hints-toggle"),
             contentAlignment = Alignment.Center,
         ) {

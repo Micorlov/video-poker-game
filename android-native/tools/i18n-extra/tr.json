@@ -101,5 +101,8 @@
  "toast_invites_rewarded": "🎉 Arkadaşların katıldı — %1$s çip kazandın!",
  "coach_hold": "Tutmak için dokun",
  "coach_release": "Bırakmak için dokun",
- "coach_press": "Şimdi %1$s dokun"
+ "coach_press": "Şimdi %1$s dokun",
+ "coach_hints": "İpucu için lambaya dokun",
+ "coach_all_in": "Günde bir, kartları gördükten sonra",
+ "toast_all_in_after_cards": "Günde bir — kartları gördükten sonra"
 }

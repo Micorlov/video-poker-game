@@ -15,6 +15,8 @@
     <string name="coach_hold">Ketuk untuk menahan</string>
     <string name="coach_release">Ketuk untuk melepas</string>
     <string name="coach_press">Sekarang ketuk %1$s</string>
+    <string name="coach_hints">Ketuk lampu untuk petunjuk</string>
+    <string name="coach_all_in">Sekali sehari, setelah kartu terbuka</string>
     <string name="play_held">DITAHAN</string>
     <string name="play_nothing">Tidak ada — %1$s</string>
     <string name="play_win_streak">Rentetan menang</string>
@@ -135,6 +137,7 @@
     <string name="win_royal_flush">Royal Flush</string>
     <string name="toast_all_in_good_luck">🔥 ALL IN — semoga beruntung!</string>
     <string name="toast_no_all_in_left">⛔ All-in habis — kembali besok!</string>
+    <string name="toast_all_in_after_cards">Sekali sehari — setelah kartu terbuka</string>
     <string name="play_all_in">ALL IN</string>
     <string name="play_all_in_left">sisa %1$d</string>
     <string name="play_this_hand">tangan ini</string>

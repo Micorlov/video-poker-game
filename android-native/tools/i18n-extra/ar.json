@@ -110,5 +110,8 @@
  "toast_invites_rewarded": "🎉 انضم أصدقاء — ربحت %1$s رقاقة!",
  "coach_hold": "اضغط للاحتفاظ",
  "coach_release": "اضغط للإفلات",
- "coach_press": "الآن اضغط %1$s"
+ "coach_press": "الآن اضغط %1$s",
+ "coach_hints": "اضغط المصباح للحصول على تلميحات",
+ "coach_all_in": "مرة في اليوم، بعد ظهور الأوراق",
+ "toast_all_in_after_cards": "مرة في اليوم — بعد ظهور الأوراق"
 }
