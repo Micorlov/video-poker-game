@@ -15,7 +15,7 @@ The tutorial is derived UI state. `FirstHands.coach` decides the next control fr
 
 This is the product order. Do not rearrange it.
 
-1. Hands where `lifetimeHands` is 0 and 1: the floating hand points at each paying card, then Draw. After the draw, once the cards are face up, it says you won (the hand name) and points at the result. Then it points at Deal.
+1. Hands where `lifetimeHands` is 0 and 1: the floating hand points at each paying card, then Draw. The win is announced as soon as the replacement cards are face up. There is no pause between the draw landing and the win. The coach says you won (the hand name) and points at the result, then points at Deal.
 2. The third hand (`lifetimeHands == 2`), only after those cards are face up: point at ALL IN. Say it is once a day and only while this hand's cards are face up.
 3. After that acknowledgement, still on the third hand: point at the hints lamp. Tapping it turns hints on.
 4. Then the coach disappears. The third hand is not coached card by card.
