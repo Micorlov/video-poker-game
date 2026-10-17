@@ -8,6 +8,7 @@
 //   PLAY_TRACK=internal node scripts/play-native-release.js commit
 //     The play-publisher service account may upload and release to testing tracks
 //     but not to production: ship to internal, then promote it in the console.
+//   PLAY_SKIP_LISTINGS=1 ...  # version update only: AAB + release notes, listings and screenshots untouched
 //
 // Build first:  source ~/keys/videopoker-upload.env && (cd android-native && ./gradlew bundleRelease)
 // Auth: service account JSON at $PLAY_SERVICE_ACCOUNT, default ~/Downloads/play-service-account.json.
@@ -18,6 +19,7 @@ const { JWT } = require('google-auth-library');
 
 const PKG = 'com.micorlov.videopoker';
 const TRACK = process.env.PLAY_TRACK || 'production';
+const SKIP_LISTINGS = process.env.PLAY_SKIP_LISTINGS === '1';
 const ROOT = path.join(__dirname, '..');
 const NATIVE = path.join(ROOT, 'android-native');
 const AAB_PATH = path.join(NATIVE, 'app/build/outputs/bundle/release/app-release.aab');
@@ -73,7 +75,7 @@ function gradleVersion() {
 // leaves a half-built edit behind.
 function loadAssets() {
     const notes = JSON.parse(fs.readFileSync(NOTES_PATH, 'utf8'));
-    const listings = JSON.parse(fs.readFileSync(LISTINGS_PATH, 'utf8'));
+    const listings = SKIP_LISTINGS ? {} : JSON.parse(fs.readFileSync(LISTINGS_PATH, 'utf8'));
 
     for (const [lang, text] of Object.entries(notes)) {
         if (text.length > NOTES_LIMIT) throw new Error(`${lang}: release notes are ${text.length} chars, over ${NOTES_LIMIT}`);
@@ -113,7 +115,7 @@ async function replaceScreenshots(token, editId, lang, files) {
 (async () => {
     const { versionCode, versionName } = gradleVersion();
     const { notes, listings, screenshots } = loadAssets();
-    console.log(`local checks ok — ${versionName} (${versionCode}), ${Object.keys(listings).length} locales`);
+    console.log(`local checks ok — ${versionName} (${versionCode}), ${Object.keys(notes).length} release-note locales, ${Object.keys(listings).length} listings`);
 
     const key = JSON.parse(fs.readFileSync(KEY_FILE, 'utf8'));
     const jwt = new JWT({
