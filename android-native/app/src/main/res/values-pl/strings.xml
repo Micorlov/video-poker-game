@@ -302,4 +302,10 @@
     <string name="toast_account_deleted">Konto usunięte</string>
     <string name="toast_account_delete_failed">Nie udało się usunąć konta — sprawdź połączenie i spróbuj ponownie</string>
     <string name="settings_privacy_policy">Polityka prywatności</string>
+    <string name="prompt_notify_title">Zezwolić na powiadomienia?</string>
+    <string name="prompt_notify_body">Dostaniesz przypomnienie, gdy dzienny bonus będzie gotowy.</string>
+    <string name="prompt_notify_allow">Zezwól na powiadomienia</string>
+    <string name="prompt_rate_title">Oceń nas na 5 gwiazdek</string>
+    <string name="prompt_rate_body">Podoba Ci się Wideo Poker? Oceń aplikację na 5 gwiazdek w Sklepie Play.</string>
+    <string name="prompt_rate_action">Oceń na 5 gwiazdek</string>
 </resources>

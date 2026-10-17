@@ -100,9 +100,23 @@ fun VideoPokerApp(
         var tab by rememberSaveable { mutableStateOf(Tab.PLAY) }
         var choosingLanguage by rememberSaveable { mutableStateOf(false) }
         LaunchedEffect(ui.settings.dailyReminderEnabled) { DailyReminderScheduler.sync(context, ui.settings.dailyReminderEnabled) }
-        val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+        var promptPermissionPending by rememberSaveable { mutableStateOf(false) }
+        val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (!promptPermissionPending) return@rememberLauncherForActivityResult
+            promptPermissionPending = false
+            viewModel.onNotificationPermissionResult(granted)
+        }
         val requestNotifications = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        val allowNotificationPrompt = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                promptPermissionPending = true
+                viewModel.onNotificationPromptAwaitingSystem()
+                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                viewModel.onNotificationPermissionResult(true)
+            }
         }
         var celebration by remember { mutableStateOf<Celebration?>(null) }
 
@@ -159,6 +173,22 @@ fun VideoPokerApp(
                 onDismiss = viewModel::onReviewDismissed,
             )
         }
+        if (ui.notificationPromptVisible) {
+            NotificationPrompt(
+                onAllow = allowNotificationPrompt,
+                onDismiss = viewModel::onNotificationPromptDismissed,
+            )
+        }
+        if (ui.ratingPromptVisible) {
+            RatingPrompt(
+                storeUrl = StoreLinks.listingUri(context.packageName).toString(),
+                onRate = {
+                    viewModel.onRatingPromptAccepted()
+                    StoreLinks.openListing(context)
+                },
+                onDismiss = viewModel::onRatingPromptDismissed,
+            )
+        }
 
         LaunchedEffect(celebration?.id) {
             val id = celebration?.id ?: return@LaunchedEffect
@@ -172,6 +202,7 @@ fun VideoPokerApp(
                 onMainAction = viewModel::onMainAction,
                 onToggleHold = viewModel::onToggleHold,
                 onSelectBet = viewModel::onSelectBet,
+                onBetLocked = viewModel::onBetLocked,
                 onRevealed = viewModel::onRevealed,
                 onToggleSound = viewModel::onToggleSound,
                 onToggleHints = viewModel::onToggleHints,

@@ -107,5 +107,11 @@
  "coach_all_in": "दिन में एक बार, कार्ड दिखने के बाद",
  "coach_hold_voice": "रखने के लिए टैप करें: %1$s",
  "coach_release_voice": "छोड़ने के लिए टैप करें: %1$s",
- "toast_all_in_after_cards": "दिन में एक बार — कार्ड दिखने के बाद"
+ "toast_all_in_after_cards": "दिन में एक बार — कार्ड दिखने के बाद",
+ "prompt_notify_title": "सूचनाओं की अनुमति दें?",
+ "prompt_notify_body": "दैनिक बोनस तैयार होने पर याद दिलाएँगे।",
+ "prompt_notify_allow": "सूचनाएँ चालू करें",
+ "prompt_rate_title": "हमें 5 स्टार दें",
+ "prompt_rate_body": "वीडियो पोकर पसंद आ रहा है? Play Store पर ऐप को 5 स्टार दें।",
+ "prompt_rate_action": "5 स्टार दें"
 }

@@ -306,4 +306,10 @@
     <string name="toast_account_deleted">تم حذف الحساب</string>
     <string name="toast_account_delete_failed">تعذّر حذف الحساب — تحقق من اتصالك وحاول مجددًا</string>
     <string name="settings_privacy_policy">سياسة الخصوصية</string>
+    <string name="prompt_notify_title">السماح بالإشعارات؟</string>
+    <string name="prompt_notify_body">سنذكّرك عندما تصبح المكافأة اليومية جاهزة.</string>
+    <string name="prompt_notify_allow">السماح بالإشعارات</string>
+    <string name="prompt_rate_title">قيّمونا بـ 5 نجوم</string>
+    <string name="prompt_rate_body">هل تستمتع بفيديو بوكر؟ قيّم التطبيق بـ 5 نجوم على متجر Play.</string>
+    <string name="prompt_rate_action">تقييم بـ 5 نجوم</string>
 </resources>

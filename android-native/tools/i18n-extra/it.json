@@ -108,5 +108,11 @@
  "coach_all_in": "Una volta al giorno, dopo aver visto le carte",
  "coach_hold_voice": "Tocca per tenere: %1$s",
  "coach_release_voice": "Tocca per lasciare: %1$s",
- "toast_all_in_after_cards": "Una volta al giorno — dopo aver visto le carte"
+ "toast_all_in_after_cards": "Una volta al giorno — dopo aver visto le carte",
+ "prompt_notify_title": "Consentire le notifiche?",
+ "prompt_notify_body": "Ricevi un promemoria quando il bonus giornaliero è pronto.",
+ "prompt_notify_allow": "Consenti notifiche",
+ "prompt_rate_title": "Valutaci con 5 stelle",
+ "prompt_rate_body": "Ti piace Video Poker? Valuta l'app con 5 stelle sul Play Store.",
+ "prompt_rate_action": "Valuta con 5 stelle"
 }

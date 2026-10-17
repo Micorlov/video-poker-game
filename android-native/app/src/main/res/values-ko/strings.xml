@@ -296,4 +296,10 @@
     <string name="toast_account_deleted">계정이 삭제되었습니다</string>
     <string name="toast_account_delete_failed">계정을 삭제하지 못했습니다. 연결을 확인하고 다시 시도하세요</string>
     <string name="settings_privacy_policy">개인정보 처리방침</string>
+    <string name="prompt_notify_title">알림을 허용할까요?</string>
+    <string name="prompt_notify_body">일일 보너스가 준비되면 알려 드립니다.</string>
+    <string name="prompt_notify_allow">알림 허용</string>
+    <string name="prompt_rate_title">별 5개로 평가해 주세요</string>
+    <string name="prompt_rate_body">비디오 포커가 마음에 드시나요? Play 스토어에서 별 5개로 평가해 주세요.</string>
+    <string name="prompt_rate_action">별 5개로 평가</string>
 </resources>

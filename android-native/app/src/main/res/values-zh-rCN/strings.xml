@@ -296,4 +296,10 @@
     <string name="toast_account_deleted">账号已删除</string>
     <string name="toast_account_delete_failed">无法删除账号——请检查网络后重试</string>
     <string name="settings_privacy_policy">隐私政策</string>
+    <string name="prompt_notify_title">允许通知？</string>
+    <string name="prompt_notify_body">每日奖励准备好时提醒你。</string>
+    <string name="prompt_notify_allow">允许通知</string>
+    <string name="prompt_rate_title">给我们 5 星评价</string>
+    <string name="prompt_rate_body">喜欢视频扑克吗？请在 Play 商店给应用打 5 星。</string>
+    <string name="prompt_rate_action">打 5 星</string>
 </resources>

@@ -105,5 +105,11 @@
  "coach_all_in": "每天一次，看到牌之后",
  "coach_hold_voice": "点按保留：%1$s",
  "coach_release_voice": "点按放开：%1$s",
- "toast_all_in_after_cards": "每天一次 — 看到牌之后"
+ "toast_all_in_after_cards": "每天一次 — 看到牌之后",
+ "prompt_notify_title": "允许通知？",
+ "prompt_notify_body": "每日奖励准备好时提醒你。",
+ "prompt_notify_allow": "允许通知",
+ "prompt_rate_title": "给我们 5 星评价",
+ "prompt_rate_body": "喜欢视频扑克吗？请在 Play 商店给应用打 5 星。",
+ "prompt_rate_action": "打 5 星"
 }

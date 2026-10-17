@@ -18,6 +18,9 @@
     <string name="play_draw_help">Replaces cards you didn\'t hold.</string>
     <string name="play_hint_hold">Tap the cards you want to keep, then draw.</string>
     <string name="play_hint_bet">Pick your bet, then deal.</string>
+    <string name="play_bet_open">Tap a chip to change your bet</string>
+    <string name="play_bet_locked">Bet locked until this hand is finished</string>
+    <string name="play_bet_locked_all_in">Bet locked — All in is available</string>
     <string name="coach_hold">Tap to keep</string>
     <string name="coach_release">Tap to let go</string>
     <string name="coach_press">Now tap %1$s</string>
@@ -329,4 +332,10 @@
     <string name="toast_account_deleted">Account deleted</string>
     <string name="toast_account_delete_failed">Couldn\'t delete the account — check your connection and try again</string>
     <string name="settings_privacy_policy">Privacy policy</string>
+    <string name="prompt_notify_title">Allow notifications?</string>
+    <string name="prompt_notify_body">Get a reminder when your daily bonus is ready.</string>
+    <string name="prompt_notify_allow">Allow notifications</string>
+    <string name="prompt_rate_title">Rate us 5 stars</string>
+    <string name="prompt_rate_body">Enjoying Video Poker? Please rate the app 5 stars on the Play Store.</string>
+    <string name="prompt_rate_action">Rate 5 stars</string>
 </resources>

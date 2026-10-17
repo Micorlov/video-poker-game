@@ -297,4 +297,10 @@
     <string name="toast_account_deleted">Hesap silindi</string>
     <string name="toast_account_delete_failed">Hesap silinemedi — bağlantını kontrol edip tekrar dene</string>
     <string name="settings_privacy_policy">Gizlilik politikası</string>
+    <string name="prompt_notify_title">Bildirimlere izin verilsin mi?</string>
+    <string name="prompt_notify_body">Günlük bonusun hazır olduğunda bir hatırlatma al.</string>
+    <string name="prompt_notify_allow">Bildirimlere izin ver</string>
+    <string name="prompt_rate_title">Bizi 5 yıldızla değerlendirin</string>
+    <string name="prompt_rate_body">Video Poker hoşunuza gidiyor mu? Uygulamayı Play Store\'da 5 yıldızla değerlendirin.</string>
+    <string name="prompt_rate_action">5 yıldız ver</string>
 </resources>

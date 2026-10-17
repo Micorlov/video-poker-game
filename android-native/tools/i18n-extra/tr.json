@@ -106,5 +106,11 @@
  "coach_all_in": "Günde bir, kartları gördükten sonra",
  "coach_hold_voice": "Tutmak için dokun: %1$s",
  "coach_release_voice": "Bırakmak için dokun: %1$s",
- "toast_all_in_after_cards": "Günde bir — kartları gördükten sonra"
+ "toast_all_in_after_cards": "Günde bir — kartları gördükten sonra",
+ "prompt_notify_title": "Bildirimlere izin verilsin mi?",
+ "prompt_notify_body": "Günlük bonusun hazır olduğunda bir hatırlatma al.",
+ "prompt_notify_allow": "Bildirimlere izin ver",
+ "prompt_rate_title": "Bizi 5 yıldızla değerlendirin",
+ "prompt_rate_body": "Video Poker hoşunuza gidiyor mu? Uygulamayı Play Store'da 5 yıldızla değerlendirin.",
+ "prompt_rate_action": "5 yıldız ver"
 }

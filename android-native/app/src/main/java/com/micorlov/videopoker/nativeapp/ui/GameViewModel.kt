@@ -17,6 +17,9 @@ import com.micorlov.videopoker.nativeapp.domain.Card
 import com.micorlov.videopoker.nativeapp.domain.DailyProfitPolicy
 import com.micorlov.videopoker.nativeapp.domain.DoubleUpResult
 import com.micorlov.videopoker.nativeapp.domain.DrawOutcome
+import com.micorlov.videopoker.nativeapp.domain.EngagementPrompt
+import com.micorlov.videopoker.nativeapp.domain.EngagementPromptPolicy
+import com.micorlov.videopoker.nativeapp.domain.EngagementPromptState
 import com.micorlov.videopoker.nativeapp.domain.GameEngine
 import com.micorlov.videopoker.nativeapp.domain.GameEvent
 import com.micorlov.videopoker.nativeapp.domain.GameState
@@ -52,6 +55,10 @@ data class UiState(
     val allInSignInPrompt: Boolean = false,
     /** The "Enjoying Video Poker?" card is up. */
     val reviewCardVisible: Boolean = false,
+    /** Push-notification permission, asked once after ten completed hands. */
+    val notificationPromptVisible: Boolean = false,
+    /** Five-star Play Store rating, asked once after twenty paying hands. */
+    val ratingPromptVisible: Boolean = false,
     /** The opening hand has already pointed at the hints lamp. */
     val hintsTipSeen: Boolean = false,
     /** The opening hand has already explained that ALL IN is once a day. */
@@ -399,6 +406,9 @@ class GameViewModel(
 
     fun onSelectBet(amount: Int) = commit(Transition(GameEngine.selectBet(_state.value.game, amount)))
 
+    /** A stake chip was tapped while the hand still owns the bet. */
+    fun onBetLocked() = showToast(ToastMessage.FinishHandFirst)
+
     fun onSelectVariant(variant: Variant) {
         val before = _state.value.game
         val transition = GameEngine.selectVariant(before, variant)
@@ -425,7 +435,73 @@ class GameViewModel(
         current.game.outcome?.let {
             effectChannel.trySend(UiEffect.HandRevealed(it))
             if (it.isWin) onWin(current.game)
+            recordTurn(current.game)
         }
+    }
+
+    /**
+     * One completed hand. A paying hand counts toward the rating ask. The dialog waits until
+     * this hand's cards are face up, and until no other prompt owns the screen.
+     */
+    private fun recordTurn(game: GameState) {
+        val outcome = game.outcome ?: return
+        var prompts = repository.loadEngagementPrompts()
+        if (outcome.isWin) prompts = prompts.copy(rewardedTurns = prompts.rewardedTurns + 1)
+        if (EngagementPromptPolicy.notificationAlreadySatisfied(game.lifetimeHands, prompts, notificationsEnabled())) {
+            prompts = prompts.copy(notificationAsked = true)
+        }
+        repository.saveEngagementPrompts(prompts)
+        showEngagementPrompt(game.lifetimeHands, prompts)
+    }
+
+    private fun showEngagementPrompt(turnsPlayed: Int, prompts: EngagementPromptState) {
+        val ui = _state.value
+        if (ui.showOnboarding || ui.notificationPromptVisible || ui.ratingPromptVisible || ui.reviewCardVisible || ui.allInOffer != null) return
+        when (EngagementPromptPolicy.decide(turnsPlayed, prompts, notificationsEnabled())) {
+            EngagementPrompt.NOTIFICATIONS -> _state.update { it.copy(notificationPromptVisible = true) }
+            EngagementPrompt.RATING -> _state.update { it.copy(ratingPromptVisible = true) }
+            EngagementPrompt.NONE -> Unit
+        }
+    }
+
+    private fun notificationsEnabled(): Boolean = with(_state.value.settings) {
+        notifySocial || notifyLeaderboard || dailyReminderEnabled || notifyBestHand
+    }
+
+    /**
+     * Hide the in-app dialog while the system permission sheet is up. The ask stays unspent
+     * until [onNotificationPermissionResult] reports what the player chose.
+     */
+    fun onNotificationPromptAwaitingSystem() {
+        _state.update { it.copy(notificationPromptVisible = false) }
+    }
+
+    /**
+     * The system permission sheet finished. Categories turn on only when permission was
+     * granted; either way the ten-turn ask is spent.
+     */
+    fun onNotificationPermissionResult(granted: Boolean) {
+        if (granted) onEnableNotifications()
+        finishNotificationPrompt()
+    }
+
+    fun onNotificationPromptDismissed() = finishNotificationPrompt()
+
+    private fun finishNotificationPrompt() {
+        val prompts = repository.loadEngagementPrompts().copy(notificationAsked = true)
+        repository.saveEngagementPrompts(prompts)
+        _state.update { it.copy(notificationPromptVisible = false) }
+        showEngagementPrompt(_state.value.game.lifetimeHands, prompts)
+    }
+
+    /** "Rate 5 stars" or the Play Store link: don't ask again. The UI opens the listing. */
+    fun onRatingPromptAccepted() = finishRatingPrompt()
+
+    fun onRatingPromptDismissed() = finishRatingPrompt()
+
+    private fun finishRatingPrompt() {
+        repository.saveEngagementPrompts(repository.loadEngagementPrompts().copy(ratingAsked = true))
+        _state.update { it.copy(ratingPromptVisible = false) }
     }
 
     /** Any paying hand can earn the rating ask; [ReviewPolicy] decides whether this one does. */
@@ -450,7 +526,8 @@ class GameViewModel(
      */
     fun onReviewTimer(blocked: Boolean) {
         reviewTimerPending = false
-        if (reviewAskedThisSession || blocked || _state.value.allInOffer != null || _state.value.reviewCardVisible) return
+        val ui = _state.value
+        if (reviewAskedThisSession || blocked || ui.allInOffer != null || ui.reviewCardVisible || ui.notificationPromptVisible || ui.ratingPromptVisible) return
         val state = repository.loadReview()
         val now = clock()
         when (ReviewPolicy.decide(state, now)) {
@@ -474,11 +551,13 @@ class GameViewModel(
         repository.saveReview(repository.loadReview().copy(rated = true))
         events.log(AnalyticsEvents.REVIEW_CARD_RATE, emptyMap())
         _state.update { it.copy(reviewCardVisible = false) }
+        showEngagementPrompt(_state.value.game.lifetimeHands, repository.loadEngagementPrompts())
     }
 
     fun onReviewDismissed() {
         events.log(AnalyticsEvents.REVIEW_CARD_DISMISSED, emptyMap())
         _state.update { it.copy(reviewCardVisible = false) }
+        showEngagementPrompt(_state.value.game.lifetimeHands, repository.loadEngagementPrompts())
     }
 
     fun onToggleSound() = updateSettings { it.copy(soundEnabled = !it.soundEnabled) }

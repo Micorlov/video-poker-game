@@ -107,5 +107,11 @@
  "coach_all_in": "Einmal am Tag, wenn die Karten offen sind",
  "coach_hold_voice": "Tippen zum Behalten: %1$s",
  "coach_release_voice": "Tippen zum Loslassen: %1$s",
- "toast_all_in_after_cards": "Einmal am Tag — erst wenn die Karten offen sind"
+ "toast_all_in_after_cards": "Einmal am Tag — erst wenn die Karten offen sind",
+ "prompt_notify_title": "Benachrichtigungen erlauben?",
+ "prompt_notify_body": "Hol dir eine Erinnerung, wenn dein täglicher Bonus bereit ist.",
+ "prompt_notify_allow": "Benachrichtigungen erlauben",
+ "prompt_rate_title": "Bewerte uns mit 5 Sternen",
+ "prompt_rate_body": "Gefällt dir Video Poker? Bitte bewerte die App mit 5 Sternen im Play Store.",
+ "prompt_rate_action": "Mit 5 Sternen bewerten"
 }

@@ -105,5 +105,11 @@
  "coach_all_in": "1日1回、カードが見えてから",
  "coach_hold_voice": "キープ: %1$s",
  "coach_release_voice": "戻す: %1$s",
- "toast_all_in_after_cards": "1日1回 — カードが見えてから"
+ "toast_all_in_after_cards": "1日1回 — カードが見えてから",
+ "prompt_notify_title": "通知を許可しますか？",
+ "prompt_notify_body": "デイリーボーナスの準備ができたらお知らせします。",
+ "prompt_notify_allow": "通知を許可",
+ "prompt_rate_title": "5つ星で評価する",
+ "prompt_rate_body": "ビデオポーカーを楽しんでいますか？Playストアで5つ星の評価をお願いします。",
+ "prompt_rate_action": "5つ星で評価"
 }

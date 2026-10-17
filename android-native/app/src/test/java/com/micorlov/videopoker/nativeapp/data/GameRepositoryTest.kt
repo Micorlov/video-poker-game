@@ -1,5 +1,6 @@
 package com.micorlov.videopoker.nativeapp.data
 
+import com.micorlov.videopoker.nativeapp.domain.EngagementPromptState
 import com.micorlov.videopoker.nativeapp.domain.PlayStats
 import com.micorlov.videopoker.nativeapp.domain.Rules
 import com.micorlov.videopoker.nativeapp.domain.BestHand
@@ -14,6 +15,14 @@ class GameRepositoryTest {
 
     private val store = InMemoryStore()
     private val repository = GameRepository(store)
+
+    @Test
+    fun `engagement prompts round-trip and default to unasked`() {
+        assertEquals(EngagementPromptState(), repository.loadEngagementPrompts())
+        val saved = EngagementPromptState(rewardedTurns = 20, notificationAsked = true, ratingAsked = true)
+        repository.saveEngagementPrompts(saved)
+        assertEquals(saved, GameRepository(store).loadEngagementPrompts())
+    }
 
     @Test
     fun `an empty store gives a fresh game`() {

@@ -302,4 +302,10 @@
     <string name="toast_account_deleted">Аккаунт удалён</string>
     <string name="toast_account_delete_failed">Не удалось удалить аккаунт — проверьте подключение и повторите попытку</string>
     <string name="settings_privacy_policy">Политика конфиденциальности</string>
+    <string name="prompt_notify_title">Разрешить уведомления?</string>
+    <string name="prompt_notify_body">Напомним, когда ежедневный бонус будет готов.</string>
+    <string name="prompt_notify_allow">Разрешить уведомления</string>
+    <string name="prompt_rate_title">Оцените нас на 5 звёзд</string>
+    <string name="prompt_rate_body">Нравится Видео-покер? Поставьте приложению 5 звёзд в Play Store.</string>
+    <string name="prompt_rate_action">Поставить 5 звёзд</string>
 </resources>

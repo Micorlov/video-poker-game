@@ -300,4 +300,10 @@
     <string name="toast_account_deleted">החשבון נמחק</string>
     <string name="toast_account_delete_failed">לא ניתן היה למחוק את החשבון — בדקו את החיבור ונסו שוב</string>
     <string name="settings_privacy_policy">מדיניות פרטיות</string>
+    <string name="prompt_notify_title">לאפשר התראות?</string>
+    <string name="prompt_notify_body">נשלח תזכורת כשהבונוס היומי מוכן.</string>
+    <string name="prompt_notify_allow">אפשרו התראות</string>
+    <string name="prompt_rate_title">דרגו אותנו ב-5 כוכבים</string>
+    <string name="prompt_rate_body">נהנים מווידאו פוקר? דרגו את האפליקציה ב-5 כוכבים ב-Play Store.</string>
+    <string name="prompt_rate_action">דרגו 5 כוכבים</string>
 </resources>

@@ -298,4 +298,10 @@
     <string name="toast_account_deleted">Conta excluída</string>
     <string name="toast_account_delete_failed">Não foi possível excluir a conta — verifique sua conexão e tente novamente</string>
     <string name="settings_privacy_policy">Política de privacidade</string>
+    <string name="prompt_notify_title">Permitir notificações?</string>
+    <string name="prompt_notify_body">Receba um lembrete quando seu bônus diário estiver pronto.</string>
+    <string name="prompt_notify_allow">Permitir notificações</string>
+    <string name="prompt_rate_title">Avalie com 5 estrelas</string>
+    <string name="prompt_rate_body">Curtindo Video Poker? Avalie o app com 5 estrelas na Play Store.</string>
+    <string name="prompt_rate_action">Avaliar com 5 estrelas</string>
 </resources>

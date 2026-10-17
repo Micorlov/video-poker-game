@@ -4,6 +4,7 @@ import com.micorlov.videopoker.nativeapp.domain.AppLanguage
 import com.micorlov.videopoker.nativeapp.domain.BestHand
 import com.micorlov.videopoker.nativeapp.domain.Card
 import com.micorlov.videopoker.nativeapp.domain.DeepLink
+import com.micorlov.videopoker.nativeapp.domain.EngagementPromptState
 import com.micorlov.videopoker.nativeapp.domain.HandEvaluator
 import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.PlayStats
@@ -122,6 +123,18 @@ class GameRepository(private val store: KeyValueStore) {
         rated = store.getBoolean(REVIEW_RATED) ?: false,
         firstDay = store.getString(REVIEW_FIRST_DAY).orEmpty(),
     )
+
+    fun loadEngagementPrompts(): EngagementPromptState = EngagementPromptState(
+        rewardedTurns = nonNegativeInt(ENGAGEMENT_REWARDED),
+        notificationAsked = store.getBoolean(ENGAGEMENT_NOTIFICATION_ASKED) ?: false,
+        ratingAsked = store.getBoolean(ENGAGEMENT_RATING_ASKED) ?: false,
+    )
+
+    fun saveEngagementPrompts(state: EngagementPromptState) = store.write {
+        putInt(ENGAGEMENT_REWARDED, state.rewardedTurns)
+        putBoolean(ENGAGEMENT_NOTIFICATION_ASKED, state.notificationAsked)
+        putBoolean(ENGAGEMENT_RATING_ASKED, state.ratingAsked)
+    }
 
     fun saveReview(state: ReviewState) = store.write {
         putInt(REVIEW_WINS, state.wins)
@@ -312,6 +325,9 @@ class GameRepository(private val store: KeyValueStore) {
         const val REVIEW_LAST_CARD_AT = "review.lastCardAt"
         const val REVIEW_RATED = "review.rated"
         const val REVIEW_FIRST_DAY = "review.firstDay"
+        const val ENGAGEMENT_REWARDED = "engagement.rewardedTurns"
+        const val ENGAGEMENT_NOTIFICATION_ASKED = "engagement.notificationAsked"
+        const val ENGAGEMENT_RATING_ASKED = "engagement.ratingAsked"
         const val ONBOARDING_SEEN = "onboarding.seen"
         const val LAST_PLAYED_DAY = "daily.lastPlayedDay"
         const val LAST_REMINDER_DAY = "daily.lastReminderDay"

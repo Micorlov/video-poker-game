@@ -299,4 +299,10 @@
     <string name="toast_account_deleted">Compte supprimé</string>
     <string name="toast_account_delete_failed">Impossible de supprimer le compte : vérifiez votre connexion et réessayez</string>
     <string name="settings_privacy_policy">Politique de confidentialité</string>
+    <string name="prompt_notify_title">Autoriser les notifications ?</string>
+    <string name="prompt_notify_body">Recevez un rappel quand votre bonus quotidien est prêt.</string>
+    <string name="prompt_notify_allow">Autoriser les notifications</string>
+    <string name="prompt_rate_title">Notez-nous 5 étoiles</string>
+    <string name="prompt_rate_body">Vous aimez Video Poker ? Notez l\'app 5 étoiles sur le Play Store.</string>
+    <string name="prompt_rate_action">Noter 5 étoiles</string>
 </resources>

@@ -298,4 +298,10 @@
     <string name="toast_account_deleted">खाता हटा दिया गया</string>
     <string name="toast_account_delete_failed">खाता हटाया नहीं जा सका — कनेक्शन जाँचें और फिर कोशिश करें</string>
     <string name="settings_privacy_policy">गोपनीयता नीति</string>
+    <string name="prompt_notify_title">सूचनाओं की अनुमति दें?</string>
+    <string name="prompt_notify_body">दैनिक बोनस तैयार होने पर याद दिलाएँगे।</string>
+    <string name="prompt_notify_allow">सूचनाएँ चालू करें</string>
+    <string name="prompt_rate_title">हमें 5 स्टार दें</string>
+    <string name="prompt_rate_body">वीडियो पोकर पसंद आ रहा है? Play Store पर ऐप को 5 स्टार दें।</string>
+    <string name="prompt_rate_action">5 स्टार दें</string>
 </resources>

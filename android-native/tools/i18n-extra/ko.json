@@ -105,5 +105,11 @@
  "coach_all_in": "하루에 한 번, 카드가 보인 뒤에",
  "coach_hold_voice": "보관하려면 탭: %1$s",
  "coach_release_voice": "놓으려면 탭: %1$s",
- "toast_all_in_after_cards": "하루에 한 번 — 카드가 보인 뒤에"
+ "toast_all_in_after_cards": "하루에 한 번 — 카드가 보인 뒤에",
+ "prompt_notify_title": "알림을 허용할까요?",
+ "prompt_notify_body": "일일 보너스가 준비되면 알려 드립니다.",
+ "prompt_notify_allow": "알림 허용",
+ "prompt_rate_title": "별 5개로 평가해 주세요",
+ "prompt_rate_body": "비디오 포커가 마음에 드시나요? Play 스토어에서 별 5개로 평가해 주세요.",
+ "prompt_rate_action": "별 5개로 평가"
 }

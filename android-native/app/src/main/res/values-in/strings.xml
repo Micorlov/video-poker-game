@@ -296,4 +296,10 @@
     <string name="toast_account_deleted">Akun dihapus</string>
     <string name="toast_account_delete_failed">Akun tidak dapat dihapus — periksa koneksi lalu coba lagi</string>
     <string name="settings_privacy_policy">Kebijakan privasi</string>
+    <string name="prompt_notify_title">Izinkan notifikasi?</string>
+    <string name="prompt_notify_body">Dapatkan pengingat saat bonus harian siap.</string>
+    <string name="prompt_notify_allow">Izinkan notifikasi</string>
+    <string name="prompt_rate_title">Beri kami 5 bintang</string>
+    <string name="prompt_rate_body">Suka Video Poker? Beri aplikasi ini 5 bintang di Play Store.</string>
+    <string name="prompt_rate_action">Beri 5 bintang</string>
 </resources>
