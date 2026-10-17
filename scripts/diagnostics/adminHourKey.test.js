@@ -72,3 +72,59 @@ test('a compact hour key is not treated as a daily score', () => {
     assert.strictEqual(env.isDailyScoreKey('2026101714'), false);
     assert.strictEqual(env.isDailyScoreKey('2026-10-17'), true);
 });
+
+const ROSTER_SRC = [
+    read('admin.html').match(/function getLocalDayStr\(d\)[\s\S]*?\n    }/)[0],
+    read('admin.html').match(/function stampDay\(ms\)[\s\S]*?\n    }/)[0],
+    read('admin.html').match(/function mergeDailyRoster\(scores, users, opens, dayKey\)[\s\S]*?\n        return rows;\n    }/)[0]
+].join('\n');
+
+function rosterEnv() {
+    const context = vm.createContext({ Date, Math, String, Object });
+    vm.runInContext(ROSTER_SRC, context);
+    return context;
+}
+
+test('the daily board includes guests and signed-in players who have no score', () => {
+    const env = rosterEnv();
+    const noon = Date.UTC(2026, 9, 17, 12);
+    const day = env.stampDay(noon);
+    const rows = env.mergeDailyRoster(
+        [],
+        [{ uid: 'u1', displayName: 'Ada', installId: 'inst-ada', loginMs: noon, lastMs: noon }],
+        [
+            { installId: 'inst-ada', firstMs: noon, lastMs: noon },
+            { installId: 'guest99', firstMs: noon, lastMs: noon }
+        ],
+        day
+    );
+    assert.deepStrictEqual(rows.map((r) => r.displayName).sort(), ['Ada', 'Guest guest9'].sort());
+});
+
+test('a scored player stays ahead of someone who only opened the app', () => {
+    const env = rosterEnv();
+    const noon = Date.UTC(2026, 9, 17, 12);
+    const day = env.stampDay(noon);
+    const rows = env.mergeDailyRoster(
+        [{ uid: 'scored', displayName: 'Bea', score: 40 }],
+        [{ uid: 'opened', displayName: 'Ada', loginMs: noon, lastMs: noon }],
+        [],
+        day
+    );
+    assert.deepStrictEqual(rows.map((r) => r.displayName), ['Bea', 'Ada']);
+    assert.strictEqual(rows[1].score, null);
+});
+
+test('a player from another day is left off this day', () => {
+    const env = rosterEnv();
+    const noon = Date.UTC(2026, 9, 17, 12);
+    const yesterday = noon - 24 * 60 * 60 * 1000;
+    const day = env.stampDay(noon);
+    const rows = env.mergeDailyRoster(
+        [],
+        [{ uid: 'old', displayName: 'Old', loginMs: yesterday, lastMs: yesterday }],
+        [{ installId: 'old-guest', firstMs: yesterday, lastMs: yesterday }],
+        day
+    );
+    assert.deepStrictEqual(rows, []);
+});

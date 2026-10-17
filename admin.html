@@ -260,7 +260,7 @@
                         <div style="display:flex; align-items:center; gap:10px;">
                             <select id="admin-overview-select" onchange="setAdminOverviewTab(this.value)" style="padding:6px 12px; font-size:14px; border-radius:6px; background:#1b3224; border:1px solid #ffd700; color:#ffd700; cursor:pointer; font-weight:bold;">
                                 <option value="hourly">Hourly Scores (UTC)</option>
-                                <option value="daily">Daily Scores</option>
+                                <option value="daily">Daily Players</option>
                             </select>
                             <button onclick="loadCurrentHour()">↻ Refresh</button>
                         </div>
@@ -941,14 +941,183 @@
         });
     }
 
+    // Local calendar day for a millisecond timestamp. Shared by the daily
+    // roster so a guest open and a signed-in lastSeen land on the same day
+    // the panel is labelled with.
+    function stampDay(ms) {
+        if (!ms) return '';
+        return getLocalDayStr(new Date(ms));
+    }
+
+    // Everyone active on dayKey, not only rows in daily_scores. Analytics
+    // counts every app open. A signed-in player who never got a score
+    // document, and a guest who never signs in, are still players for that
+    // day. Scored rows stay first; the rest sort by name.
+    function mergeDailyRoster(scores, users, opens, dayKey) {
+        var byUid = {};
+        var installToUid = {};
+        users.forEach(function(u) {
+            if (u.installId && u.uid) installToUid[u.installId] = u.uid;
+        });
+        var activeInstalls = {};
+        opens.forEach(function(o) {
+            if (!o.installId) return;
+            if (stampDay(o.lastMs) === dayKey || stampDay(o.firstMs) === dayKey) activeInstalls[o.installId] = o;
+        });
+        scores.forEach(function(s) {
+            if (!s.uid) return;
+            byUid[s.uid] = {
+                uid: s.uid,
+                displayName: s.displayName || '—',
+                photoURL: s.photoURL || '',
+                score: s.score == null ? 0 : s.score,
+                hands: s.hands || 0,
+                playMs: s.playMs || 0,
+                rebuys: s.rebuys || 0,
+                bestHand: s.bestHand || '—',
+                hasScore: true
+            };
+        });
+        users.forEach(function(u) {
+            if (!u.uid) return;
+            var seen = stampDay(u.lastMs) === dayKey || stampDay(u.loginMs) === dayKey;
+            var opened = u.installId && activeInstalls[u.installId];
+            if (byUid[u.uid]) {
+                if (byUid[u.uid].displayName === '—' && (u.displayName || u.email)) {
+                    byUid[u.uid].displayName = u.displayName || u.email;
+                }
+                return;
+            }
+            if (!seen && !opened) return;
+            byUid[u.uid] = {
+                uid: u.uid,
+                displayName: u.displayName || u.email || '—',
+                photoURL: u.photoURL || '',
+                score: null,
+                hands: null,
+                playMs: 0,
+                rebuys: 0,
+                bestHand: '—',
+                hasScore: false
+            };
+        });
+        var rows = Object.keys(byUid).map(function(k) { return byUid[k]; });
+        Object.keys(activeInstalls).forEach(function(id) {
+            if (installToUid[id]) return;
+            rows.push({
+                uid: '',
+                displayName: 'Guest ' + String(id).slice(0, 6),
+                photoURL: '',
+                score: null,
+                hands: null,
+                playMs: 0,
+                rebuys: 0,
+                bestHand: '—',
+                hasScore: false
+            });
+        });
+        rows.sort(function(a, b) {
+            if (a.hasScore !== b.hasScore) return a.hasScore ? -1 : 1;
+            var as = a.score == null ? -Infinity : a.score;
+            var bs = b.score == null ? -Infinity : b.score;
+            if (as !== bs) return bs - as;
+            return String(a.displayName).localeCompare(String(b.displayName));
+        });
+        return rows;
+    }
+
+    function loadDailyRoster(dayKey) {
+        return Promise.all([
+            db.collection('daily_scores').where('dayKey', '==', dayKey).get(),
+            db.collection('users').get(),
+            db.collection('installs').orderBy('at', 'desc').limit(GUEST_INSTALL_LIMIT).get()
+        ]).then(function(results) {
+            var scores = results[0].docs.map(function(doc) {
+                var d = doc.data();
+                return {
+                    uid: d.uid || doc.id.slice(dayKey.length + 1),
+                    displayName: d.displayName || '',
+                    photoURL: d.photoURL || '',
+                    score: d.score == null ? 0 : d.score,
+                    hands: d.hands || 0,
+                    playMs: d.playMs || 0,
+                    rebuys: d.rebuys || 0,
+                    bestHand: d.bestHand || '—'
+                };
+            });
+            var users = results[1].docs.map(function(doc) {
+                var d = doc.data();
+                return {
+                    uid: doc.id,
+                    displayName: d.displayName || '',
+                    email: d.email || '',
+                    photoURL: d.photoURL || '',
+                    installId: d.installId || '',
+                    lastMs: tsMillis(d.lastSeen),
+                    loginMs: tsMillis(d.lastLogin)
+                };
+            });
+            var opens = [];
+            results[2].docs.forEach(function(doc) {
+                var d = doc.data();
+                if (d.stage !== 'open' || !d.installId) return;
+                var firstMs = tsMillis(d.at);
+                opens.push({ installId: d.installId, firstMs: firstMs, lastMs: tsMillis(d.lastOpenAt) || firstMs });
+            });
+            return mergeDailyRoster(scores, users, opens, dayKey);
+        });
+    }
+
+    function renderPlayerRows(tbody, rows, rowKey, isDaily) {
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No players this ' + (isDaily ? 'day' : 'hour') + ' yet</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        rows.forEach(function(d, i) {
+            var rank = i + 1;
+            var medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+            var s = d.score;
+            var scoreClass = s > 0 ? 'positive' : s < 0 ? 'negative' : '';
+            var scoreText = s == null ? '—' : (s > 0 ? '+' + s : '' + s);
+            var photo = d.photoURL ? '<img src="' + d.photoURL + '">' : '';
+            var actions = (d.hasScore && d.uid)
+                ? '<button class="btn-action btn-reset" onclick="resetScore(\'' + rowKey + '\', \'' + d.uid + '\', ' + isDaily + ')">Reset</button>' +
+                  '<button class="btn-action btn-delete" onclick="deleteScore(\'' + rowKey + '\', \'' + d.uid + '\', ' + isDaily + ')">Delete</button>'
+                : '';
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + medal + '</td>' +
+                '<td>' + photo + escapeHtml(d.displayName || '—') + '</td>' +
+                '<td class="' + scoreClass + '">' + scoreText + '</td>' +
+                '<td>' + (d.hands == null ? '—' : d.hands) + '</td>' +
+                '<td>' + formatPlayTime(d.playMs) + '</td>' +
+                '<td>' + (d.hasScore ? (d.rebuys || 0) : '—') + '</td>' +
+                '<td>' + escapeHtml(d.bestHand || '—') + '</td>' +
+                '<td>' + actions + '</td>';
+            tbody.appendChild(tr);
+        });
+    }
+
     function loadCurrentHour() {
         var isDaily = adminOverviewTab === 'daily';
         var keyValue = isDaily ? getDayKey(0) : getHourKey(0);
         var tbody = document.getElementById('live-body');
 
-        var query = isDaily
-            ? db.collection('daily_scores').where('dayKey', '==', keyValue).orderBy('score', 'desc')
-            : db.collection('hourly').doc(keyValue).collection('entries').orderBy('points', 'desc');
+        if (isDaily) {
+            loadDailyRoster(keyValue).then(function(rows) {
+                var totalRebuys = 0;
+                rows.forEach(function(r) { totalRebuys += r.rebuys || 0; });
+                document.getElementById('s-hour-players').textContent = rows.length;
+                document.getElementById('s-hour-rebuys').textContent = totalRebuys;
+                renderPlayerRows(tbody, rows, keyValue, true);
+            }).catch(function(err) {
+                tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Could not load players (' + (err.code || err.message) + ')</td></tr>';
+            });
+            return;
+        }
+
+        var query = db.collection('hourly').doc(keyValue).collection('entries').orderBy('points', 'desc');
 
         query.get().then(function(snap) {
             document.getElementById('s-hour-players').textContent = snap.size;
@@ -1285,9 +1454,18 @@
 
         document.getElementById('comp-hour-label').textContent = isDaily ? keyValue : formatHourLabel(keyValue);
 
-        var query = isDaily
-            ? db.collection('daily_scores').where('dayKey', '==', keyValue).orderBy('score', 'desc')
-            : db.collection('hourly').doc(keyValue).collection('entries').orderBy('points', 'desc');
+        if (isDaily) {
+            var compBody = document.getElementById('comp-body');
+            loadDailyRoster(keyValue).then(function(rows) {
+                document.getElementById('comp-count').textContent = rows.length + ' players';
+                renderPlayerRows(compBody, rows, keyValue, true);
+            }).catch(function(err) {
+                compBody.innerHTML = '<tr><td colspan="8" class="empty-state">Could not load players (' + (err.code || err.message) + ')</td></tr>';
+            });
+            return;
+        }
+
+        var query = db.collection('hourly').doc(keyValue).collection('entries').orderBy('points', 'desc');
 
         query.get().then(function(snap) {
             document.getElementById('comp-count').textContent = snap.size + ' players';
