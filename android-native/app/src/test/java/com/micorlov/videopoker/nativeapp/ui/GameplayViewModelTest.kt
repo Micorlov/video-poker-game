@@ -77,6 +77,30 @@ class GameplayViewModelTest {
     }
 
     @Test
+    fun `the lamp leaves with the hand and lights itself on the next face-up deal`() {
+        val vm = viewModel(UserSettings(hintsEnabled = true, feedbackEnabled = false))
+
+        assertFalse(vm.state.value.hintsLampVisible)
+
+        vm.reveal()
+        assertTrue(vm.state.value.hintsLampVisible)
+        assertTrue(vm.state.value.settings.hintsEnabled)
+
+        vm.onMainAction()
+        assertTrue(vm.state.value.settings.hintsEnabled)
+        assertFalse(vm.state.value.hintsLampVisible, "draw hides the lamp")
+
+        vm.reveal()
+        assertFalse(vm.state.value.hintsLampVisible, "the result is not a new deal")
+
+        vm.onMainAction()
+        assertFalse(vm.state.value.hintsLampVisible, "the next deal is still face down")
+        vm.reveal()
+        assertTrue(vm.state.value.hintsLampVisible)
+        assertTrue(vm.state.value.settings.hintsEnabled)
+    }
+
+    @Test
     fun `playing the best hold is reviewed as best and counted`() {
         val vm = viewModel()
         val best = assertNotNull(vm.state.value.holdAnalysis).bestHolds()

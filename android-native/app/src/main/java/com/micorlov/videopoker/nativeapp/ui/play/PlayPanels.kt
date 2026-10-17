@@ -186,7 +186,8 @@ fun ResultPanel(ui: UiState, onDoubleUp: () -> Unit, modifier: Modifier = Modifi
             doubleUp != null -> DoubleUpStatus(doubleUp, ui.doubleUpRevealed, doubleUpStake, onDoubleUp)
             outcome == null || !revealed -> {
                 HintText(if (game.phase == Phase.HOLD) R.string.play_hint_hold else R.string.play_hint_bet)
-                ui.holdAnalysis?.takeIf { ui.settings.hintsEnabled }?.let { EvLine(it, game.held, Modifier.padding(top = 6.dp)) }
+                ui.holdAnalysis?.takeIf { ui.settings.hintsEnabled && ui.hintsLampVisible }
+                    ?.let { EvLine(it, game.held, Modifier.padding(top = 6.dp)) }
             }
             else -> {
                 if (outcome.isWin) WinResult(outcome) else LossResult(game)

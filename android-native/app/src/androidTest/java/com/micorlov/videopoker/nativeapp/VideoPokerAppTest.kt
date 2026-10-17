@@ -65,6 +65,9 @@ class VideoPokerAppTest {
         compose.onNodeWithTag("bet-allin").performClick()
         compose.onNodeWithTag("allin-sheet").assertDoesNotExist()
         compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.coach_hints))
+        compose.waitUntil(timeoutMillis = 5_000) {
+            compose.onAllNodesWithTag("hints-toggle").fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithTag("hints-toggle").performClick()
         compose.waitUntil(timeoutMillis = 5_000) {
             compose.onAllNodesWithTag("coach-label").fetchSemanticsNodes().isEmpty()

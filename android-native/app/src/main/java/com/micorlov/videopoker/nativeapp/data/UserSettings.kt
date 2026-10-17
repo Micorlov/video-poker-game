@@ -32,7 +32,10 @@ data class UserSettings(
     val hapticsEnabled: Boolean = true,
     val theme: AppTheme = AppTheme.GREEN,
     val defaultBet: Int = Rules.DEFAULT_BET,
-    /** Strategy hints: the best hold glows blue during the hold phase. */
+    /**
+     * Strategy hints. Once the player turns the lamp on, it lights itself on each later hand
+     * when that hand's cards are face up. The lamp itself leaves the table between hands.
+     */
     val hintsEnabled: Boolean = false,
     /** After each draw, say whether the holds were the best play and what a mistake cost. */
     val feedbackEnabled: Boolean = true,
