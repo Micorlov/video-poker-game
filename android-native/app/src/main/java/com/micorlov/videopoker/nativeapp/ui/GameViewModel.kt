@@ -151,7 +151,7 @@ class GameViewModel(
     private val clock: () -> Long = System::currentTimeMillis,
     /** The review ask is for the real app only; tests leave it off. */
     private val reviewEnabled: Boolean = false,
-    /** First-run onboarding is for the real app; tests leave it off. */
+    /** First-run walkthrough. The shipped app leaves this off so a launch deals a hand at once. */
     private val onboardingEnabled: Boolean = false,
     /** Fetches the remote flags; null (tests, offline builds) keeps the cached ones. */
     private val flagFetcher: (suspend () -> RemoteFlags?)? = null,
