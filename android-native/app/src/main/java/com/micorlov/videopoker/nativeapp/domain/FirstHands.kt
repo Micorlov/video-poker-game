@@ -39,9 +39,9 @@ object FirstHands {
         hand: List<Card>,
         held: List<Boolean>,
         cardsFaceUp: Boolean,
-        /** The lamp tip, on the first hand once the cards are face up. */
+        /** The lamp tip, on the third hand after ALL IN. */
         hintsExplained: Boolean = true,
-        /** The once-a-day ALL IN tip, on the first hand after the lamp. */
+        /** The once-a-day ALL IN tip. The third hand, once its cards are face up. */
         allInExplained: Boolean = true,
     ): CoachTarget? {
         if (!applies(lifetimeHands, variant) || !cardsFaceUp) return null
@@ -49,9 +49,10 @@ object FirstHands {
             Phase.BET -> CoachTarget.Deal
             Phase.DOUBLE_UP -> null
             Phase.HOLD -> when {
-                lifetimeHands == 0 && !hintsExplained -> CoachTarget.Hints
-                lifetimeHands == 0 && !allInExplained -> CoachTarget.AllIn
-                else -> holdCoach(variant, hand, held)
+                lifetimeHands < 2 -> holdCoach(variant, hand, held)
+                !allInExplained -> CoachTarget.AllIn
+                !hintsExplained -> CoachTarget.Hints
+                else -> null
             }
         }
     }

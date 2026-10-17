@@ -1,7 +1,6 @@
 package com.micorlov.videopoker.nativeapp
 
 import android.content.Context
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertTextContains
@@ -51,31 +50,48 @@ class VideoPokerAppTest {
 
     @Test
     fun theOpeningTutorialPointsAtTheWinningCardsThenDraw() {
-        launch()
-        compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithTag("coach-label").fetchSemanticsNodes().isNotEmpty()
-        }
-
         val context = ApplicationProvider.getApplicationContext<Context>()
-        compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.coach_hints))
-        compose.onNodeWithTag("hints-toggle").performClick()
-        compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.coach_all_in))
+        val deal = context.getString(R.string.play_deal)
+        launch()
+
+        playCoachedHand(context, listOf(1, 3))
+        tapDeal(deal)
+        playCoachedHand(context, listOf(1, 3, 4))
+        tapDeal(deal)
+
+        compose.waitUntil(timeoutMillis = 5_000) {
+            coachText().contains(context.getString(R.string.coach_all_in))
+        }
         compose.onNodeWithTag("bet-allin").performClick()
         compose.onNodeWithTag("allin-sheet").assertDoesNotExist()
-        compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.coach_hold))
-        compose.onNodeWithTag("card-1").performClick()
-        compose.onNodeWithTag("card-3").performClick()
-        compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.play_draw), substring = true, ignoreCase = true)
-
-        val deal = context.getString(R.string.play_deal)
-        compose.onNodeWithTag("main-button").performClick()
+        compose.onNodeWithTag("coach-label").assertTextContains(context.getString(R.string.coach_hints))
+        compose.onNodeWithTag("hints-toggle").performClick()
         compose.waitUntil(timeoutMillis = 5_000) {
-            compose.onAllNodesWithTag("coach-label").fetchSemanticsNodes().any { node ->
-                node.config.any { (_, value) -> value.toString().contains(deal, ignoreCase = true) }
-            }
+            compose.onAllNodesWithTag("coach-label").fetchSemanticsNodes().isEmpty()
         }
-        compose.onNodeWithTag("coach-label").assertTextContains(deal, substring = true, ignoreCase = true)
     }
+
+    private fun playCoachedHand(context: Context, holds: List<Int>) {
+        val keep = context.getString(R.string.coach_hold)
+        compose.waitUntil(timeoutMillis = 5_000) { coachText().contains(keep) }
+        holds.forEach { compose.onNodeWithTag("card-$it").performClick() }
+        compose.onNodeWithTag("coach-label").assertTextContains(
+            context.getString(R.string.play_draw),
+            substring = true,
+            ignoreCase = true,
+        )
+        compose.onNodeWithTag("main-button").performClick()
+    }
+
+    private fun tapDeal(deal: String) {
+        compose.waitUntil(timeoutMillis = 5_000) { coachText().contains(deal, ignoreCase = true) }
+        compose.onNodeWithTag("main-button").performClick()
+    }
+
+    private fun coachText(): String =
+        compose.onAllNodesWithTag("coach-label").fetchSemanticsNodes().joinToString { node ->
+            node.config.joinToString { (_, value) -> value.toString() }
+        }
 
     @Test
     fun launchDealsAHandAndChargesTheStake() {

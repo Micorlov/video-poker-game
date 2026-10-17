@@ -37,23 +37,14 @@ class FirstHandsTest {
     }
 
     @Test
-    fun `the first hand points at the lamp then at all in`() {
-        val hand = checkNotNull(FirstHands.scriptedHand(0, Variant.JACKS))
+    fun `the third hand points at all in then at the lamp`() {
+        val hand = checkNotNull(FirstHands.scriptedHand(2, Variant.JACKS))
 
-        assertEquals(CoachTarget.Hints, coach(hand, heldNone, hintsExplained = false, allInExplained = false))
-        assertEquals(CoachTarget.AllIn, coach(hand, heldNone, hintsExplained = true, allInExplained = false))
-        assertEquals(CoachTarget.Hold(1), coach(hand, heldNone))
-        assertNull(coach(hand, heldNone, hintsExplained = false, allInExplained = false, cardsFaceUp = false))
-        assertEquals(
-            CoachTarget.Hold(0),
-            coach(
-                checkNotNull(FirstHands.scriptedHand(2, Variant.JACKS)),
-                heldNone,
-                lifetimeHands = 2,
-                hintsExplained = false,
-                allInExplained = false,
-            ),
-        )
+        assertEquals(CoachTarget.Hold(1), coach(checkNotNull(FirstHands.scriptedHand(0, Variant.JACKS)), heldNone, hintsExplained = false, allInExplained = false))
+        assertEquals(CoachTarget.AllIn, coach(hand, heldNone, lifetimeHands = 2, hintsExplained = false, allInExplained = false))
+        assertEquals(CoachTarget.Hints, coach(hand, heldNone, lifetimeHands = 2, hintsExplained = false, allInExplained = true))
+        assertNull(coach(hand, heldNone, lifetimeHands = 2))
+        assertNull(coach(hand, heldNone, lifetimeHands = 2, hintsExplained = false, allInExplained = false, cardsFaceUp = false))
     }
 
     @Test
@@ -77,13 +68,10 @@ class FirstHandsTest {
     }
 
     @Test
-    fun `a flush asks for every card`() {
+    fun `the third hand is not coached card by card`() {
         val hand = checkNotNull(FirstHands.scriptedHand(2, Variant.JACKS))
-        assertEquals(CoachTarget.Hold(0), coach(hand, heldNone, lifetimeHands = 2))
-        assertEquals(
-            CoachTarget.Draw,
-            coach(hand, List(5) { true }, lifetimeHands = 2),
-        )
+        assertNull(coach(hand, heldNone, lifetimeHands = 2))
+        assertNull(coach(hand, List(5) { true }, lifetimeHands = 2))
     }
 
     @Test
