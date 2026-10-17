@@ -48,6 +48,16 @@ private const val APPROACH_STIFFNESS = 380f
 private const val APPROACH_DAMPING = 0.72f
 private const val DEAL_STAGGER_MS = 72L
 
+/**
+ * The deals that follow "Now tap Deal" (and the deal that opens the tutorial).
+ * Farther, slower, and one card at a time, so the pitch is obvious.
+ */
+private const val OPENING_DEAL_STIFFNESS = 120f
+private const val OPENING_DEAL_DAMPING = 0.86f
+private const val OPENING_DEAL_STAGGER_MS = 180L
+private const val OPENING_DEAL_FLIP_MS = 480
+private const val OPENING_DEAL_TRAVEL = 2.6f
+
 /** The turn, once the card has mostly arrived. */
 private const val FLIP_MS = 340
 
@@ -185,7 +195,21 @@ fun HandRow(
             discardsGone = true
             arrive(replaced, approaches, rotations, faceUp, ready, pace, instant, currentOnFlip)
         } else {
-            arrive((0 until HAND_SIZE).toSet(), approaches, rotations, faceUp, ready, pace, instant, currentOnFlip)
+            val openingDeal = FirstHands.applies(dealt.lifetimeHands, dealt.variant)
+            arrive(
+                (0 until HAND_SIZE).toSet(),
+                approaches,
+                rotations,
+                faceUp,
+                ready,
+                pace,
+                instant,
+                currentOnFlip,
+                staggerMs = if (openingDeal) OPENING_DEAL_STAGGER_MS else DEAL_STAGGER_MS,
+                stiffness = if (openingDeal) OPENING_DEAL_STIFFNESS else APPROACH_STIFFNESS,
+                damping = if (openingDeal) OPENING_DEAL_DAMPING else APPROACH_DAMPING,
+                flipMs = if (openingDeal) OPENING_DEAL_FLIP_MS else FLIP_MS,
+            )
         }
 
         // Opening wins rest on the held cards — pressed down — before the win is announced.
@@ -241,6 +265,11 @@ fun HandRow(
     val holdable = game.phase == Phase.HOLD
     val showingResult = outcome != null && facesSettled
     val anyHeld = game.held.any { it }
+    val dealTravel = if (outcome == null && FirstHands.applies(game.lifetimeHands, game.variant)) {
+        OPENING_DEAL_TRAVEL
+    } else {
+        1f
+    }
 
     val shown = when {
         cleared -> emptyList()
@@ -294,6 +323,7 @@ fun HandRow(
                 approach = approaches[index],
                 fold = folds[index],
                 gather = index - 2f,
+                dealTravel = dealTravel,
                 modifier = Modifier
                     .weight(1f)
                     .onGloballyPositioned { onCardPlaced(index, it) }
@@ -334,6 +364,10 @@ private suspend fun arrive(
     pace: Float,
     instant: Boolean,
     onFlip: () -> Unit,
+    staggerMs: Long = DEAL_STAGGER_MS,
+    stiffness: Float = APPROACH_STIFFNESS,
+    damping: Float = APPROACH_DAMPING,
+    flipMs: Int = FLIP_MS,
 ) {
     if (instant) {
         indices.forEach { index ->
@@ -345,12 +379,12 @@ private suspend fun arrive(
         }
         return
     }
-    val seat = spring<Float>(dampingRatio = APPROACH_DAMPING, stiffness = APPROACH_STIFFNESS)
-    val turn = tween<Float>((FLIP_MS * pace).toInt().coerceAtLeast(1), easing = FastOutSlowInEasing)
+    val seat = spring<Float>(dampingRatio = damping, stiffness = stiffness)
+    val turn = tween<Float>((flipMs * pace).toInt().coerceAtLeast(1), easing = FastOutSlowInEasing)
     coroutineScope {
         indices.sorted().forEachIndexed { order, index ->
             launch {
-                delay(order * (DEAL_STAGGER_MS * pace).toLong())
+                delay(order * (staggerMs * pace).toLong())
                 approaches[index].animateTo(1f, seat)
                 onFlip()
                 rotations[index].animateTo(0f, turn)

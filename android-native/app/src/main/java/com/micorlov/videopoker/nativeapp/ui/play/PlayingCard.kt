@@ -53,6 +53,11 @@ const val CARD_ASPECT = 0.68f
 private const val APPROACH_SCALE = 0.58f
 private const val APPROACH_Y_DP = -46f
 
+/** Opening deals start smaller and finish fading in this far along the flight (0–1). */
+private const val OPENING_APPROACH_SCALE = 0.42f
+private const val OPENING_FADE_SPAN = 0.18f
+private const val OPENING_FAN = 2.4f
+
 /** Collapsed and hinged back toward the dealer. */
 private const val FOLD_SCALE = 0.28f
 private const val FOLD_Y_DP = -20f
@@ -98,6 +103,11 @@ fun PlayingCard(
     approach: Animatable<Float, AnimationVector1D>? = null,
     fold: Animatable<Float, AnimationVector1D>? = null,
     gather: Float = 0f,
+    /**
+     * How far a fresh deal travels. 1 is the ordinary hop. The opening tutorial
+     * uses a longer flight so the deal reads as cards being pitched in.
+     */
+    dealTravel: Float = 1f,
 ) {
     val faceDown = stringResource(R.string.card_face_down)
     val faceUp by remember(rotation) { derivedStateOf { rotation.value <= 90f } }
@@ -108,15 +118,21 @@ fun PlayingCard(
             .graphicsLayer {
                 val near = (approach?.value ?: 1f).coerceAtLeast(0f)
                 val away = (fold?.value ?: 0f).coerceIn(0f, 1f)
+                val travel = dealTravel.coerceAtLeast(1f)
+                val farScale = if (travel > 1f) OPENING_APPROACH_SCALE else APPROACH_SCALE
                 // near may pass 1 while the spring settles, so the card lands a touch larger then rests.
-                val scale = (APPROACH_SCALE + (1f - APPROACH_SCALE) * near.coerceAtMost(1.06f)) *
+                val scale = (farScale + (1f - farScale) * near.coerceAtMost(1.06f)) *
                     (1f - (1f - FOLD_SCALE) * away)
                 scaleX = scale
                 scaleY = scale
-                alpha = (near.coerceAtMost(1f) * (1f - away)).coerceIn(0f, 1f)
-                translationY = ((APPROACH_Y_DP * (1f - near)) + (FOLD_Y_DP * away) - lift.value) * density
+                // An ordinary hop fades in along the whole path. A tutorial deal is opaque
+                // almost at once, so the card is visible while it is still in the air.
+                val flight = if (travel > 1f) (near / OPENING_FADE_SPAN).coerceIn(0f, 1f) else near.coerceAtMost(1f)
+                alpha = (flight * (1f - away)).coerceIn(0f, 1f)
+                translationY = ((APPROACH_Y_DP * travel * (1f - near)) + (FOLD_Y_DP * away) - lift.value) * density
                 translationX = gather * GATHER_DP * away * density
-                rotationZ = gather * FAN_DEGREES * (1f - near) * (1f - away)
+                val fan = if (travel > 1f) FAN_DEGREES * OPENING_FAN else FAN_DEGREES
+                rotationZ = gather * fan * (1f - near) * (1f - away)
                 rotationX = FOLD_DEGREES * away
                 transformOrigin = TransformOrigin(0.5f, 0.2f)
                 cameraDistance = 16f * density
