@@ -45,8 +45,8 @@ private const val HAND_SIZE = HandEvaluator.HAND_SIZE
  *
  * [alreadyRevealed] is true when this round's cards were already face up before this row
  * was composed (the player came back from another tab) — then there is nothing to flip.
- * [pace] scales the flips (the game speed setting). Between hands, [onTapToDeal] (when set)
- * lets a tap on any card deal the next hand.
+ * [pace] scales the flips (the game speed setting). [onTapToDeal] stays unset: a tap on a
+ * card never deals. Only the Deal button does.
  */
 @Composable
 fun HandRow(
@@ -138,8 +138,8 @@ fun HandRow(
                 ),
                 lift = lifts[index],
                 description = cardDescription(card, held = isHeld),
-                // A card can only be held once it is face up: a quick second tap after a tap-to-deal
-                // lands on a card still turning over, and must not hold it unseen.
+                // A card can only be held once it is face up: a tap that lands while it is still
+                // turning over must not hold it unseen.
                 clickLabel = when {
                     holdable -> holdAction.takeIf { faceUp[index] }
                     onTapToDeal != null -> dealAction

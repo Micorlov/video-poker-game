@@ -187,12 +187,8 @@ fun PlayScreen(
             feedback.haptics.light()
         }
         val doubleUp = game.doubleUp
-        val tapToDeal = {
-            feedback.haptics.medium()
-            actions.onMainAction()
-        }
-        // Between hands, once the result is up, a tap on the cards deals the next hand.
-        val settledAndShown = if (doubleUp != null) ui.doubleUpRevealed else game.phase == Phase.BET && ui.revealed
+        // Only the Deal button starts the next hand. A tap on the cards must not,
+        // including once the result is up and Deal is the way forward.
         if (doubleUp != null) {
             DoubleUpRow(
                 doubleUp = doubleUp,
@@ -203,7 +199,7 @@ fun PlayScreen(
                     feedback.haptics.light()
                     actions.onPickDoubleUp(index)
                 },
-                onTapToDeal = tapToDeal.takeIf { settledAndShown },
+                onTapToDeal = null,
                 onFlip = onFlip,
                 onRevealed = actions.onDoubleUpRevealed,
             )
@@ -219,7 +215,7 @@ fun PlayScreen(
                     feedback.haptics.light()
                     actions.onToggleHold(index)
                 },
-                onTapToDeal = tapToDeal.takeIf { settledAndShown },
+                onTapToDeal = null,
                 onFlip = onFlip,
                 onRevealed = actions.onRevealed,
                 onCardPlaced = placement::placeCard,
