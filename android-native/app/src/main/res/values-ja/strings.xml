@@ -17,6 +17,8 @@
     <string name="coach_press">次に%1$sをタップ</string>
     <string name="coach_hints">ヒントはランプをタップ</string>
     <string name="coach_all_in">1日1回、カードが見えてから</string>
+    <string name="coach_hold_voice">キープ: %1$s</string>
+    <string name="coach_release_voice">戻す: %1$s</string>
     <string name="play_held">ホールド</string>
     <string name="play_nothing">ノーハンド — %1$s</string>
     <string name="play_win_streak">連勝記録</string>

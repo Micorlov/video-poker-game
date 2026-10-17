@@ -107,5 +107,7 @@
  "coach_press": "עכשיו הקש על %1$s",
  "coach_hints": "הקש על המנורה לקבל רמזים",
  "coach_all_in": "פעם ביום, אחרי שרואים את הקלפים",
+ "coach_hold_voice": "הקש כדי לשמור: %1$s",
+ "coach_release_voice": "הקש כדי לשחרר: %1$s",
  "toast_all_in_after_cards": "פעם ביום, כשהקלפים של היד הזו גלויים"
 }

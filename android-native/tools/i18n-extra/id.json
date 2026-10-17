@@ -103,5 +103,7 @@
  "coach_press": "Sekarang ketuk %1$s",
  "coach_hints": "Ketuk lampu untuk petunjuk",
  "coach_all_in": "Sekali sehari, setelah kartu terbuka",
+ "coach_hold_voice": "Ketuk untuk menyimpan: %1$s",
+ "coach_release_voice": "Ketuk untuk melepas: %1$s",
  "toast_all_in_after_cards": "Sekali sehari — setelah kartu terbuka"
 }

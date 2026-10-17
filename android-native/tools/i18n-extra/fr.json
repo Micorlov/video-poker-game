@@ -106,5 +106,7 @@
  "coach_press": "Maintenant, touchez %1$s",
  "coach_hints": "Touchez la lampe pour des indices",
  "coach_all_in": "Une fois par jour, après avoir vu les cartes",
+ "coach_hold_voice": "Touchez pour garder : %1$s",
+ "coach_release_voice": "Touchez pour lâcher : %1$s",
  "toast_all_in_after_cards": "Une fois par jour — après avoir vu les cartes"
 }

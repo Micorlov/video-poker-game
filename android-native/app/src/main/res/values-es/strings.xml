@@ -17,6 +17,8 @@
     <string name="coach_press">Ahora toca %1$s</string>
     <string name="coach_hints">Toca la lámpara para pistas</string>
     <string name="coach_all_in">Una vez al día, después de ver las cartas</string>
+    <string name="coach_hold_voice">Toca para guardar: %1$s</string>
+    <string name="coach_release_voice">Toca para soltar: %1$s</string>
     <string name="play_held">FIJA</string>
     <string name="play_nothing">Nada — %1$s</string>
     <string name="play_win_streak">Racha de victorias</string>

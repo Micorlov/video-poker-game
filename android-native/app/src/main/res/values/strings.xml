@@ -23,6 +23,8 @@
     <string name="coach_press">Now tap %1$s</string>
     <string name="coach_hints">Tap the lamp for hints</string>
     <string name="coach_all_in">Once a day, after you see your cards</string>
+    <string name="coach_hold_voice">Tap to keep: %1$s</string>
+    <string name="coach_release_voice">Tap to let go: %1$s</string>
     <string name="play_held">HELD</string>
     <string name="play_nothing">Nothing — %1$s</string>
     <string name="play_win_streak">Win streak</string>

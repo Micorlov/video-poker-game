@@ -104,5 +104,7 @@
  "coach_press": "Şimdi %1$s dokun",
  "coach_hints": "İpucu için lambaya dokun",
  "coach_all_in": "Günde bir, kartları gördükten sonra",
+ "coach_hold_voice": "Tutmak için dokun: %1$s",
+ "coach_release_voice": "Bırakmak için dokun: %1$s",
  "toast_all_in_after_cards": "Günde bir — kartları gördükten sonra"
 }

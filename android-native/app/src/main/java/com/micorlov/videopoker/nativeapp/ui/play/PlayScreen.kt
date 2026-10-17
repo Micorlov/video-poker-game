@@ -51,11 +51,13 @@ import com.micorlov.videopoker.nativeapp.R
 import com.micorlov.videopoker.nativeapp.audio.SoundCue
 import com.micorlov.videopoker.nativeapp.domain.CoachTarget
 import com.micorlov.videopoker.nativeapp.domain.FirstHands
+import com.micorlov.videopoker.nativeapp.domain.GameState
 import com.micorlov.videopoker.nativeapp.domain.HandType
 import com.micorlov.videopoker.nativeapp.domain.Phase
 import com.micorlov.videopoker.nativeapp.ui.Feedback
 import com.micorlov.videopoker.nativeapp.ui.UiState
 import com.micorlov.videopoker.nativeapp.ui.components.ActionButton
+import com.micorlov.videopoker.nativeapp.ui.text.cardDescription
 import com.micorlov.videopoker.nativeapp.ui.text.labelRes
 import com.micorlov.videopoker.nativeapp.ui.theme.VpColors
 
@@ -75,6 +77,8 @@ data class PlayActions(
     val onDoubleUp: () -> Unit,
     val onPickDoubleUp: (Int) -> Unit,
     val onDoubleUpRevealed: (Int) -> Unit,
+    /** Speaks the current tutorial step. No-op once the opening hands are over. */
+    val onSpeak: (String) -> Unit,
     /** Opens the Friends tab; null hides the invite badge (friends switched off). */
     val onOpenFriends: (() -> Unit)? = null,
 )
@@ -113,6 +117,8 @@ fun PlayScreen(
         hintsExplained = ui.hintsTipSeen,
         allInExplained = ui.allInTipSeen,
     )
+    val spoken = coachSpoken(coach, game)
+    LaunchedEffect(coach) { spoken?.let(actions.onSpeak) }
     val hole = placement.cardsTick.let { coachHole(placement, coach) }
     val onHintsPlaced = remember { placement::placeHints }
     val onAllInPlaced = remember { placement::placeAllIn }
@@ -300,6 +306,26 @@ fun PlayScreen(
         )
     }
     }
+}
+
+/** What the tutorial says out loud. Null once the opening hands are over. */
+@Composable
+private fun coachSpoken(coach: CoachTarget?, game: GameState): String? {
+    coach ?: return null
+    return when (coach) {
+        is CoachTarget.Hold -> voiceCard(R.string.coach_hold_voice, game, coach.index)
+        is CoachTarget.Release -> voiceCard(R.string.coach_release_voice, game, coach.index)
+        CoachTarget.Hints -> stringResource(R.string.coach_hints)
+        CoachTarget.AllIn -> stringResource(R.string.coach_all_in)
+        CoachTarget.Draw -> stringResource(R.string.coach_press, stringResource(R.string.play_draw))
+        CoachTarget.Deal -> stringResource(R.string.coach_press, stringResource(R.string.play_deal))
+    }
+}
+
+@Composable
+private fun voiceCard(phrase: Int, game: GameState, index: Int): String {
+    val card = game.hand.getOrNull(index) ?: return stringResource(phrase, "")
+    return stringResource(phrase, cardDescription(card, held = false))
 }
 
 /** Where the cards and the deal button sit, in the table's own coordinates. */

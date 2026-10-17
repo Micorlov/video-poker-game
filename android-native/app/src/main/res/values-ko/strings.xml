@@ -17,6 +17,8 @@
     <string name="coach_press">이제 %1$s를 탭하세요</string>
     <string name="coach_hints">힌트는 램프를 탭하세요</string>
     <string name="coach_all_in">하루에 한 번, 카드가 보인 뒤에</string>
+    <string name="coach_hold_voice">보관하려면 탭: %1$s</string>
+    <string name="coach_release_voice">놓으려면 탭: %1$s</string>
     <string name="play_held">홀드</string>
     <string name="play_nothing">없음 — %1$s</string>
     <string name="play_win_streak">연승 기록</string>

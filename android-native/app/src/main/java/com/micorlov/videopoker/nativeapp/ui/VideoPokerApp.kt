@@ -177,6 +177,7 @@ fun VideoPokerApp(
                 onAllIn = viewModel::onAllInRequested,
                 onAllInTipSeen = viewModel::onAllInTipSeen,
                 onHintsTipSeen = viewModel::onHintsTipSeen,
+                onSpeak = { voice.speak(it) },
                 onAllInConfirmed = viewModel::onAllInConfirmed,
                 onAllInDismissed = viewModel::onAllInDismissed,
                 onDoubleUp = viewModel::onDoubleUp,

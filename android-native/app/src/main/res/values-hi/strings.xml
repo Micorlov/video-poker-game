@@ -17,6 +17,8 @@
     <string name="coach_press">अब %1$s पर टैप करें</string>
     <string name="coach_hints">संकेत के लिए लैंप पर टैप करें</string>
     <string name="coach_all_in">दिन में एक बार, कार्ड दिखने के बाद</string>
+    <string name="coach_hold_voice">रखने के लिए टैप करें: %1$s</string>
+    <string name="coach_release_voice">छोड़ने के लिए टैप करें: %1$s</string>
     <string name="play_held">रोका</string>
     <string name="play_nothing">कुछ नहीं — %1$s</string>
     <string name="play_win_streak">जीत की लड़ी</string>

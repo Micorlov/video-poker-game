@@ -103,5 +103,7 @@
  "coach_press": "现在点击%1$s",
  "coach_hints": "点灯获取提示",
  "coach_all_in": "每天一次，看到牌之后",
+ "coach_hold_voice": "点按保留：%1$s",
+ "coach_release_voice": "点按放开：%1$s",
  "toast_all_in_after_cards": "每天一次 — 看到牌之后"
 }

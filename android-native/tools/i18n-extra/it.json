@@ -106,5 +106,7 @@
  "coach_press": "Ora tocca %1$s",
  "coach_hints": "Tocca la lampada per i suggerimenti",
  "coach_all_in": "Una volta al giorno, dopo aver visto le carte",
+ "coach_hold_voice": "Tocca per tenere: %1$s",
+ "coach_release_voice": "Tocca per lasciare: %1$s",
  "toast_all_in_after_cards": "Una volta al giorno — dopo aver visto le carte"
 }

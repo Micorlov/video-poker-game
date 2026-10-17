@@ -105,5 +105,7 @@
  "coach_press": "Jetzt %1$s tippen",
  "coach_hints": "Tippe auf die Lampe für Hinweise",
  "coach_all_in": "Einmal am Tag, wenn die Karten offen sind",
+ "coach_hold_voice": "Tippen zum Behalten: %1$s",
+ "coach_release_voice": "Tippen zum Loslassen: %1$s",
  "toast_all_in_after_cards": "Einmal am Tag — erst wenn die Karten offen sind"
 }

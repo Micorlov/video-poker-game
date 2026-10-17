@@ -109,5 +109,7 @@
  "coach_press": "Teraz dotknij %1$s",
  "coach_hints": "Dotknij lampki, aby dostać podpowiedzi",
  "coach_all_in": "Raz dziennie, gdy karty są odkryte",
+ "coach_hold_voice": "Dotknij, aby zatrzymać: %1$s",
+ "coach_release_voice": "Dotknij, aby puścić: %1$s",
  "toast_all_in_after_cards": "Raz dziennie — gdy karty są odkryte"
 }

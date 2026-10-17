@@ -17,6 +17,8 @@
     <string name="coach_press">Ora tocca %1$s</string>
     <string name="coach_hints">Tocca la lampada per i suggerimenti</string>
     <string name="coach_all_in">Una volta al giorno, dopo aver visto le carte</string>
+    <string name="coach_hold_voice">Tocca per tenere: %1$s</string>
+    <string name="coach_release_voice">Tocca per lasciare: %1$s</string>
     <string name="play_held">TENUTA</string>
     <string name="play_nothing">Niente — %1$s</string>
     <string name="play_win_streak">Serie di vittorie</string>

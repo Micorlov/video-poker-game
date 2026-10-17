@@ -105,5 +105,7 @@
  "coach_press": "Agora toque em %1$s",
  "coach_hints": "Toque na lâmpada para dicas",
  "coach_all_in": "Uma vez por dia, depois de ver as cartas",
+ "coach_hold_voice": "Toque para guardar: %1$s",
+ "coach_release_voice": "Toque para soltar: %1$s",
  "toast_all_in_after_cards": "Uma vez por dia — depois de ver as cartas"
 }

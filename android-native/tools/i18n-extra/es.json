@@ -105,5 +105,7 @@
  "coach_press": "Ahora toca %1$s",
  "coach_hints": "Toca la lámpara para pistas",
  "coach_all_in": "Una vez al día, después de ver las cartas",
+ "coach_hold_voice": "Toca para guardar: %1$s",
+ "coach_release_voice": "Toca para soltar: %1$s",
  "toast_all_in_after_cards": "Una vez al día — úsalo después de ver las cartas"
 }

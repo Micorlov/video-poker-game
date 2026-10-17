@@ -103,5 +103,7 @@
  "coach_press": "次に%1$sをタップ",
  "coach_hints": "ヒントはランプをタップ",
  "coach_all_in": "1日1回、カードが見えてから",
+ "coach_hold_voice": "キープ: %1$s",
+ "coach_release_voice": "戻す: %1$s",
  "toast_all_in_after_cards": "1日1回 — カードが見えてから"
 }
