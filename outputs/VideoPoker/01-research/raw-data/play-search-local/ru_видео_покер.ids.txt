@@ -1,0 +1,15 @@
+com.kamagames.videopoker
+com.nvgamepad.diamondpokerlitecasino
+com.arcadegame.games.video.poker.slots
+com.tapinator.videopokerclassic
+com.jackpotmobile.vpmh
+com.jackpotmobile.mmvp
+com.actiongaming.originalvideopoker
+com.ddbirdwork.jmvideopoker
+com.braingames.videopokermaster
+com.zariba.videopoker
+com.bluewind.videopoker
+sk.alligator.games.americanpoker90s
+com.ppgo.dis
+air.com.playkia.videopokerme
+com.gengolia.AmericanVideoPoker

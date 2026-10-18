@@ -1,0 +1,29 @@
+---
+description: When a chat finishes, build and install the app on a connected Android phone
+alwaysApply: true
+---
+
+# Install on a real Android device when the chat finishes
+
+Before the closing reply of a chat that changed the Android app, build the debug APK and install it on the connected physical device, then launch it.
+
+## When to run
+
+Run this when the chat is done and files under `android-native/` changed. Skip chats that only answered a question or only edited docs, rules, or research notes.
+
+## Steps
+
+1. List devices with `adb devices -l`.
+2. Use a physical device. Its serial does not start with `emulator-`.
+3. If no physical device is connected, say so in the closing reply and stop. Do not install on an emulator for this step.
+4. From `android-native/`, build, install, and launch:
+
+```bash
+./gradlew assembleDebug
+adb -s <serial> install -r app/build/outputs/apk/debug/app-debug.apk
+adb -s <serial> shell am start -n com.micorlov.videopoker/com.micorlov.videopoker.nativeapp.MainActivity
+```
+
+5. Confirm install printed `Success` and the activity started. Name the device serial in the closing reply.
+
+If the build or install fails, put the error in the closing reply. Do not say the phone was updated.

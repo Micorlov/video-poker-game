@@ -1,0 +1,14 @@
+com.redrocket.poker
+com.byte3d.poker
+com.zynga.livepoker
+com.youdagames.gop3multiplayer
+com.playshoo.texaspoker.romania
+com.bigblueparrot.pokerfriends
+com.dn.games.dtcpoker
+com.gtosolutions.pokerfeud
+com.andrii.yankovskyi.pokerbot
+com.felted.felted
+nu.Pokertrainer.Pokertrainer
+com.wonderpeople.megahitpoker.global
+io.bbstud.pkc
+com.geaxgame.pokerkingpro

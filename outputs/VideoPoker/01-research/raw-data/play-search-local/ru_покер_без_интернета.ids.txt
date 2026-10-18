@@ -1,0 +1,10 @@
+com.redrocket.poker
+com.gemego.playtexasfree
+com.andrii.yankovskyi.pokerbot
+com.zengames.travel.poker
+com.casinogames.magicland.poker
+com.aquacorn.poker
+com.giletech.pokeralfie
+kr.co.mobine.aitexasholdem
+com.bluewind.texasholdem
+air.ru.crazypanda.wpcm

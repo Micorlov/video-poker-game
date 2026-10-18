@@ -1,0 +1,10 @@
+com.november31.five_play_poker
+com.november31.twenty_five_play_poker
+com.zcmxd.pokergaga
+com.november31.ten_play_poker
+com.rubyseven.multistrikepoker
+com.pyrsoftware.pokerstars.net
+com.playwpt.mobile.poker
+com.wonderpeople.megahitpoker.global
+com.zynga.livepoker
+com.youdagames.gop3multiplayer

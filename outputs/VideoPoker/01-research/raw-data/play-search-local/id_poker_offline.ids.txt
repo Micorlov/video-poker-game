@@ -1,0 +1,12 @@
+com.byte3d.poker
+com.redrocket.poker
+com.emagssob.big2
+com.felted.felted
+com.emagssob.capsasusun
+com.leyu.texaspoker
+com.zynga.livepoker
+com.wonderpeople.megahitpoker.global
+com.youdagames.gop3multiplayer
+com.andrii.yankovskyi.pokerbot
+com.murka.scatterholdem
+com.redkoda.chinesepokermultiplayernew

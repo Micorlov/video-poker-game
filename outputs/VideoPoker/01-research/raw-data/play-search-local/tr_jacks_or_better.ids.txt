@@ -1,0 +1,10 @@
+com.spacesheep.jacksorbetter
+com.micorlov.videopoker
+com.donkeycat.jacksorbetter
+com.S7SOFTWARE.VideoPokerJACKORBETTER
+video.poker.jacksorbetter.classic.offline.casino.deluxe
+poker.casino.cards
+com.innovizea.cardsharkpoker
+com.rcs.video_poker_trainer_job
+com.quikthinking.videopokerjacksorbetter
+com.basstech.videopoker

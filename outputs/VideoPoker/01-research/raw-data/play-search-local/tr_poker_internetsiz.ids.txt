@@ -1,0 +1,11 @@
+com.andrii.yankovskyi.pokerbot
+com.felted.felted
+com.offsuit.offline
+com.casinogames.magicland.poker
+com.giletech.pokeralfie
+com.wonderpeople.megahitpoker.global
+com.dn.games.dtcpoker
+com.gtosolutions.pokerfeud
+com.aquacorn.poker
+com.leyu.texaspoker
+com.freeon.tappoker

@@ -1,0 +1,14 @@
+com.redrocket.poker
+com.gemego.playtexasfree
+com.zynga.livepoker
+com.wonderpeople.megahitpoker.global
+com.byte3d.poker
+com.kamagames.pokerist
+com.offsuit.offline
+com.comunix.pokerface
+io.bbstud.pkc
+com.joj.satexas
+com.zcmxd.pokergaga
+com.youdagames.monopolypoker
+com.playtika.wsop.gp
+com.youdagames.gop3multiplayer

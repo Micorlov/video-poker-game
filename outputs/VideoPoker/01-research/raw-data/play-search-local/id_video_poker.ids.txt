@@ -1,0 +1,11 @@
+com.kamagames.videopoker
+air.videopoker
+com.arcadegame.games.video.poker.slots
+video.poker.deuceswild.jacksorbetter.classic.offline.casino
+com.tapinator.videopokerclassic
+com.jackpotmobile.mmvp
+com.jackpotmobile.vpmh
+com.november31.video_poker
+com.micorlov.videopoker
+sk.alligator.games.americanpoker90s
+com.videopokerlab.trainer
