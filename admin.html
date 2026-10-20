@@ -949,6 +949,28 @@
         return getLocalDayStr(new Date(ms));
     }
 
+    // Hands and score for one install, when they were filed under this board day.
+    // playMs is lifetime foreground time and is shown either way — that column
+    // already was. A missing hand count stays null so the cell stays a dash
+    // instead of a zero we did not actually count.
+    function installDayStats(install, dayKey) {
+        var playMs = install && install.playMs ? install.playMs : 0;
+        if (!install || install.statDay !== dayKey) return { score: null, hands: null, playMs: playMs };
+        var score = install.score == null ? null : +install.score;
+        var hands = install.hands == null ? null : +install.hands;
+        if (score !== score) score = null;
+        if (hands !== hands) hands = null;
+        return { score: score, hands: hands, playMs: playMs };
+    }
+
+    // Signed-in native players publish today's net on their profile
+    // (dailyNetProfitUtc / dailyUtcDayKey) and never wrote daily_scores.
+    function accountScore(user, dayKey) {
+        if (!user || user.utcDayKey !== dayKey || user.utcNet == null) return null;
+        var n = +user.utcNet;
+        return n === n ? n : null;
+    }
+
     // Everyone active on dayKey, not only rows in daily_scores. Analytics
     // counts every app open. A signed-in player who never got a score
     // document, and a guest who never signs in, are still players for that
@@ -989,31 +1011,34 @@
                 return;
             }
             if (!seen && !opened) return;
+            var fromInstall = installDayStats(opened || null, dayKey);
+            var score = fromInstall.score != null ? fromInstall.score : accountScore(u, dayKey);
             byUid[u.uid] = {
                 uid: u.uid,
                 displayName: u.displayName || u.email || '—',
                 photoURL: u.photoURL || '',
-                score: null,
-                hands: null,
-                playMs: 0,
+                score: score,
+                hands: fromInstall.hands,
+                playMs: fromInstall.playMs,
                 rebuys: 0,
                 bestHand: '—',
-                hasScore: false
+                hasScore: score != null
             };
         });
         var rows = Object.keys(byUid).map(function(k) { return byUid[k]; });
         Object.keys(activeInstalls).forEach(function(id) {
             if (installToUid[id]) return;
+            var guestStats = installDayStats(activeInstalls[id], dayKey);
             rows.push({
                 uid: '',
                 displayName: 'Guest ' + String(id).slice(0, 6),
                 photoURL: '',
-                score: null,
-                hands: null,
-                playMs: activeInstalls[id].playMs || 0,
+                score: guestStats.score,
+                hands: guestStats.hands,
+                playMs: guestStats.playMs,
                 rebuys: 0,
                 bestHand: '—',
-                hasScore: false
+                hasScore: guestStats.score != null
             });
         });
         rows.sort(function(a, b) {
@@ -1054,7 +1079,9 @@
                     photoURL: d.photoURL || '',
                     installId: d.installId || '',
                     lastMs: tsMillis(d.lastSeen),
-                    loginMs: tsMillis(d.lastLogin)
+                    loginMs: tsMillis(d.lastLogin),
+                    utcDayKey: d.dailyUtcDayKey || '',
+                    utcNet: d.dailyNetProfitUtc == null ? null : d.dailyNetProfitUtc
                 };
             });
             var opens = [];
@@ -1066,7 +1093,10 @@
                     installId: d.installId,
                     firstMs: firstMs,
                     lastMs: tsMillis(d.lastOpenAt) || firstMs,
-                    playMs: d.playMs || 0
+                    playMs: d.playMs || 0,
+                    statDay: d.statDay || '',
+                    hands: d.hands == null ? null : d.hands,
+                    score: d.score == null ? null : d.score
                 });
             });
             return mergeDailyRoster(scores, users, opens, dayKey);

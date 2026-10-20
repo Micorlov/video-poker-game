@@ -159,6 +159,45 @@ test('install funnel and error report rules', async (t) => {
         assert.ok(await create('errors', installId(), errorReport({ op: S('set daily_scores/*') })));
     });
 
+    async function dayStats(docId, fields) {
+        return commit({
+            update: { name: `${DOCS}/installs/${docId}`, fields },
+            updateMask: { fieldPaths: Object.keys(fields) },
+            currentDocument: { exists: true }
+        });
+    }
+
+    await t.test('today\'s hands and score can be set on the open doc', async () => {
+        const doc = await opened();
+        assert.ok(await dayStats(doc, { statDay: S('2026-10-20'), score: I(-30), hands: I(4) }));
+        assert.ok(await dayStats(doc, { statDay: S('2026-10-20'), score: I(10), hands: I(6) }));
+    });
+
+    await t.test('a score can arrive before the hand count is known', async () => {
+        const doc = await opened();
+        assert.ok(await dayStats(doc, { statDay: S('2026-10-20'), score: I(40) }));
+        assert.ok(await dayStats(doc, { statDay: S('2026-10-20'), score: I(40), hands: I(3) }));
+    });
+
+    await t.test('a same-day hand count cannot jump by more than 5000 or go backwards', async () => {
+        const doc = await opened();
+        assert.ok(await dayStats(doc, { statDay: S('2026-10-20'), score: I(0), hands: I(1) }));
+        assert.ok(!await dayStats(doc, { statDay: S('2026-10-20'), score: I(0), hands: I(5002) }));
+        assert.ok(!await dayStats(doc, { statDay: S('2026-10-20'), score: I(0), hands: I(0) }));
+    });
+
+    await t.test('a new day may reset the hand count', async () => {
+        const doc = await opened();
+        assert.ok(await dayStats(doc, { statDay: S('2026-10-20'), score: I(80), hands: I(20) }));
+        assert.ok(await dayStats(doc, { statDay: S('2026-10-21'), score: I(5), hands: I(1) }));
+    });
+
+    await t.test('day stats cannot change any other field', async () => {
+        const doc = await opened();
+        assert.ok(!await dayStats(doc, { statDay: S('2026-10-20'), score: I(1), version: S('9.9') }));
+        assert.ok(!await dayStats(doc, { statDay: S('2026-10-20'), score: I(1), playMs: I(10) }));
+    });
+
     await t.test('an error report from a build without op is still accepted', async () => {
         assert.ok(await create('errors', installId(), errorReport()));
     });

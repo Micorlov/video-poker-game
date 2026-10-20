@@ -38,6 +38,9 @@ interface SocialRemote {
 
     suspend fun pushDailyProfit(uid: String, profit: DailyProfit)
 
+    /** Remembers which install this account is, so the admin board does not list them twice. */
+    suspend fun linkInstall(uid: String, installId: String)
+
     /**
      * Erases everything the security rules let this player remove: their profile, both sides of
      * every friendship and their device tokens. Safe to repeat. The invite-reward ledger and the

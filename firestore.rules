@@ -386,11 +386,18 @@ service cloud.firestore {
     // A guest has no user document, so played time is a separate update of
     // `playMs` on this same open doc: it only grows, and one write adds at
     // most 12 hours. Called by FirestoreInstallReporter.flushPlay.
+    //
+    // The same open doc carries today's hands and score (`statDay`, `score`,
+    // and `hands` when the count is known). Guests cannot write daily_scores,
+    // which requires a signed-in uid. This update touches only those fields,
+    // on a document that already exists, and a same-day hand count can rise
+    // by at most 5000 per write. Reads stay admin-only.
     match /installs/{docId} {
       allow create: if validInstallStage(request.resource.data);
       allow update: if docId.matches('^[A-Za-z0-9]{20}_open$')
                     && (validInstallLaunch(resource.data, request.resource.data)
-                        || validInstallPlay(resource.data, request.resource.data));
+                        || validInstallPlay(resource.data, request.resource.data)
+                        || validInstallDayStats(resource.data, request.resource.data));
       allow read, delete: if request.auth != null
                           && request.auth.token.email == 'micorlov@gmail.com';
 
@@ -414,6 +421,39 @@ service cloud.firestore {
 
       function playMsBefore(d) {
         return d.get('playMs', 0);
+      }
+
+      function dayStatsChanged(before, after) {
+        return after.statDay != before.get('statDay', '');
+      }
+
+      function validInstallDayStats(before, after) {
+        return after.diff(before).affectedKeys().hasOnly(['statDay', 'hands', 'score'])
+            && after.diff(before).affectedKeys().hasAll(['statDay', 'score'])
+            && after.statDay is string
+            && after.statDay.matches('^\\d{4}-\\d{2}-\\d{2}$')
+            && after.score is int
+            && after.score >= -1000000000000
+            && after.score <= 1000000000000
+            && validInstallScoreMove(before, after)
+            && validInstallHands(before, after);
+      }
+
+      function validInstallScoreMove(before, after) {
+        return dayStatsChanged(before, after)
+            || (after.score - before.get('score', 0) <= 1000000000000
+                && before.get('score', 0) - after.score <= 1000000000000);
+      }
+
+      function validInstallHands(before, after) {
+        return !after.diff(before).affectedKeys().hasAny(['hands'])
+            || (after.hands is int
+                && after.hands >= 0
+                && after.hands <= 100000
+                && (dayStatsChanged(before, after)
+                    || !before.keys().hasAny(['hands'])
+                    || (after.hands >= before.hands
+                        && after.hands - before.hands <= 5000)));
       }
 
       function validInstallStage(d) {

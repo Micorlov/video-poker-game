@@ -1,6 +1,7 @@
 package com.micorlov.videopoker.nativeapp.data.social
 
 import com.google.firebase.firestore.FieldValue
+import com.micorlov.videopoker.nativeapp.data.InstallIdentity
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
@@ -116,6 +117,12 @@ class FirestoreSocialRemote(
             if (e.code != FirebaseFirestoreException.Code.PERMISSION_DENIED) throw e
             if (row.get().await().get("claimedAt") != null) false else throw e
         }
+    }
+
+    override suspend fun linkInstall(uid: String, installId: String) = remote {
+        if (!InstallIdentity.isValid(installId)) return@remote
+        users.document(uid).set(mapOf("installId" to installId), SetOptions.merge()).await()
+        Unit
     }
 
     override suspend fun pushDailyProfit(uid: String, profit: DailyProfit) = remote {

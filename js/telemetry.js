@@ -96,6 +96,16 @@ function vpRestUpdate(collection, docId, data, timeField) {
     });
 }
 
+// Sets only the fields in `data` on an existing document. No server timestamp:
+// the day-stats rule rejects any field other than statDay, hands and score.
+function vpRestPatch(collection, docId, data) {
+    return vpRestCommit({
+        update: { name: vpRestDocName(collection, docId), fields: vpRestFields(data) },
+        updateMask: { fieldPaths: Object.keys(data) },
+        currentDocument: { exists: true }
+    });
+}
+
 // Per-install state: a random id (no account needed) plus whether this
 // install already had a saved game when these scripts first ran — i.e. an
 // upgrade from a build that predates install tracking, not a new install.

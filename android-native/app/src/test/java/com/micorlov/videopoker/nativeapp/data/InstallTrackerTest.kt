@@ -8,6 +8,7 @@ import org.json.JSONObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class InstallTrackerTest {
@@ -147,6 +148,78 @@ class InstallTrackerTest {
         reporter.reportPlayTime(20_000)
         assertTrue(bodies.any { it.contains(""""playMs":{"integerValue":"20000"}""") })
         assertEquals(null, ledger.pendingTotal())
+    }
+
+    @Test
+    fun `an existing profit is sent without a hand count once the install exists`() = runBlocking {
+        val store = InMemoryStore()
+        val stats = DayStatsLedger(store)
+        stats.seed("2026-10-20", playedToday = true, score = 40)
+        val bodies = mutableListOf<String>()
+        val reporter = FirestoreInstallReporter(
+            InstallTracker(store),
+            PlayTimeLedger(store),
+            immediateScope(),
+            dayStats = stats,
+            post = { body ->
+                bodies += body
+                InstallWriteResult.OK
+            },
+        )
+        reporter.report(existing = false, device = device)
+        val statsBody = bodies.first { it.contains("statDay") }
+        val write = JSONObject(statsBody).getJSONArray("writes").getJSONObject(0)
+        val fields = write.getJSONObject("update").getJSONObject("fields")
+        assertEquals("2026-10-20", fields.getJSONObject("statDay").getString("stringValue"))
+        assertEquals("40", fields.getJSONObject("score").getString("integerValue"))
+        assertFalse(fields.has("hands"))
+        assertNull(stats.outbound())
+    }
+
+    @Test
+    fun `leaving the table sends the day's totals without waiting`() = runBlocking {
+        val store = InMemoryStore()
+        val stats = DayStatsLedger(store)
+        stats.seed("2026-10-20", playedToday = false, score = 0)
+        stats.record("2026-10-20", scoreDelta = -12, hand = true)
+        val bodies = mutableListOf<String>()
+        val reporter = FirestoreInstallReporter(
+            InstallTracker(store),
+            PlayTimeLedger(store),
+            immediateScope(),
+            dayStats = stats,
+            post = { body ->
+                bodies += body
+                InstallWriteResult.OK
+            },
+        )
+        reporter.report(existing = false, device = device)
+        bodies.clear()
+        stats.record("2026-10-20", scoreDelta = 7, hand = true)
+        reporter.reportDayStats(immediate = true)
+        val write = JSONObject(bodies.single { it.contains("statDay") }).getJSONArray("writes").getJSONObject(0)
+        val fields = write.getJSONObject("update").getJSONObject("fields")
+        assertEquals("2026-10-20", fields.getJSONObject("statDay").getString("stringValue"))
+        assertEquals("-5", fields.getJSONObject("score").getString("integerValue"))
+        assertEquals("2", fields.getJSONObject("hands").getString("integerValue"))
+        assertNull(stats.outbound())
+    }
+
+    @Test
+    fun `a rejected stats write stays pending`() = runBlocking {
+        val store = InMemoryStore()
+        val stats = DayStatsLedger(store)
+        stats.seed("2026-10-20", playedToday = false, score = 0)
+        stats.record("2026-10-20", scoreDelta = 8, hand = true)
+        val reporter = FirestoreInstallReporter(
+            InstallTracker(store),
+            PlayTimeLedger(store),
+            immediateScope(),
+            dayStats = stats,
+            post = { body -> if (body.contains("statDay")) InstallWriteResult.REJECTED else InstallWriteResult.OK },
+        )
+        reporter.report(existing = false, device = device)
+        assertEquals(DayStatWrite("2026-10-20", 8, 1), stats.outbound())
     }
 
     private fun immediateScope() = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)

@@ -3,7 +3,9 @@ package com.micorlov.videopoker.nativeapp.data
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.net.HttpURLConnection
 import java.net.URL
@@ -18,12 +20,38 @@ class FirestoreInstallReporter(
     private val tracker: InstallTracker,
     private val playTime: PlayTimeLedger,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+    private val dayStats: DayStatsLedger? = null,
     private val post: (String) -> InstallWriteResult = ::postCommit,
 ) {
+    private var statsJob: Job? = null
     fun report(existing: Boolean, device: InstallDevice) {
+        val state = tracker.beginLaunch()
         scope.launch {
-            runCatching { send(existing, device) }
+            runCatching { send(state, existing, device) }
                 .onFailure { Log.w(TAG, "install report failed", it) }
+        }
+    }
+
+    /**
+     * Sends today's hands and score once the install document exists.
+     * Hands come seconds apart, so a quiet spell collapses a burst into one write;
+     * [immediate] is the background flush, which must not wait.
+     */
+    fun reportDayStats(immediate: Boolean = false) {
+        if (dayStats == null) return
+        statsJob?.cancel()
+        statsJob = null
+        if (immediate) {
+            // Snapshot before returning. The caller may roll the ledger to a new
+            // day immediately afterwards, and this post must not run on the main
+            // thread (onStop flushes when the player leaves).
+            val pending = pendingDayStats() ?: return
+            scope.launch { deliverDayStats(pending) }
+            return
+        }
+        statsJob = scope.launch {
+            delay(STATS_QUIET_MS)
+            flushDayStats()
         }
     }
 
@@ -43,6 +71,7 @@ class FirestoreInstallReporter(
         if (result == InstallWriteResult.OK) {
             tracker.markOpenSent()
             flushPlay()
+            flushDayStats()
         }
         Log.i(TAG, "install ${state.id.take(6)} opens=${state.opens} sent=${state.openSent} result=$result")
     }
@@ -56,12 +85,37 @@ class FirestoreInstallReporter(
         Log.i(TAG, "play ${id.take(6)} playMs=$total result=$result")
     }
 
-    private fun send(existing: Boolean, device: InstallDevice) {
-        send(tracker.beginLaunch(), existing, device)
+    private data class PendingDayStats(val id: String, val write: DayStatWrite)
+
+    private fun pendingDayStats(): PendingDayStats? {
+        if (dayStats == null || !tracker.isOpenSent()) return null
+        val id = tracker.id() ?: return null
+        val write = dayStats.outbound() ?: return null
+        return PendingDayStats(id, write)
+    }
+
+    private fun flushDayStats() {
+        val pending = pendingDayStats() ?: return
+        deliverDayStats(pending)
+    }
+
+    private fun deliverDayStats(pending: PendingDayStats, hops: Int = 0) {
+        val write = pending.write
+        val result = post(InstallReport.dayStatsBody(pending.id, write.day, write.score, write.hands))
+        if (result == InstallWriteResult.OK) {
+            dayStats?.acknowledge(write)
+            // A same-day count moves at most MAX_HAND_STEP per write. Keep going
+            // while the device is still ahead, so one quiet spell finishes the day.
+            val more = if (hops >= MAX_STATS_HOPS) null else dayStats?.outbound()
+            if (more != null) deliverDayStats(PendingDayStats(pending.id, more), hops + 1)
+        }
+        Log.i(TAG, "stats ${pending.id.take(6)} day=${write.day} hands=${write.hands ?: "?"} score=${write.score} result=$result")
     }
 
     private companion object {
         const val TAG = "VpInstall"
+        const val STATS_QUIET_MS = 10_000L
+        const val MAX_STATS_HOPS = 25
         const val COMMIT_URL =
             "https://firestore.googleapis.com/v1/projects/video-poker-6d665/databases/(default)/documents:commit?key=AIzaSyB6m0Yis89jxvm06OFBqxs8P_vADjRXk0U"
         const val TIMEOUT_MS = 8_000

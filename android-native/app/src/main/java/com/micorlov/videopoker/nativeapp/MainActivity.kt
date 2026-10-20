@@ -47,6 +47,9 @@ class MainActivity : ComponentActivity() {
                 flagFetcher = RemoteFlagsFetcher::fetch,
                 analysisMode = AnalysisMode.BACKGROUND,
                 onNetResult = container.dailyProfit::record,
+                onLeaderboardResult = { delta, hand ->
+                    container.recordLeaderboard(LocalDate.now().toString(), delta, hand)
+                },
                 events = container.events,
                 upgradedFromLegacy = container.upgradedFromLegacy,
                 googleSignInAvailable = container.auth.available,
@@ -97,6 +100,7 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         super.onStop()
         container.profitSync.flush()
+        container.flushLeaderboard()
         val started = foregroundSince
         foregroundSince = 0L
         if (started != 0L) container.reportPlayTime(SystemClock.elapsedRealtime() - started)
