@@ -76,6 +76,8 @@ test('a compact hour key is not treated as a daily score', () => {
 const ROSTER_SRC = [
     read('admin.html').match(/function getLocalDayStr\(d\)[\s\S]*?\n    }/)[0],
     read('admin.html').match(/function stampDay\(ms\)[\s\S]*?\n    }/)[0],
+    read('admin.html').match(/function installDayStats\(install, dayKey\)[\s\S]*?\n    }/)[0],
+    read('admin.html').match(/function accountScore\(user, dayKey\)[\s\S]*?\n    }/)[0],
     read('admin.html').match(/function mergeDailyRoster\(scores, users, opens, dayKey\)[\s\S]*?\n        return rows;\n    }/)[0]
 ].join('\n');
 
@@ -114,6 +116,68 @@ test('a scored player stays ahead of someone who only opened the app', () => {
     );
     assert.deepStrictEqual(rows.map((r) => r.displayName), ['Bea', 'Ada']);
     assert.strictEqual(rows[1].score, null);
+});
+
+test('a guest shows the hands and score saved for this day, and keeps play time', () => {
+    const env = rosterEnv();
+    const noon = Date.UTC(2026, 9, 17, 12);
+    const day = env.stampDay(noon);
+    const rows = env.mergeDailyRoster(
+        [],
+        [],
+        [{ installId: 'guest99', firstMs: noon, lastMs: noon, playMs: 125000, statDay: day, hands: 40, score: -15 }],
+        day
+    );
+    assert.strictEqual(rows.length, 1);
+    assert.strictEqual(rows[0].displayName, 'Guest guest9');
+    assert.strictEqual(rows[0].hands, 40);
+    assert.strictEqual(rows[0].score, -15);
+    assert.strictEqual(rows[0].playMs, 125000);
+    assert.strictEqual(rows[0].hasScore, true);
+});
+
+test('hands and score from another day are not shown on this day', () => {
+    const env = rosterEnv();
+    const noon = Date.UTC(2026, 9, 17, 12);
+    const day = env.stampDay(noon);
+    const rows = env.mergeDailyRoster(
+        [],
+        [],
+        [{ installId: 'guest99', firstMs: noon, lastMs: noon, playMs: 125000, statDay: '1999-01-01', hands: 9, score: 100 }],
+        day
+    );
+    assert.strictEqual(rows[0].hands, null);
+    assert.strictEqual(rows[0].score, null);
+    assert.strictEqual(rows[0].playMs, 125000);
+    assert.strictEqual(rows[0].hasScore, false);
+});
+
+test('a signed-in player with no score document uses the install and, failing that, the profile net', () => {
+    const env = rosterEnv();
+    const noon = Date.UTC(2026, 9, 17, 12);
+    const day = env.stampDay(noon);
+    const linked = env.mergeDailyRoster(
+        [],
+        [{ uid: 'u1', displayName: 'Rachel', installId: 'instRachel01', loginMs: noon, lastMs: noon, utcDayKey: day, utcNet: 80 }],
+        [{ installId: 'instRachel01', firstMs: noon, lastMs: noon, playMs: 50000, statDay: day, hands: 7, score: 80 }],
+        day
+    );
+    assert.strictEqual(linked.length, 1);
+    assert.strictEqual(linked[0].displayName, 'Rachel');
+    assert.strictEqual(linked[0].hands, 7);
+    assert.strictEqual(linked[0].score, 80);
+    assert.strictEqual(linked[0].playMs, 50000);
+
+    const profileOnly = env.mergeDailyRoster(
+        [],
+        [{ uid: 'u1', displayName: 'Rachel', installId: 'instRachel01', loginMs: noon, lastMs: noon, utcDayKey: day, utcNet: 25 }],
+        [{ installId: 'instRachel01', firstMs: noon, lastMs: noon, playMs: 50000 }],
+        day
+    );
+    assert.strictEqual(profileOnly.length, 1);
+    assert.strictEqual(profileOnly[0].score, 25);
+    assert.strictEqual(profileOnly[0].hands, null);
+    assert.strictEqual(profileOnly[0].playMs, 50000);
 });
 
 test('a player from another day is left off this day', () => {

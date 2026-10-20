@@ -380,7 +380,7 @@ function setWithRetry(ref, payload, attempt) {
 }
 
 function logUserToFirestore(user) {
-    return setWithRetry(db.collection('users').doc(user.uid), {
+    var profile = {
         uid: user.uid,
         displayName: user.displayName || '',
         photoURL: user.photoURL || '',
@@ -392,7 +392,14 @@ function logUserToFirestore(user) {
         // a player is actually running — and therefore which fields their
         // client is capable of reporting.
         appVersion: window.VP_APP_VERSION || 'unknown'
-    }).then(function() {
+    };
+    // Ties this account to its install so the admin board does not list the
+    // same player once as a guest and again under their name.
+    if (typeof vpInstallId === 'function') {
+        var installId = vpInstallId();
+        if (installId) profile.installId = installId;
+    }
+    return setWithRetry(db.collection('users').doc(user.uid), profile).then(function() {
         return db.collection('users').doc(user.uid).get();
     }).then(function(doc) {
         const data = doc.exists ? doc.data() : {};

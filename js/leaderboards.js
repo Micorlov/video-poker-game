@@ -105,7 +105,10 @@ let pendingDailyScore = null;
 
 function pushDailyScore(handType, win, totalBet) {
     const user = window.egUser;
-    if (!user) return;
+    if (!user) {
+        if (typeof pushGuestDailyScore === 'function') pushGuestDailyScore(win, totalBet);
+        return;
+    }
     ensureDailyBaseline();
     const dayKey = getDayKey();
 
@@ -198,6 +201,110 @@ function pushDailyPlayTime(ms, dayKey) {
         }, { merge: true });
     });
 }
+
+// Guests have no account, so daily_scores (which the rules key to auth.uid)
+// cannot hold their hands. The install document can: the same unauthenticated
+// update that already stores play time. Totals are absolute for the local day,
+// so a retry does not add the hand twice. Hands played before this build loaded
+// are not on the device; the count starts with the next deal.
+const GUEST_STATS_KEY = 'vp_guest_day_stats';
+const GUEST_STATS_DEBOUNCE_MS = 10000;
+const GUEST_STATS_MAX_HANDS = 100000;
+const GUEST_STATS_HAND_STEP = 5000;
+const GUEST_STATS_SCORE_CAP = 1000000000000;
+let guestStatsTimer = null;
+let guestStatsAttempts = 0;
+
+function guestDayStatsAfterHand(stats, day, win, totalBet) {
+    const same = !!(stats && stats.day === day);
+    const base = same ? stats : { day: day, hands: 0, score: 0, sentDay: '', sentHands: null, sentScore: null };
+    return {
+        day: day,
+        hands: base.hands + 1,
+        score: base.score + (win - totalBet),
+        sentDay: same ? (base.sentDay || '') : '',
+        sentHands: same && base.sentHands != null ? base.sentHands : null,
+        sentScore: same && base.sentScore != null ? base.sentScore : null
+    };
+}
+
+function guestDayStatsWrite(stats) {
+    if (!stats || !stats.day) return null;
+    if (stats.sentDay === stats.day && stats.sentHands === stats.hands && stats.sentScore === stats.score) return null;
+    let hands = stats.hands;
+    let score = stats.score;
+    const continuing = stats.sentDay === stats.day && stats.sentHands != null && stats.sentScore != null;
+    if (continuing) {
+        if (hands > stats.sentHands + GUEST_STATS_HAND_STEP) hands = stats.sentHands + GUEST_STATS_HAND_STEP;
+        if (score > stats.sentScore + GUEST_STATS_SCORE_CAP) score = stats.sentScore + GUEST_STATS_SCORE_CAP;
+        if (score < stats.sentScore - GUEST_STATS_SCORE_CAP) score = stats.sentScore - GUEST_STATS_SCORE_CAP;
+    } else if (hands > GUEST_STATS_MAX_HANDS) {
+        hands = GUEST_STATS_MAX_HANDS;
+    }
+    if (score > GUEST_STATS_SCORE_CAP) score = GUEST_STATS_SCORE_CAP;
+    if (score < -GUEST_STATS_SCORE_CAP) score = -GUEST_STATS_SCORE_CAP;
+    return { statDay: stats.day, hands: hands, score: score };
+}
+
+function readGuestStats() {
+    try {
+        const raw = JSON.parse(localStorage.getItem(GUEST_STATS_KEY) || 'null');
+        if (raw && typeof raw.day === 'string') return raw;
+    } catch (e) { /* storage blocked or corrupt */ }
+    return null;
+}
+
+function writeGuestStats(stats) {
+    try { localStorage.setItem(GUEST_STATS_KEY, JSON.stringify(stats)); } catch (e) { /* storage blocked */ }
+}
+
+function pushGuestDailyScore(win, totalBet) {
+    const day = getDayKey();
+    guestStatsAttempts = 0;
+    const stats = guestDayStatsAfterHand(readGuestStats(), day, win, totalBet);
+    writeGuestStats(stats);
+    if (guestStatsTimer) clearTimeout(guestStatsTimer);
+    guestStatsTimer = setTimeout(flushGuestDailyScore, GUEST_STATS_DEBOUNCE_MS);
+}
+
+function flushGuestDailyScore() {
+    if (guestStatsTimer) { clearTimeout(guestStatsTimer); guestStatsTimer = null; }
+    const stats = readGuestStats();
+    const write = guestDayStatsWrite(stats);
+    if (!write) return;
+    if (typeof vpRestPatch !== 'function' || typeof vpInstallState !== 'function') return;
+    const install = vpInstallState();
+    if (!install.openSent || !install.id) {
+        guestStatsTimer = setTimeout(flushGuestDailyScore, GUEST_STATS_DEBOUNCE_MS);
+        return;
+    }
+    vpRestPatch('installs', install.id + '_open', write).then(function(result) {
+        if (result !== 'ok') {
+            if (guestStatsAttempts++ < 6) guestStatsTimer = setTimeout(flushGuestDailyScore, GUEST_STATS_DEBOUNCE_MS);
+            return;
+        }
+        guestStatsAttempts = 0;
+        const current = readGuestStats();
+        if (!current || current.day !== stats.day) return;
+        current.sentDay = write.statDay;
+        current.sentHands = write.hands;
+        current.sentScore = write.score;
+        writeGuestStats(current);
+        if (current.hands !== write.hands || current.score !== write.score) flushGuestDailyScore();
+    });
+}
+
+if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('pagehide', flushGuestDailyScore);
+}
+if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') flushGuestDailyScore();
+    });
+}
+// A hand whose write did not finish (the page was killed) is still in
+// localStorage. Send it on the next launch.
+try { flushGuestDailyScore(); } catch (e) { /* storage or network not available in this context */ }
 
 // --- Read-side subscriptions (top 20 fetched once; sliced to 5 for the collapsed view) ---
 function subscribeHourlyBoard() {

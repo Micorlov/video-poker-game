@@ -190,6 +190,8 @@ class GameViewModel(
     private val googleSignInAvailable: Boolean = false,
     /** Already signed in when the table opens, so the extra ALL IN is there on the first frame. */
     signedInWithGoogle: Boolean = false,
+    /** Chips won minus chips staked, and whether this settled a deal. Feeds the admin board. */
+    private val onLeaderboardResult: (Long, Boolean) -> Unit = { _, _ -> },
 ) : ViewModel() {
 
     private val effectChannel = Channel<UiEffect>(Channel.UNLIMITED)
@@ -311,7 +313,9 @@ class GameViewModel(
         todayKey?.invoke()?.let(repository::saveLastPlayedDay)
         commit(transition, persist = true)
         val drawn = transition.state.outcome ?: return
-        onNetResult(DailyProfitPolicy.handDelta(drawn))
+        val handNet = DailyProfitPolicy.handDelta(drawn)
+        onNetResult(handNet)
+        onLeaderboardResult(handNet, true)
         events.log(
             AnalyticsEvents.HAND_COMPLETED,
             mapOf(
@@ -399,7 +403,11 @@ class GameViewModel(
         val before = _state.value.game.doubleUp
         commit(Transition(GameEngine.pickDoubleUp(_state.value.game, index)), persist = true)
         val after = _state.value.game.doubleUp ?: return
-        if (before?.result == null && after.result != null) onNetResult(DailyProfitPolicy.doubleUpDelta(after))
+        if (before?.result == null && after.result != null) {
+            val delta = DailyProfitPolicy.doubleUpDelta(after)
+            onNetResult(delta)
+            onLeaderboardResult(delta, false)
+        }
     }
 
     /** Called when double-up [number]'s cards have finished turning over. */

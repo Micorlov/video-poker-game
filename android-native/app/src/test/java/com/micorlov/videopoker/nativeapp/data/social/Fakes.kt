@@ -111,6 +111,13 @@ class FakeSocialRemote : SocialRemote {
         setProfit(uid, profit)
     }
 
+    val linkedInstalls = mutableMapOf<String, String>()
+
+    override suspend fun linkInstall(uid: String, installId: String) {
+        online()
+        linkedInstalls[uid] = installId
+    }
+
     val erased = mutableListOf<String>()
 
     override suspend fun deleteUserData(uid: String) {

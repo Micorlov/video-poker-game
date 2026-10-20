@@ -20,6 +20,18 @@ internal object InstallReport {
             """"updateMask":{"fieldPaths":["playMs"]},""" +
             """"currentDocument":{"exists":true}}]}"""
 
+    /**
+     * Absolute hands and score for one local day. [hands] is omitted when the count
+     * is unknown, so the rules leave whatever was there and the board shows a dash.
+     */
+    fun dayStatsBody(id: String, day: String, score: Long, hands: Int?): String {
+        val handsJson = if (hands == null) "" else ""","hands":{"integerValue":"$hands"}"""
+        val paths = if (hands == null) """"statDay","score"""" else """"statDay","score","hands""""
+        return """{"writes":[{"update":{"name":"${docName(id)}","fields":{"statDay":{"stringValue":${jsonString(day)}},"score":{"integerValue":"$score"}""" +
+            handsJson +
+            """}},"updateMask":{"fieldPaths":[$paths]},"currentDocument":{"exists":true}}]}"""
+    }
+
     fun updateBody(state: InstallState): String =
         """{"writes":[{"update":{"name":"${docName(state.id)}","fields":{"opens":{"integerValue":"${state.opens}"}}},""" +
             """"updateMask":{"fieldPaths":["opens"]},""" +
