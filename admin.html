@@ -5,203 +5,295 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Poker — Admin Panel</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#10141a">
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0a0f1a; color: #e2e8f0; min-height: 100vh;
+        /* Kinetic Shinkansen Cockpit — charcoal HUD (Stitch export, DESIGN.md tokens) */
+        :root {
+            --surface: #10141a; --surface-lowest: #0a0e14; --surface-low: #181c22;
+            --surface-c: #1c2026; --surface-high: #262a31; --surface-highest: #31353c;
+            --on-surface: #dfe2eb; --on-surface-variant: #bacbbe;
+            --outline: #849589; --outline-variant: #3b4a41;
+            --primary: #6dffba; --primary-container: #00e599; --on-primary-container: #00613e; --on-primary: #003822;
+            --secondary: #90cdff; --secondary-container: #2098dd;
+            --tertiary: #e1e5eb; --error: #ffb4ab; --error-container: #93000a;
+            --hairline: rgba(255,255,255,0.07); --hairline-strong: rgba(255,255,255,0.12);
+            --glass: rgba(18,24,34,0.65); --inset: rgba(28,36,50,0.85);
+            --glow: 0 0 20px -4px rgba(0,229,153,0.35);
+            --font-display: 'Space Grotesk', 'Inter', sans-serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { background: var(--surface); }
+        body {
+            font-family: var(--font-body); font-size: 14px; line-height: 20px;
+            background:
+                radial-gradient(ellipse at 0% 0%, rgba(0,229,153,0.05), transparent 45%),
+                radial-gradient(ellipse at 100% 40%, rgba(144,205,255,0.04), transparent 50%),
+                var(--surface);
+            color: var(--on-surface); min-height: 100vh; -webkit-font-smoothing: antialiased;
+        }
+        ::selection { background: rgba(0,229,153,0.3); }
+        a { color: var(--secondary); }
 
+        /* Labels & micro-chips: tracked-out uppercase Space Grotesk */
+        .hud-label, th, .stat-card .label, .tab, .panel-header .badge, .hud-chip {
+            font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .pip { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); display: inline-block; flex-shrink: 0; }
+        .pip.pulse, .live-dot { animation: blink 1.6s infinite; }
+
+        /* ---------- Sign-in gate ---------- */
         .auth-gate {
             display: flex; align-items: center; justify-content: center;
-            min-height: 100vh; flex-direction: column; gap: 20px;
+            min-height: 100vh; flex-direction: column; gap: 22px; padding: 24px; text-align: center;
         }
-        .auth-gate h1 { color: #fbbf24; font-size: 1.8em; }
-        .auth-gate .denied { color: #f87171; font-size: 16px; display: none; }
+        .auth-gate .gate-chip { display: inline-flex; align-items: center; gap: 8px; padding: 3px 8px; border-radius: 4px;
+            background: var(--surface-high); color: var(--primary); font: 600 11px/14px var(--font-display); letter-spacing: 0.08em; }
+        .auth-gate h1 { font: 700 36px/44px var(--font-display); color: var(--on-surface); letter-spacing: -0.02em; text-transform: uppercase; }
+        .auth-gate h1 span { color: var(--primary-container); }
+        .auth-gate .denied { color: var(--error); font-size: 14px; display: none; }
         .auth-gate button {
-            background: #fff; color: #333; border: none; border-radius: 40px;
-            padding: 14px 32px; font-size: 16px; font-weight: 600;
-            cursor: pointer; display: flex; align-items: center; gap: 10px;
+            background: var(--primary-container); color: #090c10; border: none; border-radius: 4px;
+            padding: 12px 26px; font: 600 14px var(--font-display); letter-spacing: 0.06em; text-transform: uppercase;
+            cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: var(--glow);
         }
+        .auth-gate button svg { background: #fff; border-radius: 2px; padding: 2px; }
+        .auth-gate button:hover { background: var(--primary); }
 
         .app { display: none; }
         .app.visible { display: block; }
 
+        /* ---------- Header ---------- */
         .topbar {
-            background: #111827; border-bottom: 1px solid #1e293b;
-            padding: 14px 30px; display: flex; align-items: center; justify-content: space-between;
+            background: rgba(10,14,20,0.82); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+            box-shadow: 0 1px 8px rgba(0,0,0,0.4); border-bottom: 1px solid var(--hairline);
+            padding: 0 40px; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
             position: sticky; top: 0; z-index: 100;
         }
-        .topbar h1 { font-size: 18px; color: #fbbf24; font-weight: 700; }
-        .topbar-right { display: flex; align-items: center; gap: 14px; }
-        .topbar-right img { width: 28px; height: 28px; border-radius: 50%; }
-        .topbar-right span { font-size: 13px; color: #94a3b8; }
-        .topbar-right button {
-            background: none; border: 1px solid #334155; color: #94a3b8;
-            padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;
+        .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .brand-text { display: flex; flex-direction: column; min-width: 0; }
+        .topbar h1 { font: 500 13px/16px var(--font-display); color: var(--on-surface); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+        .brand-sub { font: 600 11px/14px var(--font-display); color: var(--outline); letter-spacing: 0.14em; text-transform: uppercase; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-right img { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--outline-variant); }
+        .topbar-right img[src=""] { display: none; }
+        .topbar-right span { font-size: 13px; color: var(--on-surface-variant); }
+        .topbar-right #topbar-build { font: 600 11px/14px var(--font-display) !important; letter-spacing: 0.08em; text-transform: uppercase;
+            background: var(--surface-low); color: var(--on-surface-variant) !important; padding: 3px 8px; border-radius: 4px; }
+        .topbar-right #topbar-version { color: var(--primary); }
+        .topbar-right button, .topbar-right a {
+            background: var(--surface-c); border: 1px solid var(--hairline-strong); color: var(--tertiary);
+            padding: 6px 12px; border-radius: 4px; font: 500 12px var(--font-display); letter-spacing: 0.08em; text-transform: uppercase;
+            cursor: pointer; text-decoration: none; white-space: nowrap;
         }
-        .topbar-right button:hover { border-color: #fbbf24; color: #fbbf24; }
-        .topbar-right a {
-            color: #94a3b8; text-decoration: none; font-size: 12px;
-            border: 1px solid #334155; padding: 5px 12px; border-radius: 6px;
+        .topbar-right button:hover, .topbar-right a:hover { border-color: var(--secondary); color: var(--on-surface); background: var(--surface-high); }
+
+        /* Telemetry sub-header */
+        .telemetry-bar {
+            background: var(--surface-lowest); border-bottom: 1px solid var(--hairline);
+            padding: 8px 40px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px;
+            font: 600 11px/14px var(--font-display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--outline);
         }
-        .topbar-right a:hover { border-color: #fbbf24; color: #fbbf24; }
+        .telemetry-bar .grp { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .telemetry-bar .ok { color: var(--primary); display: inline-flex; align-items: center; gap: 6px; }
+        .telemetry-bar b { color: var(--secondary); font-weight: 700; }
 
-        .content { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .content { max-width: 1280px; margin: 0 auto; padding: 28px 40px 48px; }
 
+        /* ---------- Tabs (segmented HUD nav) ---------- */
         .tabs {
-            display: flex; gap: 4px; margin-bottom: 24px;
-            background: #111827; border-radius: 10px; padding: 4px;
-            border: 1px solid #1e293b;
+            display: flex; gap: 4px; margin-bottom: 28px; overflow-x: auto; scrollbar-width: none;
+            background: var(--surface-low); border-radius: 8px; padding: 4px; border: 1px solid var(--hairline);
         }
+        .tabs::-webkit-scrollbar { display: none; }
         .tab {
-            padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500;
-            cursor: pointer; color: #64748b; transition: all 0.2s; border: none; background: none;
+            padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: 500; line-height: 16px; white-space: nowrap;
+            cursor: pointer; color: var(--on-surface-variant); transition: background 0.15s, color 0.15s; border: none; background: none;
         }
-        .tab:hover { color: #cbd5e1; }
-        .tab.active { background: #1e293b; color: #fbbf24; }
+        .tab:hover { color: var(--on-surface); background: var(--surface-c); }
+        .tab.active { background: var(--primary-container); color: var(--on-primary-container); font-weight: 600; box-shadow: var(--glow); }
 
+        /* ---------- Stat tiles ---------- */
         .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px; margin-bottom: 28px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 12px; margin-bottom: 28px;
         }
         .stat-card {
-            background: #111827; border: 1px solid #1e293b; border-radius: 12px;
-            padding: 20px;
+            position: relative; overflow: hidden;
+            background: var(--glass); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+            border: 1px solid var(--hairline); border-radius: 6px; padding: 14px 16px 14px;
+            transition: border-color 0.15s, box-shadow 0.15s;
         }
-        .stat-card .label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-        .stat-card .value { font-size: 28px; font-weight: 700; color: #fbbf24; }
-        .stat-card .sub { font-size: 12px; color: #475569; margin-top: 4px; }
+        .stat-card::before { /* anodized top edge */
+            content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.02) 100%);
+        }
+        .stat-card::after { /* chamfer accent */
+            content: ""; position: absolute; top: 0; right: 0; width: 10px; height: 10px;
+            background: linear-gradient(225deg, var(--primary-container) 0 50%, transparent 50%); opacity: 0.55;
+        }
+        .stat-card:hover { border-color: rgba(0,229,153,0.25); box-shadow: var(--glow); }
+        .stat-card .label { font-size: 11px; line-height: 14px; font-weight: 600; color: var(--outline); margin-bottom: 10px; }
+        .stat-card .value {
+            font: 700 28px/32px var(--font-display); color: var(--primary); letter-spacing: -0.02em;
+            font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
+        }
+        .stat-card .sub { font-size: 12px; line-height: 18px; color: var(--on-surface-variant); margin-top: 6px; }
+        .stat-card .sub .live-dot { width: 6px; height: 6px; }
+        .stat-card select, .stat-card input { background: var(--inset); color: var(--on-surface); border: 1px solid var(--hairline-strong); border-radius: 4px; padding: 4px 6px; }
 
+        /* ---------- Panels & tables ---------- */
         .panel {
-            background: #111827; border: 1px solid #1e293b; border-radius: 12px;
+            position: relative;
+            background: var(--glass); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+            border: 1px solid var(--hairline); border-radius: 8px;
             overflow: hidden; margin-bottom: 24px;
         }
+        .panel::before {
+            content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; z-index: 1;
+            background: linear-gradient(90deg, rgba(0,229,153,0.35) 0%, rgba(255,255,255,0.03) 60%);
+        }
         .panel-header {
-            padding: 16px 20px; border-bottom: 1px solid #1e293b;
+            padding: 14px 20px; border-bottom: 1px solid var(--hairline); gap: 12px; flex-wrap: wrap;
             display: flex; align-items: center; justify-content: space-between;
         }
-        .panel-header h2 { font-size: 15px; font-weight: 600; color: #e2e8f0; }
-        .panel-header .badge {
-            background: #1e293b; color: #94a3b8; padding: 3px 10px;
-            border-radius: 20px; font-size: 12px;
+        .panel-header h2 {
+            font: 600 15px/20px var(--font-display); color: var(--on-surface); letter-spacing: 0.04em; text-transform: uppercase;
         }
-        .panel-header button {
-            background: #1e293b; border: none; color: #94a3b8; padding: 6px 14px;
-            border-radius: 6px; font-size: 12px; cursor: pointer;
+        .panel-header .badge, .hud-chip {
+            background: var(--surface-lowest); color: var(--secondary); padding: 3px 8px; border: 1px solid var(--hairline);
+            border-radius: 4px; font-size: 11px; line-height: 14px; font-weight: 600;
         }
-        .panel-header button:hover { color: #fbbf24; }
+        .panel-header button, .panel button:not(.btn-action):not(.tab) {
+            background: var(--surface-c); border: 1px solid var(--hairline-strong); color: var(--tertiary); padding: 6px 12px;
+            border-radius: 4px; font: 500 12px var(--font-display); letter-spacing: 0.06em; cursor: pointer;
+        }
+        .panel-header button:hover, .panel button:not(.btn-action):not(.tab):hover { border-color: var(--secondary); color: var(--on-surface); }
 
-        table { width: 100%; border-collapse: collapse; }
+        table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
         /* Wide tables (All Users has 18 columns) scroll inside the panel instead of being clipped by its overflow:hidden. */
         .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .table-scroll th { white-space: nowrap; }
         th {
-            text-align: left; padding: 10px 16px; font-size: 11px;
-            text-transform: uppercase; letter-spacing: 0.5px; color: #475569;
-            background: #0f172a; border-bottom: 1px solid #1e293b;
-            cursor: pointer; user-select: none;
+            text-align: left; padding: 10px 16px; font-size: 11px; line-height: 14px; font-weight: 600;
+            color: var(--outline); background: var(--surface-lowest); border-bottom: 1px solid var(--hairline);
+            cursor: pointer; user-select: none; position: sticky; top: 0;
         }
-        th:hover { color: #94a3b8; }
+        th:hover { color: var(--primary); }
         td {
-            padding: 10px 16px; border-bottom: 1px solid rgba(30,41,59,0.5);
-            font-size: 13px; color: #cbd5e1;
+            padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.045);
+            font-size: 13px; color: var(--on-surface-variant); white-space: nowrap;
         }
-        tr:hover td { background: rgba(251,191,36,0.03); }
-        td img { width: 24px; height: 24px; border-radius: 50%; vertical-align: middle; margin-right: 8px; }
+        td:first-child { color: var(--on-surface); }
+        tbody tr:nth-child(even) td { background: rgba(255,255,255,0.012); }
+        tr:hover td { background: rgba(0,229,153,0.045) !important; }
+        td img { width: 24px; height: 24px; border-radius: 50%; vertical-align: middle; margin-right: 8px; border: 1px solid var(--outline-variant); }
 
-        .positive { color: #4ade80; }
-        .negative { color: #f87171; }
+        .positive { color: var(--primary-container) !important; }
+        .negative { color: var(--error) !important; }
+        .pt-clamped { color: #ffd38a; }
+        .pt-tag { font: 600 10px var(--font-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--outline);
+            border: 1px solid var(--hairline-strong); border-radius: 3px; padding: 0 4px; margin-left: 4px; }
 
+        .hud-select { padding: 6px 12px; border-radius: 4px; background: var(--surface-lowest) !important; border: 1px solid rgba(0,229,153,0.4) !important;
+            color: var(--primary) !important; font: 600 12px var(--font-display) !important; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+        .hud-btn { background: var(--surface-c); border: 1px solid var(--hairline-strong); color: var(--tertiary); padding: 6px 12px;
+            border-radius: 4px; font: 500 12px var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+        .hud-btn:hover { border-color: var(--secondary); color: var(--on-surface); }
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block; animation: hudIn 0.25s ease-out; }
+        @keyframes hudIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-        .search-bar {
-            background: #0f172a; border: 1px solid #1e293b; border-radius: 8px;
-            padding: 8px 14px; color: #e2e8f0; font-size: 13px; width: 250px;
+        .search-bar, input[type="text"], input[type="number"], input[type="datetime-local"], input[type="date"], select, textarea {
+            background: var(--inset); border: 1px solid var(--hairline-strong); border-radius: 4px;
+            padding: 7px 12px; color: var(--on-surface); font: 400 13px var(--font-body);
         }
-        .search-bar:focus { outline: none; border-color: #fbbf24; }
+        .search-bar { width: 250px; }
+        .search-bar:focus, input:focus, select:focus, textarea:focus { outline: none; border-color: rgba(0,229,153,0.5); box-shadow: 0 0 0 3px rgba(0,229,153,0.12); }
+        .search-bar::placeholder { color: var(--outline); }
 
-        .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block; margin-right: 6px; animation: blink 1.5s infinite; }
+        .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary-container); display: inline-block; margin-right: 6px; box-shadow: 0 0 8px rgba(0,229,153,0.7); }
         @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        .hour-nav { display: flex; align-items: center; gap: 10px; }
+        .hour-nav { display: flex; align-items: center; gap: 8px; }
         .hour-nav button {
-            background: #1e293b; border: none; color: #94a3b8; width: 30px; height: 30px;
-            border-radius: 6px; cursor: pointer; font-size: 16px;
+            background: var(--surface-c) !important; border: 1px solid var(--hairline-strong) !important; color: var(--on-surface-variant) !important;
+            width: 30px; height: 30px; padding: 0 !important; border-radius: 4px; cursor: pointer; font-size: 16px;
         }
-        .hour-nav button:hover { color: #fbbf24; }
-        .hour-nav span { color: #e2e8f0; font-size: 13px; font-weight: 500; min-width: 130px; text-align: center; }
+        .hour-nav button:hover { color: var(--primary) !important; border-color: rgba(0,229,153,0.4) !important; }
+        .hour-nav span { color: var(--on-surface); font: 500 13px var(--font-display); letter-spacing: 0.06em; min-width: 130px; text-align: center; }
 
-        .empty-state { text-align: center; padding: 40px; color: #475569; font-size: 14px; }
+        .empty-state { text-align: center; padding: 40px; color: var(--outline); font-size: 13px; white-space: normal; }
 
         .btn-action {
-            background: none;
-            border: 1px solid #334155;
-            border-radius: 4px;
-            padding: 3px 8px;
-            font-size: 11px;
-            cursor: pointer;
-            margin-right: 6px;
-            font-weight: 500;
-            transition: all 0.2s;
+            background: transparent; border: 1px solid var(--outline-variant); border-radius: 4px;
+            padding: 3px 8px; font: 600 11px var(--font-display); letter-spacing: 0.06em; text-transform: uppercase;
+            cursor: pointer; margin-right: 6px; transition: all 0.15s;
         }
-        .btn-reset {
-            color: #fbbf24;
-            border-color: rgba(251, 191, 36, 0.4);
-        }
-        .btn-reset:hover {
-            background: rgba(251, 191, 36, 0.1);
-            border-color: #fbbf24;
-        }
-        .btn-delete {
-            color: #f87171;
-            border-color: rgba(248, 113, 113, 0.4);
-        }
-        .btn-delete:hover {
-            background: rgba(248, 113, 113, 0.1);
-            border-color: #f87171;
-        }
+        .btn-reset { color: var(--secondary); border-color: rgba(144,205,255,0.35); }
+        .btn-reset:hover { background: rgba(144,205,255,0.1); border-color: var(--secondary); }
+        .btn-delete { color: var(--error); border-color: rgba(255,180,171,0.35); }
+        .btn-delete:hover { background: rgba(255,180,171,0.1); border-color: var(--error); }
 
-        .feature-list { padding: 6px 20px; }
+        .feature-list { padding: 4px 20px; }
         .feature-row {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 14px 0; border-bottom: 1px solid rgba(30,41,59,0.5);
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            padding: 14px 0; border-bottom: 1px solid var(--hairline);
         }
         .feature-row:last-child { border-bottom: none; }
-        .feature-row-label { font-size: 14px; color: #e2e8f0; font-weight: 500; }
-        .feature-row-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
-        .feature-config-row {
-            display: flex; align-items: center; gap: 10px; padding: 16px 20px;
-        }
-        .feature-switch { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+        .feature-row-label { font: 500 14px var(--font-display); color: var(--on-surface); letter-spacing: 0.02em; }
+        .feature-row-sub { font-size: 12px; color: var(--outline); margin-top: 2px; }
+        .feature-config-row { display: flex; align-items: center; gap: 10px; padding: 16px 20px; flex-wrap: wrap; }
+        /* Diagnostic toggle: rectilinear track with LED */
+        .feature-switch { position: relative; display: inline-block; width: 44px; height: 22px; flex-shrink: 0; }
         .feature-switch input { opacity: 0; width: 0; height: 0; }
         .feature-switch-track {
-            position: absolute; cursor: pointer; inset: 0; background: #334155;
-            border-radius: 24px; transition: 0.2s;
+            position: absolute; cursor: pointer; inset: 0; background: var(--surface-lowest);
+            border: 1px solid var(--hairline-strong); border-radius: 4px; transition: 0.2s;
         }
         .feature-switch-track::before {
-            content: ""; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px;
-            background: #e2e8f0; border-radius: 50%; transition: 0.2s;
+            content: ""; position: absolute; width: 16px; height: 14px; left: 3px; top: 3px;
+            background: rgba(255,255,255,0.25); border-radius: 2px; transition: 0.2s;
         }
-        .feature-switch input:checked + .feature-switch-track { background: #16a34a; }
-        .feature-switch input:checked + .feature-switch-track::before { transform: translateX(18px); }
+        .feature-switch input:checked + .feature-switch-track { border-color: rgba(0,229,153,0.5); box-shadow: var(--glow); }
+        .feature-switch input:checked + .feature-switch-track::before { transform: translateX(20px); background: var(--primary-container); }
 
+        .hud-foot { max-width: 1280px; margin: 0 auto; padding: 0 40px 28px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+            font: 600 11px/14px var(--font-display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--outline); }
+
+        @media (max-width: 900px) {
+            .topbar { padding: 0 16px; }
+            .telemetry-bar { padding: 8px 16px; }
+            .telemetry-bar .hide-sm { display: none; }
+            .content { padding: 16px 16px 32px; }
+            .hud-foot { padding: 0 16px 24px; }
+        }
         @media (max-width: 700px) {
-            .content { padding: 14px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .topbar { padding: 12px 16px; }
+            .topbar { height: auto; min-height: 56px; padding: 8px 12px; flex-wrap: wrap; }
+            .brand-sub, #topbar-name { display: none; }
+            .topbar-right { gap: 6px; }
+            .topbar-right #topbar-build { display: none; }
+            .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+            .stat-card { padding: 12px; }
+            .stat-card .value { font-size: 22px; line-height: 26px; }
+            .panel-header { padding: 12px 14px; }
+            .panel-header h2 { font-size: 13px; }
+            .search-bar { width: 100%; }
             th, td { padding: 8px 10px; font-size: 12px; }
+            .tabs { margin-left: -16px; margin-right: -16px; border-radius: 0; border-left: 0; border-right: 0; }
+            .auth-gate h1 { font-size: 28px; line-height: 34px; }
         }
     </style>
 </head>
 <body>
     <div class="auth-gate" id="auth-gate">
-        <h1>🎰 Admin Panel</h1>
+        <span class="gate-chip"><span class="pip pulse"></span>ORLOV GAMES // RESTRICTED CONSOLE</span>
+        <h1>Video Poker <span>Admin</span></h1>
         <button onclick="doSignIn()">
             <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A9.82 9.82 0 0 0 1.18 12c0 1.6.38 3.11 1 4.47l3.66-2.38z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.31c.87-2.6 3.3-4 6.16-4z"/></svg>
             Sign in with Google
@@ -211,13 +303,30 @@
 
     <div class="app" id="app">
         <div class="topbar">
-            <h1>🎰 Video Poker — Admin</h1>
+            <div class="brand">
+                <span class="pip pulse"></span>
+                <div class="brand-text">
+                    <h1>Video Poker — Admin</h1>
+                    <span class="brand-sub">Orlov Games // Ops Console</span>
+                </div>
+            </div>
             <div class="topbar-right">
                 <img id="topbar-photo" src="" alt="">
                 <span id="topbar-name"></span>
-                <span id="topbar-build" style="color:#64748b;font-size:12px" title="Latest client build. Players on an older build show amber in the Users tab and report fewer fields.">app v<span id="topbar-version">—</span></span>
+                <span id="topbar-build" style="color:#849589;font-size:12px" title="Latest client build. Players on an older build show amber in the Users tab and report fewer fields.">app v<span id="topbar-version">—</span></span>
                 <a href="video_poker.html">← Game</a>
                 <button onclick="firebase.auth().signOut()">Sign Out</button>
+            </div>
+        </div>
+
+        <div class="telemetry-bar">
+            <div class="grp">
+                <span>Project: <b>video-poker-6d665</b></span>
+                <span class="ok"><span class="pip pulse"></span>SYS_READY // ADMIN_SESSION</span>
+            </div>
+            <div class="grp hide-sm">
+                <span>Store: <b>Firestore</b></span>
+                <span>Clock: <b id="hud-clock">—</b></span>
             </div>
         </div>
 
@@ -236,8 +345,8 @@
             <!-- OVERVIEW -->
             <div class="tab-content active" id="tab-overview">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-                    <span id="stats-updated" style="color:#64748b;font-size:12px">—</span>
-                    <button onclick="refreshOverview()">↻ Refresh</button>
+                    <span id="stats-updated" class="hud-label" style="color:#849589;font-size:11px">—</span>
+                    <button class="hud-btn" onclick="refreshOverview()">↻ Refresh</button>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-card"><div class="label">Total Users</div><div class="value" id="s-total-users">—</div><div class="sub" id="s-total-users-sub">—</div></div>
@@ -258,7 +367,7 @@
                     <div class="panel-header" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
                         <h2 style="display:flex; align-items:center; gap:8px; margin:0;"><span class="live-dot"></span> <span id="live-title">Live — Current Day</span></h2>
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <select id="admin-overview-select" onchange="setAdminOverviewTab(this.value)" style="padding:6px 12px; font-size:14px; border-radius:6px; background:#1b3224; border:1px solid #ffd700; color:#ffd700; cursor:pointer; font-weight:bold;">
+                            <select id="admin-overview-select" onchange="setAdminOverviewTab(this.value)" class="hud-select" style="">
                                 <option value="hourly">Hourly Scores (UTC)</option>
                                 <option value="daily" selected>Daily Players</option>
                             </select>
@@ -309,7 +418,7 @@
                             <th onclick="sortUsers('_avgSessionMin')">Avg Session ↕</th>
                             <th onclick="sortUsers('_handsPerSession')">Hands/Session ↕</th>
                             <th onclick="sortUsers('_favHour')">Fav Hour ↕</th>
-                            <th onclick="sortUsers('_totalPlaytime')">Total Playtime ↕</th>
+                            <th onclick="sortUsers('_playMs')">Total Playtime ↕</th>
                             <th onclick="sortUsers('_timezone')">Timezone ↕</th>
                             <th onclick="sortUsers('_pushOpens')">Push Opens ↕</th>
                             <th>Status</th>
@@ -323,7 +432,7 @@
                         <h2>👤 Guests (not signed in)</h2>
                         <span class="badge" id="guests-count">0</span>
                     </div>
-                    <div id="guests-note" style="color:#94a3b8;font-size:12px;padding:0 4px 10px">Loading...</div>
+                    <div id="guests-note" style="color:#bacbbe;font-size:12px;padding:0 4px 10px">Loading...</div>
                     <div class="table-scroll"><table>
                         <thead><tr>
                             <th onclick="sortGuests('id')">Install ↕</th>
@@ -348,7 +457,7 @@
                     <button onclick="navHour(-1)">‹</button>
                     <span id="comp-hour-label">—</span>
                     <button onclick="navHour(1)">›</button>
-                    <select id="admin-comp-select" onchange="setAdminCompTab(this.value)" style="padding:6px 12px; font-size:14px; border-radius:6px; background:#1b3224; border:1px solid #ffd700; color:#ffd700; cursor:pointer; font-weight:bold; margin-left: auto;">
+                    <select id="admin-comp-select" onchange="setAdminCompTab(this.value)" class="hud-select" style=" margin-left: auto;">
                         <option value="hourly">Hourly History (UTC)</option>
                         <option value="daily" selected>Daily History</option>
                     </select>
@@ -430,11 +539,11 @@
                 <div class="panel">
                     <div class="panel-header"><h2>🔔 Push Center has moved</h2></div>
                     <div style="padding:22px 20px;">
-                        <p style="margin-bottom:14px; color:#94a3b8; line-height:1.6;">
+                        <p style="margin-bottom:14px; color:#bacbbe; line-height:1.6;">
                             Composing, targeting, scheduling and delivery logs now live in the dedicated
                             Push Center, which queues campaigns for the GitHub Actions poller to send.
                         </p>
-                        <a href="push-admin.html" style="display:inline-block; background:#16a34a; color:#fff; text-decoration:none; padding:11px 24px; border-radius:8px; font-size:14px; font-weight:600;">Open Push Center →</a>
+                        <a href="push-admin.html" style="display:inline-block; background:#00a86f; color:#fff; text-decoration:none; padding:11px 24px; border-radius:8px; font-size:14px; font-weight:600;">Open Push Center →</a>
                     </div>
                 </div>
             </div>
@@ -955,12 +1064,13 @@
     // instead of a zero we did not actually count.
     function installDayStats(install, dayKey) {
         var playMs = install && install.playMs ? install.playMs : 0;
-        if (!install || install.statDay !== dayKey) return { score: null, hands: null, playMs: playMs };
+        var meta = install ? { playSessions: install.opens || 1, playSinceMs: install.firstMs || 0, playLifetime: playMs > 0 } : {};
+        if (!install || install.statDay !== dayKey) return Object.assign({ score: null, hands: null, playMs: playMs }, meta);
         var score = install.score == null ? null : +install.score;
         var hands = install.hands == null ? null : +install.hands;
         if (score !== score) score = null;
         if (hands !== hands) hands = null;
-        return { score: score, hands: hands, playMs: playMs };
+        return Object.assign({ score: score, hands: hands, playMs: playMs }, meta);
     }
 
     // Signed-in native players publish today's net on their profile
@@ -1020,6 +1130,9 @@
                 score: score,
                 hands: fromInstall.hands,
                 playMs: fromInstall.playMs,
+                playSessions: fromInstall.playSessions,
+                playSinceMs: fromInstall.playSinceMs,
+                playLifetime: fromInstall.playLifetime,
                 rebuys: 0,
                 bestHand: '—',
                 hasScore: score != null
@@ -1036,6 +1149,9 @@
                 score: guestStats.score,
                 hands: guestStats.hands,
                 playMs: guestStats.playMs,
+                playSessions: guestStats.playSessions,
+                playSinceMs: guestStats.playSinceMs,
+                playLifetime: guestStats.playLifetime,
                 rebuys: 0,
                 bestHand: '—',
                 hasScore: guestStats.score != null
@@ -1094,6 +1210,7 @@
                     firstMs: firstMs,
                     lastMs: tsMillis(d.lastOpenAt) || firstMs,
                     playMs: d.playMs || 0,
+                    opens: d.opens || 1,
                     statDay: d.statDay || '',
                     hands: d.hands == null ? null : d.hands,
                     score: d.score == null ? null : d.score
@@ -1126,7 +1243,7 @@
                 '<td>' + photo + escapeHtml(d.displayName || '—') + '</td>' +
                 '<td class="' + scoreClass + '">' + scoreText + '</td>' +
                 '<td>' + (d.hands == null ? '—' : d.hands) + '</td>' +
-                '<td>' + formatPlayTime(d.playMs) + '</td>' +
+                '<td>' + playTimeCell(d.playMs, d.playSessions || 0, d.playSinceMs || 0, !!d.playLifetime) + '</td>' +
                 '<td>' + (d.hasScore ? (d.rebuys || 0) : '—') + '</td>' +
                 '<td>' + escapeHtml(d.bestHand || '—') + '</td>' +
                 '<td>' + actions + '</td>';
@@ -1250,11 +1367,39 @@
         return h ? h + 'h ' + m + 'm' : m + 'm';
     }
 
+    // A recorded play total is only believable up to MAX_PLAUSIBLE_SESSION_MS
+    // per launch, and never more than the wall-clock time since the install
+    // first reported. Older builds timed the whole onStart..onStop span (and
+    // the web build double-filed one exit), so an app left open on an awake
+    // screen could report 14 hours. The raw number stays in the cell's tooltip.
+    var MAX_PLAUSIBLE_SESSION_MS = 2 * 3600000;
+    function plausiblePlayMs(ms, sessions, sinceMs) {
+        ms = +ms || 0;
+        var cap = Infinity;
+        if (sessions > 0) cap = sessions * MAX_PLAUSIBLE_SESSION_MS;
+        if (sinceMs > 0) cap = Math.min(cap, Math.max(0, Date.now() - sinceMs));
+        return ms > cap ? { ms: cap, raw: ms, clamped: true } : { ms: ms, raw: ms, clamped: false };
+    }
+
+    // Cell markup for a play time. `lifetime` labels an install's all-time
+    // total shown on a per-day board, which has no per-day guest number.
+    function playTimeCell(ms, sessions, sinceMs, lifetime) {
+        var p = plausiblePlayMs(ms, sessions, sinceMs);
+        var text = formatPlayTime(p.ms);
+        var tip = [];
+        if (lifetime) tip.push('All-time total for this install, not this day');
+        if (p.clamped) tip.push('Raw ' + formatPlayTime(p.raw) + ' (' + p.raw + ' ms over ' + (sessions || '?') + ' launches) is implausible; capped');
+        var html = escapeHtml(text);
+        if (p.clamped) html = '<span class="pt-clamped">≤ ' + html + ' ⚠</span>';
+        if (lifetime && text !== '—') html += ' <span class="pt-tag">total</span>';
+        return tip.length ? '<span title="' + escapeHtml(tip.join(' · ')) + '">' + html + '</span>' : html;
+    }
+
     // Anything behind the current build is worth spotting at a glance: an old
     // client silently stops reporting whatever newer fields the panel reads.
     function versionCell(v) {
-        if (!v) return '<span style="color:#64748b">pre-' + CURRENT_APP_VERSION + '</span>';
-        var color = v === CURRENT_APP_VERSION ? '#4ade80' : '#fbbf24';
+        if (!v) return '<span style="color:#849589">pre-' + CURRENT_APP_VERSION + '</span>';
+        var color = v === CURRENT_APP_VERSION ? '#00e599' : '#6dffba';
         return '<span style="color:' + color + '">' + v + '</span>';
     }
 
@@ -1265,8 +1410,10 @@
                 var d = doc.data();
                 d._balance = (d.cloudState && d.cloudState.balance) ? parseInt(d.cloudState.balance) : 0;
                 d._hands = (d.cloudState && d.cloudState.handsPlayed) ? parseInt(d.cloudState.handsPlayed) : 0;
-                d._avgSessionMin = (d.totalPlayTimeMs && d.sessionCount)
-                    ? Math.round(d.totalPlayTimeMs / d.sessionCount / 60000) : 0;
+                var created = d.firstSeen && d.firstSeen.toDate ? d.firstSeen.toDate().getTime() : 0;
+                d._playMs = plausiblePlayMs(d.totalPlayTimeMs, d.sessionCount || 0, created).ms;
+                d._avgSessionMin = (d._playMs && d.sessionCount)
+                    ? Math.round(d._playMs / d.sessionCount / 60000) : 0;
                 d._handsPerSession = (d._hands && d.sessionCount)
                     ? Math.round(d._hands / d.sessionCount) : 0;
                 var phm = d.playHourMap;
@@ -1275,7 +1422,7 @@
                     var fh = parseInt(bestKey.replace('h', ''), 10);
                     d._favHour = (fh % 12 || 12) + (fh < 12 ? ' AM' : ' PM');
                 } else { d._favHour = '—'; }
-                d._totalPlaytime = formatPlayTime(d.totalPlayTimeMs);
+                d._totalPlaytime = playTimeCell(d.totalPlayTimeMs, d.sessionCount || 0, created, false);
                 if (d.timezoneOffset != null) {
                     var tz = -d.timezoneOffset;
                     d._timezone = 'UTC' + (tz >= 0 ? '+' : '') + Math.floor(Math.abs(tz) / 60) +
@@ -1384,8 +1531,8 @@
         tbody.innerHTML = rows.slice(0, 500).map(function(g) {
             var churned = (now - g.lastMs) > sevenDays;
             var badge = churned
-                ? '<span style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Churned</span>'
-                : '<span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Active</span>';
+                ? '<span style="background:#d0453a;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Churned</span>'
+                : '<span style="background:#00a86f;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Active</span>';
             var upgrade = g.existing ? ' <span title="Installed before install tracking began; first seen is when it first reported">↑</span>' : '';
             return '<tr>' +
                 '<td title="' + escapeHtml(g.id) + '">' + escapeHtml(g.id.slice(0, 6)) + upgrade + '</td>' +
@@ -1443,8 +1590,8 @@
             var activity = d.lastSeen ? d.lastSeen.toDate().getTime() : (d.lastLogin ? d.lastLogin.toDate().getTime() : 0);
             var churned = activity && (now - activity) > sevenDays;
             var badge = churned
-                ? '<span style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Churned</span>'
-                : '<span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Active</span>';
+                ? '<span style="background:#d0453a;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Churned</span>'
+                : '<span style="background:#00a86f;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">Active</span>';
             var tr = document.createElement('tr');
             tr.innerHTML =
                 '<td>' + photo + (d.displayName || '—') + '</td>' +
@@ -1829,21 +1976,21 @@
 
         var sorted = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; });
         var max = sorted.length ? counts[sorted[0]] : 1;
-        var sourceColors = { tiktok: '#ee1d52', organic: '#3b82f6', referral: '#4ade80', google: '#f59e0b', facebook: '#6366f1', untracked: '#475569' };
+        var sourceColors = { tiktok: '#ee1d52', organic: '#2098dd', referral: '#00e599', google: '#00e599', facebook: '#6366f1', untracked: '#849589' };
         var html = sorted.map(function(src) {
-            var color = sourceColors[src] || '#94a3b8';
+            var color = sourceColors[src] || '#bacbbe';
             var pct = total ? Math.round(counts[src] / total * 100) : 0;
             return barHtml(src + ' (' + pct + '%)', counts[src], max, color);
         }).join('');
         document.getElementById('chart-acquisition-sources').innerHTML = html ||
-            '<p style="color:#64748b">No acquisition data yet — appears after users sign up via tagged links</p>';
+            '<p style="color:#849589">No acquisition data yet — appears after users sign up via tagged links</p>';
     }
 
     function renderTikTokCampaigns(users) {
         var tiktokUsers = users.filter(function(u) { return u.acquisitionSource === 'tiktok'; });
         if (!tiktokUsers.length) {
             document.getElementById('chart-tiktok-campaigns').innerHTML =
-                '<p style="color:#64748b">No TikTok users yet — run your first campaign with <code>utm_source=tiktok</code></p>';
+                '<p style="color:#849589">No TikTok users yet — run your first campaign with <code>utm_source=tiktok</code></p>';
             return;
         }
         var campaigns = {};
@@ -1882,24 +2029,24 @@
             var avgHands = s.count ? Math.round(s.hands / s.count) : 0;
             var avgMin = s.count ? Math.round(s.sessionMs / s.count / 60000) : 0;
             return '<tr>' +
-                '<td style="padding:8px 12px;color:#e2e8f0;font-weight:600">' + src + '</td>' +
-                '<td style="padding:8px 12px;color:#94a3b8;text-align:center">' + s.count + '</td>' +
-                '<td style="padding:8px 12px;color:#4ade80;text-align:center">' + d1 + '</td>' +
-                '<td style="padding:8px 12px;color:#60a5fa;text-align:center">' + avgHands + '</td>' +
-                '<td style="padding:8px 12px;color:#fbbf24;text-align:center">' + avgMin + ' min</td>' +
+                '<td style="padding:8px 12px;color:#dfe2eb;font-weight:600">' + src + '</td>' +
+                '<td style="padding:8px 12px;color:#bacbbe;text-align:center">' + s.count + '</td>' +
+                '<td style="padding:8px 12px;color:#00e599;text-align:center">' + d1 + '</td>' +
+                '<td style="padding:8px 12px;color:#90cdff;text-align:center">' + avgHands + '</td>' +
+                '<td style="padding:8px 12px;color:#6dffba;text-align:center">' + avgMin + ' min</td>' +
                 '</tr>';
         }).join('');
 
         document.getElementById('chart-source-quality').innerHTML = rows
             ? '<table style="width:100%;border-collapse:collapse">' +
-              '<thead><tr style="border-bottom:1px solid #1e293b">' +
-              '<th style="padding:8px 12px;text-align:left;color:#64748b;font-size:12px;text-transform:uppercase">Source</th>' +
-              '<th style="padding:8px 12px;text-align:center;color:#64748b;font-size:12px;text-transform:uppercase">Users</th>' +
-              '<th style="padding:8px 12px;text-align:center;color:#64748b;font-size:12px;text-transform:uppercase">D1 Ret.</th>' +
-              '<th style="padding:8px 12px;text-align:center;color:#64748b;font-size:12px;text-transform:uppercase">Avg Hands</th>' +
-              '<th style="padding:8px 12px;text-align:center;color:#64748b;font-size:12px;text-transform:uppercase">Avg Session</th>' +
+              '<thead><tr style="border-bottom:1px solid #262a31">' +
+              '<th style="padding:8px 12px;text-align:left;color:#849589;font-size:12px;text-transform:uppercase">Source</th>' +
+              '<th style="padding:8px 12px;text-align:center;color:#849589;font-size:12px;text-transform:uppercase">Users</th>' +
+              '<th style="padding:8px 12px;text-align:center;color:#849589;font-size:12px;text-transform:uppercase">D1 Ret.</th>' +
+              '<th style="padding:8px 12px;text-align:center;color:#849589;font-size:12px;text-transform:uppercase">Avg Hands</th>' +
+              '<th style="padding:8px 12px;text-align:center;color:#849589;font-size:12px;text-transform:uppercase">Avg Session</th>' +
               '</tr></thead><tbody>' + rows + '</tbody></table>'
-            : '<p style="color:#64748b">No data yet</p>';
+            : '<p style="color:#849589">No data yet</p>';
 
         // D1 stat card for TikTok specifically
         var tk = sources['tiktok'];
@@ -1913,11 +2060,11 @@
     function barHtml(label, value, max, color) {
         var pct = max ? Math.round(value / max * 100) : 0;
         return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
-            '<div style="width:120px;font-size:13px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + label + '</div>' +
-            '<div style="flex:1;background:#1e293b;border-radius:4px;height:18px;overflow:hidden">' +
+            '<div style="width:120px;font-size:13px;color:#bacbbe;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + label + '</div>' +
+            '<div style="flex:1;background:#262a31;border-radius:4px;height:18px;overflow:hidden">' +
               '<div style="width:' + pct + '%;background:' + color + ';height:100%;border-radius:4px;transition:width .4s"></div>' +
             '</div>' +
-            '<div style="width:36px;text-align:right;font-size:13px;color:#e2e8f0">' + value + '</div>' +
+            '<div style="width:36px;text-align:right;font-size:13px;color:#dfe2eb">' + value + '</div>' +
           '</div>';
     }
 
@@ -1969,8 +2116,8 @@
             return total;
         }
 
-        var weekTotal = draw(weekKeys, weeks, 'chart-signups-weekly', '#38bdf8');
-        var monthTotal = draw(monthKeys, months, 'chart-signups-monthly', '#a78bfa');
+        var weekTotal = draw(weekKeys, weeks, 'chart-signups-weekly', '#90cdff');
+        var monthTotal = draw(monthKeys, months, 'chart-signups-monthly', '#90cdff');
         var suffix = undated ? ' · ' + undated + ' undated' : '';
         document.getElementById('signups-week-total').textContent = weekTotal + ' in ' + WEEKS + ' weeks' + suffix;
         document.getElementById('signups-month-total').textContent = monthTotal + ' in ' + MONTHS + ' months' + suffix;
@@ -1988,9 +2135,9 @@
         var max = sorted.length ? counts[sorted[0]] : 1;
         var html = sorted.map(function(label) {
             var current = label.indexOf(CURRENT_APP_VERSION) !== -1 && label.indexOf('pre-') === -1;
-            return barHtml(label, counts[label], max, current ? '#4ade80' : '#fbbf24');
+            return barHtml(label, counts[label], max, current ? '#00e599' : '#6dffba');
         }).join('');
-        document.getElementById('chart-versions').innerHTML = html || '<p style="color:#64748b">No version data yet</p>';
+        document.getElementById('chart-versions').innerHTML = html || '<p style="color:#849589">No version data yet</p>';
         document.getElementById('version-latest-pct').textContent = users.length
             ? Math.round(latest / users.length * 100) + '% on ' + CURRENT_APP_VERSION
             : '—';
@@ -2002,9 +2149,9 @@
         var sorted = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; }).slice(0, 15);
         var max = sorted.length ? counts[sorted[0]] : 1;
         var html = sorted.map(function(c) {
-            return barHtml(countryFlag(c !== 'Unknown' ? c : null) + ' ' + c, counts[c], max, '#3b82f6');
+            return barHtml(countryFlag(c !== 'Unknown' ? c : null) + ' ' + c, counts[c], max, '#2098dd');
         }).join('');
-        document.getElementById('chart-countries').innerHTML = html || '<p style="color:#64748b">No country data yet</p>';
+        document.getElementById('chart-countries').innerHTML = html || '<p style="color:#849589">No country data yet</p>';
     }
 
     function renderRetentionSnapshot(users) {
@@ -2030,23 +2177,23 @@
         function pct(n, d) { return d ? Math.round(n / d * 100) + '%' : '—'; }
         document.getElementById('chart-retention').innerHTML =
             '<table style="border-collapse:collapse;width:100%;font-size:13px">' +
-            '<thead><tr style="color:#64748b">' +
+            '<thead><tr style="color:#849589">' +
             '<th style="text-align:left;padding:6px 8px">Cohort</th>' +
             '<th style="padding:6px 8px">New users</th>' +
             '<th style="padding:6px 8px">Day-1 retained</th>' +
             '<th style="padding:6px 8px">Day-7 retained</th>' +
             '</tr></thead><tbody>' +
-            '<tr style="border-top:1px solid #1e293b">' +
-            '<td style="padding:6px 8px;color:#94a3b8">This week</td>' +
+            '<tr style="border-top:1px solid #262a31">' +
+            '<td style="padding:6px 8px;color:#bacbbe">This week</td>' +
             '<td style="padding:6px 8px;text-align:center">' + newThisWeek + '</td>' +
-            '<td style="padding:6px 8px;text-align:center;color:#4ade80">' + pct(d1Week, newThisWeek) + '</td>' +
-            '<td style="padding:6px 8px;text-align:center;color:#f59e0b">' + pct(d7Week, newThisWeek) + '</td>' +
+            '<td style="padding:6px 8px;text-align:center;color:#00e599">' + pct(d1Week, newThisWeek) + '</td>' +
+            '<td style="padding:6px 8px;text-align:center;color:#00e599">' + pct(d7Week, newThisWeek) + '</td>' +
             '</tr>' +
-            '<tr style="border-top:1px solid #1e293b">' +
-            '<td style="padding:6px 8px;color:#94a3b8">This month</td>' +
+            '<tr style="border-top:1px solid #262a31">' +
+            '<td style="padding:6px 8px;color:#bacbbe">This month</td>' +
             '<td style="padding:6px 8px;text-align:center">' + newThisMonth + '</td>' +
-            '<td style="padding:6px 8px;text-align:center;color:#4ade80">' + pct(d1Month, newThisMonth) + '</td>' +
-            '<td style="padding:6px 8px;text-align:center;color:#f59e0b">' + pct(d7Month, newThisMonth) + '</td>' +
+            '<td style="padding:6px 8px;text-align:center;color:#00e599">' + pct(d1Month, newThisMonth) + '</td>' +
+            '<td style="padding:6px 8px;text-align:center;color:#00e599">' + pct(d7Month, newThisMonth) + '</td>' +
             '</tr></tbody></table>';
     }
 
@@ -2060,16 +2207,16 @@
         hands.sort(function(a, b) { return b.payout - a.payout; });
         hands = hands.slice(0, 10);
         if (!hands.length) {
-            document.getElementById('chart-besthands').innerHTML = '<p style="color:#64748b">No best-hand data yet</p>';
+            document.getElementById('chart-besthands').innerHTML = '<p style="color:#849589">No best-hand data yet</p>';
             return;
         }
         var html = hands.map(function(h, i) {
             var photo = h.photo ? '<img src="' + h.photo + '" style="width:28px;height:28px;border-radius:50%;margin-right:8px;vertical-align:middle">' : '';
-            return '<div style="display:flex;align-items:center;padding:8px 0;border-top:' + (i ? '1px solid #1e293b' : 'none') + '">' +
-                '<span style="width:22px;color:#64748b;font-size:12px">' + (i + 1) + '</span>' +
+            return '<div style="display:flex;align-items:center;padding:8px 0;border-top:' + (i ? '1px solid #262a31' : 'none') + '">' +
+                '<span style="width:22px;color:#849589;font-size:12px">' + (i + 1) + '</span>' +
                 photo + '<span style="flex:1;font-size:13px">' + h.name + '</span>' +
-                '<span style="color:#a78bfa;margin-right:16px;font-size:13px">' + h.hand + '</span>' +
-                '<span style="color:#fbbf24;font-size:13px">+' + h.payout.toLocaleString() + '</span>' +
+                '<span style="color:#90cdff;margin-right:16px;font-size:13px">' + h.hand + '</span>' +
+                '<span style="color:#6dffba;font-size:13px">+' + h.payout.toLocaleString() + '</span>' +
                 '</div>';
         }).join('');
         document.getElementById('chart-besthands').innerHTML = html;
@@ -2080,7 +2227,7 @@
         list.sort(function(a, b) { return (b.cloudState.referralBonus || 0) - (a.cloudState.referralBonus || 0); });
         list = list.slice(0, 10);
         if (!list.length) {
-            document.getElementById('chart-referrers').innerHTML = '<p style="color:#64748b">No referral data yet</p>';
+            document.getElementById('chart-referrers').innerHTML = '<p style="color:#849589">No referral data yet</p>';
             return;
         }
         var max = list[0].cloudState.referralBonus;
@@ -2103,14 +2250,14 @@
         top = top.slice(0, 10);
         var pct = users.length ? Math.round(reengaged / users.length * 100) : 0;
         var summary = '<div style="display:flex;gap:32px;margin-bottom:16px">' +
-            '<div><div style="font-size:28px;font-weight:700;color:#fbbf24">' + totalOpens + '</div><div style="font-size:12px;color:#64748b;text-transform:uppercase">Total Push Opens</div></div>' +
-            '<div><div style="font-size:28px;font-weight:700;color:#4ade80">' + reengaged + '</div><div style="font-size:12px;color:#64748b;text-transform:uppercase">Users Re-engaged</div></div>' +
-            '<div><div style="font-size:28px;font-weight:700;color:#60a5fa">' + pct + '%</div><div style="font-size:12px;color:#64748b;text-transform:uppercase">Re-engagement Rate</div></div>' +
+            '<div><div style="font-size:28px;font-weight:700;color:#6dffba">' + totalOpens + '</div><div style="font-size:12px;color:#849589;text-transform:uppercase">Total Push Opens</div></div>' +
+            '<div><div style="font-size:28px;font-weight:700;color:#00e599">' + reengaged + '</div><div style="font-size:12px;color:#849589;text-transform:uppercase">Users Re-engaged</div></div>' +
+            '<div><div style="font-size:28px;font-weight:700;color:#90cdff">' + pct + '%</div><div style="font-size:12px;color:#849589;text-transform:uppercase">Re-engagement Rate</div></div>' +
             '</div>';
         var max = top.length ? top[0].count : 1;
         var bars = top.map(function(u) { return barHtml(u.name, u.count, max, '#f97316'); }).join('');
         document.getElementById('chart-push-attr').innerHTML = summary +
-            (bars || '<p style="color:#64748b">No push opens yet — data appears after users tap a notification</p>');
+            (bars || '<p style="color:#849589">No push opens yet — data appears after users tap a notification</p>');
     }
 
     function renderPlayHours(users) {
@@ -2128,7 +2275,7 @@
         var html = buckets.map(function(v, i) {
             return barHtml(labels[i], v, max, '#6366f1');
         }).join('');
-        document.getElementById('chart-playhours').innerHTML = html || '<p style="color:#64748b">No play-time data yet — data accumulates as users play</p>';
+        document.getElementById('chart-playhours').innerHTML = html || '<p style="color:#849589">No play-time data yet — data accumulates as users play</p>';
     }
 
     function renderBalanceHistogram(users) {
@@ -2147,7 +2294,7 @@
             }
         });
         var maxCount = Math.max.apply(null, buckets.map(function(b) { return b.count; })) || 1;
-        var colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6'];
+        var colors = ['#d0453a', '#f97316', '#eab308', '#00e599', '#2098dd'];
         var html = buckets.map(function(b, i) {
             return barHtml(b.label, b.count, maxCount, colors[i]);
         }).join('');
@@ -2156,5 +2303,22 @@
 
     setInterval(loadCurrentHour, 15000);
     </script>
+<script>
+    // HUD chrome: footer strip and a ticking local clock in the telemetry bar.
+    (function() {
+        var app = document.getElementById('app');
+        if (app && !document.querySelector('.hud-foot')) {
+            var f = document.createElement('div');
+            f.className = 'hud-foot';
+            f.innerHTML = '<span>● Orlov Games // Video Poker ops</span><span>Kinetic HUD v1</span>';
+            app.appendChild(f);
+        }
+        function tick() {
+            var el = document.getElementById('hud-clock');
+            if (el) el.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+        tick(); setInterval(tick, 1000);
+    })();
+</script>
 </body>
 </html>

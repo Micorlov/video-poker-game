@@ -34,8 +34,12 @@ class MainActivity : ComponentActivity() {
     /** Bumped when an invite link arrives while the app is open, so the Friends tab comes up. */
     private val openFriendsSignal = mutableIntStateOf(0)
 
-    /** Elapsed-realtime when the activity last came to the foreground. 0 while stopped. */
-    private var foregroundSince = 0L
+    /**
+     * Active play time for the current foreground span. Counts touch-to-touch
+     * time with a 2-minute idle cap, so an app left open on an awake screen no
+     * longer files hours of "play" (the Guest V9V3R8 14h bug).
+     */
+    private val playMeter = com.micorlov.videopoker.nativeapp.data.ActiveTimeMeter()
 
     private val viewModel: GameViewModel by viewModels {
         factory {
@@ -92,7 +96,7 @@ class MainActivity : ComponentActivity() {
     /** Rewards that arrived while no screen was listening reach the stack when the app comes back. */
     override fun onStart() {
         super.onStart()
-        if (foregroundSince == 0L) foregroundSince = SystemClock.elapsedRealtime()
+        playMeter.start(SystemClock.elapsedRealtime())
         viewModel.applyPendingCredits()
     }
 
@@ -101,9 +105,19 @@ class MainActivity : ComponentActivity() {
         super.onStop()
         container.profitSync.flush()
         container.flushLeaderboard()
-        val started = foregroundSince
-        foregroundSince = 0L
-        if (started != 0L) container.reportPlayTime(SystemClock.elapsedRealtime() - started)
+        val active = playMeter.stop(SystemClock.elapsedRealtime())
+        if (active > 0L) container.reportPlayTime(active)
+    }
+
+    /** Every touch or key press keeps the play meter running. */
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) playMeter.interaction(SystemClock.elapsedRealtime())
+        return super.dispatchTouchEvent(ev)
+    }
+
+    override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
+        if (event.action == android.view.KeyEvent.ACTION_DOWN) playMeter.interaction(SystemClock.elapsedRealtime())
+        return super.dispatchKeyEvent(event)
     }
 
     private fun onLinkParked(link: DeepLink) {

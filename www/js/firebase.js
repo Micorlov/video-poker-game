@@ -471,6 +471,24 @@ function logUserToFirestore(user) {
 
 var _vpSessionStart = Date.now();
 var _vpSessionHour  = new Date().getHours();
+// Active play time, not wall-clock time. A tab or app left open and visible
+// (desktop tab, phone on a charger with the screen kept awake) used to count
+// every hour as play. Now the time between two interactions is credited only up
+// to VP_IDLE_GAP_MS, and one session can never file more than VP_MAX_SESSION_MS.
+var VP_IDLE_GAP_MS     = 2 * 60 * 1000;
+var VP_MAX_SESSION_MS  = 4 * 60 * 60 * 1000;
+var _vpActiveMs   = 0;
+var _vpLastActive = _vpSessionStart;
+
+function _vpCreditActive(now) {
+    var gap = now - _vpLastActive;
+    if (gap > 0) _vpActiveMs += Math.min(gap, VP_IDLE_GAP_MS);
+    _vpLastActive = now;
+}
+
+['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach(function(type) {
+    document.addEventListener(type, function() { _vpCreditActive(Date.now()); }, { passive: true, capture: true });
+});
 // The day the current session belongs to. getDayKey() lives in
 // js/leaderboards.js, which the page may not have parsed yet at this point, so
 // the key is resolved lazily and re-resolved on every session reset.
@@ -482,7 +500,11 @@ function _vpDayKeyNow() {
 
 function _vpFlushSession() {
     if (!db || !auth || !auth.currentUser) return;
-    var dur = Date.now() - _vpSessionStart;
+    _vpCreditActive(Date.now());
+    var dur = Math.min(_vpActiveMs, VP_MAX_SESSION_MS);
+    // Zero the span now: visibilitychange and pagehide both fire on one exit,
+    // and the second must not file the same time again.
+    _vpActiveMs = 0;
     if (dur < 10000) return;
     var uid = auth.currentUser.uid;
     var update = {
@@ -499,6 +521,8 @@ function _vpFlushSession() {
 
 function _vpResetSession() {
     _vpSessionStart = Date.now();
+    _vpActiveMs   = 0;
+    _vpLastActive = _vpSessionStart;
     _vpSessionHour  = new Date().getHours();
     _vpSessionDayKey = _vpDayKeyNow();
 }
