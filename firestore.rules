@@ -429,7 +429,7 @@ service cloud.firestore {
 
       function validInstallDayStats(before, after) {
         return after.diff(before).affectedKeys().hasOnly(['statDay', 'hands', 'score'])
-            && after.diff(before).affectedKeys().hasAll(['statDay', 'score'])
+            && after.keys().hasAll(['statDay', 'score'])
             && after.statDay is string
             && after.statDay.matches('^\\d{4}-\\d{2}-\\d{2}$')
             && after.score is int
