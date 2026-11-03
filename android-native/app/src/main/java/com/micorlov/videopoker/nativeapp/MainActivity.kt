@@ -98,6 +98,7 @@ class MainActivity : ComponentActivity() {
         super.onStart()
         playMeter.start(SystemClock.elapsedRealtime())
         viewModel.applyPendingCredits()
+        if (container.notificationsAllowed()) container.pushTokens.refresh()
     }
 
     /** Friends see a hand's result within seconds of the player leaving, not only after the quiet spell. */

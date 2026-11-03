@@ -125,6 +125,12 @@ class FirestoreSocialRemote(
         Unit
     }
 
+    override suspend fun saveFcmToken(uid: String, token: String) = remote {
+        val fields = mapOf("token" to token, "platform" to "android", "updatedAt" to FieldValue.serverTimestamp())
+        users.document(uid).collection("fcmTokens").document(token).set(fields, SetOptions.merge()).await()
+        Unit
+    }
+
     override suspend fun pushDailyProfit(uid: String, profit: DailyProfit) = remote {
         val fields = mapOf(
             "dailyNetProfitUtc" to profit.net,
