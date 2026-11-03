@@ -193,3 +193,13 @@ test('a player from another day is left off this day', () => {
     );
     assert.deepStrictEqual(rows, []);
 });
+
+test('account hands fall back to the totalHands field older builds wrote', () => {
+    const src = read('admin.html').match(/function userHands\(d\)[\s\S]*?\n    }/)[0];
+    const ctx = vm.createContext({ Math, parseInt });
+    vm.runInContext(src, ctx);
+    assert.strictEqual(ctx.userHands({ cloudState: { handsPlayed: 223 }, totalHands: 121 }), 223);
+    assert.strictEqual(ctx.userHands({ totalHands: 23 }), 23);
+    assert.strictEqual(ctx.userHands({ cloudState: { handsPlayed: '7' } }), 7);
+    assert.strictEqual(ctx.userHands({}), 0);
+});

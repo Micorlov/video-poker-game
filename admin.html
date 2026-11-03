@@ -444,9 +444,11 @@
                             <th onclick="sortGuests('firstMs')">First Seen ↕</th>
                             <th onclick="sortGuests('lastMs')">Last Open ↕</th>
                             <th onclick="sortGuests('opens')">Launches ↕</th>
+                            <th onclick="sortGuests('hands')">Hands ↕</th>
+                            <th onclick="sortGuests('playMs')">Play Time ↕</th>
                             <th>Status</th>
                         </tr></thead>
-                        <tbody id="guests-body"><tr><td colspan="10" class="empty-state">Loading...</td></tr></tbody>
+                        <tbody id="guests-body"><tr><td colspan="12" class="empty-state">Loading...</td></tr></tbody>
                     </table></div>
                 </div>
             </div>
@@ -1015,7 +1017,7 @@
                 if (activity > now - 7 * day) wau++;
                 if (activity > now - 30 * day) mau++;
                 if (activity && activity < now - 7 * day) churned++;
-                var h = d.cloudState && d.cloudState.handsPlayed ? parseInt(d.cloudState.handsPlayed) : 0;
+                var h = userHands(d);
                 if (h > 0) { totalHands += h; handCount++; }
                 if (d.pushOpenCount && d.pushOpenCount > 0) pushReengaged++;
                 // Sign-up date. Users created by an app build older than the
@@ -1242,7 +1244,7 @@
                 '<td>' + medal + '</td>' +
                 '<td>' + photo + escapeHtml(d.displayName || '—') + '</td>' +
                 '<td class="' + scoreClass + '">' + scoreText + '</td>' +
-                '<td>' + (d.hands == null ? '—' : d.hands) + '</td>' +
+                '<td>' + (d.hands == null ? NO_HANDS_CELL : d.hands) + '</td>' +
                 '<td>' + playTimeCell(d.playMs, d.playSessions || 0, d.playSinceMs || 0, !!d.playLifetime) + '</td>' +
                 '<td>' + (d.hasScore ? (d.rebuys || 0) : '—') + '</td>' +
                 '<td>' + escapeHtml(d.bestHand || '—') + '</td>' +
@@ -1356,6 +1358,18 @@
         return (icons[p] || '') + ' ' + p;
     }
 
+    // Lifetime hands on an account. Current builds save cloudState.handsPlayed;
+    // older ones wrote a top-level totalHands, so take whichever is larger.
+    function userHands(d) {
+        var a = parseInt(d && d.cloudState && d.cloudState.handsPlayed, 10) || 0;
+        var b = parseInt(d && d.totalHands, 10) || 0;
+        return Math.max(a, b);
+    }
+
+    // No hand count was filed for this row. Android 3.0.4 (the Play build of
+    // Oct 17) and older send hands only to Analytics, never to Firestore.
+    var NO_HANDS_CELL = '<span title="No hand count reported. Android 3.0.4 and older do not send hands to Firestore; they appear once players update.">—</span>';
+
     // Milliseconds of play time as "2h 15m" / "40m" / "<1m". Shared by the
     // leaderboard's per-day column and the Users panel's lifetime column so the
     // two never drift apart.
@@ -1409,7 +1423,7 @@
             snap.forEach(function(doc) {
                 var d = doc.data();
                 d._balance = (d.cloudState && d.cloudState.balance) ? parseInt(d.cloudState.balance) : 0;
-                d._hands = (d.cloudState && d.cloudState.handsPlayed) ? parseInt(d.cloudState.handsPlayed) : 0;
+                d._hands = userHands(d);
                 var created = d.firstSeen && d.firstSeen.toDate ? d.firstSeen.toDate().getTime() : 0;
                 d._playMs = plausiblePlayMs(d.totalPlayTimeMs, d.sessionCount || 0, created).ms;
                 d._avgSessionMin = (d._playMs && d.sessionCount)
@@ -1465,7 +1479,8 @@
                     return {
                         id: d.installId, country: d.country || '', platform: d.platform || '', version: d.version || '',
                         lang: d.lang || '', source: d.source || '', existing: !!d.existing, opens: d.opens || 1,
-                        firstMs: firstMs, lastMs: tsMillis(d.lastOpenAt) || firstMs
+                        firstMs: firstMs, lastMs: tsMillis(d.lastOpenAt) || firstMs,
+                        playMs: d.playMs || 0, statDay: d.statDay || '', hands: d.hands == null ? -1 : +d.hands || 0
                     };
                 });
                 var trackedSinceMs = opens.reduce(function(min, d) {
@@ -1492,7 +1507,7 @@
             })
             .catch(function(e) {
                 document.getElementById('guests-note').textContent = 'Could not load: ' + (e.code || e.message);
-                document.getElementById('guests-body').innerHTML = '<tr><td colspan="10" class="empty-state">Could not load guests</td></tr>';
+                document.getElementById('guests-body').innerHTML = '<tr><td colspan="12" class="empty-state">Could not load guests</td></tr>';
             });
     }
 
@@ -1525,7 +1540,7 @@
             'Guests who played before tracking began were never recorded, so this undercounts older guests.';
         var tbody = document.getElementById('guests-body');
         if (!rows.length) {
-            tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No guests found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="12" class="empty-state">No guests found</td></tr>';
             return;
         }
         tbody.innerHTML = rows.slice(0, 500).map(function(g) {
@@ -1544,6 +1559,8 @@
                 '<td>' + new Date(g.firstMs).toLocaleDateString() + '</td>' +
                 '<td>' + new Date(g.lastMs).toLocaleString() + '</td>' +
                 '<td>' + g.opens + '</td>' +
+                '<td>' + (g.hands < 0 ? NO_HANDS_CELL : '<span title="Hands on ' + escapeHtml(g.statDay) + ', the last day it played">' + g.hands + '</span>') + '</td>' +
+                '<td>' + playTimeCell(g.playMs, g.opens, g.firstMs, false) + '</td>' +
                 '<td>' + badge + '</td></tr>';
         }).join('');
     }
@@ -2019,7 +2036,7 @@
                 s.d1Eligible++;
                 if ((lastSeen - firstSeen) > day) s.d1Retained++;
             }
-            s.hands += (u.cloudState && u.cloudState.handsPlayed) ? u.cloudState.handsPlayed : 0;
+            s.hands += userHands(u);
             s.sessionMs += u.lastSessionMs || 0;
         });
 
