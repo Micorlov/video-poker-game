@@ -118,6 +118,13 @@ class FakeSocialRemote : SocialRemote {
         linkedInstalls[uid] = installId
     }
 
+    val savedTokens = mutableListOf<Pair<String, String>>()
+
+    override suspend fun saveFcmToken(uid: String, token: String) {
+        online()
+        savedTokens += uid to token
+    }
+
     val erased = mutableListOf<String>()
 
     override suspend fun deleteUserData(uid: String) {

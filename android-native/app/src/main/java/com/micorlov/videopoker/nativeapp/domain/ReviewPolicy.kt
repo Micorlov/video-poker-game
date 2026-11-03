@@ -17,14 +17,14 @@ enum class ReviewAsk { NONE, NATIVE_SHEET, STAR_CARD }
 /**
  * When to ask for a rating. The first ask is Google Play's in-app review sheet; Play
  * rate-limits it and often shows nothing, so later asks are an "Enjoying Video Poker?" card.
- * Guardrails: one ask per session, a 7-day cooldown, at most 3 cards, never again once
- * the player taps Rate now.
+ * Guardrails: never on the install's first day, one ask per session, a 90-day cooldown, at most 3 cards,
+ * never again once the player taps Rate now.
  */
 object ReviewPolicy {
     const val WIN_STREAK_NEEDED = 3
     const val LEVEL_THRESHOLD = 3
     const val CARD_LIFETIME_CAP = 3
-    const val CARD_COOLDOWN_MS = 7L * 24 * 60 * 60 * 1000
+    const val CARD_COOLDOWN_MS = 90L * 24 * 60 * 60 * 1000
 
     /** Delay between the winning draw and the ask, so other prompts get the screen first. */
     const val PROMPT_DELAY_MS = 3200L
@@ -33,11 +33,10 @@ object ReviewPolicy {
     fun isQualityWin(type: HandType): Boolean = type.strength >= HandType.STRAIGHT.strength
 
     /**
-     * A win on the day the app was installed. [ReviewState.firstDay] is only stamped for an
-     * install with no hands played, and an empty one never qualifies: otherwise a player
-     * upgrading from an earlier build would look like a first-day player and be asked at once.
+     * The day the app was installed. [ReviewState.firstDay] is only stamped for an install with
+     * no hands played, so an upgrading player (empty) is never mistaken for a new one.
      */
-    fun isFirstDayWin(state: ReviewState, today: String): Boolean =
+    fun isFirstDay(state: ReviewState, today: String): Boolean =
         state.firstDay.isNotEmpty() && state.firstDay == today
 
     fun cardDue(state: ReviewState, now: Long): Boolean {
@@ -45,9 +44,9 @@ object ReviewPolicy {
         return now - maxOf(state.shownAt, state.lastCardAt) >= CARD_COOLDOWN_MS
     }
 
-    /** Three wins in a row, a win on the first day, or level 3. */
+    /** Three wins in a row or level 3, but never on the first day. */
     fun earned(state: ReviewState, level: Int, winStreak: Int, today: String): Boolean =
-        winStreak >= WIN_STREAK_NEEDED || isFirstDayWin(state, today) || level >= LEVEL_THRESHOLD
+        !isFirstDay(state, today) && (winStreak >= WIN_STREAK_NEEDED || level >= LEVEL_THRESHOLD)
 
     /** Whether a win should start the ask timer. */
     fun earnedAsk(state: ReviewState, level: Int, winStreak: Int, today: String, now: Long): Boolean {

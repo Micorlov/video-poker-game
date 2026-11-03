@@ -1,6 +1,12 @@
 package com.micorlov.videopoker.nativeapp
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.tasks.await
+import com.micorlov.videopoker.nativeapp.data.social.PushTokenSync
 import com.google.firebase.FirebaseApp
 import com.micorlov.videopoker.nativeapp.data.AnalyticsEvents
 import com.micorlov.videopoker.nativeapp.data.DailyProfitStore
@@ -49,6 +55,8 @@ class AppContainer(context: Context) {
     val remote: SocialRemote = if (firebaseReady) FirestoreSocialRemote(appVersion = versionName()) else UnavailableRemote
     val friends = FriendsRepository(remote, gameRepository)
     val profitSync = ProfitSync(remote, auth.user, dailyProfit.state, scope).also { if (firebaseReady) it.start() }
+    val pushTokens = PushTokenSync(remote, auth.user, { FirebaseMessaging.getInstance().token.await() }, scope)
+        .also { if (firebaseReady) it.start() }
     val accountDeletion = AccountDeletion(auth, remote, hold = profitSync::hold, release = profitSync::release)
 
     /** GA4 through Firebase Analytics: the com.micorlov.videopoker stream the web build reported to. */
@@ -89,6 +97,11 @@ class AppContainer(context: Context) {
             }
         }
     }
+
+    /** True when no runtime permission is needed (before Android 13) or the player granted it. */
+    fun notificationsAllowed(): Boolean =
+        android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(appContext, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
     fun reportPlayTime(elapsedMs: Long) = installReporter.reportPlayTime(elapsedMs)
 

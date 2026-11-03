@@ -353,7 +353,7 @@ class GameViewModelTest {
 
     @Test
     fun `the review card shows once per session and rating it ends the asks`() {
-        val week = 7L * 24 * 60 * 60 * 1000
+        val week = 90L * 24 * 60 * 60 * 1000
         repository.saveReview(ReviewState(shown = true, shownAt = 0))
         repository.saveGame(SavedGame())
         val vm = GameViewModel(repository, Random(5), clock = { 10 * week }, reviewEnabled = true)
@@ -406,7 +406,7 @@ class GameViewModelTest {
     }
 
     @Test
-    fun `a win on the install's first day earns the ask`() {
+    fun `a win on the install's first day never earns the ask`() {
         val today = "2026-10-13"
         repository.saveReview(ReviewState(firstDay = today))
         repository.saveGame(SavedGame())
@@ -415,7 +415,7 @@ class GameViewModelTest {
         assertTrue(vm.playUntilWin() > 0)
         assertEquals(1, vm.state.value.game.winStreak)
         assertTrue(vm.state.value.game.level < 3)
-        assertTrue(vm.drainEffects().any { it == UiEffect.ReviewEarned })
+        assertFalse(vm.drainEffects().any { it == UiEffect.ReviewEarned })
     }
 
     @Test

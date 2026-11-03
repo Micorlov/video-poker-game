@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import com.micorlov.videopoker.nativeapp.VideoPokerApplication
 import com.micorlov.videopoker.nativeapp.notify.DailyReminderScheduler
 import com.micorlov.videopoker.nativeapp.ui.onboarding.OnboardingFlow
 import com.micorlov.videopoker.nativeapp.ui.settings.LanguageDialog
@@ -103,6 +104,7 @@ fun VideoPokerApp(
         LaunchedEffect(ui.settings.dailyReminderEnabled) { DailyReminderScheduler.sync(context, ui.settings.dailyReminderEnabled) }
         var promptPermissionPending by rememberSaveable { mutableStateOf(false) }
         val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) (context.applicationContext as VideoPokerApplication).container.pushTokens.refresh()
             if (!promptPermissionPending) return@rememberLauncherForActivityResult
             promptPermissionPending = false
             viewModel.onNotificationPermissionResult(granted)

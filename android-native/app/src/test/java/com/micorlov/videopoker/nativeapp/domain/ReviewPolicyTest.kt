@@ -30,15 +30,16 @@ class ReviewPolicyTest {
     }
 
     @Test
-    fun `a win on the install's first day earns the ask`() {
-        assertTrue(earnedAsk(ReviewState(firstDay = today), winStreak = 1))
-        assertFalse(earnedAsk(ReviewState(firstDay = "2026-10-12"), winStreak = 1))
+    fun `nothing is asked on the install's first day, however good the session`() {
+        val firstDay = ReviewState(firstDay = today)
+        assertFalse(earnedAsk(firstDay, winStreak = 1))
+        assertFalse(earnedAsk(firstDay, winStreak = 9, level = 5))
+        assertTrue(earnedAsk(ReviewState(firstDay = "2026-10-12"), winStreak = 3))
     }
 
     @Test
-    fun `an unknown first day never earns the ask, even without a day key`() {
-        assertFalse(earnedAsk(ReviewState(firstDay = ""), winStreak = 1))
-        assertFalse(earnedAsk(ReviewState(firstDay = ""), winStreak = 1, today = ""))
+    fun `an unknown first day does not block the ask`() {
+        assertTrue(earnedAsk(ReviewState(firstDay = ""), winStreak = 3))
     }
 
     @Test
@@ -53,12 +54,12 @@ class ReviewPolicyTest {
     }
 
     @Test
-    fun `the first ask is the native sheet and later asks are the card after a week`() {
+    fun `the first ask is the native sheet and later asks are the card after ninety days`() {
         assertEquals(ReviewAsk.NATIVE_SHEET, ReviewPolicy.decide(ReviewState(), now))
 
         val asked = ReviewState(shown = true, shownAt = now)
-        assertEquals(ReviewAsk.NONE, ReviewPolicy.decide(asked, now + 6 * day))
-        assertEquals(ReviewAsk.STAR_CARD, ReviewPolicy.decide(asked, now + 7 * day))
+        assertEquals(ReviewAsk.NONE, ReviewPolicy.decide(asked, now + 89 * day))
+        assertEquals(ReviewAsk.STAR_CARD, ReviewPolicy.decide(asked, now + 90 * day))
     }
 
     @Test
@@ -74,6 +75,6 @@ class ReviewPolicyTest {
     fun `an earned streak still waits out the card cooldown once the sheet has been shown`() {
         val asked = ReviewState(shown = true, shownAt = now)
         assertFalse(ReviewPolicy.earnedAsk(asked, level = 1, winStreak = 3, today = today, now = now + day))
-        assertTrue(ReviewPolicy.earnedAsk(asked, level = 1, winStreak = 3, today = today, now = now + 7 * day))
+        assertTrue(ReviewPolicy.earnedAsk(asked, level = 1, winStreak = 3, today = today, now = now + 90 * day))
     }
 }

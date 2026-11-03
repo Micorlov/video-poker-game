@@ -41,6 +41,9 @@ interface SocialRemote {
     /** Remembers which install this account is, so the admin board does not list them twice. */
     suspend fun linkInstall(uid: String, installId: String)
 
+    /** Files [token] under users/{uid}/fcmTokens so the admin push sender can reach this device. */
+    suspend fun saveFcmToken(uid: String, token: String)
+
     /**
      * Erases everything the security rules let this player remove: their profile, both sides of
      * every friendship and their device tokens. Safe to repeat. The invite-reward ledger and the
