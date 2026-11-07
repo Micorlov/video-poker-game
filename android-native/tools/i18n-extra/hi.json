@@ -114,5 +114,6 @@
  "prompt_notify_allow": "सूचनाएँ चालू करें",
  "prompt_rate_title": "हमें 5 स्टार दें",
  "prompt_rate_body": "वीडियो पोकर पसंद आ रहा है? Play Store पर ऐप को 5 स्टार दें।",
- "prompt_rate_action": "5 स्टार दें"
+ "prompt_rate_action": "5 स्टार दें",
+ "settings_ad_privacy": "विज्ञापन गोपनीयता विकल्प"
 }

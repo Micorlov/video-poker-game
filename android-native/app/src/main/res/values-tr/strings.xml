@@ -301,6 +301,7 @@
     <string name="toast_account_deleted">Hesap silindi</string>
     <string name="toast_account_delete_failed">Hesap silinemedi — bağlantını kontrol edip tekrar dene</string>
     <string name="settings_privacy_policy">Gizlilik politikası</string>
+    <string name="settings_ad_privacy">Reklam gizliliği seçenekleri</string>
     <string name="prompt_notify_title">Bildirimlere izin verilsin mi?</string>
     <string name="prompt_notify_body">Günlük bonusun hazır olduğunda bir hatırlatma al.</string>
     <string name="prompt_notify_allow">Bildirimlere izin ver</string>

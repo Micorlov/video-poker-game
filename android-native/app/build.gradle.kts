@@ -91,6 +91,8 @@ dependencies {
     implementation("com.google.android.play:review-ktx:2.0.2")
     implementation("androidx.work:work-runtime-ktx:2.10.0")
     implementation("com.android.installreferrer:installreferrer:2.2")
+    implementation("com.google.android.gms:play-services-ads:25.5.0")
+    implementation("com.google.android.ump:user-messaging-platform:4.0.0")
 
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
     implementation("com.google.firebase:firebase-auth")

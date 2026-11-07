@@ -118,5 +118,6 @@
  "prompt_notify_allow": "Разрешить уведомления",
  "prompt_rate_title": "Оцените нас на 5 звёзд",
  "prompt_rate_body": "Нравится Видео-покер? Поставьте приложению 5 звёзд в Play Store.",
- "prompt_rate_action": "Поставить 5 звёзд"
+ "prompt_rate_action": "Поставить 5 звёзд",
+ "settings_ad_privacy": "Настройки конфиденциальности рекламы"
 }

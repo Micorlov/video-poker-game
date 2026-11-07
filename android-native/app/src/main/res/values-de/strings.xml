@@ -302,6 +302,7 @@
     <string name="toast_account_deleted">Konto gelöscht</string>
     <string name="toast_account_delete_failed">Konto konnte nicht gelöscht werden – prüfe deine Verbindung und versuche es erneut</string>
     <string name="settings_privacy_policy">Datenschutzerklärung</string>
+    <string name="settings_ad_privacy">Datenschutzoptionen für Werbung</string>
     <string name="prompt_notify_title">Benachrichtigungen erlauben?</string>
     <string name="prompt_notify_body">Hol dir eine Erinnerung, wenn dein täglicher Bonus bereit ist.</string>
     <string name="prompt_notify_allow">Benachrichtigungen erlauben</string>

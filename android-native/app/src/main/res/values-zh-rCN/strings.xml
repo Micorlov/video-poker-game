@@ -300,6 +300,7 @@
     <string name="toast_account_deleted">账号已删除</string>
     <string name="toast_account_delete_failed">无法删除账号——请检查网络后重试</string>
     <string name="settings_privacy_policy">隐私政策</string>
+    <string name="settings_ad_privacy">广告隐私选项</string>
     <string name="prompt_notify_title">允许通知？</string>
     <string name="prompt_notify_body">每日奖励准备好时提醒你。</string>
     <string name="prompt_notify_allow">允许通知</string>

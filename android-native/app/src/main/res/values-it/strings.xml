@@ -303,6 +303,7 @@
     <string name="toast_account_deleted">Account eliminato</string>
     <string name="toast_account_delete_failed">Impossibile eliminare l’account: controlla la connessione e riprova</string>
     <string name="settings_privacy_policy">Informativa sulla privacy</string>
+    <string name="settings_ad_privacy">Scelte sulla privacy degli annunci</string>
     <string name="prompt_notify_title">Consentire le notifiche?</string>
     <string name="prompt_notify_body">Ricevi un promemoria quando il bonus giornaliero è pronto.</string>
     <string name="prompt_notify_allow">Consenti notifiche</string>

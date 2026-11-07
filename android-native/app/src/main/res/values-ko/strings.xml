@@ -300,6 +300,7 @@
     <string name="toast_account_deleted">계정이 삭제되었습니다</string>
     <string name="toast_account_delete_failed">계정을 삭제하지 못했습니다. 연결을 확인하고 다시 시도하세요</string>
     <string name="settings_privacy_policy">개인정보 처리방침</string>
+    <string name="settings_ad_privacy">광고 개인정보 설정</string>
     <string name="prompt_notify_title">알림을 허용할까요?</string>
     <string name="prompt_notify_body">일일 보너스가 준비되면 알려 드립니다.</string>
     <string name="prompt_notify_allow">알림 허용</string>

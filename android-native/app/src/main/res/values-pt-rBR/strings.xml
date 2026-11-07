@@ -302,6 +302,7 @@
     <string name="toast_account_deleted">Conta excluída</string>
     <string name="toast_account_delete_failed">Não foi possível excluir a conta — verifique sua conexão e tente novamente</string>
     <string name="settings_privacy_policy">Política de privacidade</string>
+    <string name="settings_ad_privacy">Opções de privacidade de anúncios</string>
     <string name="prompt_notify_title">Permitir notificações?</string>
     <string name="prompt_notify_body">Receba um lembrete quando seu bônus diário estiver pronto.</string>
     <string name="prompt_notify_allow">Permitir notificações</string>

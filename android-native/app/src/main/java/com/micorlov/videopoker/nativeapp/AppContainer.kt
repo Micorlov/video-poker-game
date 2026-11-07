@@ -2,6 +2,7 @@ package com.micorlov.videopoker.nativeapp
 
 import android.content.Context
 import com.google.firebase.FirebaseApp
+import com.micorlov.videopoker.nativeapp.ads.Interstitials
 import com.micorlov.videopoker.nativeapp.data.AnalyticsEvents
 import com.micorlov.videopoker.nativeapp.data.DailyProfitStore
 import com.micorlov.videopoker.nativeapp.data.DailyProfitTracker
@@ -42,6 +43,7 @@ class AppContainer(context: Context) {
     private val store = SharedPreferencesStore(appContext)
 
     val gameRepository = GameRepository(store)
+    val ads = Interstitials(appContext)
     val dailyProfit = DailyProfitTracker(DailyProfitStore(store))
 
     private val firebaseReady = FirebaseApp.getApps(appContext).isNotEmpty()

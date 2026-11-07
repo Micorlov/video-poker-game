@@ -115,5 +115,6 @@
  "prompt_notify_allow": "Autoriser les notifications",
  "prompt_rate_title": "Notez-nous 5 étoiles",
  "prompt_rate_body": "Vous aimez Video Poker ? Notez l'app 5 étoiles sur le Play Store.",
- "prompt_rate_action": "Noter 5 étoiles"
+ "prompt_rate_action": "Noter 5 étoiles",
+ "settings_ad_privacy": "Choix de confidentialité des annonces"
 }

@@ -13,6 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.VideoPoker">
 
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-2693008307172998~7170210204" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
