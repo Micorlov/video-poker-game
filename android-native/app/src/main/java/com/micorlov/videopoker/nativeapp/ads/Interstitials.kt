@@ -2,7 +2,6 @@ package com.micorlov.videopoker.nativeapp.ads
 
 import android.app.Activity
 import android.content.Context
-import android.content.pm.ApplicationInfo
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -32,9 +31,10 @@ class Interstitials(private val context: Context) {
         private set
 
     private val consent = UserMessagingPlatform.getConsentInformation(context)
-    private val unitId =
-        // Debug builds must never request live ads: tapping your own is invalid traffic.
-        if (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0) TEST_UNIT else LIVE_UNIT
+
+    /** True once consent allows ad requests and the SDK is starting; the banner waits on this. */
+    var adsAllowed by mutableStateOf(false)
+        private set
 
     private var sdkStarted = false
 
@@ -93,6 +93,7 @@ class Interstitials(private val context: Context) {
     private fun startSdk() {
         if (sdkStarted || !consent.canRequestAds()) return
         sdkStarted = true
+        adsAllowed = true
         val main = Handler(Looper.getMainLooper())
         thread { MobileAds.initialize(context) { main.post(::load) } }
     }
@@ -102,7 +103,7 @@ class Interstitials(private val context: Context) {
         loading = true
         InterstitialAd.load(
             context,
-            unitId,
+            AdConfig.INTERSTITIAL,
             AdRequest.Builder().build(),
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(loaded: InterstitialAd) {
@@ -115,12 +116,5 @@ class Interstitials(private val context: Context) {
                 }
             },
         )
-    }
-
-    private companion object {
-        const val LIVE_UNIT = "ca-app-pub-2693008307172998/3230965193"
-
-        /** Google's published sample interstitial. */
-        const val TEST_UNIT = "ca-app-pub-3940256099942544/1033173712"
     }
 }

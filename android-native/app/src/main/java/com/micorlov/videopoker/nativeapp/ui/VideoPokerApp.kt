@@ -35,6 +35,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.micorlov.videopoker.nativeapp.ads.BannerAd
 import com.micorlov.videopoker.nativeapp.ads.Interstitials
 import com.micorlov.videopoker.nativeapp.audio.SoundCue
 import com.micorlov.videopoker.nativeapp.audio.SoundPlayer
@@ -311,6 +312,7 @@ fun VideoPokerApp(
                         }
                     }
                 }
+                BannerAd(allowed = ads?.adsAllowed == true)
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     BottomNav(
                         selected = tab,
