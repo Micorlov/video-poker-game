@@ -8,8 +8,8 @@ object AdConfig {
     private const val TEST_BANNER = "ca-app-pub-3940256099942544/9214589741"
     private const val TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712"
 
-    // TODO(real-ids): create the banner unit in AdMob (app ~7170210204) and paste it here.
-    private const val REAL_BANNER = "ca-app-pub-2693008307172998/REPLACE_WITH_BANNER_UNIT"
+    // Real units from AdMob (REAL_UNITS.md); used only when USE_TEST_ADS is false.
+    private const val REAL_BANNER = "ca-app-pub-2693008307172998/4992437720"
     private const val REAL_INTERSTITIAL = "ca-app-pub-2693008307172998/3230965193"
 
     val BANNER = if (USE_TEST_ADS) TEST_BANNER else REAL_BANNER
