@@ -2,7 +2,7 @@ package com.micorlov.videopoker.nativeapp.ads
 
 /** The one place ad unit IDs live. Flip USE_TEST_ADS to false only for a store release. */
 object AdConfig {
-    const val USE_TEST_ADS = true
+    const val USE_TEST_ADS = false
 
     // Google's official sample units: safe to load and click on any device.
     private const val TEST_BANNER = "ca-app-pub-3940256099942544/9214589741"
