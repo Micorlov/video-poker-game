@@ -35,12 +35,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.micorlov.videopoker.nativeapp.ads.BannerAd
+import com.micorlov.videopoker.nativeapp.ads.Interstitials
 import com.micorlov.videopoker.nativeapp.audio.SoundCue
 import com.micorlov.videopoker.nativeapp.audio.SoundPlayer
 import com.micorlov.videopoker.nativeapp.audio.VoiceAnnouncer
 import com.micorlov.videopoker.nativeapp.domain.DoubleUpResult
 import com.micorlov.videopoker.nativeapp.domain.FirstHands
 import com.micorlov.videopoker.nativeapp.domain.HandType
+import com.micorlov.videopoker.nativeapp.domain.Phase
 import com.micorlov.videopoker.nativeapp.domain.ReviewPolicy
 import kotlinx.coroutines.launch
 import com.micorlov.videopoker.nativeapp.ui.text.spokenRes
@@ -82,6 +85,8 @@ fun VideoPokerApp(
     friends: FriendsViewModel? = null,
     /** Bumped when an invite link arrives while the app is open, to bring up the Friends tab. */
     openFriendsSignal: Int = 0,
+    /** Null in UI tests, which deal straight away. */
+    ads: Interstitials? = null,
 ) {
     val ui by viewModel.state.collectAsStateWithLifecycle()
 
@@ -203,7 +208,14 @@ fun VideoPokerApp(
         val signInHost = remember(context) { ActivityHost(context.findActivity()) }
         val playActions = remember(viewModel, friends, friendsOn, signInHost) {
             PlayActions(
-                onMainAction = viewModel::onMainAction,
+                onMainAction = {
+                    val game = viewModel.state.value.game
+                    if (ads != null && game.phase == Phase.BET) {
+                        ads.beforeDeal(context.findActivity(), game.lifetimeHands, viewModel::onMainAction)
+                    } else {
+                        viewModel.onMainAction()
+                    }
+                },
                 onToggleHold = viewModel::onToggleHold,
                 onSelectBet = viewModel::onSelectBet,
                 onBetLocked = viewModel::onBetLocked,
@@ -239,7 +251,8 @@ fun VideoPokerApp(
         } else {
             null
         }
-        val settingsActions = remember(viewModel, friendsOn) {
+        val adPrivacyRow = ads?.privacyOptionsRequired == true
+        val settingsActions = remember(viewModel, friendsOn, adPrivacyRow) {
             SettingsActions(
                 onToggleSound = viewModel::onToggleSound,
                 onToggleHaptics = viewModel::onToggleHaptics,
@@ -272,6 +285,7 @@ fun VideoPokerApp(
                 onSelectHandCount = viewModel::onSelectHandCount,
                 onResetStatistics = viewModel::onResetStatistics,
                 onInviteFriends = openFriends,
+                onAdPrivacy = if (adPrivacyRow) ({ ads?.showPrivacyOptions(context.findActivity()) }) else null,
             )
         }
 
@@ -298,6 +312,7 @@ fun VideoPokerApp(
                         }
                     }
                 }
+                BannerAd(allowed = ads?.adsAllowed == true)
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     BottomNav(
                         selected = tab,

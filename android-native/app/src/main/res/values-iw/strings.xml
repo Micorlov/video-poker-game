@@ -304,6 +304,7 @@
     <string name="toast_account_deleted">החשבון נמחק</string>
     <string name="toast_account_delete_failed">לא ניתן היה למחוק את החשבון — בדקו את החיבור ונסו שוב</string>
     <string name="settings_privacy_policy">מדיניות פרטיות</string>
+    <string name="settings_ad_privacy">אפשרויות פרטיות למודעות</string>
     <string name="prompt_notify_title">לאפשר התראות?</string>
     <string name="prompt_notify_body">נשלח תזכורת כשהבונוס היומי מוכן.</string>
     <string name="prompt_notify_allow">אפשרו התראות</string>

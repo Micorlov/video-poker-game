@@ -112,5 +112,6 @@
  "prompt_notify_allow": "通知を許可",
  "prompt_rate_title": "5つ星で評価する",
  "prompt_rate_body": "ビデオポーカーを楽しんでいますか？Playストアで5つ星の評価をお願いします。",
- "prompt_rate_action": "5つ星で評価"
+ "prompt_rate_action": "5つ星で評価",
+ "settings_ad_privacy": "広告のプライバシー設定"
 }

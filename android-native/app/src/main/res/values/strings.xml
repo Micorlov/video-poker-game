@@ -333,6 +333,7 @@
     <string name="toast_account_deleted">Account deleted</string>
     <string name="toast_account_delete_failed">Couldn\'t delete the account — check your connection and try again</string>
     <string name="settings_privacy_policy">Privacy policy</string>
+    <string name="settings_ad_privacy">Ad privacy choices</string>
     <string name="prompt_notify_title">Allow notifications?</string>
     <string name="prompt_notify_body">Get a reminder when your daily bonus is ready.</string>
     <string name="prompt_notify_allow">Allow notifications</string>

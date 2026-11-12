@@ -302,6 +302,7 @@
     <string name="toast_account_deleted">Cuenta eliminada</string>
     <string name="toast_account_delete_failed">No se pudo eliminar la cuenta: comprueba tu conexión e inténtalo de nuevo</string>
     <string name="settings_privacy_policy">Política de privacidad</string>
+    <string name="settings_ad_privacy">Opciones de privacidad de anuncios</string>
     <string name="prompt_notify_title">¿Permitir notificaciones?</string>
     <string name="prompt_notify_body">Recibe un aviso cuando tu bono diario esté listo.</string>
     <string name="prompt_notify_allow">Permitir notificaciones</string>

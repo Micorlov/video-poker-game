@@ -112,5 +112,6 @@
  "prompt_notify_allow": "알림 허용",
  "prompt_rate_title": "별 5개로 평가해 주세요",
  "prompt_rate_body": "비디오 포커가 마음에 드시나요? Play 스토어에서 별 5개로 평가해 주세요.",
- "prompt_rate_action": "별 5개로 평가"
+ "prompt_rate_action": "별 5개로 평가",
+ "settings_ad_privacy": "광고 개인정보 설정"
 }

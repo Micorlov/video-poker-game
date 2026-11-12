@@ -74,6 +74,8 @@ class SettingsActions(
     val onResetStatistics: () -> Unit,
     /** Opens the Friends tab; null hides the row (friends switched off). */
     val onInviteFriends: (() -> Unit)? = null,
+    /** Reopens the ad consent form; null hides the row where the law does not require it. */
+    val onAdPrivacy: (() -> Unit)? = null,
 )
 
 /**
@@ -230,6 +232,7 @@ fun SettingsScreen(ui: UiState, actions: SettingsActions, modifier: Modifier = M
             LinkRow(stringResource(R.string.settings_rate_game), "rate-game") { StoreLinks.openListing(context) }
             LinkRow(stringResource(R.string.settings_more_games), "more-games") { StoreLinks.openDeveloperPage(context) }
             LinkRow(stringResource(R.string.settings_privacy_policy), "privacy-policy") { PolicyLinks.open(context, PolicyLinks.PRIVACY_POLICY) }
+            actions.onAdPrivacy?.let { LinkRow(stringResource(R.string.settings_ad_privacy), "ad-privacy", it) }
         }
 
         account?.let {

@@ -306,6 +306,7 @@
     <string name="toast_account_deleted">Аккаунт удалён</string>
     <string name="toast_account_delete_failed">Не удалось удалить аккаунт — проверьте подключение и повторите попытку</string>
     <string name="settings_privacy_policy">Политика конфиденциальности</string>
+    <string name="settings_ad_privacy">Настройки конфиденциальности рекламы</string>
     <string name="prompt_notify_title">Разрешить уведомления?</string>
     <string name="prompt_notify_body">Напомним, когда ежедневный бонус будет готов.</string>
     <string name="prompt_notify_allow">Разрешить уведомления</string>

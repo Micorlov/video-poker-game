@@ -43,8 +43,8 @@
 > **Play policy note (2026-09-09).** Play Console flags a short description that "uses keywords
 > that indicate price or promotion" and makes the app ineligible for Google Play promotion. The
 > old text ("No ads, 100% free!") tripped it, so the short description in every locale now names
-> the variants and modes instead and carries no price or promotional wording. "No ads" is still
-> allowed in the full description, the screenshots and the feature graphic, and stays there. The
+> the variants and modes instead and carries no price or promotional wording. The app now shows ads,
+> so "No ads" must not appear anywhere in the listing, including the screenshots and feature graphic. The
 > Console banner does not re-evaluate as you type; it reflects the published listing.
 
 
@@ -58,7 +58,7 @@ Offline video poker: Jacks or Better, Deuces Wild, multi-hand. No wifi needed
 
 **Full description** (max 4000 chars):
 ```
-Offline video poker with four classic casino games and multi-hand play. Jacks or Better, Deuces Wild, Bonus Poker and Double Bonus, in single hand, Triple Play or Five Play. No wifi needed, no ads, no real money.
+Offline video poker with four classic casino games and multi-hand play. Jacks or Better, Deuces Wild, Bonus Poker and Double Bonus, in single hand, Triple Play or Five Play. No wifi needed, no real money.
 
 PLAY VIDEO POKER OFFLINE
 No internet? Deal anyway. Every game, paytable and daily bonus works with no wifi and no mobile data, and your chips and stats are saved on your phone after every hand.
@@ -77,7 +77,7 @@ REAL CASINO PAYTABLES
 A full paytable for every variant, always on screen. Turn on strategy hints to learn which cards to hold and watch your win rate climb.
 
 FREE CHIPS EVERY DAY
-Daily chip bonus, the daily ALL IN mega-bet, win streaks with payout bonuses up to +50%, and levels that unlock new variants and multi-hand modes. Free to play, no purchases, no ads, and a free rebuy when you run out means you never go bust.
+Daily chip bonus, the daily ALL IN mega-bet, win streaks with payout bonuses up to +50%, and levels that unlock new variants and multi-hand modes. Free to play, no purchases, and a free rebuy when you run out means you never go bust.
 
 PLAY WITH FRIENDS
 Live hourly and daily leaderboards against every player in the game, a friends leaderboard, and poker rooms where you play at the same table. Sign in with Google or Facebook, invite a friend, and you both earn bonus chips.
@@ -128,7 +128,6 @@ Information We Collect
 What We Don't Collect
 - We do not process real-money payments or financial account information.
 - We do not collect precise location data.
-- We do not serve third-party advertising.
 
 How We Use Data
 Data is used solely to operate gameplay features: saving progress, showing leaderboards, enabling friends/rooms, and sending optional push notifications.
@@ -200,7 +199,7 @@ Given the simulated gambling content, target audience should exclude children:
 
 ## 7. Ads
 
-Does your app contain ads? **No** — confirmed, no ad SDK (AdMob or otherwise) anywhere in the codebase.
+Does your app contain ads? **Yes** — the native Android app shows AdMob interstitials between hands.
 
 ## 8. Financial features
 
@@ -217,5 +216,5 @@ Does your app provide health-related services or content? **No.**
 ## Status
 
 - ✅ Privacy policy hosted live at https://micorlov.github.io/video-poker-game/privacy-policy.html
-- ✅ Confirmed via codebase: no ads SDK, no analytics/Crashlytics, no IAP/billing SDK, sign-in is Google + Facebook only (Apple Sign-In package is an unused dependency — removed the misleading Apple mention from the privacy policy).
+- ✅ Confirmed via codebase: AdMob interstitials on native Android, no analytics/Crashlytics, no IAP/billing SDK, sign-in is Google + Facebook only (Apple Sign-In package is an unused dependency — removed the misleading Apple mention from the privacy policy).
 - ⏳ Everything above still needs to be pasted into Play Console by you — Google sign-in for Play Console itself requires your credentials, which this session won't handle.
